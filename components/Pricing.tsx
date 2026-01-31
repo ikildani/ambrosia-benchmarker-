@@ -38,11 +38,11 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-6">
-            <svg className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-full px-4 py-1.5 mb-6">
+            <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-sm font-medium text-brand-700">Simple Pricing</span>
+            <span className="text-sm font-medium text-teal-700">Simple Pricing</span>
           </div>
           <h2 className="text-4xl font-bold text-neutral-900 mb-4">
             Choose Your Plan
@@ -58,14 +58,14 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
           <div
             className={`relative bg-white rounded-2xl p-8 transition-all duration-300 cursor-pointer ${
               currentTier === 'free'
-                ? 'ring-2 ring-brand-500 shadow-glow-lg'
+                ? 'ring-2 ring-teal-500 shadow-glow-lg'
                 : 'border border-neutral-200 shadow-soft hover:shadow-soft-lg hover:border-neutral-300'
             }`}
             onClick={() => onSelectTier('free')}
           >
             {currentTier === 'free' && (
               <div className="absolute -top-3 left-6">
-                <span className="bg-brand-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft">
+                <span className="bg-teal-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft">
                   Current Plan
                 </span>
               </div>
@@ -126,15 +126,15 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
 
           {/* Pro Tier */}
           <div
-            className={`relative bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-2xl p-8 transition-all duration-300 cursor-pointer ${
+            className={`relative bg-gradient-to-br from-navy-900 to-navy-800 rounded-2xl p-8 transition-all duration-300 cursor-pointer ${
               currentTier === 'pro'
-                ? 'ring-2 ring-brand-500 shadow-glow-lg'
+                ? 'ring-2 ring-teal-500 shadow-glow-lg'
                 : 'shadow-soft-xl hover:shadow-soft-xl hover:-translate-y-1'
             }`}
             onClick={() => handleUpgrade()}
           >
             <div className="absolute -top-3 right-6">
-              <span className="bg-gradient-to-r from-brand-500 to-brand-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-soft">
+              <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-soft">
                 Most Popular
               </span>
             </div>
@@ -168,8 +168,8 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
                 'Unlimited calculations',
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-brand-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg className="w-3 h-3 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-5 h-5 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -183,7 +183,7 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
               disabled={isLoading}
               className={`w-full py-3.5 px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                 currentTier === 'pro'
-                  ? 'bg-brand-500/20 text-brand-300 cursor-default'
+                  ? 'bg-teal-500/20 text-teal-300 cursor-default'
                   : 'bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5'
               }`}
             >

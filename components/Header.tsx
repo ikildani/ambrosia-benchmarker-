@@ -31,14 +31,13 @@ export default function Header() {
             className="flex items-center group"
           >
             <Image
-              src="https://static.wixstatic.com/media/e2a242_df6cb9bedde343e3b97ab79426ee1402~mv2.jpg"
+              src="/logo.png"
               alt="Ambrosia Ventures"
-              width={160}
-              height={44}
-              className={`h-10 w-auto object-contain transition-all duration-300 ${
+              width={200}
+              height={55}
+              className={`h-11 w-auto object-contain transition-all duration-300 ${
                 scrolled ? '' : 'brightness-0 invert'
               }`}
-              unoptimized
               priority
             />
           </a>
@@ -47,7 +46,7 @@ export default function Header() {
             <a
               href="#calculator"
               className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-brand-600' : 'text-white/80 hover:text-white'
+                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
               }`}
             >
               Calculator
@@ -55,7 +54,7 @@ export default function Header() {
             <a
               href="#pricing"
               className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-brand-600' : 'text-white/80 hover:text-white'
+                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
               }`}
             >
               Pricing
@@ -63,7 +62,7 @@ export default function Header() {
             <a
               href="#about"
               className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-brand-600' : 'text-white/80 hover:text-white'
+                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
               }`}
             >
               About
@@ -75,8 +74,8 @@ export default function Header() {
               href="mailto:info@ambrosiaventures.co"
               className={`hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
                 scrolled
-                  ? 'bg-brand-500 text-white hover:bg-brand-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5'
-                  : 'bg-white text-neutral-900 hover:bg-white/90 shadow-soft-lg'
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5'
+                  : 'bg-white text-navy-800 hover:bg-white/90 shadow-soft-lg'
               }`}
             >
               <span>Get in Touch</span>

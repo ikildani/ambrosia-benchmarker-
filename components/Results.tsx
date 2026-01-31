@@ -16,18 +16,18 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
   return (
     <div className="mt-8 card-elevated overflow-hidden animate-slide-up">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 px-8 py-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
+      <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-8 py-6 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
             backgroundSize: '20px 20px'
           }} />
         </div>
         <div className="relative flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-success-400 animate-pulse-slow"></div>
-              <span className="text-xs font-medium text-success-400 uppercase tracking-wider">Analysis Complete</span>
+              <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse-slow"></div>
+              <span className="text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
             </div>
             <h3 className="text-xl font-bold text-white">Estimated Deal Terms</h3>
             <p className="text-neutral-400 mt-1 text-sm">
@@ -35,7 +35,7 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
             </p>
           </div>
           <span className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase ${
-            isPro ? 'bg-brand-500 text-white shadow-glow' : 'bg-neutral-700 text-neutral-300'
+            isPro ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-glow' : 'bg-navy-700 text-neutral-300'
           }`}>
             {isPro ? 'Pro Analysis' : 'Free'}
           </span>
@@ -75,11 +75,11 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
         {/* Deal Terms Grid */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Upfront Payment - Always visible */}
-          <div className="group p-6 bg-white rounded-xl border border-brand-200 shadow-soft hover:shadow-soft-lg hover:border-brand-300 transition-all duration-200">
+          <div className="group p-6 bg-white rounded-xl border border-teal-200 shadow-soft hover:shadow-soft-lg hover:border-teal-300 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-brand-700">Upfront Payment</p>
-              <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                <svg className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <p className="text-sm font-semibold text-teal-700">Upfront Payment</p>
+              <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+                <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -88,7 +88,7 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
               {formatRange(terms.upfront)}
             </p>
             <p className="text-sm text-neutral-500">
-              Median: <span className="font-semibold text-brand-600">{formatCurrency(terms.upfront.median)}</span>
+              Median: <span className="font-semibold text-teal-600">{formatCurrency(terms.upfront.median)}</span>
             </p>
           </div>
 
@@ -155,38 +155,38 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
 
         {/* CTA Section */}
         {!isPro ? (
-          <div className="mt-8 p-8 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl text-center relative overflow-hidden">
+          <div className="mt-8 p-8 bg-gradient-to-br from-navy-800 to-navy-900 rounded-2xl text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+                backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
                 backgroundSize: '16px 16px'
               }} />
             </div>
             <div className="relative">
-              <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-1.5 mb-4">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center gap-2 bg-teal-500/20 rounded-full px-4 py-1.5 mb-4">
+                <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-sm font-medium text-white">Unlock Full Insights</span>
+                <span className="text-sm font-medium text-teal-300">Unlock Full Insights</span>
               </div>
               <h4 className="text-2xl font-bold text-white mb-2">
                 Get Complete Deal Analysis
               </h4>
-              <p className="text-brand-100 mb-6 max-w-md mx-auto">
+              <p className="text-neutral-300 mb-6 max-w-md mx-auto">
                 Access milestone breakdowns, royalty analysis, and downloadable reports with Pro
               </p>
               <button
                 onClick={onUpgrade}
-                className="inline-flex items-center gap-2 bg-white text-brand-700 font-semibold py-3.5 px-8 rounded-xl
-                         hover:bg-brand-50 transition-all duration-200 shadow-soft-lg hover:shadow-soft-xl hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3.5 px-8 rounded-xl
+                         hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 shadow-glow hover:shadow-glow-lg hover:-translate-y-0.5"
               >
                 <span>Upgrade to Pro</span>
-                <span className="text-brand-500">$150/mo</span>
+                <span className="text-teal-100">$150/mo</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="mt-8 p-8 bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-2xl text-center relative overflow-hidden">
+          <div className="mt-8 p-8 bg-gradient-to-br from-navy-900 to-navy-800 rounded-2xl text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,

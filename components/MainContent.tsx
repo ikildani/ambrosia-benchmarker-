@@ -25,30 +25,42 @@ export default function MainContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-hero text-white pt-32 pb-24 px-4 overflow-hidden">
+      <section className="relative bg-hero-gradient text-white pt-32 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
         {/* Background Effects */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+          <div className="absolute inset-0 opacity-20" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.3) 1px, transparent 0)`,
             backgroundSize: '40px 40px'
           }} />
-          <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-brand-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-brand-600/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-teal-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-cyan-500/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-5xl mx-auto text-center">
+        <div className="relative max-w-5xl mx-auto text-center w-full">
+          {/* Logo */}
+          <div className="mb-8">
+            <Image
+              src="/logo.png"
+              alt="Ambrosia Ventures"
+              width={280}
+              height={77}
+              className="h-16 w-auto mx-auto brightness-0 invert"
+              priority
+            />
+          </div>
+
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 mb-8">
-            <div className="w-2 h-2 bg-success-400 rounded-full animate-pulse-slow" />
-            <span className="text-sm font-medium text-white/90">Free Tool by Ambrosia Ventures</span>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-teal-400/30 rounded-full px-5 py-2 mb-8">
+            <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse-slow" />
+            <span className="text-sm font-medium text-teal-100">Life Sciences Deal Intelligence</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 tracking-tight">
-            Life Sciences
+            Deal Terms
             <br />
-            <span className="bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent">
-              Deal Calculator
+            <span className="bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
+              Calculator
             </span>
           </h1>
 
@@ -62,8 +74,8 @@ export default function MainContent() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <a
               href="#calculator"
-              className="inline-flex items-center gap-2 bg-white text-neutral-900 font-semibold px-8 py-4 rounded-xl
-                       shadow-soft-xl hover:shadow-soft-xl transition-all duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl
+                       shadow-glow hover:shadow-glow-lg transition-all duration-200 hover:-translate-y-0.5"
             >
               <span>Try Calculator Free</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,8 +98,8 @@ export default function MainContent() {
               { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: 'All oncology modalities' },
               { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Instant results' },
             ].map((feature, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-5 py-2.5">
-                <svg className="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div key={idx} className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-teal-400/20 rounded-full px-5 py-2.5">
+                <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                 </svg>
                 <span className="text-sm font-medium text-white/80">{feature.text}</span>
@@ -112,13 +124,13 @@ export default function MainContent() {
       <section className="py-24 px-4 bg-neutral-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-6">
-              <svg className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-full px-4 py-1.5 mb-6">
+              <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="text-sm font-medium text-brand-700">Why Use This Tool</span>
+              <span className="text-sm font-medium text-teal-700">Why Use This Tool</span>
             </div>
-            <h2 className="text-4xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-4xl font-bold text-navy-800 mb-4">
               Built for Life Sciences Professionals
             </h2>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
@@ -144,13 +156,13 @@ export default function MainContent() {
                 description: 'Get immediate estimates for upfront payments, development milestones, regulatory milestones, and royalties.',
               },
             ].map((feature, idx) => (
-              <div key={idx} className="group bg-white p-8 rounded-2xl border border-neutral-200 shadow-soft hover:shadow-soft-lg hover:border-neutral-300 transition-all duration-300">
-                <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-100 transition-colors">
-                  <svg className="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div key={idx} className="group bg-white p-8 rounded-2xl border border-neutral-200 shadow-soft hover:shadow-soft-lg hover:border-teal-200 transition-all duration-300">
+                <div className="w-14 h-14 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl flex items-center justify-center mb-6 group-hover:from-teal-100 group-hover:to-cyan-100 transition-colors">
+                  <svg className="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-3">
+                <h3 className="text-xl font-bold text-navy-800 mb-3">
                   {feature.title}
                 </h3>
                 <p className="text-neutral-600 leading-relaxed">
@@ -165,10 +177,10 @@ export default function MainContent() {
       {/* About Section */}
       <section id="about" className="py-24 px-4 bg-white scroll-mt-20">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-neutral-100 border border-neutral-200 rounded-full px-4 py-1.5 mb-6">
-            <span className="text-sm font-medium text-neutral-700">About Us</span>
+          <div className="inline-flex items-center gap-2 bg-navy-50 border border-navy-200 rounded-full px-4 py-1.5 mb-6">
+            <span className="text-sm font-medium text-navy-700">About Us</span>
           </div>
-          <h2 className="text-4xl font-bold text-neutral-900 mb-6">
+          <h2 className="text-4xl font-bold text-navy-800 mb-6">
             Ambrosia Ventures
           </h2>
           <p className="text-xl text-neutral-600 mb-10 leading-relaxed">
@@ -178,7 +190,7 @@ export default function MainContent() {
           </p>
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {['Licensing Strategy', 'M&A Advisory', 'In/Out-Licensing', 'Deal Structuring', 'Valuation'].map((service, idx) => (
-              <span key={idx} className="px-5 py-2.5 bg-neutral-50 rounded-xl text-neutral-700 text-sm font-medium border border-neutral-200">
+              <span key={idx} className="px-5 py-2.5 bg-neutral-50 rounded-xl text-navy-700 text-sm font-medium border border-neutral-200">
                 {service}
               </span>
             ))}
@@ -198,30 +210,29 @@ export default function MainContent() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-neutral-900 text-neutral-400 py-16 px-4">
+      <footer className="bg-navy-900 text-neutral-400 py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-8 pb-12 border-b border-neutral-800">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-8 pb-12 border-b border-navy-800">
             <div className="flex items-center gap-4">
               <Image
-                src="https://static.wixstatic.com/media/e2a242_df6cb9bedde343e3b97ab79426ee1402~mv2.jpg"
+                src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={140}
-                height={38}
-                className="h-9 w-auto object-contain brightness-0 invert opacity-80"
-                unoptimized
+                width={180}
+                height={49}
+                className="h-10 w-auto object-contain brightness-0 invert opacity-80"
               />
             </div>
             <nav className="flex items-center gap-8 text-sm">
-              <a href="https://www.ambrosiaventures.co" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              <a href="https://www.ambrosiaventures.co" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">
                 Website
               </a>
-              <a href="mailto:info@ambrosiaventures.co" className="hover:text-white transition-colors">
+              <a href="mailto:info@ambrosiaventures.co" className="hover:text-teal-400 transition-colors">
                 Contact
               </a>
-              <a href="https://www.linkedin.com/company/ambrosia-ventures" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              <a href="https://www.linkedin.com/company/ambrosia-ventures" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">
                 LinkedIn
               </a>
-              <a href="https://instagram.com/ambrosiaventures" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              <a href="https://instagram.com/ambrosiaventures" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">
                 Instagram
               </a>
             </nav>

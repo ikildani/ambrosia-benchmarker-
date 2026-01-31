@@ -57,11 +57,11 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
     <div id="calculator" className="w-full max-w-4xl mx-auto scroll-mt-24">
       <div className="card-elevated overflow-hidden">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 px-8 py-8 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-8 py-8 overflow-hidden">
           {/* Background pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
               backgroundSize: '24px 24px'
             }} />
           </div>
@@ -69,7 +69,7 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
           <div className="relative flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
@@ -82,8 +82,8 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
             </div>
             <span className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase ${
               tier === 'pro'
-                ? 'bg-brand-500 text-white shadow-glow'
-                : 'bg-neutral-700 text-neutral-300'
+                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-glow'
+                : 'bg-navy-700 text-neutral-300'
             }`}>
               {tier === 'pro' ? 'Pro' : 'Free'}
             </span>
@@ -155,7 +155,7 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
               <div className="flex flex-wrap gap-3">
                 <label className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
                   isFirstInClass
-                    ? 'border-brand-500 bg-brand-50 shadow-glow'
+                    ? 'border-teal-500 bg-teal-50 shadow-glow'
                     : 'border-neutral-200 bg-white hover:border-neutral-300'
                 }`}>
                   <input
@@ -165,16 +165,16 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
                       setIsFirstInClass(e.target.checked);
                       if (e.target.checked) setIsBestInClass(false);
                     }}
-                    className="w-4 h-4 rounded border-neutral-300 text-brand-600 focus:ring-brand-500"
+                    className="w-4 h-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-500"
                   />
-                  <span className={`text-sm font-medium ${isFirstInClass ? 'text-brand-700' : 'text-neutral-700'}`}>
+                  <span className={`text-sm font-medium ${isFirstInClass ? 'text-teal-700' : 'text-neutral-700'}`}>
                     First-in-class
                   </span>
                 </label>
 
                 <label className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
                   isBestInClass
-                    ? 'border-brand-500 bg-brand-50 shadow-glow'
+                    ? 'border-teal-500 bg-teal-50 shadow-glow'
                     : 'border-neutral-200 bg-white hover:border-neutral-300'
                 }`}>
                   <input
@@ -184,9 +184,9 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
                       setIsBestInClass(e.target.checked);
                       if (e.target.checked) setIsFirstInClass(false);
                     }}
-                    className="w-4 h-4 rounded border-neutral-300 text-brand-600 focus:ring-brand-500"
+                    className="w-4 h-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-500"
                   />
-                  <span className={`text-sm font-medium ${isBestInClass ? 'text-brand-700' : 'text-neutral-700'}`}>
+                  <span className={`text-sm font-medium ${isBestInClass ? 'text-teal-700' : 'text-neutral-700'}`}>
                     Best-in-class
                   </span>
                 </label>
@@ -213,9 +213,9 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
           <button
             onClick={handleCalculate}
             disabled={isCalculating}
-            className="mt-8 w-full bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold py-4 px-6 rounded-xl
+            className="mt-8 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl
                      shadow-soft-lg hover:shadow-glow-lg transition-all duration-300
-                     hover:from-brand-600 hover:to-brand-700 hover:-translate-y-0.5
+                     hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
                      disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
                      flex items-center justify-center gap-3"
           >
