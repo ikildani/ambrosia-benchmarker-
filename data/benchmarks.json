@@ -1,0 +1,273 @@
+{
+  "metadata": {
+    "lastUpdated": "2024-01",
+    "sources": [
+      "Publicly announced deal terms (SEC filings, press releases)",
+      "Industry benchmark reports",
+      "Academic research on pharmaceutical licensing"
+    ],
+    "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics."
+  },
+  "oncology": {
+    "preclinical": {
+      "smallMolecule": {
+        "upfront": { "low": 5, "median": 15, "high": 40 },
+        "devMilestones": { "low": 30, "median": 80, "high": 200 },
+        "regMilestones": { "low": 20, "median": 50, "high": 120 },
+        "commMilestones": { "low": 50, "median": 150, "high": 400 },
+        "royalties": { "low": 4, "median": 7, "high": 12 },
+        "totalDealValue": { "low": 100, "median": 300, "high": 750 }
+      },
+      "antibody": {
+        "upfront": { "low": 8, "median": 25, "high": 60 },
+        "devMilestones": { "low": 40, "median": 100, "high": 250 },
+        "regMilestones": { "low": 25, "median": 60, "high": 150 },
+        "commMilestones": { "low": 60, "median": 180, "high": 450 },
+        "royalties": { "low": 5, "median": 8, "high": 14 },
+        "totalDealValue": { "low": 150, "median": 400, "high": 900 }
+      },
+      "adc": {
+        "upfront": { "low": 15, "median": 40, "high": 100 },
+        "devMilestones": { "low": 60, "median": 150, "high": 350 },
+        "regMilestones": { "low": 35, "median": 80, "high": 180 },
+        "commMilestones": { "low": 80, "median": 250, "high": 600 },
+        "royalties": { "low": 6, "median": 10, "high": 16 },
+        "totalDealValue": { "low": 200, "median": 550, "high": 1200 }
+      },
+      "cellTherapy": {
+        "upfront": { "low": 20, "median": 50, "high": 120 },
+        "devMilestones": { "low": 80, "median": 200, "high": 450 },
+        "regMilestones": { "low": 40, "median": 100, "high": 220 },
+        "commMilestones": { "low": 100, "median": 300, "high": 700 },
+        "royalties": { "low": 7, "median": 11, "high": 18 },
+        "totalDealValue": { "low": 250, "median": 700, "high": 1500 }
+      },
+      "geneTherapy": {
+        "upfront": { "low": 25, "median": 60, "high": 150 },
+        "devMilestones": { "low": 100, "median": 250, "high": 500 },
+        "regMilestones": { "low": 50, "median": 120, "high": 250 },
+        "commMilestones": { "low": 120, "median": 350, "high": 800 },
+        "royalties": { "low": 8, "median": 13, "high": 20 },
+        "totalDealValue": { "low": 300, "median": 800, "high": 1700 }
+      }
+    },
+    "phase1": {
+      "smallMolecule": {
+        "upfront": { "low": 10, "median": 30, "high": 80 },
+        "devMilestones": { "low": 50, "median": 120, "high": 300 },
+        "regMilestones": { "low": 30, "median": 70, "high": 160 },
+        "commMilestones": { "low": 80, "median": 220, "high": 500 },
+        "royalties": { "low": 5, "median": 9, "high": 14 },
+        "totalDealValue": { "low": 180, "median": 450, "high": 1000 }
+      },
+      "antibody": {
+        "upfront": { "low": 15, "median": 45, "high": 110 },
+        "devMilestones": { "low": 60, "median": 150, "high": 380 },
+        "regMilestones": { "low": 40, "median": 90, "high": 200 },
+        "commMilestones": { "low": 100, "median": 280, "high": 600 },
+        "royalties": { "low": 6, "median": 10, "high": 16 },
+        "totalDealValue": { "low": 220, "median": 580, "high": 1300 }
+      },
+      "adc": {
+        "upfront": { "low": 25, "median": 70, "high": 160 },
+        "devMilestones": { "low": 90, "median": 220, "high": 500 },
+        "regMilestones": { "low": 50, "median": 120, "high": 260 },
+        "commMilestones": { "low": 130, "median": 350, "high": 750 },
+        "royalties": { "low": 8, "median": 12, "high": 18 },
+        "totalDealValue": { "low": 300, "median": 780, "high": 1700 }
+      },
+      "cellTherapy": {
+        "upfront": { "low": 35, "median": 90, "high": 200 },
+        "devMilestones": { "low": 120, "median": 300, "high": 650 },
+        "regMilestones": { "low": 60, "median": 150, "high": 320 },
+        "commMilestones": { "low": 150, "median": 420, "high": 900 },
+        "royalties": { "low": 9, "median": 14, "high": 22 },
+        "totalDealValue": { "low": 380, "median": 980, "high": 2100 }
+      },
+      "geneTherapy": {
+        "upfront": { "low": 45, "median": 110, "high": 250 },
+        "devMilestones": { "low": 150, "median": 380, "high": 800 },
+        "regMilestones": { "low": 80, "median": 180, "high": 400 },
+        "commMilestones": { "low": 180, "median": 500, "high": 1100 },
+        "royalties": { "low": 10, "median": 16, "high": 24 },
+        "totalDealValue": { "low": 480, "median": 1200, "high": 2600 }
+      }
+    },
+    "phase2": {
+      "smallMolecule": {
+        "upfront": { "low": 25, "median": 65, "high": 180 },
+        "devMilestones": { "low": 80, "median": 200, "high": 480 },
+        "regMilestones": { "low": 50, "median": 120, "high": 280 },
+        "commMilestones": { "low": 120, "median": 350, "high": 800 },
+        "royalties": { "low": 8, "median": 12, "high": 18 },
+        "totalDealValue": { "low": 300, "median": 750, "high": 1750 }
+      },
+      "antibody": {
+        "upfront": { "low": 40, "median": 100, "high": 280 },
+        "devMilestones": { "low": 100, "median": 280, "high": 650 },
+        "regMilestones": { "low": 60, "median": 160, "high": 380 },
+        "commMilestones": { "low": 150, "median": 450, "high": 1000 },
+        "royalties": { "low": 10, "median": 14, "high": 20 },
+        "totalDealValue": { "low": 380, "median": 1000, "high": 2300 }
+      },
+      "adc": {
+        "upfront": { "low": 60, "median": 150, "high": 400 },
+        "devMilestones": { "low": 150, "median": 400, "high": 900 },
+        "regMilestones": { "low": 80, "median": 220, "high": 500 },
+        "commMilestones": { "low": 200, "median": 600, "high": 1300 },
+        "royalties": { "low": 12, "median": 16, "high": 24 },
+        "totalDealValue": { "low": 500, "median": 1400, "high": 3100 }
+      },
+      "cellTherapy": {
+        "upfront": { "low": 80, "median": 200, "high": 500 },
+        "devMilestones": { "low": 200, "median": 500, "high": 1100 },
+        "regMilestones": { "low": 100, "median": 280, "high": 620 },
+        "commMilestones": { "low": 250, "median": 750, "high": 1600 },
+        "royalties": { "low": 14, "median": 18, "high": 28 },
+        "totalDealValue": { "low": 650, "median": 1750, "high": 3800 }
+      },
+      "geneTherapy": {
+        "upfront": { "low": 100, "median": 250, "high": 600 },
+        "devMilestones": { "low": 250, "median": 620, "high": 1400 },
+        "regMilestones": { "low": 120, "median": 350, "high": 780 },
+        "commMilestones": { "low": 300, "median": 900, "high": 2000 },
+        "royalties": { "low": 15, "median": 20, "high": 30 },
+        "totalDealValue": { "low": 800, "median": 2150, "high": 4800 }
+      }
+    },
+    "phase3": {
+      "smallMolecule": {
+        "upfront": { "low": 75, "median": 200, "high": 500 },
+        "devMilestones": { "low": 150, "median": 400, "high": 900 },
+        "regMilestones": { "low": 80, "median": 220, "high": 500 },
+        "commMilestones": { "low": 200, "median": 600, "high": 1400 },
+        "royalties": { "low": 12, "median": 18, "high": 25 },
+        "totalDealValue": { "low": 550, "median": 1450, "high": 3300 }
+      },
+      "antibody": {
+        "upfront": { "low": 120, "median": 320, "high": 750 },
+        "devMilestones": { "low": 200, "median": 550, "high": 1200 },
+        "regMilestones": { "low": 100, "median": 300, "high": 680 },
+        "commMilestones": { "low": 280, "median": 800, "high": 1800 },
+        "royalties": { "low": 14, "median": 20, "high": 28 },
+        "totalDealValue": { "low": 720, "median": 2000, "high": 4400 }
+      },
+      "adc": {
+        "upfront": { "low": 180, "median": 450, "high": 1000 },
+        "devMilestones": { "low": 300, "median": 750, "high": 1600 },
+        "regMilestones": { "low": 150, "median": 400, "high": 900 },
+        "commMilestones": { "low": 380, "median": 1100, "high": 2400 },
+        "royalties": { "low": 16, "median": 22, "high": 32 },
+        "totalDealValue": { "low": 1000, "median": 2750, "high": 6000 }
+      },
+      "cellTherapy": {
+        "upfront": { "low": 250, "median": 600, "high": 1400 },
+        "devMilestones": { "low": 400, "median": 1000, "high": 2200 },
+        "regMilestones": { "low": 200, "median": 550, "high": 1200 },
+        "commMilestones": { "low": 500, "median": 1400, "high": 3000 },
+        "royalties": { "low": 18, "median": 25, "high": 35 },
+        "totalDealValue": { "low": 1400, "median": 3600, "high": 7800 }
+      },
+      "geneTherapy": {
+        "upfront": { "low": 300, "median": 750, "high": 1800 },
+        "devMilestones": { "low": 500, "median": 1250, "high": 2800 },
+        "regMilestones": { "low": 250, "median": 680, "high": 1500 },
+        "commMilestones": { "low": 600, "median": 1700, "high": 3800 },
+        "royalties": { "low": 20, "median": 28, "high": 38 },
+        "totalDealValue": { "low": 1700, "median": 4500, "high": 10000 }
+      }
+    },
+    "approved": {
+      "smallMolecule": {
+        "upfront": { "low": 200, "median": 500, "high": 1500 },
+        "devMilestones": { "low": 100, "median": 300, "high": 700 },
+        "regMilestones": { "low": 50, "median": 150, "high": 400 },
+        "commMilestones": { "low": 300, "median": 900, "high": 2500 },
+        "royalties": { "low": 18, "median": 25, "high": 35 },
+        "totalDealValue": { "low": 700, "median": 2000, "high": 5000 }
+      },
+      "antibody": {
+        "upfront": { "low": 350, "median": 800, "high": 2200 },
+        "devMilestones": { "low": 150, "median": 400, "high": 1000 },
+        "regMilestones": { "low": 80, "median": 250, "high": 600 },
+        "commMilestones": { "low": 450, "median": 1200, "high": 3500 },
+        "royalties": { "low": 20, "median": 28, "high": 40 },
+        "totalDealValue": { "low": 1100, "median": 2800, "high": 7500 }
+      },
+      "adc": {
+        "upfront": { "low": 500, "median": 1200, "high": 3000 },
+        "devMilestones": { "low": 200, "median": 550, "high": 1400 },
+        "regMilestones": { "low": 120, "median": 350, "high": 850 },
+        "commMilestones": { "low": 600, "median": 1600, "high": 4500 },
+        "royalties": { "low": 22, "median": 30, "high": 42 },
+        "totalDealValue": { "low": 1500, "median": 3800, "high": 10000 }
+      },
+      "cellTherapy": {
+        "upfront": { "low": 700, "median": 1800, "high": 4500 },
+        "devMilestones": { "low": 300, "median": 750, "high": 2000 },
+        "regMilestones": { "low": 180, "median": 500, "high": 1200 },
+        "commMilestones": { "low": 800, "median": 2200, "high": 6000 },
+        "royalties": { "low": 25, "median": 35, "high": 45 },
+        "totalDealValue": { "low": 2000, "median": 5400, "high": 14000 }
+      },
+      "geneTherapy": {
+        "upfront": { "low": 900, "median": 2200, "high": 5500 },
+        "devMilestones": { "low": 400, "median": 1000, "high": 2500 },
+        "regMilestones": { "low": 250, "median": 650, "high": 1600 },
+        "commMilestones": { "low": 1000, "median": 2800, "high": 7500 },
+        "royalties": { "low": 28, "median": 38, "high": 50 },
+        "totalDealValue": { "low": 2600, "median": 6800, "high": 17500 }
+      }
+    }
+  },
+  "indicationModifiers": {
+    "solidTumor": {
+      "common": { "multiplier": 0.9, "label": "Common (lung, breast, colorectal)" },
+      "rare": { "multiplier": 1.1, "label": "Rare solid tumors" }
+    },
+    "hematologic": {
+      "common": { "multiplier": 1.0, "label": "Common (NHL, AML, CLL)" },
+      "rare": { "multiplier": 1.15, "label": "Rare hematologic malignancies" }
+    },
+    "pediatric": {
+      "multiplier": 0.85,
+      "label": "Pediatric oncology"
+    },
+    "firstInClass": {
+      "multiplier": 1.25,
+      "label": "First-in-class mechanism"
+    },
+    "bestInClass": {
+      "multiplier": 1.15,
+      "label": "Best-in-class potential"
+    },
+    "crowdedSpace": {
+      "multiplier": 0.8,
+      "label": "Highly competitive indication"
+    }
+  },
+  "labels": {
+    "phases": {
+      "preclinical": "Preclinical (IND-enabling)",
+      "phase1": "Phase 1",
+      "phase2": "Phase 2",
+      "phase3": "Phase 3",
+      "approved": "Approved / NDA Filed"
+    },
+    "modalities": {
+      "smallMolecule": "Small Molecule",
+      "antibody": "Monoclonal Antibody",
+      "adc": "Antibody-Drug Conjugate (ADC)",
+      "cellTherapy": "Cell Therapy (CAR-T, CAR-NK)",
+      "geneTherapy": "Gene Therapy / Gene Editing"
+    },
+    "metrics": {
+      "upfront": "Upfront Payment",
+      "devMilestones": "Development Milestones",
+      "regMilestones": "Regulatory Milestones",
+      "commMilestones": "Commercial Milestones",
+      "royalties": "Royalty Rate",
+      "totalDealValue": "Total Potential Deal Value"
+    }
+  }
+}
