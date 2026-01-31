@@ -153,7 +153,7 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
             </div>
 
             <div className="mb-8">
-              <span className="text-5xl font-bold text-white">$150</span>
+              <span className="text-5xl font-bold text-white">$99</span>
               <span className="text-neutral-400 ml-2">/month</span>
             </div>
 

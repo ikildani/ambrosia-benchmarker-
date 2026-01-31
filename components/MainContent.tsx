@@ -51,7 +51,7 @@ export default function MainContent() {
               alt="Ambrosia Ventures"
               width={280}
               height={77}
-              className="h-16 w-auto mx-auto brightness-0 invert drop-shadow-lg"
+              className="h-16 w-auto mx-auto drop-shadow-lg"
               priority
             />
           </div>
@@ -284,7 +284,7 @@ export default function MainContent() {
                 alt="Ambrosia Ventures"
                 width={180}
                 height={49}
-                className="h-10 w-auto object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity"
+                className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
               />
             </div>
             <nav className="flex items-center gap-8 text-sm">
