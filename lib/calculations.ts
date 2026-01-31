@@ -1,8 +1,17 @@
 import benchmarks from '@/data/benchmarks.json';
 
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
-export type Modality = 'smallMolecule' | 'antibody' | 'adc' | 'cellTherapy' | 'geneTherapy';
-export type IndicationType = 'solidTumor_common' | 'solidTumor_rare' | 'hematologic_common' | 'hematologic_rare' | 'pediatric';
+export type Modality = 'smallMolecule' | 'antibody' | 'adc' | 'bispecific' | 'cellTherapy' | 'geneTherapy';
+export type IndicationType =
+  | 'lung'
+  | 'breast'
+  | 'colorectal'
+  | 'pancreatic'
+  | 'aml'
+  | 'other_solid'
+  | 'other_hematologic'
+  | 'pediatric';
+export type Territory = 'global' | 'usOnly' | 'exUs';
 
 export interface DealTerms {
   upfront: { low: number; median: number; high: number };
@@ -17,6 +26,7 @@ export interface CalculationInput {
   phase: Phase;
   modality: Modality;
   indicationType: IndicationType;
+  territory: Territory;
   isFirstInClass: boolean;
   isBestInClass: boolean;
   isCrowdedSpace: boolean;
@@ -59,22 +69,19 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   let totalMultiplier = 1.0;
 
   // Apply indication type modifier
-  const [indicationCategory, indicationSubtype] = input.indicationType.split('_');
-  const indicationMods = benchmarks.indicationModifiers as Record<string, Record<string, { multiplier: number; label: string }> | { multiplier: number; label: string }>;
+  const indicationMods = benchmarks.indicationModifiers as Record<string, { multiplier: number; label: string }>;
+  const indicationMod = indicationMods[input.indicationType];
+  if (indicationMod) {
+    totalMultiplier *= indicationMod.multiplier;
+    modifiers.push({ name: indicationMod.label, multiplier: indicationMod.multiplier });
+  }
 
-  if (indicationCategory === 'pediatric') {
-    const mod = indicationMods.pediatric as { multiplier: number; label: string };
-    totalMultiplier *= mod.multiplier;
-    modifiers.push({ name: mod.label, multiplier: mod.multiplier });
-  } else {
-    const categoryMods = indicationMods[indicationCategory] as Record<string, { multiplier: number; label: string }>;
-    if (categoryMods && categoryMods[indicationSubtype]) {
-      totalMultiplier *= categoryMods[indicationSubtype].multiplier;
-      modifiers.push({
-        name: categoryMods[indicationSubtype].label,
-        multiplier: categoryMods[indicationSubtype].multiplier
-      });
-    }
+  // Apply territory modifier
+  const territoryMods = benchmarks.territoryModifiers as Record<string, { multiplier: number; label: string }>;
+  const territoryMod = territoryMods[input.territory];
+  if (territoryMod) {
+    totalMultiplier *= territoryMod.multiplier;
+    modifiers.push({ name: territoryMod.label, multiplier: territoryMod.multiplier });
   }
 
   // Apply competitive position modifiers
@@ -147,14 +154,24 @@ export const modalityOptions = [
   { value: 'smallMolecule', label: 'Small Molecule' },
   { value: 'antibody', label: 'Monoclonal Antibody' },
   { value: 'adc', label: 'Antibody-Drug Conjugate (ADC)' },
+  { value: 'bispecific', label: 'Bispecific Antibody' },
   { value: 'cellTherapy', label: 'Cell Therapy (CAR-T, CAR-NK)' },
   { value: 'geneTherapy', label: 'Gene Therapy / Gene Editing' },
 ];
 
 export const indicationOptions = [
-  { value: 'solidTumor_common', label: 'Solid Tumor - Common (lung, breast, colorectal)' },
-  { value: 'solidTumor_rare', label: 'Solid Tumor - Rare' },
-  { value: 'hematologic_common', label: 'Hematologic - Common (NHL, AML, CLL)' },
-  { value: 'hematologic_rare', label: 'Hematologic - Rare' },
+  { value: 'lung', label: 'Lung Cancer (NSCLC/SCLC)' },
+  { value: 'breast', label: 'Breast Cancer' },
+  { value: 'colorectal', label: 'Colorectal Cancer' },
+  { value: 'pancreatic', label: 'Pancreatic Cancer' },
+  { value: 'aml', label: 'AML (Acute Myeloid Leukemia)' },
+  { value: 'other_solid', label: 'Other Solid Tumors' },
+  { value: 'other_hematologic', label: 'Other Hematologic Malignancies' },
   { value: 'pediatric', label: 'Pediatric Oncology' },
+];
+
+export const territoryOptions = [
+  { value: 'global', label: 'Global (Worldwide)' },
+  { value: 'usOnly', label: 'US Only' },
+  { value: 'exUs', label: 'Ex-US (Outside United States)' },
 ];

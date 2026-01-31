@@ -1,19 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Phase,
   Modality,
   IndicationType,
+  Territory,
   CalculationInput,
   CalculationResult,
   calculateDealTerms,
   phaseOptions,
   modalityOptions,
   indicationOptions,
+  territoryOptions,
 } from '@/lib/calculations';
+import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
 import Results from './Results';
 import EmailCapture from './EmailCapture';
+import PaywallModal from './PaywallModal';
 
 interface CalculatorProps {
   tier: 'free' | 'pro';
@@ -23,15 +27,30 @@ interface CalculatorProps {
 export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
   const [phase, setPhase] = useState<Phase>('phase2');
   const [modality, setModality] = useState<Modality>('smallMolecule');
-  const [indicationType, setIndicationType] = useState<IndicationType>('solidTumor_common');
+  const [indicationType, setIndicationType] = useState<IndicationType>('lung');
+  const [territory, setTerritory] = useState<Territory>('global');
   const [isFirstInClass, setIsFirstInClass] = useState(false);
   const [isBestInClass, setIsBestInClass] = useState(false);
   const [isCrowdedSpace, setIsCrowdedSpace] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [showEmailCapture, setShowEmailCapture] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
+  const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
+
+  useEffect(() => {
+    setRemainingUses(getRemainingUses(tier));
+  }, [tier]);
 
   const handleCalculate = () => {
+    // Check usage limits for free tier
+    if (!canUseCalculator(tier)) {
+      setPaywallReason('limit_reached');
+      setShowPaywall(true);
+      return;
+    }
+
     setIsCalculating(true);
     // Simulate calculation delay for premium feel
     setTimeout(() => {
@@ -39,6 +58,7 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
         phase,
         modality,
         indicationType,
+        territory,
         isFirstInClass,
         isBestInClass,
         isCrowdedSpace,
@@ -46,6 +66,12 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
       const calculatedResult = calculateDealTerms(input);
       setResult(calculatedResult);
       setIsCalculating(false);
+
+      // Increment usage after successful calculation (only for free tier)
+      if (tier === 'free') {
+        incrementUsage();
+        setRemainingUses(getRemainingUses(tier));
+      }
 
       // Scroll to results
       setTimeout(() => {
@@ -169,7 +195,7 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
               </div>
 
               {/* Indication Type */}
-              <div className="md:col-span-2 space-y-2">
+              <div className="space-y-2">
                 <label className="block text-sm font-semibold text-neutral-700">
                   Indication Type
                 </label>
@@ -185,6 +211,25 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
                   ))}
                 </select>
                 <p className="text-xs text-neutral-500">Target cancer type affects deal valuation</p>
+              </div>
+
+              {/* Territory */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-neutral-700">
+                  Territory Rights
+                </label>
+                <select
+                  value={territory}
+                  onChange={(e) => setTerritory(e.target.value as Territory)}
+                  className="select-field"
+                >
+                  {territoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500">Geographic scope of the license</p>
               </div>
             </div>
           </div>
@@ -307,6 +352,38 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
             </div>
           </div>
 
+          {/* Usage Counter for Free Tier */}
+          {tier === 'free' && (
+            <div className="mb-6 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-neutral-600">
+                    <span className="font-semibold text-navy-800">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining this month
+                  </span>
+                </div>
+                {remainingUses === 0 && (
+                  <button
+                    onClick={() => {
+                      setPaywallReason('limit_reached');
+                      setShowPaywall(true);
+                    }}
+                    className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+                  >
+                    Upgrade to Pro
+                  </button>
+                )}
+              </div>
+              {remainingUses > 0 && remainingUses <= 1 && (
+                <p className="text-xs text-warning-600 mt-2">
+                  Running low on calculations? Upgrade to Pro for unlimited access.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Calculate Button */}
           <button
             onClick={handleCalculate}
@@ -356,6 +433,12 @@ export default function Calculator({ tier, onUpgrade }: CalculatorProps) {
       {showEmailCapture && (
         <EmailCapture onClose={() => setShowEmailCapture(false)} />
       )}
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        reason={paywallReason}
+      />
     </div>
   );
 }

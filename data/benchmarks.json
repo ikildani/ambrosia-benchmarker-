@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2024-01",
+    "lastUpdated": "2025-01",
     "sources": [
       "Publicly announced deal terms (SEC filings, press releases)",
       "Industry benchmark reports",
@@ -33,6 +33,14 @@
         "commMilestones": { "low": 80, "median": 250, "high": 600 },
         "royalties": { "low": 6, "median": 10, "high": 16 },
         "totalDealValue": { "low": 200, "median": 550, "high": 1200 }
+      },
+      "bispecific": {
+        "upfront": { "low": 18, "median": 45, "high": 110 },
+        "devMilestones": { "low": 70, "median": 170, "high": 400 },
+        "regMilestones": { "low": 40, "median": 95, "high": 200 },
+        "commMilestones": { "low": 90, "median": 280, "high": 650 },
+        "royalties": { "low": 7, "median": 11, "high": 17 },
+        "totalDealValue": { "low": 230, "median": 620, "high": 1350 }
       },
       "cellTherapy": {
         "upfront": { "low": 20, "median": 50, "high": 120 },
@@ -76,6 +84,14 @@
         "royalties": { "low": 8, "median": 12, "high": 18 },
         "totalDealValue": { "low": 300, "median": 780, "high": 1700 }
       },
+      "bispecific": {
+        "upfront": { "low": 30, "median": 80, "high": 180 },
+        "devMilestones": { "low": 100, "median": 250, "high": 560 },
+        "regMilestones": { "low": 55, "median": 135, "high": 290 },
+        "commMilestones": { "low": 145, "median": 390, "high": 840 },
+        "royalties": { "low": 9, "median": 13, "high": 19 },
+        "totalDealValue": { "low": 340, "median": 880, "high": 1900 }
+      },
       "cellTherapy": {
         "upfront": { "low": 35, "median": 90, "high": 200 },
         "devMilestones": { "low": 120, "median": 300, "high": 650 },
@@ -117,6 +133,14 @@
         "commMilestones": { "low": 200, "median": 600, "high": 1300 },
         "royalties": { "low": 12, "median": 16, "high": 24 },
         "totalDealValue": { "low": 500, "median": 1400, "high": 3100 }
+      },
+      "bispecific": {
+        "upfront": { "low": 70, "median": 175, "high": 450 },
+        "devMilestones": { "low": 170, "median": 450, "high": 1000 },
+        "regMilestones": { "low": 90, "median": 250, "high": 560 },
+        "commMilestones": { "low": 225, "median": 675, "high": 1450 },
+        "royalties": { "low": 13, "median": 17, "high": 26 },
+        "totalDealValue": { "low": 560, "median": 1580, "high": 3450 }
       },
       "cellTherapy": {
         "upfront": { "low": 80, "median": 200, "high": 500 },
@@ -160,6 +184,14 @@
         "royalties": { "low": 16, "median": 22, "high": 32 },
         "totalDealValue": { "low": 1000, "median": 2750, "high": 6000 }
       },
+      "bispecific": {
+        "upfront": { "low": 200, "median": 500, "high": 1120 },
+        "devMilestones": { "low": 340, "median": 840, "high": 1800 },
+        "regMilestones": { "low": 170, "median": 450, "high": 1010 },
+        "commMilestones": { "low": 430, "median": 1240, "high": 2700 },
+        "royalties": { "low": 17, "median": 24, "high": 35 },
+        "totalDealValue": { "low": 1120, "median": 3100, "high": 6750 }
+      },
       "cellTherapy": {
         "upfront": { "low": 250, "median": 600, "high": 1400 },
         "devMilestones": { "low": 400, "median": 1000, "high": 2200 },
@@ -202,6 +234,14 @@
         "royalties": { "low": 22, "median": 30, "high": 42 },
         "totalDealValue": { "low": 1500, "median": 3800, "high": 10000 }
       },
+      "bispecific": {
+        "upfront": { "low": 560, "median": 1350, "high": 3400 },
+        "devMilestones": { "low": 225, "median": 620, "high": 1580 },
+        "regMilestones": { "low": 135, "median": 395, "high": 960 },
+        "commMilestones": { "low": 675, "median": 1800, "high": 5100 },
+        "royalties": { "low": 24, "median": 32, "high": 45 },
+        "totalDealValue": { "low": 1690, "median": 4280, "high": 11250 }
+      },
       "cellTherapy": {
         "upfront": { "low": 700, "median": 1800, "high": 4500 },
         "devMilestones": { "low": 300, "median": 750, "high": 2000 },
@@ -221,30 +261,22 @@
     }
   },
   "indicationModifiers": {
-    "solidTumor": {
-      "common": { "multiplier": 0.9, "label": "Common (lung, breast, colorectal)" },
-      "rare": { "multiplier": 1.1, "label": "Rare solid tumors" }
-    },
-    "hematologic": {
-      "common": { "multiplier": 1.0, "label": "Common (NHL, AML, CLL)" },
-      "rare": { "multiplier": 1.15, "label": "Rare hematologic malignancies" }
-    },
-    "pediatric": {
-      "multiplier": 0.85,
-      "label": "Pediatric oncology"
-    },
-    "firstInClass": {
-      "multiplier": 1.25,
-      "label": "First-in-class mechanism"
-    },
-    "bestInClass": {
-      "multiplier": 1.15,
-      "label": "Best-in-class potential"
-    },
-    "crowdedSpace": {
-      "multiplier": 0.8,
-      "label": "Highly competitive indication"
-    }
+    "lung": { "multiplier": 1.0, "label": "Lung Cancer (NSCLC/SCLC)" },
+    "breast": { "multiplier": 0.95, "label": "Breast Cancer" },
+    "colorectal": { "multiplier": 0.9, "label": "Colorectal Cancer" },
+    "pancreatic": { "multiplier": 1.1, "label": "Pancreatic Cancer" },
+    "aml": { "multiplier": 1.05, "label": "AML (Acute Myeloid Leukemia)" },
+    "other_solid": { "multiplier": 0.95, "label": "Other Solid Tumors" },
+    "other_hematologic": { "multiplier": 1.0, "label": "Other Hematologic Malignancies" },
+    "pediatric": { "multiplier": 0.85, "label": "Pediatric Oncology" },
+    "firstInClass": { "multiplier": 1.25, "label": "First-in-class mechanism" },
+    "bestInClass": { "multiplier": 1.15, "label": "Best-in-class potential" },
+    "crowdedSpace": { "multiplier": 0.8, "label": "Highly competitive indication" }
+  },
+  "territoryModifiers": {
+    "global": { "multiplier": 1.0, "label": "Global (Worldwide)" },
+    "usOnly": { "multiplier": 0.85, "label": "US Only" },
+    "exUs": { "multiplier": 0.70, "label": "Ex-US (Outside United States)" }
   },
   "labels": {
     "phases": {
@@ -258,8 +290,14 @@
       "smallMolecule": "Small Molecule",
       "antibody": "Monoclonal Antibody",
       "adc": "Antibody-Drug Conjugate (ADC)",
+      "bispecific": "Bispecific Antibody",
       "cellTherapy": "Cell Therapy (CAR-T, CAR-NK)",
       "geneTherapy": "Gene Therapy / Gene Editing"
+    },
+    "territories": {
+      "global": "Global (Worldwide)",
+      "usOnly": "US Only",
+      "exUs": "Ex-US (Outside United States)"
     },
     "metrics": {
       "upfront": "Upfront Payment",
