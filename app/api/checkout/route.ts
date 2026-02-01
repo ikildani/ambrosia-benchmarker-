@@ -11,16 +11,26 @@ import Stripe from 'stripe';
 export async function POST() {
   try {
     // Check if Stripe is configured
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    const priceId = process.env.STRIPE_PRICE_ID;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
+    const priceId = process.env.STRIPE_PRICE_ID?.trim();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
 
     if (!stripeSecretKey || !priceId) {
       // Stripe not configured - return demo mode response
       return NextResponse.json({
         demo: true,
         message: 'Stripe not configured. Running in demo mode.',
+        hasKey: !!stripeSecretKey,
+        hasPrice: !!priceId,
       });
+    }
+
+    // Verify key format
+    if (!stripeSecretKey.startsWith('sk_')) {
+      return NextResponse.json({
+        error: 'Invalid Stripe key format',
+        keyPrefix: stripeSecretKey.substring(0, 10),
+      }, { status: 500 });
     }
 
     const stripe = new Stripe(stripeSecretKey, {
