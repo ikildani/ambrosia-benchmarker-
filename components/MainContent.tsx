@@ -46,7 +46,7 @@ export default function MainContent() {
       <Header />
 
       {/* Hero Section - World-Class Light Design */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-36 lg:pt-44 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-40 lg:pt-52 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Elegant mesh gradient */}
