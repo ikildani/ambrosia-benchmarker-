@@ -28,7 +28,7 @@ export default function MainContent() {
   return (
     <>
       {/* Hero Section - Light, Professional Design */}
-      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-32 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
+      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-36 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
         {/* Elegant Background Effects */}
         <div className="absolute inset-0">
           {/* Subtle grid pattern */}
@@ -44,16 +44,13 @@ export default function MainContent() {
         </div>
 
         <div className={`relative max-w-5xl mx-auto text-center w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          {/* Logo - Original Colors */}
-          <div className="mb-10 animate-fade-in">
-            <Image
-              src="/logo.png"
-              alt="Ambrosia Ventures"
-              width={500}
-              height={138}
-              className="h-24 sm:h-28 md:h-32 w-auto mx-auto drop-shadow-sm"
-              priority
-            />
+          {/* Hero Icon - Calculator/Analytics themed */}
+          <div className="mb-8 animate-fade-in">
+            <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl shadow-lg shadow-teal-500/30 rotate-3 hover:rotate-0 transition-transform duration-300">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
           </div>
 
           {/* Badge */}
