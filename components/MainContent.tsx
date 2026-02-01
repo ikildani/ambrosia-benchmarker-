@@ -49,9 +49,9 @@ export default function MainContent() {
             <Image
               src="/logo.png"
               alt="Ambrosia Ventures"
-              width={280}
-              height={77}
-              className="h-16 w-auto mx-auto drop-shadow-lg"
+              width={400}
+              height={110}
+              className="h-28 w-auto mx-auto brightness-0 invert drop-shadow-lg"
               priority
             />
           </div>
@@ -282,9 +282,9 @@ export default function MainContent() {
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={180}
-                height={49}
-                className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                width={220}
+                height={60}
+                className="h-14 w-auto object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity"
               />
             </div>
             <nav className="flex items-center gap-8 text-sm">
