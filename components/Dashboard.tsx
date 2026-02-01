@@ -192,7 +192,7 @@ export default function Dashboard({
                     <p className="text-sm text-slate-500">
                       {tier === 'pro'
                         ? 'Full access to all features'
-                        : 'Limited to 3 calculations per month'
+                        : 'Limited to 2 calculations per month'
                       }
                     </p>
                   </div>

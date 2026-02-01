@@ -50,6 +50,12 @@ export default function MainContent() {
         setIsAuthenticated(true);
         setUserName(parsed.name || '');
         setUserEmail(parsed.email || '');
+        // Auto-upgrade pro users by email
+        const proEmails = ['ikildani@ambrosiaventures.co'];
+        if (proEmails.includes((parsed.email || '').toLowerCase())) {
+          setTier('pro');
+          localStorage.setItem('user_tier', 'pro');
+        }
       } catch {
         // Invalid stored data
       }
@@ -86,6 +92,12 @@ export default function MainContent() {
     setUserEmail(email);
     setUserName(name);
     setShowAuthModal(false);
+    // Auto-upgrade pro users by email
+    const proEmails = ['ikildani@ambrosiaventures.co'];
+    if (proEmails.includes(email.toLowerCase())) {
+      setTier('pro');
+      localStorage.setItem('user_tier', 'pro');
+    }
   };
 
   const handleSignOut = () => {
