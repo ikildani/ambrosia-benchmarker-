@@ -49,9 +49,9 @@ export default function Header({ isAuthenticated, userEmail, onAuthSuccess, onSi
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={320}
-                height={88}
-                className="h-12 sm:h-14 w-auto object-contain transition-all duration-300"
+                width={240}
+                height={66}
+                className="h-10 sm:h-12 w-auto object-contain transition-all duration-300 hover:opacity-80"
                 priority
               />
             </a>
