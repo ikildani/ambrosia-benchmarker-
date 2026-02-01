@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useUser } from '@clerk/nextjs';
 import Calculator from './Calculator';
 import Pricing from './Pricing';
 import Header from './Header';
@@ -9,10 +10,9 @@ import Header from './Header';
 export default function MainContent() {
   const [tier, setTier] = useState<'free' | 'pro'>('free');
   const [isVisible, setIsVisible] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | undefined>();
+  const { isSignedIn } = useUser();
 
-  // Check for successful Stripe checkout and auth state
+  // Check for successful Stripe checkout and saved tier
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -22,14 +22,8 @@ export default function MainContent() {
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    // Check for existing auth
-    const savedAuth = localStorage.getItem('is_authenticated');
-    const savedEmail = localStorage.getItem('user_email');
+    // Check for saved tier
     const savedTier = localStorage.getItem('user_tier');
-    if (savedAuth === 'true' && savedEmail) {
-      setIsAuthenticated(true);
-      setUserEmail(savedEmail);
-    }
     if (savedTier === 'pro') {
       setTier('pro');
     }
@@ -40,24 +34,6 @@ export default function MainContent() {
 
   const scrollToPricing = () => {
     document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleAuthSuccess = (email: string) => {
-    setIsAuthenticated(true);
-    setUserEmail(email);
-    localStorage.setItem('is_authenticated', 'true');
-    localStorage.setItem('user_email', email);
-  };
-
-  const handleSignOut = () => {
-    setIsAuthenticated(false);
-    setUserEmail(undefined);
-    setTier('free');
-    localStorage.removeItem('is_authenticated');
-    localStorage.removeItem('user_email');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_company');
-    localStorage.removeItem('user_tier');
   };
 
   const handleTierChange = (newTier: 'free' | 'pro') => {
@@ -71,16 +47,11 @@ export default function MainContent() {
 
   return (
     <>
-      {/* Header with Auth */}
-      <Header
-        isAuthenticated={isAuthenticated}
-        userEmail={userEmail}
-        onAuthSuccess={handleAuthSuccess}
-        onSignOut={handleSignOut}
-      />
+      {/* Header with Clerk Auth */}
+      <Header />
 
       {/* Hero Section - World-Class Light Design */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-32 lg:pt-36 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-36 lg:pt-44 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Elegant mesh gradient */}
