@@ -5,12 +5,28 @@ import Image from 'next/image';
 import Calculator from './Calculator';
 import Pricing from './Pricing';
 import Header from './Header';
+import AuthModal from './AuthModal';
+import Dashboard from './Dashboard';
+
+type View = 'landing' | 'dashboard';
 
 export default function MainContent() {
   const [tier, setTier] = useState<'free' | 'pro'>('free');
   const [isVisible, setIsVisible] = useState(false);
 
-  // Check for successful Stripe checkout and saved tier
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  // Modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
+
+  // View state
+  const [currentView, setCurrentView] = useState<View>('landing');
+
+  // Check for successful Stripe checkout, saved tier, and auth state
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -22,6 +38,21 @@ export default function MainContent() {
     const savedTier = localStorage.getItem('user_tier');
     if (savedTier === 'pro') {
       setTier('pro');
+    }
+
+    // Check authentication state
+    const authState = localStorage.getItem('is_authenticated');
+    const userData = localStorage.getItem('user_data');
+
+    if (authState === 'true' && userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        setIsAuthenticated(true);
+        setUserName(parsed.name || '');
+        setUserEmail(parsed.email || '');
+      } catch {
+        // Invalid stored data
+      }
     }
 
     setIsVisible(true);
@@ -40,13 +71,91 @@ export default function MainContent() {
     }
   };
 
+  const handleSignInClick = () => {
+    setAuthModalMode('signin');
+    setShowAuthModal(true);
+  };
+
+  const handleSignUpClick = () => {
+    setAuthModalMode('signup');
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = (email: string, name: string) => {
+    setIsAuthenticated(true);
+    setUserEmail(email);
+    setUserName(name);
+    setShowAuthModal(false);
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setUserName('');
+    setUserEmail('');
+    setCurrentView('landing');
+    localStorage.removeItem('is_authenticated');
+    localStorage.removeItem('user_data');
+  };
+
+  const handleDashboardClick = () => {
+    setCurrentView('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToCalculator = () => {
+    setCurrentView('landing');
+    setTimeout(() => {
+      document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // Show Dashboard view for authenticated users
+  if (currentView === 'dashboard' && isAuthenticated) {
+    return (
+      <>
+        <Dashboard
+          userName={userName}
+          userEmail={userEmail}
+          tier={tier}
+          onNavigateToCalculator={handleNavigateToCalculator}
+          onUpgrade={scrollToPricing}
+          onSignOut={handleSignOut}
+        />
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          initialMode={authModalMode}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Header */}
-      <Header />
+      <Header
+        isAuthenticated={isAuthenticated}
+        userName={userName}
+        userEmail={userEmail}
+        onSignInClick={handleSignInClick}
+        onSignUpClick={handleSignUpClick}
+        onSignOut={handleSignOut}
+        onDashboardClick={handleDashboardClick}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode={authModalMode}
+      />
 
       {/* Hero Section - World-Class Light Design */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-56 lg:pt-96 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-32 lg:pt-40 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Elegant mesh gradient */}
@@ -120,27 +229,55 @@ export default function MainContent() {
 
           {/* Premium CTA Buttons */}
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <a
-              href="#calculator"
-              className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-2xl
-                       shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-            >
-              <span className="relative z-10">Try Calculator Free</span>
-              <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </a>
-            <a
-              href="#pricing"
-              className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-2xl
-                       shadow-lg shadow-slate-200/50 hover:border-teal-300 hover:text-teal-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-            >
-              <span>View Pricing</span>
-              <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
+            {isAuthenticated ? (
+              <>
+                <a
+                  href="#calculator"
+                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-2xl
+                           shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                >
+                  <span className="relative z-10">Run Analysis</span>
+                  <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </a>
+                <button
+                  onClick={handleDashboardClick}
+                  className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-2xl
+                           shadow-lg shadow-slate-200/50 hover:border-teal-300 hover:text-teal-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <span>My Dashboard</span>
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleSignUpClick}
+                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-2xl
+                           shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                >
+                  <span className="relative z-10">Get Started Free</span>
+                  <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+                <a
+                  href="#calculator"
+                  className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-2xl
+                           shadow-lg shadow-slate-200/50 hover:border-teal-300 hover:text-teal-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <span>Try Calculator</span>
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </a>
+              </>
+            )}
           </div>
 
           {/* Premium Feature Pills */}
