@@ -23,7 +23,7 @@ export default function Header() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-32 lg:h-44">
+        <div className="flex justify-between items-center h-36 lg:h-52">
           <a
             href="https://www.ambrosiaventures.co"
             target="_blank"
@@ -33,9 +33,9 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="Ambrosia Ventures"
-              width={600}
-              height={165}
-              className="h-24 sm:h-32 lg:h-40 w-auto object-contain transition-all duration-300 hover:opacity-80"
+              width={700}
+              height={193}
+              className="h-28 sm:h-40 lg:h-48 w-auto object-contain transition-all duration-300 hover:opacity-80"
               priority
             />
           </a>
