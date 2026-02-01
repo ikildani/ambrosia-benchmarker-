@@ -25,10 +25,17 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
       if (data.url) {
         window.location.href = data.url;
       } else {
+        // Stripe not configured - scroll to pricing section
         onClose();
+        setTimeout(() => {
+          document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
     } catch {
       onClose();
+      setTimeout(() => {
+        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +116,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
           </div>
 
           <div className="text-center mb-6">
-            <span className="text-4xl font-bold text-neutral-900">$150</span>
+            <span className="text-4xl font-bold text-neutral-900">$99</span>
             <span className="text-neutral-500 ml-2">/month</span>
           </div>
 
