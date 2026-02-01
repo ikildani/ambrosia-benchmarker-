@@ -52,7 +52,8 @@ export default function MainContent() {
         setUserEmail(parsed.email || '');
         // Auto-upgrade pro users by email
         const proEmails = ['ikildani@ambrosiaventures.co'];
-        if (proEmails.includes((parsed.email || '').toLowerCase())) {
+        const userEmailLower = (parsed.email || '').toLowerCase().trim();
+        if (proEmails.some(e => e.toLowerCase() === userEmailLower)) {
           setTier('pro');
           localStorage.setItem('user_tier', 'pro');
         }
@@ -94,7 +95,8 @@ export default function MainContent() {
     setShowAuthModal(false);
     // Auto-upgrade pro users by email
     const proEmails = ['ikildani@ambrosiaventures.co'];
-    if (proEmails.includes(email.toLowerCase())) {
+    const userEmailLower = email.toLowerCase().trim();
+    if (proEmails.some(e => e.toLowerCase() === userEmailLower)) {
       setTier('pro');
       localStorage.setItem('user_tier', 'pro');
     }
