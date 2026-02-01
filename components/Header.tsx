@@ -2,11 +2,9 @@
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const { isSignedIn, isLoaded } = useUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,36 +62,16 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {!isLoaded ? (
-              <div className="w-24 h-10 bg-neutral-100 rounded-xl animate-pulse" />
-            ) : isSignedIn ? (
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-10 h-10 ring-2 ring-teal-500/20',
-                    userButtonPopoverCard: 'shadow-xl border border-neutral-200 rounded-xl',
-                    userButtonPopoverActionButton: 'hover:bg-teal-50',
-                  },
-                }}
-              />
-            ) : (
-              <>
-                <SignInButton mode="modal">
-                  <button className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors px-4 py-2">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 bg-gradient-to-r from-teal-600 to-cyan-500 text-white hover:from-teal-700 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5">
-                    <span>Sign Up Free</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </button>
-                </SignUpButton>
-              </>
-            )}
+            <a
+              href="mailto:info@ambrosiaventures.co"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+                       bg-gradient-to-r from-teal-600 to-cyan-500 text-white hover:from-teal-700 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
+            >
+              <span>Get in Touch</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>

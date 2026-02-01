@@ -9,25 +9,36 @@ interface PricingProps {
 
 export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      // Redirect to Stripe Checkout
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await response.json();
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      if (data.demo) {
+        setError('Payment system is being configured. Please contact info@ambrosiaventures.co to upgrade.');
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
       } else {
-        // For demo: just upgrade locally
-        onSelectTier('pro');
+        setError('Unable to start checkout. Please try again.');
       }
-    } catch {
-      // For demo without Stripe configured: upgrade locally
-      onSelectTier('pro');
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError('Connection error. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +191,7 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
 
             <button
               onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
-              disabled={isLoading}
+              disabled={isLoading || currentTier === 'pro'}
               className={`w-full py-3.5 px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                 currentTier === 'pro'
                   ? 'bg-teal-500/20 text-teal-300 cursor-default'
@@ -206,6 +217,12 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
                 </>
               )}
             </button>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
+                <p className="text-red-200 text-sm text-center">{error}</p>
+              </div>
+            )}
           </div>
         </div>
 

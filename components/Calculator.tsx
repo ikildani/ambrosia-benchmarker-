@@ -28,7 +28,12 @@ import {
 } from '@/lib/calculations';
 import Results from './Results';
 
-export default function Calculator() {
+interface CalculatorProps {
+  tier?: 'free' | 'pro';
+  onUpgrade?: () => void;
+}
+
+export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
   const [phase, setPhase] = useState<Phase>('phase2');
   const [modality, setModality] = useState<Modality>('smallMolecule');
   const [indication, setIndication] = useState<Indication>('lung_nsclc');
@@ -317,7 +322,7 @@ export default function Calculator() {
       {/* Results */}
       {result && (
         <div className="mt-8 animate-fade-in results-container">
-          <Results result={result} />
+          <Results result={result} tier={tier} onUpgrade={onUpgrade} />
         </div>
       )}
     </div>

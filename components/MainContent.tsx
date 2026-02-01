@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useUser } from '@clerk/nextjs';
 import Calculator from './Calculator';
 import Pricing from './Pricing';
 import Header from './Header';
@@ -10,7 +9,6 @@ import Header from './Header';
 export default function MainContent() {
   const [tier, setTier] = useState<'free' | 'pro'>('free');
   const [isVisible, setIsVisible] = useState(false);
-  const { isSignedIn } = useUser();
 
   // Check for successful Stripe checkout and saved tier
   useEffect(() => {
@@ -18,17 +16,14 @@ export default function MainContent() {
     if (params.get('success') === 'true') {
       setTier('pro');
       localStorage.setItem('user_tier', 'pro');
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    // Check for saved tier
     const savedTier = localStorage.getItem('user_tier');
     if (savedTier === 'pro') {
       setTier('pro');
     }
 
-    // Trigger entrance animation
     setIsVisible(true);
   }, []);
 
@@ -47,7 +42,7 @@ export default function MainContent() {
 
   return (
     <>
-      {/* Header with Clerk Auth */}
+      {/* Header */}
       <Header />
 
       {/* Hero Section - World-Class Light Design */}
