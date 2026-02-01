@@ -23,7 +23,9 @@ export async function POST() {
       });
     }
 
-    const stripe = new Stripe(stripeSecretKey);
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2024-12-18.acacia',
+    });
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
