@@ -2,6 +2,7 @@
 
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
 import { generatePDFReport } from '@/lib/generateReport';
+import { useTracking } from './TrackingProvider';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -12,9 +13,21 @@ interface ResultsProps {
 export default function Results({ result, tier = 'free', onUpgrade }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
   const isPro = tier === 'pro';
+  const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
 
   const handleDownloadPDF = () => {
+    trackExportAttempted('pdf');
     generatePDFReport(result);
+  };
+
+  const handleProFeatureClick = (feature: string) => {
+    trackProFeatureClick(feature as 'export_excel' | 'export_pdf' | 'comparable_deals' | 'saved_scenarios' | 'team_sharing', 'results_section');
+    onUpgrade?.();
+  };
+
+  const handleUpgradeClick = () => {
+    trackUpgradeCtaClick('results_section');
+    onUpgrade?.();
   };
 
   const getBarWidth = (median: number, max: number) => {
@@ -115,7 +128,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
           {!isPro && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
               <button
-                onClick={onUpgrade}
+                onClick={() => handleProFeatureClick('comparable_deals')}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +376,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
               Get milestone breakdowns, royalty tiers, negotiation insights, and downloadable PDF reports
             </p>
             <button
-              onClick={onUpgrade}
+              onClick={handleUpgradeClick}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow"
             >
               <span>Upgrade to Pro - $99/month</span>

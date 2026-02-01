@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Phase,
   Modality,
@@ -28,6 +28,7 @@ import {
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
+import { useTracking } from './TrackingProvider';
 import Results from './Results';
 import PaywallModal from './PaywallModal';
 
@@ -59,6 +60,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
   const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
 
+  // Tracking
+  const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
+  const calculationCountRef = useRef(0);
+
   useEffect(() => {
     setRemainingUses(getRemainingUses(tier));
   }, [tier]);
@@ -68,11 +73,17 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     if (!canUseCalculator(tier)) {
       setPaywallReason('limit_reached');
       setShowPaywall(true);
+      // Track paywall hit
+      trackPaywallHit('calculation_limit', {
+        modality,
+        phase,
+        indication,
+      });
       return;
     }
 
     setIsCalculating(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const input: CalculationInput = {
         phase,
         modality,
@@ -89,7 +100,65 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setResult(calculatedResult);
       setIsCalculating(false);
 
-      // Save to history
+      // Increment calculation count for this session
+      calculationCountRef.current += 1;
+
+      // Track calculation event
+      trackCalculation(
+        {
+          modality,
+          development_phase: phase,
+          indication_category: indication.split('_')[0], // e.g., 'lung' from 'lung_nsclc'
+          indication_specific: indication,
+          territory_scope: territory,
+        },
+        {
+          upfront_low: calculatedResult.terms.upfront.low,
+          upfront_mid: calculatedResult.terms.upfront.median,
+          upfront_high: calculatedResult.terms.upfront.high,
+          milestones_total: calculatedResult.terms.devMilestones.median +
+            calculatedResult.terms.regMilestones.median +
+            calculatedResult.terms.commMilestones.median,
+          royalty_low: calculatedResult.tieredRoyalties.base.low,
+          royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+          total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+          total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+        },
+        calculationCountRef.current
+      );
+
+      // Save calculation to database
+      try {
+        await fetch('/api/calculations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            anonymous_id: anonymousId,
+            modality,
+            development_phase: phase,
+            indication_category: indication.split('_')[0],
+            indication_specific: indication,
+            territory_scope: territory,
+            outputs: {
+              upfront_low: calculatedResult.terms.upfront.low,
+              upfront_mid: calculatedResult.terms.upfront.median,
+              upfront_high: calculatedResult.terms.upfront.high,
+              milestones_total: calculatedResult.terms.devMilestones.median +
+                calculatedResult.terms.regMilestones.median +
+                calculatedResult.terms.commMilestones.median,
+              royalty_low: calculatedResult.tieredRoyalties.base.low,
+              royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+              total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+              total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+            },
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to save calculation:', error);
+      }
+
+      // Save to local history
       addToHistory({
         inputs: {
           phase,
@@ -177,7 +246,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Development Phase</label>
                     <select
                       value={phase}
-                      onChange={(e) => setPhase(e.target.value as Phase)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as Phase;
+                        trackParameterChange('phase', phase, newValue);
+                        setPhase(newValue);
+                      }}
                       className="select-field"
                     >
                       {phaseOptions.map((option) => (
@@ -190,7 +263,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Modality</label>
                     <select
                       value={modality}
-                      onChange={(e) => setModality(e.target.value as Modality)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as Modality;
+                        trackParameterChange('modality', modality, newValue);
+                        setModality(newValue);
+                      }}
                       className="select-field"
                     >
                       {modalityOptions.map((group) => (
@@ -207,7 +284,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Primary Indication</label>
                     <select
                       value={indication}
-                      onChange={(e) => setIndication(e.target.value as Indication)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as Indication;
+                        trackParameterChange('indication', indication, newValue);
+                        setIndication(newValue);
+                      }}
                       className="select-field"
                     >
                       {indicationOptions.map((group) => (
@@ -224,7 +305,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Biomarker Status</label>
                     <select
                       value={biomarker}
-                      onChange={(e) => setBiomarker(e.target.value as BiomarkerStatus)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as BiomarkerStatus;
+                        trackParameterChange('biomarker', biomarker, newValue);
+                        setBiomarker(newValue);
+                      }}
                       className="select-field"
                     >
                       {biomarkerOptions.map((option) => (
@@ -246,7 +331,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Line of Therapy</label>
                     <select
                       value={lineOfTherapy}
-                      onChange={(e) => setLineOfTherapy(e.target.value as LineOfTherapy)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as LineOfTherapy;
+                        trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
+                        setLineOfTherapy(newValue);
+                      }}
                       className="select-field"
                     >
                       {lineOfTherapyOptions.map((option) => (
@@ -259,7 +348,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Combination Potential</label>
                     <select
                       value={combinationPotential}
-                      onChange={(e) => setCombinationPotential(e.target.value as CombinationPotential)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as CombinationPotential;
+                        trackParameterChange('combinationPotential', combinationPotential, newValue);
+                        setCombinationPotential(newValue);
+                      }}
                       className="select-field"
                     >
                       {combinationPotentialOptions.map((option) => (
@@ -284,7 +377,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Competitive Position</label>
                     <select
                       value={competitivePosition}
-                      onChange={(e) => setCompetitivePosition(e.target.value as CompetitivePosition)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as CompetitivePosition;
+                        trackParameterChange('competitivePosition', competitivePosition, newValue);
+                        setCompetitivePosition(newValue);
+                      }}
                       className="select-field"
                     >
                       {competitivePositionOptions.map((option) => (
@@ -297,7 +394,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Data Quality</label>
                     <select
                       value={dataQuality}
-                      onChange={(e) => setDataQuality(e.target.value as DataQuality)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as DataQuality;
+                        trackParameterChange('dataQuality', dataQuality, newValue);
+                        setDataQuality(newValue);
+                      }}
                       className="select-field"
                     >
                       {dataQualityOptions.map((option) => (
@@ -319,7 +420,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     <label className="block text-sm font-semibold text-neutral-700">Territory</label>
                     <select
                       value={territory}
-                      onChange={(e) => setTerritory(e.target.value as Territory)}
+                      onChange={(e) => {
+                        const newValue = e.target.value as Territory;
+                        trackParameterChange('territory', territory, newValue);
+                        setTerritory(newValue);
+                      }}
                       className="select-field"
                     >
                       {territoryOptions.map((option) => (

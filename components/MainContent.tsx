@@ -123,6 +123,11 @@ export default function MainContent() {
     }, 100);
   };
 
+  const handleNavigateHome = () => {
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Show Dashboard view for authenticated users
   if (currentView === 'dashboard' && isAuthenticated) {
     return (
@@ -131,6 +136,7 @@ export default function MainContent() {
           userName={userName}
           userEmail={userEmail}
           tier={tier}
+          onNavigateHome={handleNavigateHome}
           onNavigateToCalculator={handleNavigateToCalculator}
           onUpgrade={scrollToPricing}
           onSignOut={handleSignOut}

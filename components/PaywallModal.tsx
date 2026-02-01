@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FREE_LIMIT } from '@/lib/usage';
+import { useTracking } from './TrackingProvider';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -11,10 +12,17 @@ interface PaywallModalProps {
 
 export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { trackUpgradeCtaClick, trackPaywallDismissed } = useTracking();
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    trackPaywallDismissed();
+    onClose();
+  };
+
   const handleUpgrade = async () => {
+    trackUpgradeCtaClick('paywall_modal');
     setIsLoading(true);
     try {
       const response = await fetch('/api/checkout', {
@@ -26,13 +34,13 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
         window.location.href = data.url;
       } else {
         // Stripe not configured - scroll to pricing section
-        onClose();
+        handleClose();
         setTimeout(() => {
           document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
       }
     } catch {
-      onClose();
+      handleClose();
       setTimeout(() => {
         document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -45,7 +53,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-navy-900/80 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
@@ -58,7 +66,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
