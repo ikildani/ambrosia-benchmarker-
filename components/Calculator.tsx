@@ -26,9 +26,16 @@ import {
   dataQualityOptions,
   regulatoryDesignationOptions,
 } from '@/lib/calculations';
+import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
 import Results from './Results';
+import PaywallModal from './PaywallModal';
 
-export default function Calculator() {
+interface CalculatorProps {
+  tier?: 'free' | 'pro';
+  onUpgrade?: () => void;
+}
+
+export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
   const [phase, setPhase] = useState<Phase>('phase2');
   const [modality, setModality] = useState<Modality>('smallMolecule');
   const [indication, setIndication] = useState<Indication>('lung_nsclc');
@@ -46,23 +53,56 @@ export default function Calculator() {
   });
 
   const [result, setResult] = useState<CalculationResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
+  const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
 
   useEffect(() => {
-    const input: CalculationInput = {
-      phase,
-      modality,
-      indication,
-      territory,
-      biomarker,
-      lineOfTherapy,
-      combinationPotential,
-      competitivePosition,
-      dataQuality,
-      regulatoryDesignations,
-    };
-    const calculatedResult = calculateDealTerms(input);
-    setResult(calculatedResult);
-  }, [phase, modality, indication, territory, biomarker, lineOfTherapy, combinationPotential, competitivePosition, dataQuality, regulatoryDesignations]);
+    setRemainingUses(getRemainingUses(tier));
+  }, [tier]);
+
+  const handleCalculate = () => {
+    // Check usage limits for free tier
+    if (!canUseCalculator(tier)) {
+      setPaywallReason('limit_reached');
+      setShowPaywall(true);
+      return;
+    }
+
+    setIsCalculating(true);
+    setTimeout(() => {
+      const input: CalculationInput = {
+        phase,
+        modality,
+        indication,
+        territory,
+        biomarker,
+        lineOfTherapy,
+        combinationPotential,
+        competitivePosition,
+        dataQuality,
+        regulatoryDesignations,
+      };
+      const calculatedResult = calculateDealTerms(input);
+      setResult(calculatedResult);
+      setIsCalculating(false);
+
+      // Increment usage after successful calculation (only for free tier)
+      if (tier === 'free') {
+        incrementUsage();
+        setRemainingUses(getRemainingUses(tier));
+      }
+
+      // Scroll to results
+      setTimeout(() => {
+        document.querySelector('.results-container')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 100);
+    }, 800);
+  };
 
   const handleRegulatoryChange = (designation: keyof RegulatoryDesignations) => {
     setRegulatoryDesignations((prev) => ({
@@ -311,6 +351,65 @@ export default function Calculator() {
               </div>
             </div>
           </div>
+
+          {/* Usage Counter for Free Tier */}
+          {tier === 'free' && (
+            <div className="mt-8 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-neutral-600">
+                    <span className="font-semibold text-navy-800">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining this month
+                  </span>
+                </div>
+                {remainingUses === 0 && (
+                  <button
+                    onClick={() => {
+                      setPaywallReason('limit_reached');
+                      setShowPaywall(true);
+                    }}
+                    className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+                  >
+                    Upgrade to Pro
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Calculate Button */}
+          <button
+            onClick={handleCalculate}
+            disabled={isCalculating}
+            className="mt-6 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl
+                     shadow-soft-lg hover:shadow-glow-lg transition-all duration-300
+                     hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
+                     disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
+                     flex items-center justify-center gap-3 group"
+          >
+            {isCalculating ? (
+              <>
+                <div className="relative w-5 h-5">
+                  <div className="absolute inset-0 rounded-full border-2 border-white/30" />
+                  <div className="absolute inset-0 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                </div>
+                <span>Analyzing Market Data...</span>
+              </>
+            ) : (
+              <>
+                <span>Calculate Deal Terms</span>
+                <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
+            )}
+          </button>
+
+          <p className="text-center text-xs text-neutral-500 mt-4">
+            Free tier includes upfront payment and total deal value estimates
+          </p>
         </div>
       </div>
 
@@ -320,6 +419,12 @@ export default function Calculator() {
           <Results result={result} />
         </div>
       )}
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        reason={paywallReason}
+      />
     </div>
   );
 }
