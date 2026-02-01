@@ -4,19 +4,36 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Calculator from './Calculator';
 import Pricing from './Pricing';
+import Header from './Header';
 
 export default function MainContent() {
   const [tier, setTier] = useState<'free' | 'pro'>('free');
   const [isVisible, setIsVisible] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | undefined>();
 
-  // Check for successful Stripe checkout
+  // Check for successful Stripe checkout and auth state
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
       setTier('pro');
+      localStorage.setItem('user_tier', 'pro');
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
+
+    // Check for existing auth
+    const savedAuth = localStorage.getItem('is_authenticated');
+    const savedEmail = localStorage.getItem('user_email');
+    const savedTier = localStorage.getItem('user_tier');
+    if (savedAuth === 'true' && savedEmail) {
+      setIsAuthenticated(true);
+      setUserEmail(savedEmail);
+    }
+    if (savedTier === 'pro') {
+      setTier('pro');
+    }
+
     // Trigger entrance animation
     setIsVisible(true);
   }, []);
@@ -25,10 +42,45 @@ export default function MainContent() {
     document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleAuthSuccess = (email: string) => {
+    setIsAuthenticated(true);
+    setUserEmail(email);
+    localStorage.setItem('is_authenticated', 'true');
+    localStorage.setItem('user_email', email);
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setUserEmail(undefined);
+    setTier('free');
+    localStorage.removeItem('is_authenticated');
+    localStorage.removeItem('user_email');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('user_company');
+    localStorage.removeItem('user_tier');
+  };
+
+  const handleTierChange = (newTier: 'free' | 'pro') => {
+    setTier(newTier);
+    if (newTier === 'pro') {
+      localStorage.setItem('user_tier', 'pro');
+    } else {
+      localStorage.removeItem('user_tier');
+    }
+  };
+
   return (
     <>
+      {/* Header with Auth */}
+      <Header
+        isAuthenticated={isAuthenticated}
+        userEmail={userEmail}
+        onAuthSuccess={handleAuthSuccess}
+        onSignOut={handleSignOut}
+      />
+
       {/* Hero Section - Light, Professional Design */}
-      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-44 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
+      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-28 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
         {/* Elegant Background Effects */}
         <div className="absolute inset-0">
           {/* Subtle grid pattern */}
@@ -135,11 +187,11 @@ export default function MainContent() {
 
       {/* Calculator Section */}
       <section className="py-16 px-4 bg-mesh-gradient -mt-16">
-        <Calculator />
+        <Calculator tier={tier} onUpgrade={scrollToPricing} />
       </section>
 
       {/* Pricing Section */}
-      <Pricing currentTier={tier} onSelectTier={setTier} />
+      <Pricing currentTier={tier} onSelectTier={handleTierChange} />
 
       {/* Features Section */}
       <section className="py-24 px-4 bg-neutral-50">
