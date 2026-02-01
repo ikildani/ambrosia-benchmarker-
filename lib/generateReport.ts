@@ -1,7 +1,7 @@
 import { CalculationResult, formatCurrency, formatRange } from './calculations';
 
 export function generatePDFReport(result: CalculationResult): void {
-  const { terms, modifiers, labels } = result;
+  const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
   const reportHTML = `
 <!DOCTYPE html>
@@ -76,6 +76,46 @@ export function generatePDFReport(result: CalculationResult): void {
       padding-bottom: 10px;
       border-bottom: 1px solid #e5e5e5;
     }
+    .recommendation-box {
+      background: linear-gradient(135deg, #e6fafa 0%, #f0fdf4 100%);
+      border: 1px solid #00c7c7;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .recommendation-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #008989;
+      margin-bottom: 8px;
+    }
+    .recommendation-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a1e42;
+      margin-bottom: 4px;
+    }
+    .recommendation-rationale {
+      font-size: 13px;
+      color: #666;
+    }
+    .insight-box {
+      background: #fef3c7;
+      border: 1px solid #d97706;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .insight-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #d97706;
+      margin-bottom: 5px;
+    }
+    .insight-text {
+      font-size: 13px;
+      color: #92400e;
+    }
     .terms-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -112,6 +152,22 @@ export function generatePDFReport(result: CalculationResult): void {
       font-weight: 600;
       color: #00c7c7;
     }
+    .royalty-tiers {
+      margin-top: 10px;
+    }
+    .royalty-tier {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+    .royalty-tier-label {
+      color: #666;
+    }
+    .royalty-tier-value {
+      font-weight: 600;
+      color: #1a1e42;
+    }
     .modifiers {
       display: flex;
       flex-wrap: wrap;
@@ -130,6 +186,10 @@ export function generatePDFReport(result: CalculationResult): void {
     .modifier.negative {
       background: #fef3c7;
       color: #d97706;
+    }
+    .modifier.neutral {
+      background: #f5f5f5;
+      color: #666;
     }
     .footer {
       margin-top: 40px;
@@ -170,8 +230,24 @@ export function generatePDFReport(result: CalculationResult): void {
       <div class="meta-value">${labels.modality}</div>
     </div>
     <div class="meta-item">
+      <div class="meta-label">Indication</div>
+      <div class="meta-value">${labels.indication}</div>
+    </div>
+    <div class="meta-item">
       <div class="meta-label">Report Date</div>
       <div class="meta-value">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="recommendation-box">
+      <div class="recommendation-title">Recommended Deal Structure</div>
+      <div class="recommendation-value">${dealRecommendation.upfrontPercent}% Upfront / ${dealRecommendation.milestonePercent}% Milestones</div>
+      <div class="recommendation-rationale">${dealRecommendation.rationale}</div>
+    </div>
+    <div class="insight-box">
+      <div class="insight-title">Negotiation Insight</div>
+      <div class="insight-text">${negotiationInsight}</div>
     </div>
   </div>
 
@@ -180,8 +256,8 @@ export function generatePDFReport(result: CalculationResult): void {
     <div class="section-title">Applied Adjustments</div>
     <div class="modifiers">
       ${modifiers.map(mod => `
-        <div class="modifier ${mod.multiplier > 1 ? 'positive' : 'negative'}">
-          ${mod.name} (${mod.multiplier > 1 ? '+' : ''}${Math.round((mod.multiplier - 1) * 100)}%)
+        <div class="modifier ${mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral'}">
+          ${mod.name}${mod.multiplier !== 1 ? ` (${mod.multiplier > 1 ? '+' : ''}${Math.round((mod.multiplier - 1) * 100)}%)` : ''}
         </div>
       `).join('')}
     </div>
@@ -194,38 +270,50 @@ export function generatePDFReport(result: CalculationResult): void {
       <div class="term-card highlight">
         <div class="term-label">Upfront Payment</div>
         <div class="term-range">${formatRange(terms.upfront)}</div>
-        <div class="term-median">Median: <span>${formatCurrency(terms.upfront.median)}</span></div>
+        <div class="term-median">Expected: <span>${formatCurrency(terms.upfront.median)}</span></div>
       </div>
       <div class="term-card highlight">
         <div class="term-label">Total Deal Value</div>
         <div class="term-range">${formatRange(terms.totalDealValue)}</div>
-        <div class="term-median">Median: <span>${formatCurrency(terms.totalDealValue.median)}</span></div>
+        <div class="term-median">Expected: <span>${formatCurrency(terms.totalDealValue.median)}</span></div>
       </div>
       <div class="term-card">
         <div class="term-label">Development Milestones</div>
         <div class="term-range">${formatRange(terms.devMilestones)}</div>
-        <div class="term-median">Median: <span>${formatCurrency(terms.devMilestones.median)}</span></div>
+        <div class="term-median">Expected: <span>${formatCurrency(terms.devMilestones.median)}</span></div>
       </div>
       <div class="term-card">
         <div class="term-label">Regulatory Milestones</div>
         <div class="term-range">${formatRange(terms.regMilestones)}</div>
-        <div class="term-median">Median: <span>${formatCurrency(terms.regMilestones.median)}</span></div>
+        <div class="term-median">Expected: <span>${formatCurrency(terms.regMilestones.median)}</span></div>
       </div>
       <div class="term-card">
         <div class="term-label">Commercial Milestones</div>
         <div class="term-range">${formatRange(terms.commMilestones)}</div>
-        <div class="term-median">Median: <span>${formatCurrency(terms.commMilestones.median)}</span></div>
+        <div class="term-median">Expected: <span>${formatCurrency(terms.commMilestones.median)}</span></div>
       </div>
       <div class="term-card">
-        <div class="term-label">Royalty Rate</div>
-        <div class="term-range">${formatRange(terms.royalties, true)}</div>
-        <div class="term-median">Median: <span>${terms.royalties.median}%</span></div>
+        <div class="term-label">Tiered Royalties</div>
+        <div class="royalty-tiers">
+          <div class="royalty-tier">
+            <span class="royalty-tier-label">Base (&lt;$500M)</span>
+            <span class="royalty-tier-value">${tieredRoyalties.base.low}% - ${tieredRoyalties.base.high}%</span>
+          </div>
+          <div class="royalty-tier">
+            <span class="royalty-tier-label">Mid ($500M-$1B)</span>
+            <span class="royalty-tier-value">${tieredRoyalties.midTier.low}% - ${tieredRoyalties.midTier.high}%</span>
+          </div>
+          <div class="royalty-tier">
+            <span class="royalty-tier-label">High (&gt;$1B)</span>
+            <span class="royalty-tier-value">${tieredRoyalties.highTier.low}% - ${tieredRoyalties.highTier.high}%</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="disclaimer">
-    <strong>Disclaimer:</strong> These estimates are based on publicly available deal data and are intended for illustrative purposes only.
+    <strong>Disclaimer:</strong> These estimates are based on publicly available deal data and 2025 market benchmarks.
     Actual deal terms vary significantly based on asset-specific factors, market conditions, competitive dynamics, and negotiation outcomes.
     This tool does not constitute financial or legal advice. For detailed advisory services, please contact Ambrosia Ventures.
   </div>

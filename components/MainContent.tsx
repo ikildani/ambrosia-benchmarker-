@@ -135,7 +135,7 @@ export default function MainContent() {
 
       {/* Calculator Section */}
       <section className="py-16 px-4 bg-mesh-gradient -mt-16">
-        <Calculator tier={tier} onUpgrade={scrollToPricing} />
+        <Calculator />
       </section>
 
       {/* Pricing Section */}
