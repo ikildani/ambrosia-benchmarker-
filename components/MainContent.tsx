@@ -28,7 +28,7 @@ export default function MainContent() {
   return (
     <>
       {/* Hero Section - Light, Professional Design */}
-      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-36 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
+      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-44 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
         {/* Elegant Background Effects */}
         <div className="absolute inset-0">
           {/* Subtle grid pattern */}
