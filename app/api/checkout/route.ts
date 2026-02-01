@@ -45,11 +45,20 @@ export async function POST() {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Checkout error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    let errorMessage = 'Unknown error';
+    let errorType = 'unknown';
+
+    if (error instanceof Stripe.errors.StripeError) {
+      errorMessage = error.message;
+      errorType = error.type;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create checkout session', details: errorMessage },
+      { error: 'Failed to create checkout session', details: errorMessage, type: errorType },
       { status: 500 }
     );
   }
