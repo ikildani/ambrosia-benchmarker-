@@ -35,9 +35,7 @@ export default function Header() {
               alt="Ambrosia Ventures"
               width={200}
               height={55}
-              className={`h-11 w-auto object-contain transition-all duration-300 ${
-                scrolled ? '' : 'brightness-0 invert'
-              }`}
+              className="h-11 w-auto object-contain transition-all duration-300"
               priority
             />
           </a>
@@ -45,25 +43,19 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-8">
             <a
               href="#calculator"
-              className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
-              }`}
+              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
             >
               Calculator
             </a>
             <a
               href="#pricing"
-              className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
-              }`}
+              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
             >
               Pricing
             </a>
             <a
               href="#about"
-              className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-neutral-600 hover:text-teal-600' : 'text-white/80 hover:text-white'
-              }`}
+              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
             >
               About
             </a>
@@ -72,11 +64,8 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <a
               href="mailto:info@ambrosiaventures.co"
-              className={`hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                scrolled
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5'
-                  : 'bg-white text-navy-800 hover:bg-white/90 shadow-soft-lg'
-              }`}
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+                       bg-gradient-to-r from-teal-600 to-cyan-500 text-white hover:from-teal-700 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
             >
               <span>Get in Touch</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

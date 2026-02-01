@@ -27,55 +27,55 @@ export default function MainContent() {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative bg-hero-gradient text-white pt-32 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
-        {/* Animated Background Effects */}
+      {/* Hero Section - Light, Professional Design */}
+      <section className="relative bg-gradient-to-br from-white via-neutral-50 to-teal-50/30 pt-32 pb-24 px-4 overflow-hidden min-h-[90vh] flex items-center">
+        {/* Elegant Background Effects */}
         <div className="absolute inset-0">
-          {/* Dot pattern */}
-          <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.3) 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px'
           }} />
 
-          {/* Floating gradient orbs */}
-          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-3xl animate-float-delayed" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-teal-400/5 rounded-full blur-3xl" />
+          {/* Soft gradient orbs */}
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-teal-100/40 via-cyan-50/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-navy-100/20 via-teal-50/20 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-cyan-100/20 rounded-full blur-3xl" />
         </div>
 
         <div className={`relative max-w-5xl mx-auto text-center w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          {/* Logo */}
-          <div className="mb-8 animate-fade-in">
+          {/* Logo - Original Colors */}
+          <div className="mb-10 animate-fade-in">
             <Image
               src="/logo.png"
               alt="Ambrosia Ventures"
-              width={400}
-              height={110}
-              className="h-28 w-auto mx-auto brightness-0 invert drop-shadow-lg"
+              width={500}
+              height={138}
+              className="h-24 sm:h-28 md:h-32 w-auto mx-auto drop-shadow-sm"
               priority
             />
           </div>
 
           {/* Badge */}
-          <div className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-teal-400/30 rounded-full px-5 py-2 mb-8 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-teal-200 rounded-full px-5 py-2.5 mb-8 shadow-soft transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="relative">
-              <div className="w-2 h-2 bg-teal-400 rounded-full" />
-              <div className="absolute inset-0 w-2 h-2 bg-teal-400 rounded-full animate-ping" />
+              <div className="w-2 h-2 bg-teal-500 rounded-full" />
+              <div className="absolute inset-0 w-2 h-2 bg-teal-500 rounded-full animate-ping" />
             </div>
-            <span className="text-sm font-medium text-teal-100">Life Sciences Deal Intelligence</span>
+            <span className="text-sm font-semibold text-teal-700">Life Sciences Deal Intelligence</span>
           </div>
 
           {/* Headline */}
           <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Deal Terms
+            <span className="text-navy-900">Deal Terms</span>
             <br />
-            <span className="bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+            <span className="bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent">
               Calculator
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className={`text-xl sm:text-2xl text-neutral-300 max-w-3xl mx-auto mb-10 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <p className={`text-xl sm:text-2xl text-neutral-600 max-w-3xl mx-auto mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             Get data-driven estimates for upfront payments, milestones, and royalties
             for your oncology asset licensing or M&A transaction
           </p>
@@ -84,8 +84,8 @@ export default function MainContent() {
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <a
               href="#calculator"
-              className="group inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl
-                       shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-1 animate-breathe"
+              className="group inline-flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl
+                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1"
             >
               <span>Try Calculator Free</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,8 +94,8 @@ export default function MainContent() {
             </a>
             <a
               href="#pricing"
-              className="group inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold px-8 py-4 rounded-xl
-                       hover:bg-white/20 hover:border-white/30 transition-all duration-300"
+              className="group inline-flex items-center gap-2 bg-white border-2 border-navy-200 text-navy-700 font-semibold px-8 py-4 rounded-xl
+                       shadow-soft hover:border-teal-300 hover:text-teal-700 hover:shadow-soft-lg transition-all duration-300"
             >
               <span>View Pricing</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export default function MainContent() {
           </div>
 
           {/* Feature Pills */}
-          <div className={`flex flex-wrap justify-center gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`flex flex-wrap justify-center gap-3 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: 'Based on public deal data' },
               { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: 'All oncology modalities' },
@@ -113,21 +113,21 @@ export default function MainContent() {
             ].map((feature, idx) => (
               <div
                 key={idx}
-                className="group flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-teal-400/20 rounded-full px-5 py-2.5
-                         hover:bg-white/10 hover:border-teal-400/40 transition-all duration-300"
+                className="group flex items-center gap-2 bg-white/70 backdrop-blur-sm border border-neutral-200 rounded-full px-5 py-2.5
+                         hover:bg-white hover:border-teal-300 hover:shadow-soft transition-all duration-300"
               >
-                <svg className="w-5 h-5 text-teal-400 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-teal-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                 </svg>
-                <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">{feature.text}</span>
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-navy-800 transition-colors">{feature.text}</span>
               </div>
             ))}
           </div>
 
           {/* Scroll indicator */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block">
-            <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
-              <div className="w-1.5 h-3 bg-white/50 rounded-full animate-bounce" />
+            <div className="w-6 h-10 rounded-full border-2 border-navy-200 flex items-start justify-center p-2">
+              <div className="w-1.5 h-3 bg-teal-500 rounded-full animate-bounce" />
             </div>
           </div>
         </div>
