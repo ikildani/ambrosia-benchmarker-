@@ -27,6 +27,7 @@ import {
   regulatoryDesignationOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
+import { addToHistory } from '@/lib/history';
 import Results from './Results';
 import PaywallModal from './PaywallModal';
 
@@ -87,6 +88,26 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       const calculatedResult = calculateDealTerms(input);
       setResult(calculatedResult);
       setIsCalculating(false);
+
+      // Save to history
+      addToHistory({
+        inputs: {
+          phase,
+          modality,
+          indication,
+          territory,
+        },
+        results: {
+          upfrontLow: calculatedResult.terms.upfront.low,
+          upfrontHigh: calculatedResult.terms.upfront.high,
+          upfrontMedian: calculatedResult.terms.upfront.median,
+          totalValueLow: calculatedResult.terms.totalDealValue.low,
+          totalValueHigh: calculatedResult.terms.totalDealValue.high,
+          totalValueMedian: calculatedResult.terms.totalDealValue.median,
+        },
+        labels: calculatedResult.labels,
+        hasPDF: false,
+      });
 
       // Increment usage after successful calculation (only for free tier)
       if (tier === 'free') {
