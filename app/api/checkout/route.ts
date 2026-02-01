@@ -5,8 +5,8 @@ import Stripe from 'stripe';
 // To enable Stripe payments:
 // 1. Add your Stripe keys to .env.local:
 //    STRIPE_SECRET_KEY=sk_...
-//    STRIPE_PRICE_ID=price_... (create a $150/month recurring price in Stripe Dashboard)
-//    NEXT_PUBLIC_APP_URL=https://your-domain.com
+//    STRIPE_PRICE_ID=price_... (create a $99/month recurring price in Stripe Dashboard)
+//    NEXT_PUBLIC_APP_URL=https://calculator.ambrosiaventures.co
 
 export async function POST() {
   try {

@@ -1,6 +1,7 @@
 'use client';
 
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
+import { generatePDFReport } from '@/lib/generateReport';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -12,6 +13,10 @@ interface ResultsProps {
 export default function Results({ result, tier, onUpgrade, onGetDetailedReport }: ResultsProps) {
   const { terms, modifiers, labels } = result;
   const isPro = tier === 'pro';
+
+  const handleDownloadReport = () => {
+    generatePDFReport(result);
+  };
 
   // Calculate visual bar width for metrics (normalized to median values)
   const getBarWidth = (median: number, max: number) => {
@@ -239,7 +244,7 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
                            hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-glow hover:shadow-glow-lg hover:-translate-y-0.5 group"
                 >
                   <span>Upgrade to Pro</span>
-                  <span className="text-teal-100 font-normal">$150/mo</span>
+                  <span className="text-teal-100 font-normal">$99/mo</span>
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
@@ -249,36 +254,66 @@ export default function Results({ result, tier, onUpgrade, onGetDetailedReport }
             </div>
           </div>
         ) : (
-          <div className="mt-8 p-8 bg-gradient-to-br from-navy-900 to-navy-800 rounded-2xl text-center relative overflow-hidden">
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-                backgroundSize: '16px 16px'
-              }} />
-            </div>
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 bg-teal-500/20 rounded-full px-4 py-1.5 mb-4">
-                <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span className="text-sm font-medium text-teal-300">Expert Advisory</span>
+          <div className="mt-8 space-y-4">
+            {/* Download Report Button */}
+            <div className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl border border-teal-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-navy-800">Download Report</h4>
+                    <p className="text-sm text-neutral-600">Save your analysis as a PDF</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleDownloadReport}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3 px-6 rounded-xl
+                           hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-soft hover:shadow-glow hover:-translate-y-0.5 group"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Download PDF</span>
+                </button>
               </div>
-              <h4 className="text-xl font-bold text-white mb-2">
-                Need Custom Advisory?
-              </h4>
-              <p className="text-neutral-400 mb-6 max-w-md mx-auto">
-                Get comparable deals, valuation drivers, and negotiation strategy from our expert team
-              </p>
-              <button
-                onClick={onGetDetailedReport}
-                className="inline-flex items-center gap-2 bg-white text-neutral-900 font-semibold py-3.5 px-8 rounded-xl
-                         hover:bg-neutral-100 transition-all duration-200 shadow-soft-lg hover:shadow-soft-xl hover:-translate-y-0.5 group"
-              >
-                <span>Request Advisory Consultation</span>
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
+            </div>
+
+            {/* Advisory CTA */}
+            <div className="p-8 bg-gradient-to-br from-navy-900 to-navy-800 rounded-2xl text-center relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+                  backgroundSize: '16px 16px'
+                }} />
+              </div>
+              <div className="relative">
+                <div className="inline-flex items-center gap-2 bg-teal-500/20 rounded-full px-4 py-1.5 mb-4">
+                  <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span className="text-sm font-medium text-teal-300">Expert Advisory</span>
+                </div>
+                <h4 className="text-xl font-bold text-white mb-2">
+                  Need Custom Advisory?
+                </h4>
+                <p className="text-neutral-400 mb-6 max-w-md mx-auto">
+                  Get comparable deals, valuation drivers, and negotiation strategy from our expert team
+                </p>
+                <button
+                  onClick={onGetDetailedReport}
+                  className="inline-flex items-center gap-2 bg-white text-neutral-900 font-semibold py-3.5 px-8 rounded-xl
+                           hover:bg-neutral-100 transition-all duration-200 shadow-soft-lg hover:shadow-soft-xl hover:-translate-y-0.5 group"
+                >
+                  <span>Request Advisory Consultation</span>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
