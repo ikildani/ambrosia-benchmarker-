@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -22,9 +24,16 @@ export default function Header({
   onSignOut,
   onDashboardClick,
 }: HeaderProps) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Determine if we're on the landing page
+  const isLandingPage = pathname === '/';
+  const isCalculatorPage = pathname === '/calculator';
+  const isDashboardPage = pathname === '/dashboard';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,6 +54,11 @@ export default function Header({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -53,6 +67,25 @@ export default function Header({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Navigation items with proper routing
+  const navItems = [
+    {
+      label: 'Calculator',
+      href: '/calculator',
+      isActive: isCalculatorPage,
+    },
+    {
+      label: 'Pricing',
+      href: isLandingPage ? '#pricing' : '/#pricing',
+      isActive: false,
+    },
+    {
+      label: 'About',
+      href: isLandingPage ? '#about' : '/#about',
+      isActive: false,
+    },
+  ];
 
   return (
     <header
@@ -64,10 +97,9 @@ export default function Header({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 lg:h-24">
-          <a
-            href="https://www.ambrosiaventures.co"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* Logo */}
+          <Link
+            href="/"
             className="flex items-center group"
           >
             <Image
@@ -78,29 +110,40 @@ export default function Header({
               className="h-12 sm:h-14 lg:h-16 w-auto object-contain transition-all duration-300 hover:opacity-80"
               priority
             />
-          </a>
+          </Link>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="#calculator"
-              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
-            >
-              Calculator
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
-            >
-              Pricing
-            </a>
-            <a
-              href="#about"
-              className="text-sm font-medium text-neutral-600 hover:text-teal-600 transition-colors"
-            >
-              About
-            </a>
+            {navItems.map((item, idx) => (
+              item.href.startsWith('#') || item.href.includes('#') ? (
+                <a
+                  key={idx}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${
+                    item.isActive
+                      ? 'text-teal-600'
+                      : 'text-neutral-600 hover:text-teal-600'
+                  }`}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={idx}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${
+                    item.isActive
+                      ? 'text-teal-600'
+                      : 'text-neutral-600 hover:text-teal-600'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            ))}
           </nav>
 
+          {/* Right Side Actions */}
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <div className="relative" ref={menuRef}>
@@ -147,12 +190,12 @@ export default function Header({
 
                     {/* Menu Items */}
                     <div className="py-2">
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          onDashboardClick?.();
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors"
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors ${
+                          isDashboardPage ? 'bg-slate-50' : ''
+                        }`}
                       >
                         <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
                           <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,30 +206,14 @@ export default function Header({
                           <p className="text-sm font-medium text-slate-700">Dashboard</p>
                           <p className="text-xs text-slate-500">View history & reports</p>
                         </div>
-                      </button>
+                      </Link>
 
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          onDashboardClick?.();
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors"
-                      >
-                        <div className="w-9 h-9 rounded-xl bg-cyan-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-700">My Reports</p>
-                          <p className="text-xs text-slate-500">Download PDF reports</p>
-                        </div>
-                      </button>
-
-                      <a
-                        href="#calculator"
+                      <Link
+                        href="/calculator"
                         onClick={() => setUserMenuOpen(false)}
-                        className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors"
+                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors ${
+                          isCalculatorPage ? 'bg-slate-50' : ''
+                        }`}
                       >
                         <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
                           <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,7 +224,7 @@ export default function Header({
                           <p className="text-sm font-medium text-slate-700">Calculator</p>
                           <p className="text-xs text-slate-500">Run new analysis</p>
                         </div>
-                      </a>
+                      </Link>
                     </div>
 
                     {/* Sign Out */}
@@ -240,8 +267,107 @@ export default function Header({
                 </button>
               </>
             )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-slate-200 animate-fade-in">
+            <nav className="flex flex-col gap-1">
+              {navItems.map((item, idx) => (
+                item.href.startsWith('#') || item.href.includes('#') ? (
+                  <a
+                    key={idx}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                      item.isActive
+                        ? 'bg-teal-50 text-teal-600'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={idx}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                      item.isActive
+                        ? 'bg-teal-50 text-teal-600'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              ))}
+
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                      isDashboardPage
+                        ? 'bg-teal-50 text-teal-600'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <hr className="my-2 border-slate-200" />
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onSignOut?.();
+                    }}
+                    className="text-left px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 font-medium transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <hr className="my-2 border-slate-200" />
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onSignInClick?.();
+                    }}
+                    className="text-left px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 font-medium transition-colors"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onSignUpClick?.();
+                    }}
+                    className="text-left px-4 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-medium transition-colors"
+                  >
+                    Get Started Free
+                  </button>
+                </>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

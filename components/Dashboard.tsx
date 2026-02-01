@@ -628,44 +628,6 @@ export default function Dashboard({
               </div>
             </div>
 
-            {/* Deal Insights Card */}
-            {history.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-slate-900">Your Deal Insights</h3>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl">
-                    <p className="text-2xl font-bold text-teal-600">{history.length}</p>
-                    <p className="text-xs text-slate-600 mt-1">Total Analyses</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl">
-                    <p className="text-2xl font-bold text-cyan-600">
-                      {formatCurrency(history.reduce((sum, h) => sum + h.results.totalValueMedian, 0))}
-                    </p>
-                    <p className="text-xs text-slate-600 mt-1">Total Value Analyzed</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
-                    <p className="text-lg font-bold text-blue-600 truncate">
-                      {topPhase}
-                    </p>
-                    <p className="text-xs text-slate-600 mt-1">Top Phase</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl">
-                    <p className="text-lg font-bold text-indigo-600 truncate">
-                      {topModality}
-                    </p>
-                    <p className="text-xs text-slate-600 mt-1">Top Modality</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Personal Information */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-6">
