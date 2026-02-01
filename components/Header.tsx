@@ -39,7 +39,7 @@ export default function Header({ isAuthenticated, userEmail, onAuthSuccess, onSi
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-20 lg:h-24">
             <a
               href="https://www.ambrosiaventures.co"
               target="_blank"
@@ -49,9 +49,9 @@ export default function Header({ isAuthenticated, userEmail, onAuthSuccess, onSi
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={240}
-                height={66}
-                className="h-10 sm:h-12 w-auto object-contain transition-all duration-300 hover:opacity-80"
+                width={320}
+                height={88}
+                className="h-12 sm:h-14 lg:h-16 w-auto object-contain transition-all duration-300 hover:opacity-80"
                 priority
               />
             </a>

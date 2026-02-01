@@ -80,7 +80,7 @@ export default function MainContent() {
       />
 
       {/* Hero Section - World-Class Light Design */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/80 to-teal-50/40 pt-28 pb-20 px-4 overflow-hidden min-h-[85vh] flex items-center">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 pt-32 lg:pt-36 pb-20 px-4 overflow-hidden min-h-[88vh] flex items-center">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Elegant mesh gradient */}
@@ -99,25 +99,40 @@ export default function MainContent() {
         </div>
 
         <div className={`relative max-w-5xl mx-auto text-center w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          {/* Premium Icon with glow effect */}
-          <div className="mb-10 animate-fade-in">
+          {/* Life Sciences Icon - DNA + Analytics */}
+          <div className="mb-12 animate-fade-in">
             <div className="relative inline-flex">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-xl opacity-40 scale-110" />
-              <div className="relative inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-teal-500 via-teal-400 to-cyan-500 rounded-2xl shadow-2xl">
-                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-3xl blur-2xl opacity-30 scale-125" />
+              {/* Icon container */}
+              <div className="relative inline-flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-slate-700/50">
+                {/* DNA Helix + Chart Icon */}
+                <svg className="w-12 h-12 sm:w-14 sm:h-14" viewBox="0 0 48 48" fill="none">
+                  {/* DNA Helix */}
+                  <path d="M14 8C14 8 18 12 24 12C30 12 34 8 34 8" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M14 16C14 16 18 20 24 20C30 20 34 16 34 16" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M14 24C14 24 18 28 24 28C30 28 34 24 34 24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
+                  {/* Vertical lines */}
+                  <path d="M14 8V24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M34 8V24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
+                  {/* Chart bars */}
+                  <rect x="16" y="32" width="4" height="8" rx="1" fill="url(#chartGradient)"/>
+                  <rect x="22" y="28" width="4" height="12" rx="1" fill="url(#chartGradient)"/>
+                  <rect x="28" y="30" width="4" height="10" rx="1" fill="url(#chartGradient)"/>
+                  {/* Gradients */}
+                  <defs>
+                    <linearGradient id="dnaGradient" x1="14" y1="8" x2="34" y2="24" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#2dd4bf"/>
+                      <stop offset="1" stopColor="#06b6d4"/>
+                    </linearGradient>
+                    <linearGradient id="chartGradient" x1="16" y1="28" x2="32" y2="40" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#14b8a6"/>
+                      <stop offset="1" stopColor="#0891b2"/>
+                    </linearGradient>
+                  </defs>
                 </svg>
               </div>
             </div>
-          </div>
-
-          {/* Premium Badge */}
-          <div className={`inline-flex items-center gap-2.5 bg-white/90 backdrop-blur-md border border-teal-100 rounded-full px-5 py-2.5 mb-8 shadow-lg shadow-teal-500/5 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <div className="relative flex items-center justify-center">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-              <div className="absolute w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-            </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-teal-700 to-cyan-600 bg-clip-text text-transparent">Life Sciences Deal Intelligence</span>
           </div>
 
           {/* Premium Headline */}
