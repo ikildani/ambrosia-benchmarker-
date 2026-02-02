@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
 import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { GlobalJsonLd } from "./json-ld";
@@ -51,6 +52,7 @@ export default function RootLayout({
         <AuthProvider>
           <TrackingProvider>{children}</TrackingProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

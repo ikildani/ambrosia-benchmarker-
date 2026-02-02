@@ -39,14 +39,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Not Found' };
   }
 
+  const ogImageUrl = `/api/og?title=${encodeURIComponent(page.hero_title || page.title)}&subtitle=${encodeURIComponent(page.meta_description || 'Calculate licensing deal values')}&type=landing`;
+
   return {
     title: page.title,
     description: page.meta_description || undefined,
+    alternates: {
+      canonical: `https://calculator.ambrosiaventures.co/${page.slug}`,
+    },
     openGraph: {
       title: page.title,
       description: page.meta_description || undefined,
       type: 'website',
       url: `https://calculator.ambrosiaventures.co/${page.slug}`,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: page.title,
+      description: page.meta_description || undefined,
+      images: [ogImageUrl],
     },
   };
 }

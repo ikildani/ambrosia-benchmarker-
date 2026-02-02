@@ -1,8 +1,113 @@
 import { ImageResponse } from 'next/og';
+import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const title = searchParams.get('title');
+  const subtitle = searchParams.get('subtitle');
+  const type = searchParams.get('type') || 'default';
+
+  // If custom title provided, use dynamic template
+  if (title) {
+    const colors = {
+      default: { bg: '#0f172a', accent: '#14b8a6' },
+      blog: { bg: '#1e293b', accent: '#06b6d4' },
+      landing: { bg: '#0f172a', accent: '#14b8a6' },
+    };
+    const scheme = colors[type as keyof typeof colors] || colors.default;
+
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-end',
+            backgroundColor: scheme.bg,
+            padding: '60px',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '600px',
+              height: '600px',
+              background: `radial-gradient(circle, ${scheme.accent}20 0%, transparent 70%)`,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '60px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: scheme.accent,
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                color: 'white',
+                fontWeight: 'bold',
+              }}
+            >
+              A
+            </div>
+            <span style={{ color: 'white', fontSize: '24px', fontWeight: 600 }}>
+              Ambrosia Ventures
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px' }}>
+            <h1
+              style={{
+                fontSize: title.length > 50 ? '48px' : '56px',
+                fontWeight: 'bold',
+                color: 'white',
+                lineHeight: 1.2,
+                margin: 0,
+              }}
+            >
+              {title}
+            </h1>
+            {subtitle && (
+              <p style={{ fontSize: '24px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '8px',
+              background: `linear-gradient(90deg, ${scheme.accent}, #06b6d4)`,
+            }}
+          />
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
+  }
+
+  // Default OG image (existing code)
   return new ImageResponse(
     (
       <div
