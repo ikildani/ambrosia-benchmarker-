@@ -77,7 +77,7 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
   };
 
   return (
-    <div className="w-full h-48 sm:h-64">
+    <div className="w-full h-36 sm:h-64 mb-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

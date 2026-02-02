@@ -53,15 +53,15 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
   };
 
   return (
-    <div className="w-full h-40 sm:h-48">
+    <div className="w-full h-32 sm:h-48 mb-2">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{
-            top: 10,
-            right: isMobile ? 10 : 30,
+            top: 5,
+            right: isMobile ? 5 : 30,
             left: 0,
-            bottom: 10
+            bottom: isMobile ? 5 : 10
           }}
         >
           <defs>
@@ -72,10 +72,11 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           </defs>
           <XAxis
             dataKey="sales"
-            tickFormatter={(value) => isMobile ? (value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`) : `$${value}M`}
-            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
+            tickFormatter={(value) => isMobile ? (value === 0 ? '0' : value >= 1000 ? `${value/1000}B` : `${value}M`) : `$${value}M`}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            interval={0}
+            interval={isMobile ? 1 : 0}
+            tickMargin={isMobile ? 2 : 5}
           />
           <YAxis
             domain={[0, Math.max(royalties.highTier.high + 5, 30)]}

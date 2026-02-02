@@ -105,7 +105,7 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
   }
 
   return (
-    <div className="w-full h-40 sm:h-48">
+    <div className="w-full h-32 sm:h-48 mb-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
