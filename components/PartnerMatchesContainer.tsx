@@ -4,6 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { PartnerMatches } from './benchmarker/PartnerMatches';
 import { useTracking } from './TrackingProvider';
 
+export interface PartnerMatchForPDF {
+  company_name: string;
+  match_score: number;
+  match_reasons: { reason: string; strength: string }[];
+  deals_last_12mo: number;
+  hq_country: string | null;
+}
+
 interface PartnerMatchesContainerProps {
   // Calculation inputs for matching
   modality: string;
@@ -15,6 +23,9 @@ interface PartnerMatchesContainerProps {
   // User context
   tier: 'free' | 'pro';
   onUpgrade: () => void;
+
+  // Callback when matches are loaded (for PDF export)
+  onMatchesLoaded?: (matches: PartnerMatchForPDF[]) => void;
 }
 
 export default function PartnerMatchesContainer({
@@ -25,6 +36,7 @@ export default function PartnerMatchesContainer({
   territory,
   tier,
   onUpgrade,
+  onMatchesLoaded,
 }: PartnerMatchesContainerProps) {
   const { sessionId, anonymousId, userId } = useTracking();
   const [matches, setMatches] = useState<any[]>([]);
@@ -62,12 +74,24 @@ export default function PartnerMatchesContainer({
       }
 
       const data = await res.json();
-      setMatches(data.matches || []);
+      const fetchedMatches = data.matches || [];
+      setMatches(fetchedMatches);
       setTotalMatches(data.total_matches || 0);
       setMatchesShown(data.matches_shown || 0);
       setUpgradeCta(data.upgrade_cta || null);
       setAdvisoryCta(data.advisory_cta || null);
       setCalculationId(data.calculation_id);
+
+      // Notify parent of loaded matches for PDF export
+      if (onMatchesLoaded && fetchedMatches.length > 0) {
+        onMatchesLoaded(fetchedMatches.map((m: any) => ({
+          company_name: m.company_name,
+          match_score: m.match_score,
+          match_reasons: m.match_reasons || [],
+          deals_last_12mo: m.deals_last_12mo || 0,
+          hq_country: m.hq_country,
+        })));
+      }
     } catch (err) {
       console.error('Partner matching error:', err);
       setError('Unable to find partner matches. Please try again.');

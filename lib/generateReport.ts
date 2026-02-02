@@ -1,7 +1,19 @@
 import { CalculationResult, formatCurrency, formatRange } from './calculations';
 import { markPDFGenerated, getHistory } from './history';
 
-export function generatePDFReport(result: CalculationResult, historyId?: string): void {
+export interface PartnerForPDF {
+  company_name: string;
+  match_score: number;
+  match_reasons: { reason: string; strength: string }[];
+  deals_last_12mo: number;
+  hq_country: string | null;
+}
+
+export function generatePDFReport(
+  result: CalculationResult,
+  historyId?: string,
+  partnerMatches?: PartnerForPDF[]
+): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
   // Calculate percentages for visual charts
@@ -72,8 +84,8 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-      color: white;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #e2e8f0 100%);
+      color: var(--gray-800);
       padding: 60px;
       position: relative;
       overflow: hidden;
@@ -82,11 +94,11 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     .cover-page::before {
       content: '';
       position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 80%;
-      height: 150%;
-      background: radial-gradient(ellipse, rgba(0, 199, 199, 0.15) 0%, transparent 70%);
+      top: 50%;
+      right: -10%;
+      width: 60%;
+      height: 100%;
+      background: radial-gradient(ellipse, rgba(0, 199, 199, 0.08) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -119,8 +131,8 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     }
 
     .cover-badge {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: var(--navy);
+      color: white;
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 11px;
@@ -140,8 +152,8 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
 
     .cover-subtitle {
       font-size: 13px;
-      font-weight: 500;
-      color: var(--teal);
+      font-weight: 600;
+      color: var(--teal-dark);
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 16px;
@@ -153,6 +165,7 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
       line-height: 1.1;
       margin-bottom: 24px;
       letter-spacing: -1px;
+      color: var(--navy);
     }
 
     .cover-meta-grid {
@@ -161,7 +174,7 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
       gap: 24px;
       margin-top: 40px;
       padding-top: 40px;
-      border-top: 1px solid rgba(255,255,255,0.2);
+      border-top: 1px solid var(--gray-200);
     }
 
     .cover-meta-item label {
@@ -170,13 +183,14 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: rgba(255,255,255,0.6);
+      color: var(--gray-500);
       margin-bottom: 6px;
     }
 
     .cover-meta-item span {
       font-size: 16px;
       font-weight: 600;
+      color: var(--navy);
     }
 
     .cover-footer {
@@ -189,13 +203,13 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
 
     .cover-report-id {
       font-size: 11px;
-      color: rgba(255,255,255,0.5);
+      color: var(--gray-400);
     }
 
     .cover-date {
       text-align: right;
       font-size: 12px;
-      color: rgba(255,255,255,0.7);
+      color: var(--gray-500);
     }
 
     /* Content Pages */
@@ -654,6 +668,72 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
       font-size: 10px;
     }
 
+    /* Partner Matching */
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .partner-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .partner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .partner-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .partner-location {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+
+    .partner-score {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--cyan) 100%);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .partner-reasons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .partner-reason {
+      background: var(--gray-100);
+      color: var(--gray-600);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+    }
+
+    .partner-reason.strong {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+    }
+
+    .partner-activity {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+
     /* Disclaimer */
     .disclaimer {
       background: var(--gray-50);
@@ -965,6 +1045,39 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
           <div class="modifier-tag ${mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral'}">
             ${mod.multiplier > 1 ? '<span class="modifier-arrow">▲</span>' : mod.multiplier < 1 ? '<span class="modifier-arrow">▼</span>' : ''}
             ${mod.name}${mod.multiplier !== 1 ? ` (${mod.multiplier > 1 ? '+' : ''}${Math.round((mod.multiplier - 1) * 100)}%)` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    ${partnerMatches && partnerMatches.length > 0 ? `
+    <!-- Partner Matching -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        </div>
+        <h3 class="section-title">Potential Partners</h3>
+      </div>
+      <div class="partners-grid">
+        ${partnerMatches.slice(0, 4).map(partner => `
+          <div class="partner-card">
+            <div class="partner-header">
+              <div>
+                <div class="partner-name">${partner.company_name}</div>
+                ${partner.hq_country ? `<div class="partner-location">${partner.hq_country}</div>` : ''}
+              </div>
+              <div class="partner-score">${partner.match_score}%</div>
+            </div>
+            <div class="partner-reasons">
+              ${partner.match_reasons.slice(0, 2).map(r => `
+                <span class="partner-reason ${r.strength === 'strong' ? 'strong' : ''}">${r.reason}</span>
+              `).join('')}
+            </div>
+            ${partner.deals_last_12mo > 0 ? `
+              <div class="partner-activity">${partner.deals_last_12mo} deal${partner.deals_last_12mo > 1 ? 's' : ''} in last 12 months</div>
+            ` : ''}
           </div>
         `).join('')}
       </div>

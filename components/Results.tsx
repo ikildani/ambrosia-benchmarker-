@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { CalculationResult, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
-import { generatePDFReport } from '@/lib/generateReport';
+import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
 import { useTracking } from './TrackingProvider';
-import PartnerMatchesContainer from './PartnerMatchesContainer';
+import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -362,10 +362,15 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
   const isPro = tier === 'pro';
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    generatePDFReport(result);
+    generatePDFReport(result, undefined, partnerMatches);
+  };
+
+  const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
+    setPartnerMatches(matches as PartnerForPDF[]);
   };
 
   const handleProFeatureClick = (feature: string) => {
@@ -771,6 +776,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
             territory={inputs.territory}
             tier={tier}
             onUpgrade={onUpgrade || (() => {})}
+            onMatchesLoaded={handlePartnerMatchesLoaded}
           />
         )}
 

@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   keywords: ["biotech", "licensing", "deal terms", "oncology", "milestones", "royalties", "M&A", "life sciences"],
   authors: [{ name: "Ambrosia Ventures" }],
   metadataBase: new URL("https://calculator.ambrosiaventures.co"),
+  verification: {
+    google: "iAzMTWYwwCcC_foIWu0oPFBXKfYOT61aCgqs3vQ0r4c",
+  },
   openGraph: {
     title: "Life Sciences Deal Calculator",
     description: "Data-driven estimates for oncology licensing deals",
