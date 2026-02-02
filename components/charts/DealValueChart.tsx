@@ -105,8 +105,8 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
           />
           <Tooltip
             content={<CustomTooltip />}
-            position={isMobile ? { x: 0, y: -60 } : undefined}
-            wrapperStyle={isMobile ? { zIndex: 10, pointerEvents: 'none' } : undefined}
+            position={isMobile ? { x: 10, y: 10 } : undefined}
+            wrapperStyle={isMobile ? { pointerEvents: 'none' } : undefined}
           />
           <Bar
             dataKey="median"

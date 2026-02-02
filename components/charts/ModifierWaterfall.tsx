@@ -134,8 +134,8 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
           />
           <Tooltip
             content={<CustomTooltip />}
-            position={isMobile ? { x: 0, y: -60 } : undefined}
-            wrapperStyle={isMobile ? { zIndex: 10, pointerEvents: 'none' } : undefined}
+            position={isMobile ? { x: 10, y: 10 } : undefined}
+            wrapperStyle={isMobile ? { pointerEvents: 'none' } : undefined}
           />
           <ReferenceLine y={baseValue} stroke="#E5E7EB" strokeDasharray="3 3" />
           <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={50}>
