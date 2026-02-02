@@ -130,7 +130,7 @@ export default function BenchmarkInfo() {
             {/* Footer */}
             <div className="p-4 bg-neutral-50 border-t border-neutral-100">
               <p className="text-xs text-neutral-500 text-center">
-                Benchmarks are updated quarterly based on market activity
+                Benchmarks are updated monthly based on market activity
               </p>
             </div>
           </div>

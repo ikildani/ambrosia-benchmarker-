@@ -9,16 +9,16 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
 
     // Get user tier from query params
-    const userId = searchParams.get('user_id');
+    const email = searchParams.get('email');
     const clientTier = searchParams.get('tier');
 
     let userTier: 'free' | 'pro' = 'free';
 
-    if (userId) {
+    if (email) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('tier')
-        .eq('id', userId)
+        .eq('email', email)
         .single();
 
       userTier = (profile?.tier as 'free' | 'pro') || 'free';

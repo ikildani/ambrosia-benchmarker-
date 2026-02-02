@@ -86,7 +86,7 @@ export default function DealBrowser() {
     try {
       const params = new URLSearchParams();
 
-      if (user?.id) params.set('user_id', user.id);
+      if (user?.email) params.set('email', user.email);
       params.set('tier', tier);
       params.set('page', page.toString());
       params.set('sort_by', sortBy);
@@ -119,7 +119,7 @@ export default function DealBrowser() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, tier, page, sortBy, sortOrder, filters]);
+  }, [user?.email, tier, page, sortBy, sortOrder, filters]);
 
   useEffect(() => {
     fetchDeals();

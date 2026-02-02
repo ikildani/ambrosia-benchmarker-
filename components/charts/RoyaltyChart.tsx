@@ -1,0 +1,106 @@
+'use client';
+
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { TieredRoyalties } from '@/lib/calculations';
+
+interface RoyaltyChartProps {
+  royalties: TieredRoyalties;
+}
+
+export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
+  // Create data points for the step chart
+  const data = [
+    { sales: 0, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
+    { sales: 250, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
+    { sales: 500, low: royalties.midTier.low, high: royalties.midTier.high, tier: 'Mid' },
+    { sales: 750, low: royalties.midTier.low, high: royalties.midTier.high, tier: 'Mid' },
+    { sales: 1000, low: royalties.highTier.low, high: royalties.highTier.high, tier: 'High' },
+    { sales: 1500, low: royalties.highTier.low, high: royalties.highTier.high, tier: 'High' },
+    { sales: 2000, low: royalties.highTier.low, high: royalties.highTier.high, tier: 'High' },
+  ];
+
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean;
+    payload?: Array<{ value: number; dataKey: string }>;
+    label?: number;
+  }) => {
+    if (active && payload && payload.length) {
+      const item = data.find(d => d.sales === label);
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-neutral-200">
+          <p className="font-semibold text-navy-800 mb-1">
+            ${label}M Annual Sales
+          </p>
+          <p className="text-xs text-neutral-500 mb-2">{item?.tier} Tier</p>
+          <div className="space-y-1 text-sm">
+            <p className="text-neutral-600">
+              Royalty Range: <span className="font-bold text-teal-600">
+                {payload[0]?.value}% - {payload[1]?.value}%
+              </span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="w-full h-48">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+        >
+          <defs>
+            <linearGradient id="royaltyGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.05} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="sales"
+            tickFormatter={(value) => `$${value}M`}
+            tick={{ fontSize: 11, fill: '#6B7280' }}
+            axisLine={{ stroke: '#E5E7EB' }}
+          />
+          <YAxis
+            domain={[0, Math.max(royalties.highTier.high + 5, 30)]}
+            tickFormatter={(value) => `${value}%`}
+            tick={{ fontSize: 11, fill: '#6B7280' }}
+            axisLine={{ stroke: '#E5E7EB' }}
+            width={40}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <ReferenceLine x={500} stroke="#E5E7EB" strokeDasharray="3 3" />
+          <ReferenceLine x={1000} stroke="#E5E7EB" strokeDasharray="3 3" />
+          <Area
+            type="stepAfter"
+            dataKey="low"
+            stroke="#0D9488"
+            strokeWidth={2}
+            fill="url(#royaltyGradient)"
+          />
+          <Area
+            type="stepAfter"
+            dataKey="high"
+            stroke="#14B8A6"
+            strokeWidth={2}
+            fill="none"
+            strokeDasharray="4 2"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+      <div className="flex justify-center gap-4 mt-2 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-0.5 bg-teal-600"></div>
+          <span className="text-neutral-500">Low Range</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-0.5 bg-teal-500 border-dashed"></div>
+          <span className="text-neutral-500">High Range</span>
+        </div>
+      </div>
+    </div>
+  );
+}

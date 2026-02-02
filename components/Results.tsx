@@ -5,6 +5,9 @@ import { CalculationResult, formatCurrency, formatRange, DrillDownData, Mileston
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
 import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
 import BenchmarkInfo from './BenchmarkInfo';
+import ChartSection from './charts/ChartSection';
+import ScenarioComparison from './ScenarioComparison';
+import ShareModal from './ShareModal';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
@@ -366,6 +369,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
@@ -479,6 +483,15 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
                 </svg>
                 <span>Excel</span>
               </button>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-100 text-sm font-medium rounded-xl transition-all duration-200 border border-cyan-400/30 hover:border-cyan-400/50 w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span>Share</span>
+              </button>
             </div>
           )}
         </div>
@@ -553,32 +566,40 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
             {/* Mobile: horizontal scroll, Desktop: wrap */}
             <div className="flex sm:flex-wrap gap-2 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
               {modifiers.map((mod, idx) => (
-                <span
-                  key={idx}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex-shrink-0 ${
-                    mod.multiplier > 1
-                      ? 'bg-teal-50 text-teal-700 border border-teal-200'
-                      : mod.multiplier < 1
-                      ? 'bg-warning-50 text-warning-700 border border-warning-200'
-                      : 'bg-neutral-50 text-neutral-700 border border-neutral-200'
-                  }`}
-                >
-                  {mod.multiplier > 1 ? (
-                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                  ) : mod.multiplier < 1 ? (
-                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                  ) : null}
-                  <span className="whitespace-nowrap">{mod.name}</span>
-                  {mod.multiplier !== 1 && (
-                    <span className="font-bold whitespace-nowrap">
-                      ({mod.multiplier > 1 ? '+' : ''}{Math.round((mod.multiplier - 1) * 100)}%)
-                    </span>
+                <div key={idx} className="group relative flex-shrink-0">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 cursor-help ${
+                      mod.multiplier > 1
+                        ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                        : mod.multiplier < 1
+                        ? 'bg-warning-50 text-warning-700 border border-warning-200'
+                        : 'bg-neutral-50 text-neutral-700 border border-neutral-200'
+                    }`}
+                  >
+                    {mod.multiplier > 1 ? (
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                    ) : mod.multiplier < 1 ? (
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    ) : null}
+                    <span className="whitespace-nowrap">{mod.name}</span>
+                    {mod.multiplier !== 1 && (
+                      <span className="font-bold whitespace-nowrap">
+                        ({mod.multiplier > 1 ? '+' : ''}{Math.round((mod.multiplier - 1) * 100)}%)
+                      </span>
+                    )}
+                  </span>
+                  {/* Tooltip with context */}
+                  {mod.context && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
+                      {mod.context}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800" />
+                    </div>
                   )}
-                </span>
+                </div>
               ))}
             </div>
           </div>
@@ -776,6 +797,35 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
             )}
           </div>
         </div>
+
+        {/* Interactive Charts Section */}
+        <ChartSection
+          terms={terms}
+          tieredRoyalties={tieredRoyalties}
+          modifiers={modifiers}
+          isPro={isPro}
+          onUpgrade={onUpgrade}
+        />
+
+        {/* Scenario Comparison (Pro only) */}
+        {isPro && (
+          <ScenarioComparison
+            currentResult={result}
+            currentInputs={inputs}
+            currentLabels={labels}
+          />
+        )}
+
+        {/* Share Modal */}
+        {inputs && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            inputs={inputs}
+            results={result}
+            labels={labels}
+          />
+        )}
 
         {/* Upgrade CTA for Free Users */}
         {!isPro && (

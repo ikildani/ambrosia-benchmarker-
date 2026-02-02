@@ -1,16 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2025-01",
-    "version": "2.0",
-    "nextUpdate": "2025-04",
+    "lastUpdated": "2026-02",
+    "version": "3.1",
+    "nextUpdate": "2026-03",
+    "updateFrequency": "monthly",
     "sources": [
       "Publicly announced deal terms (SEC filings, press releases)",
       "Industry benchmark reports",
-      "2024-2025 mega-deal analysis"
+      "2024-2026 mega-deal analysis"
     ],
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
-    "marketNotes": "2025 values are ~15-20% higher than 2023 due to competition for quality oncology assets, strategic urgency (LOE cliffs), and multiple mega-deals resetting expectations.",
+    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Strategic urgency around LOE cliffs and competitive pressure for differentiated assets maintaining elevated valuations.",
     "changelog": [
+      {
+        "date": "2026-01-15",
+        "version": "3.0",
+        "summary": "Q1 2026 Major Update",
+        "changes": [
+          "Radiopharmaceutical premium maintained at 1.60x reflecting sustained demand",
+          "Molecular Glue category updated to 1.45x based on 2025 activity",
+          "Phase 2b+ with biomarker-selected populations at premium",
+          "China territory discount adjusted to 0.20x reflecting regulatory changes",
+          "Added combination therapy premium factors",
+          "Updated competitive landscape weights for crowded indications"
+        ]
+      },
+      {
+        "date": "2025-07-01",
+        "version": "2.5",
+        "summary": "Mid-Year 2025 Update",
+        "changes": [
+          "ADC premium adjusted to 1.50x following Gilead mega-deals",
+          "Bispecific/T-cell engager premium to 1.40x",
+          "mRNA oncology vaccine premium increased to 1.35x",
+          "Updated royalty tier thresholds"
+        ]
+      },
       {
         "date": "2025-01-15",
         "version": "2.0",
@@ -33,17 +58,6 @@
           "PROTAC/Degrader premium increased to 1.35x",
           "Added line of therapy multipliers (1L, 2L, 3L+)",
           "Updated competitive position factors"
-        ]
-      },
-      {
-        "date": "2024-07-01",
-        "version": "1.2",
-        "summary": "Mid-Year 2024 Calibration",
-        "changes": [
-          "Overall values increased 15-20% vs 2023 baseline",
-          "Added biomarker selection multiplier",
-          "Refined indication-specific multipliers for rare diseases",
-          "Added regulatory designation premiums"
         ]
       }
     ]

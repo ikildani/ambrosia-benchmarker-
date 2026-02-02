@@ -252,7 +252,7 @@ export default function DealFilters({
                     onChange={(e) => onFilterChange({ yearFrom: e.target.value })}
                     className="flex-1 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
-                    {Array.from({ length: 7 }, (_, i) => 2019 + i).map((year) => (
+                    {Array.from({ length: 8 }, (_, i) => 2019 + i).map((year) => (
                       <option key={year} value={year}>
                         {year}
                       </option>
@@ -264,7 +264,7 @@ export default function DealFilters({
                     onChange={(e) => onFilterChange({ yearTo: e.target.value })}
                     className="flex-1 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
-                    {Array.from({ length: 7 }, (_, i) => 2019 + i).map((year) => (
+                    {Array.from({ length: 8 }, (_, i) => 2019 + i).map((year) => (
                       <option key={year} value={year}>
                         {year}
                       </option>
