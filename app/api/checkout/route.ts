@@ -33,9 +33,7 @@ export async function POST() {
       }, { status: 500 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2026-01-28.clover',
-    });
+    const stripe = new Stripe(stripeSecretKey);
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({

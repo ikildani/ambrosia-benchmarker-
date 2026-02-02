@@ -13,6 +13,7 @@ interface TrackingContextType {
 
   // Auth
   user: ReturnType<typeof useAuth>['user'];
+  userId: string | undefined;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   signUp: ReturnType<typeof useAuth>['signUp'];
@@ -60,6 +61,7 @@ export function TrackingProvider({ children }: { children: ReactNode }) {
 
     // Auth
     user: auth.user,
+    userId: auth.user?.id,
     isAuthenticated: auth.isAuthenticated,
     isAuthLoading: auth.isLoading,
     signUp: auth.signUp,

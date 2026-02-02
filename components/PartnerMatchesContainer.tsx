@@ -1,0 +1,182 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { PartnerMatches } from './benchmarker/PartnerMatches';
+import { useTracking } from './TrackingProvider';
+
+interface PartnerMatchesContainerProps {
+  // Calculation inputs for matching
+  modality: string;
+  phase: string;
+  indicationCategory: string | null;
+  indicationSpecific: string | null;
+  territory: string;
+
+  // User context
+  tier: 'free' | 'pro';
+  onUpgrade: () => void;
+}
+
+export default function PartnerMatchesContainer({
+  modality,
+  phase,
+  indicationCategory,
+  indicationSpecific,
+  territory,
+  tier,
+  onUpgrade,
+}: PartnerMatchesContainerProps) {
+  const { sessionId, anonymousId, userId } = useTracking();
+  const [matches, setMatches] = useState<any[]>([]);
+  const [totalMatches, setTotalMatches] = useState(0);
+  const [matchesShown, setMatchesShown] = useState(0);
+  const [upgradeCta, setUpgradeCta] = useState<any>(null);
+  const [advisoryCta, setAdvisoryCta] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [calculationId, setCalculationId] = useState<string | undefined>();
+
+  const fetchMatches = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/partners/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          session_id: sessionId,
+          anonymous_id: anonymousId,
+          modality: mapModality(modality),
+          development_phase: mapPhase(phase),
+          indication_category: indicationCategory,
+          indication_specific: indicationSpecific,
+          territory_scope: mapTerritory(territory),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch partner matches');
+      }
+
+      const data = await res.json();
+      setMatches(data.matches || []);
+      setTotalMatches(data.total_matches || 0);
+      setMatchesShown(data.matches_shown || 0);
+      setUpgradeCta(data.upgrade_cta || null);
+      setAdvisoryCta(data.advisory_cta || null);
+      setCalculationId(data.calculation_id);
+    } catch (err) {
+      console.error('Partner matching error:', err);
+      setError('Unable to find partner matches. Please try again.');
+    }
+
+    setLoading(false);
+  }, [modality, phase, indicationCategory, indicationSpecific, territory, userId, sessionId, anonymousId]);
+
+  useEffect(() => {
+    if (modality && phase) {
+      fetchMatches();
+    }
+  }, [fetchMatches, modality, phase]);
+
+  if (loading) {
+    return (
+      <div className="mt-8 border-t border-neutral-200 pt-8">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-neutral-600">Finding potential partners...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-8 border-t border-neutral-200 pt-8">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-sm text-red-600">{error}</p>
+          <button
+            onClick={fetchMatches}
+            className="mt-2 text-sm text-red-700 underline hover:no-underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (matches.length === 0 && !loading) {
+    return (
+      <div className="mt-8 border-t border-neutral-200 pt-8">
+        <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
+          <p className="text-sm text-neutral-600">
+            No partner matches found for this asset profile. Try adjusting the modality or indication.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <PartnerMatches
+      calculationId={calculationId}
+      sessionId={sessionId}
+      anonymousId={anonymousId}
+      userId={userId}
+      matches={matches}
+      totalMatches={totalMatches}
+      matchesShown={matchesShown}
+      userTier={tier}
+      upgradeCta={upgradeCta}
+      advisoryCta={advisoryCta}
+      onUpgradeClick={onUpgrade}
+    />
+  );
+}
+
+// Map frontend values to backend enum values
+function mapModality(modality: string): string {
+  const map: Record<string, string> = {
+    smallMolecule: 'small_molecule',
+    antibody: 'antibody',
+    adc: 'adc',
+    bispecific: 'bispecific',
+    carT: 'car_t',
+    cellTherapy: 'cell_therapy',
+    geneTherapy: 'gene_therapy',
+    mrna: 'mrna',
+    peptide: 'peptide',
+    oligonucleotide: 'oligonucleotide',
+    radiopharm: 'radiopharm',
+    other: 'other',
+  };
+  return map[modality] || modality;
+}
+
+function mapPhase(phase: string): string {
+  const map: Record<string, string> = {
+    discovery: 'discovery',
+    preclinical: 'preclinical',
+    phase1: 'phase_1',
+    phase2: 'phase_2',
+    phase3: 'phase_3',
+    approved: 'approved',
+  };
+  return map[phase] || phase;
+}
+
+function mapTerritory(territory: string): string {
+  const map: Record<string, string> = {
+    global: 'global',
+    us: 'us',
+    exUs: 'ex_us',
+    china: 'china',
+    japan: 'japan',
+    eu: 'eu',
+    row: 'row',
+  };
+  return map[territory] || territory;
+}

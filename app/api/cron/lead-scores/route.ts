@@ -5,19 +5,33 @@ import { createServiceClient } from '@/lib/supabase/server';
 // Add to vercel.json: { "crons": [{ "path": "/api/cron/lead-scores", "schedule": "0 */6 * * *" }] }
 
 const SCORING_WEIGHTS = {
+  // Activity frequency
   sessions_7d: 10,
   sessions_30d: 3,
   calculations_7d: 8,
   calculations_30d: 2,
+
+  // Standard intent signals
   paywall_hits: 15,
   export_attempts: 20,
   pro_feature_clicks: 12,
+
+  // Engagement depth
   unique_modalities: 5,
   unique_indications: 3,
   avg_session_duration: 0.5,
+
+  // Recency bonus
   activity_today: 20,
   activity_3d: 15,
   activity_7d: 10,
+
+  // Partner matching events (HIGH INTENT - these users are serious)
+  partner_match_requested: 25,
+  partner_clicked: 10,
+  partner_expanded: 15,
+  partner_upgrade_cta_clicked: 20,
+  partner_advisory_cta_clicked: 40, // Highest intent signal - ready to buy advisory
 };
 
 const TIER_THRESHOLDS = {
@@ -69,9 +83,17 @@ export async function GET(request: NextRequest) {
       const uniqueModalities = new Set(calculations.map((c) => c.modality)).size;
       const uniqueIndications = new Set(calculations.map((c) => c.indication_category)).size;
 
+      // Standard intent signals
       const paywallHits = events.filter((e) => e.event_type === 'paywall_displayed').length;
       const exportAttempts = events.filter((e) => e.event_type === 'export_attempted').length;
       const proFeatureClicks = events.filter((e) => e.event_type === 'pro_feature_clicked').length;
+
+      // Partner matching events (HIGH INTENT)
+      const partnerMatchRequests = events.filter((e) => e.event_type === 'partner_match_requested').length;
+      const partnerClicks = events.filter((e) => e.event_type === 'partner_clicked').length;
+      const partnerExpanded = events.filter((e) => e.event_type === 'partner_expanded').length;
+      const partnerUpgradeClicks = events.filter((e) => e.event_type === 'partner_upgrade_cta_clicked').length;
+      const partnerAdvisoryClicks = events.filter((e) => e.event_type === 'partner_advisory_cta_clicked').length;
 
       const avgSessionDuration = sessions.length > 0
         ? sessions.reduce((acc, s) => acc + (s.duration_seconds || 0), 0) / sessions.length
@@ -79,16 +101,29 @@ export async function GET(request: NextRequest) {
 
       // Calculate score
       let score = 0;
+
+      // Activity frequency
       score += sessions7d * SCORING_WEIGHTS.sessions_7d;
       score += sessions30d * SCORING_WEIGHTS.sessions_30d;
       score += calculations7d * SCORING_WEIGHTS.calculations_7d;
       score += calculations30d * SCORING_WEIGHTS.calculations_30d;
+
+      // Standard intent signals
       score += paywallHits * SCORING_WEIGHTS.paywall_hits;
       score += exportAttempts * SCORING_WEIGHTS.export_attempts;
       score += proFeatureClicks * SCORING_WEIGHTS.pro_feature_clicks;
+
+      // Engagement depth
       score += uniqueModalities * SCORING_WEIGHTS.unique_modalities;
       score += uniqueIndications * SCORING_WEIGHTS.unique_indications;
       score += (avgSessionDuration / 60) * SCORING_WEIGHTS.avg_session_duration;
+
+      // Partner matching events (HIGH INTENT - cap each type to avoid runaway scores)
+      score += Math.min(partnerMatchRequests, 5) * SCORING_WEIGHTS.partner_match_requested;
+      score += Math.min(partnerClicks, 10) * SCORING_WEIGHTS.partner_clicked;
+      score += Math.min(partnerExpanded, 5) * SCORING_WEIGHTS.partner_expanded;
+      score += Math.min(partnerUpgradeClicks, 3) * SCORING_WEIGHTS.partner_upgrade_cta_clicked;
+      score += Math.min(partnerAdvisoryClicks, 2) * SCORING_WEIGHTS.partner_advisory_cta_clicked;
 
       // Find timestamps
       const allTimestamps = [

@@ -68,6 +68,29 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     setRemainingUses(getRemainingUses(tier));
   }, [tier]);
 
+  // Check for prefilled inputs from history reuse
+  useEffect(() => {
+    const prefill = sessionStorage.getItem('prefill_calculation');
+    if (prefill) {
+      try {
+        const inputs = JSON.parse(prefill);
+        if (inputs.phase) setPhase(inputs.phase as Phase);
+        if (inputs.modality) setModality(inputs.modality as Modality);
+        if (inputs.indication) setIndication(inputs.indication as Indication);
+        if (inputs.territory) setTerritory(inputs.territory as Territory);
+        if (inputs.biomarker) setBiomarker(inputs.biomarker as BiomarkerStatus);
+        if (inputs.lineOfTherapy) setLineOfTherapy(inputs.lineOfTherapy as LineOfTherapy);
+        if (inputs.combinationPotential) setCombinationPotential(inputs.combinationPotential as CombinationPotential);
+        if (inputs.competitivePosition) setCompetitivePosition(inputs.competitivePosition as CompetitivePosition);
+        if (inputs.dataQuality) setDataQuality(inputs.dataQuality as DataQuality);
+        if (inputs.regulatoryDesignations) setRegulatoryDesignations(inputs.regulatoryDesignations);
+        sessionStorage.removeItem('prefill_calculation');
+      } catch {
+        // Ignore invalid prefill data
+      }
+    }
+  }, []);
+
   const handleCalculate = () => {
     // Check usage limits for free tier
     if (!canUseCalculator(tier)) {
@@ -158,13 +181,19 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         console.error('Failed to save calculation:', error);
       }
 
-      // Save to local history
+      // Save to local history with ALL inputs for recalculation
       addToHistory({
         inputs: {
           phase,
           modality,
           indication,
           territory,
+          biomarker,
+          lineOfTherapy,
+          combinationPotential,
+          competitivePosition,
+          dataQuality,
+          regulatoryDesignations,
         },
         results: {
           upfrontLow: calculatedResult.terms.upfront.low,
@@ -205,7 +234,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     <div id="calculator" className="w-full max-w-6xl mx-auto scroll-mt-24">
       <div className="card-elevated overflow-hidden">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-8 py-8 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
@@ -215,14 +244,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl" />
           <div className="relative">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow flex-shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">Oncology Deal Terms Calculator</h2>
-                <p className="text-neutral-400 text-sm mt-0.5">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">Oncology Deal Terms Calculator</h2>
+                <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
                   2025 Market Benchmarks
                 </p>
               </div>
@@ -231,10 +260,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         </div>
 
         {/* Form */}
-        <div className="p-8 bg-gradient-subtle">
-          <div className="grid lg:grid-cols-2 gap-8">
+        <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Left Column */}
-            <div className="space-y-8">
+            <div className="space-y-6 lg:space-y-8">
               {/* Asset Details Section */}
               <div>
                 <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
@@ -365,7 +394,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             </div>
 
             {/* Right Column */}
-            <div className="space-y-8">
+            <div className="space-y-6 lg:space-y-8">
               {/* Competitive Landscape Section */}
               <div>
                 <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
@@ -435,11 +464,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-neutral-700">Regulatory Designations</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                       {regulatoryDesignationOptions.map((option) => (
                         <label
                           key={option.value}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                          className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                             regulatoryDesignations[option.value as keyof RegulatoryDesignations]
                               ? 'border-teal-500 bg-teal-50'
                               : 'border-neutral-200 bg-white hover:border-teal-300'
@@ -480,14 +509,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
           {/* Usage Counter for Free Tier */}
           {tier === 'free' && (
-            <div className="mt-8 p-4 rounded-xl bg-neutral-50 border border-neutral-200">
-              <div className="flex items-center justify-between">
+            <div className="mt-6 lg:mt-8 p-3 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm text-neutral-600">
-                    <span className="font-semibold text-navy-800">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining this month
+                  <span className="text-xs sm:text-sm text-neutral-600">
+                    <span className="font-semibold text-navy-800">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining
                   </span>
                 </div>
                 {remainingUses === 0 && (
@@ -496,7 +525,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       setPaywallReason('limit_reached');
                       setShowPaywall(true);
                     }}
-                    className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+                    className="text-xs sm:text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
                   >
                     Upgrade to Pro
                   </button>
@@ -509,11 +538,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           <button
             onClick={handleCalculate}
             disabled={isCalculating}
-            className="mt-6 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl
+            className="mt-4 sm:mt-6 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl
                      shadow-soft-lg hover:shadow-glow-lg transition-all duration-300
                      hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
                      disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
-                     flex items-center justify-center gap-3 group"
+                     flex items-center justify-center gap-2 sm:gap-3 group text-sm sm:text-base"
           >
             {isCalculating ? (
               <>
@@ -542,7 +571,17 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       {/* Results */}
       {result && (
         <div className="mt-8 animate-fade-in results-container">
-          <Results result={result} tier={tier} onUpgrade={onUpgrade} />
+          <Results
+            result={result}
+            tier={tier}
+            onUpgrade={onUpgrade}
+            inputs={{
+              modality,
+              phase,
+              indication,
+              territory,
+            }}
+          />
         </div>
       )}
 

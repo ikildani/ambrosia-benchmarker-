@@ -3,14 +3,61 @@
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
 import { generatePDFReport } from '@/lib/generateReport';
 import { useTracking } from './TrackingProvider';
+import PartnerMatchesContainer from './PartnerMatchesContainer';
 
 interface ResultsProps {
   result: CalculationResult;
   tier?: 'free' | 'pro';
   onUpgrade?: () => void;
+  // Inputs for partner matching
+  inputs?: {
+    modality: string;
+    phase: string;
+    indication: string;
+    territory: string;
+  };
 }
 
-export default function Results({ result, tier = 'free', onUpgrade }: ResultsProps) {
+// Helper to extract indication category from specific indication
+function getIndicationCategory(indication: string): string | null {
+  // Map specific indications to categories
+  if (indication.startsWith('lung_') || indication.startsWith('breast_') ||
+      indication.startsWith('colorectal') || indication.startsWith('pancreatic') ||
+      indication.startsWith('gastric') || indication.startsWith('ovarian') ||
+      indication.startsWith('prostate') || indication.startsWith('melanoma') ||
+      indication.startsWith('rcc') || indication.startsWith('hcc') ||
+      indication.startsWith('bladder') || indication.startsWith('head_neck') ||
+      indication.startsWith('glioblastoma') || indication.startsWith('solid')) {
+    return 'solid_tumor';
+  }
+  if (indication.startsWith('aml') || indication.startsWith('all') ||
+      indication.startsWith('cll') || indication.startsWith('dlbcl') ||
+      indication.startsWith('follicular') || indication.startsWith('myeloma') ||
+      indication.startsWith('mds') || indication.startsWith('lymphoma') ||
+      indication.startsWith('heme')) {
+    return 'hematological';
+  }
+  if (indication.startsWith('ra_') || indication.startsWith('lupus') ||
+      indication.startsWith('ibd') || indication.startsWith('psoriasis') ||
+      indication.startsWith('ms_') || indication.startsWith('autoimmune')) {
+    return 'autoimmune';
+  }
+  if (indication.startsWith('alzheimer') || indication.startsWith('parkinson') ||
+      indication.startsWith('depression') || indication.startsWith('schizophrenia') ||
+      indication.startsWith('pain') || indication.startsWith('cns')) {
+    return 'cns';
+  }
+  if (indication.startsWith('rare_') || indication.startsWith('orphan')) {
+    return 'rare_disease';
+  }
+  if (indication.startsWith('hiv') || indication.startsWith('hep') ||
+      indication.startsWith('covid') || indication.startsWith('infectious')) {
+    return 'infectious';
+  }
+  return null;
+}
+
+export default function Results({ result, tier = 'free', onUpgrade, inputs }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
   const isPro = tier === 'pro';
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
@@ -39,7 +86,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
   return (
     <div className="card-elevated overflow-hidden animate-slide-up">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-8 py-6 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
@@ -48,41 +95,41 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
         </div>
         <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl" />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <div className="relative">
-                <div className="w-2.5 h-2.5 rounded-full bg-teal-400" />
-                <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping" />
+              <div className="relative flex-shrink-0">
+                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400" />
+                <div className="absolute inset-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400 animate-ping" />
               </div>
-              <span className="text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
+              <span className="text-[10px] sm:text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
               {isPro && (
-                <span className="ml-2 px-2 py-0.5 bg-teal-500/20 text-teal-300 text-xs font-semibold rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-semibold rounded-full">
                   PRO
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-bold text-white">Estimated Deal Terms</h3>
-            <p className="text-neutral-400 mt-1 text-sm flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-700 rounded-md text-xs">
+            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">Estimated Deal Terms</h3>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-neutral-400 text-xs sm:text-sm">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.phase}
               </span>
-              <span className="text-neutral-500">&bull;</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-700 rounded-md text-xs">
+              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.modality}
               </span>
-              <span className="text-neutral-500">&bull;</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-700 rounded-md text-xs">
+              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.indication}
               </span>
-            </p>
+            </div>
           </div>
           {isPro && (
             <button
               onClick={handleDownloadPDF}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30"
+              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>Download PDF</span>
@@ -91,37 +138,37 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
         </div>
       </div>
 
-      <div className="p-8 bg-gradient-subtle">
+      <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
-        <div className="mb-6 p-5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft flex-shrink-0">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft flex-shrink-0">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
-              <h4 className="font-bold text-navy-800 mb-1">Recommended Deal Structure</h4>
-              <p className="text-lg font-semibold text-teal-700">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-navy-800 mb-1 text-sm sm:text-base">Recommended Deal Structure</h4>
+              <p className="text-base sm:text-lg font-semibold text-teal-700">
                 {dealRecommendation.upfrontPercent}% Upfront / {dealRecommendation.milestonePercent}% Milestones
               </p>
-              <p className="text-sm text-neutral-600 mt-1">{dealRecommendation.rationale}</p>
+              <p className="text-xs sm:text-sm text-neutral-600 mt-1">{dealRecommendation.rationale}</p>
             </div>
           </div>
         </div>
 
         {/* Negotiation Insight - Pro Feature */}
-        <div className="relative mb-6">
-          <div className={`p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="relative mb-4 sm:mb-6">
+          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <div>
-                <h4 className="font-bold text-amber-800 mb-1">Negotiation Insight</h4>
-                <p className="text-sm text-amber-900">{negotiationInsight}</p>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-amber-800 mb-1 text-sm sm:text-base">Negotiation Insight</h4>
+                <p className="text-xs sm:text-sm text-amber-900">{negotiationInsight}</p>
               </div>
             </div>
           </div>
@@ -142,14 +189,14 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
 
         {/* Applied Modifiers */}
         {modifiers.length > 0 && (
-          <div className="mb-6 p-5 bg-white rounded-xl border border-neutral-200 shadow-inner-soft">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white rounded-xl border border-neutral-200 shadow-inner-soft">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              <p className="text-sm font-semibold text-neutral-700">Applied Adjustments</p>
+              <p className="text-xs sm:text-sm font-semibold text-neutral-700">Applied Adjustments</p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {modifiers.map((mod, idx) => (
                 <span
                   key={idx}
@@ -183,7 +230,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
         )}
 
         {/* Deal Terms Grid */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Upfront Payment */}
           <div className="group metric-card border-teal-200 hover:border-teal-300">
             <div className="flex items-center justify-between mb-4">
@@ -196,7 +243,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
                 <p className="text-sm font-semibold text-teal-700">Upfront Payment</p>
               </div>
             </div>
-            <p className="text-2xl font-bold text-neutral-900 mb-2 number-animate">
+            <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
               {formatRange(terms.upfront)}
             </p>
             <div className="flex items-center justify-between mb-2">
@@ -227,7 +274,7 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
                 Potential
               </span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900 mb-2 number-animate">
+            <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
               {formatRange(terms.totalDealValue)}
             </p>
             <div className="flex items-center justify-between mb-2">
@@ -370,14 +417,14 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
 
         {/* Upgrade CTA for Free Users */}
         {!isPro && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
-            <h4 className="text-lg font-bold text-white mb-2">Unlock Full Analysis</h4>
-            <p className="text-neutral-300 text-sm mb-4">
+          <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">Unlock Full Analysis</h4>
+            <p className="text-neutral-300 text-xs sm:text-sm mb-3 sm:mb-4 max-w-md mx-auto">
               Get milestone breakdowns, royalty tiers, negotiation insights, and downloadable PDF reports
             </p>
             <button
               onClick={handleUpgradeClick}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow w-full sm:w-auto"
             >
               <span>Upgrade to Pro - $99/month</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,13 +434,26 @@ export default function Results({ result, tier = 'free', onUpgrade }: ResultsPro
           </div>
         )}
 
+        {/* Partner Matches */}
+        {inputs && (
+          <PartnerMatchesContainer
+            modality={inputs.modality}
+            phase={inputs.phase}
+            indicationCategory={getIndicationCategory(inputs.indication)}
+            indicationSpecific={inputs.indication}
+            territory={inputs.territory}
+            tier={tier}
+            onUpgrade={onUpgrade || (() => {})}
+          />
+        )}
+
         {/* Disclaimer */}
-        <div className="mt-8 p-4 bg-neutral-100 rounded-xl border border-neutral-200">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-neutral-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-neutral-100 rounded-xl border border-neutral-200">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-xs text-neutral-500 leading-relaxed">
+            <p className="text-[10px] sm:text-xs text-neutral-500 leading-relaxed">
               <strong className="text-neutral-600">Disclaimer:</strong> These estimates are based on publicly available deal data and 2025 market benchmarks.
               Actual deal terms vary significantly based on asset-specific factors, market conditions, competitive dynamics,
               and negotiation outcomes. This tool does not constitute financial or legal advice.

@@ -3,21 +3,35 @@ import { createServiceClient } from '@/lib/supabase/server';
 
 // Valid event types
 const VALID_EVENT_TYPES = [
+  // Calculation events
   'calculation_started',
   'calculation_completed',
   'parameter_changed',
   'output_section_viewed',
   'output_section_expanded',
   'results_copied',
+
+  // Paywall events
   'paywall_displayed',
   'paywall_dismissed',
   'export_attempted',
   'pro_feature_clicked',
   'upgrade_cta_clicked',
+
+  // Session events
   'session_started',
   'session_ended',
+
+  // Profile events
   'profile_updated',
   'preferences_changed',
+
+  // Partner matching events (HIGH INTENT)
+  'partner_match_requested',
+  'partner_clicked',
+  'partner_expanded',
+  'partner_upgrade_cta_clicked',
+  'partner_advisory_cta_clicked',
 ] as const;
 
 type EventType = typeof VALID_EVENT_TYPES[number];
