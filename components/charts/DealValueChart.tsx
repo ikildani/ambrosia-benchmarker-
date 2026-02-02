@@ -103,7 +103,7 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
             axisLine={{ stroke: '#E5E7EB' }}
             width={isMobile ? 50 : 75}
           />
-          <Tooltip content={<CustomTooltip />} />
+          {!isMobile && <Tooltip content={<CustomTooltip />} />}
           <Bar
             dataKey="median"
             radius={[0, 4, 4, 0]}
