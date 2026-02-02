@@ -11,10 +11,27 @@ export const metadata: Metadata = {
   description: "Estimate upfront payments, milestones, and royalties for oncology asset licensing deals. Powered by Ambrosia Ventures.",
   keywords: ["biotech", "licensing", "deal terms", "oncology", "milestones", "royalties", "M&A", "life sciences"],
   authors: [{ name: "Ambrosia Ventures" }],
+  metadataBase: new URL("https://calculator.ambrosiaventures.co"),
   openGraph: {
     title: "Life Sciences Deal Calculator",
-    description: "Estimate deal terms for oncology asset licensing",
+    description: "Data-driven estimates for oncology licensing deals",
     type: "website",
+    url: "https://calculator.ambrosiaventures.co",
+    siteName: "Ambrosia Ventures",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Life Sciences Deal Calculator by Ambrosia Ventures",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Life Sciences Deal Calculator",
+    description: "Data-driven estimates for oncology licensing deals",
+    images: ["/api/og"],
   },
 };
 
