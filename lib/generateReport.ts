@@ -126,7 +126,7 @@ export function generatePDFReport(
     }
 
     .cover-logo img {
-      height: 40px;
+      height: 72px;
       width: auto;
     }
 
@@ -234,7 +234,7 @@ export function generatePDFReport(
     }
 
     .page-logo img {
-      height: 28px;
+      height: 44px;
       width: auto;
     }
 
@@ -779,7 +779,7 @@ export function generatePDFReport(
     }
 
     .footer-brand img {
-      height: 20px;
+      height: 28px;
       width: auto;
     }
 
