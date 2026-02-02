@@ -102,11 +102,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback((email: string, name: string, userData?: Partial<User>) => {
+    // Check for cached profile data for this email
+    const emailKey = `profile_cache_${email.toLowerCase().trim()}`;
+    const cachedProfile = localStorage.getItem(emailKey);
+    let profileData: Partial<User> = {};
+
+    if (cachedProfile) {
+      try {
+        profileData = JSON.parse(cachedProfile);
+      } catch {
+        // Invalid cached data, ignore
+      }
+    }
+
     const newUser: User = {
       email,
       name,
       createdAt: new Date().toISOString(),
-      ...userData,
+      ...profileData, // Restore cached profile data
+      ...userData, // Override with any new data provided
     };
 
     setIsAuthenticated(true);
@@ -126,19 +140,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(() => {
+    // Cache profile data before signing out (so it persists for next sign-in)
+    if (user?.email) {
+      const emailKey = `profile_cache_${user.email.toLowerCase().trim()}`;
+      const profileToCache = {
+        company: user.company,
+        title: user.title,
+        phone: user.phone,
+        linkedIn: user.linkedIn,
+        role: user.role,
+      };
+      localStorage.setItem(emailKey, JSON.stringify(profileToCache));
+    }
+
     setIsAuthenticated(false);
     setUser(null);
     setTierState('free');
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_tier');
-  }, []);
+  }, [user]);
 
   const updateUser = useCallback((data: Partial<User>) => {
     setUser(prev => {
       if (!prev) return null;
       const updated = { ...prev, ...data };
       localStorage.setItem('user_data', JSON.stringify(updated));
+
+      // Also update the profile cache for this email
+      if (updated.email) {
+        const emailKey = `profile_cache_${updated.email.toLowerCase().trim()}`;
+        const profileToCache = {
+          company: updated.company,
+          title: updated.title,
+          phone: updated.phone,
+          linkedIn: updated.linkedIn,
+          role: updated.role,
+        };
+        localStorage.setItem(emailKey, JSON.stringify(profileToCache));
+      }
+
       return updated;
     });
   }, []);

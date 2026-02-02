@@ -40,13 +40,18 @@ export default function HistoryDetailModal({
   const isPro = tier === 'pro';
 
   // Handle close with animation
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback((e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (isClosing) return; // Prevent multiple close attempts
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       onClose();
-    }, 250); // Match animation duration
-  }, [onClose]);
+    }, 200); // Match animation duration
+  }, [onClose, isClosing]);
 
   const handlePartnerMatchesLoaded = useCallback((matches: PartnerMatchForPDF[]) => {
     setPartnerMatches(matches as PartnerForPDF[]);
@@ -161,10 +166,10 @@ export default function HistoryDetailModal({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-250 ${
+        className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200 ${
           isClosing ? 'opacity-0' : 'animate-backdrop-fade'
         }`}
-        onClick={handleClose}
+        onClick={(e) => handleClose(e)}
         aria-hidden="true"
       />
 
@@ -173,7 +178,7 @@ export default function HistoryDetailModal({
         ref={modalRef}
         className={`relative w-full sm:max-w-4xl sm:mx-4 max-h-[90vh] bg-white
                    rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden
-                   transition-all duration-250 ${
+                   transition-all duration-200 ${
                      isClosing
                        ? 'opacity-0 translate-y-8 sm:translate-y-4 scale-95'
                        : 'animate-modal-slide-up'
@@ -195,7 +200,7 @@ export default function HistoryDetailModal({
 
           <button
             ref={closeButtonRef}
-            onClick={handleClose}
+            onClick={(e) => handleClose(e)}
             className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center
                        rounded-full bg-white/10 hover:bg-white/20 transition-colors
                        focus:outline-none focus:ring-2 focus:ring-white/50"
