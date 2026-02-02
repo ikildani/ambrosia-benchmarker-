@@ -564,7 +564,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
               )}
             </div>
             {/* Mobile: horizontal scroll, Desktop: wrap */}
-            <div className="flex sm:flex-wrap gap-2 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0 pt-12 -mt-12">
               {modifiers.map((mod, idx) => (
                 <div key={idx} className="group relative flex-shrink-0">
                   <span
@@ -594,7 +594,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
                   </span>
                   {/* Tooltip with context */}
                   {mod.context && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg min-w-[200px] max-w-[280px] text-center leading-relaxed">
+                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal">
                       {mod.context}
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800" />
                     </div>
