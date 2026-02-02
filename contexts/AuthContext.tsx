@@ -128,8 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(() => {
     setIsAuthenticated(false);
     setUser(null);
+    setTierState('free');
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_data');
+    localStorage.removeItem('user_tier');
   }, []);
 
   const updateUser = useCallback((data: Partial<User>) => {

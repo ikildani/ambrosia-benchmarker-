@@ -1032,7 +1032,11 @@ export default function Dashboard({
       {/* History Detail Modal */}
       <HistoryDetailModal
         isOpen={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
+        onClose={() => {
+          setShowHistoryModal(false);
+          // Clear selected item after a delay to allow close animation to complete
+          setTimeout(() => setSelectedHistoryItem(null), 350);
+        }}
         item={selectedHistoryItem}
         tier={tier}
         onReuse={handleReuseInputs}

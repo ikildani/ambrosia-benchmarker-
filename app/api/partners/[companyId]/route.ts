@@ -225,7 +225,7 @@ export async function GET(
       advisory_cta: {
         message: 'Need deeper partner analysis? Our advisory team provides full market mapping, warm introductions, and deal support.',
         cta_text: 'Book a Call',
-        cta_url: 'https://calendly.com/ambrosia-advisory',
+        cta_url: 'https://calendly.com/ambrosiaventures/strategy-session',
       },
     };
 
