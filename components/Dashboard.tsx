@@ -394,7 +394,7 @@ export default function Dashboard({
                     : 'text-slate-500 hover:text-slate-900 active:bg-white/50'
                 }`}
               >
-                <svg className={`w-4.5 h-4.5 sm:w-4 sm:h-4 flex-shrink-0 transition-colors ${
+                <svg className={`w-4 h-4 flex-shrink-0 transition-colors ${
                   activeTab === tab.id ? 'text-teal-600' : ''
                 }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />

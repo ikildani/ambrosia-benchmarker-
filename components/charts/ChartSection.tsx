@@ -90,19 +90,19 @@ export default function ChartSection({
           {isPro ? (
             <>
               {/* Tabs */}
-              <div className="flex border-b border-neutral-200">
+              <div className="flex border-b border-neutral-200 overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                       activeTab === tab.id
                         ? 'text-teal-600 border-b-2 border-teal-500 -mb-px bg-teal-50/50'
                         : 'text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50'
                     }`}
                   >
                     {tab.icon}
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span>{tab.label}</span>
                   </button>
                 ))}
               </div>

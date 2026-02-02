@@ -242,19 +242,19 @@ export function PartnerMatches({
   return (
     <div className="mt-8 border-t border-gray-200 pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
+      <div className="flex items-center justify-between mb-2 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Target className="w-5 h-5 text-blue-600 flex-shrink-0" />
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
             Potential Partners
           </h3>
         </div>
-        <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+        <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded flex-shrink-0">
           {totalMatches} matches
         </span>
       </div>
 
-      <p className="text-sm text-gray-600 mb-6">
+      <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
         Companies actively acquiring or licensing assets similar to yours, ranked by fit.
       </p>
 
@@ -377,7 +377,7 @@ export function PartnerMatches({
                     )}
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
                       <StatCard
                         icon={<TrendingUp className="w-4 h-4" />}
                         value={partnerDetails?.company?.deals_last_24mo || match.deals_last_24mo || 0}
@@ -656,17 +656,17 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+    <div className={`flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 min-w-0 ${
       highlight
         ? 'bg-green-50 border border-green-200'
         : 'bg-white border border-gray-100'
     }`}>
-      <div className={highlight ? 'text-green-600' : 'text-gray-400'}>{icon}</div>
-      <div>
-        <div className={`text-sm font-semibold ${highlight ? 'text-green-700' : 'text-gray-900'}`}>
+      <div className={`flex-shrink-0 ${highlight ? 'text-green-600' : 'text-gray-400'}`}>{icon}</div>
+      <div className="min-w-0">
+        <div className={`text-xs sm:text-sm font-semibold truncate ${highlight ? 'text-green-700' : 'text-gray-900'}`}>
           {value || 'N/A'}
         </div>
-        <div className="text-xs text-gray-500">{label}</div>
+        <div className="text-[10px] sm:text-xs text-gray-500 truncate">{label}</div>
       </div>
     </div>
   );
