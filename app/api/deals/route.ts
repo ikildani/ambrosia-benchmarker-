@@ -168,17 +168,17 @@ export async function GET(request: NextRequest) {
 }
 
 async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>) {
-  // Get distinct values for filters
+  // Get distinct values for filters - use limit to ensure we get all rows
   const [modalities, phases, indications, dealTypes] = await Promise.all([
-    supabase.from('deals').select('modality').not('modality', 'is', null),
-    supabase.from('deals').select('phase_at_signing').not('phase_at_signing', 'is', null),
-    supabase.from('deals').select('indication_category').not('indication_category', 'is', null),
-    supabase.from('deals').select('deal_type').not('deal_type', 'is', null),
+    supabase.from('deals').select('modality').not('modality', 'is', null).limit(5000),
+    supabase.from('deals').select('phase_at_signing').not('phase_at_signing', 'is', null).limit(5000),
+    supabase.from('deals').select('indication_category').not('indication_category', 'is', null).limit(5000),
+    supabase.from('deals').select('deal_type').not('deal_type', 'is', null).limit(5000),
   ]);
 
   return {
-    modalities: [...new Set((modalities.data || []).map(d => d.modality))].sort(),
-    phases: [...new Set((phases.data || []).map(d => d.phase_at_signing))].sort(),
+    modalities: [...new Set((modalities.data || []).map(d => d.modality))].filter(Boolean).sort(),
+    phases: [...new Set((phases.data || []).map(d => d.phase_at_signing))].filter(Boolean).sort(),
     indications: [...new Set((indications.data || []).map(d => d.indication_category))].filter(Boolean).sort(),
     dealTypes: [...new Set((dealTypes.data || []).map(d => d.deal_type))].filter(Boolean).sort(),
   };
