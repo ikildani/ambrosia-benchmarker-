@@ -65,10 +65,6 @@ export async function POST(request: NextRequest) {
       allow_promotion_codes: true,
       // Tax ID collection for business customers
       tax_id_collection: { enabled: true },
-      // Customer creation for portal access
-      customer_creation: 'always',
-      // Enable Stripe to send payment receipts
-      payment_intent_data: undefined,
       subscription_data: {
         metadata: {
           product: 'deal-calculator-pro',
