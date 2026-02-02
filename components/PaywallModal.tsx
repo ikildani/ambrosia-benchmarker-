@@ -105,11 +105,12 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
             <p className="text-sm font-semibold text-neutral-700 mb-4">Upgrade to Pro for:</p>
             <ul className="space-y-3">
               {[
-                'Unlimited deal calculations',
+                '5 partner matches with full profiles',
+                'Partner deal history & patent cliffs',
                 'Full milestone breakdowns',
                 'Royalty rate analysis',
                 'Downloadable PDF reports',
-                'Priority email support',
+                'Unlimited calculations',
               ].map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">

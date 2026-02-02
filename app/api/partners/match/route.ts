@@ -191,9 +191,9 @@ export async function POST(request: NextRequest) {
         remaining_hidden: hiddenMatches,
         features: [
           'See 5 partner matches (vs 2)',
-          'View detailed company profiles',
-          'See deal history and activity signals',
-          'Access therapeutic focus insights',
+          'Full company profiles & deal history',
+          'Patent cliff & acquisition signals',
+          'Avg upfront & deal activity metrics',
         ],
       };
     }

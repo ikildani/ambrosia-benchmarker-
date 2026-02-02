@@ -94,13 +94,14 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
 
             <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {[
-                { included: true, text: 'Basic deal term ranges' },
-                { included: true, text: 'Upfront payment estimates' },
-                { included: true, text: 'Total deal value calculations' },
+                { included: true, text: 'Basic deal term estimates' },
+                { included: true, text: 'Upfront & total value ranges' },
                 { included: true, text: 'All phases & modalities' },
-                { included: false, text: 'Milestone breakdowns' },
+                { included: true, text: '2 partner matches (names only)' },
+                { included: false, text: 'Full milestone breakdowns' },
                 { included: false, text: 'Royalty rate analysis' },
-                { included: false, text: 'Downloadable reports' },
+                { included: false, text: 'Partner profiles & deal history' },
+                { included: false, text: 'PDF reports' },
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2 sm:gap-3">
                   {item.included ? (
@@ -170,12 +171,13 @@ export default function Pricing({ currentTier, onSelectTier }: PricingProps) {
 
             <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {[
-                'Everything in Free',
+                'Everything in Free, plus:',
+                '5 partner matches with full profiles',
+                'Partner deal history & activity signals',
+                'Therapeutic focus & patent cliff data',
                 'Full milestone breakdowns',
                 'Royalty rate analysis',
                 'Downloadable PDF reports',
-                'Competitive positioning insights',
-                'Priority email support',
                 'Unlimited calculations',
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2 sm:gap-3">
