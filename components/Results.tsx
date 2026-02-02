@@ -16,6 +16,7 @@ interface ResultsProps {
     indication: string;
     territory: string;
   };
+  onPartnerMatchesLoaded?: (matches: PartnerMatchForPDF[]) => void;
 }
 
 // Badge configuration for each metric
@@ -357,7 +358,7 @@ function MethodologySection() {
   );
 }
 
-export default function Results({ result, tier = 'free', onUpgrade, inputs }: ResultsProps) {
+export default function Results({ result, tier = 'free', onUpgrade, inputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
@@ -371,6 +372,8 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
 
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
     setPartnerMatches(matches as PartnerForPDF[]);
+    // Also notify parent component if callback provided
+    onPartnerMatchesLoaded?.(matches);
   };
 
   const handleProFeatureClick = (feature: string) => {

@@ -119,7 +119,7 @@ export function generatePDFReport(
     }
 
     .cover-logo img {
-      height: 120px;
+      height: 160px;
       width: auto;
     }
 
@@ -236,14 +236,16 @@ export function generatePDFReport(
       border-bottom: 2px solid var(--gray-100);
     }
 
-    .page-logo {
+    .page-info-left {
       display: flex;
       align-items: center;
     }
 
-    .page-logo img {
-      height: 56px;
-      width: auto;
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.5px;
     }
 
     .page-info {
@@ -474,9 +476,9 @@ export function generatePDFReport(
       min-width: 40px;
     }
 
-    .deal-bar-segment.upfront { background: var(--teal); }
-    .deal-bar-segment.dev { background: var(--cyan); }
-    .deal-bar-segment.reg { background: #6366f1; }
+    .deal-bar-segment.upfront { background: #059669; }
+    .deal-bar-segment.dev { background: #0ea5e9; }
+    .deal-bar-segment.reg { background: #8b5cf6; }
     .deal-bar-segment.comm { background: var(--navy); }
 
     .deal-legend {
@@ -499,9 +501,9 @@ export function generatePDFReport(
       border-radius: 3px;
     }
 
-    .legend-dot.upfront { background: var(--teal); }
-    .legend-dot.dev { background: var(--cyan); }
-    .legend-dot.reg { background: #6366f1; }
+    .legend-dot.upfront { background: #059669; }
+    .legend-dot.dev { background: #0ea5e9; }
+    .legend-dot.reg { background: #8b5cf6; }
     .legend-dot.comm { background: var(--navy); }
 
     /* Terms Grid */
@@ -744,26 +746,37 @@ export function generatePDFReport(
 
     /* Disclaimer */
     .disclaimer {
-      background: var(--gray-50);
+      background: linear-gradient(135deg, var(--gray-50) 0%, #f1f5f9 100%);
       border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 32px;
+      border-left: 4px solid var(--gray-400);
+      border-radius: 0 12px 12px 0;
+      padding: 24px 28px;
+      margin-top: 40px;
+      margin-bottom: 100px;
+      page-break-inside: avoid;
     }
 
     .disclaimer-title {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--gray-500);
-      margin-bottom: 8px;
+      letter-spacing: 1.5px;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .disclaimer-title::before {
+      content: '⚠';
+      font-size: 14px;
     }
 
     .disclaimer-text {
-      font-size: 11px;
-      color: var(--gray-500);
-      line-height: 1.6;
+      font-size: 12px;
+      color: var(--gray-600);
+      line-height: 1.7;
     }
 
     /* Footer */
@@ -787,8 +800,19 @@ export function generatePDFReport(
     }
 
     .footer-brand img {
-      height: 36px;
+      height: 32px;
       width: auto;
+    }
+
+    .footer-url {
+      font-size: 11px;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+
+    .footer-copyright {
+      font-size: 10px;
+      color: var(--gray-400);
     }
 
     /* Print Optimization */
@@ -861,7 +885,9 @@ export function generatePDFReport(
   <!-- Content Page -->
   <div class="content-page">
     <div class="page-header">
-      <div class="page-logo"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
+      <div class="page-info-left">
+        <span class="page-title">Deal Terms Analysis</span>
+      </div>
       <div class="page-info">
         Report ID: ${reportId}<br/>
         ${reportDate}
@@ -1102,8 +1128,8 @@ export function generatePDFReport(
 
     <div class="page-footer">
       <div class="footer-brand"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
-      <div>www.ambrosiaventures.co</div>
-      <div>© ${new Date().getFullYear()} Ambrosia Ventures. All rights reserved.</div>
+      <div class="footer-url">calculator.ambrosiaventures.co</div>
+      <div class="footer-copyright">© ${new Date().getFullYear()} Ambrosia Ventures</div>
     </div>
   </div>
 </body>

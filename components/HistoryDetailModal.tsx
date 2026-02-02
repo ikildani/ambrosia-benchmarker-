@@ -10,8 +10,9 @@ import {
   BiomarkerStatus, LineOfTherapy, CombinationPotential,
   CompetitivePosition, DataQuality
 } from '@/lib/calculations';
-import { generatePDFReport } from '@/lib/generateReport';
+import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
 import Results from './Results';
+import { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
 interface HistoryDetailModalProps {
   isOpen: boolean;
@@ -32,9 +33,14 @@ export default function HistoryDetailModal({
 }: HistoryDetailModalProps) {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const isPro = tier === 'pro';
+
+  const handlePartnerMatchesLoaded = useCallback((matches: PartnerMatchForPDF[]) => {
+    setPartnerMatches(matches as PartnerForPDF[]);
+  }, []);
 
   // Recalculate when item changes
   useEffect(() => {
@@ -130,9 +136,9 @@ export default function HistoryDetailModal({
 
   const handleDownloadPDF = useCallback(() => {
     if (result) {
-      generatePDFReport(result);
+      generatePDFReport(result, item?.id, partnerMatches);
     }
-  }, [result]);
+  }, [result, item, partnerMatches]);
 
   if (!isOpen || !item) return null;
 
@@ -239,9 +245,20 @@ export default function HistoryDetailModal({
               </div>
               <p className="mt-4 text-slate-500 text-sm">Recalculating results...</p>
             </div>
-          ) : result ? (
+          ) : result && item ? (
             <div className="animate-fade-in">
-              <Results result={result} tier={tier} onUpgrade={onUpgrade} />
+              <Results
+                result={result}
+                tier={tier}
+                onUpgrade={onUpgrade}
+                inputs={{
+                  modality: item.inputs.modality,
+                  phase: item.inputs.phase,
+                  indication: item.inputs.indication,
+                  territory: item.inputs.territory
+                }}
+                onPartnerMatchesLoaded={handlePartnerMatchesLoaded}
+              />
             </div>
           ) : null}
         </div>
