@@ -72,10 +72,10 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           </defs>
           <XAxis
             dataKey="sales"
-            tickFormatter={(value) => isMobile ? (value === 0 ? '0' : value >= 1000 ? `${value/1000}B` : `${value}M`) : (value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`)}
-            tick={{ fontSize: isMobile ? 8 : 12, fill: '#6B7280' }}
+            tickFormatter={(value) => value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            interval={isMobile ? 1 : 1}
+            ticks={isMobile ? [0, 500, 1000, 2000] : [0, 500, 1000, 2000]}
             tickMargin={isMobile ? 2 : 8}
           />
           <YAxis
