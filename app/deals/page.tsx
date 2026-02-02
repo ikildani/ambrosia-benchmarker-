@@ -232,7 +232,7 @@ export default function DealsPage() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={closeAuthModal}
-        mode={authModalMode}
+        initialMode={authModalMode}
         onSuccess={handleAuthSuccess}
       />
     </div>
