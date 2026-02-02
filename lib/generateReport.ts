@@ -45,8 +45,11 @@ export function generatePDFReport(
 <head>
   <meta charset="UTF-8">
   <title>Deal Terms Analysis Report - Ambrosia Ventures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="${logoUrl}">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -84,40 +87,30 @@ export function generatePDFReport(
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #e2e8f0 100%);
+      background: white;
       color: var(--gray-800);
-      padding: 60px;
+      padding: 0;
       position: relative;
       overflow: hidden;
     }
 
-    .cover-page::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: -10%;
-      width: 60%;
-      height: 100%;
-      background: radial-gradient(ellipse, rgba(0, 199, 199, 0.08) 0%, transparent 70%);
-      pointer-events: none;
+    .cover-top-bar {
+      height: 8px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--teal) 50%, var(--cyan) 100%);
     }
 
-    .cover-page::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--teal), var(--cyan));
+    .cover-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 80px;
     }
 
     .cover-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      position: relative;
-      z-index: 1;
+      align-items: center;
+      margin-bottom: 80px;
     }
 
     .cover-logo {
@@ -126,19 +119,20 @@ export function generatePDFReport(
     }
 
     .cover-logo img {
-      height: 72px;
+      height: 120px;
       width: auto;
     }
 
     .cover-badge {
-      background: var(--navy);
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
       color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 14px rgba(26, 30, 66, 0.3);
     }
 
     .cover-content {
@@ -146,70 +140,84 @@ export function generatePDFReport(
       display: flex;
       flex-direction: column;
       justify-content: center;
-      position: relative;
-      z-index: 1;
     }
 
     .cover-subtitle {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--teal-dark);
+      color: var(--teal);
       text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
     }
 
     .cover-title {
-      font-size: 42px;
+      font-size: 56px;
       font-weight: 800;
       line-height: 1.1;
-      margin-bottom: 24px;
-      letter-spacing: -1px;
+      margin-bottom: 16px;
+      letter-spacing: -2px;
       color: var(--navy);
+    }
+
+    .cover-title-highlight {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .cover-meta-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 40px;
-      padding-top: 40px;
-      border-top: 1px solid var(--gray-200);
+      gap: 32px;
+      margin-top: 60px;
+      padding: 32px;
+      background: var(--gray-50);
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .cover-meta-item {
+      text-align: center;
     }
 
     .cover-meta-item label {
       display: block;
-      font-size: 10px;
-      font-weight: 500;
+      font-size: 11px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       color: var(--gray-500);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .cover-meta-item span {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
       color: var(--navy);
     }
 
     .cover-footer {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      position: relative;
-      z-index: 1;
+      align-items: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--gray-200);
+      margin-top: auto;
     }
 
     .cover-report-id {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--gray-400);
+      font-weight: 500;
     }
 
     .cover-date {
       text-align: right;
-      font-size: 12px;
-      color: var(--gray-500);
+      font-size: 13px;
+      color: var(--gray-600);
+      font-weight: 500;
     }
 
     /* Content Pages */
@@ -234,7 +242,7 @@ export function generatePDFReport(
     }
 
     .page-logo img {
-      height: 44px;
+      height: 56px;
       width: auto;
     }
 
@@ -779,7 +787,7 @@ export function generatePDFReport(
     }
 
     .footer-brand img {
-      height: 28px;
+      height: 36px;
       width: auto;
     }
 
@@ -816,36 +824,36 @@ export function generatePDFReport(
 <body>
   <!-- Cover Page -->
   <div class="cover-page">
-    <div class="cover-header">
-      <div class="cover-logo"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
-      <div class="cover-badge">Confidential</div>
-    </div>
+    <div class="cover-top-bar"></div>
+    <div class="cover-main">
+      <div class="cover-header">
+        <div class="cover-logo"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
+        <div class="cover-badge">Confidential</div>
+      </div>
 
-    <div class="cover-content">
-      <div class="cover-subtitle">Life Sciences Deal Intelligence</div>
-      <h1 class="cover-title">Deal Terms<br/>Analysis Report</h1>
+      <div class="cover-content">
+        <div class="cover-subtitle">Life Sciences Deal Intelligence</div>
+        <h1 class="cover-title">Deal Terms<br/><span class="cover-title-highlight">Analysis Report</span></h1>
 
-      <div class="cover-meta-grid">
-        <div class="cover-meta-item">
-          <label>Development Phase</label>
-          <span>${labels.phase}</span>
-        </div>
-        <div class="cover-meta-item">
-          <label>Modality</label>
-          <span>${labels.modality}</span>
-        </div>
-        <div class="cover-meta-item">
-          <label>Indication</label>
-          <span>${labels.indication}</span>
+        <div class="cover-meta-grid">
+          <div class="cover-meta-item">
+            <label>Development Phase</label>
+            <span>${labels.phase}</span>
+          </div>
+          <div class="cover-meta-item">
+            <label>Modality</label>
+            <span>${labels.modality}</span>
+          </div>
+          <div class="cover-meta-item">
+            <label>Indication</label>
+            <span>${labels.indication}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="cover-footer">
-      <div class="cover-report-id">Report ID: ${reportId}</div>
-      <div class="cover-date">
-        ${reportDate}<br/>
-        ${reportTime}
+      <div class="cover-footer">
+        <div class="cover-report-id">Report ID: ${reportId}</div>
+        <div class="cover-date">${reportDate} • ${reportTime}</div>
       </div>
     </div>
   </div>
@@ -1112,9 +1120,19 @@ export function generatePDFReport(
   if (printWindow) {
     printWindow.document.write(reportHTML);
     printWindow.document.close();
-    // Auto-trigger print dialog after a short delay
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+
+    // Wait for images and fonts to load before printing
+    const logoImg = printWindow.document.querySelector('.cover-logo img') as HTMLImageElement;
+    if (logoImg && !logoImg.complete) {
+      logoImg.onload = () => printWindow.print();
+      logoImg.onerror = () => printWindow.print();
+    } else {
+      // Image already loaded or no image, print after fonts load
+      printWindow.document.fonts?.ready?.then(() => {
+        printWindow.print();
+      }).catch(() => {
+        printWindow.print();
+      });
+    }
   }
 }
