@@ -16,6 +16,37 @@ interface User {
   createdAt?: string;
 }
 
+// Type guard to validate user data from localStorage
+function isValidUserData(data: unknown): data is User {
+  if (typeof data !== 'object' || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj.email === 'string' &&
+    typeof obj.name === 'string' &&
+    (obj.company === undefined || typeof obj.company === 'string') &&
+    (obj.title === undefined || typeof obj.title === 'string') &&
+    (obj.phone === undefined || typeof obj.phone === 'string') &&
+    (obj.linkedIn === undefined || typeof obj.linkedIn === 'string') &&
+    (obj.role === undefined || typeof obj.role === 'string') &&
+    (obj.createdAt === undefined || typeof obj.createdAt === 'string')
+  );
+}
+
+// Safe JSON parse with validation
+function safeParseUserData(jsonString: string): User | null {
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (isValidUserData(parsed)) {
+      return parsed;
+    }
+    console.warn('Invalid user data structure in localStorage');
+    return null;
+  } catch {
+    console.warn('Failed to parse user data from localStorage');
+    return null;
+  }
+}
+
 interface AuthContextType {
   // Auth state
   isAuthenticated: boolean;
@@ -71,27 +102,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userData = localStorage.getItem('user_data');
 
     if (authState === 'true' && userData) {
-      try {
-        const parsed = JSON.parse(userData);
+      const parsed = safeParseUserData(userData);
+      if (parsed) {
         setIsAuthenticated(true);
-        setUser({
-          email: parsed.email || '',
-          name: parsed.name || '',
-          company: parsed.company,
-          title: parsed.title,
-          phone: parsed.phone,
-          linkedIn: parsed.linkedIn,
-          role: parsed.role,
-          createdAt: parsed.createdAt,
-        });
+        setUser(parsed);
 
         // Auto-upgrade pro users by email
-        const userEmailLower = (parsed.email || '').toLowerCase().trim();
+        const userEmailLower = parsed.email.toLowerCase().trim();
         if (PRO_EMAILS.some(e => e.toLowerCase() === userEmailLower)) {
           setTierState('pro');
           localStorage.setItem('user_tier', 'pro');
         }
-      } catch {
+      } else {
         // Invalid stored data, clear it
         localStorage.removeItem('is_authenticated');
         localStorage.removeItem('user_data');
@@ -108,10 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let profileData: Partial<User> = {};
 
     if (cachedProfile) {
-      try {
-        profileData = JSON.parse(cachedProfile);
-      } catch {
-        // Invalid cached data, ignore
+      const parsed = safeParseUserData(cachedProfile);
+      if (parsed) {
+        profileData = parsed;
       }
     }
 

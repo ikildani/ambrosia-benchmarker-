@@ -154,13 +154,40 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
     const anonymousId = searchParams.get('anonymous_id');
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const sessionId = searchParams.get('session_id');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
 
     if (!userId && !anonymousId) {
       return NextResponse.json(
         { error: 'user_id or anonymous_id is required' },
         { status: 400 }
       );
+    }
+
+    // SECURITY: For anonymous_id queries, require session_id for verification
+    // This prevents enumeration attacks on anonymous calculation data
+    if (anonymousId && !userId) {
+      if (!sessionId) {
+        return NextResponse.json(
+          { error: 'session_id required for anonymous access' },
+          { status: 400 }
+        );
+      }
+
+      // Verify the session_id matches calculations with this anonymous_id
+      const { data: sessionCheck } = await supabase
+        .from('calculations')
+        .select('id')
+        .eq('anonymous_id', anonymousId)
+        .eq('session_id', sessionId)
+        .limit(1);
+
+      if (!sessionCheck || sessionCheck.length === 0) {
+        return NextResponse.json(
+          { error: 'Invalid session' },
+          { status: 403 }
+        );
+      }
     }
 
     let query = supabase

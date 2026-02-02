@@ -2,12 +2,14 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TieredRoyalties } from '@/lib/calculations';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface RoyaltyChartProps {
   royalties: TieredRoyalties;
 }
 
 export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
+  const isMobile = useIsMobile();
   // Create data points for the step chart
   const data = [
     { sales: 0, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
@@ -46,11 +48,16 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
   };
 
   return (
-    <div className="w-full h-48">
+    <div className="w-full h-40 sm:h-48">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+          margin={{
+            top: 10,
+            right: isMobile ? 10 : 30,
+            left: 0,
+            bottom: 10
+          }}
         >
           <defs>
             <linearGradient id="royaltyGradient" x1="0" y1="0" x2="0" y2="1">
@@ -61,15 +68,15 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           <XAxis
             dataKey="sales"
             tickFormatter={(value) => `$${value}M`}
-            tick={{ fontSize: 11, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
           />
           <YAxis
             domain={[0, Math.max(royalties.highTier.high + 5, 30)]}
             tickFormatter={(value) => `${value}%`}
-            tick={{ fontSize: 11, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            width={40}
+            width={isMobile ? 32 : 40}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine x={500} stroke="#E5E7EB" strokeDasharray="3 3" />

@@ -95,7 +95,8 @@ function DrillDownPanel({
             {isRoyalty ? 'Royalty Tiers' : 'Breakdown'}
           </h5>
           <div className="bg-neutral-50 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[320px]">
               <thead>
                 <tr className="bg-neutral-100">
                   <th className="text-left py-2 px-3 font-medium text-neutral-600">Component</th>
@@ -124,6 +125,7 @@ function DrillDownPanel({
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

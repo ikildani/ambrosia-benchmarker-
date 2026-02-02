@@ -1,6 +1,7 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface Modifier {
   name: string;
@@ -13,8 +14,10 @@ interface ModifierWaterfallProps {
 }
 
 export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
+  const isMobile = useIsMobile();
   // Build waterfall data
   let runningValue = baseValue;
+  const truncateLength = isMobile ? 8 : 15;
   const data = [
     {
       name: 'Base',
@@ -26,7 +29,7 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
       const impact = runningValue * (mod.multiplier - 1);
       const newValue = runningValue + impact;
       const item = {
-        name: mod.name.length > 15 ? mod.name.substring(0, 15) + '...' : mod.name,
+        name: mod.name.length > truncateLength ? mod.name.substring(0, truncateLength) + '...' : mod.name,
         fullName: mod.name,
         value: Math.abs(impact),
         impact,
@@ -95,32 +98,38 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
 
   if (modifiers.length === 0) {
     return (
-      <div className="w-full h-48 flex items-center justify-center text-neutral-400 text-sm">
+      <div className="w-full h-40 sm:h-48 flex items-center justify-center text-neutral-400 text-sm">
         No modifiers applied
       </div>
     );
   }
 
   return (
-    <div className="w-full h-48">
+    <div className="w-full h-40 sm:h-48">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 10, right: 20, left: 10, bottom: 30 }}
+          margin={{
+            top: 10,
+            right: isMobile ? 10 : 20,
+            left: isMobile ? 5 : 10,
+            bottom: isMobile ? 40 : 30
+          }}
         >
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 10, fill: '#6B7280' }}
-            angle={-45}
+            tick={{ fontSize: isMobile ? 8 : 10, fill: '#6B7280' }}
+            angle={isMobile ? -60 : -45}
             textAnchor="end"
-            height={50}
+            height={isMobile ? 60 : 50}
+            interval={0}
             axisLine={{ stroke: '#E5E7EB' }}
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: 11, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            width={55}
+            width={isMobile ? 40 : 55}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine y={baseValue} stroke="#E5E7EB" strokeDasharray="3 3" />

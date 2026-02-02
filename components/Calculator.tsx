@@ -59,10 +59,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
   const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Tracking
   const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
   const calculationCountRef = useRef(0);
+  // Ref for race condition prevention - checked immediately before async work
+  const calculatingRef = useRef(false);
 
   useEffect(() => {
     setRemainingUses(getRemainingUses(tier));
@@ -70,8 +73,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
   // Check for prefilled inputs from history reuse
   useEffect(() => {
+    let mounted = true;
+
     const prefill = sessionStorage.getItem('prefill_calculation');
-    if (prefill) {
+    if (prefill && mounted) {
       try {
         const inputs = JSON.parse(prefill);
         if (inputs.phase) setPhase(inputs.phase as Phase);
@@ -89,6 +94,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         // Ignore invalid prefill data
       }
     }
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleCalculate = () => {
@@ -105,10 +114,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       return;
     }
 
-    // Prevent multiple clicks while calculating
-    if (isCalculating) return;
+    // Prevent multiple clicks - check both state and ref for race condition prevention
+    if (isCalculating || calculatingRef.current) return;
 
+    // Set ref immediately BEFORE any async work to prevent race conditions
+    calculatingRef.current = true;
     setIsCalculating(true);
+    setSaveError(null);
 
     // Use requestAnimationFrame + setTimeout for smooth UI update before calculation
     requestAnimationFrame(() => {
@@ -156,7 +168,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             calculationCountRef.current
           );
 
-          // Save calculation to database (non-blocking)
+          // Save calculation to database (non-blocking but with user feedback)
           fetch('/api/calculations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -181,9 +193,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 total_deal_value_high: calculatedResult.terms.totalDealValue.high,
               },
             }),
-          }).catch(error => {
-            console.error('Failed to save calculation to database:', error);
-          });
+          })
+            .then(async (response) => {
+              if (!response.ok) {
+                throw new Error('Server returned an error');
+              }
+            })
+            .catch(error => {
+              console.error('Failed to save calculation to database:', error);
+              setSaveError('Unable to save calculation. Your results are shown but may not be synced.');
+            });
 
       // Save to local history with ALL inputs for recalculation
       addToHistory({
@@ -228,6 +247,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           console.error('Calculation error:', error);
         } finally {
           setIsCalculating(false);
+          calculatingRef.current = false;
         }
       }, 600);
     });
@@ -490,7 +510,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                             onChange={() => handleRegulatoryChange(option.value as keyof RegulatoryDesignations)}
                             className="sr-only"
                           />
-                          <div className={`w-6 h-6 sm:w-5 sm:h-5 rounded-lg sm:rounded-md border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
+                          <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
                             regulatoryDesignations[option.value as keyof RegulatoryDesignations]
                               ? 'bg-teal-500 border-teal-500'
                               : 'border-neutral-300'
@@ -541,6 +561,25 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </button>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Save Error Warning */}
+          {saveError && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span className="text-sm text-amber-700 flex-1">{saveError}</span>
+              <button
+                onClick={() => setSaveError(null)}
+                className="text-amber-600 hover:text-amber-800 p-1"
+                aria-label="Dismiss warning"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           )}
 

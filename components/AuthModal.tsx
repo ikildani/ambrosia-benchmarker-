@@ -336,13 +336,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
         {mode === 'signup' && (
           <div>
             <label className="block text-sm font-semibold text-neutral-700 mb-2">
-              Full Name <span className="text-red-500">*</span>
+              Full Name <span className="text-red-500" aria-hidden="true">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Smith"
+              aria-required="true"
               className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
                        focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
             />
@@ -351,13 +352,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
 
         <div>
           <label className="block text-sm font-semibold text-neutral-700 mb-2">
-            Work Email <span className="text-red-500">*</span>
+            Work Email <span className="text-red-500" aria-hidden="true">*</span>
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="john@company.com"
+            aria-required="true"
             className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
                      focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
@@ -365,7 +367,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
 
         <div>
           <label className="block text-sm font-semibold text-neutral-700 mb-2">
-            Password <span className="text-red-500">*</span>
+            Password <span className="text-red-500" aria-hidden="true">*</span>
           </label>
           <div className="relative">
             <input
@@ -373,13 +375,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'signup' ? 'Min. 8 characters' : '••••••••'}
+              aria-required="true"
               className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
                        focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+              aria-pressed={showPassword}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors p-2"
             >
               {showPassword ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,12 +510,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
 
   return (
     <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+        className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up"
+      >
         {/* Header */}
         <div className="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 px-8 py-8">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+            aria-label="Close dialog"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -524,8 +535,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white">{header.title}</h3>
-              <p className="text-neutral-400 text-sm mt-1">{header.subtitle}</p>
+              <h3 id="auth-modal-title" className="text-2xl font-bold text-white">{header.title}</h3>
+              <p className="text-neutral-500 text-sm mt-1">{header.subtitle}</p>
             </div>
           </div>
         </div>
@@ -533,24 +544,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-8">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div role="alert" className="mb-6 p-4 bg-red-100 border border-red-300 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-red-700 text-sm">{error}</p>
+              <p className="text-red-800 text-sm">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div role="status" className="mb-6 p-4 bg-green-100 border border-green-300 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-green-700 text-sm">{success}</p>
+              <p className="text-green-800 text-sm">{success}</p>
             </div>
           )}
 

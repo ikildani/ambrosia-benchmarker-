@@ -176,7 +176,7 @@ export default function Header({
 
                 {/* Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in">
                     {/* User Info Header */}
                     <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-slate-200">
                       <div className="flex items-center gap-3">

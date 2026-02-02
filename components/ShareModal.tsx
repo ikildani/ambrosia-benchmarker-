@@ -82,15 +82,22 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
       <div
         className="absolute inset-0 bg-navy-900/60 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
+        className="relative bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in"
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white">Share Analysis</h3>
+            <h3 id="share-modal-title" className="text-lg font-bold text-white">Share Analysis</h3>
             <button
               onClick={onClose}
-              className="p-1 text-white/80 hover:text-white transition-colors"
+              className="p-2.5 w-11 h-11 flex items-center justify-center text-white/80 hover:text-white transition-colors rounded-lg"
+              aria-label="Close share dialog"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -135,7 +142,7 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                <div role="alert" className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-800 text-sm">
                   {error}
                 </div>
               )}

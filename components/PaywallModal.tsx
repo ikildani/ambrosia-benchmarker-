@@ -54,10 +54,16 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
       <div
         className="absolute inset-0 bg-navy-900/80 backdrop-blur-sm"
         onClick={handleClose}
+        aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
-        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-8 py-10 overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="paywall-modal-title"
+        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
+      >
+        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-8 py-6 sm:py-10 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
@@ -67,7 +73,8 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
 
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label="Close dialog"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -87,7 +94,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
               )}
             </div>
 
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 id="paywall-modal-title" className="text-2xl font-bold text-white mb-2">
               {reason === 'limit_reached'
                 ? 'Monthly Limit Reached'
                 : 'Unlock Pro Features'}
@@ -100,7 +107,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
           <div className="mb-8">
             <p className="text-sm font-semibold text-neutral-700 mb-4">Upgrade to Pro for:</p>
             <ul className="space-y-3">

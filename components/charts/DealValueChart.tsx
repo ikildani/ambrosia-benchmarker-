@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DealTerms } from '@/lib/calculations';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface DealValueChartProps {
   terms: DealTerms;
@@ -13,6 +14,8 @@ const formatCurrency = (value: number) => {
 };
 
 export default function DealValueChart({ terms }: DealValueChartProps) {
+  const isMobile = useIsMobile();
+
   const data = [
     {
       name: 'Upfront',
@@ -74,25 +77,30 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
   };
 
   return (
-    <div className="w-full h-64">
+    <div className="w-full h-48 sm:h-64">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 10, right: 30, left: 80, bottom: 10 }}
+          margin={{
+            top: 10,
+            right: isMobile ? 15 : 30,
+            left: isMobile ? 60 : 80,
+            bottom: 10
+          }}
         >
           <XAxis
             type="number"
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: 12, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 10 : 12, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 12, fill: '#374151' }}
+            tick={{ fontSize: isMobile ? 10 : 12, fill: '#374151' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            width={75}
+            width={isMobile ? 55 : 75}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar

@@ -31,10 +31,7 @@ export async function POST(request: NextRequest) {
       userTier = (profile?.tier as 'free' | 'pro') || 'free';
     }
 
-    if (userTier === 'free' && tier === 'pro') {
-      userTier = 'pro';
-    }
-
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     if (userTier !== 'pro') {
       return NextResponse.json(
         { error: 'Pro subscription required to share calculations' },
