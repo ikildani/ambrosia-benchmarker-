@@ -115,9 +115,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Use cached name if the provided name is just the email prefix (sign-in mode)
+    const displayName = profileData.name && name === email.split('@')[0]
+      ? profileData.name
+      : name;
+
     const newUser: User = {
       email,
-      name,
+      name: displayName,
       createdAt: new Date().toISOString(),
       ...profileData, // Restore cached profile data
       ...userData, // Override with any new data provided
@@ -144,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user?.email) {
       const emailKey = `profile_cache_${user.email.toLowerCase().trim()}`;
       const profileToCache = {
+        name: user.name,
         company: user.company,
         title: user.title,
         phone: user.phone,
@@ -171,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (updated.email) {
         const emailKey = `profile_cache_${updated.email.toLowerCase().trim()}`;
         const profileToCache = {
+          name: updated.name,
           company: updated.company,
           title: updated.title,
           phone: updated.phone,
