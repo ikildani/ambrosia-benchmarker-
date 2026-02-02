@@ -358,9 +358,9 @@ export default function Dashboard({
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={240}
-                height={64}
-                className="h-12 sm:h-14 w-auto object-contain"
+                width={320}
+                height={90}
+                className="h-14 sm:h-16 lg:h-20 w-auto object-contain"
                 priority
               />
             </button>
