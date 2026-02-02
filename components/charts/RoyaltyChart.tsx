@@ -10,8 +10,13 @@ interface RoyaltyChartProps {
 
 export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
   const isMobile = useIsMobile();
-  // Create data points for the step chart
-  const data = [
+  // Create data points for the step chart - simplified on mobile
+  const data = isMobile ? [
+    { sales: 0, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
+    { sales: 500, low: royalties.midTier.low, high: royalties.midTier.high, tier: 'Mid' },
+    { sales: 1000, low: royalties.highTier.low, high: royalties.highTier.high, tier: 'High' },
+    { sales: 2000, low: royalties.highTier.low, high: royalties.highTier.high, tier: 'High' },
+  ] : [
     { sales: 0, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
     { sales: 250, low: royalties.base.low, high: royalties.base.high, tier: 'Base' },
     { sales: 500, low: royalties.midTier.low, high: royalties.midTier.high, tier: 'Mid' },
@@ -67,10 +72,10 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           </defs>
           <XAxis
             dataKey="sales"
-            tickFormatter={(value) => isMobile ? `$${value >= 1000 ? value/1000 + 'B' : value + 'M'}` : `$${value}M`}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
+            tickFormatter={(value) => isMobile ? (value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`) : `$${value}M`}
+            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            interval={isMobile ? 1 : 0}
+            interval={0}
           />
           <YAxis
             domain={[0, Math.max(royalties.highTier.high + 5, 30)]}

@@ -254,96 +254,97 @@ export default function Dashboard({
             </div>
           </div>
 
-          {/* Mobile Navigation - Full-screen overlay */}
-          {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-x-0 top-16 bottom-0 bg-white z-[100] animate-mobile-menu overflow-y-auto safe-bottom">
-              <nav className="flex flex-col p-4 gap-1">
-                {/* Navigation Links */}
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }}
-                  className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                  </div>
-                  <span className="text-base">Home</span>
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }}
-                  className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-base">Calculator</span>
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                  className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <span className="text-base">Pricing</span>
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                  className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <span className="text-base">About</span>
-                </button>
-
-                {/* Divider */}
-                <div className="my-4 border-t border-slate-200" />
-
-                {/* User Section */}
-                <div className="px-4 py-3 bg-slate-50 rounded-2xl mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 truncate">{userName}</p>
-                      <p className="text-sm text-slate-500 truncate">{userEmail}</p>
-                    </div>
-                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                      tier === 'pro'
-                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                        : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {tier === 'pro' ? 'Pro' : 'Free'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Sign Out Button */}
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onSignOut(); }}
-                  className="flex items-center gap-4 px-4 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-2xl font-medium transition-colors touch-feedback"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                  </div>
-                  <span className="text-base">Sign Out</span>
-                </button>
-              </nav>
-            </div>
-          )}
         </div>
       </header>
+
+      {/* Mobile Navigation - Full-screen overlay - OUTSIDE header to avoid stacking context issues */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-x-0 top-16 bottom-0 bg-white z-[9999] overflow-y-auto safe-bottom">
+          <nav className="flex flex-col p-4 gap-1">
+            {/* Navigation Links */}
+            <button
+              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }}
+              className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <span className="text-base">Home</span>
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }}
+              className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
+            >
+              <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-base">Calculator</span>
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+              className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-base">Pricing</span>
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+              className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-base">About</span>
+            </button>
+
+            {/* Divider */}
+            <div className="my-4 border-t border-slate-200" />
+
+            {/* User Section */}
+            <div className="px-4 py-3 bg-slate-50 rounded-2xl mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-900 truncate">{userName}</p>
+                  <p className="text-sm text-slate-500 truncate">{userEmail}</p>
+                </div>
+                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                  tier === 'pro'
+                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {tier === 'pro' ? 'Pro' : 'Free'}
+                </span>
+              </div>
+            </div>
+
+            {/* Sign Out Button */}
+            <button
+              onClick={() => { setMobileMenuOpen(false); onSignOut(); }}
+              className="flex items-center gap-4 px-4 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-2xl font-medium transition-colors touch-feedback"
+            >
+              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <span className="text-base">Sign Out</span>
+            </button>
+          </nav>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Banner - Mobile optimized */}
