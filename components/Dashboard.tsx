@@ -429,7 +429,7 @@ export default function Dashboard({
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-[10px] sm:text-xs font-medium text-teal-700">Total Analyses</span>
+                      <span className="text-xs font-medium text-teal-700">Total Analyses</span>
                     </div>
                     <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-700">{history.length}</p>
                   </div>
@@ -439,7 +439,7 @@ export default function Dashboard({
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-[10px] sm:text-xs font-medium text-cyan-700 truncate">Total Value</span>
+                      <span className="text-xs font-medium text-cyan-700 truncate">Total Value</span>
                     </div>
                     <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-cyan-700">
                       {formatCurrency(history.reduce((sum, h) => sum + h.results.totalValueMedian, 0))}
@@ -451,7 +451,7 @@ export default function Dashboard({
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
-                      <span className="text-[10px] sm:text-xs font-medium text-blue-700 truncate">Top Phase</span>
+                      <span className="text-xs font-medium text-blue-700 truncate">Top Phase</span>
                     </div>
                     <p className="text-sm sm:text-lg lg:text-xl font-bold text-blue-700 truncate">
                       {topPhase}
@@ -463,7 +463,7 @@ export default function Dashboard({
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
-                      <span className="text-[10px] sm:text-xs font-medium text-indigo-700 truncate">Top Modality</span>
+                      <span className="text-xs font-medium text-indigo-700 truncate">Top Modality</span>
                     </div>
                     <p className="text-sm sm:text-lg lg:text-xl font-bold text-indigo-700 truncate">
                       {topModality}

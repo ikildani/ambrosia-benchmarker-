@@ -468,18 +468,18 @@ export default function Home() {
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-xs sm:text-sm font-bold text-neutral-300 mb-1.5">Important Disclaimer</h4>
-                <p className="text-[10px] sm:text-xs text-neutral-400 leading-relaxed mb-2">
+                <p className="text-xs text-neutral-400 leading-relaxed mb-2">
                   <strong className="text-neutral-300">For Informational Purposes Only:</strong> These estimates are generated
                   using publicly available deal data, industry benchmarks, and algorithmic models. They are intended solely
                   for educational and planning purposes.
                 </p>
-                <p className="text-[10px] sm:text-xs text-neutral-400 leading-relaxed mb-2">
+                <p className="text-xs text-neutral-400 leading-relaxed mb-2">
                   <strong className="text-neutral-300">Not Professional Advice:</strong> This tool does not constitute financial,
                   legal, investment, or professional advice of any kind. Actual deal terms can vary significantly (often by
                   50% or more) based on asset-specific factors, competitive dynamics, market conditions, negotiation leverage,
                   and numerous other variables not captured by this model.
                 </p>
-                <p className="text-[10px] sm:text-xs text-neutral-400 leading-relaxed">
+                <p className="text-xs text-neutral-400 leading-relaxed">
                   <strong className="text-neutral-300">Consult Professionals:</strong> Before making any business decisions,
                   consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
                   <Link href="/terms" className="text-teal-400 hover:text-teal-300 ml-1 underline">Terms</Link>

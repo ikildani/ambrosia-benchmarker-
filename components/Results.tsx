@@ -421,24 +421,24 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
                 <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400" />
                 <div className="absolute inset-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400 animate-ping" />
               </div>
-              <span className="text-[10px] sm:text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
+              <span className="text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
               {isPro && (
-                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-semibold rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-teal-500/20 text-teal-300 text-xs font-semibold rounded-full">
                   PRO
                 </span>
               )}
             </div>
             <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">Estimated Deal Terms</h3>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-neutral-400 text-xs sm:text-sm">
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.phase}
               </span>
               <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.modality}
               </span>
               <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-none">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.indication}
               </span>
             </div>
@@ -515,7 +515,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
               </svg>
               <p className="text-xs sm:text-sm font-semibold text-neutral-700">Applied Adjustments</p>
               {modifiers.length > 2 && (
-                <span className="sm:hidden text-[10px] text-neutral-400 ml-auto flex items-center gap-1">
+                <span className="sm:hidden text-xs text-neutral-400 ml-auto flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -796,18 +796,18 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xs sm:text-sm font-bold text-slate-700 mb-1.5">Important Disclaimer</h4>
-              <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed mb-2">
+              <p className="text-xs text-slate-500 leading-relaxed mb-2">
                 <strong className="text-slate-600">For Informational Purposes Only:</strong> These estimates are generated
                 using publicly available deal data, industry benchmarks, and algorithmic models. They are intended solely
                 for educational and planning purposes.
               </p>
-              <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed mb-2">
+              <p className="text-xs text-slate-500 leading-relaxed mb-2">
                 <strong className="text-slate-600">Not Professional Advice:</strong> This tool does not constitute financial,
                 legal, investment, or professional advice of any kind. Actual deal terms can vary significantly (often by
                 50% or more) based on asset-specific factors, competitive dynamics, market conditions, negotiation leverage,
                 and numerous other variables not captured by this model.
               </p>
-              <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 <strong className="text-slate-600">Consult Professionals:</strong> Before making any business decisions,
                 consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
                 <a href="/terms" className="text-teal-600 hover:text-teal-700 ml-1 underline">Terms</a>

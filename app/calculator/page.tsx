@@ -118,7 +118,7 @@ export default function CalculatorPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Pro Badge */}
               {tier === 'pro' && (
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 rounded-full text-[10px] sm:text-xs font-semibold text-amber-700">
+                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 rounded-full text-xs font-semibold text-amber-700">
                   <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                   </svg>
@@ -147,7 +147,7 @@ export default function CalculatorPage() {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 pr-2 sm:pr-3 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all duration-200"
                   >
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] sm:text-xs font-semibold">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xs font-semibold">
                       {user?.name ? getInitials(user.name) : 'U'}
                     </div>
                     <span className="text-xs sm:text-sm font-medium text-slate-700 hidden sm:block max-w-[100px] truncate">
@@ -301,7 +301,7 @@ export default function CalculatorPage() {
               Visit Website
             </a>
           </div>
-          <p className="text-[10px] sm:text-xs text-slate-400 text-center sm:text-right max-w-sm">
+          <p className="text-xs text-slate-400 text-center sm:text-right max-w-sm">
             For informational purposes only. Not financial or legal advice.
           </p>
         </div>
