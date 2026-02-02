@@ -105,7 +105,7 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
   }
 
   return (
-    <div className="w-full h-32 sm:h-48 mb-2">
+    <div className="w-full h-32 sm:h-56 mb-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
@@ -118,12 +118,13 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
         >
           <XAxis
             dataKey="name"
-            tick={{ fontSize: isMobile ? 7 : 10, fill: '#6B7280' }}
-            angle={isMobile ? -45 : -45}
+            tick={{ fontSize: isMobile ? 7 : 11, fill: '#6B7280' }}
+            angle={isMobile ? -45 : -30}
             textAnchor="end"
-            height={isMobile ? 50 : 50}
+            height={isMobile ? 50 : 60}
             interval={0}
             axisLine={{ stroke: '#E5E7EB' }}
+            tickMargin={5}
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(value)}
