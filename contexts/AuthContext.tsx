@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 // Pro user emails that get auto-upgraded
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co'];
+const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
 
 interface User {
   email: string;
