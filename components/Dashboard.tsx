@@ -5,6 +5,18 @@ import Image from 'next/image';
 import { getHistory, deleteHistoryItem, clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import HistoryDetailModal from './HistoryDetailModal';
 
+// Avatar color options
+const AVATAR_COLORS = [
+  { id: 'teal', name: 'Teal', from: 'from-teal-400', to: 'to-cyan-500', shadow: 'shadow-teal-500/40', ring: 'ring-teal-500/20' },
+  { id: 'violet', name: 'Violet', from: 'from-violet-500', to: 'to-purple-600', shadow: 'shadow-violet-500/40', ring: 'ring-violet-500/20' },
+  { id: 'rose', name: 'Rose', from: 'from-rose-400', to: 'to-pink-600', shadow: 'shadow-rose-500/40', ring: 'ring-rose-500/20' },
+  { id: 'amber', name: 'Amber', from: 'from-amber-400', to: 'to-orange-500', shadow: 'shadow-amber-500/40', ring: 'ring-amber-500/20' },
+  { id: 'emerald', name: 'Emerald', from: 'from-emerald-400', to: 'to-green-600', shadow: 'shadow-emerald-500/40', ring: 'ring-emerald-500/20' },
+  { id: 'blue', name: 'Blue', from: 'from-blue-400', to: 'to-indigo-600', shadow: 'shadow-blue-500/40', ring: 'ring-blue-500/20' },
+  { id: 'slate', name: 'Slate', from: 'from-slate-500', to: 'to-slate-700', shadow: 'shadow-slate-500/40', ring: 'ring-slate-500/20' },
+  { id: 'fuchsia', name: 'Fuchsia', from: 'from-fuchsia-400', to: 'to-pink-600', shadow: 'shadow-fuchsia-500/40', ring: 'ring-fuchsia-500/20' },
+];
+
 interface DashboardProps {
   userName: string;
   userEmail: string;
@@ -75,6 +87,7 @@ export default function Dashboard({
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [avatarColor, setAvatarColor] = useState('teal');
 
   useEffect(() => {
     setMounted(true);
@@ -92,6 +105,11 @@ export default function Dashboard({
       } catch {
         // ignore
       }
+    }
+    // Load avatar color preference
+    const savedAvatarColor = localStorage.getItem('avatar_color');
+    if (savedAvatarColor && AVATAR_COLORS.some(c => c.id === savedAvatarColor)) {
+      setAvatarColor(savedAvatarColor);
     }
   }, []);
 
@@ -264,6 +282,14 @@ export default function Dashboard({
     return `$${value.toFixed(2)}M`;
   };
 
+  // Get current avatar color
+  const currentAvatarColor = AVATAR_COLORS.find(c => c.id === avatarColor) || AVATAR_COLORS[0];
+
+  const handleAvatarColorChange = (colorId: string) => {
+    setAvatarColor(colorId);
+    localStorage.setItem('avatar_color', colorId);
+  };
+
   // Compute deal insights
   const totalValueAnalyzed = history.reduce((sum, h) => sum + h.results.totalValueMedian, 0);
 
@@ -379,7 +405,7 @@ export default function Dashboard({
                 <span className="hidden sm:inline-flex px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold rounded-full shadow-sm">Pro Plan</span>
               )}
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-teal-500/20">
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br ${currentAvatarColor.from} ${currentAvatarColor.to} flex items-center justify-center text-white font-semibold text-sm shadow-md ${currentAvatarColor.shadow}`}>
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden sm:block">
@@ -416,7 +442,7 @@ export default function Dashboard({
             <div className="my-4 border-t border-slate-200" />
             <div className="px-4 py-3 bg-slate-50 rounded-2xl mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">{userName.charAt(0).toUpperCase()}</div>
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${currentAvatarColor.from} ${currentAvatarColor.to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>{userName.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-slate-900 truncate">{userName}</p>
                   <p className="text-sm text-slate-500 truncate">{userEmail}</p>
@@ -817,7 +843,7 @@ export default function Dashboard({
               <div className="relative p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                   <div className="relative">
-                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-5xl font-bold text-white shadow-xl shadow-teal-500/40 ring-4 ring-white/20">
+                    <div className={`w-28 h-28 rounded-2xl bg-gradient-to-br ${currentAvatarColor.from} ${currentAvatarColor.to} flex items-center justify-center text-5xl font-bold text-white shadow-xl ${currentAvatarColor.shadow} ring-4 ring-white/20`}>
                       {editName.charAt(0).toUpperCase()}
                     </div>
                     {tier === 'pro' && (
@@ -897,8 +923,38 @@ export default function Dashboard({
               </div>
             </div>
 
-            {/* Professional Details */}
+            {/* Avatar Color */}
             <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                </div>
+                <h3 className="font-semibold text-slate-900">Avatar Color</h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {AVATAR_COLORS.map((color) => (
+                  <button
+                    key={color.id}
+                    onClick={() => handleAvatarColorChange(color.id)}
+                    className={`group relative w-12 h-12 rounded-xl bg-gradient-to-br ${color.from} ${color.to} flex items-center justify-center text-white font-bold text-lg shadow-lg ${color.shadow} transition-all hover:scale-110 ${avatarColor === color.id ? 'ring-4 ring-offset-2 ' + color.ring : ''}`}
+                    title={color.name}
+                  >
+                    {editName.charAt(0).toUpperCase()}
+                    {avatarColor === color.id && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                        <svg className="w-3 h-3 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-4 text-sm text-slate-500">Choose a color for your avatar across the dashboard</p>
+            </div>
+
+            {/* Professional Details */}
+            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
                   <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
