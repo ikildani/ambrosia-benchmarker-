@@ -299,16 +299,9 @@ export default function PrivacyPage() {
               If you have questions or concerns about this Privacy Policy or our data practices, please contact us:
             </p>
             <div className="not-prose p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="font-semibold text-slate-800 mb-2">Ambrosia Ventures LLC</p>
-              <p className="text-sm text-slate-600 mb-1">
-                Privacy Inquiries: <a href="mailto:privacy@ambrosiaventures.co" className="text-teal-600 hover:underline">privacy@ambrosiaventures.co</a>
-              </p>
-              <p className="text-sm text-slate-600 mb-1">
-                General Contact: <a href="mailto:info@ambrosiaventures.co" className="text-teal-600 hover:underline">info@ambrosiaventures.co</a>
-              </p>
-              <p className="text-sm text-slate-600">
-                Website: <a href="https://www.ambrosiaventures.co" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">www.ambrosiaventures.co</a>
-              </p>
+              <p className="font-semibold text-slate-800 mb-1">Ambrosia Ventures LLC</p>
+              <p className="text-sm text-slate-600">Email: <a href="mailto:info@ambrosiaventures.co" className="text-teal-600 hover:underline">info@ambrosiaventures.co</a></p>
+              <p className="text-sm text-slate-600">Website: <a href="https://www.ambrosiaventures.co" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">www.ambrosiaventures.co</a></p>
             </div>
           </section>
 
