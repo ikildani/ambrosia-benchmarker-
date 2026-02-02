@@ -108,7 +108,7 @@ export default function ChartSection({
               </div>
 
               {/* Chart Content */}
-              <div className="p-4 sm:p-6">
+              <div className="p-3 sm:p-6 overflow-hidden">
                 {activeTab === 'breakdown' && (
                   <div>
                     <h4 className="text-sm font-semibold text-neutral-700 mb-3">

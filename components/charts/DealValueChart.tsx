@@ -92,15 +92,16 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
           <XAxis
             type="number"
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 10 : 12, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
+            tickCount={isMobile ? 4 : 6}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: isMobile ? 10 : 12, fill: '#374151' }}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: '#374151' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            width={isMobile ? 55 : 75}
+            width={isMobile ? 50 : 75}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar

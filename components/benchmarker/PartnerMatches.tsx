@@ -403,35 +403,29 @@ export function PartnerMatches({
 
                     {/* Patent Cliffs - Why They're Motivated */}
                     {partnerDetails?.company?.patent_cliffs && partnerDetails.company.patent_cliffs.length > 0 && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <AlertTriangle className="w-4 h-4 text-amber-600" />
-                          <span className="text-xs font-medium text-amber-800 uppercase tracking-wide">
-                            Patent Cliffs — Why They&apos;re Acquiring
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 overflow-hidden">
+                        <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                          <span className="text-[10px] sm:text-xs font-medium text-amber-800 uppercase tracking-wide truncate">
+                            Patent Cliffs
                           </span>
                         </div>
                         <div className="space-y-2">
                           {partnerDetails.company.patent_cliffs.slice(0, 3).map((cliff: PatentCliff, i: number) => (
                             <div
                               key={i}
-                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-sm bg-white border border-amber-100 rounded-lg px-3 py-2"
+                              className="flex items-center justify-between gap-2 text-sm bg-white border border-amber-100 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
                             >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <Pill className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                                <span className="font-medium text-gray-900 truncate">{cliff.drug_name}</span>
-                                {cliff.indication && (
-                                  <>
-                                    <span className="text-gray-300 hidden sm:inline">•</span>
-                                    <span className="text-gray-600 truncate hidden sm:inline">{cliff.indication}</span>
-                                  </>
-                                )}
+                              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                                <Pill className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 flex-shrink-0" />
+                                <span className="font-medium text-gray-900 truncate text-xs sm:text-sm">{cliff.drug_name}</span>
                               </div>
-                              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-5 sm:ml-0">
-                                <span className="text-amber-700 font-medium text-xs sm:text-sm">
-                                  {formatCurrency(cliff.revenue_usd)}/yr
+                              <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+                                <span className="text-amber-700 font-medium text-[10px] sm:text-sm whitespace-nowrap">
+                                  {formatCurrency(cliff.revenue_usd)}
                                 </span>
-                                <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-medium rounded">
-                                  LOE {cliff.expiry_year}
+                                <span className="px-1.5 sm:px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] sm:text-xs font-medium rounded whitespace-nowrap">
+                                  {cliff.expiry_year}
                                 </span>
                               </div>
                             </div>

@@ -17,7 +17,7 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
   const isMobile = useIsMobile();
   // Build waterfall data
   let runningValue = baseValue;
-  const truncateLength = isMobile ? 8 : 15;
+  const truncateLength = isMobile ? 6 : 15;
   const data = [
     {
       name: 'Base',
@@ -118,18 +118,19 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
         >
           <XAxis
             dataKey="name"
-            tick={{ fontSize: isMobile ? 8 : 10, fill: '#6B7280' }}
-            angle={isMobile ? -60 : -45}
+            tick={{ fontSize: isMobile ? 7 : 10, fill: '#6B7280' }}
+            angle={isMobile ? -45 : -45}
             textAnchor="end"
-            height={isMobile ? 60 : 50}
+            height={isMobile ? 50 : 50}
             interval={0}
             axisLine={{ stroke: '#E5E7EB' }}
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 9 : 11, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
             axisLine={{ stroke: '#E5E7EB' }}
-            width={isMobile ? 40 : 55}
+            width={isMobile ? 35 : 55}
+            tickCount={isMobile ? 4 : 6}
           />
           <Tooltip content={<CustomTooltip />} />
           <ReferenceLine y={baseValue} stroke="#E5E7EB" strokeDasharray="3 3" />
