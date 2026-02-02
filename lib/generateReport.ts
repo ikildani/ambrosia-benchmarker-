@@ -1,7 +1,27 @@
 import { CalculationResult, formatCurrency, formatRange } from './calculations';
+import { markPDFGenerated, getHistory } from './history';
 
-export function generatePDFReport(result: CalculationResult): void {
+export function generatePDFReport(result: CalculationResult, historyId?: string): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
+
+  // Calculate percentages for visual charts
+  const totalValue = terms.totalDealValue.median;
+  const upfrontPct = Math.round((terms.upfront.median / totalValue) * 100);
+  const devPct = Math.round((terms.devMilestones.median / totalValue) * 100);
+  const regPct = Math.round((terms.regMilestones.median / totalValue) * 100);
+  const commPct = Math.round((terms.commMilestones.median / totalValue) * 100);
+
+  // Generate unique report ID
+  const reportId = `AV-${Date.now().toString(36).toUpperCase()}`;
+  const reportDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const reportTime = new Date().toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   const reportHTML = `
 <!DOCTYPE html>
@@ -10,322 +30,958 @@ export function generatePDFReport(result: CalculationResult): void {
   <meta charset="UTF-8">
   <title>Deal Terms Analysis Report - Ambrosia Ventures</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #1a1e42;
+      --navy-light: #272d63;
+      --teal: #00c7c7;
+      --teal-dark: #008989;
+      --teal-light: #e6fafa;
+      --cyan: #00bcd4;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+
     body {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      color: #1a1e42;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--gray-800);
       line-height: 1.6;
-      padding: 40px;
-      max-width: 800px;
-      margin: 0 auto;
+      background: white;
+      font-size: 11pt;
     }
-    .header {
-      text-align: center;
-      padding-bottom: 30px;
-      border-bottom: 2px solid #00c7c7;
-      margin-bottom: 30px;
+
+    /* Cover Page */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: white;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
     }
-    .logo-text {
-      font-size: 28px;
-      font-weight: bold;
-      color: #1a1e42;
+
+    .cover-page::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 80%;
+      height: 150%;
+      background: radial-gradient(ellipse, rgba(0, 199, 199, 0.15) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .logo-text span { color: #00c7c7; }
-    .subtitle {
-      color: #666;
-      margin-top: 5px;
-      font-size: 14px;
+
+    .cover-page::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--teal), var(--cyan));
     }
-    .report-title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-top: 20px;
-      color: #1a1e42;
-    }
-    .meta {
+
+    .cover-header {
       display: flex;
       justify-content: space-between;
-      background: #f5f5f5;
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
     }
-    .meta-item {
-      text-align: center;
+
+    .cover-logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
     }
-    .meta-label {
+
+    .cover-logo span { color: var(--teal); }
+
+    .cover-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .cover-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .cover-meta-item label {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 6px;
+    }
+
+    .cover-meta-item span {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .cover-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-report-id {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .cover-date {
+      text-align: right;
       font-size: 12px;
-      color: #666;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Content Pages */
+    .content-page {
+      padding: 50px 60px;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+
+    .page-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .page-logo span { color: var(--teal); }
+
+    .page-info {
+      font-size: 10px;
+      color: var(--gray-500);
+      text-align: right;
+    }
+
+    /* Executive Summary */
+    .executive-summary {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .executive-summary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0, 199, 199, 0.2) 0%, transparent 70%);
+    }
+
+    .executive-summary h2 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--teal);
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      position: relative;
+    }
+
+    .summary-stat {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .summary-stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .summary-stat-value.highlight {
+      color: var(--teal);
+    }
+
+    .summary-stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .meta-value {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1a1e42;
-      margin-top: 4px;
-    }
+
+    /* Section Styling */
     .section {
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--cyan) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
     .section-title {
       font-size: 18px;
-      font-weight: bold;
-      color: #1a1e42;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e5e5e5;
+      font-weight: 700;
+      color: var(--navy);
     }
-    .recommendation-box {
-      background: linear-gradient(135deg, #e6fafa 0%, #f0fdf4 100%);
-      border: 1px solid #00c7c7;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
+
+    /* Recommendation Box */
+    .recommendation-card {
+      background: linear-gradient(135deg, var(--teal-light) 0%, #f0fdfa 100%);
+      border: 1px solid var(--teal);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
     }
-    .recommendation-title {
-      font-size: 14px;
+
+    .recommendation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .recommendation-label {
+      font-size: 11px;
       font-weight: 600;
-      color: #008989;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--teal-dark);
+    }
+
+    .recommendation-badge {
+      background: var(--teal);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .recommendation-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--navy);
       margin-bottom: 8px;
     }
-    .recommendation-value {
-      font-size: 20px;
-      font-weight: bold;
-      color: #1a1e42;
-      margin-bottom: 4px;
-    }
+
     .recommendation-rationale {
       font-size: 13px;
-      color: #666;
+      color: var(--gray-600);
+      line-height: 1.6;
     }
-    .insight-box {
-      background: #fef3c7;
-      border: 1px solid #d97706;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
+
+    /* Insight Box */
+    .insight-card {
+      background: var(--amber-light);
+      border: 1px solid var(--amber);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
     }
-    .insight-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #d97706;
-      margin-bottom: 5px;
+
+    .insight-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--amber);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .insight-text {
+
+    .insight-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+    }
+
+    .insight-content h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 4px;
+    }
+
+    .insight-content p {
       font-size: 13px;
       color: #92400e;
+      line-height: 1.5;
     }
+
+    /* Deal Visualization */
+    .deal-visual {
+      background: var(--gray-50);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .deal-visual-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray-500);
+      margin-bottom: 16px;
+    }
+
+    .deal-bar-container {
+      height: 48px;
+      background: var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 16px;
+    }
+
+    .deal-bar-segment {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      min-width: 40px;
+    }
+
+    .deal-bar-segment.upfront { background: var(--teal); }
+    .deal-bar-segment.dev { background: var(--cyan); }
+    .deal-bar-segment.reg { background: #6366f1; }
+    .deal-bar-segment.comm { background: var(--navy); }
+
+    .deal-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.upfront { background: var(--teal); }
+    .legend-dot.dev { background: var(--cyan); }
+    .legend-dot.reg { background: #6366f1; }
+    .legend-dot.comm { background: var(--navy); }
+
+    /* Terms Grid */
     .terms-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
+
     .term-card {
-      background: #f8f9fa;
-      border: 1px solid #e5e5e5;
-      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
       padding: 20px;
+      transition: all 0.2s;
     }
-    .term-card.highlight {
-      background: linear-gradient(135deg, #e6fafa 0%, #f0fdf4 100%);
-      border-color: #00c7c7;
+
+    .term-card.primary {
+      background: linear-gradient(135deg, var(--teal-light) 0%, #f0fdfa 100%);
+      border-color: var(--teal);
     }
+
+    .term-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
     .term-label {
-      font-size: 12px;
-      color: #666;
+      font-size: 11px;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      color: var(--gray-500);
     }
+
+    .term-card.primary .term-label {
+      color: var(--teal-dark);
+    }
+
+    .term-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--gray-100);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .term-card.primary .term-icon {
+      background: var(--teal);
+    }
+
+    .term-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--gray-500);
+    }
+
+    .term-card.primary .term-icon svg {
+      fill: white;
+    }
+
     .term-range {
-      font-size: 20px;
-      font-weight: bold;
-      color: #1a1e42;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
       margin-bottom: 4px;
     }
+
     .term-median {
-      font-size: 14px;
-      color: #666;
+      font-size: 13px;
+      color: var(--gray-500);
     }
-    .term-median span {
-      font-weight: 600;
-      color: #00c7c7;
+
+    .term-median strong {
+      color: var(--teal-dark);
+      font-weight: 700;
     }
+
+    /* Royalties Card */
+    .royalties-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
     .royalty-tiers {
-      margin-top: 10px;
+      margin-top: 12px;
     }
+
     .royalty-tier {
       display: flex;
       justify-content: space-between;
-      padding: 5px 0;
-      font-size: 13px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
     }
+
+    .royalty-tier:last-child {
+      border-bottom: none;
+    }
+
+    .royalty-tier-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tier-indicator {
+      width: 8px;
+      height: 24px;
+      border-radius: 4px;
+    }
+
+    .tier-indicator.base { background: var(--teal); }
+    .tier-indicator.mid { background: var(--cyan); }
+    .tier-indicator.high { background: var(--navy); }
+
     .royalty-tier-label {
-      color: #666;
+      font-size: 13px;
+      color: var(--gray-600);
     }
+
+    .royalty-tier-threshold {
+      font-size: 11px;
+      color: var(--gray-400);
+    }
+
     .royalty-tier-value {
-      font-weight: 600;
-      color: #1a1e42;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
     }
-    .modifiers {
+
+    /* Modifiers */
+    .modifiers-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
-    .modifier {
-      padding: 6px 12px;
+
+    .modifier-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
       border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 12px;
+      font-weight: 600;
     }
-    .modifier.positive {
-      background: #e6fafa;
-      color: #008989;
+
+    .modifier-tag.positive {
+      background: var(--success-light);
+      color: #065f46;
     }
-    .modifier.negative {
-      background: #fef3c7;
-      color: #d97706;
+
+    .modifier-tag.negative {
+      background: #fee2e2;
+      color: #991b1b;
     }
-    .modifier.neutral {
-      background: #f5f5f5;
-      color: #666;
+
+    .modifier-tag.neutral {
+      background: var(--gray-100);
+      color: var(--gray-600);
     }
-    .footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e5e5;
-      font-size: 11px;
-      color: #999;
-      text-align: center;
+
+    .modifier-arrow {
+      font-size: 10px;
     }
+
+    /* Disclaimer */
     .disclaimer {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 11px;
-      color: #666;
-      margin-top: 30px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 32px;
     }
+
+    .disclaimer-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .disclaimer-text {
+      font-size: 11px;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .page-footer {
+      position: absolute;
+      bottom: 40px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--gray-200);
+      font-size: 10px;
+      color: var(--gray-400);
+    }
+
+    .footer-brand {
+      font-weight: 600;
+      color: var(--gray-500);
+    }
+
+    .footer-brand span { color: var(--teal); }
+
+    /* Print Optimization */
     @media print {
-      body { padding: 20px; }
-      .term-card { break-inside: avoid; }
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .cover-page {
+        page-break-after: always;
+      }
+
+      .content-page {
+        page-break-inside: avoid;
+      }
+
+      .term-card, .recommendation-card, .insight-card {
+        break-inside: avoid;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo-text">Ambrosia<span>Ventures</span></div>
-    <div class="subtitle">Life Sciences Deal Intelligence</div>
-    <div class="report-title">Deal Terms Analysis Report</div>
-  </div>
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <div class="cover-header">
+      <div class="cover-logo">Ambrosia<span>Ventures</span></div>
+      <div class="cover-badge">Confidential</div>
+    </div>
 
-  <div class="meta">
-    <div class="meta-item">
-      <div class="meta-label">Development Phase</div>
-      <div class="meta-value">${labels.phase}</div>
-    </div>
-    <div class="meta-item">
-      <div class="meta-label">Modality</div>
-      <div class="meta-value">${labels.modality}</div>
-    </div>
-    <div class="meta-item">
-      <div class="meta-label">Indication</div>
-      <div class="meta-value">${labels.indication}</div>
-    </div>
-    <div class="meta-item">
-      <div class="meta-label">Report Date</div>
-      <div class="meta-value">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-    </div>
-  </div>
+    <div class="cover-content">
+      <div class="cover-subtitle">Life Sciences Deal Intelligence</div>
+      <h1 class="cover-title">Deal Terms<br/>Analysis Report</h1>
 
-  <div class="section">
-    <div class="recommendation-box">
-      <div class="recommendation-title">Recommended Deal Structure</div>
-      <div class="recommendation-value">${dealRecommendation.upfrontPercent}% Upfront / ${dealRecommendation.milestonePercent}% Milestones</div>
-      <div class="recommendation-rationale">${dealRecommendation.rationale}</div>
-    </div>
-    <div class="insight-box">
-      <div class="insight-title">Negotiation Insight</div>
-      <div class="insight-text">${negotiationInsight}</div>
-    </div>
-  </div>
-
-  ${modifiers.length > 0 ? `
-  <div class="section">
-    <div class="section-title">Applied Adjustments</div>
-    <div class="modifiers">
-      ${modifiers.map(mod => `
-        <div class="modifier ${mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral'}">
-          ${mod.name}${mod.multiplier !== 1 ? ` (${mod.multiplier > 1 ? '+' : ''}${Math.round((mod.multiplier - 1) * 100)}%)` : ''}
+      <div class="cover-meta-grid">
+        <div class="cover-meta-item">
+          <label>Development Phase</label>
+          <span>${labels.phase}</span>
         </div>
-      `).join('')}
-    </div>
-  </div>
-  ` : ''}
-
-  <div class="section">
-    <div class="section-title">Estimated Deal Terms</div>
-    <div class="terms-grid">
-      <div class="term-card highlight">
-        <div class="term-label">Upfront Payment</div>
-        <div class="term-range">${formatRange(terms.upfront)}</div>
-        <div class="term-median">Expected: <span>${formatCurrency(terms.upfront.median)}</span></div>
-      </div>
-      <div class="term-card highlight">
-        <div class="term-label">Total Deal Value</div>
-        <div class="term-range">${formatRange(terms.totalDealValue)}</div>
-        <div class="term-median">Expected: <span>${formatCurrency(terms.totalDealValue.median)}</span></div>
-      </div>
-      <div class="term-card">
-        <div class="term-label">Development Milestones</div>
-        <div class="term-range">${formatRange(terms.devMilestones)}</div>
-        <div class="term-median">Expected: <span>${formatCurrency(terms.devMilestones.median)}</span></div>
-      </div>
-      <div class="term-card">
-        <div class="term-label">Regulatory Milestones</div>
-        <div class="term-range">${formatRange(terms.regMilestones)}</div>
-        <div class="term-median">Expected: <span>${formatCurrency(terms.regMilestones.median)}</span></div>
-      </div>
-      <div class="term-card">
-        <div class="term-label">Commercial Milestones</div>
-        <div class="term-range">${formatRange(terms.commMilestones)}</div>
-        <div class="term-median">Expected: <span>${formatCurrency(terms.commMilestones.median)}</span></div>
-      </div>
-      <div class="term-card">
-        <div class="term-label">Tiered Royalties</div>
-        <div class="royalty-tiers">
-          <div class="royalty-tier">
-            <span class="royalty-tier-label">Base (&lt;$500M)</span>
-            <span class="royalty-tier-value">${tieredRoyalties.base.low}% - ${tieredRoyalties.base.high}%</span>
-          </div>
-          <div class="royalty-tier">
-            <span class="royalty-tier-label">Mid ($500M-$1B)</span>
-            <span class="royalty-tier-value">${tieredRoyalties.midTier.low}% - ${tieredRoyalties.midTier.high}%</span>
-          </div>
-          <div class="royalty-tier">
-            <span class="royalty-tier-label">High (&gt;$1B)</span>
-            <span class="royalty-tier-value">${tieredRoyalties.highTier.low}% - ${tieredRoyalties.highTier.high}%</span>
-          </div>
+        <div class="cover-meta-item">
+          <label>Modality</label>
+          <span>${labels.modality}</span>
+        </div>
+        <div class="cover-meta-item">
+          <label>Indication</label>
+          <span>${labels.indication}</span>
         </div>
       </div>
     </div>
+
+    <div class="cover-footer">
+      <div class="cover-report-id">Report ID: ${reportId}</div>
+      <div class="cover-date">
+        ${reportDate}<br/>
+        ${reportTime}
+      </div>
+    </div>
   </div>
 
-  <div class="disclaimer">
-    <strong>Disclaimer:</strong> These estimates are based on publicly available deal data and 2025 market benchmarks.
-    Actual deal terms vary significantly based on asset-specific factors, market conditions, competitive dynamics, and negotiation outcomes.
-    This tool does not constitute financial or legal advice. For detailed advisory services, please contact Ambrosia Ventures.
-  </div>
+  <!-- Content Page -->
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-logo">Ambrosia<span>Ventures</span></div>
+      <div class="page-info">
+        Report ID: ${reportId}<br/>
+        ${reportDate}
+      </div>
+    </div>
 
-  <div class="footer">
-    <p>Generated by Ambrosia Ventures Deal Calculator</p>
-    <p>© ${new Date().getFullYear()} Ambrosia Ventures. All rights reserved.</p>
-    <p>www.ambrosiaventures.co | info@ambrosiaventures.co</p>
+    <!-- Executive Summary -->
+    <div class="executive-summary">
+      <h2>Executive Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-stat">
+          <div class="summary-stat-value">${formatCurrency(terms.upfront.median)}</div>
+          <div class="summary-stat-label">Upfront Payment</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value highlight">${formatCurrency(terms.totalDealValue.median)}</div>
+          <div class="summary-stat-label">Total Deal Value</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendation -->
+    <div class="section">
+      <div class="recommendation-card">
+        <div class="recommendation-header">
+          <div class="recommendation-label">Recommended Deal Structure</div>
+          <div class="recommendation-badge">AI Optimized</div>
+        </div>
+        <div class="recommendation-value">${dealRecommendation.upfrontPercent}% Upfront / ${dealRecommendation.milestonePercent}% Milestones</div>
+        <div class="recommendation-rationale">${dealRecommendation.rationale}</div>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <div class="insight-content">
+          <h4>Negotiation Insight</h4>
+          <p>${negotiationInsight}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal Value Breakdown -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        </div>
+        <h3 class="section-title">Deal Value Breakdown</h3>
+      </div>
+
+      <div class="deal-visual">
+        <div class="deal-visual-title">Value Distribution</div>
+        <div class="deal-bar-container">
+          <div class="deal-bar-segment upfront" style="width: ${upfrontPct}%">${upfrontPct}%</div>
+          <div class="deal-bar-segment dev" style="width: ${devPct}%">${devPct}%</div>
+          <div class="deal-bar-segment reg" style="width: ${regPct}%">${regPct}%</div>
+          <div class="deal-bar-segment comm" style="width: ${commPct}%">${commPct}%</div>
+        </div>
+        <div class="deal-legend">
+          <div class="legend-item"><div class="legend-dot upfront"></div>Upfront (${formatCurrency(terms.upfront.median)})</div>
+          <div class="legend-item"><div class="legend-dot dev"></div>Development (${formatCurrency(terms.devMilestones.median)})</div>
+          <div class="legend-item"><div class="legend-dot reg"></div>Regulatory (${formatCurrency(terms.regMilestones.median)})</div>
+          <div class="legend-item"><div class="legend-dot comm"></div>Commercial (${formatCurrency(terms.commMilestones.median)})</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimated Deal Terms -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        </div>
+        <h3 class="section-title">Estimated Deal Terms</h3>
+      </div>
+
+      <div class="terms-grid">
+        <div class="term-card primary">
+          <div class="term-card-header">
+            <div class="term-label">Upfront Payment</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>
+            </div>
+          </div>
+          <div class="term-range">${formatRange(terms.upfront)}</div>
+          <div class="term-median">Expected: <strong>${formatCurrency(terms.upfront.median)}</strong></div>
+        </div>
+
+        <div class="term-card primary">
+          <div class="term-card-header">
+            <div class="term-label">Total Deal Value</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+            </div>
+          </div>
+          <div class="term-range">${formatRange(terms.totalDealValue)}</div>
+          <div class="term-median">Expected: <strong>${formatCurrency(terms.totalDealValue.median)}</strong></div>
+        </div>
+
+        <div class="term-card">
+          <div class="term-card-header">
+            <div class="term-label">Development Milestones</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+            </div>
+          </div>
+          <div class="term-range">${formatRange(terms.devMilestones)}</div>
+          <div class="term-median">Expected: <strong>${formatCurrency(terms.devMilestones.median)}</strong></div>
+        </div>
+
+        <div class="term-card">
+          <div class="term-card-header">
+            <div class="term-label">Regulatory Milestones</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            </div>
+          </div>
+          <div class="term-range">${formatRange(terms.regMilestones)}</div>
+          <div class="term-median">Expected: <strong>${formatCurrency(terms.regMilestones.median)}</strong></div>
+        </div>
+
+        <div class="term-card">
+          <div class="term-card-header">
+            <div class="term-label">Commercial Milestones</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            </div>
+          </div>
+          <div class="term-range">${formatRange(terms.commMilestones)}</div>
+          <div class="term-median">Expected: <strong>${formatCurrency(terms.commMilestones.median)}</strong></div>
+        </div>
+
+        <div class="royalties-card">
+          <div class="term-card-header">
+            <div class="term-label">Tiered Royalties</div>
+            <div class="term-icon">
+              <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+            </div>
+          </div>
+          <div class="royalty-tiers">
+            <div class="royalty-tier">
+              <div class="royalty-tier-info">
+                <div class="tier-indicator base"></div>
+                <div>
+                  <div class="royalty-tier-label">Base Tier</div>
+                  <div class="royalty-tier-threshold">&lt;$500M net sales</div>
+                </div>
+              </div>
+              <div class="royalty-tier-value">${tieredRoyalties.base.low}% - ${tieredRoyalties.base.high}%</div>
+            </div>
+            <div class="royalty-tier">
+              <div class="royalty-tier-info">
+                <div class="tier-indicator mid"></div>
+                <div>
+                  <div class="royalty-tier-label">Mid Tier</div>
+                  <div class="royalty-tier-threshold">$500M - $1B net sales</div>
+                </div>
+              </div>
+              <div class="royalty-tier-value">${tieredRoyalties.midTier.low}% - ${tieredRoyalties.midTier.high}%</div>
+            </div>
+            <div class="royalty-tier">
+              <div class="royalty-tier-info">
+                <div class="tier-indicator high"></div>
+                <div>
+                  <div class="royalty-tier-label">High Tier</div>
+                  <div class="royalty-tier-threshold">&gt;$1B net sales</div>
+                </div>
+              </div>
+              <div class="royalty-tier-value">${tieredRoyalties.highTier.low}% - ${tieredRoyalties.highTier.high}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${modifiers.length > 0 ? `
+    <!-- Applied Adjustments -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+        </div>
+        <h3 class="section-title">Applied Adjustments</h3>
+      </div>
+      <div class="modifiers-grid">
+        ${modifiers.map(mod => `
+          <div class="modifier-tag ${mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral'}">
+            ${mod.multiplier > 1 ? '<span class="modifier-arrow">▲</span>' : mod.multiplier < 1 ? '<span class="modifier-arrow">▼</span>' : ''}
+            ${mod.name}${mod.multiplier !== 1 ? ` (${mod.multiplier > 1 ? '+' : ''}${Math.round((mod.multiplier - 1) * 100)}%)` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <div class="disclaimer-title">Important Disclaimer</div>
+      <div class="disclaimer-text">
+        These estimates are based on publicly available deal data and current market benchmarks. Actual deal terms vary significantly based on asset-specific factors including clinical data quality, competitive landscape, intellectual property position, manufacturing considerations, and negotiation dynamics. This analysis does not constitute financial, legal, or investment advice. For comprehensive deal advisory services, please contact Ambrosia Ventures directly.
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-brand">Ambrosia<span>Ventures</span></div>
+      <div>www.ambrosiaventures.co</div>
+      <div>© ${new Date().getFullYear()} Ambrosia Ventures. All rights reserved.</div>
+    </div>
   </div>
 </body>
 </html>
   `;
+
+  // Mark PDF as generated in history if historyId provided
+  if (historyId) {
+    markPDFGenerated(historyId);
+  }
 
   // Open in new window for printing/saving as PDF
   const printWindow = window.open('', '_blank');
