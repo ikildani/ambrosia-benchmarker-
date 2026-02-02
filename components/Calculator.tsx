@@ -105,65 +105,43 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       return;
     }
 
+    // Prevent multiple clicks while calculating
+    if (isCalculating) return;
+
     setIsCalculating(true);
-    setTimeout(async () => {
-      const input: CalculationInput = {
-        phase,
-        modality,
-        indication,
-        territory,
-        biomarker,
-        lineOfTherapy,
-        combinationPotential,
-        competitivePosition,
-        dataQuality,
-        regulatoryDesignations,
-      };
-      const calculatedResult = calculateDealTerms(input);
-      setResult(calculatedResult);
-      setIsCalculating(false);
 
-      // Increment calculation count for this session
-      calculationCountRef.current += 1;
-
-      // Track calculation event
-      trackCalculation(
-        {
-          modality,
-          development_phase: phase,
-          indication_category: indication.split('_')[0], // e.g., 'lung' from 'lung_nsclc'
-          indication_specific: indication,
-          territory_scope: territory,
-        },
-        {
-          upfront_low: calculatedResult.terms.upfront.low,
-          upfront_mid: calculatedResult.terms.upfront.median,
-          upfront_high: calculatedResult.terms.upfront.high,
-          milestones_total: calculatedResult.terms.devMilestones.median +
-            calculatedResult.terms.regMilestones.median +
-            calculatedResult.terms.commMilestones.median,
-          royalty_low: calculatedResult.tieredRoyalties.base.low,
-          royalty_high: calculatedResult.tieredRoyalties.highTier.high,
-          total_deal_value_low: calculatedResult.terms.totalDealValue.low,
-          total_deal_value_high: calculatedResult.terms.totalDealValue.high,
-        },
-        calculationCountRef.current
-      );
-
-      // Save calculation to database
-      try {
-        await fetch('/api/calculations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session_id: sessionId,
-            anonymous_id: anonymousId,
+    // Use requestAnimationFrame + setTimeout for smooth UI update before calculation
+    requestAnimationFrame(() => {
+      setTimeout(async () => {
+        try {
+          const input: CalculationInput = {
+            phase,
             modality,
-            development_phase: phase,
-            indication_category: indication.split('_')[0],
-            indication_specific: indication,
-            territory_scope: territory,
-            outputs: {
+            indication,
+            territory,
+            biomarker,
+            lineOfTherapy,
+            combinationPotential,
+            competitivePosition,
+            dataQuality,
+            regulatoryDesignations,
+          };
+          const calculatedResult = calculateDealTerms(input);
+          setResult(calculatedResult);
+
+          // Increment calculation count for this session
+          calculationCountRef.current += 1;
+
+          // Track calculation event
+          trackCalculation(
+            {
+              modality,
+              development_phase: phase,
+              indication_category: indication.split('_')[0],
+              indication_specific: indication,
+              territory_scope: territory,
+            },
+            {
               upfront_low: calculatedResult.terms.upfront.low,
               upfront_mid: calculatedResult.terms.upfront.median,
               upfront_high: calculatedResult.terms.upfront.high,
@@ -175,11 +153,37 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               total_deal_value_low: calculatedResult.terms.totalDealValue.low,
               total_deal_value_high: calculatedResult.terms.totalDealValue.high,
             },
-          }),
-        });
-      } catch (error) {
-        console.error('Failed to save calculation:', error);
-      }
+            calculationCountRef.current
+          );
+
+          // Save calculation to database (non-blocking)
+          fetch('/api/calculations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: sessionId,
+              anonymous_id: anonymousId,
+              modality,
+              development_phase: phase,
+              indication_category: indication.split('_')[0],
+              indication_specific: indication,
+              territory_scope: territory,
+              outputs: {
+                upfront_low: calculatedResult.terms.upfront.low,
+                upfront_mid: calculatedResult.terms.upfront.median,
+                upfront_high: calculatedResult.terms.upfront.high,
+                milestones_total: calculatedResult.terms.devMilestones.median +
+                  calculatedResult.terms.regMilestones.median +
+                  calculatedResult.terms.commMilestones.median,
+                royalty_low: calculatedResult.tieredRoyalties.base.low,
+                royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+                total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+                total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+              },
+            }),
+          }).catch(error => {
+            console.error('Failed to save calculation to database:', error);
+          });
 
       // Save to local history with ALL inputs for recalculation
       addToHistory({
@@ -207,20 +211,26 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         hasPDF: false,
       });
 
-      // Increment usage after successful calculation (only for free tier)
-      if (tier === 'free') {
-        incrementUsage();
-        setRemainingUses(getRemainingUses(tier));
-      }
+          // Increment usage after successful calculation (only for free tier)
+          if (tier === 'free') {
+            incrementUsage();
+            setRemainingUses(getRemainingUses(tier));
+          }
 
-      // Scroll to results
-      setTimeout(() => {
-        document.querySelector('.results-container')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }, 100);
-    }, 800);
+          // Scroll to results
+          setTimeout(() => {
+            document.querySelector('.results-container')?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }, 100);
+        } catch (error) {
+          console.error('Calculation error:', error);
+        } finally {
+          setIsCalculating(false);
+        }
+      }, 600);
+    });
   };
 
   const handleRegulatoryChange = (designation: keyof RegulatoryDesignations) => {

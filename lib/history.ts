@@ -45,11 +45,13 @@ const MAX_HISTORY_ITEMS = 50;
 
 export function getHistory(): CalculationHistoryItem[] {
   if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(HISTORY_KEY);
-  if (!stored) return [];
   try {
+    const stored = localStorage.getItem(HISTORY_KEY);
+    if (!stored) return [];
     return JSON.parse(stored);
-  } catch {
+  } catch (error) {
+    // Handle localStorage access errors (private browsing, disabled, etc.)
+    console.warn('Unable to access localStorage for history:', error);
     return [];
   }
 }
@@ -63,25 +65,47 @@ export function addToHistory(item: Omit<CalculationHistoryItem, 'id' | 'timestam
   };
 
   const updatedHistory = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+  } catch (error) {
+    // Handle quota exceeded or other storage errors
+    console.warn('Unable to save to localStorage:', error);
+    // Try to clear old items and retry
+    try {
+      const trimmedHistory = updatedHistory.slice(0, Math.floor(MAX_HISTORY_ITEMS / 2));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmedHistory));
+    } catch {
+      // Storage completely unavailable
+      console.error('localStorage unavailable, history will not persist');
+    }
+  }
 
   return newItem;
 }
 
 export function markPDFGenerated(id: string): void {
-  const history = getHistory();
-  const updated = history.map(item =>
-    item.id === id
-      ? { ...item, hasPDF: true, pdfGeneratedAt: new Date().toISOString() }
-      : item
-  );
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  try {
+    const history = getHistory();
+    const updated = history.map(item =>
+      item.id === id
+        ? { ...item, hasPDF: true, pdfGeneratedAt: new Date().toISOString() }
+        : item
+    );
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.warn('Unable to mark PDF as generated:', error);
+  }
 }
 
 export function deleteHistoryItem(id: string): void {
-  const history = getHistory();
-  const updated = history.filter(item => item.id !== id);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  try {
+    const history = getHistory();
+    const updated = history.filter(item => item.id !== id);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.warn('Unable to delete history item:', error);
+  }
 }
 
 export function clearHistory(): void {

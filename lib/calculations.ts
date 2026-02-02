@@ -316,18 +316,21 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
 
-  // Calculate upfront based on phase ratios
+  // Calculate upfront based on phase ratios with risk adjustment
   const upfrontRatios = phaseConfig.upfrontRatios[input.phase];
   const riskScore = calculateRiskScore(input);
   // Higher risk = lower upfront ratio (toward low end)
-  const riskFactor = riskScore / 100; // 0 to 1
-  const upfrontRatioLow = upfrontRatios.low + (upfrontRatios.high - upfrontRatios.low) * (1 - riskFactor);
-  const upfrontRatioHigh = upfrontRatios.low + (upfrontRatios.high - upfrontRatios.low) * (1 - riskFactor * 0.5);
+  const riskFactor = Math.max(0, Math.min(riskScore / 100, 1)); // Clamp 0 to 1
+
+  // Apply risk adjustment consistently across all calculations
+  const adjustedRatioLow = upfrontRatios.low + (upfrontRatios.high - upfrontRatios.low) * (1 - riskFactor);
+  const adjustedRatioHigh = upfrontRatios.low + (upfrontRatios.high - upfrontRatios.low) * (1 - riskFactor * 0.5);
+  const adjustedRatioMedian = (adjustedRatioLow + adjustedRatioHigh) / 2;
 
   const upfront = {
-    low: Math.round(totalDealValue.low * upfrontRatios.low),
-    median: Math.round(totalDealValue.median * (upfrontRatioLow + upfrontRatioHigh) / 2),
-    high: Math.round(totalDealValue.high * upfrontRatios.high)
+    low: Math.round(totalDealValue.low * adjustedRatioLow * 0.9), // 10% lower for conservative low estimate
+    median: Math.round(totalDealValue.median * adjustedRatioMedian),
+    high: Math.round(totalDealValue.high * adjustedRatioHigh * 1.1) // 10% higher for optimistic high estimate
   };
 
   // Calculate milestone allocations
@@ -379,7 +382,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   };
 
   // Calculate deal recommendation
-  const recommendedUpfrontPercent = Math.round((upfrontRatioLow + upfrontRatioHigh) / 2 * 100);
+  const recommendedUpfrontPercent = Math.round(adjustedRatioMedian * 100);
   const dealRecommendation: DealRecommendation = {
     upfrontPercent: recommendedUpfrontPercent,
     milestonePercent: 100 - recommendedUpfrontPercent,
