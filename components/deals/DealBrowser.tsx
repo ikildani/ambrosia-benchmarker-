@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DealFilters from './DealFilters';
 import DealTable from './DealTable';
 import DealCard from './DealCard';
+import { generateDealsExcel, DealForExcel } from '@/lib/generateExcel';
 
 export interface Deal {
   id: string;
