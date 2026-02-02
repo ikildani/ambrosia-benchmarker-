@@ -110,7 +110,7 @@ export interface CalculationResult {
   tieredRoyalties: TieredRoyalties;
   dealRecommendation: DealRecommendation;
   negotiationInsight: string;
-  modifiers: { name: string; multiplier: number }[];
+  modifiers: { name: string; multiplier: number; context?: string }[];
   labels: {
     phase: string;
     modality: string;
@@ -213,7 +213,7 @@ function getNegotiationInsight(input: CalculationInput): string {
 }
 
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
-  const modifiers: { name: string; multiplier: number }[] = [];
+  const modifiers: { name: string; multiplier: number; context?: string }[] = [];
 
   // Get phase baselines
   const phaseBaseline = benchmarks.phaseBaselines[input.phase];
@@ -222,53 +222,53 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Get multipliers from benchmarks
   const modalityData = benchmarks.modalities[input.modality];
   const modalityMultiplier = modalityData?.multiplier ?? 1.0;
-  modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier });
+  modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData?.context });
 
   // Get indication multiplier
   const category = getIndicationCategory(input.indication);
   const indicationsCategory = benchmarks.indications[category] as Record<string, { multiplier: number; label: string }>;
   const indicationData = indicationsCategory[input.indication];
   const indicationMultiplier = indicationData?.multiplier ?? 1.0;
-  modifiers.push({ name: indicationData?.label ?? input.indication, multiplier: indicationMultiplier });
+  modifiers.push({ name: indicationData?.label ?? input.indication, multiplier: indicationMultiplier, context: indicationData?.context });
 
   // Get territory multiplier
   const territoryData = benchmarks.territories[input.territory];
   const territoryMultiplier = territoryData?.multiplier ?? 1.0;
-  modifiers.push({ name: territoryData?.label ?? input.territory, multiplier: territoryMultiplier });
+  modifiers.push({ name: territoryData?.label ?? input.territory, multiplier: territoryMultiplier, context: territoryData?.context });
 
   // Get biomarker multiplier
   const biomarkerData = benchmarks.multiplierConfig.biomarker[input.biomarker];
   const biomarkerMultiplier = biomarkerData?.multiplier ?? 1.0;
   if (biomarkerMultiplier !== 1.0) {
-    modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier });
+    modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier, context: biomarkerData?.context });
   }
 
   // Get line of therapy multiplier
   const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy];
   const lotMultiplier = lotData?.multiplier ?? 1.0;
   if (lotMultiplier !== 1.0) {
-    modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier });
+    modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier, context: lotData?.context });
   }
 
   // Get combination potential multiplier
   const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential];
   const comboMultiplier = comboData?.multiplier ?? 1.0;
   if (comboMultiplier !== 1.0) {
-    modifiers.push({ name: comboData?.label ?? input.combinationPotential, multiplier: comboMultiplier });
+    modifiers.push({ name: comboData?.label ?? input.combinationPotential, multiplier: comboMultiplier, context: comboData?.context });
   }
 
   // Get competitive position multiplier
   const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
   const competitiveMultiplier = compData?.multiplier ?? 1.0;
   if (competitiveMultiplier !== 1.0) {
-    modifiers.push({ name: compData?.label ?? input.competitivePosition, multiplier: competitiveMultiplier });
+    modifiers.push({ name: compData?.label ?? input.competitivePosition, multiplier: competitiveMultiplier, context: compData?.context });
   }
 
   // Get data quality multiplier
   const dataData = benchmarks.multiplierConfig.dataQuality[input.dataQuality];
   const dataQualityMultiplier = dataData?.multiplier ?? 1.0;
   if (dataQualityMultiplier !== 1.0) {
-    modifiers.push({ name: dataData?.label ?? input.dataQuality, multiplier: dataQualityMultiplier });
+    modifiers.push({ name: dataData?.label ?? input.dataQuality, multiplier: dataQualityMultiplier, context: dataData?.context });
   }
 
   // Calculate regulatory bonus (additive, capped at 20%)
@@ -430,7 +430,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
 function generateDrillDownData(
   input: CalculationInput,
-  modifiers: { name: string; multiplier: number }[],
+  modifiers: { name: string; multiplier: number; context?: string }[],
   rangeWidth: number,
   devMilestones: { low: number; median: number; high: number },
   regMilestones: { low: number; median: number; high: number },
