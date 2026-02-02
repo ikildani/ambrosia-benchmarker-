@@ -112,14 +112,16 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
         </AreaChart>
       </ResponsiveContainer>
       </div>
-      <div className="hidden sm:flex justify-center gap-8 mt-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-teal-600"></div>
-          <span className="text-neutral-500">Low Range</span>
+      <div className="hidden sm:flex justify-center gap-12 mt-6 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-teal-600 rounded"></div>
+          <span className="text-neutral-600">Low Range</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-teal-500 border-dashed"></div>
-          <span className="text-neutral-500">High Range</span>
+        <div className="flex items-center gap-3">
+          <svg className="w-6 h-2" viewBox="0 0 24 2">
+            <line x1="0" y1="1" x2="24" y2="1" stroke="#14B8A6" strokeWidth="2" strokeDasharray="4 2" />
+          </svg>
+          <span className="text-neutral-600">High Range</span>
         </div>
       </div>
     </div>
