@@ -170,6 +170,44 @@ export default function DealBrowser() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Excel Export - Pro Only */}
+          {tier === 'pro' && (
+            <button
+              onClick={() => {
+                const dealsForExport: DealForExcel[] = deals.map(deal => ({
+                  licensor_name: deal.licensor_name,
+                  licensee_name: deal.licensee_name,
+                  asset_name: deal.asset_name,
+                  modality: deal.modality,
+                  indication_category: deal.indication_category,
+                  phase_at_signing: deal.phase_at_signing,
+                  territory: deal.territory,
+                  deal_type: deal.deal_type,
+                  upfront_usd: deal.upfront_usd,
+                  milestones_total_usd: deal.milestones_total_usd,
+                  total_deal_value_usd: deal.total_deal_value_usd,
+                  royalty_low_pct: deal.royalty_low_pct,
+                  royalty_high_pct: deal.royalty_high_pct,
+                  announced_date: deal.announced_date,
+                  terms_disclosed: deal.terms_disclosed,
+                }));
+                generateDealsExcel(dealsForExport, {
+                  modality: filters.modality.join(', '),
+                  phase: filters.phase.join(', '),
+                  indication: filters.indication.join(', '),
+                  deal_type: filters.dealType.join(', '),
+                  year_range: `${filters.yearFrom}-${filters.yearTo}`,
+                });
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export Excel
+            </button>
+          )}
+
           {/* View Toggle */}
           <div className="hidden sm:flex items-center bg-neutral-100 rounded-lg p-1">
             <button
