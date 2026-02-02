@@ -132,8 +132,8 @@ export async function GET(request: NextRequest) {
           }}
         >
           <svg
-            width="80"
-            height="80"
+            width="120"
+            height="120"
             viewBox="0 0 64 64"
             fill="none"
           >
@@ -213,9 +213,7 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: 64,
               fontWeight: 700,
-              background: 'linear-gradient(90deg, #14b8a6 0%, #06b6d4 100%)',
-              backgroundClip: 'text',
-              color: 'transparent',
+              color: '#14b8a6',
               textAlign: 'center',
               lineHeight: 1.1,
               marginBottom: 32,

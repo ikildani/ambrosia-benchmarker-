@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     siteName: "Ambrosia Ventures",
     images: [
       {
-        url: "/api/og",
+        url: "https://calculator.ambrosiaventures.co/api/og",
         width: 1200,
         height: 630,
         alt: "Life Sciences Deal Calculator by Ambrosia Ventures",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Life Sciences Deal Calculator",
     description: "Data-driven estimates for oncology licensing deals",
-    images: ["/api/og"],
+    images: ["https://calculator.ambrosiaventures.co/api/og"],
   },
 };
 

@@ -260,8 +260,8 @@ export default function Dashboard({
   const recentCalculations = history.slice(0, 5);
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}B`;
-    return `$${value}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(2)}B`;
+    return `$${value.toFixed(2)}M`;
   };
 
   // Compute deal insights
@@ -358,9 +358,9 @@ export default function Dashboard({
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={180}
-                height={48}
-                className="h-9 sm:h-10 w-auto object-contain"
+                width={240}
+                height={64}
+                className="h-12 sm:h-14 w-auto object-contain"
                 priority
               />
             </button>
