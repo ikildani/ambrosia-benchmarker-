@@ -10,6 +10,26 @@
   --cyan: #00bcd4;
 }
 
+/* Dark mode colors */
+.dark {
+  --foreground: #f1f5f9;
+  --background: #0f172a;
+  --navy: #1e293b;
+  --teal: #14b8a6;
+  --cyan: #06b6d4;
+}
+
+/* Dark mode base styles */
+.dark body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.dark ::selection {
+  background: rgba(20, 184, 166, 0.3);
+  color: #f1f5f9;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -686,4 +706,103 @@ select::selection {
   .hover\:bg-teal-50:active {
     @apply bg-teal-100;
   }
+}
+
+/* ============================================
+   DARK MODE COMPONENT OVERRIDES
+   ============================================ */
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #14b8a6 0%, #06b6d4 100%);
+  border-color: #1e293b;
+}
+
+/* Dark mode cards */
+.dark .card,
+.dark .card-elevated,
+.dark .card-interactive {
+  @apply bg-slate-800 border-slate-700;
+}
+
+.dark .card-interactive:hover {
+  @apply border-slate-600;
+}
+
+/* Dark mode inputs */
+.dark .input-field,
+.dark .select-field {
+  @apply bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400;
+}
+
+.dark .input-field:hover,
+.dark .select-field:hover {
+  @apply border-slate-500;
+}
+
+.dark .input-field:focus,
+.dark .select-field:focus {
+  @apply border-teal-500 ring-teal-500/20;
+}
+
+/* Dark mode metric cards */
+.dark .metric-card {
+  @apply bg-slate-800 border-slate-700;
+}
+
+/* Dark mode skeleton loading */
+.dark .skeleton {
+  @apply bg-slate-700;
+}
+
+/* Dark mode scroll fade */
+.dark .scroll-fade-right::after {
+  @apply from-slate-900;
+}
+
+.dark .scroll-fade-left::before {
+  @apply from-slate-900;
+}
+
+/* Dark mode glass effect */
+.dark .glass {
+  @apply bg-slate-900/80 border-slate-700/50;
+}
+
+/* Dark mode sticky header */
+.dark .sticky-header-blur {
+  @apply bg-slate-900/95 border-slate-700/50;
+}
+
+/* Dark mode bottom navigation */
+.dark .bottom-nav {
+  @apply bg-slate-900 border-slate-700;
+}
+
+/* Dark mode badges */
+.dark .badge-teal {
+  @apply bg-teal-900/50 text-teal-300 border-teal-700;
+}
+
+.dark .badge-success {
+  @apply bg-green-900/50 text-green-300 border-green-700;
+}
+
+/* Dark mode progress bar */
+.dark .progress-bar {
+  @apply bg-slate-700;
+}
+
+/* Dark mode tooltip */
+.dark .tooltip {
+  @apply bg-slate-700 text-slate-100;
+}
+
+/* Dark mode history item shimmer */
+.dark .history-item-clickable::after {
+  @apply via-teal-500/10;
 }

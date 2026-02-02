@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { getHistory, deleteHistoryItem, clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import HistoryDetailModal from './HistoryDetailModal';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Avatar color options
 const AVATAR_COLORS = [
@@ -62,6 +63,7 @@ export default function Dashboard({
   onUpgrade,
   onSignOut,
 }: DashboardProps) {
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [history, setHistory] = useState<CalculationHistoryItem[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'settings'>('overview');
   const [editName, setEditName] = useState(userName);
@@ -375,9 +377,9 @@ export default function Dashboard({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-lg border-b border-slate-200/80 sticky top-0 z-40 safe-top">
+      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-700/80 sticky top-0 z-40 safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
@@ -392,10 +394,10 @@ export default function Dashboard({
             </button>
 
             <nav className="hidden md:flex items-center gap-8">
-              <button onClick={onNavigateHome} className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Home</button>
-              <button onClick={onNavigateToCalculator} className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Calculator</button>
-              <button onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Pricing</button>
-              <button onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-slate-600 hover:text-slate-900 font-medium transition-colors">About</button>
+              <button onClick={onNavigateHome} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Home</button>
+              <button onClick={onNavigateToCalculator} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Calculator</button>
+              <button onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Pricing</button>
+              <button onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">About</button>
             </nav>
 
             <div className="flex items-center gap-2 sm:gap-4">
@@ -425,27 +427,27 @@ export default function Dashboard({
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-white z-[9999] overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 top-16 bg-white dark:bg-slate-900 z-[9999] overflow-y-auto animate-fade-in">
           <nav className="flex flex-col p-4 gap-1">
-            <button onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            <button onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
               </div>
               <span className="text-base">Home</span>
             </button>
-            <button onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-2xl font-medium transition-colors touch-feedback">
+            <button onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback">
               <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
               </div>
               <span className="text-base">Calculator</span>
             </button>
-            <div className="my-4 border-t border-slate-200" />
-            <div className="px-4 py-3 bg-slate-50 rounded-2xl mb-4">
+            <div className="my-4 border-t border-slate-200 dark:border-slate-700" />
+            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700 rounded-2xl mb-4">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${currentAvatarColor.from} ${currentAvatarColor.to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>{userName.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 truncate">{userName}</p>
-                  <p className="text-sm text-slate-500 truncate">{userEmail}</p>
+                  <p className="font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
                 </div>
                 <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${tier === 'pro' ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' : 'bg-slate-200 text-slate-600'}`}>{tier === 'pro' ? 'Pro' : 'Free'}</span>
               </div>
@@ -513,7 +515,7 @@ export default function Dashboard({
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Deal Insights */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,8 +523,8 @@ export default function Dashboard({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">Your Deal Insights</h3>
-                  <p className="text-sm text-slate-500">Analytics from your deal calculations</p>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">Your Deal Insights</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Analytics from your deal calculations</p>
                 </div>
               </div>
 
@@ -601,7 +603,7 @@ export default function Dashboard({
 
             {/* Insights Section */}
             {history.length > 0 && getPersonalizedInsights().length > 0 && (
-              <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
+              <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,8 +611,8 @@ export default function Dashboard({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900">Personalized Insights</h3>
-                    <p className="text-sm text-slate-500">Based on your analysis history</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">Personalized Insights</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Based on your analysis history</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -643,7 +645,7 @@ export default function Dashboard({
                   )}
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-slate-900">Subscription</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
                       {tier === 'free' && <button onClick={onUpgrade} className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors">Upgrade to Pro</button>}
                     </div>
                     <div className="flex items-center gap-4">
@@ -653,8 +655,8 @@ export default function Dashboard({
                         </svg>
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
-                        <p className="text-sm text-slate-500">{tier === 'pro' ? 'Full access to all features' : 'Limited to 2 calculations per month'}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? 'Full access to all features' : 'Limited to 2 calculations per month'}</p>
                       </div>
                     </div>
                   </div>
@@ -663,7 +665,7 @@ export default function Dashboard({
 
               {/* Recent Activity */}
               <div className={`bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-5' : 'opacity-0'}`}>
-                <h3 className="font-semibold text-slate-900 mb-3 sm:mb-4 text-sm sm:text-base">Recent Activity</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Recent Activity</h3>
                 {recentCalculations.length > 0 ? (
                   <div className="space-y-4">
                     {recentCalculations.map((item, idx) => (
@@ -697,7 +699,7 @@ export default function Dashboard({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <p className="text-sm text-slate-500">No calculations yet</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">No calculations yet</p>
                     <button onClick={onNavigateToCalculator} className="mt-3 text-sm font-medium text-teal-600 hover:text-teal-700">Start your first calculation</button>
                   </div>
                 )}
@@ -708,10 +710,10 @@ export default function Dashboard({
 
         {/* HISTORY TAB */}
         {activeTab === 'history' && (
-          <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${mounted ? 'animate-fade-in' : 'opacity-0'}`}>
+          <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden ${mounted ? 'animate-fade-in' : 'opacity-0'}`}>
             <div className="p-6 border-b border-slate-200">
-              <h3 className="font-semibold text-slate-900">Calculation History</h3>
-              <p className="text-sm text-slate-500 mt-1">View and manage your past deal analyses</p>
+              <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
             </div>
 
             {/* Search and Filters */}
@@ -769,7 +771,7 @@ export default function Dashboard({
                               </div>
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-semibold text-slate-900">{item.labels.phase}</p>
+                                  <p className="font-semibold text-slate-900 dark:text-white">{item.labels.phase}</p>
                                   {item.hasPDF && <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs font-medium rounded-full">PDF</span>}
                                 </div>
                                 <p className="text-sm text-slate-600">{item.labels.modality} • {item.labels.indication}</p>
@@ -789,7 +791,7 @@ export default function Dashboard({
                             </div>
                           </div>
                           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
-                            <button onClick={(e) => { e.stopPropagation(); handleDeleteHistory(item.id); }} className="text-sm text-slate-500 hover:text-red-600 transition-colors">Delete</button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteHistory(item.id); }} className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 transition-colors">Delete</button>
                           </div>
                         </div>
                       ))}
@@ -803,7 +805,7 @@ export default function Dashboard({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">No matching calculations</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-2">No matching calculations</h3>
                   <p className="text-slate-500 mb-4">Try adjusting your search or filters</p>
                   <button onClick={() => { setSearchQuery(''); setFilterPhase('all'); setFilterModality('all'); }} className="text-teal-600 font-medium hover:text-teal-700">Clear all filters</button>
                 </div>
@@ -818,7 +820,7 @@ export default function Dashboard({
                     </svg>
                   </div>
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">No calculations yet</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">No calculations yet</h3>
                 <p className="text-slate-500 mb-4">Your calculation history will appear here</p>
                 <button onClick={onNavigateToCalculator} className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -876,16 +878,16 @@ export default function Dashboard({
             </div>
 
             {/* Personal Information */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900">Personal Information</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Personal Information</h3>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={editName}
@@ -895,11 +897,11 @@ export default function Dashboard({
                   {formErrors.name && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formErrors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email <span className="text-slate-400 font-normal">(read only)</span></label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email <span className="text-slate-400 font-normal">(read only)</span></label>
                   <input type="email" value={userEmail} disabled className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone Number</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
                   <input
                     type="tel"
                     value={editPhone}
@@ -910,7 +912,7 @@ export default function Dashboard({
                   {formErrors.phone && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formErrors.phone}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">LinkedIn Profile</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">LinkedIn Profile</label>
                   <input
                     type="url"
                     value={editLinkedIn}
@@ -924,12 +926,12 @@ export default function Dashboard({
             </div>
 
             {/* Avatar Color */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900">Avatar Color</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Avatar Color</h3>
               </div>
               <div className="flex flex-wrap gap-3">
                 {AVATAR_COLORS.map((color) => (
@@ -950,29 +952,109 @@ export default function Dashboard({
                   </button>
                 ))}
               </div>
-              <p className="mt-4 text-sm text-slate-500">Choose a color for your avatar across the dashboard</p>
+              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400">Choose a color for your avatar across the dashboard</p>
+            </div>
+
+            {/* Appearance */}
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </div>
+                <h3 className="font-semibold text-slate-900 dark:text-white dark:text-white">Appearance</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Light Mode */}
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`relative p-4 rounded-xl border-2 transition-all ${theme === 'light' ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                      <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className={`text-sm font-medium ${theme === 'light' ? 'text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400'}`}>Light</span>
+                  </div>
+                  {theme === 'light' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Dark Mode */}
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`relative p-4 rounded-xl border-2 transition-all ${theme === 'dark' ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center shadow-sm">
+                      <svg className="w-5 h-5 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                      </svg>
+                    </div>
+                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400'}`}>Dark</span>
+                  </div>
+                  {theme === 'dark' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* System Mode */}
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`relative p-4 rounded-xl border-2 transition-all ${theme === 'system' ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'}`}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-white to-slate-800 border border-slate-300 flex items-center justify-center shadow-sm overflow-hidden">
+                      <svg className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.321A1 1 0 0113.5 17H6.5a1 1 0 01-.195-1.19l.804-.32.122-.49H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className={`text-sm font-medium ${theme === 'system' ? 'text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400'}`}>System</span>
+                  </div>
+                  {theme === 'system' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              </div>
+              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400">
+                {theme === 'system' ? `Currently using ${resolvedTheme} mode based on your system preference` : `Using ${theme} mode`}
+              </p>
             </div>
 
             {/* Professional Details */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900">Professional Details</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Professional Details</h3>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Job Title</label>
-                  <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="e.g., VP Business Development" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all" />
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Job Title</label>
+                  <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="e.g., VP Business Development" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Company</label>
-                  <input type="text" value={editCompany} onChange={(e) => setEditCompany(e.target.value)} placeholder="e.g., Biotech Inc." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all" />
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Company</label>
+                  <input type="text" value={editCompany} onChange={(e) => setEditCompany(e.target.value)} placeholder="e.g., Biotech Inc." className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Your Role in Deal Process</label>
-                  <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Your Role in Deal Process</label>
+                  <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all">
                     <option value="">Select your role...</option>
                     <option value="bd_executive">Business Development Executive</option>
                     <option value="corporate_dev">Corporate Development</option>
@@ -996,12 +1078,12 @@ export default function Dashboard({
             </div>
 
             {/* Subscription with Feature Comparison */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900">Subscription</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
               </div>
 
               <div className={`p-5 rounded-xl mb-6 ${tier === 'pro' ? 'bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200' : 'bg-slate-50 border border-slate-200'}`}>
@@ -1012,7 +1094,7 @@ export default function Dashboard({
                     </div>
                     <div>
                       <p className="text-lg font-bold text-slate-900">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
-                      <p className="text-sm text-slate-500">{tier === 'pro' ? '$99/month • Billed monthly' : 'Free forever'}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? '$99/month • Billed monthly' : 'Free forever'}</p>
                     </div>
                   </div>
                   {tier === 'free' && <button onClick={onUpgrade} className="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20">Upgrade Now</button>}
@@ -1057,12 +1139,12 @@ export default function Dashboard({
             </div>
 
             {/* Data & Privacy */}
-            <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-4' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-4' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900">Data & Privacy</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Data & Privacy</h3>
               </div>
               <button onClick={handleExportData} disabled={isExporting} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors group disabled:opacity-70">
                 <div className="flex items-center gap-3">
@@ -1075,7 +1157,7 @@ export default function Dashboard({
                   </div>
                   <div className="text-left">
                     <p className="font-medium text-slate-900">{isExporting ? 'Exporting...' : 'Export All My Data'}</p>
-                    <p className="text-sm text-slate-500">{isExporting ? `${exportProgress}% complete` : 'Download your profile and calculation history'}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{isExporting ? `${exportProgress}% complete` : 'Download your profile and calculation history'}</p>
                   </div>
                 </div>
                 {!isExporting && <svg className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>}
@@ -1099,11 +1181,11 @@ export default function Dashboard({
                 <button onClick={onSignOut} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors group">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center group-hover:bg-slate-300 transition-colors">
-                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     </div>
                     <div className="text-left">
                       <p className="font-medium text-slate-900">Sign Out</p>
-                      <p className="text-sm text-slate-500">Sign out of your account on this device</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Sign out of your account on this device</p>
                     </div>
                   </div>
                 </button>
