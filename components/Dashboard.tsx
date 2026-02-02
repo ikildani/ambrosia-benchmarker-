@@ -257,9 +257,9 @@ export default function Dashboard({
         </div>
       </header>
 
-      {/* Mobile Navigation - Full-screen overlay - OUTSIDE header to avoid stacking context issues */}
+      {/* Mobile Navigation - Full-screen overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-white z-[9999] overflow-y-auto border-t-4 border-teal-500">
+        <div className="fixed inset-0 top-16 bg-white z-[9999] overflow-y-auto">
           <nav className="flex flex-col p-4 gap-1">
             {/* Navigation Links */}
             <button
