@@ -18,28 +18,28 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
 
   const data = [
     {
-      name: 'Upfront',
+      name: isMobile ? 'Upfront' : 'Upfront',
       low: terms.upfront.low,
       median: terms.upfront.median,
       high: terms.upfront.high,
       fill: '#14B8A6', // teal-500
     },
     {
-      name: 'Dev Milestones',
+      name: isMobile ? 'Dev MS' : 'Dev Milestones',
       low: terms.devMilestones.low,
       median: terms.devMilestones.median,
       high: terms.devMilestones.high,
       fill: '#06B6D4', // cyan-500
     },
     {
-      name: 'Reg Milestones',
+      name: isMobile ? 'Reg MS' : 'Reg Milestones',
       low: terms.regMilestones.low,
       median: terms.regMilestones.median,
       high: terms.regMilestones.high,
       fill: '#0D9488', // teal-600
     },
     {
-      name: 'Comm Milestones',
+      name: isMobile ? 'Comm MS' : 'Comm Milestones',
       low: terms.commMilestones.low,
       median: terms.commMilestones.median,
       high: terms.commMilestones.high,
