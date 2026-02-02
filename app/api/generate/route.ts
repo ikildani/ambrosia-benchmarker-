@@ -1,13 +1,41 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { getContentGenerator } from '@/lib/ai/content-generator';
 import { GenerateContentRequest, generateSlug } from '@/types/content';
 
 // Admin email check
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',');
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',').map(e => e.trim().toLowerCase());
 
 export async function POST(request: Request) {
   try {
+    // Security: Require admin authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Authorization required' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.split(' ')[1];
+    const authClient = createServerClient();
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: 401 }
+      );
+    }
+
+    // Verify user is admin
+    if (!user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
     const body = (await request.json()) as GenerateContentRequest;
     const { job_type, target_keyword, parameters } = body;
 

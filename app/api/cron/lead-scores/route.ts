@@ -42,9 +42,16 @@ const TIER_THRESHOLDS = {
 };
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret (optional but recommended)
+  // Security: Require cron secret for all cron endpoints
   const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret) {
+    console.error('CRON_SECRET environment variable is not set');
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+  }
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

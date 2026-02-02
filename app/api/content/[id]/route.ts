@@ -1,12 +1,46 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { UpdateBlogPostRequest, generateSlug } from '@/types/content';
+
+// Admin email check
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',').map(e => e.trim().toLowerCase());
+
+// Helper to verify admin authentication
+async function verifyAdmin(request: Request): Promise<{ authorized: boolean; error?: NextResponse }> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Authorization required' }, { status: 401 }),
+    };
+  }
+
+  const token = authHeader.split(' ')[1];
+  const authClient = createServerClient();
+  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+
+  if (authError || !user) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 }),
+    };
+  }
+
+  if (!user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Admin access required' }, { status: 403 }),
+    };
+  }
+
+  return { authorized: true };
+}
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// GET - Get a single blog post by ID
+// GET - Get a single blog post by ID (Public)
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
@@ -35,9 +69,15 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 }
 
-// PATCH - Update a blog post
+// PATCH - Update a blog post (Admin only)
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
+    // Security: Require admin authentication
+    const authResult = await verifyAdmin(request);
+    if (!authResult.authorized) {
+      return authResult.error;
+    }
+
     const { id } = await params;
     const body = (await request.json()) as UpdateBlogPostRequest;
     const supabase = createServiceClient();
@@ -117,9 +157,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
-// DELETE - Delete a blog post
+// DELETE - Delete a blog post (Admin only)
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
+    // Security: Require admin authentication
+    const authResult = await verifyAdmin(request);
+    if (!authResult.authorized) {
+      return authResult.error;
+    }
+
     const { id } = await params;
     const supabase = createServiceClient();
 

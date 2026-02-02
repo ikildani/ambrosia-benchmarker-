@@ -1,8 +1,42 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/types/content';
 
-// GET - List landing pages
+// Admin email check
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',').map(e => e.trim().toLowerCase());
+
+// Helper to verify admin authentication
+async function verifyAdmin(request: Request): Promise<{ authorized: boolean; error?: NextResponse }> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Authorization required' }, { status: 401 }),
+    };
+  }
+
+  const token = authHeader.split(' ')[1];
+  const authClient = createServerClient();
+  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+
+  if (authError || !user) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 }),
+    };
+  }
+
+  if (!user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    return {
+      authorized: false,
+      error: NextResponse.json({ error: 'Admin access required' }, { status: 403 }),
+    };
+  }
+
+  return { authorized: true };
+}
+
+// GET - List landing pages - Public for published
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -39,9 +73,15 @@ export async function GET(request: Request) {
   }
 }
 
-// POST - Create landing page
+// POST - Create landing page (Admin only)
 export async function POST(request: Request) {
   try {
+    // Security: Require admin authentication
+    const authResult = await verifyAdmin(request);
+    if (!authResult.authorized) {
+      return authResult.error;
+    }
+
     const body = await request.json();
 
     if (!body.title) {
