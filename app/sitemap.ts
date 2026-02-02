@@ -28,30 +28,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = createServiceClient();
 
     // Fetch published blog posts
-    const { data: posts } = await supabase
+    const { data: posts, error: postsError } = await supabase
       .from('blog_posts')
-      .select('slug, updated_at, published_at')
+      .select('slug, published_at')
       .eq('status', 'published');
+
+    if (postsError) {
+      console.error('Sitemap: Error fetching blog posts:', postsError.message);
+    }
 
     if (posts) {
       blogPages = posts.map((post) => ({
         url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.updated_at || post.published_at),
+        lastModified: new Date(post.published_at || new Date()),
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       }));
     }
 
     // Fetch published landing pages
-    const { data: pages } = await supabase
+    const { data: pages, error: pagesError } = await supabase
       .from('landing_pages')
-      .select('slug, updated_at, published_at')
+      .select('slug, published_at')
       .eq('status', 'published');
+
+    if (pagesError) {
+      console.error('Sitemap: Error fetching landing pages:', pagesError.message);
+    }
 
     if (pages) {
       landingPages = pages.map((page) => ({
         url: `${baseUrl}/${page.slug}`,
-        lastModified: new Date(page.updated_at || page.published_at),
+        lastModified: new Date(page.published_at || new Date()),
         changeFrequency: 'monthly' as const,
         priority: 0.8,
       }));
