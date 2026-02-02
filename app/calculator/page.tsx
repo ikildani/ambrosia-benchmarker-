@@ -106,9 +106,9 @@ export default function CalculatorPage() {
                 <Image
                   src="/logo.png"
                   alt="Ambrosia Ventures"
-                  width={280}
-                  height={80}
-                  className="h-8 sm:h-10 lg:h-12 w-auto object-contain"
+                  width={320}
+                  height={90}
+                  className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
                   priority
                 />
               </Link>

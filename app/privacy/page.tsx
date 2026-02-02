@@ -16,9 +16,9 @@ export default function PrivacyPage() {
               <Image
                 src="/logo.png"
                 alt="Ambrosia Ventures"
-                width={180}
-                height={48}
-                className="h-9 sm:h-10 w-auto object-contain"
+                width={240}
+                height={64}
+                className="h-12 sm:h-14 w-auto object-contain"
                 priority
               />
             </Link>
