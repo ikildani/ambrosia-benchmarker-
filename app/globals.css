@@ -414,3 +414,276 @@ select::selection {
     transform: none !important;
   }
 }
+
+/* ============================================
+   WORLD-CLASS MOBILE UX ENHANCEMENTS
+   ============================================ */
+
+/* Safe area support for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Smooth horizontal scroll snap for tabs */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-center {
+  scroll-snap-align: center;
+}
+
+.scroll-snap-start {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile touch feedback */
+.touch-feedback {
+  @apply transition-all duration-150;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-feedback:active {
+  @apply scale-[0.97] opacity-80;
+}
+
+/* Mobile menu slide animation */
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Full-screen mobile menu overlay */
+@keyframes mobileMenuIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-mobile-menu {
+  animation: mobileMenuIn 0.2s ease-out forwards;
+}
+
+/* Floating action button pulse */
+@keyframes fabPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 199, 199, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(0, 199, 199, 0.6);
+  }
+}
+
+.fab-pulse {
+  animation: fabPulse 2s ease-in-out infinite;
+}
+
+/* Active tab indicator animation */
+@keyframes tabIndicator {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.animate-tab-indicator {
+  animation: tabIndicator 0.2s ease-out forwards;
+}
+
+/* Swipe hint animation */
+@keyframes swipeHint {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
+}
+
+.swipe-hint {
+  animation: swipeHint 1.5s ease-in-out infinite;
+}
+
+/* Bottom sheet animation */
+@keyframes bottomSheetUp {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-bottom-sheet {
+  animation: bottomSheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Skeleton loading for mobile */
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton {
+  @apply bg-slate-200 rounded;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+/* Better select dropdowns on mobile */
+@media (max-width: 640px) {
+  .select-field {
+    @apply py-4 text-base;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  .input-field {
+    @apply py-4 text-base;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+}
+
+/* Touch-friendly checkbox/radio */
+.touch-checkbox {
+  @apply min-h-[48px] min-w-[48px];
+}
+
+/* Sticky header with blur */
+.sticky-header-blur {
+  @apply sticky top-0 z-40 bg-white/95 backdrop-blur-lg border-b border-slate-200/50;
+}
+
+/* Card press effect */
+.card-pressable {
+  @apply transition-all duration-150;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card-pressable:active {
+  @apply scale-[0.98] shadow-sm;
+}
+
+/* Horizontal scroll indicator gradient */
+.scroll-fade-right::after {
+  content: '';
+  @apply absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none;
+}
+
+.scroll-fade-left::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10;
+}
+
+/* Mobile-optimized button sizes */
+@media (max-width: 640px) {
+  .btn-mobile {
+    @apply min-h-[48px] px-4;
+  }
+}
+
+/* Bottom navigation bar */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 pb-4;
+}
+
+/* Pull to refresh indicator */
+@keyframes pullRefresh {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pull-refresh-spinner {
+  animation: pullRefresh 1s linear infinite;
+}
+
+/* Smooth slide transitions */
+.slide-enter {
+  transform: translateX(100%);
+}
+
+.slide-enter-active {
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-exit {
+  transform: translateX(0);
+}
+
+.slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* iOS-style bounce */
+@supports (-webkit-touch-callout: none) {
+  .ios-bounce {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Enhanced active states for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .hover\:bg-slate-50:active {
+    @apply bg-slate-100;
+  }
+
+  .hover\:bg-slate-100:active {
+    @apply bg-slate-200;
+  }
+
+  .hover\:bg-teal-50:active {
+    @apply bg-teal-100;
+  }
+}

@@ -96,7 +96,7 @@ export default function Header({
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20 lg:h-24">
+        <div className="flex justify-between items-center h-16 sm:h-20 lg:h-24">
           {/* Logo */}
           <Link
             href="/"
@@ -107,7 +107,7 @@ export default function Header({
               alt="Ambrosia Ventures"
               width={900}
               height={248}
-              className="h-12 sm:h-14 lg:h-16 w-auto object-contain transition-all duration-300 hover:opacity-80"
+              className="h-14 sm:h-20 md:h-28 lg:h-36 w-auto object-contain transition-all duration-300 hover:opacity-80"
               priority
             />
           </Link>
@@ -268,10 +268,11 @@ export default function Header({
               </>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Larger touch target */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
+              className="md:hidden p-3 -mr-2 text-slate-600 hover:text-slate-900 transition-colors touch-feedback rounded-xl"
+              aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
@@ -284,84 +285,145 @@ export default function Header({
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Full-screen overlay */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-200 animate-fade-in">
-            <nav className="flex flex-col gap-1">
-              {navItems.map((item, idx) => (
-                item.href.startsWith('#') || item.href.includes('#') ? (
+          <div className="md:hidden fixed inset-0 top-16 sm:top-20 bg-white z-50 animate-mobile-menu overflow-y-auto safe-bottom">
+            <nav className="flex flex-col p-4 gap-1">
+              {navItems.map((item, idx) => {
+                const iconMap: Record<string, JSX.Element> = {
+                  Calculator: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  ),
+                  Pricing: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  About: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                };
+
+                return item.href.startsWith('#') || item.href.includes('#') ? (
                   <a
                     key={idx}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
                         ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
                     }`}
                   >
-                    {item.label}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      item.isActive ? 'bg-teal-100' : 'bg-slate-100'
+                    }`}>
+                      {iconMap[item.label] || iconMap.About}
+                    </div>
+                    <span className="text-base">{item.label}</span>
                   </a>
                 ) : (
                   <Link
                     key={idx}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
                         ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
                     }`}
                   >
-                    {item.label}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      item.isActive ? 'bg-teal-100' : 'bg-slate-100'
+                    }`}>
+                      {iconMap[item.label] || iconMap.About}
+                    </div>
+                    <span className="text-base">{item.label}</span>
                   </Link>
-                )
-              ))}
+                );
+              })}
 
               {isAuthenticated ? (
                 <>
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       isDashboardPage
                         ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
                     }`}
                   >
-                    Dashboard
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      isDashboardPage ? 'bg-teal-100' : 'bg-slate-100'
+                    }`}>
+                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </div>
+                    <span className="text-base">Dashboard</span>
                   </Link>
-                  <hr className="my-2 border-slate-200" />
+
+                  {/* User Info Card */}
+                  <div className="my-4 px-4 py-3 bg-slate-50 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 truncate">{userName || 'User'}</p>
+                        <p className="text-sm text-slate-500 truncate">{userEmail || 'user@example.com'}</p>
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
                       onSignOut?.();
                     }}
-                    className="text-left px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 font-medium transition-colors"
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-red-600 hover:bg-red-50 active:bg-red-100 font-medium transition-colors touch-feedback"
                   >
-                    Sign Out
+                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </div>
+                    <span className="text-base">Sign Out</span>
                   </button>
                 </>
               ) : (
                 <>
-                  <hr className="my-2 border-slate-200" />
+                  <div className="my-4 border-t border-slate-200" />
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
                       onSignInClick?.();
                     }}
-                    className="text-left px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 font-medium transition-colors"
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-slate-700 hover:bg-slate-50 active:bg-slate-100 font-medium transition-colors touch-feedback"
                   >
-                    Sign In
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      </svg>
+                    </div>
+                    <span className="text-base">Sign In</span>
                   </button>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
                       onSignUpClick?.();
                     }}
-                    className="text-left px-4 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 mx-4 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold transition-all shadow-lg shadow-teal-500/25 touch-feedback active:scale-[0.98]"
                   >
-                    Get Started Free
+                    <span className="text-base">Get Started Free</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </button>
                 </>
               )}

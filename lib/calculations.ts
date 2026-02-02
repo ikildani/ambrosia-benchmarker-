@@ -76,6 +76,35 @@ export interface CalculationInput {
   regulatoryDesignations: RegulatoryDesignations;
 }
 
+// Drill-down data for expanded metric views
+export interface MilestoneBreakdown {
+  label: string;
+  percentage: number;
+  value: { low: number; median: number; high: number };
+}
+
+export interface FactorImpact {
+  name: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  percentage: number;
+}
+
+export interface DrillDownData {
+  rangeExplanation: string;
+  rangeWidthPercent: number;
+  factors: FactorImpact[];
+  breakdown?: MilestoneBreakdown[];
+}
+
+export interface DrillDownCollection {
+  upfront: DrillDownData;
+  totalDealValue: DrillDownData;
+  devMilestones: DrillDownData;
+  regMilestones: DrillDownData;
+  commMilestones: DrillDownData;
+  royalties: DrillDownData;
+}
+
 export interface CalculationResult {
   terms: DealTerms;
   tieredRoyalties: TieredRoyalties;
@@ -87,6 +116,8 @@ export interface CalculationResult {
     modality: string;
     indication: string;
   };
+  drillDown: DrillDownCollection;
+  phase: Phase;
 }
 
 // Helper to get indication category
@@ -361,6 +392,17 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Get labels
   const labels = benchmarks.labels;
 
+  // Generate drill-down data
+  const drillDown = generateDrillDownData(
+    input,
+    modifiers,
+    rangeWidth,
+    devMilestones,
+    regMilestones,
+    commMilestones,
+    tieredRoyalties
+  );
+
   return {
     terms: {
       upfront,
@@ -377,7 +419,134 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       phase: labels.phases[input.phase],
       modality: modalityData?.label ?? input.modality,
       indication: indicationData?.label ?? input.indication
+    },
+    drillDown,
+    phase: input.phase
+  };
+}
+
+function generateDrillDownData(
+  input: CalculationInput,
+  modifiers: { name: string; multiplier: number }[],
+  rangeWidth: number,
+  devMilestones: { low: number; median: number; high: number },
+  regMilestones: { low: number; median: number; high: number },
+  commMilestones: { low: number; median: number; high: number },
+  tieredRoyalties: TieredRoyalties
+): DrillDownCollection {
+  const phaseLabels = benchmarks.labels.phases;
+  const rangePercent = Math.round(rangeWidth * 100);
+
+  // Convert modifiers to factor impacts
+  const factors: FactorImpact[] = modifiers.map(mod => ({
+    name: mod.name,
+    impact: mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral',
+    percentage: Math.round((mod.multiplier - 1) * 100)
+  }));
+
+  // Phase-specific range explanations
+  const rangeExplanations: Record<Phase, string> = {
+    preclinical: `Preclinical assets have the widest valuation range (±${rangePercent}%) due to significant development uncertainty and limited clinical validation.`,
+    phase1: `Phase 1 assets show moderate variance (±${rangePercent}%) as initial safety data reduces but doesn't eliminate development risk.`,
+    phase2: `Phase 2 assets typically see ±${rangePercent}% variance based on efficacy signals, competitive dynamics, and pathway clarity.`,
+    phase3: `Phase 3 assets have tighter ranges (±${rangePercent}%) given substantial de-risking, though regulatory and commercial uncertainties remain.`,
+    approved: `Approved assets show the tightest ranges (±${rangePercent}%) with valuations driven primarily by commercial execution factors.`
+  };
+
+  // Development milestone breakdown by phase
+  const devBreakdowns: Record<Phase, MilestoneBreakdown[]> = {
+    preclinical: [
+      { label: 'IND Filing', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) },
+      { label: 'Phase 1 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) },
+      { label: 'Phase 2 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) },
+      { label: 'Phase 3 Start', percentage: 20, value: calculateBreakdownValue(devMilestones, 0.20) }
+    ],
+    phase1: [
+      { label: 'Phase 1 Completion', percentage: 40, value: calculateBreakdownValue(devMilestones, 0.40) },
+      { label: 'Phase 2 Start', percentage: 35, value: calculateBreakdownValue(devMilestones, 0.35) },
+      { label: 'Phase 3 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) }
+    ],
+    phase2: [
+      { label: 'Phase 2 Completion', percentage: 60, value: calculateBreakdownValue(devMilestones, 0.60) },
+      { label: 'Phase 3 Start', percentage: 40, value: calculateBreakdownValue(devMilestones, 0.40) }
+    ],
+    phase3: [
+      { label: 'Phase 3 Completion', percentage: 70, value: calculateBreakdownValue(devMilestones, 0.70) },
+      { label: 'NDA/BLA Filing', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) }
+    ],
+    approved: [
+      { label: 'Label Expansion', percentage: 100, value: calculateBreakdownValue(devMilestones, 1.0) }
+    ]
+  };
+
+  // Regulatory milestone breakdown
+  const regBreakdown: MilestoneBreakdown[] = [
+    { label: 'FDA Approval', percentage: 50, value: calculateBreakdownValue(regMilestones, 0.50) },
+    { label: 'EMA Approval', percentage: 30, value: calculateBreakdownValue(regMilestones, 0.30) },
+    { label: 'Other Major Markets', percentage: 20, value: calculateBreakdownValue(regMilestones, 0.20) }
+  ];
+
+  // Commercial milestone breakdown
+  const commBreakdown: MilestoneBreakdown[] = [
+    { label: 'First $100M Net Sales', percentage: 15, value: calculateBreakdownValue(commMilestones, 0.15) },
+    { label: '$500M Net Sales', percentage: 25, value: calculateBreakdownValue(commMilestones, 0.25) },
+    { label: '$1B Net Sales', percentage: 30, value: calculateBreakdownValue(commMilestones, 0.30) },
+    { label: '$2B+ Net Sales', percentage: 30, value: calculateBreakdownValue(commMilestones, 0.30) }
+  ];
+
+  // Royalty tier explanation
+  const royaltyBreakdown: MilestoneBreakdown[] = [
+    { label: `Base Tier (<$500M)`, percentage: tieredRoyalties.base.low, value: { low: tieredRoyalties.base.low, median: (tieredRoyalties.base.low + tieredRoyalties.base.high) / 2, high: tieredRoyalties.base.high } },
+    { label: `Mid Tier ($500M-$1B)`, percentage: tieredRoyalties.midTier.low, value: { low: tieredRoyalties.midTier.low, median: (tieredRoyalties.midTier.low + tieredRoyalties.midTier.high) / 2, high: tieredRoyalties.midTier.high } },
+    { label: `High Tier (>$1B)`, percentage: tieredRoyalties.highTier.low, value: { low: tieredRoyalties.highTier.low, median: (tieredRoyalties.highTier.low + tieredRoyalties.highTier.high) / 2, high: tieredRoyalties.highTier.high } }
+  ];
+
+  return {
+    upfront: {
+      rangeExplanation: `Upfront payments are guaranteed at signing. The range reflects market variability and negotiation outcomes for ${phaseLabels[input.phase]} assets.`,
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral')
+    },
+    totalDealValue: {
+      rangeExplanation: rangeExplanations[input.phase],
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral')
+    },
+    devMilestones: {
+      rangeExplanation: `Development milestones are paid upon achieving clinical trial objectives. Earlier-stage deals weight more toward development milestones.`,
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral'),
+      breakdown: devBreakdowns[input.phase]
+    },
+    regMilestones: {
+      rangeExplanation: `Regulatory milestones are contingent on approval by health authorities. FDA typically accounts for 50% of regulatory milestone value.`,
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral'),
+      breakdown: regBreakdown
+    },
+    commMilestones: {
+      rangeExplanation: `Commercial milestones are tied to net sales thresholds. Later-stage deals weight more toward commercial milestones.`,
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral'),
+      breakdown: commBreakdown
+    },
+    royalties: {
+      rangeExplanation: `Royalties are ongoing payments on net sales, typically tiered to increase with sales volume. Rates reflect modality, indication, and competitive factors.`,
+      rangeWidthPercent: rangePercent,
+      factors: factors.filter(f => f.impact !== 'neutral'),
+      breakdown: royaltyBreakdown
     }
+  };
+}
+
+function calculateBreakdownValue(
+  total: { low: number; median: number; high: number },
+  percentage: number
+): { low: number; median: number; high: number } {
+  return {
+    low: Math.round(total.low * percentage),
+    median: Math.round(total.median * percentage),
+    high: Math.round(total.high * percentage)
   };
 }
 

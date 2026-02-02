@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { GlobalJsonLd } from "./json-ld";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <GlobalJsonLd />
         <AuthProvider>
           <TrackingProvider>{children}</TrackingProvider>
         </AuthProvider>

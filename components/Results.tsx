@@ -1,6 +1,7 @@
 'use client';
 
-import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
+import { useState } from 'react';
+import { CalculationResult, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { generatePDFReport } from '@/lib/generateReport';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer from './PartnerMatchesContainer';
@@ -9,7 +10,6 @@ interface ResultsProps {
   result: CalculationResult;
   tier?: 'free' | 'pro';
   onUpgrade?: () => void;
-  // Inputs for partner matching
   inputs?: {
     modality: string;
     phase: string;
@@ -18,9 +18,18 @@ interface ResultsProps {
   };
 }
 
+// Badge configuration for each metric
+const metricBadges: Record<string, { label: string; color: string }> = {
+  upfront: { label: 'Guaranteed', color: 'teal' },
+  totalDealValue: { label: 'Potential', color: 'success' },
+  devMilestones: { label: 'If Achieved', color: 'cyan' },
+  regMilestones: { label: 'Upon Approval', color: 'teal' },
+  commMilestones: { label: 'Sales-Based', color: 'cyan' },
+  royalties: { label: 'On Net Sales', color: 'teal' }
+};
+
 // Helper to extract indication category from specific indication
 function getIndicationCategory(indication: string): string | null {
-  // Map specific indications to categories
   if (indication.startsWith('lung_') || indication.startsWith('breast_') ||
       indication.startsWith('colorectal') || indication.startsWith('pancreatic') ||
       indication.startsWith('gastric') || indication.startsWith('ovarian') ||
@@ -57,10 +66,302 @@ function getIndicationCategory(indication: string): string | null {
   return null;
 }
 
+// Drill-down panel component
+function DrillDownPanel({
+  data,
+  isRoyalty = false
+}: {
+  data: DrillDownData;
+  isRoyalty?: boolean;
+}) {
+  return (
+    <div className="mt-4 pt-4 border-t border-neutral-200 animate-fade-in">
+      {/* Why This Range */}
+      <div className="mb-4">
+        <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Why This Range?</h5>
+        <p className="text-sm text-neutral-600 leading-relaxed">{data.rangeExplanation}</p>
+      </div>
+
+      {/* Breakdown Table */}
+      {data.breakdown && data.breakdown.length > 0 && (
+        <div className="mb-4">
+          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+            {isRoyalty ? 'Royalty Tiers' : 'Breakdown'}
+          </h5>
+          <div className="bg-neutral-50 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-neutral-100">
+                  <th className="text-left py-2 px-3 font-medium text-neutral-600">Component</th>
+                  <th className="text-center py-2 px-3 font-medium text-neutral-600">
+                    {isRoyalty ? 'Rate' : 'Share'}
+                  </th>
+                  <th className="text-right py-2 px-3 font-medium text-neutral-600">
+                    {isRoyalty ? 'Range' : 'Value'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.breakdown.map((item, idx) => (
+                  <tr key={idx} className="border-t border-neutral-200">
+                    <td className="py-2 px-3 text-neutral-700">{item.label}</td>
+                    <td className="py-2 px-3 text-center text-neutral-600">
+                      {isRoyalty ? `${item.value.low}% - ${item.value.high}%` : `${item.percentage}%`}
+                    </td>
+                    <td className="py-2 px-3 text-right font-medium text-neutral-800">
+                      {isRoyalty
+                        ? `${item.value.low}% - ${item.value.high}%`
+                        : `${formatCurrency(item.value.low)} - ${formatCurrency(item.value.high)}`
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Key Factors */}
+      {data.factors && data.factors.length > 0 && (
+        <div>
+          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Key Factors</h5>
+          <div className="space-y-1.5">
+            {data.factors.slice(0, 5).map((factor, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm">
+                {factor.impact === 'positive' ? (
+                  <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                ) : factor.impact === 'negative' ? (
+                  <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                ) : (
+                  <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+                  </div>
+                )}
+                <span className={factor.impact === 'positive' ? 'text-teal-700' : factor.impact === 'negative' ? 'text-amber-700' : 'text-neutral-600'}>
+                  {factor.name}
+                  {factor.percentage !== 0 && (
+                    <span className="font-semibold ml-1">
+                      ({factor.percentage > 0 ? '+' : ''}{factor.percentage}%)
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Expandable Metric Card component
+function MetricCard({
+  title,
+  icon,
+  value,
+  expected,
+  expectedColor,
+  badge,
+  badgeColor,
+  progressWidth,
+  progressColor,
+  drillDown,
+  isExpanded,
+  onToggle,
+  canExpand,
+  isPro,
+  onProClick
+}: {
+  title: string;
+  icon: React.ReactNode;
+  value: string;
+  expected: string;
+  expectedColor: string;
+  badge: string;
+  badgeColor: string;
+  progressWidth: number;
+  progressColor: string;
+  drillDown?: DrillDownData;
+  isExpanded: boolean;
+  onToggle: () => void;
+  canExpand: boolean;
+  isPro: boolean;
+  onProClick: () => void;
+}) {
+  const badgeColorClasses: Record<string, string> = {
+    teal: 'bg-teal-100 text-teal-700',
+    success: 'bg-success-100 text-success-700',
+    cyan: 'bg-cyan-100 text-cyan-700'
+  };
+
+  const iconBgClasses: Record<string, string> = {
+    teal: 'bg-gradient-to-br from-teal-500 to-cyan-500',
+    success: 'bg-gradient-to-br from-success-500 to-success-400',
+    cyan: 'bg-cyan-50 group-hover:bg-cyan-100'
+  };
+
+  const iconTextClasses: Record<string, string> = {
+    teal: 'text-white',
+    success: 'text-white',
+    cyan: 'text-cyan-600'
+  };
+
+  return (
+    <div
+      className={`group metric-card border-neutral-200 hover:border-teal-200 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200' : ''}`}
+    >
+      <div
+        className={`${canExpand ? 'cursor-pointer' : ''}`}
+        onClick={() => {
+          if (canExpand) {
+            onToggle();
+          } else if (!isPro) {
+            onProClick();
+          }
+        }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className={`w-10 h-10 rounded-xl ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
+              <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
+                {icon}
+              </div>
+            </div>
+            <p className="text-sm font-semibold text-neutral-700">{title}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
+              {badge}
+            </span>
+            {canExpand && (
+              <svg
+                className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            )}
+            {!canExpand && !isPro && (
+              <div className="p-1 bg-navy-100 rounded">
+                <svg className="w-3 h-3 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+            )}
+          </div>
+        </div>
+        <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
+          {value}
+        </p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm text-neutral-500">
+            Expected: <span className={`font-bold ${expectedColor}`}>{expected}</span>
+          </p>
+        </div>
+        <div className="progress-bar">
+          <div
+            className={`h-full ${progressColor} rounded-full transition-all duration-500`}
+            style={{ width: `${progressWidth}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Drill-down panel */}
+      {isExpanded && drillDown && (
+        <DrillDownPanel data={drillDown} />
+      )}
+    </div>
+  );
+}
+
+// Methodology Section component
+function MethodologySection() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="mt-6 sm:mt-8">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 rounded-xl border border-navy-200 hover:border-navy-300 transition-all"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-600 to-navy-700 flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <span className="font-semibold text-navy-800">How We Calculate This</span>
+        </div>
+        <svg
+          className={`w-5 h-5 text-navy-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isExpanded && (
+        <div className="mt-3 p-5 bg-white rounded-xl border border-neutral-200 animate-fade-in">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg font-bold text-navy-800">Powered by</span>
+            <span className="text-lg font-bold text-teal-600">Ambrosia Ventures</span>
+          </div>
+
+          <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+            These estimates are generated using Ambrosia Ventures&apos; proprietary benchmarking model,
+            developed from our team&apos;s deep expertise in life sciences M&A and licensing transactions.
+          </p>
+
+          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Our Model Analyzes</h5>
+          <ul className="space-y-2 mb-4">
+            {[
+              'Publicly disclosed deal terms (SEC filings, press releases)',
+              'Industry benchmark reports and market intelligence',
+              'Recent transaction activity and emerging trends'
+            ].map((item, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-sm text-neutral-600">
+                <svg className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+            The algorithm weighs multiple factors including development phase, therapeutic modality,
+            indication, territory scope, competitive landscape, and clinical data quality to generate
+            customized ranges specific to your asset profile.
+          </p>
+
+          <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-xs text-amber-800">
+              <strong>Important:</strong> These are illustrative estimates for planning purposes only.
+              Actual deal terms vary significantly based on asset-specific factors, market conditions,
+              negotiation dynamics, and factors not captured in this model. This does not constitute
+              financial or legal advice.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Results({ result, tier = 'free', onUpgrade, inputs }: ResultsProps) {
-  const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
+  const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
@@ -82,6 +383,16 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
   };
 
   const maxTotalValue = terms.totalDealValue.high;
+
+  const toggleCard = (cardId: string) => {
+    setExpandedCard(expandedCard === cardId ? null : cardId);
+  };
+
+  // Determine if a card can be expanded (free users can only expand upfront)
+  const canExpandCard = (cardId: string) => {
+    if (isPro) return true;
+    return cardId === 'upfront';
+  };
 
   return (
     <div className="card-elevated overflow-hidden animate-slide-up">
@@ -187,20 +498,29 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
           )}
         </div>
 
-        {/* Applied Modifiers */}
+        {/* Applied Modifiers - Horizontal scroll on mobile */}
         {modifiers.length > 0 && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white rounded-xl border border-neutral-200 shadow-inner-soft">
-            <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
+              <svg className="w-4 h-4 text-teal-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
               <p className="text-xs sm:text-sm font-semibold text-neutral-700">Applied Adjustments</p>
+              {modifiers.length > 2 && (
+                <span className="sm:hidden text-[10px] text-neutral-400 ml-auto flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  Scroll
+                </span>
+              )}
             </div>
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            {/* Mobile: horizontal scroll, Desktop: wrap */}
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
               {modifiers.map((mod, idx) => (
                 <span
                   key={idx}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex-shrink-0 ${
                     mod.multiplier > 1
                       ? 'bg-teal-50 text-teal-700 border border-teal-200'
                       : mod.multiplier < 1
@@ -209,17 +529,17 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
                   }`}
                 >
                   {mod.multiplier > 1 ? (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                   ) : mod.multiplier < 1 ? (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                   ) : null}
-                  {mod.name}
+                  <span className="whitespace-nowrap">{mod.name}</span>
                   {mod.multiplier !== 1 && (
-                    <span className="font-bold">
+                    <span className="font-bold whitespace-nowrap">
                       ({mod.multiplier > 1 ? '+' : ''}{Math.round((mod.multiplier - 1) * 100)}%)
                     </span>
                   )}
@@ -229,164 +549,175 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
           </div>
         )}
 
+        {/* Expandable hint for free users */}
+        {!isPro && (
+          <div className="mb-4 flex items-center gap-2 text-xs text-neutral-500">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Click on Upfront Payment to see detailed breakdown. Upgrade to Pro for full analysis.</span>
+          </div>
+        )}
+
         {/* Deal Terms Grid */}
         <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Upfront Payment */}
-          <div className="group metric-card border-teal-200 hover:border-teal-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-sm font-semibold text-teal-700">Upfront Payment</p>
-              </div>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
-              {formatRange(terms.upfront)}
-            </p>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-neutral-500">
-                Expected: <span className="font-bold text-teal-600">{formatCurrency(terms.upfront.median)}</span>
-              </p>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-bar-fill"
-                style={{ width: `${getBarWidth(terms.upfront.median, maxTotalValue)}%` }}
-              />
-            </div>
-          </div>
+          <MetricCard
+            title="Upfront Payment"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            value={formatRange(terms.upfront)}
+            expected={formatCurrency(terms.upfront.median)}
+            expectedColor="text-teal-600"
+            badge={metricBadges.upfront.label}
+            badgeColor={metricBadges.upfront.color}
+            progressWidth={getBarWidth(terms.upfront.median, maxTotalValue)}
+            progressColor="bg-gradient-to-r from-teal-500 to-cyan-500"
+            drillDown={drillDown?.upfront}
+            isExpanded={expandedCard === 'upfront'}
+            onToggle={() => toggleCard('upfront')}
+            canExpand={canExpandCard('upfront')}
+            isPro={isPro}
+            onProClick={() => handleProFeatureClick('comparable_deals')}
+          />
 
           {/* Total Deal Value */}
-          <div className="group metric-card border-success-200 hover:border-success-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-success-500 to-success-400 flex items-center justify-center shadow-soft group-hover:shadow-soft-lg transition-all duration-300">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <p className="text-sm font-semibold text-success-700">Total Deal Value</p>
-              </div>
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-success-100 text-success-700">
-                Potential
-              </span>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
-              {formatRange(terms.totalDealValue)}
-            </p>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-neutral-500">
-                Expected: <span className="font-bold text-success-600">{formatCurrency(terms.totalDealValue.median)}</span>
-              </p>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="h-full bg-gradient-to-r from-success-500 to-success-400 rounded-full transition-all duration-500"
-                style={{ width: `${getBarWidth(terms.totalDealValue.median, maxTotalValue)}%` }}
-              />
-            </div>
-          </div>
+          <MetricCard
+            title="Total Deal Value"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            }
+            value={formatRange(terms.totalDealValue)}
+            expected={formatCurrency(terms.totalDealValue.median)}
+            expectedColor="text-success-600"
+            badge={metricBadges.totalDealValue.label}
+            badgeColor={metricBadges.totalDealValue.color}
+            progressWidth={getBarWidth(terms.totalDealValue.median, maxTotalValue)}
+            progressColor="bg-gradient-to-r from-success-500 to-success-400"
+            drillDown={drillDown?.totalDealValue}
+            isExpanded={expandedCard === 'totalDealValue'}
+            onToggle={() => toggleCard('totalDealValue')}
+            canExpand={canExpandCard('totalDealValue')}
+            isPro={isPro}
+            onProClick={() => handleProFeatureClick('comparable_deals')}
+          />
 
-          {/* Development Milestones - Pro Feature */}
-          <div className="relative">
-            <div className={`group metric-card border-neutral-200 hover:border-teal-200 ${!isPro ? 'blur-sm' : ''}`}>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center transition-colors group-hover:bg-cyan-100">
-                  <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                  </svg>
-                </div>
-                <p className="text-sm font-semibold text-neutral-700">Development Milestones</p>
-              </div>
-              <p className="text-2xl font-bold text-neutral-900 mb-2">
-                {formatRange(terms.devMilestones)}
-              </p>
-              <p className="text-sm text-neutral-500">
-                Expected: <span className="font-bold text-neutral-700">{formatCurrency(terms.devMilestones.median)}</span>
-              </p>
-            </div>
-            {!isPro && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-2 bg-navy-800 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Development Milestones */}
+          <MetricCard
+            title="Development Milestones"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            }
+            value={formatRange(terms.devMilestones)}
+            expected={formatCurrency(terms.devMilestones.median)}
+            expectedColor="text-neutral-700"
+            badge={metricBadges.devMilestones.label}
+            badgeColor={metricBadges.devMilestones.color}
+            progressWidth={getBarWidth(terms.devMilestones.median, maxTotalValue)}
+            progressColor="bg-gradient-to-r from-cyan-500 to-cyan-400"
+            drillDown={drillDown?.devMilestones}
+            isExpanded={expandedCard === 'devMilestones'}
+            onToggle={() => toggleCard('devMilestones')}
+            canExpand={canExpandCard('devMilestones')}
+            isPro={isPro}
+            onProClick={() => handleProFeatureClick('comparable_deals')}
+          />
 
-          {/* Regulatory Milestones - Pro Feature */}
-          <div className="relative">
-            <div className={`group metric-card border-neutral-200 hover:border-teal-200 ${!isPro ? 'blur-sm' : ''}`}>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center transition-colors group-hover:bg-teal-100">
-                  <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <p className="text-sm font-semibold text-neutral-700">Regulatory Milestones</p>
-              </div>
-              <p className="text-2xl font-bold text-neutral-900 mb-2">
-                {formatRange(terms.regMilestones)}
-              </p>
-              <p className="text-sm text-neutral-500">
-                Expected: <span className="font-bold text-neutral-700">{formatCurrency(terms.regMilestones.median)}</span>
-              </p>
-            </div>
-            {!isPro && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-2 bg-navy-800 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Regulatory Milestones */}
+          <MetricCard
+            title="Regulatory Milestones"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            }
+            value={formatRange(terms.regMilestones)}
+            expected={formatCurrency(terms.regMilestones.median)}
+            expectedColor="text-neutral-700"
+            badge={metricBadges.regMilestones.label}
+            badgeColor={metricBadges.regMilestones.color}
+            progressWidth={getBarWidth(terms.regMilestones.median, maxTotalValue)}
+            progressColor="bg-gradient-to-r from-teal-500 to-teal-400"
+            drillDown={drillDown?.regMilestones}
+            isExpanded={expandedCard === 'regMilestones'}
+            onToggle={() => toggleCard('regMilestones')}
+            canExpand={canExpandCard('regMilestones')}
+            isPro={isPro}
+            onProClick={() => handleProFeatureClick('comparable_deals')}
+          />
 
-          {/* Commercial Milestones - Pro Feature */}
-          <div className="relative">
-            <div className={`group metric-card border-neutral-200 hover:border-teal-200 ${!isPro ? 'blur-sm' : ''}`}>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center transition-colors group-hover:bg-cyan-100">
-                  <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p className="text-sm font-semibold text-neutral-700">Commercial Milestones</p>
-              </div>
-              <p className="text-2xl font-bold text-neutral-900 mb-2">
-                {formatRange(terms.commMilestones)}
-              </p>
-              <p className="text-sm text-neutral-500">
-                Expected: <span className="font-bold text-neutral-700">{formatCurrency(terms.commMilestones.median)}</span>
-              </p>
-            </div>
-            {!isPro && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-2 bg-navy-800 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Commercial Milestones */}
+          <MetricCard
+            title="Commercial Milestones"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            }
+            value={formatRange(terms.commMilestones)}
+            expected={formatCurrency(terms.commMilestones.median)}
+            expectedColor="text-neutral-700"
+            badge={metricBadges.commMilestones.label}
+            badgeColor={metricBadges.commMilestones.color}
+            progressWidth={getBarWidth(terms.commMilestones.median, maxTotalValue)}
+            progressColor="bg-gradient-to-r from-cyan-500 to-cyan-400"
+            drillDown={drillDown?.commMilestones}
+            isExpanded={expandedCard === 'commMilestones'}
+            onToggle={() => toggleCard('commMilestones')}
+            canExpand={canExpandCard('commMilestones')}
+            isPro={isPro}
+            onProClick={() => handleProFeatureClick('comparable_deals')}
+          />
 
-          {/* Tiered Royalties - Pro Feature */}
-          <div className="relative">
-            <div className={`group metric-card border-neutral-200 hover:border-teal-200 ${!isPro ? 'blur-sm' : ''}`}>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center transition-colors group-hover:bg-teal-100">
-                  <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+          {/* Tiered Royalties */}
+          <div className={`group metric-card border-neutral-200 hover:border-teal-200 transition-all duration-300 ${expandedCard === 'royalties' ? 'ring-2 ring-teal-200' : ''}`}>
+            <div
+              className={canExpandCard('royalties') ? 'cursor-pointer' : ''}
+              onClick={() => {
+                if (canExpandCard('royalties')) {
+                  toggleCard('royalties');
+                } else {
+                  handleProFeatureClick('comparable_deals');
+                }
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center transition-colors group-hover:bg-teal-100">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-neutral-700">Tiered Royalties</p>
                 </div>
-                <p className="text-sm font-semibold text-neutral-700">Tiered Royalties</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal-100 text-teal-700">
+                    {metricBadges.royalties.label}
+                  </span>
+                  {canExpandCard('royalties') ? (
+                    <svg
+                      className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${expandedCard === 'royalties' ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  ) : (
+                    <div className="p-1 bg-navy-100 rounded">
+                      <svg className="w-3 h-3 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -403,14 +734,10 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
                 </div>
               </div>
             </div>
-            {!isPro && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-2 bg-navy-800 rounded-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-              </div>
+
+            {/* Drill-down panel for royalties */}
+            {expandedCard === 'royalties' && drillDown?.royalties && (
+              <DrillDownPanel data={drillDown.royalties} isRoyalty={true} />
             )}
           </div>
         </div>
@@ -420,7 +747,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
           <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
             <h4 className="text-base sm:text-lg font-bold text-white mb-2">Unlock Full Analysis</h4>
             <p className="text-neutral-300 text-xs sm:text-sm mb-3 sm:mb-4 max-w-md mx-auto">
-              Get milestone breakdowns, royalty tiers, negotiation insights, and downloadable PDF reports
+              Get detailed breakdowns for all metrics, negotiation insights, and downloadable PDF reports
             </p>
             <button
               onClick={handleUpgradeClick}
@@ -447,14 +774,17 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs }: Re
           />
         )}
 
+        {/* Methodology Section */}
+        <MethodologySection />
+
         {/* Disclaimer */}
-        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-neutral-100 rounded-xl border border-neutral-200">
+        <div className="mt-4 p-3 sm:p-4 bg-neutral-100 rounded-xl border border-neutral-200">
           <div className="flex items-start gap-2 sm:gap-3">
             <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-[10px] sm:text-xs text-neutral-500 leading-relaxed">
-              <strong className="text-neutral-600">Disclaimer:</strong> These estimates are based on publicly available deal data and 2025 market benchmarks.
+              <strong className="text-neutral-600">Disclaimer:</strong> These estimates are based on publicly available deal data and current market benchmarks.
               Actual deal terms vary significantly based on asset-specific factors, market conditions, competitive dynamics,
               and negotiation outcomes. This tool does not constitute financial or legal advice.
             </p>
