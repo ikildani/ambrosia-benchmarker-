@@ -172,21 +172,21 @@ export default function HistoryDetailModal({
       >
         {/* Header */}
         <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-6 overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute inset-0 opacity-10">
+          {/* Decorative elements - pointer-events-none so they don't block clicks */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
               backgroundSize: '24px 24px'
             }} />
           </div>
-          <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
 
           <button
             ref={closeButtonRef}
             onClick={handleClose}
-            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center
+            className="absolute top-4 right-4 z-10 w-12 h-12 flex items-center justify-center
                        rounded-full bg-white/10 hover:bg-white/20 transition-colors
-                       focus:outline-none focus:ring-2 focus:ring-white/50"
+                       focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
             aria-label="Close modal"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

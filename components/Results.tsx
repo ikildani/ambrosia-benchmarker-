@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { CalculationResult, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
+import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
+import BenchmarkInfo from './BenchmarkInfo';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
@@ -370,6 +372,18 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
     generatePDFReport(result, undefined, partnerMatches);
   };
 
+  const handleDownloadExcel = () => {
+    trackExportAttempted('excel');
+    const partnersForExcel: PartnerForExcel[] = partnerMatches.map(p => ({
+      company_name: p.company_name,
+      match_score: p.match_score,
+      match_reasons: p.match_reasons,
+      deals_last_12mo: p.deals_last_12mo,
+      hq_country: p.hq_country,
+    }));
+    generateExcelReport(result, inputs, partnersForExcel);
+  };
+
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
     setPartnerMatches(matches as PartnerForPDF[]);
     // Also notify parent component if callback provided
@@ -441,18 +455,31 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
               <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
                 {labels.indication}
               </span>
+              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
+              <BenchmarkInfo />
             </div>
           </div>
           {isPro && (
-            <button
-              onClick={handleDownloadPDF}
-              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Download PDF</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleDownloadPDF}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>PDF</span>
+              </button>
+              <button
+                onClick={handleDownloadExcel}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 text-sm font-medium rounded-xl transition-all duration-200 border border-teal-400/30 hover:border-teal-400/50 w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Excel</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
