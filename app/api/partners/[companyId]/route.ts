@@ -185,6 +185,11 @@ export async function GET(
         strategic_priorities: company.strategic_priorities || [],
         patent_cliffs: company.patent_cliffs || [],
 
+        // Patent cliff revenue at risk
+        revenue_at_risk_2025: company.revenue_at_risk_2025,
+        revenue_at_risk_2026: company.revenue_at_risk_2026,
+        revenue_at_risk_2027: company.revenue_at_risk_2027,
+
         // Data quality
         data_quality_score: company.data_quality_score,
         data_sources: company.data_sources || [],
