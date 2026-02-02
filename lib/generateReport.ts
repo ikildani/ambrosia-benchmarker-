@@ -11,6 +11,10 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
   const regPct = Math.round((terms.regMilestones.median / totalValue) * 100);
   const commPct = Math.round((terms.commMilestones.median / totalValue) * 100);
 
+  // Get the origin for logo URL
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const logoUrl = `${origin}/logo.png`;
+
   // Generate unique report ID
   const reportId = `AV-${Date.now().toString(36).toUpperCase()}`;
   const reportDate = new Date().toLocaleDateString('en-US', {
@@ -105,12 +109,14 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     }
 
     .cover-logo {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
     }
 
-    .cover-logo span { color: var(--teal); }
+    .cover-logo img {
+      height: 40px;
+      width: auto;
+    }
 
     .cover-badge {
       background: rgba(255,255,255,0.1);
@@ -209,12 +215,14 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     }
 
     .page-logo {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--navy);
+      display: flex;
+      align-items: center;
     }
 
-    .page-logo span { color: var(--teal); }
+    .page-logo img {
+      height: 28px;
+      width: auto;
+    }
 
     .page-info {
       font-size: 10px;
@@ -686,11 +694,14 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     }
 
     .footer-brand {
-      font-weight: 600;
-      color: var(--gray-500);
+      display: flex;
+      align-items: center;
     }
 
-    .footer-brand span { color: var(--teal); }
+    .footer-brand img {
+      height: 20px;
+      width: auto;
+    }
 
     /* Print Optimization */
     @media print {
@@ -726,7 +737,7 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
   <!-- Cover Page -->
   <div class="cover-page">
     <div class="cover-header">
-      <div class="cover-logo">Ambrosia<span>Ventures</span></div>
+      <div class="cover-logo"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
       <div class="cover-badge">Confidential</div>
     </div>
 
@@ -762,7 +773,7 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
   <!-- Content Page -->
   <div class="content-page">
     <div class="page-header">
-      <div class="page-logo">Ambrosia<span>Ventures</span></div>
+      <div class="page-logo"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
       <div class="page-info">
         Report ID: ${reportId}<br/>
         ${reportDate}
@@ -969,7 +980,7 @@ export function generatePDFReport(result: CalculationResult, historyId?: string)
     </div>
 
     <div class="page-footer">
-      <div class="footer-brand">Ambrosia<span>Ventures</span></div>
+      <div class="footer-brand"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
       <div>www.ambrosiaventures.co</div>
       <div>© ${new Date().getFullYear()} Ambrosia Ventures. All rights reserved.</div>
     </div>
