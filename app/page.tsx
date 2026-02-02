@@ -431,18 +431,30 @@ export default function Home() {
                 { label: 'Website', href: 'https://www.ambrosiaventures.co', external: true },
                 { label: 'Contact', href: 'mailto:info@ambrosiaventures.co', external: false },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ambrosia-ventures', external: true },
-                { label: 'Instagram', href: 'https://instagram.com/ambrosiaventures', external: true },
+                { label: 'Terms', href: '/terms', external: false },
+                { label: 'Privacy', href: '/privacy', external: false },
               ].map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.href}
-                  target={link.external ? '_blank' : undefined}
-                  rel={link.external ? 'noopener noreferrer' : undefined}
-                  className="hover:text-teal-400 transition-colors duration-300 relative group"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-400 group-hover:w-full transition-all duration-300" />
-                </a>
+                link.external ? (
+                  <a
+                    key={idx}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-teal-400 transition-colors duration-300 relative group"
+                  >
+                    {link.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-400 group-hover:w-full transition-all duration-300" />
+                  </a>
+                ) : (
+                  <Link
+                    key={idx}
+                    href={link.href}
+                    className="hover:text-teal-400 transition-colors duration-300 relative group"
+                  >
+                    {link.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-400 group-hover:w-full transition-all duration-300" />
+                  </Link>
+                )
               ))}
             </nav>
           </div>
