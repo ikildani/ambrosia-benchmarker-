@@ -86,7 +86,11 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
             width={isMobile ? 28 : 40}
             tickCount={isMobile ? 4 : 6}
           />
-          {!isMobile && <Tooltip content={<CustomTooltip />} />}
+          <Tooltip
+            content={<CustomTooltip />}
+            position={isMobile ? { x: 0, y: -60 } : undefined}
+            wrapperStyle={isMobile ? { zIndex: 10, pointerEvents: 'none' } : undefined}
+          />
           <ReferenceLine x={500} stroke="#E5E7EB" strokeDasharray="3 3" />
           <ReferenceLine x={1000} stroke="#E5E7EB" strokeDasharray="3 3" />
           <Area
