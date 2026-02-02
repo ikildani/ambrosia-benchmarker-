@@ -179,33 +179,33 @@
   },
   "multiplierConfig": {
     "biomarker": {
-      "selected": { "multiplier": 1.15, "label": "Biomarker-selected" },
-      "unselected": { "multiplier": 1.00, "label": "Broad / Unselected" }
+      "selected": { "multiplier": 1.15, "label": "Biomarker-selected", "context": "Enriched population improves response rates" },
+      "unselected": { "multiplier": 1.00, "label": "Broad / Unselected", "context": "Larger addressable population" }
     },
     "lineOfTherapy": {
-      "1L": { "multiplier": 1.25, "label": "First-line (1L)" },
-      "2L": { "multiplier": 1.00, "label": "Second-line (2L)" },
-      "3L+": { "multiplier": 0.85, "label": "Third-line+ (3L+)" }
+      "1L": { "multiplier": 1.25, "label": "First-line (1L)", "context": "Largest patient population, premium value" },
+      "2L": { "multiplier": 1.00, "label": "Second-line (2L)", "context": "Standard positioning baseline" },
+      "3L+": { "multiplier": 0.85, "label": "Third-line+ (3L+)", "context": "Smaller population, limited commercial potential" }
     },
     "combinationPotential": {
-      "strong": { "multiplier": 1.20, "label": "Strong combo backbone potential" },
-      "some": { "multiplier": 1.10, "label": "Some combo potential" },
-      "standalone": { "multiplier": 1.00, "label": "Standalone only" }
+      "strong": { "multiplier": 1.20, "label": "Strong combo backbone potential", "context": "Can anchor combination regimens" },
+      "some": { "multiplier": 1.10, "label": "Some combo potential", "context": "Compatible with SOC combinations" },
+      "standalone": { "multiplier": 1.00, "label": "Standalone only", "context": "Monotherapy positioning" }
     },
     "competitivePosition": {
-      "firstInClass": { "multiplier": 1.25, "label": "First-in-class, no competition" },
-      "firstToPivotal": { "multiplier": 1.15, "label": "First to pivotal trial" },
-      "bestInClass": { "multiplier": 1.10, "label": "Best-in-class potential" },
-      "racing": { "multiplier": 1.00, "label": "Racing with 1-2 others" },
-      "behind": { "multiplier": 0.80, "label": "Behind 3+ competitors" },
-      "crowded": { "multiplier": 0.70, "label": "Crowded with approved drugs" }
+      "firstInClass": { "multiplier": 1.25, "label": "First-in-class, no competition", "context": "Novel mechanism, maximum leverage" },
+      "firstToPivotal": { "multiplier": 1.15, "label": "First to pivotal trial", "context": "Lead position in development race" },
+      "bestInClass": { "multiplier": 1.10, "label": "Best-in-class potential", "context": "Differentiated profile vs competitors" },
+      "racing": { "multiplier": 1.00, "label": "Racing with 1-2 others", "context": "Competitive but manageable" },
+      "behind": { "multiplier": 0.80, "label": "Behind 3+ competitors", "context": "Significant competitive pressure" },
+      "crowded": { "multiplier": 0.70, "label": "Crowded with approved drugs", "context": "Must differentiate to gain share" }
     },
     "dataQuality": {
-      "pivotalReady": { "multiplier": 1.15, "label": "Pivotal-ready data" },
-      "strongPhase2": { "multiplier": 1.08, "label": "Strong Phase 2 (clear signal)" },
-      "promising": { "multiplier": 1.00, "label": "Promising early data" },
-      "mixed": { "multiplier": 0.85, "label": "Mixed / inconsistent results" },
-      "limited": { "multiplier": 0.75, "label": "Limited data" }
+      "pivotalReady": { "multiplier": 1.15, "label": "Pivotal-ready data", "context": "De-risked, ready for registration" },
+      "strongPhase2": { "multiplier": 1.08, "label": "Strong Phase 2 (clear signal)", "context": "Clear efficacy signal established" },
+      "promising": { "multiplier": 1.00, "label": "Promising early data", "context": "Encouraging but needs confirmation" },
+      "mixed": { "multiplier": 0.85, "label": "Mixed / inconsistent results", "context": "Efficacy uncertainty remains" },
+      "limited": { "multiplier": 0.75, "label": "Limited data", "context": "High clinical risk" }
     },
     "regulatoryDesignations": {
       "breakthrough": { "bonus": 0.12, "label": "Breakthrough Therapy" },
