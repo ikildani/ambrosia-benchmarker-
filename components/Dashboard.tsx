@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getHistory, deleteHistoryItem, clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
+import HistoryDetailModal from './HistoryDetailModal';
 
 interface DashboardProps {
   userName: string;
@@ -36,6 +37,8 @@ export default function Dashboard({
   const [saveMessage, setSaveMessage] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<CalculationHistoryItem | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   useEffect(() => {
     setHistory(getHistory());
@@ -59,6 +62,18 @@ export default function Dashboard({
   const handleDeleteHistory = (id: string) => {
     deleteHistoryItem(id);
     setHistory(getHistory());
+  };
+
+  const handleHistoryClick = (item: CalculationHistoryItem) => {
+    setSelectedHistoryItem(item);
+    setShowHistoryModal(true);
+  };
+
+  const handleReuseInputs = (item: CalculationHistoryItem) => {
+    // Store inputs in sessionStorage for calculator to pick up
+    sessionStorage.setItem('prefill_calculation', JSON.stringify(item.inputs));
+    setShowHistoryModal(false);
+    onNavigateToCalculator();
   };
 
   const handleSaveSettings = async () => {
@@ -156,7 +171,7 @@ export default function Dashboard({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20">
       {/* Header with Full Navigation */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -240,36 +255,36 @@ export default function Dashboard({
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-slate-200">
-              <nav className="flex flex-col gap-2">
+            <div className="md:hidden py-4 border-t border-slate-200 bg-white">
+              <nav className="flex flex-col gap-1">
                 <button
                   onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }}
-                  className="text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                  className="text-left px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors"
                 >
                   Home
                 </button>
                 <button
                   onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }}
-                  className="text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                  className="text-left px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors"
                 >
                   Calculator
                 </button>
                 <button
                   onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                  className="text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                  className="text-left px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors"
                 >
                   Pricing
                 </button>
                 <button
                   onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                  className="text-left px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                  className="text-left px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-medium transition-colors"
                 >
                   About
                 </button>
                 <hr className="my-2 border-slate-200" />
                 <button
                   onClick={onSignOut}
-                  className="text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium"
+                  className="text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
                 >
                   Sign Out
                 </button>
@@ -279,9 +294,9 @@ export default function Dashboard({
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Banner */}
-        <div className="mb-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">
+        <div className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
@@ -290,16 +305,16 @@ export default function Dashboard({
           </div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/20 rounded-full blur-3xl" />
 
-          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
-              <p className="text-slate-400 max-w-lg">
+          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
+            <div className="text-center lg:text-left">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
+              <p className="text-slate-400 text-sm sm:text-base max-w-lg">
                 Access your deal analysis tools, review past calculations, and download reports.
               </p>
             </div>
             <button
               onClick={onNavigateToCalculator}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl
                        shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,7 +326,7 @@ export default function Dashboard({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-1 mb-8 bg-slate-100 p-1 rounded-xl w-fit">
+        <div className="flex gap-1 mb-6 sm:mb-8 bg-slate-100 p-1 rounded-xl w-full sm:w-fit">
           {[
             { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
             { id: 'history', label: 'History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -320,16 +335,16 @@ export default function Dashboard({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-none ${
                 activeTab === tab.id
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
               </svg>
-              {tab.label}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -352,49 +367,49 @@ export default function Dashboard({
               </div>
 
               {history.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-xl border border-teal-200/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-lg sm:rounded-xl border border-teal-200/50">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-xs font-medium text-teal-700">Total Analyses</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-teal-700">Total Analyses</span>
                     </div>
-                    <p className="text-3xl font-bold text-teal-700">{history.length}</p>
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-700">{history.length}</p>
                   </div>
 
-                  <div className="p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-xl border border-cyan-200/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-lg sm:rounded-xl border border-cyan-200/50">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-xs font-medium text-cyan-700">Total Value Analyzed</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-cyan-700 truncate">Total Value</span>
                     </div>
-                    <p className="text-3xl font-bold text-cyan-700">
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-cyan-700">
                       {formatCurrency(history.reduce((sum, h) => sum + h.results.totalValueMedian, 0))}
                     </p>
                   </div>
 
-                  <div className="p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg sm:rounded-xl border border-blue-200/50">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
-                      <span className="text-xs font-medium text-blue-700">Most Common Phase</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-blue-700 truncate">Top Phase</span>
                     </div>
-                    <p className="text-xl font-bold text-blue-700 truncate">
+                    <p className="text-sm sm:text-lg lg:text-xl font-bold text-blue-700 truncate">
                       {topPhase}
                     </p>
                   </div>
 
-                  <div className="p-5 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl border border-indigo-200/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-lg sm:rounded-xl border border-indigo-200/50">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
-                      <span className="text-xs font-medium text-indigo-700">Top Modality</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-indigo-700 truncate">Top Modality</span>
                     </div>
-                    <p className="text-xl font-bold text-indigo-700 truncate">
+                    <p className="text-sm sm:text-lg lg:text-xl font-bold text-indigo-700 truncate">
                       {topModality}
                     </p>
                   </div>
@@ -423,8 +438,8 @@ export default function Dashboard({
 
             <div className="grid lg:grid-cols-3 gap-6">
             {/* Stats Cards */}
-            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm sm:col-span-2">
+            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm sm:col-span-2">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-slate-900">Subscription</h3>
                   {tier === 'free' && (
@@ -460,13 +475,23 @@ export default function Dashboard({
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h3 className="font-semibold text-slate-900 mb-4">Recent Activity</h3>
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+              <h3 className="font-semibold text-slate-900 mb-3 sm:mb-4 text-sm sm:text-base">Recent Activity</h3>
               {recentCalculations.length > 0 ? (
                 <div className="space-y-4">
                   {recentCalculations.map((item) => (
-                    <div key={item.id} className="flex items-start gap-3 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
-                      <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <div
+                      key={item.id}
+                      onClick={() => handleHistoryClick(item)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleHistoryClick(item)}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View ${item.labels.phase} ${item.labels.modality} calculation from ${formatDate(item.timestamp)}`}
+                      className="flex items-start gap-3 pb-4 border-b border-slate-100 last:border-0 last:pb-0
+                                 cursor-pointer hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-all duration-200
+                                 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
                         <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
@@ -479,6 +504,9 @@ export default function Dashboard({
                           {formatDate(item.timestamp)}
                         </p>
                       </div>
+                      <svg className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   ))}
                 </div>
@@ -513,10 +541,17 @@ export default function Dashboard({
             {history.length > 0 ? (
               <div className="divide-y divide-slate-100">
                 {history.map((item) => (
-                  <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-start justify-between gap-4">
+                  <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors history-item-clickable group">
+                    <div
+                      onClick={() => handleHistoryClick(item)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleHistoryClick(item)}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View calculation details for ${item.labels.phase} ${item.labels.modality}`}
+                      className="flex items-start justify-between gap-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 rounded-lg -m-2 p-2"
+                    >
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center flex-shrink-0 group-hover:from-teal-100 group-hover:to-cyan-100 transition-colors">
                           <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
@@ -538,20 +573,25 @@ export default function Dashboard({
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-slate-500">Upfront</p>
-                        <p className="font-semibold text-slate-900">
-                          {formatCurrency(item.results.upfrontMedian)}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-2">Total Value</p>
-                        <p className="font-semibold text-teal-600">
-                          {formatCurrency(item.results.totalValueMedian)}
-                        </p>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-sm text-slate-500">Upfront</p>
+                          <p className="font-semibold text-slate-900">
+                            {formatCurrency(item.results.upfrontMedian)}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-2">Total Value</p>
+                          <p className="font-semibold text-teal-600">
+                            {formatCurrency(item.results.totalValueMedian)}
+                          </p>
+                        </div>
+                        <svg className="w-5 h-5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
                       <button
-                        onClick={() => handleDeleteHistory(item.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDeleteHistory(item.id); }}
                         className="text-sm text-slate-500 hover:text-red-600 transition-colors"
                       >
                         Delete
@@ -932,6 +972,16 @@ export default function Dashboard({
           </div>
         )}
       </div>
+
+      {/* History Detail Modal */}
+      <HistoryDetailModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        item={selectedHistoryItem}
+        tier={tier}
+        onReuse={handleReuseInputs}
+        onUpgrade={onUpgrade}
+      />
     </div>
   );
 }

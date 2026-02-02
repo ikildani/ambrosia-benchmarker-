@@ -352,3 +352,65 @@ select::selection {
 .progress-bar-fill {
   @apply h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full transition-all duration-500;
 }
+
+/* Modal animations */
+@keyframes modalSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes backdropFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeInSimple {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-modal-slide-up {
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-backdrop-fade {
+  animation: backdropFade 0.25s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeInSimple 0.3s ease-out forwards;
+}
+
+/* History item hover effects */
+.history-item-clickable {
+  @apply relative overflow-hidden cursor-pointer;
+}
+
+.history-item-clickable::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-teal-500/5 to-transparent
+         -translate-x-full transition-transform duration-500 pointer-events-none;
+}
+
+.history-item-clickable:hover::after {
+  @apply translate-x-full;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-slide-up,
+  .animate-backdrop-fade,
+  .animate-fade-in,
+  .history-item-clickable::after {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

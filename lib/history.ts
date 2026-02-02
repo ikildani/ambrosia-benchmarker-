@@ -1,5 +1,12 @@
 // Calculation history management
 
+export interface RegulatoryDesignationsInput {
+  breakthrough: boolean;
+  fastTrack: boolean;
+  orphan: boolean;
+  prime: boolean;
+}
+
 export interface CalculationHistoryItem {
   id: string;
   timestamp: string;
@@ -8,6 +15,13 @@ export interface CalculationHistoryItem {
     modality: string;
     indication: string;
     territory: string;
+    // Extended inputs for full recalculation
+    biomarker?: string;
+    lineOfTherapy?: string;
+    combinationPotential?: string;
+    competitivePosition?: string;
+    dataQuality?: string;
+    regulatoryDesignations?: RegulatoryDesignationsInput;
   };
   results: {
     upfrontLow: number;
@@ -90,4 +104,35 @@ export function formatDate(isoString: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+// Default values for legacy history items missing extended inputs
+export const DEFAULT_EXTENDED_INPUTS = {
+  biomarker: 'unselected' as const,
+  lineOfTherapy: '2L' as const,
+  combinationPotential: 'some' as const,
+  competitivePosition: 'racing' as const,
+  dataQuality: 'promising' as const,
+  regulatoryDesignations: {
+    breakthrough: false,
+    fastTrack: false,
+    orphan: false,
+    prime: false,
+  },
+};
+
+// Get history item with defaults applied for legacy items
+export function getHistoryItemWithDefaults(item: CalculationHistoryItem): CalculationHistoryItem {
+  return {
+    ...item,
+    inputs: {
+      ...item.inputs,
+      biomarker: item.inputs.biomarker ?? DEFAULT_EXTENDED_INPUTS.biomarker,
+      lineOfTherapy: item.inputs.lineOfTherapy ?? DEFAULT_EXTENDED_INPUTS.lineOfTherapy,
+      combinationPotential: item.inputs.combinationPotential ?? DEFAULT_EXTENDED_INPUTS.combinationPotential,
+      competitivePosition: item.inputs.competitivePosition ?? DEFAULT_EXTENDED_INPUTS.competitivePosition,
+      dataQuality: item.inputs.dataQuality ?? DEFAULT_EXTENDED_INPUTS.dataQuality,
+      regulatoryDesignations: item.inputs.regulatoryDesignations ?? DEFAULT_EXTENDED_INPUTS.regulatoryDesignations,
+    },
+  };
 }
