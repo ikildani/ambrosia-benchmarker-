@@ -64,23 +64,23 @@ export default function CalculatorPage() {
   // Show loading state while auth is initializing
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
-          <p className="text-slate-600 font-medium">Loading...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-teal-200 dark:border-teal-800 border-t-teal-500 animate-spin" />
+          <p className="text-slate-600 dark:text-slate-300 font-medium">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Simplified Header */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-xl shadow-soft border-b border-neutral-100'
-            : 'bg-white/80 backdrop-blur-sm'
+            ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-soft border-b border-neutral-100 dark:border-slate-700'
+            : 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm'
         }`}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -89,7 +89,7 @@ export default function CalculatorPage() {
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 href="/"
-                className="flex items-center gap-1 sm:gap-2 text-slate-600 hover:text-teal-600 transition-colors group"
+                className="flex items-center gap-1 sm:gap-2 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors group"
               >
                 <svg
                   className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:-translate-x-1"

@@ -411,7 +411,7 @@ export default function Dashboard({
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-slate-900 leading-tight">{userName}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white leading-tight">{userName}</p>
                   <p className="text-xs text-slate-500">{userEmail}</p>
                 </div>
               </div>
@@ -491,7 +491,7 @@ export default function Dashboard({
 
         {/* Navigation Tabs */}
         <div className={`mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0 ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
-          <div className="flex gap-1.5 sm:gap-1 bg-slate-100 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
+          <div className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
             {[
               { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
               { id: 'history', label: 'History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -500,7 +500,7 @@ export default function Dashboard({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-[80px] sm:min-w-0 scroll-snap-center touch-feedback ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-md sm:shadow-sm' : 'text-slate-500 hover:text-slate-900 active:bg-white/50'}`}
+                className={`flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-[80px] sm:min-w-0 scroll-snap-center touch-feedback ${activeTab === tab.id ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md sm:shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:bg-white/50 dark:active:bg-slate-600/50'}`}
               >
                 <svg className={`w-4 h-4 flex-shrink-0 transition-colors ${activeTab === tab.id ? 'text-teal-600' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
@@ -587,7 +587,7 @@ export default function Dashboard({
                       </svg>
                     </div>
                   </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">Start Your Deal Journey</h4>
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Start Your Deal Journey</h4>
                   <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">Run your first analysis to unlock powerful insights, track your portfolio, and benchmark against industry standards.</p>
                   <button onClick={onNavigateToCalculator} className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -617,15 +617,15 @@ export default function Dashboard({
                 </div>
                 <div className="space-y-3">
                   {getPersonalizedInsights().map((insight, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${insight.iconBg}`}>
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${insight.iconBg} dark:opacity-90`}>
                         <svg className={`w-4 h-4 ${insight.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{insight.title}</p>
-                        <p className="text-xs text-slate-500">{insight.description}</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{insight.title}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{insight.description}</p>
                       </div>
                     </div>
                   ))}
@@ -636,7 +636,7 @@ export default function Dashboard({
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Subscription Card - Enhanced */}
               <div className={`lg:col-span-2 ${mounted ? 'animate-fade-in stagger-4' : 'opacity-0'}`}>
-                <div className={`bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border shadow-sm overflow-hidden relative ${tier === 'pro' ? 'border-teal-200' : 'border-slate-200'}`}>
+                <div className={`bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border shadow-sm overflow-hidden relative ${tier === 'pro' ? 'border-teal-200 dark:border-teal-700' : 'border-slate-200 dark:border-slate-700'}`}>
                   {tier === 'pro' && (
                     <>
                       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full blur-2xl" />
@@ -664,7 +664,7 @@ export default function Dashboard({
               </div>
 
               {/* Recent Activity */}
-              <div className={`bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm ${mounted ? 'animate-fade-in stagger-5' : 'opacity-0'}`}>
+              <div className={`bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-5' : 'opacity-0'}`}>
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Recent Activity</h3>
                 {recentCalculations.length > 0 ? (
                   <div className="space-y-4">
@@ -675,15 +675,15 @@ export default function Dashboard({
                         onKeyDown={(e) => e.key === 'Enter' && handleHistoryClick(item)}
                         role="button"
                         tabIndex={0}
-                        className={`flex items-start gap-3 pb-4 border-b border-slate-100 last:border-0 last:pb-0 cursor-pointer hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}
+                        className={`flex items-start gap-3 pb-4 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 -mx-2 px-2 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 dark:group-hover:bg-teal-900/50 transition-colors">
                           <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate">{item.labels.phase} • {item.labels.modality}</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.labels.phase} • {item.labels.modality}</p>
                           <p className="text-xs text-slate-500">{formatDate(item.timestamp)}</p>
                         </div>
                         <svg className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -694,7 +694,7 @@ export default function Dashboard({
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
                       <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -711,14 +711,14 @@ export default function Dashboard({
         {/* HISTORY TAB */}
         {activeTab === 'history' && (
           <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden ${mounted ? 'animate-fade-in' : 'opacity-0'}`}>
-            <div className="p-6 border-b border-slate-200">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
               <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
             </div>
 
             {/* Search and Filters */}
             {history.length > 0 && (
-              <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50">
+              <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -729,15 +729,15 @@ export default function Dashboard({
                       placeholder="Search calculations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                     />
                   </div>
                   <div className="flex gap-2">
-                    <select value={filterPhase} onChange={(e) => setFilterPhase(e.target.value)} className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[120px]">
+                    <select value={filterPhase} onChange={(e) => setFilterPhase(e.target.value)} className="px-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[120px]">
                       <option value="all">All Phases</option>
                       {uniquePhases.map(phase => <option key={phase} value={phase}>{phase}</option>)}
                     </select>
-                    <select value={filterModality} onChange={(e) => setFilterModality(e.target.value)} className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[130px]">
+                    <select value={filterModality} onChange={(e) => setFilterModality(e.target.value)} className="px-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[130px]">
                       <option value="all">All Modalities</option>
                       {uniqueModalities.map(mod => <option key={mod} value={mod}>{mod}</option>)}
                     </select>
@@ -751,11 +751,11 @@ export default function Dashboard({
                 <div>
                   {groupedHistory.map((group) => (
                     <div key={group.label}>
-                      <div className="px-6 py-3 bg-slate-100 border-b border-slate-200 sticky top-16 z-10">
-                        <h4 className="text-sm font-semibold text-slate-600">{group.label}</h4>
+                      <div className="px-6 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 sticky top-16 z-10">
+                        <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-300">{group.label}</h4>
                       </div>
                       {group.items.map((item, idx) => (
-                        <div key={item.id} className={`p-6 hover:bg-slate-50 transition-colors history-item-clickable group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}>
+                        <div key={item.id} className={`p-6 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors history-item-clickable group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}>
                           <div
                             onClick={() => handleHistoryClick(item)}
                             onKeyDown={(e) => e.key === 'Enter' && handleHistoryClick(item)}
@@ -774,7 +774,7 @@ export default function Dashboard({
                                   <p className="font-semibold text-slate-900 dark:text-white">{item.labels.phase}</p>
                                   {item.hasPDF && <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs font-medium rounded-full">PDF</span>}
                                 </div>
-                                <p className="text-sm text-slate-600">{item.labels.modality} • {item.labels.indication}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">{item.labels.modality} • {item.labels.indication}</p>
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                   <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs font-medium rounded">{formatCurrency(item.results.upfrontMedian)} upfront</span>
                                   <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 text-xs font-medium rounded">{formatCurrency(item.results.totalValueMedian)} total</span>
@@ -790,7 +790,7 @@ export default function Dashboard({
                               </svg>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
+                          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                             <button onClick={(e) => { e.stopPropagation(); handleDeleteHistory(item.id); }} className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 transition-colors">Delete</button>
                           </div>
                         </div>
@@ -800,7 +800,7 @@ export default function Dashboard({
                 </div>
               ) : (
                 <div className="p-12 text-center">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -892,7 +892,7 @@ export default function Dashboard({
                     type="text"
                     value={editName}
                     onChange={(e) => { setEditName(e.target.value); setFormErrors(prev => ({ ...prev, name: '' })); }}
-                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.name ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.name ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
                   />
                   {formErrors.name && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formErrors.name}</p>}
                 </div>
@@ -907,7 +907,7 @@ export default function Dashboard({
                     value={editPhone}
                     onChange={(e) => { setEditPhone(e.target.value); setFormErrors(prev => ({ ...prev, phone: '' })); }}
                     placeholder="+1 (555) 000-0000"
-                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.phone ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.phone ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
                   />
                   {formErrors.phone && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formErrors.phone}</p>}
                 </div>
@@ -918,7 +918,7 @@ export default function Dashboard({
                     value={editLinkedIn}
                     onChange={(e) => { setEditLinkedIn(e.target.value); setFormErrors(prev => ({ ...prev, linkedIn: '' })); }}
                     placeholder="linkedin.com/in/yourprofile"
-                    className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.linkedIn ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all ${formErrors.linkedIn ? 'border-red-300 bg-red-50' : 'border-slate-200'}`}
                   />
                   {formErrors.linkedIn && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formErrors.linkedIn}</p>}
                 </div>
@@ -952,7 +952,7 @@ export default function Dashboard({
                   </button>
                 ))}
               </div>
-              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400">Choose a color for your avatar across the dashboard</p>
+              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Choose a color for your avatar across the dashboard</p>
             </div>
 
             {/* Appearance */}
@@ -961,7 +961,7 @@ export default function Dashboard({
                 <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                   <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white dark:text-white">Appearance</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Appearance</h3>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {/* Light Mode */}
@@ -1030,7 +1030,7 @@ export default function Dashboard({
                   )}
                 </button>
               </div>
-              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400">
+              <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
                 {theme === 'system' ? `Currently using ${resolvedTheme} mode based on your system preference` : `Using ${theme} mode`}
               </p>
             </div>
@@ -1086,14 +1086,14 @@ export default function Dashboard({
                 <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
               </div>
 
-              <div className={`p-5 rounded-xl mb-6 ${tier === 'pro' ? 'bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200' : 'bg-slate-50 border border-slate-200'}`}>
+              <div className={`p-5 rounded-xl mb-6 ${tier === 'pro' ? 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 border border-teal-200 dark:border-teal-700' : 'bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${tier === 'pro' ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25' : 'bg-slate-200'}`}>
                       <svg className={`w-7 h-7 ${tier === 'pro' ? 'text-white' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-slate-900">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? '$99/month • Billed monthly' : 'Free forever'}</p>
                     </div>
                   </div>
@@ -1102,11 +1102,11 @@ export default function Dashboard({
               </div>
 
               {/* Feature Comparison */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="grid grid-cols-3 bg-slate-50 px-4 py-3 border-b border-slate-200">
-                  <span className="text-sm font-semibold text-slate-700">Feature</span>
-                  <span className="text-sm font-semibold text-slate-700 text-center">Free</span>
-                  <span className="text-sm font-semibold text-teal-700 text-center">Pro</span>
+              <div className="border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                <div className="grid grid-cols-3 bg-slate-50 dark:bg-slate-700 px-4 py-3 border-b border-slate-200 dark:border-slate-600">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Feature</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 text-center">Free</span>
+                  <span className="text-sm font-semibold text-teal-700 dark:text-teal-400 text-center">Pro</span>
                 </div>
                 {[
                   { feature: 'Monthly calculations', free: '2', pro: 'Unlimited' },
@@ -1115,8 +1115,8 @@ export default function Dashboard({
                   { feature: 'History retention', free: '30 days', pro: 'Forever' },
                   { feature: 'Priority support', free: false, pro: true },
                 ].map((row, idx) => (
-                  <div key={idx} className="grid grid-cols-3 px-4 py-3 border-b border-slate-100 last:border-0">
-                    <span className="text-sm text-slate-600">{row.feature}</span>
+                  <div key={idx} className="grid grid-cols-3 px-4 py-3 border-b border-slate-100 dark:border-slate-700 last:border-0 bg-white dark:bg-slate-800">
+                    <span className="text-sm text-slate-600 dark:text-slate-300">{row.feature}</span>
                     <span className="text-sm text-center">
                       {typeof row.free === 'boolean'
                         ? row.free
@@ -1146,9 +1146,9 @@ export default function Dashboard({
                 </div>
                 <h3 className="font-semibold text-slate-900 dark:text-white">Data & Privacy</h3>
               </div>
-              <button onClick={handleExportData} disabled={isExporting} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors group disabled:opacity-70">
+              <button onClick={handleExportData} disabled={isExporting} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-colors group disabled:opacity-70">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors relative overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60 transition-colors relative overflow-hidden">
                     {isExporting ? (
                       <svg className="w-5 h-5 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                     ) : (
@@ -1156,7 +1156,7 @@ export default function Dashboard({
                     )}
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-slate-900">{isExporting ? 'Exporting...' : 'Export All My Data'}</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{isExporting ? 'Exporting...' : 'Export All My Data'}</p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">{isExporting ? `${exportProgress}% complete` : 'Download your profile and calculation history'}</p>
                   </div>
                 </div>
@@ -1170,21 +1170,21 @@ export default function Dashboard({
             </div>
 
             {/* Account Actions */}
-            <div className={`bg-white rounded-2xl p-6 border border-red-200 shadow-sm ${mounted ? 'animate-fade-in stagger-5' : 'opacity-0'}`}>
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-red-200 dark:border-red-900/50 shadow-sm ${mounted ? 'animate-fade-in stagger-5' : 'opacity-0'}`}>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
-                <h3 className="font-semibold text-red-600">Account Actions</h3>
+                <h3 className="font-semibold text-red-600 dark:text-red-400">Account Actions</h3>
               </div>
               <div className="space-y-3">
-                <button onClick={onSignOut} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors group">
+                <button onClick={onSignOut} className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-colors group">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center group-hover:bg-slate-300 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-600 flex items-center justify-center group-hover:bg-slate-300 dark:group-hover:bg-slate-500 transition-colors">
                       <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     </div>
                     <div className="text-left">
-                      <p className="font-medium text-slate-900">Sign Out</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Sign Out</p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Sign out of your account on this device</p>
                     </div>
                   </div>

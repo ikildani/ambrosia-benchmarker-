@@ -806,3 +806,88 @@ select::selection {
 .dark .history-item-clickable::after {
   @apply via-teal-500/10;
 }
+
+/* Dark mode calculator styles */
+.dark .bg-gradient-subtle {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.dark .card-elevated {
+  @apply bg-slate-800 border-slate-700;
+}
+
+.dark .select-field {
+  @apply bg-slate-700 border-slate-600 text-slate-100;
+}
+
+.dark .select-field:hover {
+  @apply border-slate-500;
+}
+
+.dark .select-field:focus {
+  @apply border-teal-500 ring-teal-500/20;
+}
+
+.dark .select-field option {
+  @apply bg-slate-800 text-slate-100;
+}
+
+.dark .select-field optgroup {
+  @apply bg-slate-900 text-slate-400 font-semibold;
+}
+
+/* Dark mode text colors for calculator */
+.dark .text-navy-800 {
+  @apply text-slate-100;
+}
+
+.dark .text-neutral-700 {
+  @apply text-slate-300;
+}
+
+.dark .text-neutral-600 {
+  @apply text-slate-400;
+}
+
+.dark .text-neutral-500 {
+  @apply text-slate-400;
+}
+
+.dark .text-neutral-400 {
+  @apply text-slate-500;
+}
+
+/* Dark mode buttons */
+.dark .btn-secondary {
+  @apply bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:border-slate-500;
+}
+
+/* Dark mode checkboxes and labels */
+.dark .bg-white {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .border-neutral-200 {
+  @apply border-slate-600;
+}
+
+.dark .border-neutral-300 {
+  @apply border-slate-500;
+}
+
+/* Dark mode results section */
+.dark .bg-neutral-50 {
+  @apply bg-slate-700/50;
+}
+
+.dark .bg-neutral-100 {
+  @apply bg-slate-700;
+}
+
+.dark .text-neutral-900 {
+  @apply text-slate-100;
+}
+
+.dark .text-neutral-800 {
+  @apply text-slate-200;
+}
