@@ -173,7 +173,7 @@ export default function Dashboard({
       {/* Header with Full Navigation */}
       <header className="bg-white/95 backdrop-blur-lg border-b border-slate-200/80 sticky top-0 z-40 safe-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
               <Image
@@ -256,7 +256,7 @@ export default function Dashboard({
 
           {/* Mobile Navigation - Full-screen overlay */}
           {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 top-16 bg-white z-50 animate-mobile-menu overflow-y-auto safe-bottom">
+            <div className="md:hidden fixed inset-x-0 top-16 bottom-0 bg-white z-[100] animate-mobile-menu overflow-y-auto safe-bottom">
               <nav className="flex flex-col p-4 gap-1">
                 {/* Navigation Links */}
                 <button
