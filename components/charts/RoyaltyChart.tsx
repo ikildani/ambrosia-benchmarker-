@@ -53,17 +53,18 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
   };
 
   return (
-    <div className="w-full h-32 sm:h-56 mb-2">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{
-            top: 5,
-            right: isMobile ? 5 : 30,
-            left: 0,
-            bottom: isMobile ? 5 : 10
-          }}
-        >
+    <div className="w-full">
+      <div className="h-32 sm:h-52">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={data}
+            margin={{
+              top: 5,
+              right: isMobile ? 5 : 30,
+              left: 0,
+              bottom: isMobile ? 5 : 10
+            }}
+          >
           <defs>
             <linearGradient id="royaltyGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
@@ -110,6 +111,7 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           />
         </AreaChart>
       </ResponsiveContainer>
+      </div>
       <div className="hidden sm:flex justify-center gap-8 mt-4 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-4 h-0.5 bg-teal-600"></div>
