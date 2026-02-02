@@ -54,8 +54,8 @@ const initialFilters: Filters = {
   dealType: [],
   minUpfront: '',
   maxUpfront: '',
-  yearFrom: '',
-  yearTo: '',
+  yearFrom: '2019',
+  yearTo: '2026',
   termsDisclosed: false,
   search: '',
 };

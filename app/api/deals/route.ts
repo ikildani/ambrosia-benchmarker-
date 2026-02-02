@@ -84,13 +84,15 @@ export async function GET(request: NextRequest) {
     }
 
     const yearFrom = searchParams.get('year_from');
-    if (yearFrom) {
-      query = query.gte('announced_date', `${yearFrom}-01-01`);
-    }
-
     const yearTo = searchParams.get('year_to');
-    if (yearTo) {
-      query = query.lte('announced_date', `${yearTo}-12-31`);
+
+    // Apply date filter - include NULL dates OR dates within range
+    if (yearFrom && yearTo) {
+      query = query.or(`announced_date.is.null,and(announced_date.gte.${yearFrom}-01-01,announced_date.lte.${yearTo}-12-31)`);
+    } else if (yearFrom) {
+      query = query.or(`announced_date.is.null,announced_date.gte.${yearFrom}-01-01`);
+    } else if (yearTo) {
+      query = query.or(`announced_date.is.null,announced_date.lte.${yearTo}-12-31`);
     }
 
     const termsDisclosed = searchParams.get('terms_disclosed');
