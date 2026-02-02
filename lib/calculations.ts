@@ -220,52 +220,52 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const phaseConfig = benchmarks.phaseConfig;
 
   // Get multipliers from benchmarks
-  const modalityData = benchmarks.modalities[input.modality];
+  const modalityData = benchmarks.modalities[input.modality] as { multiplier: number; label: string; context?: string } | undefined;
   const modalityMultiplier = modalityData?.multiplier ?? 1.0;
   modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData?.context });
 
   // Get indication multiplier
   const category = getIndicationCategory(input.indication);
-  const indicationsCategory = benchmarks.indications[category] as Record<string, { multiplier: number; label: string }>;
+  const indicationsCategory = benchmarks.indications[category] as Record<string, { multiplier: number; label: string; context?: string }>;
   const indicationData = indicationsCategory[input.indication];
   const indicationMultiplier = indicationData?.multiplier ?? 1.0;
   modifiers.push({ name: indicationData?.label ?? input.indication, multiplier: indicationMultiplier, context: indicationData?.context });
 
   // Get territory multiplier
-  const territoryData = benchmarks.territories[input.territory];
+  const territoryData = benchmarks.territories[input.territory] as { multiplier: number; label: string; context?: string } | undefined;
   const territoryMultiplier = territoryData?.multiplier ?? 1.0;
   modifiers.push({ name: territoryData?.label ?? input.territory, multiplier: territoryMultiplier, context: territoryData?.context });
 
   // Get biomarker multiplier
-  const biomarkerData = benchmarks.multiplierConfig.biomarker[input.biomarker];
+  const biomarkerData = benchmarks.multiplierConfig.biomarker[input.biomarker] as { multiplier: number; label: string; context?: string } | undefined;
   const biomarkerMultiplier = biomarkerData?.multiplier ?? 1.0;
   if (biomarkerMultiplier !== 1.0) {
     modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier, context: biomarkerData?.context });
   }
 
   // Get line of therapy multiplier
-  const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy];
+  const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy] as { multiplier: number; label: string; context?: string } | undefined;
   const lotMultiplier = lotData?.multiplier ?? 1.0;
   if (lotMultiplier !== 1.0) {
     modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier, context: lotData?.context });
   }
 
   // Get combination potential multiplier
-  const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential];
+  const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential] as { multiplier: number; label: string; context?: string } | undefined;
   const comboMultiplier = comboData?.multiplier ?? 1.0;
   if (comboMultiplier !== 1.0) {
     modifiers.push({ name: comboData?.label ?? input.combinationPotential, multiplier: comboMultiplier, context: comboData?.context });
   }
 
   // Get competitive position multiplier
-  const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
+  const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition] as { multiplier: number; label: string; context?: string } | undefined;
   const competitiveMultiplier = compData?.multiplier ?? 1.0;
   if (competitiveMultiplier !== 1.0) {
     modifiers.push({ name: compData?.label ?? input.competitivePosition, multiplier: competitiveMultiplier, context: compData?.context });
   }
 
   // Get data quality multiplier
-  const dataData = benchmarks.multiplierConfig.dataQuality[input.dataQuality];
+  const dataData = benchmarks.multiplierConfig.dataQuality[input.dataQuality] as { multiplier: number; label: string; context?: string } | undefined;
   const dataQualityMultiplier = dataData?.multiplier ?? 1.0;
   if (dataQualityMultiplier !== 1.0) {
     modifiers.push({ name: dataData?.label ?? input.dataQuality, multiplier: dataQualityMultiplier, context: dataData?.context });
