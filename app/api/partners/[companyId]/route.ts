@@ -14,6 +14,7 @@ export async function GET(
     const userId = searchParams.get('user_id');
     const sessionId = searchParams.get('session_id');
     const anonymousId = searchParams.get('anonymous_id');
+    const clientTier = searchParams.get('tier'); // Accept tier from frontend
 
     // Verify user tier (Pro required for full profiles)
     let userTier: 'free' | 'pro' = 'free';
@@ -26,6 +27,11 @@ export async function GET(
         .single();
 
       userTier = (profile?.tier as 'free' | 'pro') || 'free';
+    }
+
+    // Use client-provided tier as fallback (for localStorage auth users)
+    if (userTier === 'free' && clientTier === 'pro') {
+      userTier = 'pro';
     }
 
     // Free users can't access detailed profiles

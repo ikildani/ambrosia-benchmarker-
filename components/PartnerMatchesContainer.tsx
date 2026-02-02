@@ -53,6 +53,7 @@ export default function PartnerMatchesContainer({
           indication_category: indicationCategory,
           indication_specific: indicationSpecific,
           territory_scope: mapTerritory(territory),
+          tier: tier, // Pass tier from frontend as fallback
         }),
       });
 

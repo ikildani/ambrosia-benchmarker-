@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
       indication_category,
       indication_specific,
       territory_scope,
+      tier: clientTier, // Accept tier from frontend as fallback
     } = body;
 
     // Validate required fields
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine user tier
+    // Determine user tier - check database first, then use client tier as fallback
     let userTier: 'free' | 'pro' = 'free';
     let authenticatedUserId: string | null = null;
 
@@ -48,6 +49,11 @@ export async function POST(request: NextRequest) {
         authenticatedUserId = profile.id;
         userTier = (profile.tier as 'free' | 'pro') || 'free';
       }
+    }
+
+    // Use client-provided tier as fallback (for localStorage auth users)
+    if (userTier === 'free' && clientTier === 'pro') {
+      userTier = 'pro';
     }
 
     // Build match input
