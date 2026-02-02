@@ -90,12 +90,12 @@ export default function ChartSection({
           {isPro ? (
             <>
               {/* Tabs */}
-              <div className="flex border-b border-neutral-200 overflow-x-auto">
+              <div className="flex border-b border-neutral-200 overflow-x-auto gap-1 sm:gap-2">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                       activeTab === tab.id
                         ? 'text-teal-600 border-b-2 border-teal-500 -mb-px bg-teal-50/50'
                         : 'text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50'
