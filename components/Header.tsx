@@ -5,14 +5,16 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Avatar gradient options (synced with Dashboard.tsx)
+// Avatar gradient options - premium color combinations (synced with Dashboard.tsx)
 const AVATAR_GRADIENTS = [
-  { id: 'teal-cyan', from: 'from-teal-500', to: 'to-cyan-500', label: 'Teal' },
-  { id: 'purple-pink', from: 'from-purple-500', to: 'to-pink-500', label: 'Purple' },
-  { id: 'blue-indigo', from: 'from-blue-500', to: 'to-indigo-500', label: 'Blue' },
-  { id: 'orange-red', from: 'from-orange-500', to: 'to-red-500', label: 'Orange' },
-  { id: 'green-emerald', from: 'from-green-500', to: 'to-emerald-500', label: 'Green' },
-  { id: 'rose-pink', from: 'from-rose-500', to: 'to-pink-400', label: 'Rose' },
+  { id: 'ocean', from: 'from-cyan-500', to: 'to-blue-600', label: 'Ocean' },
+  { id: 'aurora', from: 'from-violet-500', to: 'to-fuchsia-500', label: 'Aurora' },
+  { id: 'sunset', from: 'from-orange-400', to: 'to-rose-500', label: 'Sunset' },
+  { id: 'forest', from: 'from-emerald-500', to: 'to-teal-600', label: 'Forest' },
+  { id: 'midnight', from: 'from-indigo-600', to: 'to-purple-700', label: 'Midnight' },
+  { id: 'ember', from: 'from-amber-500', to: 'to-orange-600', label: 'Ember' },
+  { id: 'sakura', from: 'from-pink-400', to: 'to-rose-500', label: 'Sakura' },
+  { id: 'slate', from: 'from-slate-500', to: 'to-zinc-600', label: 'Slate' },
 ];
 
 function getAvatarGradient(id: string | null) {
@@ -42,7 +44,7 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [avatarGradientId, setAvatarGradientId] = useState<string>('teal-cyan');
+  const [avatarGradientId, setAvatarGradientId] = useState<string>('ocean');
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Load avatar from localStorage
