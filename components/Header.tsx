@@ -5,6 +5,20 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
+// Avatar gradient options (synced with Dashboard.tsx)
+const AVATAR_GRADIENTS = [
+  { id: 'teal-cyan', from: 'from-teal-500', to: 'to-cyan-500', label: 'Teal' },
+  { id: 'purple-pink', from: 'from-purple-500', to: 'to-pink-500', label: 'Purple' },
+  { id: 'blue-indigo', from: 'from-blue-500', to: 'to-indigo-500', label: 'Blue' },
+  { id: 'orange-red', from: 'from-orange-500', to: 'to-red-500', label: 'Orange' },
+  { id: 'green-emerald', from: 'from-green-500', to: 'to-emerald-500', label: 'Green' },
+  { id: 'rose-pink', from: 'from-rose-500', to: 'to-pink-400', label: 'Rose' },
+];
+
+function getAvatarGradient(id: string | null) {
+  return AVATAR_GRADIENTS.find(g => g.id === id) || AVATAR_GRADIENTS[0];
+}
+
 interface HeaderProps {
   isAuthenticated?: boolean;
   userName?: string;
@@ -28,7 +42,23 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [avatarGradientId, setAvatarGradientId] = useState<string>('teal-cyan');
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Load avatar from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        if (parsed.avatarGradient) {
+          setAvatarGradientId(parsed.avatarGradient);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
 
   // Determine if we're on the landing page
   const isLandingPage = pathname === '/';
@@ -159,7 +189,7 @@ export default function Header({
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                  <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarGradient(avatarGradientId).from} ${getAvatarGradient(avatarGradientId).to} flex items-center justify-center text-white text-sm font-semibold shadow-sm`}>
                     {userName ? getInitials(userName) : 'U'}
                   </div>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-200 hidden sm:block">
@@ -181,7 +211,7 @@ export default function Header({
                     {/* User Info Header */}
                     <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-lg font-semibold shadow-md">
+                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarGradient(avatarGradientId).from} ${getAvatarGradient(avatarGradientId).to} flex items-center justify-center text-white text-lg font-semibold shadow-md`}>
                           {userName ? getInitials(userName) : 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -383,7 +413,7 @@ export default function Header({
                   {/* User Info Card */}
                   <div className="my-4 px-4 py-3 bg-slate-50 rounded-2xl">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarGradient(avatarGradientId).from} ${getAvatarGradient(avatarGradientId).to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
                         {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                       </div>
                       <div className="flex-1 min-w-0">

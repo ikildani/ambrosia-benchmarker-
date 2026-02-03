@@ -6,6 +6,20 @@ import { getHistory, deleteHistoryItem, clearHistory, formatDate, type Calculati
 import { useTheme } from '@/lib/theme';
 import HistoryDetailModal from './HistoryDetailModal';
 
+// Avatar gradient options
+const AVATAR_GRADIENTS = [
+  { id: 'teal-cyan', from: 'from-teal-500', to: 'to-cyan-500', label: 'Teal' },
+  { id: 'purple-pink', from: 'from-purple-500', to: 'to-pink-500', label: 'Purple' },
+  { id: 'blue-indigo', from: 'from-blue-500', to: 'to-indigo-500', label: 'Blue' },
+  { id: 'orange-red', from: 'from-orange-500', to: 'to-red-500', label: 'Orange' },
+  { id: 'green-emerald', from: 'from-green-500', to: 'to-emerald-500', label: 'Green' },
+  { id: 'rose-pink', from: 'from-rose-500', to: 'to-pink-400', label: 'Rose' },
+];
+
+function getAvatarGradient(id: string | null) {
+  return AVATAR_GRADIENTS.find(g => g.id === id) || AVATAR_GRADIENTS[0];
+}
+
 function AppearanceSettings() {
   const { theme, setTheme } = useTheme();
 
@@ -128,6 +142,7 @@ export default function Dashboard({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('teal-cyan');
 
   useEffect(() => {
     setHistory(getHistory());
@@ -142,6 +157,7 @@ export default function Dashboard({
         setEditLinkedIn(parsed.linkedIn || '');
         setEditRole(parsed.role || '');
         setMemberSince(parsed.createdAt || new Date().toISOString());
+        setSelectedAvatar(parsed.avatarGradient || 'teal-cyan');
       } catch {
         // ignore
       }
@@ -178,6 +194,7 @@ export default function Dashboard({
         parsed.phone = editPhone;
         parsed.linkedIn = editLinkedIn;
         parsed.role = editRole;
+        parsed.avatarGradient = selectedAvatar;
         localStorage.setItem('user_data', JSON.stringify(parsed));
       }
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -317,7 +334,7 @@ export default function Dashboard({
 
               {/* User Avatar/Dropdown */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-teal-500/20">
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-teal-500/20`}>
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden sm:block">
@@ -402,7 +419,7 @@ export default function Dashboard({
             {/* User Section */}
             <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -782,7 +799,7 @@ export default function Dashboard({
               <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl" />
 
               <div className="relative flex flex-col sm:flex-row items-center gap-6">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-4xl font-bold shadow-xl shadow-teal-500/30">
+                <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-4xl font-bold shadow-xl shadow-teal-500/30`}>
                   {editName.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-center sm:text-left flex-1">
@@ -811,6 +828,31 @@ export default function Dashboard({
                     {saveMessage}
                   </div>
                 )}
+              </div>
+
+              {/* Avatar Color Selection */}
+              <div className="relative mt-6 pt-6 border-t border-slate-700/50">
+                <p className="text-sm font-medium text-slate-400 mb-3">Choose Avatar Color</p>
+                <div className="flex flex-wrap gap-3">
+                  {AVATAR_GRADIENTS.map((gradient) => (
+                    <button
+                      key={gradient.id}
+                      onClick={() => setSelectedAvatar(gradient.id)}
+                      className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient.from} ${gradient.to} flex items-center justify-center transition-all ${
+                        selectedAvatar === gradient.id
+                          ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110'
+                          : 'hover:scale-105 opacity-70 hover:opacity-100'
+                      }`}
+                      title={gradient.label}
+                    >
+                      {selectedAvatar === gradient.id && (
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
