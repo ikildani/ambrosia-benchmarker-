@@ -83,18 +83,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize from localStorage on mount
   useEffect(() => {
-    // Check for Stripe success redirect
+    // SECURITY: Removed URL parameter tier upgrade (?success=true)
+    // Tier upgrades should ONLY happen via verified Stripe webhook
+    // The webhook updates the database, and we verify tier server-side
+
+    // Clean up any success parameter from URL (user may have bookmarked it)
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
-      setTierState('pro');
-      localStorage.setItem('user_tier', 'pro');
       window.history.replaceState({}, '', window.location.pathname);
+      // Note: Tier will be verified from database on next API call
     }
 
-    // Load saved tier
+    // SECURITY: localStorage tier is for UI display only, not authorization
+    // All Pro features must be verified server-side against the database
     const savedTier = localStorage.getItem('user_tier');
     if (savedTier === 'pro') {
-      setTierState('pro');
+      setTierState('pro'); // UI hint only - server will verify
     }
 
     // Load auth state

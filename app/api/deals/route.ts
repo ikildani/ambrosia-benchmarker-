@@ -10,8 +10,10 @@ export async function GET(request: NextRequest) {
 
     // Get user tier from query params
     const email = searchParams.get('email');
-    const clientTier = searchParams.get('tier');
+    // SECURITY: Removed clientTier - never trust client-provided tier
+    // const clientTier = searchParams.get('tier');
 
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
 
     if (email) {
@@ -24,10 +26,8 @@ export async function GET(request: NextRequest) {
       userTier = (profile?.tier as 'free' | 'pro') || 'free';
     }
 
-    // Use client-provided tier as fallback
-    if (userTier === 'free' && clientTier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
+    // Tier must be verified from database only
 
     // Build query
     let query = supabase

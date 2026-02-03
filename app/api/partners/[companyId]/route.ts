@@ -14,9 +14,10 @@ export async function GET(
     const userId = searchParams.get('user_id');
     const sessionId = searchParams.get('session_id');
     const anonymousId = searchParams.get('anonymous_id');
-    const clientTier = searchParams.get('tier'); // Accept tier from frontend
+    // SECURITY: Removed clientTier - never trust client-provided tier
+    // const clientTier = searchParams.get('tier');
 
-    // Verify user tier (Pro required for full profiles)
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
 
     if (userId) {
@@ -29,10 +30,8 @@ export async function GET(
       userTier = (profile?.tier as 'free' | 'pro') || 'free';
     }
 
-    // Use client-provided tier as fallback (for localStorage auth users)
-    if (userTier === 'free' && clientTier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
+    // Tier must be verified from database only
 
     // Free users can't access detailed profiles
     if (userTier !== 'pro') {

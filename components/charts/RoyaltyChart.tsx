@@ -52,8 +52,43 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
     return null;
   };
 
+  // A11Y-002: Generate accessible description for screen readers
+  const chartDescription = `Tiered royalty chart showing: Base tier (under $500M sales) ${royalties.base.low}%-${royalties.base.high}%, Mid tier ($500M-$1B sales) ${royalties.midTier.low}%-${royalties.midTier.high}%, High tier (over $1B sales) ${royalties.highTier.low}%-${royalties.highTier.high}%.`;
+
   return (
-    <div className="w-full">
+    <div className="w-full" role="img" aria-label={chartDescription}>
+      {/* A11Y: Hidden table for screen reader users */}
+      <table className="sr-only" aria-label="Tiered royalty rates">
+        <caption>Royalty rates by annual sales tier</caption>
+        <thead>
+          <tr>
+            <th scope="col">Sales Tier</th>
+            <th scope="col">Sales Range</th>
+            <th scope="col">Low Rate</th>
+            <th scope="col">High Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Base Tier</td>
+            <td>Under $500M</td>
+            <td>{royalties.base.low}%</td>
+            <td>{royalties.base.high}%</td>
+          </tr>
+          <tr>
+            <td>Mid Tier</td>
+            <td>$500M - $1B</td>
+            <td>{royalties.midTier.low}%</td>
+            <td>{royalties.midTier.high}%</td>
+          </tr>
+          <tr>
+            <td>High Tier</td>
+            <td>Over $1B</td>
+            <td>{royalties.highTier.low}%</td>
+            <td>{royalties.highTier.high}%</td>
+          </tr>
+        </tbody>
+      </table>
       <div className="h-32 sm:h-52">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
@@ -114,11 +149,11 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
       </div>
       <div className="hidden sm:flex justify-center gap-12 mt-6 text-xs">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-0.5 bg-teal-600 rounded"></div>
+          <div className="w-6 h-0.5 bg-teal-600 rounded" aria-hidden="true"></div>
           <span className="text-neutral-600">Low Range</span>
         </div>
         <div className="flex items-center gap-3">
-          <svg className="w-6 h-2" viewBox="0 0 24 2">
+          <svg className="w-6 h-2" viewBox="0 0 24 2" aria-hidden="true">
             <line x1="0" y1="1" x2="24" y2="1" stroke="#14B8A6" strokeWidth="2" strokeDasharray="4 2" />
           </svg>
           <span className="text-neutral-600">High Range</span>
