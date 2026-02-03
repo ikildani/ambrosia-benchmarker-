@@ -19,6 +19,13 @@ import {
   Clock,
   Pill,
 } from 'lucide-react';
+import { ScoreBreakdown } from './ScoreBreakdown';
+import type {
+  DetailedScoreBreakdown,
+  WatchOutFactor,
+  RelevantDeal,
+  StrategicContext,
+} from '@/types/partner-breakdown';
 
 interface MatchReason {
   category: string;
@@ -51,6 +58,11 @@ interface PartnerMatch {
   acquisition_appetite?: string | null;
   data_quality_score?: number;
   profile_locked: boolean;
+  // Enhanced breakdown (Pro tier only)
+  detailed_breakdown?: DetailedScoreBreakdown | null;
+  watch_outs?: WatchOutFactor[] | null;
+  relevant_deals?: RelevantDeal[] | null;
+  strategic_context?: StrategicContext | null;
 }
 
 interface UpgradeCTA {
@@ -119,6 +131,14 @@ interface CompanyProfile {
   };
 }
 
+interface UserAsset {
+  modality: string;
+  phase: string;
+  indication_category: string | null;
+  indication_specific: string | null;
+  territory: string | null;
+}
+
 interface PartnerMatchesProps {
   calculationId?: string;
   sessionId?: string;
@@ -131,6 +151,8 @@ interface PartnerMatchesProps {
   upgradeCta?: UpgradeCTA | null;
   advisoryCta?: AdvisoryCTA | null;
   onUpgradeClick: () => void;
+  // User's asset for outreach generation
+  userAsset?: UserAsset;
 }
 
 export function PartnerMatches({
@@ -145,6 +167,7 @@ export function PartnerMatches({
   upgradeCta,
   advisoryCta,
   onUpgradeClick,
+  userAsset,
 }: PartnerMatchesProps) {
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
   const [partnerDetails, setPartnerDetails] = useState<CompanyProfile | null>(null);
@@ -343,6 +366,23 @@ export function PartnerMatches({
 
             {/* Expanded Profile (Pro Only) */}
             {expandedPartner === match.company_id && !match.profile_locked && (
+              <>
+                {/* Enhanced Score Breakdown (when available) */}
+                {match.detailed_breakdown && userAsset ? (
+                  <ScoreBreakdown
+                    companyId={match.company_id}
+                    companyName={match.company_name}
+                    matchScore={match.match_score}
+                    detailedBreakdown={match.detailed_breakdown}
+                    watchOuts={match.watch_outs || null}
+                    approachStrategy={null}
+                    relevantDeals={match.relevant_deals || null}
+                    strategicContext={match.strategic_context || null}
+                    userAsset={userAsset}
+                    userId={userId}
+                    sessionId={sessionId}
+                  />
+                ) : (
               <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4 bg-gradient-to-b from-gray-50/50 dark:from-slate-700/50 to-white dark:to-slate-800">
                 {loadingDetails ? (
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 py-4">
@@ -560,6 +600,8 @@ export function PartnerMatches({
                   </div>
                 )}
               </div>
+                )}
+              </>
             )}
           </div>
         ))}

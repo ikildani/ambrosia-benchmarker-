@@ -145,6 +145,15 @@ export default function PartnerMatchesContainer({
     );
   }
 
+  // Build user asset context for outreach generation
+  const userAsset = {
+    modality: mapModality(modality),
+    phase: mapPhase(phase),
+    indication_category: indicationCategory,
+    indication_specific: indicationSpecific,
+    territory: mapTerritory(territory),
+  };
+
   return (
     <PartnerMatches
       calculationId={calculationId}
@@ -158,6 +167,7 @@ export default function PartnerMatchesContainer({
       upgradeCta={upgradeCta}
       advisoryCta={advisoryCta}
       onUpgradeClick={onUpgrade}
+      userAsset={userAsset}
     />
   );
 }

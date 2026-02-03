@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { findPartnerMatches, MatchInput } from '@/lib/services/partner-matching';
+import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 
 // Tier-based match limits
 const MATCH_LIMITS = {
@@ -64,8 +64,14 @@ export async function POST(request: NextRequest) {
       territory_scope: territory_scope || null,
     };
 
+    // Build options - include enhanced breakdown for Pro tier
+    const matchOptions: FindPartnerMatchesOptions = {
+      limit: 50,
+      includeEnhancedBreakdown: userTier === 'pro',
+    };
+
     // Find matches
-    const result = await findPartnerMatches(supabase, matchInput, 50);
+    const result = await findPartnerMatches(supabase, matchInput, matchOptions);
 
     // Determine how many to show based on tier
     const matchLimit = MATCH_LIMITS[userTier];
@@ -93,7 +99,7 @@ export async function POST(request: NextRequest) {
           avg_upfront_usd: null,
         };
       } else {
-        // Pro tier: full profile data
+        // Pro tier: full profile data with enhanced breakdown
         return {
           rank: index + 1,
           company_id: match.company_id,
@@ -120,6 +126,11 @@ export async function POST(request: NextRequest) {
           acquisition_appetite: match.acquisition_appetite,
           data_quality_score: match.data_quality_score,
           profile_locked: false,
+          // Enhanced breakdown (Pro tier only)
+          detailed_breakdown: match.detailed_breakdown || null,
+          watch_outs: match.watch_outs || null,
+          relevant_deals: match.relevant_deals || null,
+          strategic_context: match.strategic_context || null,
         };
       }
     });

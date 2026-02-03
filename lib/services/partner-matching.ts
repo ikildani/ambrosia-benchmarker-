@@ -2,6 +2,16 @@
 // Matches user's asset profile to potential acquirers/licensees
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import {
+  DetailedScoreBreakdown,
+  ScoreFactor,
+  EvidenceLine,
+  WatchOutFactor,
+  RelevantDeal,
+  StrategicContext,
+  PatentCliff,
+  EnhancedPartnerMatchData,
+} from '@/types/partner-breakdown';
 
 // Scoring weights - tuned for deal relevance
 const WEIGHTS = {
@@ -111,6 +121,12 @@ export interface PartnerMatch {
   acquisition_appetite: string | null;
   strategic_priorities: string[];
   data_quality_score: number;
+
+  // Enhanced breakdown data (Pro tier only)
+  detailed_breakdown?: DetailedScoreBreakdown;
+  watch_outs?: WatchOutFactor[];
+  relevant_deals?: RelevantDeal[];
+  strategic_context?: StrategicContext;
 }
 
 export interface MatchReason {
@@ -136,11 +152,17 @@ export interface MatchResult {
   generated_at: string;
 }
 
+export interface FindPartnerMatchesOptions {
+  limit?: number;
+  includeEnhancedBreakdown?: boolean; // Pro tier: include detailed breakdown, watch-outs, etc.
+}
+
 export async function findPartnerMatches(
   supabase: SupabaseClient,
   input: MatchInput,
-  limit: number = 50
+  options: FindPartnerMatchesOptions = {}
 ): Promise<MatchResult> {
+  const { limit = 50, includeEnhancedBreakdown = false } = options;
   // Fetch all actively acquiring companies with good data
   const { data: companies, error } = await supabase
     .from('companies')
@@ -166,12 +188,39 @@ export async function findPartnerMatches(
   // Score each company
   const scoredMatches: PartnerMatch[] = [];
 
+  // Pre-fetch deals for all companies if enhanced breakdown is needed
+  // This is more efficient than fetching per-company
+  let companyDealsMap: Map<string, any[]> = new Map();
+  if (includeEnhancedBreakdown) {
+    const companyIds = companies.map((c) => c.id);
+    const { data: allDeals } = await supabase
+      .from('deals')
+      .select(
+        'id, asset_name, licensor_id, licensee_id, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
+      )
+      .or(`licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`)
+      .gte('announced_date', new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString())
+      .order('announced_date', { ascending: false });
+
+    if (allDeals) {
+      for (const deal of allDeals) {
+        const licensorDeals = companyDealsMap.get(deal.licensor_id) || [];
+        licensorDeals.push(deal);
+        companyDealsMap.set(deal.licensor_id, licensorDeals);
+
+        const licenseeDeals = companyDealsMap.get(deal.licensee_id) || [];
+        licenseeDeals.push(deal);
+        companyDealsMap.set(deal.licensee_id, licenseeDeals);
+      }
+    }
+  }
+
   for (const company of companies) {
     const { score, breakdown, reasons } = calculateMatchScore(company, input);
 
     // Only include meaningful matches (score >= 15)
     if (score >= 15) {
-      scoredMatches.push({
+      const match: PartnerMatch = {
         company_id: company.id,
         company_name: company.name,
         company_type: company.company_type,
@@ -197,7 +246,30 @@ export async function findPartnerMatches(
         acquisition_appetite: company.acquisition_appetite,
         strategic_priorities: company.strategic_priorities || [],
         data_quality_score: company.data_quality_score || 0,
-      });
+      };
+
+      // Add enhanced breakdown for Pro tier
+      if (includeEnhancedBreakdown) {
+        const companyDeals = companyDealsMap.get(company.id) || [];
+        match.detailed_breakdown = buildDetailedBreakdown(company, input, breakdown, companyDeals);
+        match.watch_outs = calculateWatchOuts(company, input, companyDeals);
+        match.strategic_context = buildStrategicContext(company);
+        match.relevant_deals = companyDeals.slice(0, 5).map((deal) => ({
+          id: deal.id,
+          asset_name: deal.asset_name || 'Undisclosed',
+          partner_name: deal.licensor_name || deal.licensee_name || 'Unknown',
+          modality: deal.modality,
+          indication: deal.indication_specific || deal.indication_category,
+          phase: deal.phase_at_signing,
+          total_value_usd: deal.total_deal_value_usd,
+          upfront_usd: deal.upfront_usd,
+          announced_date: deal.announced_date,
+          deal_type: deal.deal_type,
+          relevance: generateDealRelevance(deal),
+        }));
+      }
+
+      scoredMatches.push(match);
     }
   }
 
@@ -467,3 +539,545 @@ export const formatters = {
   indication: formatIndication,
   indicationCategory: formatIndicationCategory,
 };
+
+// ============================================================================
+// ENHANCED BREAKDOWN FUNCTIONS
+// ============================================================================
+
+/**
+ * Build detailed score breakdown with evidence lines for each category
+ */
+export function buildDetailedBreakdown(
+  company: any,
+  input: MatchInput,
+  breakdown: ScoreBreakdown,
+  companyDeals: any[]
+): DetailedScoreBreakdown {
+  const factors: ScoreFactor[] = [];
+
+  // MODALITY FACTOR
+  if (breakdown.modality > 0) {
+    const modalityEvidence: EvidenceLine[] = [];
+    const companyPrimaryModalities = company.modalities_primary || [];
+    const companyModalities = company.modalities_active || [];
+
+    if (companyPrimaryModalities.includes(input.modality)) {
+      modalityEvidence.push({
+        text: `${formatModality(input.modality)} is a primary focus area`,
+        type: 'strategic',
+        highlight: true,
+      });
+    }
+
+    // Find deals in this modality
+    const modalityDeals = companyDeals.filter(
+      (d) => d.modality === input.modality || d.modality?.includes(input.modality)
+    );
+    if (modalityDeals.length > 0) {
+      modalityEvidence.push({
+        text: `${modalityDeals.length} ${formatModality(input.modality)} deal${modalityDeals.length > 1 ? 's' : ''} in last 24 months`,
+        type: 'deal',
+      });
+
+      // Highlight largest deal
+      const largestDeal = modalityDeals.sort(
+        (a, b) => (b.total_deal_value_usd || 0) - (a.total_deal_value_usd || 0)
+      )[0];
+      if (largestDeal && largestDeal.total_deal_value_usd) {
+        modalityEvidence.push({
+          text: `${largestDeal.asset_name || 'Recent deal'} (${formatCurrency(largestDeal.total_deal_value_usd)} total)`,
+          type: 'deal',
+          sourceData: { id: largestDeal.id, value: largestDeal.total_deal_value_usd },
+        });
+      }
+    }
+
+    // Count active modalities
+    const activeModalityCount = companyModalities.filter(
+      (m: string) => m === input.modality || MODALITY_ADJACENCY[input.modality]?.includes(m)
+    ).length;
+    if (activeModalityCount > 1) {
+      modalityEvidence.push({
+        text: `${activeModalityCount} related modalities in active development`,
+        type: 'metric',
+      });
+    }
+
+    factors.push({
+      category: 'modality',
+      title: `${formatModality(input.modality)} Expertise`,
+      points: breakdown.modality,
+      maxPoints: WEIGHTS.modality_exact,
+      evidenceLines: modalityEvidence,
+    });
+  }
+
+  // INDICATION FACTOR
+  if (breakdown.indication > 0) {
+    const indicationEvidence: EvidenceLine[] = [];
+    const companyIndications = company.indications_active || [];
+    const indicationLabel = input.indication_specific
+      ? formatIndication(input.indication_specific)
+      : formatIndicationCategory(input.indication_category || '');
+
+    if (input.indication_specific && (company.indications_specific || []).includes(input.indication_specific)) {
+      indicationEvidence.push({
+        text: `${indicationLabel} is an active focus area`,
+        type: 'strategic',
+        highlight: true,
+      });
+    } else if (input.indication_category && companyIndications.includes(input.indication_category)) {
+      indicationEvidence.push({
+        text: `Active ${formatIndicationCategory(input.indication_category)} programs`,
+        type: 'strategic',
+      });
+    }
+
+    // Count indication-specific programs
+    const indicationDeals = companyDeals.filter(
+      (d) =>
+        d.indication_category === input.indication_category ||
+        d.indication_specific === input.indication_specific
+    );
+    if (indicationDeals.length > 0) {
+      indicationEvidence.push({
+        text: `${indicationDeals.length} deal${indicationDeals.length > 1 ? 's' : ''} in ${indicationLabel}`,
+        type: 'deal',
+      });
+    }
+
+    // Check strategic priorities
+    const priorities = company.strategic_priorities || [];
+    const hasIndicationPriority = priorities.some(
+      (p: string) =>
+        p.toLowerCase().includes(input.indication_category?.toLowerCase() || '') ||
+        p.toLowerCase().includes(input.indication_specific?.toLowerCase() || '')
+    );
+    if (hasIndicationPriority) {
+      indicationEvidence.push({
+        text: `${indicationLabel} is a strategic priority`,
+        type: 'strategic',
+        highlight: true,
+      });
+    }
+
+    factors.push({
+      category: 'indication',
+      title: `${indicationLabel} Interest`,
+      points: breakdown.indication,
+      maxPoints: WEIGHTS.indication_specific_exact,
+      evidenceLines: indicationEvidence,
+    });
+  }
+
+  // PHASE FACTOR
+  if (breakdown.phase > 0) {
+    const phaseEvidence: EvidenceLine[] = [];
+    const phaseLabel = formatPhase(input.development_phase);
+
+    // Calculate phase preference stats
+    const phaseDeals = companyDeals.filter((d) => d.phase_at_signing === input.development_phase);
+    const totalDeals = companyDeals.length;
+    if (totalDeals > 0 && phaseDeals.length > 0) {
+      const phasePercent = Math.round((phaseDeals.length / totalDeals) * 100);
+      phaseEvidence.push({
+        text: `${phasePercent}% of deals at ${phaseLabel}`,
+        type: 'metric',
+        highlight: phasePercent >= 50,
+      });
+    }
+
+    // Average upfront at this phase
+    const avgUpfront = company.avg_upfront_usd;
+    if (avgUpfront) {
+      phaseEvidence.push({
+        text: `Average upfront: ${formatCurrency(avgUpfront)}`,
+        type: 'metric',
+      });
+    }
+
+    // Phase preference range
+    if (company.phase_preference_min && company.phase_preference_max) {
+      phaseEvidence.push({
+        text: `Licenses from ${formatPhase(company.phase_preference_min)} to ${formatPhase(company.phase_preference_max)}`,
+        type: 'strategic',
+      });
+    }
+
+    factors.push({
+      category: 'phase',
+      title: `${phaseLabel} Track Record`,
+      points: breakdown.phase,
+      maxPoints: WEIGHTS.phase_in_range,
+      evidenceLines: phaseEvidence,
+    });
+  }
+
+  // ACTIVITY FACTOR
+  if (breakdown.activity > 0) {
+    const activityEvidence: EvidenceLine[] = [];
+
+    // Deal velocity
+    const deals12mo = company.deals_last_12mo || 0;
+    const deals24mo = company.deals_last_24mo || 0;
+    if (deals24mo > 0) {
+      activityEvidence.push({
+        text: `${deals24mo} deal${deals24mo > 1 ? 's' : ''} in last 24 months`,
+        type: 'metric',
+        highlight: deals24mo >= 5,
+      });
+    }
+
+    // Recent deal timing
+    if (company.last_deal_date) {
+      const lastDeal = new Date(company.last_deal_date);
+      const monthsAgo = Math.round(
+        (Date.now() - lastDeal.getTime()) / (1000 * 60 * 60 * 24 * 30)
+      );
+      if (monthsAgo <= 6) {
+        activityEvidence.push({
+          text: `Most recent deal: ${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`,
+          type: 'deal',
+          highlight: true,
+        });
+      }
+    }
+
+    // Active trials
+    if (company.active_trials_count > 0) {
+      activityEvidence.push({
+        text: `${company.active_trials_count} active clinical trial${company.active_trials_count > 1 ? 's' : ''}`,
+        type: 'trial',
+      });
+    }
+
+    // BD activity indicator
+    if (deals12mo >= 4) {
+      activityEvidence.push({
+        text: 'Active BD team, fast decision-making',
+        type: 'strategic',
+      });
+    }
+
+    factors.push({
+      category: 'activity',
+      title: 'Deal Velocity',
+      points: breakdown.activity,
+      maxPoints: WEIGHTS.deal_last_6mo + WEIGHTS.active_trials_relevant,
+      evidenceLines: activityEvidence,
+    });
+  }
+
+  // TERRITORY FACTOR (if applicable)
+  if (breakdown.territory > 0 && input.territory_scope) {
+    const territoryEvidence: EvidenceLine[] = [];
+    const territories = company.territory_focus || [];
+
+    if (territories.includes('global')) {
+      territoryEvidence.push({
+        text: 'Licenses worldwide rights',
+        type: 'strategic',
+      });
+    } else {
+      territoryEvidence.push({
+        text: `Active in ${formatTerritory(input.territory_scope)} market`,
+        type: 'strategic',
+      });
+    }
+
+    factors.push({
+      category: 'territory',
+      title: 'Territory Fit',
+      points: breakdown.territory,
+      maxPoints: WEIGHTS.territory_match,
+      evidenceLines: territoryEvidence,
+    });
+  }
+
+  // STRATEGIC FACTOR (from patent cliffs)
+  const patentCliffs = parsePatentCliffs(company.patent_cliffs);
+  const relevantCliff = patentCliffs.find(
+    (cliff) =>
+      cliff.indication?.toLowerCase().includes(input.indication_category?.toLowerCase() || '') ||
+      cliff.indication?.toLowerCase().includes(input.indication_specific?.toLowerCase() || '')
+  );
+
+  if (relevantCliff || (company.revenue_at_risk_2027 && company.revenue_at_risk_2027 > 1000000000)) {
+    const strategicEvidence: EvidenceLine[] = [];
+
+    if (relevantCliff) {
+      strategicEvidence.push({
+        text: `${relevantCliff.drug_name} patent cliff ${relevantCliff.expiry_year} (${formatCurrency(relevantCliff.revenue_usd)} at risk)`,
+        type: 'patent_cliff',
+        highlight: true,
+      });
+      strategicEvidence.push({
+        text: `Pipeline gap in ${relevantCliff.indication || input.indication_category}`,
+        type: 'strategic',
+      });
+    } else if (company.revenue_at_risk_2027 > 1000000000) {
+      strategicEvidence.push({
+        text: `${formatCurrency(company.revenue_at_risk_2027)} revenue at risk by 2027`,
+        type: 'patent_cliff',
+        highlight: true,
+      });
+    }
+
+    factors.push({
+      category: 'strategic',
+      title: 'Strategic Need',
+      points: 10, // Bonus points for strategic alignment
+      maxPoints: 15,
+      evidenceLines: strategicEvidence,
+    });
+  }
+
+  // Calculate totals
+  const rawTotal = factors.reduce((sum, f) => sum + f.points, 0);
+  const maxPossible = factors.reduce((sum, f) => sum + f.maxPoints, 0);
+
+  return {
+    factors: factors.sort((a, b) => b.points - a.points), // Sort by points descending
+    rawTotal,
+    normalizedTotal: Math.round((rawTotal / Math.max(maxPossible, 1)) * 100),
+    maxPossible,
+  };
+}
+
+/**
+ * Calculate watch-out factors for a partner match
+ */
+export function calculateWatchOuts(
+  company: any,
+  input: MatchInput,
+  companyDeals: any[]
+): WatchOutFactor[] {
+  const watchOuts: WatchOutFactor[] = [];
+
+  // 1. Integration Mode - Recent large acquisition
+  const recentAcquisitions = companyDeals.filter(
+    (d) =>
+      d.deal_type === 'acquisition' &&
+      new Date(d.announced_date) > new Date(Date.now() - 18 * 30 * 24 * 60 * 60 * 1000)
+  );
+  if (recentAcquisitions.length > 0) {
+    const acquisition = recentAcquisitions[0];
+    watchOuts.push({
+      title: 'Integration Mode',
+      impact: -8,
+      description: `Post-${acquisition.asset_name || 'acquisition'} integration may slow BD processes. Decision timelines could be 20-30% longer.`,
+      severity: 'medium',
+      category: 'timing',
+    });
+  }
+
+  // 2. Global Rights Preference - If user wants regional but company prefers global
+  const territoryDeals = companyDeals.filter((d) => d.territory);
+  if (territoryDeals.length >= 3) {
+    const globalDeals = territoryDeals.filter(
+      (d) => d.territory === 'global' || d.territory === 'worldwide'
+    );
+    const globalPercent = Math.round((globalDeals.length / territoryDeals.length) * 100);
+
+    if (
+      globalPercent > 80 &&
+      input.territory_scope &&
+      !['global', 'worldwide'].includes(input.territory_scope)
+    ) {
+      watchOuts.push({
+        title: 'Global Rights Preference',
+        impact: 0, // Informational
+        description: `${globalPercent}% of deals are worldwide rights. Historically reluctant to do regional deals.`,
+        severity: 'low',
+        category: 'structure',
+      });
+    }
+  }
+
+  // 3. BD Activity Slowdown
+  const deals6mo = companyDeals.filter(
+    (d) => new Date(d.announced_date) > new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000)
+  ).length;
+  if (company.deals_last_12mo >= 4 && deals6mo === 0) {
+    watchOuts.push({
+      title: 'BD Activity Slowdown',
+      impact: -5,
+      description: 'No deals in last 6 months despite active history. May indicate internal restructuring.',
+      severity: 'medium',
+      category: 'timing',
+    });
+  }
+
+  // 4. Phase Mismatch Risk
+  const inputPhaseRank = PHASE_RANK[input.development_phase] ?? 2;
+  const minPhaseRank = PHASE_RANK[company.phase_preference_min] ?? 0;
+  const maxPhaseRank = PHASE_RANK[company.phase_preference_max] ?? 5;
+
+  if (inputPhaseRank < minPhaseRank - 1) {
+    watchOuts.push({
+      title: 'Early Stage Hesitation',
+      impact: -5,
+      description: `Historically focuses on ${formatPhase(company.phase_preference_min)}+ assets. May require more data package.`,
+      severity: 'medium',
+      category: 'strategic',
+    });
+  }
+
+  // 5. Competitive Pipeline - Check if they have similar asset
+  const companyIndications = company.indications_specific || [];
+  const hasCompetingAsset =
+    input.indication_specific &&
+    companyIndications.includes(input.indication_specific) &&
+    (company.modalities_active || []).includes(input.modality);
+
+  if (hasCompetingAsset) {
+    watchOuts.push({
+      title: 'Competing Internal Asset',
+      impact: -10,
+      description: `Existing ${formatModality(input.modality)} program in ${formatIndication(input.indication_specific!)} may cause internal competition.`,
+      severity: 'high',
+      category: 'competition',
+    });
+  }
+
+  // 6. Financial constraints (if data available)
+  if (company.acquisition_appetite === 'selective' || company.acquisition_appetite === 'inactive') {
+    watchOuts.push({
+      title: 'Conservative BD Posture',
+      impact: -3,
+      description: 'Currently showing selective deal appetite. May have budget constraints.',
+      severity: 'low',
+      category: 'timing',
+    });
+  }
+
+  return watchOuts.sort((a, b) => a.impact - b.impact); // Most negative first
+}
+
+/**
+ * Build strategic context from company data
+ */
+export function buildStrategicContext(company: any): StrategicContext {
+  const patentCliffs = parsePatentCliffs(company.patent_cliffs);
+
+  const revenueAtRisk: { year: number; amount: number }[] = [];
+  if (company.revenue_at_risk_2025 > 0) {
+    revenueAtRisk.push({ year: 2025, amount: company.revenue_at_risk_2025 });
+  }
+  if (company.revenue_at_risk_2026 > 0) {
+    revenueAtRisk.push({ year: 2026, amount: company.revenue_at_risk_2026 });
+  }
+  if (company.revenue_at_risk_2027 > 0) {
+    revenueAtRisk.push({ year: 2027, amount: company.revenue_at_risk_2027 });
+  }
+
+  // Identify pipeline gaps based on patent cliffs
+  const pipelineGaps: string[] = [];
+  for (const cliff of patentCliffs) {
+    if (cliff.indication && cliff.expiry_year <= 2028) {
+      pipelineGaps.push(cliff.indication);
+    }
+  }
+
+  return {
+    patent_cliffs: patentCliffs,
+    revenue_at_risk: revenueAtRisk,
+    pipeline_gaps: Array.from(new Set(pipelineGaps)), // Dedupe
+    strategic_priorities: company.strategic_priorities || [],
+  };
+}
+
+/**
+ * Fetch recent deals for a company
+ */
+export async function fetchCompanyDeals(
+  supabase: SupabaseClient,
+  companyId: string,
+  limit: number = 10
+): Promise<RelevantDeal[]> {
+  const { data: deals, error } = await supabase
+    .from('deals')
+    .select(
+      'id, asset_name, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
+    )
+    .or(`licensor_id.eq.${companyId},licensee_id.eq.${companyId}`)
+    .order('announced_date', { ascending: false })
+    .limit(limit);
+
+  if (error || !deals) {
+    return [];
+  }
+
+  return deals.map((deal) => ({
+    id: deal.id,
+    asset_name: deal.asset_name || 'Undisclosed',
+    partner_name: deal.licensor_name || deal.licensee_name || 'Unknown',
+    modality: deal.modality,
+    indication: deal.indication_specific || deal.indication_category,
+    phase: deal.phase_at_signing,
+    total_value_usd: deal.total_deal_value_usd,
+    upfront_usd: deal.upfront_usd,
+    announced_date: deal.announced_date,
+    deal_type: deal.deal_type,
+    relevance: generateDealRelevance(deal),
+  }));
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function parsePatentCliffs(cliffs: any): PatentCliff[] {
+  if (!cliffs || !Array.isArray(cliffs)) {
+    return [];
+  }
+  return cliffs
+    .filter((c) => c.drug_name && c.expiry_year)
+    .map((c) => ({
+      drug_name: c.drug_name,
+      indication: c.indication || null,
+      revenue_usd: c.revenue_usd || 0,
+      expiry_year: c.expiry_year,
+    }));
+}
+
+function formatCurrency(value: number): string {
+  if (value >= 1000000000) {
+    return `$${(value / 1000000000).toFixed(1)}B`;
+  }
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(0)}M`;
+  }
+  return `$${value.toLocaleString()}`;
+}
+
+function formatTerritory(territory: string): string {
+  const labels: Record<string, string> = {
+    global: 'Global',
+    worldwide: 'Worldwide',
+    us: 'US',
+    us_eu: 'US & EU',
+    ex_us: 'Ex-US',
+    ex_china: 'Ex-China',
+    china: 'China',
+    japan: 'Japan',
+    europe: 'Europe',
+  };
+  return labels[territory] || territory;
+}
+
+function generateDealRelevance(deal: any): string {
+  const parts: string[] = [];
+  if (deal.modality) parts.push(formatModality(deal.modality));
+  if (deal.phase_at_signing) parts.push(formatPhase(deal.phase_at_signing));
+  if (deal.deal_type) {
+    const typeLabels: Record<string, string> = {
+      license: 'License',
+      acquisition: 'Acquisition',
+      collaboration: 'Collaboration',
+      option: 'Option',
+    };
+    parts.push(typeLabels[deal.deal_type] || deal.deal_type);
+  }
+  return parts.join(' · ') || 'Recent deal';
+}
