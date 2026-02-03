@@ -34,6 +34,7 @@ export default function HistoryDetailModal({
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
+  const [fullInputs, setFullInputs] = useState<CalculationInput | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const isPro = tier === 'pro';
@@ -46,6 +47,27 @@ export default function HistoryDetailModal({
   const handlePartnerMatchesLoaded = useCallback((matches: PartnerMatchForPDF[]) => {
     setPartnerMatches(matches as PartnerForPDF[]);
   }, []);
+
+  // Handle sensitivity analysis changes - recalculate with new inputs
+  const handleSensitivityApply = useCallback((newInputs: Partial<CalculationInput>) => {
+    if (!fullInputs) return;
+
+    // Merge new inputs with existing
+    const updatedInputs: CalculationInput = {
+      ...fullInputs,
+      ...newInputs,
+    };
+
+    setFullInputs(updatedInputs);
+    setIsCalculating(true);
+
+    // Recalculate with updated inputs
+    setTimeout(() => {
+      const calculated = calculateDealTerms(updatedInputs);
+      setResult(calculated);
+      setIsCalculating(false);
+    }, 100);
+  }, [fullInputs]);
 
   // Recalculate when item changes
   useEffect(() => {
@@ -68,6 +90,9 @@ export default function HistoryDetailModal({
         dataQuality: itemWithDefaults.inputs.dataQuality as DataQuality,
         regulatoryDesignations: itemWithDefaults.inputs.regulatoryDesignations!,
       };
+
+      // Store full inputs for sensitivity analysis
+      setFullInputs(input);
 
       // Slight delay for animation smoothness
       const timer = setTimeout(() => {
@@ -261,6 +286,8 @@ export default function HistoryDetailModal({
                   indication: item.inputs.indication,
                   territory: item.inputs.territory
                 }}
+                fullInputs={fullInputs || undefined}
+                onApplyNewInputs={handleSensitivityApply}
                 onPartnerMatchesLoaded={handlePartnerMatchesLoaded}
               />
             </div>
