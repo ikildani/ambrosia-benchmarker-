@@ -1511,9 +1511,17 @@ select::selection {
   border-color: rgb(51 65 85); /* slate-700 */
 }
 
-/* Warning backgrounds */
+/* Warning colors for adjustments */
 .dark .bg-warning-50 {
-  background-color: rgba(120 53 15 / 0.3); /* amber-900/30 */
+  background-color: rgba(120 53 15 / 0.5); /* amber-900/50 - darker for better contrast */
+}
+
+.dark .text-warning-700 {
+  color: rgb(251 191 36); /* amber-400 - bright for readability */
+}
+
+.dark .border-warning-200 {
+  border-color: rgb(180 83 9); /* amber-700 */
 }
 
 /* Security: CSP-compliant styles */
