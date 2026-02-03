@@ -144,6 +144,7 @@ interface PartnerMatchesProps {
   sessionId?: string;
   anonymousId?: string;
   userId?: string;
+  userEmail?: string;
   matches: PartnerMatch[];
   totalMatches: number;
   matchesShown: number;
@@ -160,6 +161,7 @@ export function PartnerMatches({
   sessionId,
   anonymousId,
   userId,
+  userEmail,
   matches,
   totalMatches,
   matchesShown,
@@ -380,6 +382,7 @@ export function PartnerMatches({
                     strategicContext={match.strategic_context || null}
                     userAsset={userAsset}
                     userId={userId}
+                    userEmail={userEmail}
                     sessionId={sessionId}
                   />
                 ) : (

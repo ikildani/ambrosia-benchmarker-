@@ -33,6 +33,7 @@ interface ScoreBreakdownProps {
     territory: string | null;
   };
   userId?: string;
+  userEmail?: string;
   sessionId?: string;
   onRegenerateStrategy?: () => void;
 }
@@ -48,6 +49,7 @@ export function ScoreBreakdown({
   strategicContext,
   userAsset,
   userId,
+  userEmail,
   sessionId,
   onRegenerateStrategy,
 }: ScoreBreakdownProps) {
@@ -75,6 +77,7 @@ export function ScoreBreakdown({
           },
           user_asset: userAsset,
           user_id: userId,
+          user_email: userEmail,
           session_id: sessionId,
         }),
       });
@@ -88,7 +91,7 @@ export function ScoreBreakdown({
     } finally {
       setIsRegeneratingStrategy(false);
     }
-  }, [companyId, companyName, matchScore, detailedBreakdown, watchOuts, strategicContext, userAsset, userId, sessionId]);
+  }, [companyId, companyName, matchScore, detailedBreakdown, watchOuts, strategicContext, userAsset, userId, userEmail, sessionId]);
 
   // Build match context for email modal
   const matchContext = {
@@ -195,6 +198,7 @@ export function ScoreBreakdown({
         matchContext={matchContext}
         userAsset={userAsset}
         userId={userId}
+        userEmail={userEmail}
         sessionId={sessionId}
       />
     </div>

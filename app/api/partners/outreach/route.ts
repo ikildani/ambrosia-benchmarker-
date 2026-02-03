@@ -6,11 +6,15 @@ import { OutreachGenerationRequest } from '@/types/partner-breakdown';
 // Rate limiting constants
 const DAILY_EMAIL_LIMIT = 10;
 
+// Pro user emails (synced with AuthContext)
+const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const body = await request.json() as OutreachGenerationRequest & {
       user_id?: string;
+      user_email?: string;
       session_id?: string;
     };
 
@@ -24,6 +28,7 @@ export async function POST(request: NextRequest) {
       sender_name,
       sender_company,
       user_id,
+      user_email,
       session_id,
     } = body;
 
@@ -49,6 +54,14 @@ export async function POST(request: NextRequest) {
       if (profile) {
         authenticatedUserId = profile.id;
         userTier = (profile.tier as 'free' | 'pro') || 'free';
+      }
+    }
+
+    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    if (userTier === 'free' && user_email) {
+      const emailLower = user_email.toLowerCase().trim();
+      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
+        userTier = 'pro';
       }
     }
 

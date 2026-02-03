@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PartnerMatches } from './benchmarker/PartnerMatches';
 import { useTracking } from './TrackingProvider';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface PartnerMatchForPDF {
   company_name: string;
@@ -39,6 +40,7 @@ export default function PartnerMatchesContainer({
   onMatchesLoaded,
 }: PartnerMatchesContainerProps) {
   const { sessionId, anonymousId, userId } = useTracking();
+  const { user } = useAuth();
   const [matches, setMatches] = useState<any[]>([]);
   const [totalMatches, setTotalMatches] = useState(0);
   const [matchesShown, setMatchesShown] = useState(0);
@@ -58,6 +60,7 @@ export default function PartnerMatchesContainer({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
+          user_email: user?.email, // Pass email for Pro verification
           session_id: sessionId,
           anonymous_id: anonymousId,
           modality: mapModality(modality),
@@ -98,7 +101,7 @@ export default function PartnerMatchesContainer({
     }
 
     setLoading(false);
-  }, [modality, phase, indicationCategory, indicationSpecific, territory, userId, sessionId, anonymousId]);
+  }, [modality, phase, indicationCategory, indicationSpecific, territory, userId, sessionId, anonymousId, user?.email]);
 
   useEffect(() => {
     if (modality && phase) {
@@ -160,6 +163,7 @@ export default function PartnerMatchesContainer({
       sessionId={sessionId}
       anonymousId={anonymousId}
       userId={userId}
+      userEmail={user?.email}
       matches={matches}
       totalMatches={totalMatches}
       matchesShown={matchesShown}

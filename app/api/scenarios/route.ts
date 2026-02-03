@@ -3,6 +3,9 @@ import { createServiceClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+// Pro user emails (synced with AuthContext)
+const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+
 // GET - List saved scenarios for a user
 export async function GET(request: NextRequest) {
   try {
@@ -29,8 +32,13 @@ export async function GET(request: NextRequest) {
 
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
-    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
-    // Tier must be verified from database only
+    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    if (userTier === 'free' && email) {
+      const emailLower = email.toLowerCase().trim();
+      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
+        userTier = 'pro';
+      }
+    }
 
     if (userTier !== 'pro') {
       return NextResponse.json(
@@ -91,7 +99,13 @@ export async function POST(request: NextRequest) {
 
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
-    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
+    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    if (userTier === 'free' && email) {
+      const emailLower = email.toLowerCase().trim();
+      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
+        userTier = 'pro';
+      }
+    }
 
     if (userTier !== 'pro') {
       return NextResponse.json(

@@ -19,6 +19,7 @@ interface OutreachEmailModalProps {
     territory: string | null;
   };
   userId?: string;
+  userEmail?: string;
   sessionId?: string;
 }
 
@@ -31,6 +32,7 @@ export function OutreachEmailModal({
   matchContext,
   userAsset,
   userId,
+  userEmail,
   sessionId,
 }: OutreachEmailModalProps) {
   const [tone, setTone] = useState<EmailTone>('formal');
@@ -58,6 +60,7 @@ export function OutreachEmailModal({
           tone,
           recipient_role: recipientRole || undefined,
           user_id: userId,
+          user_email: userEmail,
           session_id: sessionId,
         }),
       });
@@ -83,7 +86,7 @@ export function OutreachEmailModal({
     } finally {
       setIsGenerating(false);
     }
-  }, [companyId, companyName, matchContext, userAsset, tone, recipientRole, userId, sessionId]);
+  }, [companyId, companyName, matchContext, userAsset, tone, recipientRole, userId, userEmail, sessionId]);
 
   const copyToClipboard = useCallback(async () => {
     if (!email) return;

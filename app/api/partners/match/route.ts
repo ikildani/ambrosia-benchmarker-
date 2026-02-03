@@ -8,6 +8,9 @@ const MATCH_LIMITS = {
   pro: 5,
 };
 
+// Pro user emails (synced with AuthContext)
+const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
@@ -18,13 +21,12 @@ export async function POST(request: NextRequest) {
       session_id,
       anonymous_id,
       user_id,
+      user_email, // Email for Pro verification fallback
       modality,
       development_phase,
       indication_category,
       indication_specific,
       territory_scope,
-      // SECURITY: Removed clientTier - never trust client-provided tier
-      // tier: clientTier,
     } = body;
 
     // Validate required fields
@@ -35,10 +37,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Only trust database-verified tier, never client-provided tier
+    // Determine user tier from verified sources
     let userTier: 'free' | 'pro' = 'free';
     let authenticatedUserId: string | null = null;
 
+    // Method 1: Check Supabase user_profiles by user_id
     if (user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -52,8 +55,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
-    // Tier must be verified from database only
+    // Method 2: Check PRO_EMAILS list by email (for localStorage auth users)
+    if (userTier === 'free' && user_email) {
+      const emailLower = user_email.toLowerCase().trim();
+      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
+        userTier = 'pro';
+      }
+    }
 
     // Build match input
     const matchInput: MatchInput = {
