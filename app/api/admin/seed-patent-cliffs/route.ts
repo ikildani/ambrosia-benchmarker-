@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-
-// Pro user emails who can run this seed
-const ADMIN_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+import { isAdminEmail } from '@/lib/config/authorized-emails';
 
 // Patent cliff data for major pharma companies
 const patentCliffData: Record<string, {
@@ -231,7 +229,7 @@ export async function POST(request: NextRequest) {
     const { user_email } = body;
 
     // Verify admin access
-    if (!user_email || !ADMIN_EMAILS.some(e => e.toLowerCase() === user_email.toLowerCase())) {
+    if (!isAdminEmail(user_email)) {
       return NextResponse.json(
         { error: 'Unauthorized - admin access required' },
         { status: 403 }

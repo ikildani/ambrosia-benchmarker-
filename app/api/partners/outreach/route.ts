@@ -2,12 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getOutreachGenerator } from '@/lib/services/outreach-generator';
 import { OutreachGenerationRequest } from '@/types/partner-breakdown';
+import { isProEmail } from '@/lib/config/authorized-emails';
 
 // Rate limiting constants
 const DAILY_EMAIL_LIMIT = 10;
-
-// Pro user emails (synced with AuthContext)
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,11 +56,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
-    if (userTier === 'free' && user_email) {
-      const emailLower = user_email.toLowerCase().trim();
-      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
-        userTier = 'pro';
-      }
+    if (userTier === 'free' && isProEmail(user_email)) {
+      userTier = 'pro';
     }
 
     // Only Pro users can generate outreach emails

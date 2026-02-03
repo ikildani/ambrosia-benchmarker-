@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { CreateBlogPostRequest, generateSlug } from '@/types/content';
-
-// Admin email check
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',').map(e => e.trim().toLowerCase());
+import { isAdminEmail } from '@/lib/config/authorized-emails';
 
 // Helper to verify admin authentication
 async function verifyAdmin(request: Request): Promise<{ authorized: boolean; error?: NextResponse }> {
@@ -26,7 +24,7 @@ async function verifyAdmin(request: Request): Promise<{ authorized: boolean; err
     };
   }
 
-  if (!user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+  if (!isAdminEmail(user.email)) {
     return {
       authorized: false,
       error: NextResponse.json({ error: 'Admin access required' }, { status: 403 }),

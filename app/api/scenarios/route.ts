@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { isProEmail } from '@/lib/config/authorized-emails';
 
 export const dynamic = 'force-dynamic';
-
-// Pro user emails (synced with AuthContext)
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
 
 // GET - List saved scenarios for a user
 export async function GET(request: NextRequest) {
@@ -33,11 +31,8 @@ export async function GET(request: NextRequest) {
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
-    if (userTier === 'free' && email) {
-      const emailLower = email.toLowerCase().trim();
-      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
-        userTier = 'pro';
-      }
+    if (userTier === 'free' && isProEmail(email)) {
+      userTier = 'pro';
     }
 
     if (userTier !== 'pro') {
@@ -100,11 +95,8 @@ export async function POST(request: NextRequest) {
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
-    if (userTier === 'free' && email) {
-      const emailLower = email.toLowerCase().trim();
-      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
-        userTier = 'pro';
-      }
+    if (userTier === 'free' && isProEmail(email)) {
+      userTier = 'pro';
     }
 
     if (userTier !== 'pro') {

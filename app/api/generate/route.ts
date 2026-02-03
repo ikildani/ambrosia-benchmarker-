@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { getContentGenerator } from '@/lib/ai/content-generator';
 import { GenerateContentRequest, generateSlug } from '@/types/content';
-
-// Admin email check
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'ikildani@ambrosiaventures.co').split(',').map(e => e.trim().toLowerCase());
+import { isAdminEmail } from '@/lib/config/authorized-emails';
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     // Verify user is admin
-    if (!user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

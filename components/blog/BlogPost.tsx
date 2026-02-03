@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import DOMPurify from 'dompurify';
 import { BlogPost as BlogPostType } from '@/types/content';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter } from 'lucide-react';
@@ -54,9 +55,16 @@ const modalityLabels: Record<string, string> = {
   oncolyticVirus: 'Oncolytic Virus',
 };
 
+// Validate URL to prevent XSS via javascript:, data:, vbscript: protocols
+function isSafeUrl(url: string): boolean {
+  const trimmedUrl = url.trim().toLowerCase();
+  const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+  return !dangerousProtocols.some(protocol => trimmedUrl.startsWith(protocol));
+}
+
 // Simple markdown to HTML converter for basic formatting
 function renderContent(content: string): string {
-  return content
+  const html = content
     // Headers
     .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold text-slate-900 mt-8 mb-3">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold text-slate-900 mt-10 mb-4">$1</h2>')
@@ -65,8 +73,13 @@ function renderContent(content: string): string {
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
     // Italic
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-teal-600 hover:text-teal-700 underline">$1</a>')
+    // Links - with URL protocol validation
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+      if (isSafeUrl(url)) {
+        return `<a href="${url}" class="text-teal-600 hover:text-teal-700 underline" rel="noopener noreferrer">${text}</a>`;
+      }
+      return text; // Strip dangerous links, keep text only
+    })
     // Bullet lists
     .replace(/^\- (.*$)/gim, '<li class="ml-4 list-disc">$1</li>')
     // Numbered lists
@@ -75,6 +88,12 @@ function renderContent(content: string): string {
     .replace(/\n\n/g, '</p><p class="mb-4 text-slate-700 leading-relaxed">')
     // Line breaks
     .replace(/\n/g, '<br />');
+
+  // Sanitize HTML to prevent XSS attacks
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'strong', 'em', 'a', 'li', 'br'],
+    ALLOWED_ATTR: ['href', 'class', 'rel'],
+  });
 }
 
 export default function BlogPostComponent({ post }: BlogPostProps) {

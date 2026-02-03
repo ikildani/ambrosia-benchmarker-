@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 interface CalculationRequest {
   session_id?: string;
@@ -33,6 +34,20 @@ interface CalculationRequest {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const body: CalculationRequest = await request.json();

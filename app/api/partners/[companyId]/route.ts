@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-
-// Pro user emails (synced with AuthContext)
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+import { isProEmail } from '@/lib/config/authorized-emails';
 
 export async function GET(
   request: NextRequest,
@@ -33,11 +31,8 @@ export async function GET(
     }
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
-    if (userTier === 'free' && userEmail) {
-      const emailLower = userEmail.toLowerCase().trim();
-      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
-        userTier = 'pro';
-      }
+    if (userTier === 'free' && isProEmail(userEmail)) {
+      userTier = 'pro';
     }
 
     // Free users can't access detailed profiles

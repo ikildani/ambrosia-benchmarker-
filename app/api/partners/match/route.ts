@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
+import { isProEmail } from '@/lib/config/authorized-emails';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 // Tier-based match limits
 const MATCH_LIMITS = {
@@ -8,10 +10,21 @@ const MATCH_LIMITS = {
   pro: 5,
 };
 
-// Pro user emails (synced with AuthContext)
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
-
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = checkRateLimit(identifier, 'partnerMatch', RATE_LIMIT_CONFIGS.partnerMatch);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const body = await request.json();
@@ -56,11 +69,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Method 2: Check PRO_EMAILS list by email (for localStorage auth users)
-    if (userTier === 'free' && user_email) {
-      const emailLower = user_email.toLowerCase().trim();
-      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
-        userTier = 'pro';
-      }
+    if (userTier === 'free' && isProEmail(user_email)) {
+      userTier = 'pro';
     }
 
     // Build match input

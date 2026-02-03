@@ -1,9 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-
-// Pro user emails that get auto-upgraded
-const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 
 interface User {
   email: string;
@@ -111,9 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUser(parsed);
 
-        // Auto-upgrade pro users by email
-        const userEmailLower = parsed.email.toLowerCase().trim();
-        if (PRO_EMAILS.some(e => e.toLowerCase() === userEmailLower)) {
+        // Auto-upgrade pro users by email (UI hint only - server verifies)
+        if (isProEmailClient(parsed.email)) {
           setTierState('pro');
           localStorage.setItem('user_tier', 'pro');
         }
@@ -161,9 +158,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('is_authenticated', 'true');
     localStorage.setItem('user_data', JSON.stringify(newUser));
 
-    // Auto-upgrade pro users by email
-    const userEmailLower = email.toLowerCase().trim();
-    if (PRO_EMAILS.some(e => e.toLowerCase() === userEmailLower)) {
+    // Auto-upgrade pro users by email (UI hint only - server verifies)
+    if (isProEmailClient(email)) {
       setTierState('pro');
       localStorage.setItem('user_tier', 'pro');
     }
