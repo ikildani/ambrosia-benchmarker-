@@ -97,7 +97,7 @@ export default function Header({
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-xl shadow-soft border-b border-neutral-100'
+          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-soft border-b border-neutral-100 dark:border-slate-800'
           : 'bg-transparent'
       }`}
     >
@@ -113,7 +113,8 @@ export default function Header({
               alt="Ambrosia Ventures"
               width={900}
               height={248}
-              className="h-14 sm:h-20 md:h-28 lg:h-36 w-auto object-contain transition-all duration-300 hover:opacity-80"
+              className="h-14 sm:h-20 md:h-28 lg:h-36 w-auto object-contain transition-all duration-300 hover:opacity-80
+                         dark:[filter:brightness(2.2)_contrast(1.3)_saturate(1.4)_drop-shadow(0_0_15px_rgba(255,255,255,0.8))_drop-shadow(0_0_30px_rgba(255,255,255,0.5))_drop-shadow(0_0_45px_rgba(255,255,255,0.3))]"
               priority
             />
           </Link>
@@ -127,8 +128,8 @@ export default function Header({
                   href={item.href}
                   className={`text-sm font-medium transition-colors ${
                     item.isActive
-                      ? 'text-teal-600'
-                      : 'text-neutral-600 hover:text-teal-600'
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
                   }`}
                 >
                   {item.label}
@@ -139,8 +140,8 @@ export default function Header({
                   href={item.href}
                   className={`text-sm font-medium transition-colors ${
                     item.isActive
-                      ? 'text-teal-600'
-                      : 'text-neutral-600 hover:text-teal-600'
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
                   }`}
                 >
                   {item.label}
@@ -156,12 +157,12 @@ export default function Header({
                 {/* User Avatar Button */}
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all duration-200"
+                  className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
                     {userName ? getInitials(userName) : 'U'}
                   </div>
-                  <span className="text-sm font-medium text-slate-700 hidden sm:block">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200 hidden sm:block">
                     {userName || 'User'}
                   </span>
                   <svg
@@ -176,18 +177,18 @@ export default function Header({
 
                 {/* Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
                     {/* User Info Header */}
-                    <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-slate-200">
+                    <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-lg font-semibold shadow-md">
                           {userName ? getInitials(userName) : 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                             {userName || 'User'}
                           </p>
-                          <p className="text-xs text-slate-500 truncate">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                             {userEmail || 'user@example.com'}
                           </p>
                         </div>
@@ -199,53 +200,53 @@ export default function Header({
                       <Link
                         href="/dashboard"
                         onClick={() => setUserMenuOpen(false)}
-                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors ${
-                          isDashboardPage ? 'bg-slate-50' : ''
+                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                          isDashboardPage ? 'bg-slate-50 dark:bg-slate-700' : ''
                         }`}
                       >
-                        <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-700">Dashboard</p>
-                          <p className="text-xs text-slate-500">View history & reports</p>
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Dashboard</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">View history & reports</p>
                         </div>
                       </Link>
 
                       <Link
                         href="/calculator"
                         onClick={() => setUserMenuOpen(false)}
-                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors ${
-                          isCalculatorPage ? 'bg-slate-50' : ''
+                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                          isCalculatorPage ? 'bg-slate-50 dark:bg-slate-700' : ''
                         }`}
                       >
-                        <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-700">Calculator</p>
-                          <p className="text-xs text-slate-500">Run new analysis</p>
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Calculator</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">Run new analysis</p>
                         </div>
                       </Link>
                     </div>
 
                     {/* Sign Out */}
-                    <div className="border-t border-slate-200 p-2">
+                    <div className="border-t border-slate-200 dark:border-slate-700 p-2">
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
                           onSignOut?.();
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left hover:bg-red-50 transition-colors group"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left hover:bg-red-50 dark:hover:bg-red-500/20 transition-colors group"
                       >
                         <svg className="w-5 h-5 text-slate-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        <span className="text-sm font-medium text-slate-600 group-hover:text-red-600 transition-colors">
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                           Sign Out
                         </span>
                       </button>
@@ -257,7 +258,7 @@ export default function Header({
               <>
                 <button
                   onClick={onSignInClick}
-                  className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors"
+                  className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
                 >
                   Sign In
                 </button>
@@ -277,7 +278,7 @@ export default function Header({
             {/* Mobile Menu Button - Larger touch target */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-3 -mr-2 text-slate-600 hover:text-slate-900 transition-colors touch-feedback rounded-xl"
+              className="md:hidden p-3 -mr-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors touch-feedback rounded-xl"
               aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +294,7 @@ export default function Header({
 
         {/* Mobile Navigation - Full-screen overlay */}
         {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 top-16 sm:top-20 bg-white z-50 animate-mobile-menu overflow-y-auto safe-bottom">
+          <div className="md:hidden fixed inset-0 top-16 sm:top-20 bg-white dark:bg-slate-900 z-50 animate-mobile-menu overflow-y-auto safe-bottom">
             <nav className="flex flex-col p-4 gap-1">
               {navItems.map((item, idx) => {
                 const iconMap: Record<string, JSX.Element> = {
@@ -326,12 +327,12 @@ export default function Header({
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
-                        ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      item.isActive ? 'bg-teal-100' : 'bg-slate-100'
+                      item.isActive ? 'bg-teal-100 dark:bg-teal-500/30' : 'bg-slate-100 dark:bg-slate-800'
                     }`}>
                       {iconMap[item.label] || iconMap.About}
                     </div>
@@ -344,12 +345,12 @@ export default function Header({
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
-                        ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      item.isActive ? 'bg-teal-100' : 'bg-slate-100'
+                      item.isActive ? 'bg-teal-100 dark:bg-teal-500/30' : 'bg-slate-100 dark:bg-slate-800'
                     }`}>
                       {iconMap[item.label] || iconMap.About}
                     </div>

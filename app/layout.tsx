@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/lib/theme";
 import { GlobalJsonLd } from "./json-ld";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -46,13 +47,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <GlobalJsonLd />
-        <AuthProvider>
-          <TrackingProvider>{children}</TrackingProvider>
-        </AuthProvider>
-        <Analytics />
+        <ThemeProvider>
+          <GlobalJsonLd />
+          <AuthProvider>
+            <TrackingProvider>{children}</TrackingProvider>
+          </AuthProvider>
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

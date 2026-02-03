@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Fetch scenarios
     const { data: scenarios, error } = await supabase
       .from('saved_scenarios')
-      .select('id, name, inputs, results, labels, created_at, updated_at')
+      .select('id, name, notes, inputs, results, labels, created_at, updated_at')
       .eq('email', email)
       .order('created_at', { ascending: false })
       .limit(50);
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const body = await request.json();
-    const { email, name, inputs, results, labels, tier } = body;
+    const { email, name, notes, inputs, results, labels, tier } = body;
 
     if (!email || !name || !inputs || !results) {
       return NextResponse.json(
@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
         user_id: profile?.id || null,
         email,
         name,
+        notes: notes || null,
         inputs,
         results,
         labels: labels || {},

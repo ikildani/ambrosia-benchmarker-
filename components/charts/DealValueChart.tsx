@@ -57,17 +57,17 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
       if (!item) return null;
 
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-neutral-200">
-          <p className="font-semibold text-navy-800 mb-1">{label}</p>
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg border border-neutral-200 dark:border-slate-600">
+          <p className="font-semibold text-navy-800 dark:text-white mb-1">{label}</p>
           <div className="space-y-1 text-sm">
-            <p className="text-neutral-500">
-              Low: <span className="font-medium text-neutral-700">{formatCurrency(item.low)}</span>
+            <p className="text-neutral-500 dark:text-slate-400">
+              Low: <span className="font-medium text-neutral-700 dark:text-slate-200">{formatCurrency(item.low)}</span>
             </p>
-            <p className="text-teal-600">
+            <p className="text-teal-600 dark:text-teal-400">
               Median: <span className="font-bold">{formatCurrency(item.median)}</span>
             </p>
-            <p className="text-neutral-500">
-              High: <span className="font-medium text-neutral-700">{formatCurrency(item.high)}</span>
+            <p className="text-neutral-500 dark:text-slate-400">
+              High: <span className="font-medium text-neutral-700 dark:text-slate-200">{formatCurrency(item.high)}</span>
             </p>
           </div>
         </div>

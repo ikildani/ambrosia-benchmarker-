@@ -71,22 +71,22 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
       const item = payload[0].payload;
 
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-neutral-200">
-          <p className="font-semibold text-navy-800 mb-1">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg border border-neutral-200 dark:border-slate-600">
+          <p className="font-semibold text-navy-800 dark:text-white mb-1">
             {item.fullName || item.name}
           </p>
           {item.isBase && (
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 dark:text-slate-300">
               Base Value: <span className="font-bold">{formatCurrency(item.value)}</span>
             </p>
           )}
           {item.isFinal && (
-            <p className="text-sm text-neutral-600">
-              Final Value: <span className="font-bold text-teal-600">{formatCurrency(item.value)}</span>
+            <p className="text-sm text-neutral-600 dark:text-slate-300">
+              Final Value: <span className="font-bold text-teal-600 dark:text-teal-400">{formatCurrency(item.value)}</span>
             </p>
           )}
           {!item.isBase && !item.isFinal && (
-            <p className={`text-sm ${item.isPositive ? 'text-teal-600' : 'text-amber-600'}`}>
+            <p className={`text-sm ${item.isPositive ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'}`}>
               {item.isPositive ? '+' : '-'}{formatCurrency(item.value)}
             </p>
           )}
@@ -98,7 +98,7 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
 
   if (modifiers.length === 0) {
     return (
-      <div className="w-full h-40 sm:h-48 flex items-center justify-center text-neutral-400 text-sm">
+      <div className="w-full h-40 sm:h-48 flex items-center justify-center text-neutral-400 dark:text-slate-500 text-sm">
         No modifiers applied
       </div>
     );

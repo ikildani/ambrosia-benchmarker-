@@ -108,10 +108,10 @@ export default function PartnerMatchesContainer({
 
   if (loading) {
     return (
-      <div className="mt-8 border-t border-neutral-200 pt-8">
+      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-8">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-neutral-600">Finding potential partners...</span>
+          <span className="text-sm text-neutral-600 dark:text-slate-300">Finding potential partners...</span>
         </div>
       </div>
     );
@@ -119,12 +119,12 @@ export default function PartnerMatchesContainer({
 
   if (error) {
     return (
-      <div className="mt-8 border-t border-neutral-200 pt-8">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-          <p className="text-sm text-red-600">{error}</p>
+      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-8">
+        <div className="p-4 bg-red-50 dark:bg-red-500/20 border border-red-200 dark:border-red-500/30 rounded-xl">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           <button
             onClick={fetchMatches}
-            className="mt-2 text-sm text-red-700 underline hover:no-underline"
+            className="mt-2 text-sm text-red-700 dark:text-red-400 underline hover:no-underline"
           >
             Try again
           </button>
@@ -135,9 +135,9 @@ export default function PartnerMatchesContainer({
 
   if (matches.length === 0 && !loading) {
     return (
-      <div className="mt-8 border-t border-neutral-200 pt-8">
-        <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
-          <p className="text-sm text-neutral-600">
+      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-8">
+        <div className="p-4 bg-neutral-50 dark:bg-slate-800 border border-neutral-200 dark:border-slate-700 rounded-xl">
+          <p className="text-sm text-neutral-600 dark:text-slate-300">
             No partner matches found for this asset profile. Try adjusting the modality or indication.
           </p>
         </div>

@@ -240,21 +240,21 @@ export function PartnerMatches({
   }, [userId, sessionId, anonymousId, calculationId, expandedPartner]);
 
   return (
-    <div className="mt-8 border-t border-gray-200 pt-8">
+    <div className="mt-8 border-t border-gray-200 dark:border-slate-700 pt-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Target className="w-5 h-5 text-blue-600 flex-shrink-0" />
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+          <Target className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
             Potential Partners
           </h3>
         </div>
-        <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded flex-shrink-0">
+        <span className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded flex-shrink-0">
           {totalMatches} matches
         </span>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
+      <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300 mb-4 sm:mb-6">
         Companies actively acquiring or licensing assets similar to yours, ranked by fit.
       </p>
 
@@ -265,8 +265,8 @@ export function PartnerMatches({
             key={match.company_id}
             className={`border rounded-xl transition-all duration-200 ${
               match.profile_locked
-                ? 'bg-gray-50/50 border-gray-200 cursor-pointer hover:bg-gray-100/50'
-                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md cursor-pointer'
+                ? 'bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-slate-700/50'
+                : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500/50 hover:shadow-md cursor-pointer'
             }`}
           >
             {/* Main Row */}
@@ -283,7 +283,7 @@ export function PartnerMatches({
                     ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white'
                     : match.rank === 3
                     ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                 }`}>
                   {match.rank}
                 </div>
@@ -291,22 +291,22 @@ export function PartnerMatches({
                 {/* Company Info */}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{match.company_name}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{match.company_name}</span>
                     {match.ticker && (
-                      <span className="text-xs text-gray-400">({match.ticker})</span>
+                      <span className="text-xs text-gray-400 dark:text-slate-500">({match.ticker})</span>
                     )}
                     {match.profile_locked && (
-                      <Lock className="w-4 h-4 text-gray-400" />
+                      <Lock className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-slate-400">
                       {formatCompanyType(match.company_type)}
                     </span>
                     {match.hq_country && (
                       <>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-sm text-gray-500">{match.hq_country}</span>
+                        <span className="text-gray-300 dark:text-slate-600">•</span>
+                        <span className="text-sm text-gray-500 dark:text-slate-400">{match.hq_country}</span>
                       </>
                     )}
                   </div>
@@ -318,34 +318,34 @@ export function PartnerMatches({
                 <div className="text-right">
                   <div className="flex items-center gap-1">
                     <div className={`text-sm font-semibold ${
-                      match.match_score >= 70 ? 'text-green-600' :
-                      match.match_score >= 50 ? 'text-blue-600' :
-                      match.match_score >= 30 ? 'text-amber-600' :
-                      'text-gray-600'
+                      match.match_score >= 70 ? 'text-green-600 dark:text-green-400' :
+                      match.match_score >= 50 ? 'text-blue-600 dark:text-blue-400' :
+                      match.match_score >= 30 ? 'text-amber-600 dark:text-amber-400' :
+                      'text-gray-600 dark:text-slate-400'
                     }`}>
                       {match.match_score}%
                     </div>
-                    <span className="text-xs text-gray-400">match</span>
+                    <span className="text-xs text-gray-400 dark:text-slate-500">match</span>
                   </div>
                   {!match.profile_locked && match.deals_last_12mo !== null && match.deals_last_12mo > 0 && (
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                       {match.deals_last_12mo} deal{match.deals_last_12mo > 1 ? 's' : ''} in 12mo
                     </div>
                   )}
                 </div>
                 {expandedPartner === match.company_id ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                  <ChevronDown className="w-5 h-5 text-gray-400 dark:text-slate-500" />
                 ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-5 h-5 text-gray-400 dark:text-slate-500" />
                 )}
               </div>
             </div>
 
             {/* Expanded Profile (Pro Only) */}
             {expandedPartner === match.company_id && !match.profile_locked && (
-              <div className="border-t border-gray-100 px-4 py-4 bg-gradient-to-b from-gray-50/50 to-white">
+              <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4 bg-gradient-to-b from-gray-50/50 dark:from-slate-700/50 to-white dark:to-slate-800">
                 {loadingDetails ? (
-                  <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 py-4">
                     <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                     Loading details...
                   </div>
@@ -354,7 +354,7 @@ export function PartnerMatches({
                     {/* Match Reasons */}
                     {match.match_reasons && match.match_reasons.length > 0 && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2">
                           Why They Match
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -363,10 +363,10 @@ export function PartnerMatches({
                               key={i}
                               className={`px-2.5 py-1 text-xs rounded-full ${
                                 reason.strength === 'strong'
-                                  ? 'bg-green-100 text-green-700'
+                                  ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300'
                                   : reason.strength === 'moderate'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : 'bg-gray-100 text-gray-600'
+                                  ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300'
+                                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                               }`}
                             >
                               {reason.reason}
@@ -403,10 +403,10 @@ export function PartnerMatches({
 
                     {/* Patent Cliffs - Why They're Motivated */}
                     {partnerDetails?.company?.patent_cliffs && partnerDetails.company.patent_cliffs.length > 0 && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 overflow-hidden">
+                      <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3 sm:p-4 overflow-hidden">
                         <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                          <span className="text-[10px] sm:text-xs font-medium text-amber-800 uppercase tracking-wide truncate">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                          <span className="text-[10px] sm:text-xs font-medium text-amber-800 dark:text-amber-300 uppercase tracking-wide truncate">
                             Patent Cliffs
                           </span>
                         </div>
@@ -414,17 +414,17 @@ export function PartnerMatches({
                           {partnerDetails.company.patent_cliffs.slice(0, 3).map((cliff: PatentCliff, i: number) => (
                             <div
                               key={i}
-                              className="flex items-center justify-between gap-2 text-sm bg-white border border-amber-100 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
+                              className="flex items-center justify-between gap-2 text-sm bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-500/20 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
                             >
                               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                                <Pill className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 flex-shrink-0" />
-                                <span className="font-medium text-gray-900 truncate text-xs sm:text-sm">{cliff.drug_name}</span>
+                                <Pill className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                                <span className="font-medium text-gray-900 dark:text-white truncate text-xs sm:text-sm">{cliff.drug_name}</span>
                               </div>
                               <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-                                <span className="text-amber-700 font-medium text-[10px] sm:text-sm whitespace-nowrap">
+                                <span className="text-amber-700 dark:text-amber-300 font-medium text-[10px] sm:text-sm whitespace-nowrap">
                                   {formatCurrency(cliff.revenue_usd)}
                                 </span>
-                                <span className="px-1.5 sm:px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] sm:text-xs font-medium rounded whitespace-nowrap">
+                                <span className="px-1.5 sm:px-2 py-0.5 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px] sm:text-xs font-medium rounded whitespace-nowrap">
                                   {cliff.expiry_year}
                                 </span>
                               </div>
@@ -434,20 +434,20 @@ export function PartnerMatches({
                         {(partnerDetails.company.revenue_at_risk_2025 ||
                           partnerDetails.company.revenue_at_risk_2026 ||
                           partnerDetails.company.revenue_at_risk_2027) && (
-                          <div className="mt-3 pt-3 border-t border-amber-200 flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
-                            <span className="text-amber-700 font-medium">Revenue at Risk:</span>
+                          <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-500/30 flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
+                            <span className="text-amber-700 dark:text-amber-300 font-medium">Revenue at Risk:</span>
                             {partnerDetails.company.revenue_at_risk_2025 && (
-                              <span className="text-gray-700">
+                              <span className="text-gray-700 dark:text-slate-300">
                                 2025: <strong>{formatCurrency(partnerDetails.company.revenue_at_risk_2025)}</strong>
                               </span>
                             )}
                             {partnerDetails.company.revenue_at_risk_2026 && (
-                              <span className="text-gray-700">
+                              <span className="text-gray-700 dark:text-slate-300">
                                 2026: <strong>{formatCurrency(partnerDetails.company.revenue_at_risk_2026)}</strong>
                               </span>
                             )}
                             {partnerDetails.company.revenue_at_risk_2027 && (
-                              <span className="text-gray-700">
+                              <span className="text-gray-700 dark:text-slate-300">
                                 2027: <strong>{formatCurrency(partnerDetails.company.revenue_at_risk_2027)}</strong>
                               </span>
                             )}
@@ -460,19 +460,19 @@ export function PartnerMatches({
                     {partnerDetails?.recent_deals && partnerDetails.recent_deals.length > 0 && (
                       <div>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2">
-                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                             Recent Deals
                           </div>
                           {partnerDetails.company?.avg_upfront_usd && (
                             <div className="flex items-center gap-1.5 text-xs">
-                              <DollarSign className="w-3 h-3 text-green-600" />
-                              <span className="text-gray-500">Avg:</span>
-                              <span className="font-semibold text-green-600">
+                              <DollarSign className="w-3 h-3 text-green-600 dark:text-green-400" />
+                              <span className="text-gray-500 dark:text-slate-400">Avg:</span>
+                              <span className="font-semibold text-green-600 dark:text-green-400">
                                 {formatCurrency(partnerDetails.company.avg_upfront_usd)}
                               </span>
                               {partnerDetails.company?.median_upfront_usd &&
                                partnerDetails.company.median_upfront_usd !== partnerDetails.company.avg_upfront_usd && (
-                                <span className="text-gray-400 hidden sm:inline">
+                                <span className="text-gray-400 dark:text-slate-500 hidden sm:inline">
                                   (Med: {formatCurrency(partnerDetails.company.median_upfront_usd)})
                                 </span>
                               )}
@@ -483,26 +483,26 @@ export function PartnerMatches({
                           {partnerDetails.recent_deals.slice(0, 5).map((deal, i: number) => (
                             <div
                               key={i}
-                              className="bg-white border border-gray-100 rounded-lg px-3 py-2.5 hover:border-gray-200 transition-colors"
+                              className="bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-lg px-3 py-2.5 hover:border-gray-200 dark:hover:border-slate-600 transition-colors"
                             >
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-medium text-gray-900 text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-white text-sm">
                                       {deal.asset_name}
                                     </span>
-                                    <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                                    <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">
                                       {formatModality(deal.modality)}
                                     </span>
-                                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                                    <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded">
                                       {formatPhase(deal.phase)}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 flex-wrap">
+                                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-slate-400 flex-wrap">
                                     <span className="truncate">from {deal.licensor}</span>
                                     {deal.indication && (
                                       <>
-                                        <span className="text-gray-300 hidden sm:inline">•</span>
+                                        <span className="text-gray-300 dark:text-slate-600 hidden sm:inline">•</span>
                                         <span className="truncate hidden sm:inline">{deal.indication}</span>
                                       </>
                                     )}
@@ -512,20 +512,20 @@ export function PartnerMatches({
                                   {deal.terms_disclosed ? (
                                     <div className="text-left sm:text-right">
                                       {deal.upfront_usd && (
-                                        <div className="text-green-600 font-semibold text-xs sm:text-sm">
+                                        <div className="text-green-600 dark:text-green-400 font-semibold text-xs sm:text-sm">
                                           {formatCurrency(deal.upfront_usd)} upfront
                                         </div>
                                       )}
                                       {deal.total_value_usd && (
-                                        <div className="text-xs text-gray-500 hidden sm:block">
+                                        <div className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
                                           {formatCurrency(deal.total_value_usd)} total
                                         </div>
                                       )}
                                     </div>
                                   ) : (
-                                    <span className="text-gray-400 text-xs">Undisclosed</span>
+                                    <span className="text-gray-400 dark:text-slate-500 text-xs">Undisclosed</span>
                                   )}
-                                  <div className="text-xs text-gray-400">
+                                  <div className="text-xs text-gray-400 dark:text-slate-500">
                                     <Clock className="w-3 h-3 inline mr-1" />
                                     {formatDate(deal.announced_date)}
                                   </div>
@@ -540,17 +540,17 @@ export function PartnerMatches({
                     {/* Therapeutic Focus */}
                     {(partnerDetails?.company?.modalities_primary?.length ?? 0) > 0 && (
                       <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2">
                           Primary Focus Areas
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {partnerDetails?.company?.modalities_primary?.map((m: string) => (
-                            <span key={m} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                            <span key={m} className="px-2 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded">
                               {formatModality(m)}
                             </span>
                           ))}
                           {partnerDetails?.company?.indications_active?.slice(0, 3).map((i: string) => (
-                            <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded">
+                            <span key={i} className="px-2 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs rounded">
                               {formatIndicationCategory(i)}
                             </span>
                           ))}
@@ -567,22 +567,22 @@ export function PartnerMatches({
 
       {/* Free Tier: Upgrade CTA */}
       {userTier === 'free' && upgradeCta && (
-        <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl border border-blue-100">
+        <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-purple-500/10 rounded-xl border border-blue-100 dark:border-blue-500/30">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-5 h-5 text-blue-600" />
-                <p className="font-semibold text-gray-900">
+                <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <p className="font-semibold text-gray-900 dark:text-white">
                   {upgradeCta.remaining_hidden}+ more potential partners
                 </p>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-slate-300">
                 {upgradeCta.message}
               </p>
               <ul className="mt-3 space-y-1">
                 {upgradeCta.features.slice(0, 3).map((feature, i) => (
-                  <li key={i} className="text-sm text-gray-600 flex items-center gap-2">
-                    <div className="w-1 h-1 bg-blue-500 rounded-full" />
+                  <li key={i} className="text-sm text-gray-600 dark:text-slate-300 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-blue-500 dark:bg-blue-400 rounded-full" />
                     {feature}
                   </li>
                 ))}
@@ -590,7 +590,7 @@ export function PartnerMatches({
             </div>
             <button
               onClick={handleUpgradeCtaClick}
-              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             >
               Upgrade to Pro
               <ArrowRight className="w-4 h-4" />
@@ -601,16 +601,16 @@ export function PartnerMatches({
 
       {/* Pro Tier: Advisory CTA */}
       {userTier === 'pro' && advisoryCta && (
-        <div className="mt-6 p-5 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 rounded-xl border border-amber-200">
+        <div className="mt-6 p-5 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-500/10 dark:via-orange-500/10 dark:to-yellow-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Globe className="w-5 h-5 text-amber-600" />
-                <p className="font-semibold text-gray-900">
+                <Globe className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <p className="font-semibold text-gray-900 dark:text-white">
                   Need deeper partner analysis?
                 </p>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-slate-300">
                 {advisoryCta.message}
               </p>
             </div>
@@ -619,7 +619,7 @@ export function PartnerMatches({
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleAdvisoryCtaClick}
-              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-500 dark:to-orange-500 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 dark:hover:from-amber-400 dark:hover:to-orange-400 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             >
               {advisoryCta.cta_text}
               <ExternalLink className="w-4 h-4" />
@@ -646,15 +646,15 @@ function StatCard({
   return (
     <div className={`flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 min-w-0 ${
       highlight
-        ? 'bg-green-50 border border-green-200'
-        : 'bg-white border border-gray-100'
+        ? 'bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30'
+        : 'bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700'
     }`}>
-      <div className={`flex-shrink-0 ${highlight ? 'text-green-600' : 'text-gray-400'}`}>{icon}</div>
+      <div className={`flex-shrink-0 ${highlight ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-slate-500'}`}>{icon}</div>
       <div className="min-w-0">
-        <div className={`text-xs sm:text-sm font-semibold truncate ${highlight ? 'text-green-700' : 'text-gray-900'}`}>
+        <div className={`text-xs sm:text-sm font-semibold truncate ${highlight ? 'text-green-700 dark:text-green-300' : 'text-gray-900 dark:text-white'}`}>
           {value || 'N/A'}
         </div>
-        <div className="text-[10px] sm:text-xs text-gray-500 truncate">{label}</div>
+        <div className="text-[10px] sm:text-xs text-gray-500 dark:text-slate-400 truncate">{label}</div>
       </div>
     </div>
   );

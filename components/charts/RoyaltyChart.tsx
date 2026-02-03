@@ -34,14 +34,14 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
     if (active && payload && payload.length) {
       const item = data.find(d => d.sales === label);
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-neutral-200">
-          <p className="font-semibold text-navy-800 mb-1">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg border border-neutral-200 dark:border-slate-600">
+          <p className="font-semibold text-navy-800 dark:text-white mb-1">
             ${label}M Annual Sales
           </p>
-          <p className="text-xs text-neutral-500 mb-2">{item?.tier} Tier</p>
+          <p className="text-xs text-neutral-500 dark:text-slate-400 mb-2">{item?.tier} Tier</p>
           <div className="space-y-1 text-sm">
-            <p className="text-neutral-600">
-              Royalty Range: <span className="font-bold text-teal-600">
+            <p className="text-neutral-600 dark:text-slate-300">
+              Royalty Range: <span className="font-bold text-teal-600 dark:text-teal-400">
                 {payload[0]?.value}% - {payload[1]?.value}%
               </span>
             </p>
@@ -115,13 +115,13 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
       <div className="hidden sm:flex justify-center gap-12 mt-6 text-xs">
         <div className="flex items-center gap-3">
           <div className="w-6 h-0.5 bg-teal-600 rounded"></div>
-          <span className="text-neutral-600">Low Range</span>
+          <span className="text-neutral-600 dark:text-slate-400">Low Range</span>
         </div>
         <div className="flex items-center gap-3">
           <svg className="w-6 h-2" viewBox="0 0 24 2">
             <line x1="0" y1="1" x2="24" y2="1" stroke="#14B8A6" strokeWidth="2" strokeDasharray="4 2" />
           </svg>
-          <span className="text-neutral-600">High Range</span>
+          <span className="text-neutral-600 dark:text-slate-400">High Range</span>
         </div>
       </div>
     </div>

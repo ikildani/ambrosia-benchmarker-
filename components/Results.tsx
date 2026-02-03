@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { CalculationResult, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
+import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
+import { SensitivityAnalysis } from './sensitivity';
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
 import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
 import BenchmarkInfo from './BenchmarkInfo';
 import ChartSection from './charts/ChartSection';
 import ScenarioComparison from './ScenarioComparison';
 import ShareModal from './ShareModal';
+import NegotiationPlaybookModal from './NegotiationPlaybookModal';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
@@ -21,6 +23,8 @@ interface ResultsProps {
     indication: string;
     territory: string;
   };
+  fullInputs?: CalculationInput;
+  onApplyNewInputs?: (inputs: Partial<CalculationInput>) => void;
   onPartnerMatchesLoaded?: (matches: PartnerMatchForPDF[]) => void;
 }
 
@@ -81,41 +85,41 @@ function DrillDownPanel({
   isRoyalty?: boolean;
 }) {
   return (
-    <div className="mt-4 pt-4 border-t border-neutral-200 animate-fade-in">
+    <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-slate-600 animate-fade-in">
       {/* Why This Range */}
       <div className="mb-4">
-        <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Why This Range?</h5>
-        <p className="text-sm text-neutral-600 leading-relaxed">{data.rangeExplanation}</p>
+        <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Why This Range?</h5>
+        <p className="text-sm text-neutral-600 dark:text-slate-300 leading-relaxed">{data.rangeExplanation}</p>
       </div>
 
       {/* Breakdown Table */}
       {data.breakdown && data.breakdown.length > 0 && (
         <div className="mb-4">
-          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             {isRoyalty ? 'Royalty Tiers' : 'Breakdown'}
           </h5>
-          <div className="bg-neutral-50 rounded-lg overflow-hidden">
+          <div className="bg-neutral-50 dark:bg-slate-700/50 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[320px]">
               <thead>
-                <tr className="bg-neutral-100">
-                  <th className="text-left py-2 px-3 font-medium text-neutral-600">Component</th>
-                  <th className="text-center py-2 px-3 font-medium text-neutral-600">
+                <tr className="bg-neutral-100 dark:bg-slate-700">
+                  <th className="text-left py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">Component</th>
+                  <th className="text-center py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
                     {isRoyalty ? 'Rate' : 'Share'}
                   </th>
-                  <th className="text-right py-2 px-3 font-medium text-neutral-600">
+                  <th className="text-right py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
                     {isRoyalty ? 'Range' : 'Value'}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {data.breakdown.map((item, idx) => (
-                  <tr key={idx} className="border-t border-neutral-200">
-                    <td className="py-2 px-3 text-neutral-700">{item.label}</td>
-                    <td className="py-2 px-3 text-center text-neutral-600">
+                  <tr key={idx} className="border-t border-neutral-200 dark:border-slate-600">
+                    <td className="py-2 px-3 text-neutral-700 dark:text-slate-200">{item.label}</td>
+                    <td className="py-2 px-3 text-center text-neutral-600 dark:text-slate-300">
                       {isRoyalty ? `${item.value.low}% - ${item.value.high}%` : `${item.percentage}%`}
                     </td>
-                    <td className="py-2 px-3 text-right font-medium text-neutral-800">
+                    <td className="py-2 px-3 text-right font-medium text-neutral-800 dark:text-white">
                       {isRoyalty
                         ? `${item.value.low}% - ${item.value.high}%`
                         : `${formatCurrency(item.value.low)} - ${formatCurrency(item.value.high)}`
@@ -133,7 +137,7 @@ function DrillDownPanel({
       {/* Key Factors */}
       {data.factors && data.factors.length > 0 && (
         <div>
-          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Key Factors</h5>
+          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Factors</h5>
           <div className="space-y-1.5">
             {data.factors.slice(0, 5).map((factor, idx) => (
               <div key={idx} className="flex items-center gap-2 text-sm">
@@ -147,10 +151,10 @@ function DrillDownPanel({
                   </svg>
                 ) : (
                   <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-slate-500" />
                   </div>
                 )}
-                <span className={factor.impact === 'positive' ? 'text-teal-700' : factor.impact === 'negative' ? 'text-amber-700' : 'text-neutral-600'}>
+                <span className={factor.impact === 'positive' ? 'text-teal-700 dark:text-teal-400' : factor.impact === 'negative' ? 'text-amber-700 dark:text-amber-400' : 'text-neutral-600 dark:text-slate-300'}>
                   {factor.name}
                   {factor.percentage !== 0 && (
                     <span className="font-semibold ml-1">
@@ -221,7 +225,7 @@ function MetricCard({
 
   return (
     <div
-      className={`group metric-card border-neutral-200 hover:border-teal-200 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200' : ''}`}
+      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
@@ -240,7 +244,7 @@ function MetricCard({
                 {icon}
               </div>
             </div>
-            <p className="text-sm font-semibold text-neutral-700">{title}</p>
+            <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{title}</p>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
@@ -257,19 +261,19 @@ function MetricCard({
               </svg>
             )}
             {!canExpand && !isPro && (
-              <div className="p-1 bg-navy-100 rounded">
-                <svg className="w-3 h-3 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-1 bg-navy-100 dark:bg-slate-600 rounded">
+                <svg className="w-3 h-3 text-navy-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
             )}
           </div>
         </div>
-        <p className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 number-animate">
+        <p className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white mb-2 number-animate">
           {value}
         </p>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-slate-400">
             Expected: <span className={`font-bold ${expectedColor}`}>{expected}</span>
           </p>
         </div>
@@ -297,7 +301,7 @@ function MethodologySection() {
     <div className="mt-6 sm:mt-8">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 rounded-xl border border-navy-200 hover:border-navy-300 transition-all"
+        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 dark:from-slate-700 dark:to-slate-800 rounded-xl border border-navy-200 dark:border-slate-600 hover:border-navy-300 dark:hover:border-slate-500 transition-all"
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-600 to-navy-700 flex items-center justify-center">
@@ -305,10 +309,10 @@ function MethodologySection() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
-          <span className="font-semibold text-navy-800">How We Calculate This</span>
+          <span className="font-semibold text-navy-800 dark:text-white">How We Calculate This</span>
         </div>
         <svg
-          className={`w-5 h-5 text-navy-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-navy-500 dark:text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -318,25 +322,25 @@ function MethodologySection() {
       </button>
 
       {isExpanded && (
-        <div className="mt-3 p-5 bg-white rounded-xl border border-neutral-200 animate-fade-in">
+        <div className="mt-3 p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg font-bold text-navy-800">Powered by</span>
-            <span className="text-lg font-bold text-teal-600">Ambrosia Ventures</span>
+            <span className="text-lg font-bold text-navy-800 dark:text-white">Powered by</span>
+            <span className="text-lg font-bold text-teal-600 dark:text-teal-400">Ambrosia Ventures</span>
           </div>
 
-          <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 leading-relaxed">
             These estimates are generated using Ambrosia Ventures&apos; proprietary benchmarking model,
             developed from our team&apos;s deep expertise in life sciences M&A and licensing transactions.
           </p>
 
-          <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">Our Model Analyzes</h5>
+          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Our Model Analyzes</h5>
           <ul className="space-y-2 mb-4">
             {[
               'Publicly disclosed deal terms (SEC filings, press releases)',
               'Industry benchmark reports and market intelligence',
               'Recent transaction activity and emerging trends'
             ].map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-neutral-600">
+              <li key={idx} className="flex items-start gap-2 text-sm text-neutral-600 dark:text-slate-300">
                 <svg className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -345,14 +349,14 @@ function MethodologySection() {
             ))}
           </ul>
 
-          <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 leading-relaxed">
             The algorithm weighs multiple factors including development phase, therapeutic modality,
             indication, territory scope, competitive landscape, and clinical data quality to generate
             customized ranges specific to your asset profile.
           </p>
 
-          <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <p className="text-xs text-amber-800">
+          <div className="p-3 bg-amber-50 dark:bg-amber-500/20 rounded-lg border border-amber-200 dark:border-amber-500/30">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
               <strong>Important:</strong> These are illustrative estimates for planning purposes only.
               Actual deal terms vary significantly based on asset-specific factors, market conditions,
               negotiation dynamics, and factors not captured in this model. This does not constitute
@@ -365,13 +369,14 @@ function MethodologySection() {
   );
 }
 
-export default function Results({ result, tier = 'free', onUpgrade, inputs, onPartnerMatchesLoaded }: ResultsProps) {
+export default function Results({ result, tier = 'free', onUpgrade, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showPlaybookModal, setShowPlaybookModal] = useState(false);
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
@@ -550,14 +555,14 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
 
         {/* Applied Modifiers - Horizontal scroll on mobile */}
         {modifiers.length > 0 && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white rounded-xl border border-neutral-200 shadow-inner-soft">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
             <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
-              <svg className="w-4 h-4 text-teal-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              <p className="text-xs sm:text-sm font-semibold text-neutral-700">Applied Adjustments</p>
+              <p className="text-xs sm:text-sm font-semibold text-neutral-700 dark:text-slate-200">Applied Adjustments</p>
               {modifiers.length > 2 && (
-                <span className="sm:hidden text-xs text-neutral-400 ml-auto flex items-center gap-1">
+                <span className="sm:hidden text-xs text-neutral-400 dark:text-slate-500 ml-auto flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -572,10 +577,10 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
                   <span
                     className={`inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 cursor-help ${
                       mod.multiplier > 1
-                        ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30'
                         : mod.multiplier < 1
-                        ? 'bg-warning-50 text-warning-700 border border-warning-200'
-                        : 'bg-neutral-50 text-neutral-700 border border-neutral-200'
+                        ? 'bg-warning-50 dark:bg-amber-500/20 text-warning-700 dark:text-amber-300 border border-warning-200 dark:border-amber-500/30'
+                        : 'bg-neutral-50 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600'
                     }`}
                   >
                     {mod.multiplier > 1 ? (
@@ -609,7 +614,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
 
         {/* Expandable hint for free users */}
         {!isPro && (
-          <div className="mb-4 flex items-center gap-2 text-xs text-neutral-500">
+          <div className="mb-4 flex items-center gap-2 text-xs text-neutral-500 dark:text-slate-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -735,7 +740,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
           />
 
           {/* Tiered Royalties */}
-          <div className={`group metric-card border-neutral-200 hover:border-teal-200 transition-all duration-300 ${expandedCard === 'royalties' ? 'ring-2 ring-teal-200' : ''}`}>
+          <div className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${expandedCard === 'royalties' ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}>
             <div
               className={canExpandCard('royalties') ? 'cursor-pointer' : ''}
               onClick={() => {
@@ -748,15 +753,15 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center transition-colors group-hover:bg-teal-100">
-                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center transition-colors group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30">
+                    <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-neutral-700">Tiered Royalties</p>
+                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">Tiered Royalties</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal-100 text-teal-700">
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
                     {metricBadges.royalties.label}
                   </span>
                   {canExpandCard('royalties') ? (
@@ -769,8 +774,8 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   ) : (
-                    <div className="p-1 bg-navy-100 rounded">
-                      <svg className="w-3 h-3 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-1 bg-navy-100 dark:bg-slate-600 rounded">
+                      <svg className="w-3 h-3 text-navy-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                     </div>
@@ -779,16 +784,16 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Base (&lt;$500M)</span>
-                  <span className="font-bold text-neutral-900">{tieredRoyalties.base.low}% - {tieredRoyalties.base.high}%</span>
+                  <span className="text-sm text-neutral-600 dark:text-slate-300">Base (&lt;$500M)</span>
+                  <span className="font-bold text-neutral-900 dark:text-white">{tieredRoyalties.base.low}% - {tieredRoyalties.base.high}%</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Mid ($500M-$1B)</span>
-                  <span className="font-bold text-neutral-900">{tieredRoyalties.midTier.low}% - {tieredRoyalties.midTier.high}%</span>
+                  <span className="text-sm text-neutral-600 dark:text-slate-300">Mid ($500M-$1B)</span>
+                  <span className="font-bold text-neutral-900 dark:text-white">{tieredRoyalties.midTier.low}% - {tieredRoyalties.midTier.high}%</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">High (&gt;$1B)</span>
-                  <span className="font-bold text-neutral-900">{tieredRoyalties.highTier.low}% - {tieredRoyalties.highTier.high}%</span>
+                  <span className="text-sm text-neutral-600 dark:text-slate-300">High (&gt;$1B)</span>
+                  <span className="font-bold text-neutral-900 dark:text-white">{tieredRoyalties.highTier.low}% - {tieredRoyalties.highTier.high}%</span>
                 </div>
               </div>
             </div>
@@ -809,6 +814,55 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
           onUpgrade={onUpgrade}
         />
 
+        {/* Sensitivity Analysis */}
+        {fullInputs && onApplyNewInputs && (
+          <SensitivityAnalysis
+            currentInputs={fullInputs}
+            currentResult={result}
+            onApplyChanges={onApplyNewInputs}
+            isPro={isPro}
+            onUpgrade={onUpgrade}
+          />
+        )}
+
+        {/* Negotiation Playbook CTA */}
+        <div className="relative mt-6 sm:mt-8">
+          <div className={`p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl ${!isPro ? 'blur-sm pointer-events-none' : ''}`}>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h4 className="text-lg font-bold text-white mb-1">AI-Powered Negotiation Playbook</h4>
+                <p className="text-neutral-300 text-sm">
+                  Get strategic talking points tailored to your asset profile and market position
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPlaybookModal(true)}
+                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow whitespace-nowrap"
+              >
+                Generate Playbook
+              </button>
+            </div>
+          </div>
+          {!isPro && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+              <button
+                onClick={() => handleProFeatureClick('negotiation_playbook')}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Unlock with Pro
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Scenario Comparison (Pro only) */}
         {isPro && (
           <ScenarioComparison
@@ -823,6 +877,17 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
           <ShareModal
             isOpen={showShareModal}
             onClose={() => setShowShareModal(false)}
+            inputs={inputs}
+            results={result}
+            labels={labels}
+          />
+        )}
+
+        {/* Negotiation Playbook Modal */}
+        {inputs && (
+          <NegotiationPlaybookModal
+            isOpen={showPlaybookModal}
+            onClose={() => setShowPlaybookModal(false)}
             inputs={inputs}
             results={result}
             labels={labels}

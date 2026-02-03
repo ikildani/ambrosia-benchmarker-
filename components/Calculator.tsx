@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Circle, Star, Hexagon, Dna, Globe2, CheckCircle } from 'lucide-react';
 import {
   Phase,
   Modality,
@@ -31,6 +32,104 @@ import { addToHistory } from '@/lib/history';
 import { useTracking } from './TrackingProvider';
 import Results from './Results';
 import PaywallModal from './PaywallModal';
+import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
+import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
+
+// Template types and data
+interface DealTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: 'standard' | 'premium' | 'highValue' | 'platform' | 'regional' | 'commercial';
+  values: Partial<CalculationInput>;
+}
+
+const DEAL_TEMPLATES: DealTemplate[] = [
+  {
+    id: 'standard-phase2',
+    name: 'Standard Phase 2',
+    description: 'Most common deal type',
+    icon: 'standard',
+    values: {
+      phase: 'phase2',
+      modality: 'smallMolecule',
+      indication: 'lung_nsclc',
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'first-in-class',
+    name: 'First-in-Class',
+    description: 'Premium positioning',
+    icon: 'premium',
+    values: {
+      phase: 'phase1',
+      modality: 'bispecific',
+      territory: 'global',
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+  {
+    id: 'late-stage-adc',
+    name: 'Late-Stage ADC',
+    description: 'High-value acquisitions',
+    icon: 'highValue',
+    values: {
+      phase: 'phase3',
+      modality: 'adc',
+      indication: 'breast_her2',
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'pivotalReady',
+    },
+  },
+  {
+    id: 'platform-multi-asset',
+    name: 'Platform / Multi-Asset',
+    description: 'CAR-T, gene therapy',
+    icon: 'platform',
+    values: {
+      phase: 'phase1',
+      modality: 'carT_solid',
+      territory: 'global',
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+  {
+    id: 'regional-carveout',
+    name: 'Regional Carve-Out',
+    description: 'China/Japan rights only',
+    icon: 'regional',
+    values: {
+      phase: 'phase2',
+      territory: 'china',
+    },
+  },
+  {
+    id: 'commercial-asset',
+    name: 'Commercial Asset',
+    description: 'Approved products',
+    icon: 'commercial',
+    values: {
+      phase: 'approved',
+      territory: 'global',
+      dataQuality: 'pivotalReady',
+    },
+  },
+];
+
+const TEMPLATE_ICONS: Record<DealTemplate['icon'], React.ComponentType<{ className?: string }>> = {
+  standard: Circle,
+  premium: Star,
+  highValue: Hexagon,
+  platform: Dna,
+  regional: Globe2,
+  commercial: CheckCircle,
+};
 
 interface CalculatorProps {
   tier?: 'free' | 'pro';
@@ -61,6 +160,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep | null>(null);
+
+  // Template selection state
+  const [showTemplates, setShowTemplates] = useState(true);
+  const [highlightedFields, setHighlightedFields] = useState<Set<string>>(new Set());
+
   // Tracking
   const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
   const calculationCountRef = useRef(0);
@@ -70,6 +177,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   useEffect(() => {
     setRemainingUses(getRemainingUses(tier));
   }, [tier]);
+
+  // Check if onboarding should show for first-time users
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (shouldShowOnboarding()) {
+        setShowOnboarding(true);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check for prefilled inputs from history reuse
   useEffect(() => {
@@ -90,6 +207,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         if (inputs.dataQuality) setDataQuality(inputs.dataQuality as DataQuality);
         if (inputs.regulatoryDesignations) setRegulatoryDesignations(inputs.regulatoryDesignations);
         sessionStorage.removeItem('prefill_calculation');
+        // Hide templates when prefill data is present
+        setShowTemplates(false);
       } catch {
         // Ignore invalid prefill data
       }
@@ -253,11 +372,57 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     });
   };
 
+  // Handle sensitivity analysis changes - updates inputs and triggers recalculation
+  const handleSensitivityApply = (newInputs: Partial<CalculationInput>) => {
+    // Update each state variable if provided
+    if (newInputs.phase) setPhase(newInputs.phase);
+    if (newInputs.modality) setModality(newInputs.modality);
+    if (newInputs.indication) setIndication(newInputs.indication);
+    if (newInputs.territory) setTerritory(newInputs.territory);
+    if (newInputs.biomarker) setBiomarker(newInputs.biomarker);
+    if (newInputs.lineOfTherapy) setLineOfTherapy(newInputs.lineOfTherapy);
+    if (newInputs.combinationPotential) setCombinationPotential(newInputs.combinationPotential);
+    if (newInputs.competitivePosition) setCompetitivePosition(newInputs.competitivePosition);
+    if (newInputs.dataQuality) setDataQuality(newInputs.dataQuality);
+    if (newInputs.regulatoryDesignations) setRegulatoryDesignations(newInputs.regulatoryDesignations);
+
+    // Trigger recalculation with new values
+    // We need to use setTimeout to ensure state has updated
+    setTimeout(() => {
+      handleCalculate();
+    }, 0);
+  };
+
   const handleRegulatoryChange = (designation: keyof RegulatoryDesignations) => {
     setRegulatoryDesignations((prev) => ({
       ...prev,
       [designation]: !prev[designation],
     }));
+  };
+
+  const applyTemplate = (template: DealTemplate) => {
+    const { values } = template;
+    const fieldsSet = new Set<string>();
+
+    if (values.phase) { setPhase(values.phase); fieldsSet.add('phase'); }
+    if (values.modality) { setModality(values.modality); fieldsSet.add('modality'); }
+    if (values.indication) { setIndication(values.indication); fieldsSet.add('indication'); }
+    if (values.territory) { setTerritory(values.territory); fieldsSet.add('territory'); }
+    if (values.biomarker) { setBiomarker(values.biomarker); fieldsSet.add('biomarker'); }
+    if (values.lineOfTherapy) { setLineOfTherapy(values.lineOfTherapy); fieldsSet.add('lineOfTherapy'); }
+    if (values.combinationPotential) { setCombinationPotential(values.combinationPotential); fieldsSet.add('combinationPotential'); }
+    if (values.competitivePosition) { setCompetitivePosition(values.competitivePosition); fieldsSet.add('competitivePosition'); }
+    if (values.dataQuality) { setDataQuality(values.dataQuality); fieldsSet.add('dataQuality'); }
+    if (values.regulatoryDesignations) { setRegulatoryDesignations(values.regulatoryDesignations); fieldsSet.add('regulatoryDesignations'); }
+
+    setHighlightedFields(fieldsSet);
+    setShowTemplates(false);
+
+    // Clear highlight after animation
+    setTimeout(() => setHighlightedFields(new Set()), 2000);
+
+    // Track template selection
+    trackParameterChange('template', 'none', template.id);
   };
 
   return (
@@ -289,20 +454,67 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           </div>
         </div>
 
+        {/* Template Selection */}
+        {showTemplates && (
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
+              <p className="text-sm text-neutral-500 dark:text-slate-400">Based on 500+ analyzed deals</p>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              {DEAL_TEMPLATES.map((template) => {
+                const IconComponent = TEMPLATE_ICONS[template.icon];
+                return (
+                  <button
+                    key={template.id}
+                    onClick={() => applyTemplate(template)}
+                    className="p-4 rounded-xl border-2 border-neutral-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-500
+                               bg-white dark:bg-slate-800 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-all text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-neutral-100 dark:bg-slate-700 group-hover:bg-teal-100 dark:group-hover:bg-teal-900/50
+                                    flex items-center justify-center mb-3 transition-colors">
+                      <IconComponent className="w-5 h-5 text-neutral-500 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
+                    </div>
+                    <div className="font-semibold text-navy-800 dark:text-white text-sm">{template.name}</div>
+                    <div className="text-xs text-neutral-500 dark:text-slate-400 mt-1">{template.description}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex-1 h-px bg-neutral-200 dark:bg-slate-700" />
+              <span className="text-xs text-neutral-400 dark:text-slate-500">or</span>
+              <div className="flex-1 h-px bg-neutral-200 dark:bg-slate-700" />
+            </div>
+
+            <button
+              onClick={() => setShowTemplates(false)}
+              className="mt-4 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium flex items-center gap-1 group"
+            >
+              Start from scratch
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         {/* Form */}
         <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Left Column */}
             <div className="space-y-6 lg:space-y-8">
               {/* Asset Details Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
+              <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
+                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-teal-500 text-white text-xs flex items-center justify-center">1</span>
                   Asset Details
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Development Phase</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Development Phase</label>
                     <select
                       value={phase}
                       onChange={(e) => {
@@ -310,7 +522,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('phase', phase, newValue);
                         setPhase(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('phase') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {phaseOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -319,7 +531,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Modality</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Modality</label>
                     <select
                       value={modality}
                       onChange={(e) => {
@@ -327,7 +539,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('modality', modality, newValue);
                         setModality(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {modalityOptions.map((group) => (
                         <optgroup key={group.group} label={group.group}>
@@ -340,7 +552,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Primary Indication</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Primary Indication</label>
                     <select
                       value={indication}
                       onChange={(e) => {
@@ -348,7 +560,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('indication', indication, newValue);
                         setIndication(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {indicationOptions.map((group) => (
                         <optgroup key={group.group} label={group.group}>
@@ -361,7 +573,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Biomarker Status</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status</label>
                     <select
                       value={biomarker}
                       onChange={(e) => {
@@ -369,7 +581,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('biomarker', biomarker, newValue);
                         setBiomarker(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('biomarker') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {biomarkerOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -381,13 +593,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
               {/* Target Profile Section */}
               <div>
-                <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-teal-500/70 text-white text-xs flex items-center justify-center">2</span>
                   Target Profile
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Line of Therapy</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
                     <select
                       value={lineOfTherapy}
                       onChange={(e) => {
@@ -395,7 +607,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
                         setLineOfTherapy(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('lineOfTherapy') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {lineOfTherapyOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -404,7 +616,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Combination Potential</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Combination Potential</label>
                     <select
                       value={combinationPotential}
                       onChange={(e) => {
@@ -412,7 +624,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('combinationPotential', combinationPotential, newValue);
                         setCombinationPotential(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('combinationPotential') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {combinationPotentialOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -426,14 +638,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             {/* Right Column */}
             <div className="space-y-6 lg:space-y-8">
               {/* Competitive Landscape Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
+              <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
+                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-teal-500/50 text-white text-xs flex items-center justify-center">3</span>
                   Competitive Landscape
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Competitive Position</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Competitive Position</label>
                     <select
                       value={competitivePosition}
                       onChange={(e) => {
@@ -441,7 +653,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('competitivePosition', competitivePosition, newValue);
                         setCompetitivePosition(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('competitivePosition') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {competitivePositionOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -450,7 +662,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Data Quality</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Data Quality</label>
                     <select
                       value={dataQuality}
                       onChange={(e) => {
@@ -458,7 +670,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('dataQuality', dataQuality, newValue);
                         setDataQuality(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('dataQuality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {dataQualityOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -470,13 +682,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
               {/* Deal Scope Section */}
               <div>
-                <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-teal-500/30 text-teal-700 text-xs flex items-center justify-center">4</span>
                   Deal Scope
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Territory</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory</label>
                     <select
                       value={territory}
                       onChange={(e) => {
@@ -484,7 +696,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         trackParameterChange('territory', territory, newValue);
                         setTerritory(newValue);
                       }}
-                      className="select-field"
+                      className={`select-field transition-all duration-300 ${highlightedFields.has('territory') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
                       {territoryOptions.map((option) => (
                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -493,7 +705,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700">Regulatory Designations</label>
+                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                       {regulatoryDesignationOptions.map((option) => (
                         <label
@@ -539,14 +751,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
           {/* Usage Counter for Free Tier */}
           {tier === 'free' && (
-            <div className="mt-6 lg:mt-8 p-3 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+            <div className="mt-6 lg:mt-8 p-3 sm:p-4 rounded-xl bg-neutral-50 dark:bg-slate-800 border border-neutral-200 dark:border-slate-700">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-xs sm:text-sm text-neutral-600">
-                    <span className="font-semibold text-navy-800">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining
+                  <span className="text-xs sm:text-sm text-neutral-600 dark:text-slate-400">
+                    <span className="font-semibold text-navy-800 dark:text-white">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining
                   </span>
                 </div>
                 {remainingUses === 0 && (
@@ -631,6 +843,19 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               indication,
               territory,
             }}
+            fullInputs={{
+              phase,
+              modality,
+              indication,
+              territory,
+              biomarker,
+              lineOfTherapy,
+              combinationPotential,
+              competitivePosition,
+              dataQuality,
+              regulatoryDesignations,
+            }}
+            onApplyNewInputs={handleSensitivityApply}
           />
         </div>
       )}
@@ -639,6 +864,21 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         reason={paywallReason}
+      />
+
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => {
+          markOnboardingSkipped();
+          setShowOnboarding(false);
+          setOnboardingStep(null);
+        }}
+        onComplete={() => {
+          markOnboardingComplete();
+          setShowOnboarding(false);
+          setOnboardingStep(null);
+        }}
+        onStepChange={setOnboardingStep}
       />
     </div>
   );
