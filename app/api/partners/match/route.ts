@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       anonymous_id,
       user_id,
       user_email, // Email for Pro verification fallback
+      tier: clientTier, // Tier from frontend (localStorage auth)
       modality,
       development_phase,
       indication_category,
@@ -70,6 +71,12 @@ export async function POST(request: NextRequest) {
 
     // Method 2: Check PRO_EMAILS list by email (for localStorage auth users)
     if (userTier === 'free' && isProEmail(user_email)) {
+      userTier = 'pro';
+    }
+
+    // Method 3: Trust client tier if passed (for localStorage-based Pro users)
+    // This handles cases where Pro status is stored in localStorage after Stripe payment
+    if (userTier === 'free' && clientTier === 'pro') {
       userTier = 'pro';
     }
 
