@@ -21,6 +21,7 @@ interface OutreachEmailModalProps {
   userId?: string;
   userEmail?: string;
   sessionId?: string;
+  tier?: 'free' | 'pro';
 }
 
 export function OutreachEmailModal({
@@ -34,6 +35,7 @@ export function OutreachEmailModal({
   userId,
   userEmail,
   sessionId,
+  tier,
 }: OutreachEmailModalProps) {
   const [tone, setTone] = useState<EmailTone>('formal');
   const [recipientRole, setRecipientRole] = useState('');
@@ -62,6 +64,7 @@ export function OutreachEmailModal({
           user_id: userId,
           user_email: userEmail,
           session_id: sessionId,
+          tier: tier, // Pass client-side tier for localStorage auth
         }),
       });
 
@@ -86,7 +89,7 @@ export function OutreachEmailModal({
     } finally {
       setIsGenerating(false);
     }
-  }, [companyId, companyName, matchContext, userAsset, tone, recipientRole, userId, userEmail, sessionId]);
+  }, [companyId, companyName, matchContext, userAsset, tone, recipientRole, userId, userEmail, sessionId, tier]);
 
   const copyToClipboard = useCallback(async () => {
     if (!email) return;

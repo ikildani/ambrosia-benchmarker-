@@ -387,6 +387,7 @@ export function PartnerMatches({
                     userId={userId}
                     userEmail={userEmail}
                     sessionId={sessionId}
+                    tier={userTier}
                   />
                 ) : (
               <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4 bg-gradient-to-b from-gray-50/50 dark:from-slate-700/50 to-white dark:to-slate-800">

@@ -35,6 +35,7 @@ interface ScoreBreakdownProps {
   userId?: string;
   userEmail?: string;
   sessionId?: string;
+  tier?: 'free' | 'pro';
   onRegenerateStrategy?: () => void;
 }
 
@@ -51,16 +52,20 @@ export function ScoreBreakdown({
   userId,
   userEmail,
   sessionId,
+  tier,
   onRegenerateStrategy,
 }: ScoreBreakdownProps) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isRegeneratingStrategy, setIsRegeneratingStrategy] = useState(false);
   const [localStrategy, setLocalStrategy] = useState<ApproachStrategy | null>(approachStrategy);
+  const [strategyError, setStrategyError] = useState<string | null>(null);
 
   const handleRegenerateStrategy = useCallback(async () => {
     if (!detailedBreakdown) return;
 
     setIsRegeneratingStrategy(true);
+    setStrategyError(null);
+
     try {
       // Call the outreach API which also generates strategy
       const res = await fetch('/api/partners/outreach', {
@@ -79,19 +84,27 @@ export function ScoreBreakdown({
           user_id: userId,
           user_email: userEmail,
           session_id: sessionId,
+          tier: tier, // Pass client-side tier for localStorage auth
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+
+      if (res.ok && data.approach_strategy) {
         setLocalStrategy(data.approach_strategy);
+        setStrategyError(null);
+      } else if (data.upgrade_required) {
+        setStrategyError('Upgrade to Pro to generate approach strategies');
+      } else {
+        setStrategyError(data.error || 'Failed to generate strategy. Please try again.');
       }
     } catch (error) {
       console.error('Failed to regenerate strategy:', error);
+      setStrategyError('Network error. Please check your connection and try again.');
     } finally {
       setIsRegeneratingStrategy(false);
     }
-  }, [companyId, companyName, matchScore, detailedBreakdown, watchOuts, strategicContext, userAsset, userId, userEmail, sessionId]);
+  }, [companyId, companyName, matchScore, detailedBreakdown, watchOuts, strategicContext, userAsset, userId, userEmail, sessionId, tier]);
 
   // Build match context for email modal
   const matchContext = {
@@ -211,23 +224,33 @@ export function ScoreBreakdown({
 
       {/* Generate Strategy Button (if no strategy exists) */}
       {!localStrategy && detailedBreakdown && (
-        <button
-          onClick={handleRegenerateStrategy}
-          disabled={isRegeneratingStrategy}
-          className="mt-4 w-full py-2.5 border border-teal-200 bg-teal-50 text-teal-700 font-medium rounded-lg hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {isRegeneratingStrategy ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Generating Strategy...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="w-4 h-4" />
-              Generate Approach Strategy
-            </>
+        <div className="mt-4">
+          <button
+            onClick={handleRegenerateStrategy}
+            disabled={isRegeneratingStrategy}
+            className="w-full py-2.5 border border-teal-200 bg-teal-50 text-teal-700 font-medium rounded-lg hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {isRegeneratingStrategy ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating Strategy...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Generate Approach Strategy
+              </>
+            )}
+          </button>
+          {strategyError && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                {strategyError}
+              </p>
+            </div>
           )}
-        </button>
+        </div>
       )}
 
       {/* Action Buttons */}
@@ -253,6 +276,7 @@ export function ScoreBreakdown({
         userId={userId}
         userEmail={userEmail}
         sessionId={sessionId}
+        tier={tier}
       />
     </div>
   );

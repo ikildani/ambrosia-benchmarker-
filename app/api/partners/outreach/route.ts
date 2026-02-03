@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       user_id?: string;
       user_email?: string;
       session_id?: string;
+      tier?: 'free' | 'pro'; // Client-side tier for localStorage auth
     };
 
     const {
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
       user_id,
       user_email,
       session_id,
+      tier: clientTier,
     } = body;
 
     // Validate required fields
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
     let userTier: 'free' | 'pro' = 'free';
     let authenticatedUserId: string | null = null;
 
+    // Method 1: Check Supabase user_profiles by user_id
     if (user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -55,8 +58,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    // Method 2: Check PRO_EMAILS list for localStorage auth users
     if (userTier === 'free' && isProEmail(user_email)) {
+      userTier = 'pro';
+    }
+
+    // Method 3: Trust client tier if passed (for localStorage-based Pro users)
+    // This handles cases where Pro status is stored in localStorage after Stripe payment
+    if (userTier === 'free' && clientTier === 'pro') {
       userTier = 'pro';
     }
 
