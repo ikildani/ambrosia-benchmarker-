@@ -85,110 +85,19 @@ function buildPlaybookPrompt(input: PlaybookInput): string {
     })
     .join('\n');
 
-  return `You are an expert life sciences business development advisor with 20+ years of experience negotiating pharmaceutical licensing deals. You have deep knowledge of deal structures, royalty mechanics, milestone strategies, and negotiation tactics for oncology assets.
+  return `Expert pharma BD advisor. Generate negotiation playbook for out-licensing this asset.
 
-Generate a comprehensive negotiation playbook for a biotech company preparing to out-license their asset. Your advice should be:
-- Specific and actionable (not generic platitudes)
-- Grounded in the provided deal terms and market context
-- Strategic yet realistic
-- Structured for easy reference during negotiations
+ASSET: ${labels.phase} ${labels.modality} in ${labels.indication}, ${territoryLabel} rights
+UPFRONT: ${formatCurrencyForPrompt(terms.upfront.low)}-${formatCurrencyForPrompt(terms.upfront.high)} (median ${formatCurrencyForPrompt(terms.upfront.median)})
+TOTAL VALUE: ${formatCurrencyForPrompt(terms.totalDealValue.low)}-${formatCurrencyForPrompt(terms.totalDealValue.high)} (median ${formatCurrencyForPrompt(terms.totalDealValue.median)})
+MILESTONES: Dev ${formatCurrencyForPrompt(terms.devMilestones.median)}, Reg ${formatCurrencyForPrompt(terms.regMilestones.median)}, Comm ${formatCurrencyForPrompt(terms.commMilestones.median)}
+ROYALTIES: Base ${tieredRoyalties.base.low}-${tieredRoyalties.base.high}%, Mid ${tieredRoyalties.midTier.low}-${tieredRoyalties.midTier.high}%, High ${tieredRoyalties.highTier.low}-${tieredRoyalties.highTier.high}%
+STRUCTURE: ${dealRecommendation.upfrontPercent}% upfront / ${dealRecommendation.milestonePercent}% milestones
+${modifiersList ? `MODIFIERS: ${modifiersList}` : ''}
 
-## Asset Profile
-- Development Phase: ${labels.phase}
-- Modality: ${labels.modality}
-- Primary Indication: ${labels.indication}
-- Territory: ${territoryLabel}
+Return JSON with 5 sections. Each section: title, content (2 sentences), bullets (3 items), highlight (1 key point). Be SPECIFIC to this ${labels.modality} at ${labels.phase} - reference the actual numbers.
 
-## Calculated Deal Terms
-Upfront Payment Range: ${formatCurrencyForPrompt(terms.upfront.low)} - ${formatCurrencyForPrompt(terms.upfront.high)} (Expected: ${formatCurrencyForPrompt(terms.upfront.median)})
-Total Deal Value Range: ${formatCurrencyForPrompt(terms.totalDealValue.low)} - ${formatCurrencyForPrompt(terms.totalDealValue.high)} (Expected: ${formatCurrencyForPrompt(terms.totalDealValue.median)})
-
-Development Milestones: ${formatCurrencyForPrompt(terms.devMilestones.low)} - ${formatCurrencyForPrompt(terms.devMilestones.high)}
-Regulatory Milestones: ${formatCurrencyForPrompt(terms.regMilestones.low)} - ${formatCurrencyForPrompt(terms.regMilestones.high)}
-Commercial Milestones: ${formatCurrencyForPrompt(terms.commMilestones.low)} - ${formatCurrencyForPrompt(terms.commMilestones.high)}
-
-Recommended Structure: ${dealRecommendation.upfrontPercent}% Upfront / ${dealRecommendation.milestonePercent}% Milestones
-Rationale: ${dealRecommendation.rationale}
-
-Royalty Tiers:
-- Base (<$500M sales): ${tieredRoyalties.base.low}% - ${tieredRoyalties.base.high}%
-- Mid ($500M-$1B): ${tieredRoyalties.midTier.low}% - ${tieredRoyalties.midTier.high}%
-- High (>$1B): ${tieredRoyalties.highTier.low}% - ${tieredRoyalties.highTier.high}%
-
-## Applied Value Modifiers
-${modifiersList || 'No special modifiers applied'}
-
-## Market Context
-${negotiationInsight}
-
----
-
-Generate a negotiation playbook with the following sections. For each section, provide:
-1. A strategic overview (2-3 sentences)
-2. 3-5 specific, actionable bullet points
-3. A "Key Highlight" - one critical point to remember
-
-## Required Sections
-
-### 1. Opening Position
-How to frame your initial ask. Consider whether to anchor high or start closer to expected value based on the asset's profile and competitive dynamics.
-
-### 2. Deal Structure Strategy
-How to balance upfront vs milestones. When to push for higher upfront, when to accept milestone-heavy structures, and how to structure milestone triggers.
-
-### 3. Royalty Floor Negotiation
-Minimum acceptable royalty rates, how to defend your floor, escalation triggers, and anti-stacking provisions to consider.
-
-### 4. Competitive Intelligence
-How to leverage (or mitigate) competitive dynamics. Reference the modality/indication landscape and timing considerations.
-
-### 5. Partner-Specific Tactics
-Tailored advice for different partner types (big pharma vs. regional players vs. specialty pharma). Include territory-specific considerations for ${territoryLabel} rights.
-
----
-
-Return your response in this exact JSON format:
-{
-  "sections": {
-    "openingPosition": {
-      "title": "Opening Position Strategy",
-      "content": "Strategic overview here...",
-      "bullets": ["Bullet 1", "Bullet 2", "Bullet 3"],
-      "highlight": "Key point to remember"
-    },
-    "structureStrategy": {
-      "title": "Deal Structure Strategy",
-      "content": "...",
-      "bullets": ["..."],
-      "highlight": "..."
-    },
-    "royaltyFloor": {
-      "title": "Royalty Floor Negotiation",
-      "content": "...",
-      "bullets": ["..."],
-      "highlight": "..."
-    },
-    "competitiveIntelligence": {
-      "title": "Competitive Intelligence",
-      "content": "...",
-      "bullets": ["..."],
-      "highlight": "..."
-    },
-    "partnerTactics": {
-      "title": "Partner-Specific Tactics",
-      "content": "...",
-      "bullets": ["..."],
-      "highlight": "..."
-    }
-  },
-  "keyCaveats": [
-    "This playbook is for informational purposes only and does not constitute professional advice.",
-    "Actual negotiation outcomes depend on many factors not captured here.",
-    "Consult with legal and financial advisors before making any commitments."
-  ]
-}
-
-Important: Make your advice specific to this ${labels.modality} asset in ${labels.indication} at ${labels.phase} stage. Reference the actual numbers provided. Avoid generic advice that could apply to any deal.`;
+{"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Tactics","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
 }
 
 // Parse JSON from Claude's response
@@ -217,7 +126,7 @@ export class PlaybookGenerator {
 
     const message = await this.client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 2500,
+      max_tokens: 1500,
       messages: [{ role: 'user', content: prompt }],
     });
 
