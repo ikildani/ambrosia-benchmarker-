@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+// Pro user emails (synced with AuthContext)
+const PRO_EMAILS = ['ikildani@ambrosiaventures.co', 'czuckerman@ambrosiaventures.co'];
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { companyId: string } }
@@ -12,10 +15,9 @@ export async function GET(
     // Get user info from query params or headers
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get('user_id');
+    const userEmail = searchParams.get('user_email');
     const sessionId = searchParams.get('session_id');
     const anonymousId = searchParams.get('anonymous_id');
-    // SECURITY: Removed clientTier - never trust client-provided tier
-    // const clientTier = searchParams.get('tier');
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
@@ -30,8 +32,13 @@ export async function GET(
       userTier = (profile?.tier as 'free' | 'pro') || 'free';
     }
 
-    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
-    // Tier must be verified from database only
+    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    if (userTier === 'free' && userEmail) {
+      const emailLower = userEmail.toLowerCase().trim();
+      if (PRO_EMAILS.some(e => e.toLowerCase() === emailLower)) {
+        userTier = 'pro';
+      }
+    }
 
     // Free users can't access detailed profiles
     if (userTier !== 'pro') {

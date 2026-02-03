@@ -211,9 +211,9 @@ export function PartnerMatches({
     try {
       const params = new URLSearchParams();
       if (userId) params.set('user_id', userId);
+      if (userEmail) params.set('user_email', userEmail);
       if (sessionId) params.set('session_id', sessionId);
       if (anonymousId) params.set('anonymous_id', anonymousId);
-      params.set('tier', userTier); // Pass tier for access control
 
       const res = await fetch(`/api/partners/${match.company_id}?${params}`);
       if (res.ok) {
@@ -225,7 +225,7 @@ export function PartnerMatches({
     }
 
     setLoadingDetails(false);
-  }, [expandedPartner, userId, sessionId, anonymousId, calculationId, onUpgradeClick, userTier]);
+  }, [expandedPartner, userId, userEmail, sessionId, anonymousId, calculationId, onUpgradeClick, userTier]);
 
   const handleUpgradeCtaClick = useCallback(async () => {
     await fetch('/api/events', {
