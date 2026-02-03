@@ -65,6 +65,8 @@ export async function POST(request: Request): Promise<NextResponse<PlaybookRespo
   } catch (error) {
     console.error('Playbook generation error:', error);
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     // Handle specific error types
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -80,8 +82,16 @@ export async function POST(request: Request): Promise<NextResponse<PlaybookRespo
       );
     }
 
+    // Include error details for debugging
+    if (error instanceof Error && error.message.includes('No JSON found')) {
+      return NextResponse.json(
+        { success: false, error: 'AI response format error. Retrying may help.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { success: false, error: 'Failed to generate playbook. Please try again.' },
+      { success: false, error: `Generation failed: ${errorMessage.slice(0, 100)}` },
       { status: 500 }
     );
   }
