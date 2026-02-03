@@ -827,33 +827,8 @@ select::selection {
 
 /* Dark mode calculator styles */
 .dark .bg-gradient-subtle {
-  background: rgb(15 23 42); /* slate-900 solid */
-}
-
-/* Dark mode gradient overrides - solid backgrounds for better dark mode appearance */
-.dark .bg-gradient-to-r.from-teal-50,
-.dark .bg-gradient-to-r.from-teal-50.to-cyan-50 {
-  background: rgb(30 41 59); /* slate-800 solid */
-}
-
-.dark .bg-gradient-to-r.from-amber-50,
-.dark .bg-gradient-to-r.from-amber-50.to-yellow-50 {
-  background: rgb(30 41 59); /* slate-800 solid */
-}
-
-.dark .bg-gradient-to-br.from-slate-100,
-.dark .bg-gradient-to-br.from-slate-100.to-neutral-100 {
-  background: rgb(30 41 59); /* slate-800 solid */
-}
-
-.dark .bg-gradient-to-r.from-navy-50,
-.dark .bg-gradient-to-r.from-navy-50.to-slate-50 {
-  background: rgb(30 41 59); /* slate-800 solid */
-}
-
-.dark .bg-gradient-to-r.from-navy-800,
-.dark .bg-gradient-to-r.from-navy-800.to-navy-900 {
-  background: rgb(15 23 42); /* slate-900 solid */
+  background: rgb(15 23 42) !important; /* slate-900 solid */
+  background-image: none !important;
 }
 
 .dark .card-elevated {

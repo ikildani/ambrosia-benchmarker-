@@ -222,21 +222,21 @@ export default function HistoryDetailModal({
         <div className="overflow-y-auto max-h-[calc(90vh-220px)] p-6">
           {/* Quick Summary Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-xl border border-teal-200/50">
-              <p className="text-xs text-teal-600 font-medium mb-1">Phase</p>
-              <p className="text-sm font-semibold text-teal-800 truncate">{item.labels.phase}</p>
+            <div className="p-3 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-teal-200/50 dark:border-slate-600">
+              <p className="text-xs text-teal-600 dark:text-teal-400 font-medium mb-1">Phase</p>
+              <p className="text-sm font-semibold text-teal-800 dark:text-teal-300 truncate">{item.labels.phase}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-xl border border-cyan-200/50">
-              <p className="text-xs text-cyan-600 font-medium mb-1">Modality</p>
-              <p className="text-sm font-semibold text-cyan-800 truncate">{item.labels.modality}</p>
+            <div className="p-3 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-cyan-200/50 dark:border-slate-600">
+              <p className="text-xs text-cyan-600 dark:text-cyan-400 font-medium mb-1">Modality</p>
+              <p className="text-sm font-semibold text-cyan-800 dark:text-cyan-300 truncate">{item.labels.modality}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
-              <p className="text-xs text-blue-600 font-medium mb-1">Indication</p>
-              <p className="text-sm font-semibold text-blue-800 truncate">{item.labels.indication}</p>
+            <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-blue-200/50 dark:border-slate-600">
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Indication</p>
+              <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 truncate">{item.labels.indication}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl border border-indigo-200/50">
-              <p className="text-xs text-indigo-600 font-medium mb-1">Total Value</p>
-              <p className="text-sm font-semibold text-indigo-800">{formatCurrency(item.results.totalValueMedian)}</p>
+            <div className="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-indigo-200/50 dark:border-slate-600">
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Total Value</p>
+              <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">{formatCurrency(item.results.totalValueMedian)}</p>
             </div>
           </div>
 

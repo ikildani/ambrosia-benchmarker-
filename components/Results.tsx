@@ -297,7 +297,7 @@ function MethodologySection() {
     <div className="mt-6 sm:mt-8">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 rounded-xl border border-navy-200 hover:border-navy-300 transition-all"
+        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 dark:from-slate-800 dark:to-slate-800 rounded-xl border border-navy-200 dark:border-slate-700 hover:border-navy-300 dark:hover:border-slate-600 transition-all"
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-600 to-navy-700 flex items-center justify-center">
@@ -501,7 +501,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
 
       <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-slate-800 dark:to-slate-800 rounded-xl border border-teal-200 dark:border-slate-700">
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft flex-shrink-0">
               <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -520,7 +520,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
 
         {/* Negotiation Insight - Pro Feature */}
         <div className="relative mb-4 sm:mb-6">
-          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
+          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-slate-800 dark:to-slate-800 rounded-xl border border-amber-200 dark:border-slate-700 ${!isPro ? 'blur-sm' : ''}`}>
             <div className="flex items-start gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -866,7 +866,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, onPa
         <MethodologySection />
 
         {/* World-Class Disclaimer */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-5 bg-gradient-to-br from-slate-100 to-neutral-100 rounded-xl border border-neutral-200">
+        <div className="mt-6 sm:mt-8 p-4 sm:p-5 bg-gradient-to-br from-slate-100 to-neutral-100 dark:from-slate-800 dark:to-slate-800 rounded-xl border border-neutral-200 dark:border-slate-700">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-200 flex items-center justify-center flex-shrink-0">
               <svg className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
