@@ -164,6 +164,14 @@ export default function Dashboard({
     }
   }, []);
 
+  // Time-based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   const handleDeleteHistory = (id: string) => {
     deleteHistoryItem(id);
     setHistory(getHistory());
@@ -465,6 +473,12 @@ export default function Dashboard({
 
           <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div className="text-center sm:text-left">
+              <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
+                <span className="text-teal-400 text-sm font-medium">{getGreeting()}</span>
+                {tier === 'pro' && (
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold rounded-full">Pro Member</span>
+                )}
+              </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
               <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto sm:mx-0">
                 Access your deal analysis tools, review past calculations, and download reports.
