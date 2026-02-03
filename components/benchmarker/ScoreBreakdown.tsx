@@ -185,7 +185,7 @@ export function ScoreBreakdown({
                 <span className="text-amber-700 dark:text-amber-300 font-medium">Revenue at Risk:</span>
                 {strategicContext.revenue_at_risk.map((risk, i) => (
                   <span key={i} className="text-gray-700 dark:text-slate-300">
-                    {risk.year}: <strong>{formatCurrency(risk.amount_usd)}</strong>
+                    {risk.year}: <strong>{formatCurrency(risk.amount)}</strong>
                   </span>
                 ))}
               </div>
