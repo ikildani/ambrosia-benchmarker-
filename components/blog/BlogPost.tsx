@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 import { BlogPost as BlogPostType } from '@/types/content';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter } from 'lucide-react';
