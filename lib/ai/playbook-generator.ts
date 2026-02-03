@@ -126,7 +126,7 @@ export class PlaybookGenerator {
 
     const message = await this.client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1500,
+      max_tokens: 1200,
       messages: [{ role: 'user', content: prompt }],
     });
 
