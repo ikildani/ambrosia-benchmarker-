@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Mail, User, RefreshCw, Loader2 } from 'lucide-react';
+import { Mail, User, RefreshCw, Loader2, AlertTriangle, Pill } from 'lucide-react';
 import { ScoreProgressBar } from './ScoreProgressBar';
 import { MatchFactor } from './MatchFactor';
 import { WatchOutItem } from './WatchOutItem';
@@ -141,6 +141,59 @@ export function ScoreBreakdown({
         </div>
       )}
 
+      {/* Patent Cliffs - Why They're Motivated */}
+      {strategicContext?.patent_cliffs && strategicContext.patent_cliffs.length > 0 && (
+        <div className="mt-5">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3 sm:p-4 overflow-hidden">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-[10px] sm:text-xs font-medium text-amber-800 dark:text-amber-300 uppercase tracking-wide truncate">
+                Patent Cliffs - Why They Need Assets
+              </span>
+            </div>
+            <div className="space-y-2">
+              {strategicContext.patent_cliffs.slice(0, 3).map((cliff, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-2 text-sm bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-500/20 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
+                >
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                    <Pill className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <span className="font-medium text-gray-900 dark:text-white truncate text-xs sm:text-sm">
+                      {cliff.drug_name}
+                    </span>
+                    {cliff.indication && (
+                      <span className="text-gray-500 dark:text-slate-400 text-xs truncate hidden sm:inline">
+                        ({cliff.indication})
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+                    <span className="text-amber-700 dark:text-amber-300 font-medium text-[10px] sm:text-sm whitespace-nowrap">
+                      {formatCurrency(cliff.revenue_usd)}
+                    </span>
+                    <span className="px-1.5 sm:px-2 py-0.5 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px] sm:text-xs font-medium rounded whitespace-nowrap">
+                      {cliff.expiry_year}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Revenue at Risk Summary */}
+            {strategicContext.revenue_at_risk && strategicContext.revenue_at_risk.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-500/30 flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
+                <span className="text-amber-700 dark:text-amber-300 font-medium">Revenue at Risk:</span>
+                {strategicContext.revenue_at_risk.map((risk, i) => (
+                  <span key={i} className="text-gray-700 dark:text-slate-300">
+                    {risk.year}: <strong>{formatCurrency(risk.amount_usd)}</strong>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Recent Deal Activity */}
       {relevantDeals && relevantDeals.length > 0 && (
         <RecentDealsSection deals={relevantDeals} maxDeals={3} />
@@ -203,6 +256,14 @@ export function ScoreBreakdown({
       />
     </div>
   );
+}
+
+// Helper function to format currency
+function formatCurrency(value: number | null | undefined): string {
+  if (value === null || value === undefined) return 'N/A';
+  if (value >= 1000000000) return `$${(value / 1000000000).toFixed(1)}B`;
+  if (value >= 1000000) return `$${(value / 1000000).toFixed(0)}M`;
+  return `$${value.toLocaleString()}`;
 }
 
 export default ScoreBreakdown;
