@@ -531,62 +531,52 @@ export default function Dashboard({
               {history.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {/* Total Analyses */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-950 dark:to-teal-900/50 rounded-lg sm:rounded-xl border border-teal-200/50 dark:border-teal-700/50 relative overflow-hidden group hover:shadow-lg hover:shadow-teal-500/10 dark:hover:shadow-teal-400/10 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-teal-500 dark:from-teal-500 dark:to-teal-400 opacity-80" />
-                    <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-teal-500/10 dark:bg-teal-400/20 flex items-center justify-center">
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      </div>
+                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-teal-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-teal-300 dark:hover:border-slate-500 transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-teal-500 dark:bg-teal-500" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium text-teal-700 dark:text-slate-400">Total Analyses</span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Total Analyses</span>
-                    <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-teal-700 dark:text-teal-300 mt-1">{history.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-teal-700 dark:text-white">{history.length}</p>
                     {history.length > 1 && <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity"><MiniSparkline data={getSparklineData()} /></div>}
                   </div>
 
                   {/* Total Value */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-cyan-950 dark:to-cyan-900/50 rounded-lg sm:rounded-xl border border-cyan-200/50 dark:border-cyan-700/50 relative overflow-hidden group hover:shadow-lg hover:shadow-cyan-500/10 dark:hover:shadow-cyan-400/10 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-cyan-500 dark:from-cyan-500 dark:to-cyan-400 opacity-80" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/20 flex items-center justify-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
+                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-cyan-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-cyan-300 dark:hover:border-slate-500 transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-cyan-500 dark:bg-cyan-500" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600 dark:text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-xs font-medium text-cyan-700 dark:text-slate-400 truncate">Total Value</span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider truncate">Total Value</span>
-                    <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-700 dark:text-cyan-300 mt-1">{formatCurrency(totalValueAnalyzed)}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-cyan-700 dark:text-white">{formatCurrency(totalValueAnalyzed)}</p>
                   </div>
 
                   {/* Top Phase */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950 dark:to-blue-900/50 rounded-lg sm:rounded-xl border border-blue-200/50 dark:border-blue-700/50 relative overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 dark:hover:shadow-blue-400/10 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-500 dark:from-blue-500 dark:to-blue-400 opacity-80" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/20 flex items-center justify-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                      </div>
+                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-blue-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-blue-300 dark:hover:border-slate-500 transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-500" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      </svg>
+                      <span className="text-xs font-medium text-blue-700 dark:text-slate-400 truncate">Top Phase</span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider truncate">Top Phase</span>
-                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-700 dark:text-blue-300 mt-1 truncate">{topPhase}</p>
+                    <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-white truncate">{topPhase}</p>
                   </div>
 
                   {/* Top Modality */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-950 dark:to-indigo-900/50 rounded-lg sm:rounded-xl border border-indigo-200/50 dark:border-indigo-700/50 relative overflow-hidden group hover:shadow-lg hover:shadow-indigo-500/10 dark:hover:shadow-indigo-400/10 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-indigo-500 dark:from-indigo-500 dark:to-indigo-400 opacity-80" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-400/20 flex items-center justify-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                      </div>
+                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-indigo-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-indigo-300 dark:hover:border-slate-500 transition-all duration-300">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-500 dark:bg-indigo-500" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      </svg>
+                      <span className="text-xs font-medium text-indigo-700 dark:text-slate-400 truncate">Top Modality</span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider truncate">Top Modality</span>
-                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-indigo-700 dark:text-indigo-300 mt-1 truncate">{topModality}</p>
+                    <p className="text-lg sm:text-xl font-bold text-indigo-700 dark:text-white truncate">{topModality}</p>
                   </div>
                 </div>
               ) : (
