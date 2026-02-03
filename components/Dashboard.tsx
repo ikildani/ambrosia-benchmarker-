@@ -463,40 +463,15 @@ export default function Dashboard({
     return insights.slice(0, 3);
   };
 
-  // Determine background based on resolved theme - this bypasses CSS dark: variants
-  const bgStyle = resolvedTheme === 'dark'
-    ? { background: 'linear-gradient(to bottom right, #0f172a, #0f172a, #1e293b)' }
-    : { background: 'linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2))' };
-
-  // Dynamic styles that override dark: variants based on resolved theme
-  const dynamicStyles = resolvedTheme === 'light' ? `
-    .dark\\:bg-slate-800 { background-color: #ffffff !important; }
-    .dark\\:bg-slate-900 { background-color: #ffffff !important; }
-    .dark\\:bg-slate-700 { background-color: #f1f5f9 !important; }
-    .dark\\:bg-slate-900\\/95 { background-color: rgba(255,255,255,0.95) !important; }
-    .dark\\:border-slate-700 { border-color: #e2e8f0 !important; }
-    .dark\\:border-slate-600 { border-color: #cbd5e1 !important; }
-    .dark\\:text-slate-200 { color: #1e293b !important; }
-    .dark\\:text-slate-300 { color: #334155 !important; }
-    .dark\\:text-slate-400 { color: #64748b !important; }
-    .dark\\:text-white { color: #0f172a !important; }
-    .dark\\:hover\\:bg-slate-800:hover { background-color: #f1f5f9 !important; }
-    .dark\\:hover\\:bg-slate-700:hover { background-color: #e2e8f0 !important; }
-    .dark\\:active\\:bg-slate-700:active { background-color: #cbd5e1 !important; }
-  ` : '';
-
   return (
     <>
-      {/* Dynamic theme override styles */}
-      {dynamicStyles && <style dangerouslySetInnerHTML={{ __html: dynamicStyles }} />}
-
-      <div className="min-h-screen" style={bgStyle}>
+      <div className="min-h-screen" style={{ background: 'var(--page-bg)' }}>
       {/* Header */}
       <header
         className="backdrop-blur-lg border-b sticky top-0 z-40 safe-top"
         style={{
-          backgroundColor: resolvedTheme === 'dark' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          borderColor: resolvedTheme === 'dark' ? 'rgba(51, 65, 85, 0.8)' : 'rgba(226, 232, 240, 0.8)'
+          backgroundColor: 'var(--header-bg)',
+          borderColor: 'var(--header-border)'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -548,7 +523,7 @@ export default function Dashboard({
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 top-16 z-[9999] overflow-y-auto animate-fade-in"
-          style={{ backgroundColor: resolvedTheme === 'dark' ? '#0f172a' : '#ffffff' }}
+          style={{ backgroundColor: 'var(--card-bg)' }}
         >
           <nav className="flex flex-col p-4 gap-1">
             <button onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback">
@@ -614,8 +589,7 @@ export default function Dashboard({
         {/* Navigation Tabs */}
         <div className={`mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0 ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
           <div
-            className="flex gap-1.5 sm:gap-1 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x"
-            style={{ backgroundColor: resolvedTheme === 'dark' ? '#1e293b' : '#f1f5f9' }}
+            className="flex gap-1.5 sm:gap-1 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x bg-slate-100 dark:bg-slate-800"
           >
             {[
               { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },

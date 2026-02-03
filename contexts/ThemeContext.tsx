@@ -41,7 +41,7 @@ function resolveTheme(theme: Theme): 'light' | 'dark' {
   return theme;
 }
 
-// Apply theme to document - uses both class and data attribute for reliability
+// Apply theme to document - uses classes, data attributes, and CSS custom properties
 function applyThemeToDocument(resolved: 'light' | 'dark') {
   if (typeof document === 'undefined') return;
 
@@ -53,23 +53,34 @@ function applyThemeToDocument(resolved: 'light' | 'dark') {
     root.classList.remove('light');
     root.setAttribute('data-theme', 'dark');
     root.style.colorScheme = 'dark';
-    // Also set on body for extra reliability
+    // Set CSS custom properties for theme
+    root.style.setProperty('--page-bg', 'linear-gradient(to bottom right, #0f172a, #0f172a, #1e293b)');
+    root.style.setProperty('--header-bg', 'rgba(15, 23, 42, 0.95)');
+    root.style.setProperty('--header-border', 'rgba(51, 65, 85, 0.8)');
+    root.style.setProperty('--card-bg', '#1e293b');
+    root.style.setProperty('--card-border', '#334155');
+    root.style.setProperty('--text-primary', '#f1f5f9');
+    root.style.setProperty('--text-secondary', '#94a3b8');
     body.classList.add('dark-mode');
     body.classList.remove('light-mode');
-    body.setAttribute('data-theme', 'dark');
   } else {
     root.classList.remove('dark');
     root.classList.add('light');
     root.setAttribute('data-theme', 'light');
     root.style.colorScheme = 'light';
-    // Also set on body for extra reliability
+    // Set CSS custom properties for theme
+    root.style.setProperty('--page-bg', 'linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2))');
+    root.style.setProperty('--header-bg', 'rgba(255, 255, 255, 0.95)');
+    root.style.setProperty('--header-border', 'rgba(226, 232, 240, 0.8)');
+    root.style.setProperty('--card-bg', '#ffffff');
+    root.style.setProperty('--card-border', '#e2e8f0');
+    root.style.setProperty('--text-primary', '#0f172a');
+    root.style.setProperty('--text-secondary', '#64748b');
     body.classList.add('light-mode');
     body.classList.remove('dark-mode');
-    body.setAttribute('data-theme', 'light');
   }
 
-  // Force a repaint on mobile Safari by triggering a transform
-  // This is a known workaround for Safari CSS recalculation issues
+  // Force a repaint on mobile Safari
   body.style.transform = 'translateZ(0)';
   requestAnimationFrame(() => {
     body.style.transform = '';

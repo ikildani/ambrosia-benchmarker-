@@ -63,25 +63,39 @@ export default function RootLayout({
                   } else if (theme === 'light') {
                     isDark = false;
                   } else {
-                    // theme is 'system' or not set
                     isDark = systemDark;
                   }
 
                   var root = document.documentElement;
-                  // Use both class and data attribute for maximum reliability
+
+                  // Set CSS custom properties for theme colors
                   if (isDark) {
                     root.classList.add('dark');
                     root.classList.remove('light');
                     root.setAttribute('data-theme', 'dark');
                     root.style.colorScheme = 'dark';
+                    root.style.setProperty('--page-bg', 'linear-gradient(to bottom right, #0f172a, #0f172a, #1e293b)');
+                    root.style.setProperty('--header-bg', 'rgba(15, 23, 42, 0.95)');
+                    root.style.setProperty('--header-border', 'rgba(51, 65, 85, 0.8)');
+                    root.style.setProperty('--card-bg', '#1e293b');
+                    root.style.setProperty('--card-border', '#334155');
+                    root.style.setProperty('--text-primary', '#f1f5f9');
+                    root.style.setProperty('--text-secondary', '#94a3b8');
                   } else {
                     root.classList.remove('dark');
                     root.classList.add('light');
                     root.setAttribute('data-theme', 'light');
                     root.style.colorScheme = 'light';
+                    root.style.setProperty('--page-bg', 'linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2))');
+                    root.style.setProperty('--header-bg', 'rgba(255, 255, 255, 0.95)');
+                    root.style.setProperty('--header-border', 'rgba(226, 232, 240, 0.8)');
+                    root.style.setProperty('--card-bg', '#ffffff');
+                    root.style.setProperty('--card-border', '#e2e8f0');
+                    root.style.setProperty('--text-primary', '#0f172a');
+                    root.style.setProperty('--text-secondary', '#64748b');
                   }
 
-                  // Apply to body when it becomes available
+                  // Apply to body when available
                   function applyToBody() {
                     var body = document.body;
                     if (!body) {
@@ -91,11 +105,9 @@ export default function RootLayout({
                     if (isDark) {
                       body.classList.add('dark-mode');
                       body.classList.remove('light-mode');
-                      body.setAttribute('data-theme', 'dark');
                     } else {
                       body.classList.add('light-mode');
                       body.classList.remove('dark-mode');
-                      body.setAttribute('data-theme', 'light');
                     }
                   }
                   if (document.body) {
