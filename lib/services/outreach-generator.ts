@@ -241,7 +241,29 @@ function parseJsonResponse<T>(text: string): T {
   if (!jsonMatch) {
     throw new Error('No JSON found in response');
   }
-  return JSON.parse(jsonMatch[0]) as T;
+
+  // Clean up control characters that can appear in AI-generated JSON
+  let cleanedJson = jsonMatch[0]
+    // Replace actual newlines inside strings with escaped newlines
+    .replace(/(?<=:\s*"[^"]*)\n(?=[^"]*")/g, '\\n')
+    // Replace tabs with spaces
+    .replace(/\t/g, ' ')
+    // Remove other control characters
+    .replace(/[\x00-\x1F\x7F]/g, (char) => {
+      if (char === '\n' || char === '\r') return '\\n';
+      if (char === '\t') return ' ';
+      return '';
+    });
+
+  try {
+    return JSON.parse(cleanedJson) as T;
+  } catch (e) {
+    // If still failing, try a more aggressive cleanup
+    cleanedJson = jsonMatch[0]
+      .replace(/[\x00-\x1F\x7F]/g, ' ')
+      .replace(/\s+/g, ' ');
+    return JSON.parse(cleanedJson) as T;
+  }
 }
 
 // ============================================================================

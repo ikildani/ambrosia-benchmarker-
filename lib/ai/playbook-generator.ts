@@ -100,13 +100,23 @@ Return JSON with 5 sections. Each section: title, content (2 sentences), bullets
 {"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Tactics","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
 }
 
-// Parse JSON from Claude's response
+// Parse JSON from Claude's response with control character cleanup
 function parseJsonResponse<T>(text: string): T {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('No JSON found in response');
   }
-  return JSON.parse(jsonMatch[0]) as T;
+
+  // Clean up control characters that can appear in AI-generated JSON
+  let cleanedJson = jsonMatch[0]
+    .replace(/[\x00-\x1F\x7F]/g, (char) => {
+      if (char === '\n' || char === '\r') return ' ';
+      if (char === '\t') return ' ';
+      return '';
+    })
+    .replace(/\s+/g, ' ');
+
+  return JSON.parse(cleanedJson) as T;
 }
 
 // Playbook Generator class
