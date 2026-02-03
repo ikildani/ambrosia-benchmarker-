@@ -726,85 +726,103 @@ select::selection {
 .dark .card,
 .dark .card-elevated,
 .dark .card-interactive {
-  @apply bg-slate-800 border-slate-700;
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
 }
 
 .dark .card-interactive:hover {
-  @apply border-slate-600;
+  border-color: rgb(71 85 105); /* slate-600 */
 }
 
 /* Dark mode inputs */
 .dark .input-field,
 .dark .select-field {
-  @apply bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400;
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(71 85 105); /* slate-600 */
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark .input-field::placeholder,
+.dark .select-field::placeholder {
+  color: rgb(148 163 184); /* slate-400 */
 }
 
 .dark .input-field:hover,
 .dark .select-field:hover {
-  @apply border-slate-500;
+  border-color: rgb(100 116 139); /* slate-500 */
 }
 
 .dark .input-field:focus,
 .dark .select-field:focus {
-  @apply border-teal-500 ring-teal-500/20;
+  border-color: rgb(20 184 166); /* teal-500 */
+  --tw-ring-color: rgba(20, 184, 166, 0.2); /* teal-500/20 */
 }
 
 /* Dark mode metric cards */
 .dark .metric-card {
-  @apply bg-slate-800 border-slate-700;
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
 }
 
 /* Dark mode skeleton loading */
 .dark .skeleton {
-  @apply bg-slate-700;
+  background-color: rgb(51 65 85); /* slate-700 */
 }
 
 /* Dark mode scroll fade */
 .dark .scroll-fade-right::after {
-  @apply from-slate-900;
+  --tw-gradient-from: #0f172a; /* slate-900 */
 }
 
 .dark .scroll-fade-left::before {
-  @apply from-slate-900;
+  --tw-gradient-from: #0f172a; /* slate-900 */
 }
 
 /* Dark mode glass effect */
 .dark .glass {
-  @apply bg-slate-900/80 border-slate-700/50;
+  background-color: rgba(15 23 42 / 0.8); /* slate-900/80 */
+  border-color: rgba(51 65 85 / 0.5); /* slate-700/50 */
 }
 
 /* Dark mode sticky header */
 .dark .sticky-header-blur {
-  @apply bg-slate-900/95 border-slate-700/50;
+  background-color: rgba(15 23 42 / 0.95); /* slate-900/95 */
+  border-color: rgba(51 65 85 / 0.5); /* slate-700/50 */
 }
 
 /* Dark mode bottom navigation */
 .dark .bottom-nav {
-  @apply bg-slate-900 border-slate-700;
+  background-color: rgb(15 23 42); /* slate-900 */
+  border-color: rgb(51 65 85); /* slate-700 */
 }
 
 /* Dark mode badges */
 .dark .badge-teal {
-  @apply bg-teal-900/50 text-teal-300 border-teal-700;
+  background-color: rgba(19 78 74 / 0.5); /* teal-900/50 */
+  color: rgb(94 234 212); /* teal-300 */
+  border-color: rgb(15 118 110); /* teal-700 */
 }
 
 .dark .badge-success {
-  @apply bg-green-900/50 text-green-300 border-green-700;
+  background-color: rgba(20 83 45 / 0.5); /* green-900/50 */
+  color: rgb(134 239 172); /* green-300 */
+  border-color: rgb(21 128 61); /* green-700 */
 }
 
 /* Dark mode progress bar */
 .dark .progress-bar {
-  @apply bg-slate-700;
+  background-color: rgb(51 65 85); /* slate-700 */
 }
 
 /* Dark mode tooltip */
 .dark .tooltip {
-  @apply bg-slate-700 text-slate-100;
+  background-color: rgb(51 65 85); /* slate-700 */
+  color: rgb(241 245 249); /* slate-100 */
 }
 
 /* Dark mode history item shimmer */
 .dark .history-item-clickable::after {
-  @apply via-teal-500/10;
+  --tw-gradient-via: rgba(20, 184, 166, 0.1); /* teal-500/10 */
 }
 
 /* Dark mode calculator styles */
@@ -813,53 +831,67 @@ select::selection {
 }
 
 .dark .card-elevated {
-  @apply bg-slate-800 border-slate-700;
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
 }
 
 .dark .select-field {
-  @apply bg-slate-700 border-slate-600 text-slate-100;
+  background-color: rgb(51 65 85); /* slate-700 */
+  border-color: rgb(71 85 105); /* slate-600 */
+  color: rgb(241 245 249); /* slate-100 */
 }
 
 .dark .select-field:hover {
-  @apply border-slate-500;
+  border-color: rgb(100 116 139); /* slate-500 */
 }
 
 .dark .select-field:focus {
-  @apply border-teal-500 ring-teal-500/20;
+  border-color: rgb(20 184 166); /* teal-500 */
+  --tw-ring-color: rgba(20, 184, 166, 0.2); /* teal-500/20 */
 }
 
 .dark .select-field option {
-  @apply bg-slate-800 text-slate-100;
+  background-color: rgb(30 41 59); /* slate-800 */
+  color: rgb(241 245 249); /* slate-100 */
 }
 
 .dark .select-field optgroup {
-  @apply bg-slate-900 text-slate-400 font-semibold;
+  background-color: rgb(15 23 42); /* slate-900 */
+  color: rgb(148 163 184); /* slate-400 */
+  font-weight: 600;
 }
 
 /* Dark mode text colors for calculator */
 .dark .text-navy-800 {
-  @apply text-slate-100;
+  color: rgb(241 245 249); /* slate-100 */
 }
 
 .dark .text-neutral-700 {
-  @apply text-slate-300;
+  color: rgb(203 213 225); /* slate-300 */
 }
 
 .dark .text-neutral-600 {
-  @apply text-slate-400;
+  color: rgb(148 163 184); /* slate-400 */
 }
 
 .dark .text-neutral-500 {
-  @apply text-slate-400;
+  color: rgb(148 163 184); /* slate-400 */
 }
 
 .dark .text-neutral-400 {
-  @apply text-slate-500;
+  color: rgb(100 116 139); /* slate-500 */
 }
 
 /* Dark mode buttons */
 .dark .btn-secondary {
-  @apply bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:border-slate-500;
+  background-color: rgb(51 65 85); /* slate-700 */
+  border-color: rgb(71 85 105); /* slate-600 */
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark .btn-secondary:hover {
+  background-color: rgb(71 85 105); /* slate-600 */
+  border-color: rgb(100 116 139); /* slate-500 */
 }
 
 /* Dark mode checkboxes and labels */
@@ -868,26 +900,584 @@ select::selection {
 }
 
 .dark .border-neutral-200 {
-  @apply border-slate-600;
+  border-color: rgb(71 85 105); /* slate-600 */
 }
 
 .dark .border-neutral-300 {
-  @apply border-slate-500;
+  border-color: rgb(100 116 139); /* slate-500 */
 }
 
 /* Dark mode results section */
 .dark .bg-neutral-50 {
-  @apply bg-slate-700/50;
+  background-color: rgba(51 65 85 / 0.5); /* slate-700/50 */
 }
 
 .dark .bg-neutral-100 {
-  @apply bg-slate-700;
+  background-color: rgb(51 65 85); /* slate-700 */
 }
 
 .dark .text-neutral-900 {
-  @apply text-slate-100;
+  color: rgb(241 245 249); /* slate-100 */
 }
 
 .dark .text-neutral-800 {
-  @apply text-slate-200;
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+/* ============================================
+   COMPREHENSIVE DARK MODE SUPPORT
+   ============================================ */
+
+/* Dark mode teal backgrounds */
+.dark .bg-teal-50 {
+  background-color: rgba(19 78 74 / 0.3); /* teal-900/30 */
+}
+
+.dark .bg-teal-100 {
+  background-color: rgba(19 78 74 / 0.4); /* teal-900/40 */
+}
+
+/* Dark mode text colors - ensure all contrasting */
+.dark .text-teal-700 {
+  color: rgb(45 212 191); /* teal-400 */
+}
+
+.dark .text-teal-600 {
+  color: rgb(45 212 191); /* teal-400 */
+}
+
+.dark .text-cyan-700 {
+  color: rgb(34 211 238); /* cyan-400 */
+}
+
+.dark .text-blue-700 {
+  color: rgb(96 165 250); /* blue-400 */
+}
+
+.dark .text-indigo-700 {
+  color: rgb(129 140 248); /* indigo-400 */
+}
+
+.dark .text-amber-700 {
+  color: rgb(251 191 36); /* amber-400 */
+}
+
+.dark .text-amber-600 {
+  color: rgb(251 191 36); /* amber-400 */
+}
+
+.dark .text-green-700 {
+  color: rgb(74 222 128); /* green-400 */
+}
+
+.dark .text-red-700 {
+  color: rgb(248 113 113); /* red-400 */
+}
+
+.dark .text-red-600 {
+  color: rgb(248 113 113); /* red-400 */
+}
+
+.dark .text-red-500 {
+  color: rgb(248 113 113); /* red-400 */
+}
+
+/* Dark mode backgrounds for colored sections */
+.dark .bg-amber-50 {
+  background-color: rgba(120 53 15 / 0.3); /* amber-900/30 */
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(30 58 138 / 0.3); /* blue-900/30 */
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(127 29 29 / 0.3); /* red-900/30 */
+}
+
+.dark .bg-green-50 {
+  background-color: rgba(20 83 45 / 0.3); /* green-900/30 */
+}
+
+/* Dark mode borders */
+.dark .border-teal-200 {
+  border-color: rgb(15 118 110); /* teal-700 */
+}
+
+.dark .border-amber-200 {
+  border-color: rgb(180 83 9); /* amber-700 */
+}
+
+.dark .border-red-200 {
+  border-color: rgb(185 28 28); /* red-700 */
+}
+
+.dark .border-green-200 {
+  border-color: rgb(21 128 61); /* green-700 */
+}
+
+.dark .border-blue-200 {
+  border-color: rgb(29 78 216); /* blue-700 */
+}
+
+/* Dark mode gradients for metric cards */
+.dark .bg-gradient-to-br.from-teal-50 {
+  background: linear-gradient(to bottom right, rgba(20, 184, 166, 0.2) 0%, rgba(20, 184, 166, 0.1) 100%);
+}
+
+.dark .bg-gradient-to-br.from-cyan-50 {
+  background: linear-gradient(to bottom right, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+}
+
+.dark .bg-gradient-to-br.from-blue-50 {
+  background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+.dark .bg-gradient-to-br.from-indigo-50 {
+  background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+}
+
+.dark .bg-gradient-to-br.from-amber-50 {
+  background: linear-gradient(to bottom right, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+}
+
+.dark .bg-gradient-to-br.from-green-50 {
+  background: linear-gradient(to bottom right, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+}
+
+/* Dark mode border colors for gradient cards */
+.dark .border-teal-200\/50 {
+  border-color: rgba(20, 184, 166, 0.3);
+}
+
+.dark .border-cyan-200\/50 {
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.dark .border-blue-200\/50 {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .border-indigo-200\/50 {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Dark mode select dropdown arrow */
+.dark .select-field {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%2394a3b8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E');
+}
+
+/* Dark mode mesh gradient background */
+.dark .bg-mesh-gradient {
+  background:
+    radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.15) 0px, transparent 50%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Dark mode active states for checkboxes */
+.dark .hover\:border-teal-300:hover {
+  border-color: rgb(13 148 136); /* teal-600 */
+}
+
+.dark .active\:bg-teal-50\/50:active {
+  background-color: rgba(19, 78, 74, 0.3); /* teal-900/30 */
+}
+
+/* Dark mode for regulatory designation checkboxes */
+.dark .border-neutral-200.bg-white {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(71 85 105); /* slate-600 */
+}
+
+.dark .border-teal-500.bg-teal-50 {
+  background-color: rgba(19, 78, 74, 0.4); /* teal-900/40 */
+  border-color: rgb(20 184 166); /* teal-500 - same, just maintain it */
+}
+
+/* Dark mode text colors for checkbox labels */
+.dark .text-neutral-700 {
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+/* Dark mode shadow adjustments */
+.dark .shadow-inner-soft {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode usage counter */
+.dark .bg-neutral-50.border-neutral-200 {
+  background-color: rgba(30, 41, 59, 0.5); /* slate-800/50 */
+  border-color: rgb(71 85 105); /* slate-600 */
+}
+
+/* Dark mode warning boxes */
+.dark .bg-amber-50.border-amber-200 {
+  background-color: rgba(120, 53, 15, 0.3); /* amber-900/30 */
+  border-color: rgba(180, 83, 9, 0.5); /* amber-700/50 */
+}
+
+.dark .text-amber-700 {
+  color: rgb(251 191 36); /* amber-400 */
+}
+
+.dark .text-amber-600 {
+  color: rgb(251 191 36); /* amber-400 */
+}
+
+/* Dark mode home/landing page */
+.dark .bg-gradient-to-br.from-slate-50 {
+  background: linear-gradient(to bottom right, #0f172a 0%, #1e293b 100%);
+}
+
+/* Dark mode header */
+.dark .bg-white\/95 {
+  background-color: rgba(15, 23, 42, 0.95);
+}
+
+.dark .border-slate-200\/80 {
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+/* Dark mode nav links */
+.dark .text-slate-600 {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+.dark .hover\:text-slate-900:hover {
+  color: rgb(255 255 255); /* white */
+}
+
+/* Dark mode footer */
+.dark .bg-slate-50 {
+  background-color: rgba(30 41 59 / 0.5); /* slate-800/50 */
+}
+
+.dark .bg-slate-100 {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Dark mode blog/content cards */
+.dark .bg-white.border-slate-200 {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Dark mode modals */
+.dark .bg-white.rounded-2xl {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .bg-white.rounded-xl {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+/* Dark mode table styles */
+.dark th {
+  background-color: rgb(30 41 59); /* slate-800 */
+  color: rgb(226 232 240); /* slate-200 */
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark td {
+  border-color: rgb(51 65 85); /* slate-700 */
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+.dark tr:hover td {
+  background-color: rgba(51 65 85 / 0.5); /* slate-700/50 */
+}
+
+/* Ensure proper contrast for all text on dark backgrounds */
+.dark .text-slate-900,
+.dark .text-gray-900 {
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark .text-slate-800,
+.dark .text-gray-800 {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .text-slate-700,
+.dark .text-gray-700 {
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+.dark .text-slate-600,
+.dark .text-gray-600 {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+/* Dark mode focus rings */
+.dark .focus\:ring-teal-100:focus {
+  --tw-ring-color: rgba(20, 184, 166, 0.2);
+}
+
+/* Dark mode dividers */
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(51 65 85);
+}
+
+/* Dark mode hover states */
+.dark .hover\:bg-slate-100:hover {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .hover\:border-slate-300:hover {
+  border-color: rgb(100 116 139); /* slate-500 */
+}
+
+/* Dark mode chart backgrounds */
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(148, 163, 184, 0.2);
+}
+
+.dark .recharts-text {
+  fill: #94a3b8;
+}
+
+/* Dark mode form inputs in modals */
+.dark .bg-neutral-50 {
+  background-color: rgba(51 65 85 / 0.5); /* slate-700/50 */
+}
+
+.dark input.bg-neutral-50,
+.dark textarea.bg-neutral-50 {
+  background-color: rgb(51 65 85); /* slate-700 */
+  border-color: rgb(71 85 105); /* slate-600 */
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark input.bg-neutral-50::placeholder,
+.dark textarea.bg-neutral-50::placeholder {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+.dark input.bg-neutral-50:focus,
+.dark textarea.bg-neutral-50:focus {
+  border-color: rgb(20 184 166); /* teal-500 */
+  --tw-ring-color: rgba(20, 184, 166, 0.2); /* teal-500/20 */
+}
+
+/* Dark mode header when scrolled */
+.dark .bg-white\/95 {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+.dark .border-neutral-100 {
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Dark mode landing page sections */
+.dark .from-white {
+  --tw-gradient-from: #0f172a;
+}
+
+.dark .via-slate-50\/50 {
+  --tw-gradient-via: rgba(30, 41, 59, 0.5);
+}
+
+.dark .to-teal-50\/30 {
+  --tw-gradient-to: rgba(20, 184, 166, 0.1);
+}
+
+/* Dark mode background effects */
+.dark .bg-teal-200\/30 {
+  background-color: rgba(20, 184, 166, 0.15);
+}
+
+.dark .bg-cyan-100\/40 {
+  background-color: rgba(6, 182, 212, 0.2);
+}
+
+.dark .bg-navy-100\/20 {
+  background-color: rgba(30, 41, 59, 0.4);
+}
+
+/* Dark mode feature pills */
+.dark .bg-white\/80 {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+.dark .border-slate-200\/80 {
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+/* Dark mode gradient overlays */
+.dark .from-slate-50 {
+  --tw-gradient-from: #0f172a;
+}
+
+/* Dark mode buttons */
+.dark .bg-white.border-slate-200.text-slate-700 {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(71 85 105); /* slate-600 */
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .hover\:border-teal-300:hover {
+  border-color: rgb(13 148 136); /* teal-600 */
+}
+
+.dark .hover\:text-teal-700:hover {
+  color: rgb(45 212 191); /* teal-400 */
+}
+
+/* Dark mode shadow adjustments */
+.dark .shadow-slate-200\/50 {
+  --tw-shadow-color: rgba(15, 23, 42, 0.5);
+}
+
+.dark .shadow-teal-500\/20 {
+  --tw-shadow-color: rgba(20, 184, 166, 0.3);
+}
+
+/* Dark mode for pricing section */
+.dark .bg-gradient-to-b.from-slate-50 {
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+}
+
+/* Dark mode cards with white background */
+.dark .bg-white {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .border-slate-200 {
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Dark mode navy colors */
+.dark .bg-navy-50 {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+.dark .text-navy-600 {
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+.dark .text-navy-800 {
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark .text-navy-500 {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+.dark .border-navy-200 {
+  border-color: rgb(71 85 105); /* slate-600 */
+}
+
+.dark .from-navy-50 {
+  --tw-gradient-from: #334155;
+}
+
+.dark .to-slate-50 {
+  --tw-gradient-to: #1e293b;
+}
+
+/* Dark mode success colors */
+.dark .text-success-700 {
+  color: rgb(74 222 128); /* green-400 */
+}
+
+.dark .bg-success-100 {
+  background-color: rgba(20 83 45 / 0.4); /* green-900/40 */
+}
+
+/* Dark mode cyan colors */
+.dark .bg-cyan-50 {
+  background-color: rgba(22 78 99 / 0.3); /* cyan-900/30 */
+}
+
+.dark .bg-cyan-100 {
+  background-color: rgba(22 78 99 / 0.4); /* cyan-900/40 */
+}
+
+.dark .text-cyan-600 {
+  color: rgb(34 211 238); /* cyan-400 */
+}
+
+/* Dark mode methodology section */
+.dark .from-navy-600 {
+  --tw-gradient-from: #475569;
+}
+
+.dark .to-navy-700 {
+  --tw-gradient-to: #334155;
+}
+
+/* Dark mode footer and about sections */
+.dark .bg-navy-900 {
+  background-color: rgb(2 6 23); /* slate-950 */
+}
+
+.dark .bg-navy-800 {
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+/* Dark mode pricing cards */
+.dark .hover\:shadow-teal-500\/10:hover {
+  --tw-shadow-color: rgba(20, 184, 166, 0.2);
+}
+
+/* Dark mode text in various sections */
+.dark .text-slate-500 {
+  color: rgb(148 163 184); /* slate-400 - slightly lighter for better contrast */
+}
+
+.dark .text-slate-400 {
+  color: rgb(203 213 225); /* slate-300 - more contrast in dark mode */
+}
+
+/* Dark mode popover/dropdown */
+.dark [data-radix-popper-content-wrapper] {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Dark mode mobile menu */
+.dark .bg-white.z-50 {
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+/* Security: CSP-compliant styles */
+@supports (content-visibility: auto) {
+  .optimize-rendering {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px;
+  }
+}
+
+/* ============================================
+   SECURITY BEST PRACTICES
+   ============================================ */
+
+/* Prevent text selection on sensitive elements */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hide sensitive content from screen readers when appropriate */
+.sr-hidden {
+  speak: none;
+}
+
+/* Ensure proper contrast ratios for accessibility */
+@media (prefers-contrast: high) {
+  .dark .text-slate-400 {
+    color: rgb(226 232 240) !important; /* slate-200 */
+  }
+
+  .dark .text-slate-500 {
+    color: rgb(203 213 225) !important; /* slate-300 */
+  }
 }
