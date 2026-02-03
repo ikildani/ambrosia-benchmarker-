@@ -66,16 +66,9 @@ body[data-theme="dark"] {
     color: #171717 !important;
   }
 
-  /* Force light backgrounds on all elements when light mode is selected */
-  html.light .bg-gradient-to-br,
-  html[data-theme="light"] .bg-gradient-to-br {
-    --tw-gradient-from: #f8fafc !important;
-    --tw-gradient-via: #ffffff !important;
-    --tw-gradient-to: rgba(240, 253, 250, 0.2) !important;
-  }
-
-  html.light .min-h-screen,
-  html[data-theme="light"] .min-h-screen {
+  /* Force light backgrounds on page container only - not all gradients */
+  html.light > body > div > div.min-h-screen,
+  html[data-theme="light"] > body > div > div.min-h-screen {
     background: linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2)) !important;
   }
 

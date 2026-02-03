@@ -490,24 +490,6 @@ export default function Dashboard({
       {/* Dynamic theme override styles */}
       {dynamicStyles && <style dangerouslySetInnerHTML={{ __html: dynamicStyles }} />}
 
-      {/* DEBUG: Theme indicator - remove after debugging */}
-      <div className="fixed bottom-20 left-4 z-[99999] px-3 py-2 rounded-lg text-xs font-mono shadow-lg"
-           style={{
-             backgroundColor: '#ffffff',
-             color: '#000000',
-             border: '3px solid #f97316'
-           }}>
-        <div><strong>theme:</strong> {theme}</div>
-        <div><strong>resolved:</strong> {resolvedTheme}</div>
-        <div><strong>localStorage:</strong> {typeof window !== 'undefined' ? localStorage.getItem('theme') || 'null' : 'ssr'}</div>
-        <button
-          onClick={() => { setTheme('light'); alert('Set to light! theme=' + theme); }}
-          style={{ marginTop: '4px', padding: '4px 8px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '4px' }}
-        >
-          Force Light
-        </button>
-      </div>
-
       <div className="min-h-screen" style={bgStyle}>
       {/* Header */}
       <header
