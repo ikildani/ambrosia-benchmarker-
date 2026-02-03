@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
     const email = searchParams.get('email');
-    const clientTier = searchParams.get('tier');
+    // SECURITY: Removed client tier - never trust client-provided tier
+    // const clientTier = searchParams.get('tier');
 
     if (!email) {
       return NextResponse.json(
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify Pro tier
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
@@ -28,10 +29,8 @@ export async function GET(request: NextRequest) {
 
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
-    // Use client tier as fallback
-    if (userTier === 'free' && clientTier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
+    // Tier must be verified from database only
 
     if (userTier !== 'pro') {
       return NextResponse.json(
@@ -71,7 +70,9 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const body = await request.json();
-    const { email, name, notes, inputs, results, labels, tier } = body;
+
+    // SECURITY: Removed tier from destructuring - never trust client-provided tier
+    const { email, name, notes, inputs, results, labels } = body;
 
     if (!email || !name || !inputs || !results) {
       return NextResponse.json(
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify Pro tier
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
@@ -90,9 +91,7 @@ export async function POST(request: NextRequest) {
 
     userTier = (profile?.tier as 'free' | 'pro') || 'free';
 
-    if (userTier === 'free' && tier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
 
     if (userTier !== 'pro') {
       return NextResponse.json(

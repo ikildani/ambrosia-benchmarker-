@@ -76,8 +76,37 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
     return null;
   };
 
+  // A11Y-002: Generate accessible description for screen readers
+  const chartDescription = `Deal value breakdown chart showing: Upfront payment ${formatCurrency(terms.upfront.median)}, Development milestones ${formatCurrency(terms.devMilestones.median)}, Regulatory milestones ${formatCurrency(terms.regMilestones.median)}, Commercial milestones ${formatCurrency(terms.commMilestones.median)}.`;
+
   return (
-    <div className="w-full h-36 sm:h-64 mb-2">
+    <div
+      className="w-full h-36 sm:h-64 mb-2"
+      role="img"
+      aria-label={chartDescription}
+    >
+      {/* A11Y: Hidden table for screen reader users */}
+      <table className="sr-only" aria-label="Deal value breakdown">
+        <caption>Deal term values showing low, median, and high estimates</caption>
+        <thead>
+          <tr>
+            <th scope="col">Component</th>
+            <th scope="col">Low</th>
+            <th scope="col">Median</th>
+            <th scope="col">High</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.name}>
+              <td>{item.name}</td>
+              <td>{formatCurrency(item.low)}</td>
+              <td>{formatCurrency(item.median)}</td>
+              <td>{formatCurrency(item.high)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

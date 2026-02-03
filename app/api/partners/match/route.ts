@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       indication_category,
       indication_specific,
       territory_scope,
-      tier: clientTier, // Accept tier from frontend as fallback
+      // SECURITY: Removed clientTier - never trust client-provided tier
+      // tier: clientTier,
     } = body;
 
     // Validate required fields
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine user tier - check database first, then use client tier as fallback
+    // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
     let authenticatedUserId: string | null = null;
 
@@ -51,10 +52,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Use client-provided tier as fallback (for localStorage auth users)
-    if (userTier === 'free' && clientTier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
+    // Tier must be verified from database only
 
     // Build match input
     const matchInput: MatchInput = {
