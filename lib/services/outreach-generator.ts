@@ -277,8 +277,8 @@ export class OutreachGenerator {
     const prompt = buildStrategyPrompt(context);
 
     const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 768,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -347,8 +347,8 @@ export class OutreachGenerator {
     const prompt = buildEmailPrompt(emailContext);
 
     const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 512,
       messages: [{ role: 'user', content: prompt }],
     });
 
