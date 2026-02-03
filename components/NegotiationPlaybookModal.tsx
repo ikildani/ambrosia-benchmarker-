@@ -121,6 +121,10 @@ export default function NegotiationPlaybookModal({
     setLoading(true);
     setError(null);
 
+    // Create abort controller with 60 second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const response = await fetch('/api/playbook', {
         method: 'POST',
@@ -136,8 +140,10 @@ export default function NegotiationPlaybookModal({
           },
           labels,
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -146,8 +152,13 @@ export default function NegotiationPlaybookModal({
 
       setPlaybook(data.playbook);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to generate playbook. Please try again.');
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Request timed out. The AI is taking longer than expected. Please try again.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Unable to generate playbook. Please try again.');
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [inputs, results, labels]);

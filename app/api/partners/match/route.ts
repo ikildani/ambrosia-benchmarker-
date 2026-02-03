@@ -6,8 +6,8 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 
 // Tier-based match limits
 const MATCH_LIMITS = {
-  free: 2,
-  pro: 5,
+  free: 3,
+  pro: 10,
 };
 
 export async function POST(request: NextRequest) {
