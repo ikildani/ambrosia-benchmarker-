@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import DOMPurify from 'isomorphic-dompurify';
 import { BlogPost as BlogPostType } from '@/types/content';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter } from 'lucide-react';
@@ -62,10 +61,24 @@ function isSafeUrl(url: string): boolean {
   return !dangerousProtocols.some(protocol => trimmedUrl.startsWith(protocol));
 }
 
+// Simple HTML escape for text content
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Simple markdown to HTML converter for basic formatting
+// Content is already validated through controlled regex patterns and URL validation
 function renderContent(content: string): string {
-  const html = content
-    // Headers
+  // First escape any HTML in the raw content to prevent XSS
+  const escapedContent = escapeHtml(content);
+
+  const html = escapedContent
+    // Headers (using escaped content, so &lt; and &gt; won't interfere)
     .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold text-slate-900 mt-8 mb-3">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold text-slate-900 mt-10 mb-4">$1</h2>')
     .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-slate-900 mt-12 mb-6">$1</h1>')
@@ -73,9 +86,11 @@ function renderContent(content: string): string {
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
     // Italic
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Links - with URL protocol validation
+    // Links - with URL protocol validation (URL was already escaped)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
-      if (isSafeUrl(url)) {
+      // Unescape the URL for validation, then re-escape for output
+      const unescapedUrl = url.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'");
+      if (isSafeUrl(unescapedUrl)) {
         return `<a href="${url}" class="text-teal-600 hover:text-teal-700 underline" rel="noopener noreferrer">${text}</a>`;
       }
       return text; // Strip dangerous links, keep text only
@@ -89,11 +104,7 @@ function renderContent(content: string): string {
     // Line breaks
     .replace(/\n/g, '<br />');
 
-  // Sanitize HTML to prevent XSS attacks
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'strong', 'em', 'a', 'li', 'br'],
-    ALLOWED_ATTR: ['href', 'class', 'rel'],
-  });
+  return html;
 }
 
 export default function BlogPostComponent({ post }: BlogPostProps) {
