@@ -117,17 +117,34 @@ export default function Dashboard({
 
   // Filtered history for search/filter
   const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim() && filterPhase === 'all' && filterModality === 'all') {
+      return history;
+    }
+
     return history.filter(item => {
       const query = searchQuery.toLowerCase().trim();
-      const matchesSearch = query === '' ||
-        item.labels.phase.toLowerCase().includes(query) ||
-        item.labels.modality.toLowerCase().includes(query) ||
-        item.labels.indication.toLowerCase().includes(query) ||
-        item.inputs.territory?.toLowerCase().includes(query) ||
-        item.inputs.phase?.toLowerCase().includes(query) ||
-        item.inputs.modality?.toLowerCase().includes(query) ||
-        item.inputs.indication?.toLowerCase().includes(query);
 
+      // If no search query, match all for search
+      if (!query) {
+        const matchesPhase = filterPhase === 'all' || item.labels.phase === filterPhase;
+        const matchesModality = filterModality === 'all' || item.labels.modality === filterModality;
+        return matchesPhase && matchesModality;
+      }
+
+      // Search across all relevant fields
+      const searchableText = [
+        item.labels.phase,
+        item.labels.modality,
+        item.labels.indication,
+        item.inputs.territory,
+        item.inputs.phase,
+        item.inputs.modality,
+        item.inputs.indication,
+        item.timestamp,
+        formatDate(item.timestamp)
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      const matchesSearch = searchableText.includes(query);
       const matchesPhase = filterPhase === 'all' || item.labels.phase === filterPhase;
       const matchesModality = filterModality === 'all' || item.labels.modality === filterModality;
 
