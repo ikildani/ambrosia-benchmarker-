@@ -118,10 +118,15 @@ export default function Dashboard({
   // Filtered history for search/filter
   const filteredHistory = useMemo(() => {
     return history.filter(item => {
-      const matchesSearch = searchQuery === '' ||
-        item.labels.phase.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.labels.modality.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.labels.indication.toLowerCase().includes(searchQuery.toLowerCase());
+      const query = searchQuery.toLowerCase().trim();
+      const matchesSearch = query === '' ||
+        item.labels.phase.toLowerCase().includes(query) ||
+        item.labels.modality.toLowerCase().includes(query) ||
+        item.labels.indication.toLowerCase().includes(query) ||
+        item.inputs.territory?.toLowerCase().includes(query) ||
+        item.inputs.phase?.toLowerCase().includes(query) ||
+        item.inputs.modality?.toLowerCase().includes(query) ||
+        item.inputs.indication?.toLowerCase().includes(query);
 
       const matchesPhase = filterPhase === 'all' || item.labels.phase === filterPhase;
       const matchesModality = filterModality === 'all' || item.labels.modality === filterModality;
@@ -531,52 +536,27 @@ export default function Dashboard({
               {history.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {/* Total Analyses */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-teal-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-teal-300 dark:hover:border-slate-500 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-teal-500 dark:bg-teal-500" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-xs font-medium text-teal-700 dark:text-slate-400">Total Analyses</span>
-                    </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-teal-700 dark:text-white">{history.length}</p>
-                    {history.length > 1 && <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity"><MiniSparkline data={getSparklineData()} /></div>}
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Analyses</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">{history.length}</p>
                   </div>
 
                   {/* Total Value */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-cyan-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-cyan-300 dark:hover:border-slate-500 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-cyan-500 dark:bg-cyan-500" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600 dark:text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-xs font-medium text-cyan-700 dark:text-slate-400 truncate">Total Value</span>
-                    </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-cyan-700 dark:text-white">{formatCurrency(totalValueAnalyzed)}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Value</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">{formatCurrency(totalValueAnalyzed)}</p>
                   </div>
 
                   {/* Top Phase */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-blue-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-blue-300 dark:hover:border-slate-500 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-500" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                      </svg>
-                      <span className="text-xs font-medium text-blue-700 dark:text-slate-400 truncate">Top Phase</span>
-                    </div>
-                    <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-white truncate">{topPhase}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Top Phase</p>
+                    <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topPhase}</p>
                   </div>
 
                   {/* Top Modality */}
-                  <div className="metric-card p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-slate-800 dark:to-slate-800 rounded-lg sm:rounded-xl border border-indigo-200/50 dark:border-slate-600 relative overflow-hidden group hover:border-indigo-300 dark:hover:border-slate-500 transition-all duration-300">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-500 dark:bg-indigo-500" />
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                      </svg>
-                      <span className="text-xs font-medium text-indigo-700 dark:text-slate-400 truncate">Top Modality</span>
-                    </div>
-                    <p className="text-lg sm:text-xl font-bold text-indigo-700 dark:text-white truncate">{topModality}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Top Modality</p>
+                    <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topModality}</p>
                   </div>
                 </div>
               ) : (
