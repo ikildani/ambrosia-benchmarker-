@@ -13,8 +13,6 @@ const AVATAR_GRADIENTS = [
   { id: 'sunset', from: 'from-orange-400', to: 'to-rose-500', label: 'Sunset' },
   { id: 'forest', from: 'from-emerald-500', to: 'to-teal-600', label: 'Forest' },
   { id: 'midnight', from: 'from-indigo-600', to: 'to-purple-700', label: 'Midnight' },
-  { id: 'ember', from: 'from-amber-500', to: 'to-orange-600', label: 'Ember' },
-  { id: 'sakura', from: 'from-pink-400', to: 'to-rose-500', label: 'Sakura' },
   { id: 'slate', from: 'from-slate-500', to: 'to-zinc-600', label: 'Slate' },
 ];
 
