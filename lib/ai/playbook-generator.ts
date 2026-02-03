@@ -217,7 +217,7 @@ export class PlaybookGenerator {
 
     const message = await this.client.messages.create({
       model: 'claude-3-5-haiku-20241022',
-      max_tokens: 2048,
+      max_tokens: 3000,
       messages: [{ role: 'user', content: prompt }],
     });
 
