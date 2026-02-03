@@ -167,8 +167,19 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Outreach generation error:', error);
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    // Return more specific error for debugging
+    if (errorMessage.includes('No JSON found')) {
+      return NextResponse.json(
+        { error: 'AI response format error. Please try again.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to generate outreach email' },
+      { error: `Generation failed: ${errorMessage.slice(0, 100)}` },
       { status: 500 }
     );
   }
