@@ -23,10 +23,8 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
 
-    // Get user tier from query params
-    const email = searchParams.get('email');
-    // SECURITY: Removed clientTier - never trust client-provided tier
-    // const clientTier = searchParams.get('tier');
+    // Get user email from headers (more secure than query params)
+    const email = request.headers.get('x-user-email');
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';

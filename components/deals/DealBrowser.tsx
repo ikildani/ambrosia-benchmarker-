@@ -87,8 +87,7 @@ export default function DealBrowser() {
     try {
       const params = new URLSearchParams();
 
-      if (user?.email) params.set('email', user.email);
-      params.set('tier', tier);
+      // Non-sensitive filter params stay in URL
       params.set('page', page.toString());
       params.set('sort_by', sortBy);
       params.set('sort_order', sortOrder);
@@ -104,7 +103,11 @@ export default function DealBrowser() {
       if (filters.termsDisclosed) params.set('terms_disclosed', 'true');
       if (filters.search) params.set('search', filters.search);
 
-      const response = await fetch(`/api/deals?${params.toString()}`);
+      // Send user identifiers in headers instead of query params for security
+      const headers: Record<string, string> = {};
+      if (user?.email) headers['X-User-Email'] = user.email;
+
+      const response = await fetch(`/api/deals?${params.toString()}`, { headers });
       const data = await response.json();
 
       if (!response.ok) {

@@ -209,13 +209,16 @@ export function PartnerMatches({
     setLoadingDetails(true);
 
     try {
-      const params = new URLSearchParams();
-      if (userId) params.set('user_id', userId);
-      if (userEmail) params.set('user_email', userEmail);
-      if (sessionId) params.set('session_id', sessionId);
-      if (anonymousId) params.set('anonymous_id', anonymousId);
+      // Send user identifiers in headers instead of query params for security
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (userId) headers['X-User-Id'] = userId;
+      if (userEmail) headers['X-User-Email'] = userEmail;
+      if (sessionId) headers['X-Session-Id'] = sessionId;
+      if (anonymousId) headers['X-Anonymous-Id'] = anonymousId;
 
-      const res = await fetch(`/api/partners/${match.company_id}?${params}`);
+      const res = await fetch(`/api/partners/${match.company_id}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setPartnerDetails(data);

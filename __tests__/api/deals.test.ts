@@ -132,7 +132,10 @@ describe('/api/deals', () => {
         error: null,
       });
 
-      const request = new NextRequest('http://localhost/api/deals?email=pro@example.com');
+      // Send email in header instead of query params
+      const request = new NextRequest('http://localhost/api/deals', {
+        headers: { 'X-User-Email': 'pro@example.com' },
+      });
 
       const response = await GET(request);
       const data = await response.json();
@@ -151,8 +154,10 @@ describe('/api/deals', () => {
         error: null,
       });
 
-      // Try to pass tier=pro in query (attack attempt)
-      const request = new NextRequest('http://localhost/api/deals?email=test@example.com&tier=pro');
+      // Try to pass tier=pro in query (attack attempt) - email now in header
+      const request = new NextRequest('http://localhost/api/deals?tier=pro', {
+        headers: { 'X-User-Email': 'test@example.com' },
+      });
 
       const response = await GET(request);
       const data = await response.json();

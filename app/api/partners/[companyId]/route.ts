@@ -10,12 +10,11 @@ export async function GET(
     const supabase = createServiceClient();
     const { companyId } = params;
 
-    // Get user info from query params or headers
-    const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get('user_id');
-    const userEmail = searchParams.get('user_email');
-    const sessionId = searchParams.get('session_id');
-    const anonymousId = searchParams.get('anonymous_id');
+    // Get user info from headers (more secure than query params)
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const sessionId = request.headers.get('x-session-id');
+    const anonymousId = request.headers.get('x-anonymous-id');
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' = 'free';
