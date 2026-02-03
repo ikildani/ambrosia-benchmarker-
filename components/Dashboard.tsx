@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { getHistory, deleteHistoryItem, clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import HistoryDetailModal from './HistoryDetailModal';
 import { useTheme } from '@/contexts/ThemeContext';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 // Avatar color options
 const AVATAR_COLORS = [
@@ -90,6 +91,16 @@ export default function Dashboard({
   const [exportProgress, setExportProgress] = useState(0);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [avatarColor, setAvatarColor] = useState('teal');
+
+  // Password update state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -314,6 +325,60 @@ export default function Dashboard({
     localStorage.setItem('avatar_color', colorId);
   };
 
+  const handlePasswordUpdate = async () => {
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    // Validation
+    if (!newPassword || !confirmNewPassword) {
+      setPasswordError('Please fill in all password fields');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    if (!isSupabaseConfigured()) {
+      setPasswordError('Password update requires authentication to be configured');
+      return;
+    }
+
+    const supabase = createClient();
+    if (!supabase) {
+      setPasswordError('Authentication service unavailable');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        setPasswordError(error.message);
+        return;
+      }
+
+      setPasswordSuccess('Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setTimeout(() => setPasswordSuccess(''), 5000);
+    } catch (err) {
+      console.error('Password update error:', err);
+      setPasswordError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   // Compute deal insights
   const totalValueAnalyzed = history.reduce((sum, h) => sum + h.results.totalValueMedian, 0);
 
@@ -398,10 +463,60 @@ export default function Dashboard({
     return insights.slice(0, 3);
   };
 
+  // Determine background based on resolved theme - this bypasses CSS dark: variants
+  const bgStyle = resolvedTheme === 'dark'
+    ? { background: 'linear-gradient(to bottom right, #0f172a, #0f172a, #1e293b)' }
+    : { background: 'linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2))' };
+
+  // Dynamic styles that override dark: variants based on resolved theme
+  const dynamicStyles = resolvedTheme === 'light' ? `
+    .dark\\:bg-slate-800 { background-color: #ffffff !important; }
+    .dark\\:bg-slate-900 { background-color: #ffffff !important; }
+    .dark\\:bg-slate-700 { background-color: #f1f5f9 !important; }
+    .dark\\:bg-slate-900\\/95 { background-color: rgba(255,255,255,0.95) !important; }
+    .dark\\:border-slate-700 { border-color: #e2e8f0 !important; }
+    .dark\\:border-slate-600 { border-color: #cbd5e1 !important; }
+    .dark\\:text-slate-200 { color: #1e293b !important; }
+    .dark\\:text-slate-300 { color: #334155 !important; }
+    .dark\\:text-slate-400 { color: #64748b !important; }
+    .dark\\:text-white { color: #0f172a !important; }
+    .dark\\:hover\\:bg-slate-800:hover { background-color: #f1f5f9 !important; }
+    .dark\\:hover\\:bg-slate-700:hover { background-color: #e2e8f0 !important; }
+    .dark\\:active\\:bg-slate-700:active { background-color: #cbd5e1 !important; }
+  ` : '';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+    <>
+      {/* Dynamic theme override styles */}
+      {dynamicStyles && <style dangerouslySetInnerHTML={{ __html: dynamicStyles }} />}
+
+      {/* DEBUG: Theme indicator - remove after debugging */}
+      <div className="fixed bottom-20 left-4 z-[99999] px-3 py-2 rounded-lg text-xs font-mono shadow-lg"
+           style={{
+             backgroundColor: '#ffffff',
+             color: '#000000',
+             border: '3px solid #f97316'
+           }}>
+        <div><strong>theme:</strong> {theme}</div>
+        <div><strong>resolved:</strong> {resolvedTheme}</div>
+        <div><strong>localStorage:</strong> {typeof window !== 'undefined' ? localStorage.getItem('theme') || 'null' : 'ssr'}</div>
+        <button
+          onClick={() => { setTheme('light'); alert('Set to light! theme=' + theme); }}
+          style={{ marginTop: '4px', padding: '4px 8px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '4px' }}
+        >
+          Force Light
+        </button>
+      </div>
+
+      <div className="min-h-screen" style={bgStyle}>
       {/* Header */}
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-700/80 sticky top-0 z-40 safe-top">
+      <header
+        className="backdrop-blur-lg border-b sticky top-0 z-40 safe-top"
+        style={{
+          backgroundColor: resolvedTheme === 'dark' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          borderColor: resolvedTheme === 'dark' ? 'rgba(51, 65, 85, 0.8)' : 'rgba(226, 232, 240, 0.8)'
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
@@ -449,7 +564,10 @@ export default function Dashboard({
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-white dark:bg-slate-900 z-[9999] overflow-y-auto animate-fade-in">
+        <div
+          className="fixed inset-0 top-16 z-[9999] overflow-y-auto animate-fade-in"
+          style={{ backgroundColor: resolvedTheme === 'dark' ? '#0f172a' : '#ffffff' }}
+        >
           <nav className="flex flex-col p-4 gap-1">
             <button onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }} className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback">
               <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
@@ -501,8 +619,8 @@ export default function Dashboard({
                   <span className="px-2 py-0.5 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold rounded-full">Pro Member</span>
                 )}
               </div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
-              <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto sm:mx-0">{getWelcomeSubtext()}</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2 truncate">Welcome back, {userName.split(' ')[0]}!</h1>
+              <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto sm:mx-0 line-clamp-2">{getWelcomeSubtext()}</p>
             </div>
             <button onClick={onNavigateToCalculator} className="hidden sm:inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all hover:-translate-y-0.5 touch-feedback">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -513,7 +631,10 @@ export default function Dashboard({
 
         {/* Navigation Tabs */}
         <div className={`mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0 ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
-          <div className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
+          <div
+            className="flex gap-1.5 sm:gap-1 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x"
+            style={{ backgroundColor: resolvedTheme === 'dark' ? '#1e293b' : '#f1f5f9' }}
+          >
             {[
               { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
               { id: 'history', label: 'History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -551,29 +672,29 @@ export default function Dashboard({
               </div>
 
               {history.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                   {/* Total Analyses */}
-                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Analyses</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">{history.length}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+                    <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 truncate">Total Analyses</p>
+                    <p className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">{history.length}</p>
                   </div>
 
                   {/* Total Value */}
-                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Value</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">{formatCurrency(totalValueAnalyzed)}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+                    <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 truncate">Total Value</p>
+                    <p className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">{formatCurrency(totalValueAnalyzed)}</p>
                   </div>
 
                   {/* Top Phase */}
-                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Top Phase</p>
-                    <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topPhase}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+                    <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 truncate">Top Phase</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topPhase}</p>
                   </div>
 
                   {/* Top Modality */}
-                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Top Modality</p>
-                    <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topModality}</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+                    <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 truncate">Top Modality</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{topModality}</p>
                   </div>
                 </div>
               ) : (
@@ -616,15 +737,15 @@ export default function Dashboard({
                 </div>
                 <div className="space-y-3">
                   {getPersonalizedInsights().map((insight, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors overflow-hidden">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${insight.iconBg} dark:opacity-90`}>
                         <svg className={`w-4 h-4 ${insight.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-slate-900 dark:text-white">{insight.title}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{insight.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{insight.description}</p>
                       </div>
                     </div>
                   ))}
@@ -718,8 +839,8 @@ export default function Dashboard({
             {/* Search and Filters */}
             {history.length > 0 && (
               <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
+                <div className="flex flex-col gap-3">
+                  <div className="relative">
                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -728,15 +849,15 @@ export default function Dashboard({
                       placeholder="Search calculations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-base"
                     />
                   </div>
-                  <div className="flex gap-2">
-                    <select value={filterPhase} onChange={(e) => setFilterPhase(e.target.value)} className="px-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[120px]">
+                  <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1">
+                    <select value={filterPhase} onChange={(e) => setFilterPhase(e.target.value)} className="flex-1 min-w-0 px-3 py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all">
                       <option value="all">All Phases</option>
                       {uniquePhases.map(phase => <option key={phase} value={phase}>{phase}</option>)}
                     </select>
-                    <select value={filterModality} onChange={(e) => setFilterModality(e.target.value)} className="px-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all min-w-[130px]">
+                    <select value={filterModality} onChange={(e) => setFilterModality(e.target.value)} className="flex-1 min-w-0 px-3 py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all">
                       <option value="all">All Modalities</option>
                       {uniqueModalities.map(mod => <option key={mod} value={mod}>{mod}</option>)}
                     </select>
@@ -750,11 +871,11 @@ export default function Dashboard({
                 <div>
                   {groupedHistory.map((group) => (
                     <div key={group.label}>
-                      <div className="px-6 py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 sticky top-16 z-10">
-                        <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-300">{group.label}</h4>
+                      <div className="px-4 sm:px-6 py-2 sm:py-3 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 sticky top-[64px] z-10">
+                        <h4 className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">{group.label}</h4>
                       </div>
                       {group.items.map((item, idx) => (
-                        <div key={item.id} className={`p-6 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors history-item-clickable group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}>
+                        <div key={item.id} className={`p-4 sm:p-6 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors history-item-clickable group ${mounted ? `animate-fade-in stagger-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}>
                           <div
                             onClick={() => handleHistoryClick(item)}
                             onKeyDown={(e) => e.key === 'Enter' && handleHistoryClick(item)}
@@ -762,21 +883,21 @@ export default function Dashboard({
                             tabIndex={0}
                             className="flex items-start justify-between gap-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 rounded-lg -m-2 p-2"
                           >
-                            <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center flex-shrink-0 group-hover:from-teal-100 group-hover:to-cyan-100 transition-colors">
+                            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 flex items-center justify-center flex-shrink-0 group-hover:from-teal-100 group-hover:to-cyan-100 dark:group-hover:from-teal-900/50 dark:group-hover:to-cyan-900/50 transition-colors">
                                 <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                               </div>
-                              <div>
+                              <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-semibold text-slate-900 dark:text-white">{item.labels.phase}</p>
-                                  {item.hasPDF && <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs font-medium rounded-full">PDF</span>}
+                                  <p className="font-semibold text-slate-900 dark:text-white truncate">{item.labels.phase}</p>
+                                  {item.hasPDF && <span className="px-2 py-0.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-xs font-medium rounded-full flex-shrink-0">PDF</span>}
                                 </div>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">{item.labels.modality} • {item.labels.indication}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{item.labels.modality} • {item.labels.indication}</p>
                                 <div className="flex flex-wrap gap-1.5 mt-2">
-                                  <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs font-medium rounded">{formatCurrency(item.results.upfrontMedian)} upfront</span>
-                                  <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 text-xs font-medium rounded">{formatCurrency(item.results.totalValueMedian)} total</span>
+                                  <span className="px-2 py-0.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-xs font-medium rounded whitespace-nowrap">{formatCurrency(item.results.upfrontMedian)} upfront</span>
+                                  <span className="px-2 py-0.5 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-xs font-medium rounded whitespace-nowrap">{formatCurrency(item.results.totalValueMedian)} total</span>
                                 </div>
                               </div>
                             </div>
@@ -856,18 +977,18 @@ export default function Dashboard({
                     )}
                   </div>
 
-                  <div className="text-center sm:text-left flex-1 text-white">
-                    <h2 className="text-2xl sm:text-3xl font-bold">{editName}</h2>
-                    <p className="text-slate-400 mt-1">{userEmail}</p>
-                    {editTitle && editCompany && <p className="text-teal-400 mt-1 font-medium">{editTitle} at {editCompany}</p>}
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-4">
-                      <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${tier === 'pro' ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+                  <div className="text-center sm:text-left flex-1 min-w-0 text-white overflow-hidden">
+                    <h2 className="text-2xl sm:text-3xl font-bold truncate">{editName}</h2>
+                    <p className="text-slate-400 mt-1 truncate">{userEmail}</p>
+                    {editTitle && editCompany && <p className="text-teal-400 mt-1 font-medium truncate">{editTitle} at {editCompany}</p>}
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mt-4">
+                      <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap ${tier === 'pro' ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30' : 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
                         {tier === 'pro' ? 'Pro Member' : 'Free Plan'}
                       </span>
                       {memberSince && (
-                        <span className="text-slate-500 text-sm flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          Member since {new Date(memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        <span className="text-slate-500 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          <span className="hidden xs:inline">Member since</span><span className="xs:hidden">Since</span> {new Date(memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </span>
                       )}
                     </div>
@@ -1031,6 +1152,105 @@ export default function Dashboard({
               </div>
               <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
                 {theme === 'system' ? `Currently using ${resolvedTheme} mode based on your system preference` : `Using ${theme} mode`}
+              </p>
+            </div>
+
+            {/* Security - Password Update */}
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Security</h3>
+              </div>
+
+              {passwordError && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-2">
+                  <svg className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-red-700 dark:text-red-400">{passwordError}</p>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-sm text-green-700 dark:text-green-400">{passwordSuccess}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => { setNewPassword(e.target.value); setPasswordError(''); }}
+                      placeholder="Min. 8 characters"
+                      className="w-full px-4 py-3 pr-12 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors touch-feedback"
+                    >
+                      {showNewPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => { setConfirmNewPassword(e.target.value); setPasswordError(''); }}
+                    placeholder="Re-enter new password"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                  />
+                </div>
+
+                <button
+                  onClick={handlePasswordUpdate}
+                  disabled={isUpdatingPassword || !newPassword || !confirmNewPassword}
+                  className="w-full mt-2 px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-feedback"
+                >
+                  {isUpdatingPassword ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                      </svg>
+                      <span>Update Password</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+                Password must be at least 8 characters. We recommend using a unique password you don&apos;t use elsewhere.
               </p>
             </div>
 
@@ -1279,5 +1499,6 @@ export default function Dashboard({
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
       </button>
     </div>
+    </>
   );
 }

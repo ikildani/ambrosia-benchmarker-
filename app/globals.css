@@ -8,21 +8,146 @@
   --navy: #1a1e42;
   --teal: #00c7c7;
   --cyan: #00bcd4;
+  color-scheme: light;
 }
 
-/* Dark mode colors */
-.dark {
+/* ============================================
+   EXPLICIT LIGHT MODE STYLES
+   Maximum specificity for mobile reliability
+   ============================================ */
+html:not(.dark),
+html.light,
+html[data-theme="light"] {
+  color-scheme: light !important;
+}
+
+html:not(.dark) body,
+html.light body,
+html[data-theme="light"] body {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+}
+
+/* Override any dark mode leakage in light mode */
+html[data-theme="light"] * {
+  --tw-bg-opacity: 1;
+}
+
+/* Body-level light mode styles for mobile reliability */
+body.light-mode,
+body[data-theme="light"] {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+}
+
+/* Body-level dark mode styles */
+body.dark-mode,
+body[data-theme="dark"] {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+/* ============================================
+   CRITICAL: Override system dark mode when
+   user explicitly selects light mode
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  /* When system is dark but user selected light */
+  html.light,
+  html[data-theme="light"],
+  html:not(.dark) {
+    color-scheme: light !important;
+  }
+
+  html.light body,
+  html[data-theme="light"] body,
+  html:not(.dark) body {
+    background-color: #ffffff !important;
+    color: #171717 !important;
+  }
+
+  /* Force light backgrounds on all elements when light mode is selected */
+  html.light .bg-gradient-to-br,
+  html[data-theme="light"] .bg-gradient-to-br {
+    --tw-gradient-from: #f8fafc !important;
+    --tw-gradient-via: #ffffff !important;
+    --tw-gradient-to: rgba(240, 253, 250, 0.2) !important;
+  }
+
+  html.light .min-h-screen,
+  html[data-theme="light"] .min-h-screen {
+    background: linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2)) !important;
+  }
+
+  /* Override dark: variants when light mode is explicitly selected */
+  html.light .dark\:from-slate-900,
+  html[data-theme="light"] .dark\:from-slate-900 {
+    --tw-gradient-from: #f8fafc !important;
+  }
+
+  html.light .dark\:via-slate-900,
+  html[data-theme="light"] .dark\:via-slate-900 {
+    --tw-gradient-via: #ffffff !important;
+  }
+
+  html.light .dark\:to-slate-800,
+  html[data-theme="light"] .dark\:to-slate-800 {
+    --tw-gradient-to: rgba(240, 253, 250, 0.2) !important;
+  }
+
+  html.light .dark\:bg-slate-900,
+  html[data-theme="light"] .dark\:bg-slate-900 {
+    background-color: #ffffff !important;
+  }
+
+  html.light .dark\:bg-slate-800,
+  html[data-theme="light"] .dark\:bg-slate-800 {
+    background-color: #ffffff !important;
+  }
+
+  html.light .dark\:bg-slate-900\/95,
+  html[data-theme="light"] .dark\:bg-slate-900\/95 {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  html.light .dark\:border-slate-700,
+  html[data-theme="light"] .dark\:border-slate-700 {
+    border-color: #e2e8f0 !important;
+  }
+
+  html.light .dark\:text-slate-200,
+  html[data-theme="light"] .dark\:text-slate-200 {
+    color: #1e293b !important;
+  }
+
+  html.light .dark\:text-slate-300,
+  html[data-theme="light"] .dark\:text-slate-300 {
+    color: #334155 !important;
+  }
+
+  html.light .dark\:text-slate-400,
+  html[data-theme="light"] .dark\:text-slate-400 {
+    color: #64748b !important;
+  }
+}
+
+/* ============================================
+   EXPLICIT DARK MODE STYLES
+   ============================================ */
+html.dark,
+html[data-theme="dark"] {
   --foreground: #f1f5f9;
   --background: #0f172a;
   --navy: #1e293b;
   --teal: #14b8a6;
   --cyan: #06b6d4;
+  color-scheme: dark !important;
 }
 
-/* Dark mode base styles */
-.dark body {
-  color: var(--foreground);
-  background: var(--background);
+html.dark body,
+html[data-theme="dark"] body {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
 }
 
 .dark ::selection {
@@ -1510,6 +1635,174 @@ select::selection {
 }
 
 /* ============================================
+   LIGHT MODE EXPLICIT OVERRIDES
+   Forces light mode styles when data-theme="light"
+   ============================================ */
+html[data-theme="light"] .bg-white,
+html.light .bg-white {
+  background-color: rgb(255 255 255) !important;
+}
+
+html[data-theme="light"] .bg-slate-50,
+html.light .bg-slate-50 {
+  background-color: rgb(248 250 252) !important;
+}
+
+html[data-theme="light"] .bg-slate-100,
+html.light .bg-slate-100 {
+  background-color: rgb(241 245 249) !important;
+}
+
+html[data-theme="light"] .bg-neutral-50,
+html.light .bg-neutral-50 {
+  background-color: rgb(250 250 250) !important;
+}
+
+html[data-theme="light"] .text-slate-900,
+html.light .text-slate-900 {
+  color: rgb(15 23 42) !important;
+}
+
+html[data-theme="light"] .text-slate-800,
+html.light .text-slate-800 {
+  color: rgb(30 41 59) !important;
+}
+
+html[data-theme="light"] .text-slate-700,
+html.light .text-slate-700 {
+  color: rgb(51 65 85) !important;
+}
+
+html[data-theme="light"] .text-slate-600,
+html.light .text-slate-600 {
+  color: rgb(71 85 105) !important;
+}
+
+html[data-theme="light"] .border-slate-200,
+html.light .border-slate-200 {
+  border-color: rgb(226 232 240) !important;
+}
+
+html[data-theme="light"] .border-slate-100,
+html.light .border-slate-100 {
+  border-color: rgb(241 245 249) !important;
+}
+
+/* Ensure cards are white in light mode */
+html[data-theme="light"] .card,
+html[data-theme="light"] .card-elevated,
+html[data-theme="light"] .card-interactive,
+html.light .card,
+html.light .card-elevated,
+html.light .card-interactive {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgba(229, 231, 235, 0.8) !important;
+}
+
+/* Ensure inputs are white in light mode */
+html[data-theme="light"] .input-field,
+html[data-theme="light"] .select-field,
+html.light .input-field,
+html.light .select-field {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(229 231 235) !important;
+  color: rgb(17 24 39) !important;
+}
+
+/* Ensure modals are white in light mode */
+html[data-theme="light"] .bg-white.rounded-2xl,
+html[data-theme="light"] .bg-white.rounded-xl,
+html.light .bg-white.rounded-2xl,
+html.light .bg-white.rounded-xl {
+  background-color: rgb(255 255 255) !important;
+}
+
+/* Light mode gradient backgrounds */
+html[data-theme="light"] .bg-gradient-subtle,
+html.light .bg-gradient-subtle {
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%) !important;
+}
+
+html[data-theme="light"] .bg-mesh-gradient,
+html.light .bg-mesh-gradient {
+  background:
+    radial-gradient(at 40% 20%, rgba(0, 199, 199, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(0, 188, 212, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(0, 199, 199, 0.05) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(0, 188, 212, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(0, 199, 199, 0.1) 0px, transparent 50%),
+    linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%) !important;
+}
+
+/* Light mode sticky header */
+html[data-theme="light"] .sticky-header-blur,
+html.light .sticky-header-blur {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(226, 232, 240, 0.5) !important;
+}
+
+/* Light mode bottom navigation */
+html[data-theme="light"] .bottom-nav,
+html[data-theme="light"] .mobile-bottom-nav,
+html.light .bottom-nav,
+html.light .mobile-bottom-nav {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(226 232 240) !important;
+}
+
+/* Light mode scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track,
+html.light ::-webkit-scrollbar-track {
+  background: #fafafa !important;
+}
+
+/* Light mode for Dashboard backgrounds */
+html[data-theme="light"] .bg-slate-800,
+html.light .bg-slate-800 {
+  background-color: rgb(30 41 59) !important; /* Keep dark header dark */
+}
+
+/* Ensure metric cards are correct in light mode */
+html[data-theme="light"] .metric-card,
+html.light .metric-card {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgba(229, 231, 235, 0.8) !important;
+}
+
+/* ============================================
+   NUCLEAR OVERRIDE: Force light mode on
+   Dashboard main container
+   ============================================ */
+html.light .min-h-screen.bg-gradient-to-br,
+html[data-theme="light"] .min-h-screen.bg-gradient-to-br,
+html:not(.dark) .min-h-screen.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, #f8fafc, #ffffff, rgba(240, 253, 250, 0.2)) !important;
+}
+
+/* Force all dark: variant classes to use light values when not in dark mode */
+html:not(.dark) [class*="dark:bg-slate-9"],
+html:not(.dark) [class*="dark:bg-slate-8"],
+html.light [class*="dark:bg-slate-9"],
+html.light [class*="dark:bg-slate-8"],
+html[data-theme="light"] [class*="dark:bg-slate-9"],
+html[data-theme="light"] [class*="dark:bg-slate-8"] {
+  background-color: inherit !important;
+}
+
+/* Ensure the page wrapper is always light in light mode */
+html:not(.dark) > body,
+html.light > body,
+html[data-theme="light"] > body {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) > body > div,
+html.light > body > div,
+html[data-theme="light"] > body > div {
+  background-color: transparent !important;
+}
+
+/* ============================================
    SECURITY BEST PRACTICES
    ============================================ */
 
@@ -1533,4 +1826,471 @@ select::selection {
   .dark .text-slate-500 {
     color: rgb(203 213 225) !important; /* slate-300 */
   }
+}
+
+/* ============================================
+   WORLD-CLASS MOBILE OPTIMIZATIONS
+   ============================================ */
+
+/* Minimum touch target size (44x44px per WCAG 2.1) */
+@media (max-width: 640px) {
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+  }
+
+  /* Larger tap targets for interactive elements */
+  .tap-target-44 {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-spacing {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Full-width buttons on mobile */
+  .btn-mobile-full {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Optimized form inputs for mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  /* Better modal positioning on mobile */
+  .modal-mobile {
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+    margin-top: auto;
+  }
+
+  /* Sticky bottom actions */
+  .sticky-bottom-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 16px;
+    background: linear-gradient(to top, white 0%, white 80%, transparent 100%);
+    margin: 0 -16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .dark .sticky-bottom-actions {
+    background: linear-gradient(to top, rgb(30 41 59) 0%, rgb(30 41 59) 80%, transparent 100%);
+  }
+
+  /* Mobile card improvements */
+  .card-mobile {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  /* Optimized header on mobile */
+  .header-mobile {
+    padding: 12px 16px;
+  }
+
+  /* Mobile navigation improvements */
+  .nav-mobile {
+    padding: 8px 0;
+    gap: 4px;
+  }
+
+  .nav-mobile button,
+  .nav-mobile a {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  /* Better scrolling on mobile */
+  .scroll-mobile {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+  }
+
+  /* Improved bottom sheet on mobile */
+  .bottom-sheet-mobile {
+    border-radius: 24px 24px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    max-height: 85vh;
+    touch-action: pan-y;
+  }
+
+  /* Mobile-optimized grid */
+  .grid-mobile-1 {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .grid-mobile-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+  }
+
+  /* Better list items on mobile */
+  .list-item-mobile {
+    padding: 14px 16px;
+    margin: 0 -16px;
+    border-radius: 0;
+  }
+
+  /* Mobile section headers */
+  .section-header-mobile {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  /* Floating action button position */
+  .fab-position {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+}
+
+/* Tablet-specific optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Optimized spacing for tablets */
+  .tablet-spacing {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* Better grid layouts for tablets */
+  .grid-tablet-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-tablet-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Mobile-first animations that respect device capabilities */
+@media (max-width: 640px) {
+  /* Faster animations on mobile for better responsiveness */
+  .animate-fast {
+    animation-duration: 0.15s !important;
+  }
+
+  /* Disable parallax effects on mobile */
+  .no-parallax-mobile {
+    transform: none !important;
+    background-attachment: scroll !important;
+  }
+
+  /* Reduced motion effects for performance */
+  .animate-modal-slide-up {
+    animation-duration: 0.25s;
+  }
+
+  .animate-fade-in {
+    animation-duration: 0.2s;
+  }
+}
+
+/* Touch-optimized hover states */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects that don't work well on touch */
+  .hover\:shadow-lg:hover,
+  .hover\:shadow-xl:hover {
+    box-shadow: none;
+  }
+
+  /* Use active states instead of hover */
+  .touch-active:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  /* Better button feedback on touch */
+  button:active,
+  [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Disable hover transforms on touch devices */
+  .hover\:-translate-y-0\.5:hover,
+  .hover\:-translate-y-1:hover {
+    transform: none;
+  }
+}
+
+/* Mobile swipe gestures enhancement */
+.swipe-container {
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimized images for mobile */
+@media (max-width: 640px) {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .image-mobile {
+    object-fit: cover;
+    aspect-ratio: 16/9;
+  }
+}
+
+/* Mobile keyboard handling */
+@media (max-height: 500px) and (max-width: 640px) {
+  /* When keyboard is open, hide non-essential elements */
+  .hide-on-keyboard {
+    display: none !important;
+  }
+
+  /* Reduce padding when keyboard is open */
+  .keyboard-aware {
+    padding-bottom: 8px !important;
+  }
+}
+
+/* Mobile status bar safe area for notched phones */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .safe-area-all {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-compact {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .landscape-hide {
+    display: none !important;
+  }
+
+  .landscape-row {
+    flex-direction: row !important;
+    gap: 16px;
+  }
+}
+
+/* Mobile-optimized scrollbars */
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    border-width: 0;
+  }
+}
+
+/* Improved loading states for mobile */
+.mobile-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+}
+
+.dark .mobile-loading {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+/* Pull-to-refresh visual indicator */
+.ptr-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-100%);
+  transition: transform 0.2s ease-out;
+  z-index: 100;
+}
+
+.ptr-indicator.active {
+  transform: translateY(0);
+}
+
+/* Enhanced focus styles for mobile accessibility */
+@media (max-width: 640px) {
+  :focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 3px;
+  }
+}
+
+/* Mobile-optimized text */
+@media (max-width: 640px) {
+  .text-mobile-sm {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .text-mobile-base {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .text-mobile-lg {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+
+  .text-mobile-xl {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .text-mobile-2xl {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+}
+
+/* Mobile bottom navigation bar */
+@media (max-width: 640px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid rgb(226 232 240);
+    padding: 8px 16px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    z-index: 50;
+  }
+
+  .dark .mobile-bottom-nav {
+    background: rgb(15 23 42);
+    border-color: rgb(51 65 85);
+  }
+
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    transition: all 0.15s ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-nav-item.active {
+    color: rgb(20 184 166);
+  }
+
+  .mobile-bottom-nav-item:active {
+    background: rgba(20, 184, 166, 0.1);
+    transform: scale(0.95);
+  }
+}
+
+/* Mobile card stack effect */
+.card-stack-mobile {
+  position: relative;
+}
+
+.card-stack-mobile::before,
+.card-stack-mobile::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 8px;
+  border-radius: 0 0 12px 12px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.card-stack-mobile::before {
+  bottom: -4px;
+  z-index: -1;
+}
+
+.card-stack-mobile::after {
+  bottom: -8px;
+  left: 16px;
+  right: 16px;
+  z-index: -2;
+}
+
+.dark .card-stack-mobile::before,
+.dark .card-stack-mobile::after {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Progress indicator for mobile forms */
+.mobile-progress {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}
+
+.mobile-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgb(203 213 225);
+  transition: all 0.2s ease-out;
+}
+
+.mobile-progress-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: rgb(20 184 166);
+}
+
+.dark .mobile-progress-dot {
+  background: rgb(71 85 105);
+}
+
+.dark .mobile-progress-dot.active {
+  background: rgb(20 184 166);
 }

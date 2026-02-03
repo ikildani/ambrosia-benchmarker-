@@ -219,24 +219,24 @@ export default function HistoryDetailModal({
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-220px)] p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-220px)] p-4 sm:p-6">
           {/* Quick Summary Pills */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-teal-200/50 dark:border-slate-600">
-              <p className="text-xs text-teal-600 dark:text-teal-400 font-medium mb-1">Phase</p>
-              <p className="text-sm font-semibold text-teal-800 dark:text-teal-300 truncate">{item.labels.phase}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-teal-200/50 dark:border-slate-600 overflow-hidden">
+              <p className="text-[10px] sm:text-xs text-teal-600 dark:text-teal-400 font-medium mb-0.5 sm:mb-1">Phase</p>
+              <p className="text-xs sm:text-sm font-semibold text-teal-800 dark:text-teal-300 truncate">{item.labels.phase}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-cyan-200/50 dark:border-slate-600">
-              <p className="text-xs text-cyan-600 dark:text-cyan-400 font-medium mb-1">Modality</p>
-              <p className="text-sm font-semibold text-cyan-800 dark:text-cyan-300 truncate">{item.labels.modality}</p>
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-cyan-200/50 dark:border-slate-600 overflow-hidden">
+              <p className="text-[10px] sm:text-xs text-cyan-600 dark:text-cyan-400 font-medium mb-0.5 sm:mb-1">Modality</p>
+              <p className="text-xs sm:text-sm font-semibold text-cyan-800 dark:text-cyan-300 truncate">{item.labels.modality}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-blue-200/50 dark:border-slate-600">
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Indication</p>
-              <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 truncate">{item.labels.indication}</p>
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-blue-200/50 dark:border-slate-600 overflow-hidden">
+              <p className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium mb-0.5 sm:mb-1">Indication</p>
+              <p className="text-xs sm:text-sm font-semibold text-blue-800 dark:text-blue-300 truncate">{item.labels.indication}</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-indigo-200/50 dark:border-slate-600">
-              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Total Value</p>
-              <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">{formatCurrency(item.results.totalValueMedian)}</p>
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-indigo-200/50 dark:border-slate-600 overflow-hidden">
+              <p className="text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-0.5 sm:mb-1">Total Value</p>
+              <p className="text-xs sm:text-sm font-semibold text-indigo-800 dark:text-indigo-300">{formatCurrency(item.results.totalValueMedian)}</p>
             </div>
           </div>
 
@@ -268,42 +268,45 @@ export default function HistoryDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 flex flex-col sm:flex-row gap-3">
+        <div className="border-t border-slate-200 dark:border-slate-700 px-4 sm:px-6 py-4 bg-slate-50 dark:bg-slate-800 flex flex-col sm:flex-row gap-2 sm:gap-3 safe-bottom">
           <button
             onClick={handleReuse}
             className="flex-1 inline-flex items-center justify-center gap-2
-                       px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-500
+                       px-4 py-3.5 sm:py-3 bg-gradient-to-r from-teal-600 to-cyan-500
                        text-white font-semibold rounded-xl shadow-lg shadow-teal-500/20
-                       hover:from-teal-500 hover:to-cyan-400 hover:shadow-xl hover:-translate-y-0.5
-                       transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                       hover:from-teal-500 hover:to-cyan-400 hover:shadow-xl sm:hover:-translate-y-0.5
+                       transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
+                       active:scale-[0.98] touch-feedback"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Use These Inputs
+            <span className="truncate">Use These Inputs</span>
           </button>
 
           {isPro && result && (
             <button
               onClick={handleDownloadPDF}
               className="flex-1 inline-flex items-center justify-center gap-2
-                         px-4 py-3 bg-white border border-slate-200
-                         text-slate-700 font-semibold rounded-xl
-                         hover:bg-slate-50 hover:border-slate-300
-                         transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                         px-4 py-3.5 sm:py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600
+                         text-slate-700 dark:text-slate-200 font-semibold rounded-xl
+                         hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500
+                         transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2
+                         active:scale-[0.98] touch-feedback"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Download PDF
+              <span className="truncate">Download PDF</span>
             </button>
           )}
 
           <button
             onClick={onClose}
             className="sm:hidden inline-flex items-center justify-center gap-2
-                       px-4 py-3 bg-slate-100 text-slate-600 font-medium rounded-xl
-                       hover:bg-slate-200 transition-all duration-200"
+                       px-4 py-3.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-xl
+                       hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200
+                       active:scale-[0.98] touch-feedback"
           >
             Close
           </button>

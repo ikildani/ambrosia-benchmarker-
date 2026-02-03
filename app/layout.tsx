@@ -48,6 +48,67 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var isDark = false;
+
+                  if (theme === 'dark') {
+                    isDark = true;
+                  } else if (theme === 'light') {
+                    isDark = false;
+                  } else {
+                    // theme is 'system' or not set
+                    isDark = systemDark;
+                  }
+
+                  var root = document.documentElement;
+                  // Use both class and data attribute for maximum reliability
+                  if (isDark) {
+                    root.classList.add('dark');
+                    root.classList.remove('light');
+                    root.setAttribute('data-theme', 'dark');
+                    root.style.colorScheme = 'dark';
+                  } else {
+                    root.classList.remove('dark');
+                    root.classList.add('light');
+                    root.setAttribute('data-theme', 'light');
+                    root.style.colorScheme = 'light';
+                  }
+
+                  // Apply to body when it becomes available
+                  function applyToBody() {
+                    var body = document.body;
+                    if (!body) {
+                      requestAnimationFrame(applyToBody);
+                      return;
+                    }
+                    if (isDark) {
+                      body.classList.add('dark-mode');
+                      body.classList.remove('light-mode');
+                      body.setAttribute('data-theme', 'dark');
+                    } else {
+                      body.classList.add('light-mode');
+                      body.classList.remove('dark-mode');
+                      body.setAttribute('data-theme', 'light');
+                    }
+                  }
+                  if (document.body) {
+                    applyToBody();
+                  } else {
+                    document.addEventListener('DOMContentLoaded', applyToBody);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <GlobalJsonLd />
         <ThemeProvider>
