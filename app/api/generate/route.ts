@@ -92,6 +92,7 @@ export async function POST(request: Request) {
             ai_prompt_used: target_keyword,
             generation_model: 'claude-sonnet-4-20250514',
             status: 'draft',
+            sources: content.sources || [],
           })
           .select()
           .single();

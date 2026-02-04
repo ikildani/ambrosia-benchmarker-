@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { BlogPost as BlogPostType } from '@/types/content';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter, ExternalLink, BookOpen } from 'lucide-react';
 
 interface BlogPostProps {
   post: BlogPostType;
@@ -221,6 +221,48 @@ export default function BlogPostComponent({ post }: BlogPostProps) {
             >
               Try the Calculator
             </Link>
+          </div>
+        )}
+
+        {/* Sources Section */}
+        {post.sources && post.sources.length > 0 && (
+          <div className="bg-slate-50 rounded-xl p-6 mb-12">
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-5 h-5 text-slate-600" />
+              <h3 className="text-lg font-semibold text-slate-900">Sources & References</h3>
+            </div>
+            <ul className="space-y-3">
+              {post.sources.map((source, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="text-slate-400 font-medium min-w-[1.5rem]">{index + 1}.</span>
+                  <div className="flex-1">
+                    {source.url ? (
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-600 hover:text-teal-700 hover:underline inline-flex items-center gap-1"
+                      >
+                        {source.title}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-slate-700">{source.title}</span>
+                    )}
+                    {(source.publication || source.date) && (
+                      <span className="text-slate-500 ml-1">
+                        {source.publication && `— ${source.publication}`}
+                        {source.date && ` (${source.date})`}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-slate-500 border-t border-slate-200 pt-4">
+              Data and insights in this article are compiled from public sources, SEC filings, and industry reports.
+              Always verify specific deal terms through official company disclosures.
+            </p>
           </div>
         )}
 

@@ -70,8 +70,19 @@ Return the article in this exact JSON format:
   "faqs": [
     { "question": "Question 1?", "answer": "Answer 1" },
     { "question": "Question 2?", "answer": "Answer 2" }
+  ],
+  "sources": [
+    { "title": "Source title or description", "publication": "Publication name", "url": "https://example.com/article", "date": "2024" },
+    { "title": "Another source", "publication": "SEC Filing / Press Release / Journal Name" }
   ]
 }
+
+### Sources Requirements
+Include 3-6 credible sources that support the data and claims in the article. Sources should include:
+- Industry reports (e.g., BioPharma Dive, Endpoints News, FiercePharma)
+- SEC filings and press releases for specific deal data
+- Academic journals or research reports where applicable
+- Reputable industry databases (e.g., Evaluate Pharma, GlobalData)
 
 Write the article now.`;
 }
@@ -119,8 +130,18 @@ Return the article in this exact JSON format:
   "content": "Full article content in Markdown format",
   "faqs": [
     { "question": "Question 1?", "answer": "Answer 1" }
+  ],
+  "sources": [
+    { "title": "Source title or description", "publication": "Publication name", "url": "https://example.com/article", "date": "2024" }
   ]
 }
+
+### Sources Requirements
+Include 3-6 credible sources that support the educational content. Sources should include:
+- Industry guides and best practices documentation
+- SEC filings showing example deal structures
+- Academic or legal publications on licensing terms
+- Reputable industry databases and reports
 
 Write the article now.`;
 }
@@ -161,8 +182,18 @@ Return the article in this exact JSON format:
   "content": "Full article content in Markdown format",
   "faqs": [
     { "question": "Question 1?", "answer": "Answer 1" }
+  ],
+  "sources": [
+    { "title": "Source title or description", "publication": "Publication name", "url": "https://example.com/article", "date": "2024" }
   ]
 }
+
+### Sources Requirements
+Include 3-6 credible sources that support the deal trends analysis. Sources should include:
+- Recent deal announcements and press releases
+- Industry publications (BioPharma Dive, Endpoints News, FiercePharma, STAT News)
+- Financial filings and investor presentations
+- Market research reports (Evaluate Pharma, GlobalData, DealForma)
 
 Write the article now.`;
 }
@@ -201,8 +232,19 @@ Return the article in this exact JSON format:
   "content": "Full article content in Markdown format",
   "faqs": [
     { "question": "Question 1?", "answer": "Answer 1" }
+  ],
+  "sources": [
+    { "title": "Source title or description", "publication": "Publication name", "url": "https://example.com/article", "date": "2024" }
   ]
 }
+
+### Sources Requirements
+Include 3-6 credible sources that support the competitive analysis. Sources should include:
+- Market research reports (McKinsey, BCG, Deloitte life sciences reports)
+- Industry publications covering competitive landscape
+- Company 10-K filings and investor presentations
+- Clinical trial databases (ClinicalTrials.gov) for pipeline analysis
+- FDA approval and regulatory documents
 
 Write the article now.`;
 }

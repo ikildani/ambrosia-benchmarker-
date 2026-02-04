@@ -5,6 +5,13 @@ export type ContentCategory = 'deal-trends' | 'modality-insights' | 'educational
 export type JobType = 'blog_post' | 'landing_page' | 'faq';
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
+export interface BlogPostSource {
+  title: string;
+  url?: string;
+  publication?: string;
+  date?: string;
+}
+
 export interface BlogPost {
   id: string;
   slug: string;
@@ -32,6 +39,7 @@ export interface BlogPost {
   published_at: string | null;
   view_count: number;
   related_post_ids: string[] | null;
+  sources: BlogPostSource[] | null;
 }
 
 export interface LandingPage {

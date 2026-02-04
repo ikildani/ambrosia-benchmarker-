@@ -11,12 +11,20 @@ import { generateLandingPagePrompt, LandingPagePromptParams } from './prompts/la
 import { ContentCategory, GenerationParameters } from '@/types/content';
 
 // Types
+export interface GeneratedBlogSource {
+  title: string;
+  url?: string;
+  publication?: string;
+  date?: string;
+}
+
 export interface GeneratedBlogContent {
   title: string;
   meta_description: string;
   excerpt: string;
   content: string;
   faqs: Array<{ question: string; answer: string }>;
+  sources: GeneratedBlogSource[];
 }
 
 export interface GeneratedLandingContent {
