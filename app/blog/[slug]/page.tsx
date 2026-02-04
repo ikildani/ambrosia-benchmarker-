@@ -10,6 +10,9 @@ import { NewsletterSignup } from '@/components/blog/NewsletterSignup';
 import { AuthorSchema } from '@/components/seo/AuthorSchema';
 import { ArrowLeft } from 'lucide-react';
 
+// Revalidate pages every 60 seconds to pick up content changes
+export const revalidate = 60;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
