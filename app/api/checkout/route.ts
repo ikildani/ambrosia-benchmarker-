@@ -87,18 +87,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error: unknown) {
     console.error('Checkout error:', error);
-    let errorMessage = 'Unknown error';
-    let errorType = 'unknown';
-
+    // Log detailed error server-side but return generic message to client
     if (error instanceof Stripe.errors.StripeError) {
-      errorMessage = error.message;
-      errorType = error.type;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+      console.error('Stripe error type:', error.type, 'message:', error.message);
     }
-
     return NextResponse.json(
-      { error: 'Failed to create checkout session', details: errorMessage, type: errorType },
+      { error: 'Failed to create checkout session. Please try again.' },
       { status: 500 }
     );
   }

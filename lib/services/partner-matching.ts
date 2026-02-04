@@ -173,7 +173,8 @@ export async function findPartnerMatches(
     .limit(500);
 
   if (error) {
-    throw new Error(`Failed to fetch companies: ${error.message}`);
+    console.error('Failed to fetch companies:', error);
+    throw new Error('Failed to fetch companies from database');
   }
 
   if (!companies || companies.length === 0) {

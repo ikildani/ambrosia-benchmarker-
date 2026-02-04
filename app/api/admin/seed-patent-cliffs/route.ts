@@ -249,8 +249,9 @@ export async function POST(request: NextRequest) {
       .order('name');
 
     if (fetchError) {
+      console.error('Failed to fetch companies:', fetchError);
       return NextResponse.json(
-        { error: `Failed to fetch companies: ${fetchError.message}` },
+        { error: 'Failed to fetch companies from database' },
         { status: 500 }
       );
     }

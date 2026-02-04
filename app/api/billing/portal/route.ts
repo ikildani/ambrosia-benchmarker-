@@ -97,8 +97,9 @@ export async function POST(request: NextRequest) {
     console.error('Billing portal error:', error);
 
     if (error instanceof Stripe.errors.StripeError) {
+      console.error('Stripe error:', error.message);
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Billing portal request failed. Please try again.' },
         { status: 400 }
       );
     }

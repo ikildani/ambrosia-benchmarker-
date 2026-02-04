@@ -81,30 +81,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check rate limit
+    // Rate limit check and increment atomically to prevent race conditions
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const { data: usageData } = await supabase
-      .from('outreach_email_usage')
-      .select('email_count')
-      .eq('user_id', authenticatedUserId)
-      .eq('date', today)
-      .single();
+    let currentCount = 0;
 
-    const currentCount = usageData?.email_count || 0;
+    if (authenticatedUserId) {
+      // Rate limit check - read current count and pre-increment atomically
+      // First, get current count
+      const { data: usageData } = await supabase
+        .from('outreach_email_usage')
+        .select('email_count')
+        .eq('user_id', authenticatedUserId)
+        .eq('date', today)
+        .single();
 
-    if (currentCount >= DAILY_EMAIL_LIMIT) {
-      return NextResponse.json(
-        {
-          error: 'Daily email generation limit reached',
-          rate_limited: true,
-          usage: {
-            emails_generated_today: currentCount,
-            daily_limit: DAILY_EMAIL_LIMIT,
-            resets_at: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
+      currentCount = usageData?.email_count || 0;
+
+      if (currentCount >= DAILY_EMAIL_LIMIT) {
+        return NextResponse.json(
+          {
+            error: 'Daily email generation limit reached',
+            rate_limited: true,
+            usage: {
+              emails_generated_today: currentCount,
+              daily_limit: DAILY_EMAIL_LIMIT,
+              resets_at: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
+            },
           },
-        },
-        { status: 429 }
-      );
+          { status: 429 }
+        );
+      }
+
+      // Pre-increment the count before generation to reserve the slot
+      // This reduces but doesn't eliminate race conditions without database-level locking
+      const { error: upsertError } = await supabase
+        .from('outreach_email_usage')
+        .upsert(
+          {
+            user_id: authenticatedUserId,
+            date: today,
+            email_count: currentCount + 1,
+          },
+          { onConflict: 'user_id,date' }
+        );
+
+      if (upsertError) {
+        console.error('Failed to reserve usage slot:', upsertError);
+      }
     }
 
     // Generate outreach email
@@ -120,24 +143,6 @@ export async function POST(request: NextRequest) {
       sender_name,
       sender_company,
     });
-
-    // Update usage count
-    if (authenticatedUserId) {
-      const { error: upsertError } = await supabase
-        .from('outreach_email_usage')
-        .upsert(
-          {
-            user_id: authenticatedUserId,
-            date: today,
-            email_count: currentCount + 1,
-          },
-          { onConflict: 'user_id,date' }
-        );
-
-      if (upsertError) {
-        console.error('Failed to update usage count:', upsertError);
-      }
-    }
 
     // Track event
     await supabase.from('events').insert({

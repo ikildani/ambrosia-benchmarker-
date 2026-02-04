@@ -40,6 +40,9 @@ export async function DELETE(request: NextRequest) {
       events: eventsCount.count || 0,
     };
 
+    // Track deletion errors for reporting
+    const deletionErrors: string[] = [];
+
     // Delete in correct order (respecting foreign keys)
     // Events reference sessions, so delete events first
     const { error: eventsError } = await supabase
@@ -49,6 +52,7 @@ export async function DELETE(request: NextRequest) {
 
     if (eventsError) {
       console.error('Error deleting events:', eventsError);
+      deletionErrors.push('events');
     }
 
     // Delete calculations
@@ -59,6 +63,7 @@ export async function DELETE(request: NextRequest) {
 
     if (calculationsError) {
       console.error('Error deleting calculations:', calculationsError);
+      deletionErrors.push('calculations');
     }
 
     // Delete sessions
@@ -69,6 +74,7 @@ export async function DELETE(request: NextRequest) {
 
     if (sessionsError) {
       console.error('Error deleting sessions:', sessionsError);
+      deletionErrors.push('sessions');
     }
 
     // Delete lead score
@@ -79,9 +85,10 @@ export async function DELETE(request: NextRequest) {
 
     if (leadScoreError) {
       console.error('Error deleting lead score:', leadScoreError);
+      deletionErrors.push('lead_scores');
     }
 
-    // Delete user profile
+    // Delete user profile - this is critical
     const { error: profileError } = await supabase
       .from('user_profiles')
       .delete()
@@ -89,15 +96,29 @@ export async function DELETE(request: NextRequest) {
 
     if (profileError) {
       console.error('Error deleting profile:', profileError);
+      deletionErrors.push('user_profile');
+      // Profile deletion failure is critical - stop here
+      return NextResponse.json(
+        {
+          error: 'Failed to delete user profile',
+          partial_deletion: deletionErrors.length > 1,
+          failed_tables: deletionErrors,
+        },
+        { status: 500 }
+      );
     }
 
-    // Finally, delete the auth user
+    // Finally, delete the auth user - this is critical
     const { error: authDeleteError } = await supabase.auth.admin.deleteUser(user.id);
 
     if (authDeleteError) {
       console.error('Error deleting auth user:', authDeleteError);
       return NextResponse.json(
-        { error: 'Failed to delete auth account' },
+        {
+          error: 'Failed to delete auth account. Profile data was removed but auth record remains.',
+          partial_deletion: true,
+          failed_tables: ['auth_user'],
+        },
         { status: 500 }
       );
     }
@@ -106,6 +127,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'All user data has been permanently deleted',
       deleted: deletionSummary,
+      warnings: deletionErrors.length > 0 ? `Some non-critical data may not have been deleted: ${deletionErrors.join(', ')}` : undefined,
     });
   } catch (error) {
     console.error('Data deletion error:', error);

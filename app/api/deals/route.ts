@@ -96,8 +96,13 @@ export async function GET(request: NextRequest) {
       query = query.lte('upfront_usd', parseInt(maxUpfront) * 1000000);
     }
 
-    const yearFrom = searchParams.get('year_from');
-    const yearTo = searchParams.get('year_to');
+    const yearFromRaw = searchParams.get('year_from');
+    const yearToRaw = searchParams.get('year_to');
+
+    // Validate year inputs to prevent injection (must be 4-digit integers)
+    const yearRegex = /^\d{4}$/;
+    const yearFrom = yearFromRaw && yearRegex.test(yearFromRaw) ? yearFromRaw : null;
+    const yearTo = yearToRaw && yearRegex.test(yearToRaw) ? yearToRaw : null;
 
     // Apply date filter - include NULL dates OR dates within range
     if (yearFrom && yearTo) {
