@@ -374,60 +374,68 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
   // Handle sensitivity analysis changes - updates inputs and triggers recalculation
   const handleSensitivityApply = (newInputs: Partial<CalculationInput>) => {
-    // Merge new inputs with current state values to get complete input
-    const mergedInputs: CalculationInput = {
-      phase: newInputs.phase || phase,
-      modality: newInputs.modality || modality,
-      indication: newInputs.indication || indication,
-      territory: newInputs.territory || territory,
-      biomarker: newInputs.biomarker || biomarker,
-      lineOfTherapy: newInputs.lineOfTherapy || lineOfTherapy,
-      combinationPotential: newInputs.combinationPotential || combinationPotential,
-      competitivePosition: newInputs.competitivePosition || competitivePosition,
-      dataQuality: newInputs.dataQuality || dataQuality,
-      regulatoryDesignations: newInputs.regulatoryDesignations || regulatoryDesignations,
-    };
+    try {
+      // Merge new inputs with current state values to get complete input
+      const mergedInputs: CalculationInput = {
+        phase: (newInputs.phase as Phase) || phase,
+        modality: (newInputs.modality as Modality) || modality,
+        indication: (newInputs.indication as Indication) || indication,
+        territory: (newInputs.territory as Territory) || territory,
+        biomarker: (newInputs.biomarker as BiomarkerStatus) || biomarker,
+        lineOfTherapy: (newInputs.lineOfTherapy as LineOfTherapy) || lineOfTherapy,
+        combinationPotential: (newInputs.combinationPotential as CombinationPotential) || combinationPotential,
+        competitivePosition: (newInputs.competitivePosition as CompetitivePosition) || competitivePosition,
+        dataQuality: (newInputs.dataQuality as DataQuality) || dataQuality,
+        regulatoryDesignations: newInputs.regulatoryDesignations || regulatoryDesignations,
+      };
 
-    // Update state variables for UI sync
-    if (newInputs.phase) setPhase(newInputs.phase);
-    if (newInputs.modality) setModality(newInputs.modality);
-    if (newInputs.indication) setIndication(newInputs.indication);
-    if (newInputs.territory) setTerritory(newInputs.territory);
-    if (newInputs.biomarker) setBiomarker(newInputs.biomarker);
-    if (newInputs.lineOfTherapy) setLineOfTherapy(newInputs.lineOfTherapy);
-    if (newInputs.combinationPotential) setCombinationPotential(newInputs.combinationPotential);
-    if (newInputs.competitivePosition) setCompetitivePosition(newInputs.competitivePosition);
-    if (newInputs.dataQuality) setDataQuality(newInputs.dataQuality);
-    if (newInputs.regulatoryDesignations) setRegulatoryDesignations(newInputs.regulatoryDesignations);
+      // Update state variables for UI sync
+      if (newInputs.phase) setPhase(newInputs.phase as Phase);
+      if (newInputs.modality) setModality(newInputs.modality as Modality);
+      if (newInputs.indication) setIndication(newInputs.indication as Indication);
+      if (newInputs.territory) setTerritory(newInputs.territory as Territory);
+      if (newInputs.biomarker) setBiomarker(newInputs.biomarker as BiomarkerStatus);
+      if (newInputs.lineOfTherapy) setLineOfTherapy(newInputs.lineOfTherapy as LineOfTherapy);
+      if (newInputs.combinationPotential) setCombinationPotential(newInputs.combinationPotential as CombinationPotential);
+      if (newInputs.competitivePosition) setCompetitivePosition(newInputs.competitivePosition as CompetitivePosition);
+      if (newInputs.dataQuality) setDataQuality(newInputs.dataQuality as DataQuality);
+      if (newInputs.regulatoryDesignations) setRegulatoryDesignations(newInputs.regulatoryDesignations);
 
-    // Calculate directly with merged inputs (don't rely on state which is async)
-    const calculatedResult = calculateDealTerms(mergedInputs);
-    setResult(calculatedResult);
+      // Calculate directly with merged inputs (don't rely on state which is async)
+      const calculatedResult = calculateDealTerms(mergedInputs);
+      setResult(calculatedResult);
 
-    // Track calculation event
-    calculationCountRef.current += 1;
-    trackCalculation(
-      {
-        modality: mergedInputs.modality,
-        development_phase: mergedInputs.phase,
-        indication_category: mergedInputs.indication.split('_')[0],
-        indication_specific: mergedInputs.indication,
-        territory_scope: mergedInputs.territory,
-      },
-      {
-        upfront_low: calculatedResult.terms.upfront.low,
-        upfront_mid: calculatedResult.terms.upfront.median,
-        upfront_high: calculatedResult.terms.upfront.high,
-        milestones_total: calculatedResult.terms.devMilestones.median +
-          calculatedResult.terms.regMilestones.median +
-          calculatedResult.terms.commMilestones.median,
-        royalty_low: calculatedResult.tieredRoyalties.base.low,
-        royalty_high: calculatedResult.tieredRoyalties.highTier.high,
-        total_deal_value_low: calculatedResult.terms.totalDealValue.low,
-        total_deal_value_high: calculatedResult.terms.totalDealValue.high,
-      },
-      calculationCountRef.current
-    );
+      // Track calculation event (non-blocking)
+      try {
+        calculationCountRef.current += 1;
+        trackCalculation(
+          {
+            modality: mergedInputs.modality,
+            development_phase: mergedInputs.phase,
+            indication_category: mergedInputs.indication?.split('_')[0] || '',
+            indication_specific: mergedInputs.indication || '',
+            territory_scope: mergedInputs.territory,
+          },
+          {
+            upfront_low: calculatedResult.terms.upfront.low,
+            upfront_mid: calculatedResult.terms.upfront.median,
+            upfront_high: calculatedResult.terms.upfront.high,
+            milestones_total: calculatedResult.terms.devMilestones.median +
+              calculatedResult.terms.regMilestones.median +
+              calculatedResult.terms.commMilestones.median,
+            royalty_low: calculatedResult.tieredRoyalties.base.low,
+            royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+            total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+            total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+          },
+          calculationCountRef.current
+        );
+      } catch (trackError) {
+        console.error('Error tracking sensitivity calculation:', trackError);
+      }
+    } catch (error) {
+      console.error('Error applying sensitivity changes:', error);
+    }
   };
 
   const handleRegulatoryChange = (designation: keyof RegulatoryDesignations) => {
