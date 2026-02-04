@@ -46,22 +46,34 @@ export default function SensitivityAnalysis({
 
   // Get current selection for a parameter (pending or original)
   const getSelectedValue = (paramKey: keyof CalculationInput): string => {
-    if (paramKey in pendingChanges) {
-      return String(pendingChanges[paramKey]);
+    try {
+      if (paramKey in pendingChanges) {
+        const pendingValue = pendingChanges[paramKey];
+        return pendingValue !== undefined && pendingValue !== null ? String(pendingValue) : '';
+      }
+      const currentValue = currentInputs[paramKey];
+      return currentValue !== undefined && currentValue !== null ? String(currentValue) : '';
+    } catch {
+      return '';
     }
-    return String(currentInputs[paramKey]);
   };
 
   // Handle option selection
   const handleSelect = (paramKey: keyof CalculationInput, value: string) => {
-    const currentValue = String(currentInputs[paramKey]);
-    if (value === currentValue) {
-      // Remove from pending if selecting current value
-      const newPending = { ...pendingChanges };
-      delete newPending[paramKey];
-      setPendingChanges(newPending);
-    } else {
-      setPendingChanges(prev => ({ ...prev, [paramKey]: value }));
+    try {
+      const currentValue = currentInputs[paramKey];
+      const currentValueStr = currentValue !== undefined && currentValue !== null ? String(currentValue) : '';
+
+      if (value === currentValueStr) {
+        // Remove from pending if selecting current value
+        const newPending = { ...pendingChanges };
+        delete newPending[paramKey];
+        setPendingChanges(newPending);
+      } else {
+        setPendingChanges(prev => ({ ...prev, [paramKey]: value }));
+      }
+    } catch (error) {
+      console.error('Error in handleSelect:', error);
     }
   };
 
@@ -171,14 +183,18 @@ export default function SensitivityAnalysis({
 
                 {/* Parameter Selectors */}
                 <div className="space-y-4">
-                  {topParameters.map((param) => (
-                    <ParameterSelector
-                      key={param.parameterKey}
-                      sensitivity={param}
-                      selectedValue={getSelectedValue(param.parameterKey)}
-                      onSelect={(value) => handleSelect(param.parameterKey, value)}
-                    />
-                  ))}
+                  {topParameters.map((param) => {
+                    if (!param || !param.parameterKey) return null;
+                    const selectedValue = getSelectedValue(param.parameterKey);
+                    return (
+                      <ParameterSelector
+                        key={param.parameterKey}
+                        sensitivity={param}
+                        selectedValue={selectedValue}
+                        onSelect={(value) => handleSelect(param.parameterKey, value)}
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Action Buttons */}

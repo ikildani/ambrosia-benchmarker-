@@ -39,15 +39,18 @@ export default function ParameterSelector({
 
       {/* Options */}
       <div className="p-2">
-        {visibleOptions.map((option) => (
-          <OptionRow
-            key={option.value}
-            option={option}
-            isSelected={option.value === selectedValue}
-            isCurrent={option.value === currentValue}
-            onSelect={() => onSelect(option.value)}
-          />
-        ))}
+        {visibleOptions.map((option) => {
+          if (!option || option.value === undefined) return null;
+          return (
+            <OptionRow
+              key={option.value}
+              option={option}
+              isSelected={String(option.value) === String(selectedValue)}
+              isCurrent={String(option.value) === String(currentValue)}
+              onSelect={() => onSelect(option.value)}
+            />
+          );
+        })}
 
         {/* Show more button */}
         {hasMoreOptions && !isExpanded && (
