@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 
+// Force dynamic rendering since we use request.headers
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get auth token from header
