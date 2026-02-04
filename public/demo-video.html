@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Ambrosia Ventures - Demo Video</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background: #020617;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        .video-container {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Scene Base */
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            background: #020617;
+        }
+
+        .scene.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Caption Styling */
+        .caption {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .caption.visible {
+            animation: captionIn 0.5s ease-out forwards;
+        }
+
+        .caption.hiding {
+            animation: captionOut 0.3s ease-in forwards;
+        }
+
+        @keyframes captionIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes captionOut {
+            from { opacity: 1; transform: translateX(-50%) translateY(0); }
+            to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+
+        .caption-text {
+            font-size: 48px;
+            font-weight: 600;
+            color: #FFFFFF;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5);
+            line-height: 1.3;
+            max-width: 1400px;
+        }
+
+        .caption-text .highlight {
+            color: #2DD4BF;
+        }
+
+        .caption-text .subtle {
+            font-weight: 400;
+            color: #94A3B8;
+            font-size: 40px;
+        }
+
+        /* Scene 1: Cold Open */
+        .scene-1 {
+            background: #000;
+        }
+
+        .typewriter {
+            font-size: 64px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Inter', monospace;
+        }
+
+        .typewriter .cursor {
+            display: inline-block;
+            width: 4px;
+            height: 70px;
+            background: #2DD4BF;
+            margin-left: 8px;
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Scene 2: Problem */
+        .scene-2 {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        }
+
+        .chaos-numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .chaos-number {
+            position: absolute;
+            font-size: 24px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.1);
+            font-family: 'Inter', monospace;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            from { transform: translateY(100vh) rotate(0deg); }
+            to { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .problem-text {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .problem-text h2 {
+            font-size: 42px;
+            font-weight: 600;
+            color: #2DD4BF;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+
+        .problem-text h2.visible {
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+
+        .problem-text p {
+            font-size: 56px;
+            font-weight: 700;
+            color: #fff;
+            opacity: 0;
+        }
+
+        .problem-text p.visible {
+            animation: fadeUp 0.6s ease-out 0.3s forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scene 3: Logo Reveal */
+        .scene-3 {
+            background: radial-gradient(ellipse at center, #0F172A 0%, #020617 100%);
+        }
+
+        .logo-reveal {
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .logo-reveal.visible {
+            animation: logoReveal 1.2s ease-out forwards;
+        }
+
+        @keyframes logoReveal {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .logo-reveal img {
+            height: 100px;
+            margin-bottom: 30px;
+            filter: brightness(1.3);
+        }
+
+        .logo-reveal h1 {
+            font-size: 52px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .logo-reveal .tagline {
+            font-size: 28px;
+            color: #64748B;
+            font-weight: 400;
+        }
+
+        /* Scene 4+: Product Demo */
+        .scene-demo {
+            background: #0F172A;
+            padding: 60px;
+        }
+
+        .browser-frame {
+            width: 1600px;
+            height: 900px;
+            background: #1E293B;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .browser-header {
+            height: 50px;
+            background: #0F172A;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 8px;
+        }
+
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red { background: #EF4444; }
+        .browser-dot.yellow { background: #F59E0B; }
+        .browser-dot.green { background: #22C55E; }
+
+        .browser-url {
+            flex: 1;
+            margin-left: 20px;
+            height: 30px;
+            background: #1E293B;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: #64748B;
+            font-size: 14px;
+        }
+
+        .browser-content {
+            height: calc(100% - 50px);
+            background: #0F172A;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Calculator Mock */
+        .calculator-mock {
+            padding: 40px;
+            height: 100%;
+            display: flex;
+            gap: 40px;
+        }
+
+        .calc-left {
+            flex: 1;
+        }
+
+        .calc-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .calc-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .calc-field {
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .calc-field.visible {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .calc-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .calc-select {
+            width: 100%;
+            padding: 16px 20px;
+            background: #1E293B;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .calc-select.highlighted {
+            border-color: #14B8A6;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+        }
+
+        .calc-select.filled {
+            background: rgba(20, 184, 166, 0.1);
+            border-color: #14B8A6;
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.3s;
+        }
+
+        .calc-btn.visible {
+            animation: btnReveal 0.5s ease-out forwards;
+        }
+
+        .calc-btn.pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes btnReveal {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(20, 184, 166, 0); }
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .results-panel.visible {
+            animation: resultsIn 0.6s ease-out forwards;
+        }
+
+        @keyframes resultsIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #64748B;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            padding-top: 20px;
+            margin-top: 10px;
+            border-top: 2px solid #14B8A6;
+        }
+
+        .result-label {
+            font-size: 16px;
+            color: #94A3B8;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .result-row:last-child .result-value {
+            font-size: 32px;
+            color: #2DD4BF;
+        }
+
+        .result-value .counting {
+            display: inline-block;
+        }
+
+        /* Sensitivity Panel */
+        .sensitivity-panel {
+            background: #1E293B;
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+            opacity: 0;
+        }
+
+        .sensitivity-panel.visible {
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+
+        .sensitivity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sensitivity-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .impact-badge {
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #F87171;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .sensitivity-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sensitivity-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #0F172A;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sensitivity-option.selected {
+            border-color: #14B8A6;
+            background: rgba(20, 184, 166, 0.1);
+        }
+
+        .sensitivity-option.highlight {
+            animation: optionPulse 0.5s ease-out;
+        }
+
+        @keyframes optionPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(20, 184, 166, 0.5); }
+            100% { transform: scale(1); }
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-radio.checked {
+            border-color: #14B8A6;
+        }
+
+        .option-radio.checked::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #14B8A6;
+            border-radius: 50%;
+        }
+
+        .option-label {
+            flex: 1;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .option-value {
+            text-align: right;
+        }
+
+        .option-amount {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .option-delta {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .option-delta.positive {
+            color: #22C55E;
+        }
+
+        .option-delta.negative {
+            color: #F59E0B;
+        }
+
+        .option-delta.neutral {
+            color: #64748B;
+        }
+
+        /* Value Change Animation */
+        .value-change {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .value-change.visible {
+            animation: valueChangeAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes valueChangeAnim {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .value-change-text {
+            font-size: 120px;
+            font-weight: 800;
+            color: #22C55E;
+            text-shadow: 0 0 60px rgba(34, 197, 94, 0.5);
+        }
+
+        /* Scene: Stats */
+        .scene-stats {
+            background: radial-gradient(ellipse at center, #0F172A 0%, #020617 100%);
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 60px;
+        }
+
+        .stat-card {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .stat-card.visible {
+            animation: statIn 0.6s ease-out forwards;
+        }
+
+        @keyframes statIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-value {
+            font-size: 80px;
+            font-weight: 800;
+            color: #2DD4BF;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 20px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        /* Scene: Final CTA */
+        .scene-cta {
+            background: radial-gradient(ellipse at 50% 100%, rgba(20, 184, 166, 0.15) 0%, #020617 60%);
+        }
+
+        .cta-content {
+            text-align: center;
+        }
+
+        .cta-content h1 {
+            font-size: 72px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+
+        .cta-content h1.visible {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+
+        .cta-content h2 {
+            font-size: 48px;
+            font-weight: 600;
+            color: #94A3B8;
+            margin-bottom: 60px;
+            opacity: 0;
+        }
+
+        .cta-content h2.visible {
+            animation: fadeUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 24px 48px;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .cta-button.visible {
+            animation: fadeUp 0.6s ease-out 0.6s forwards;
+        }
+
+        .cta-url {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #64748B;
+            opacity: 0;
+        }
+
+        .cta-url.visible {
+            animation: fadeUp 0.5s ease-out 0.9s forwards;
+        }
+
+        /* End Card */
+        .scene-end {
+            background: #020617;
+        }
+
+        .end-content {
+            text-align: center;
+            opacity: 0;
+        }
+
+        .end-content.visible {
+            animation: fadeUp 1s ease-out forwards;
+        }
+
+        .end-content img {
+            height: 80px;
+            margin-bottom: 30px;
+            filter: brightness(1.2);
+        }
+
+        .end-content .tagline {
+            font-size: 24px;
+            color: #475569;
+        }
+
+        /* Cursor */
+        .fake-cursor {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease-out;
+        }
+
+        .fake-cursor.visible {
+            opacity: 1;
+        }
+
+        .fake-cursor.clicking {
+            transform: scale(0.8);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #14B8A6, #06B6D4);
+            width: 0%;
+            z-index: 10000;
+        }
+
+        /* Play Button Overlay */
+        .play-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            cursor: pointer;
+        }
+
+        .play-overlay.hidden {
+            display: none;
+        }
+
+        .play-button {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 60px rgba(20, 184, 166, 0.5);
+        }
+
+        .play-button svg {
+            width: 50px;
+            height: 50px;
+            fill: #fff;
+            margin-left: 8px;
+        }
+
+        .play-text {
+            font-size: 24px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .play-hint {
+            font-size: 16px;
+            color: #64748B;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container" id="video">
+        <!-- Play Overlay -->
+        <div class="play-overlay" id="playOverlay">
+            <div class="play-button">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="play-text">Click to Play Demo</div>
+            <div class="play-hint">75 seconds · No audio · Full screen recommended</div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar" id="progress"></div>
+
+        <!-- Fake Cursor -->
+        <div class="fake-cursor" id="cursor"></div>
+
+        <!-- Scene 1: Cold Open -->
+        <div class="scene scene-1" id="scene1">
+            <div class="typewriter" id="typewriter">
+                <span id="typeText"></span><span class="cursor"></span>
+            </div>
+        </div>
+
+        <!-- Scene 2: Problem -->
+        <div class="scene scene-2" id="scene2">
+            <div class="chaos-numbers" id="chaosNumbers"></div>
+            <div class="problem-text">
+                <h2 id="problemLine1">Phase 2 ADC. Oncology. Global rights.</h2>
+                <p id="problemLine2">What should you ask for?</p>
+            </div>
+        </div>
+
+        <!-- Scene 3: Logo Reveal -->
+        <div class="scene scene-3" id="scene3">
+            <div class="logo-reveal" id="logoReveal">
+                <img src="/logo.png" alt="Ambrosia Ventures">
+                <h1>Life Sciences Deal Calculator</h1>
+                <div class="tagline">Data-driven deal intelligence</div>
+            </div>
+        </div>
+
+        <!-- Scene 4: Calculator Demo -->
+        <div class="scene scene-demo" id="scene4">
+            <div class="browser-frame">
+                <div class="browser-header">
+                    <div class="browser-dot red"></div>
+                    <div class="browser-dot yellow"></div>
+                    <div class="browser-dot green"></div>
+                    <div class="browser-url">ambrosia-benchmarker.vercel.app/calculator</div>
+                </div>
+                <div class="browser-content">
+                    <div class="calculator-mock">
+                        <div class="calc-left">
+                            <div class="calc-title">Deal Calculator</div>
+
+                            <div class="calc-field" id="field1">
+                                <div class="calc-label">Development Phase</div>
+                                <div class="calc-select" id="select1">Select phase...</div>
+                            </div>
+
+                            <div class="calc-field" id="field2">
+                                <div class="calc-label">Modality</div>
+                                <div class="calc-select" id="select2">Select modality...</div>
+                            </div>
+
+                            <div class="calc-field" id="field3">
+                                <div class="calc-label">Indication</div>
+                                <div class="calc-select" id="select3">Select indication...</div>
+                            </div>
+
+                            <div class="calc-field" id="field4">
+                                <div class="calc-label">Territory</div>
+                                <div class="calc-select" id="select4">Select territory...</div>
+                            </div>
+
+                            <button class="calc-btn" id="calcBtn">Calculate Deal Value</button>
+                        </div>
+
+                        <div class="calc-right">
+                            <div class="results-panel" id="resultsPanel">
+                                <div class="results-title">Estimated Deal Terms</div>
+                                <div class="result-row">
+                                    <span class="result-label">Upfront Payment</span>
+                                    <span class="result-value" id="upfrontValue">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Development Milestones</span>
+                                    <span class="result-value" id="devMilestones">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Commercial Milestones</span>
+                                    <span class="result-value" id="commMilestones">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Royalty Rate</span>
+                                    <span class="result-value" id="royaltyRate">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Total Deal Value</span>
+                                    <span class="result-value" id="totalValue">-</span>
+                                </div>
+                            </div>
+
+                            <div class="sensitivity-panel" id="sensitivityPanel">
+                                <div class="sensitivity-header">
+                                    <div class="sensitivity-title">Sensitivity Analysis</div>
+                                    <div class="impact-badge">HIGH IMPACT</div>
+                                </div>
+                                <div class="sensitivity-options">
+                                    <div class="sensitivity-option" id="opt1">
+                                        <div class="option-radio"></div>
+                                        <div class="option-label">Phase 1</div>
+                                        <div class="option-value">
+                                            <div class="option-amount">$420M</div>
+                                            <div class="option-delta negative">-$780M</div>
+                                        </div>
+                                    </div>
+                                    <div class="sensitivity-option selected" id="opt2">
+                                        <div class="option-radio checked"></div>
+                                        <div class="option-label">Phase 2</div>
+                                        <div class="option-value">
+                                            <div class="option-amount">$1.2B</div>
+                                            <div class="option-delta neutral">Current</div>
+                                        </div>
+                                    </div>
+                                    <div class="sensitivity-option" id="opt3">
+                                        <div class="option-radio"></div>
+                                        <div class="option-label">Phase 3</div>
+                                        <div class="option-value">
+                                            <div class="option-amount">$2.8B</div>
+                                            <div class="option-delta positive">+$1.6B</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value Change Popup -->
+            <div class="value-change" id="valueChange">
+                <div class="value-change-text">+$1.6B</div>
+            </div>
+        </div>
+
+        <!-- Scene 5: Stats -->
+        <div class="scene scene-stats" id="scene5">
+            <div class="stats-grid">
+                <div class="stat-card" id="stat1">
+                    <div class="stat-value">$150B+</div>
+                    <div class="stat-label">Deal Value Analyzed</div>
+                </div>
+                <div class="stat-card" id="stat2">
+                    <div class="stat-value">500+</div>
+                    <div class="stat-label">Transactions Indexed</div>
+                </div>
+                <div class="stat-card" id="stat3">
+                    <div class="stat-value">Weekly</div>
+                    <div class="stat-label">Data Updates</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 6: CTA -->
+        <div class="scene scene-cta" id="scene6">
+            <div class="cta-content">
+                <h1 id="ctaLine1">Stop guessing.</h1>
+                <h2 id="ctaLine2">Start negotiating with data.</h2>
+                <div class="cta-button" id="ctaBtn">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Try Free Today
+                </div>
+                <div class="cta-url" id="ctaUrl">No credit card required</div>
+            </div>
+        </div>
+
+        <!-- Scene 7: End Card -->
+        <div class="scene scene-end" id="scene7">
+            <div class="end-content" id="endContent">
+                <img src="/logo.png" alt="Ambrosia Ventures">
+                <div class="tagline">Deal Intelligence for Life Sciences</div>
+            </div>
+        </div>
+
+        <!-- Caption Container -->
+        <div class="caption" id="caption">
+            <div class="caption-text" id="captionText"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const playOverlay = document.getElementById('playOverlay');
+        const progress = document.getElementById('progress');
+        const cursor = document.getElementById('cursor');
+        const caption = document.getElementById('caption');
+        const captionText = document.getElementById('captionText');
+
+        let isPlaying = false;
+        let startTime = 0;
+        const TOTAL_DURATION = 75000; // 75 seconds
+
+        // Generate chaos numbers for scene 2
+        const chaosNumbers = document.getElementById('chaosNumbers');
+        const dealTerms = ['$50M', '$100M', '$250M', '$500M', '$1B', '$2B', '8%', '12%', '15%', '20%'];
+        for (let i = 0; i < 30; i++) {
+            const num = document.createElement('div');
+            num.className = 'chaos-number';
+            num.textContent = dealTerms[Math.floor(Math.random() * dealTerms.length)];
+            num.style.left = Math.random() * 100 + '%';
+            num.style.animationDelay = Math.random() * 10 + 's';
+            num.style.animationDuration = (8 + Math.random() * 6) + 's';
+            chaosNumbers.appendChild(num);
+        }
+
+        // Timeline
+        const timeline = [
+            // Scene 1: Typewriter (0-4s)
+            { time: 0, action: () => showScene('scene1') },
+            { time: 100, action: () => typeText("What's your drug asset worth?", 80) },
+
+            // Scene 2: Problem (4-8s)
+            { time: 4000, action: () => showScene('scene2') },
+            { time: 4200, action: () => document.getElementById('problemLine1').classList.add('visible') },
+            { time: 4800, action: () => document.getElementById('problemLine2').classList.add('visible') },
+
+            // Scene 3: Logo Reveal (8-12s)
+            { time: 8000, action: () => showScene('scene3') },
+            { time: 8200, action: () => document.getElementById('logoReveal').classList.add('visible') },
+            { time: 9000, action: () => showCaption('Life Sciences Deal Calculator') },
+            { time: 11500, action: () => hideCaption() },
+
+            // Scene 4: Calculator Demo (12-55s)
+            { time: 12000, action: () => showScene('scene4') },
+            { time: 12500, action: () => showCaption('Benchmark any deal in 60 seconds') },
+
+            // Show fields one by one
+            { time: 13000, action: () => {
+                document.getElementById('field1').classList.add('visible');
+                showCursor(400, 280);
+            }},
+            { time: 14000, action: () => {
+                document.getElementById('field2').classList.add('visible');
+            }},
+            { time: 14500, action: () => {
+                document.getElementById('field3').classList.add('visible');
+            }},
+            { time: 15000, action: () => {
+                document.getElementById('field4').classList.add('visible');
+                hideCaption();
+            }},
+
+            // Fill in fields
+            { time: 16000, action: () => {
+                showCaption('Customize every variable');
+                moveCursor(400, 280);
+            }},
+            { time: 16500, action: () => clickAndFill('select1', 'Phase 2') },
+            { time: 18000, action: () => moveCursor(400, 370) },
+            { time: 18500, action: () => clickAndFill('select2', 'ADC (Antibody-Drug Conjugate)') },
+            { time: 20000, action: () => moveCursor(400, 460) },
+            { time: 20500, action: () => clickAndFill('select3', 'Breast Cancer (HER2+)') },
+            { time: 22000, action: () => moveCursor(400, 550) },
+            { time: 22500, action: () => clickAndFill('select4', 'Global (Worldwide)') },
+
+            // Calculate button
+            { time: 24000, action: () => {
+                hideCaption();
+                document.getElementById('calcBtn').classList.add('visible');
+            }},
+            { time: 24500, action: () => {
+                document.getElementById('calcBtn').classList.add('pulse');
+                moveCursor(400, 650);
+            }},
+            { time: 25500, action: () => showCaption('One click.') },
+            { time: 26500, action: () => {
+                cursorClick();
+                document.getElementById('calcBtn').classList.remove('pulse');
+            }},
+
+            // Show results
+            { time: 27500, action: () => {
+                hideCaption();
+                hideCursor();
+                document.getElementById('resultsPanel').classList.add('visible');
+            }},
+            { time: 28000, action: () => showCaption('Instant benchmarks') },
+            { time: 28500, action: () => countUp('upfrontValue', '$85M - $140M') },
+            { time: 29000, action: () => countUp('devMilestones', '$250M - $400M') },
+            { time: 29500, action: () => countUp('commMilestones', '$200M - $350M') },
+            { time: 30000, action: () => countUp('royaltyRate', '8% - 15%') },
+            { time: 30500, action: () => countUp('totalValue', '$1.2B - $2.1B') },
+
+            { time: 32000, action: () => {
+                hideCaption();
+                showCaption('Powered by 500+ real deals');
+            }},
+
+            // Sensitivity Analysis
+            { time: 36000, action: () => {
+                hideCaption();
+                document.getElementById('sensitivityPanel').classList.add('visible');
+                showCaption('See what moves the needle');
+            }},
+
+            // Click Phase 3
+            { time: 40000, action: () => {
+                hideCaption();
+                showCursor(1350, 620);
+            }},
+            { time: 41000, action: () => {
+                cursorClick();
+                document.getElementById('opt2').classList.remove('selected');
+                document.getElementById('opt2').querySelector('.option-radio').classList.remove('checked');
+                document.getElementById('opt3').classList.add('selected', 'highlight');
+                document.getElementById('opt3').querySelector('.option-radio').classList.add('checked');
+            }},
+            { time: 41500, action: () => {
+                document.getElementById('totalValue').textContent = '$2.8B - $4.2B';
+                document.getElementById('totalValue').style.color = '#22C55E';
+                document.getElementById('valueChange').classList.add('visible');
+                showCaption('<span class="highlight">Phase change: +$1.6 billion</span>');
+            }},
+            { time: 44000, action: () => {
+                document.getElementById('valueChange').classList.remove('visible');
+                hideCursor();
+            }},
+
+            { time: 46000, action: () => {
+                hideCaption();
+                showCaption('Explore unlimited scenarios');
+            }},
+
+            // Scene 5: Stats (50-58s)
+            { time: 50000, action: () => {
+                hideCaption();
+                showScene('scene5');
+            }},
+            { time: 50500, action: () => document.getElementById('stat1').classList.add('visible') },
+            { time: 51200, action: () => document.getElementById('stat2').classList.add('visible') },
+            { time: 51900, action: () => document.getElementById('stat3').classList.add('visible') },
+
+            // Scene 6: CTA (58-70s)
+            { time: 58000, action: () => showScene('scene6') },
+            { time: 58500, action: () => document.getElementById('ctaLine1').classList.add('visible') },
+            { time: 60500, action: () => document.getElementById('ctaLine2').classList.add('visible') },
+            { time: 63000, action: () => document.getElementById('ctaBtn').classList.add('visible') },
+            { time: 64500, action: () => document.getElementById('ctaUrl').classList.add('visible') },
+
+            // Scene 7: End Card (70-75s)
+            { time: 70000, action: () => showScene('scene7') },
+            { time: 70500, action: () => document.getElementById('endContent').classList.add('visible') },
+
+            // End
+            { time: 75000, action: () => {
+                // Video complete
+            }}
+        ];
+
+        let timelineIndex = 0;
+
+        function showScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(sceneId).classList.add('active');
+        }
+
+        function showCaption(text) {
+            captionText.innerHTML = text;
+            caption.classList.remove('hiding');
+            caption.classList.add('visible');
+        }
+
+        function hideCaption() {
+            caption.classList.add('hiding');
+            caption.classList.remove('visible');
+        }
+
+        function typeText(text, speed) {
+            const typeEl = document.getElementById('typeText');
+            let i = 0;
+            typeEl.textContent = '';
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    typeEl.textContent += text[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, speed);
+        }
+
+        function showCursor(x, y) {
+            cursor.style.left = x + 'px';
+            cursor.style.top = y + 'px';
+            cursor.classList.add('visible');
+        }
+
+        function hideCursor() {
+            cursor.classList.remove('visible');
+        }
+
+        function moveCursor(x, y) {
+            cursor.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
+            cursor.style.left = x + 'px';
+            cursor.style.top = y + 'px';
+        }
+
+        function cursorClick() {
+            cursor.classList.add('clicking');
+            setTimeout(() => cursor.classList.remove('clicking'), 150);
+        }
+
+        function clickAndFill(selectId, value) {
+            const select = document.getElementById(selectId);
+            cursorClick();
+            setTimeout(() => {
+                select.textContent = value;
+                select.classList.add('filled');
+            }, 150);
+        }
+
+        function countUp(elementId, finalText) {
+            const el = document.getElementById(elementId);
+            el.textContent = finalText;
+            el.style.animation = 'fadeUp 0.3s ease-out';
+        }
+
+        function updateProgress() {
+            if (!isPlaying) return;
+            const elapsed = Date.now() - startTime;
+            const percent = Math.min((elapsed / TOTAL_DURATION) * 100, 100);
+            progress.style.width = percent + '%';
+
+            // Process timeline events
+            while (timelineIndex < timeline.length && elapsed >= timeline[timelineIndex].time) {
+                timeline[timelineIndex].action();
+                timelineIndex++;
+            }
+
+            if (elapsed < TOTAL_DURATION) {
+                requestAnimationFrame(updateProgress);
+            }
+        }
+
+        function startVideo() {
+            playOverlay.classList.add('hidden');
+            isPlaying = true;
+            startTime = Date.now();
+            timelineIndex = 0;
+            updateProgress();
+        }
+
+        // Click to start
+        playOverlay.addEventListener('click', startVideo);
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isPlaying) {
+                startVideo();
+            }
+        });
+    </script>
+</body>
+</html>
