@@ -27,6 +27,75 @@
             overflow: hidden;
         }
 
+        /* Animated Background */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #020617 0%, #0F172A 50%, #020617 100%);
+            z-index: 0;
+        }
+
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(20, 184, 166, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            animation: bgPulse 20s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(2%, 2%) rotate(1deg); }
+            50% { transform: translate(0, 4%) rotate(0deg); }
+            75% { transform: translate(-2%, 2%) rotate(-1deg); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(20, 184, 166, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .particle:nth-child(2) { left: 10%; animation-delay: -2s; animation-duration: 18s; }
+        .particle:nth-child(3) { left: 20%; animation-delay: -4s; animation-duration: 12s; }
+        .particle:nth-child(4) { left: 30%; animation-delay: -6s; animation-duration: 20s; }
+        .particle:nth-child(5) { left: 40%; animation-delay: -8s; animation-duration: 14s; }
+        .particle:nth-child(6) { left: 50%; animation-delay: -10s; animation-duration: 16s; }
+        .particle:nth-child(7) { left: 60%; animation-delay: -12s; animation-duration: 22s; }
+        .particle:nth-child(8) { left: 70%; animation-delay: -14s; animation-duration: 13s; }
+        .particle:nth-child(9) { left: 80%; animation-delay: -16s; animation-duration: 17s; }
+        .particle:nth-child(10) { left: 90%; animation-delay: -18s; animation-duration: 19s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(1100px) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+
         /* Scene Base */
         .scene {
             position: absolute;
@@ -39,7 +108,8 @@
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            background: #020617;
+            z-index: 10;
+            transition: opacity 0.8s ease-in-out;
         }
 
         .scene.active {
@@ -47,727 +117,44 @@
             pointer-events: auto;
         }
 
-        /* Caption Styling */
-        .caption {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            opacity: 0;
-            z-index: 100;
-        }
-
-        .caption.visible {
-            animation: captionIn 0.5s ease-out forwards;
-        }
-
-        .caption.hiding {
-            animation: captionOut 0.3s ease-in forwards;
-        }
-
-        @keyframes captionIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        @keyframes captionOut {
-            from { opacity: 1; transform: translateX(-50%) translateY(0); }
-            to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        }
-
-        .caption-text {
-            font-size: 48px;
-            font-weight: 600;
-            color: #FFFFFF;
-            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5);
-            line-height: 1.3;
-            max-width: 1400px;
-        }
-
-        .caption-text .highlight {
-            color: #2DD4BF;
-        }
-
-        .caption-text .subtle {
-            font-weight: 400;
-            color: #94A3B8;
-            font-size: 40px;
-        }
-
-        /* Scene 1: Cold Open */
-        .scene-1 {
-            background: #000;
-        }
-
-        .typewriter {
-            font-size: 64px;
-            font-weight: 700;
-            color: #fff;
-            font-family: 'Inter', monospace;
-        }
-
-        .typewriter .cursor {
-            display: inline-block;
-            width: 4px;
-            height: 70px;
-            background: #2DD4BF;
-            margin-left: 8px;
-            animation: blink 0.8s infinite;
-            vertical-align: middle;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        /* Scene 2: Problem */
-        .scene-2 {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-        }
-
-        .chaos-numbers {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .chaos-number {
-            position: absolute;
-            font-size: 24px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.1);
-            font-family: 'Inter', monospace;
-            animation: float 10s infinite linear;
-        }
-
-        @keyframes float {
-            from { transform: translateY(100vh) rotate(0deg); }
-            to { transform: translateY(-100vh) rotate(360deg); }
-        }
-
-        .problem-text {
-            text-align: center;
-            z-index: 10;
-        }
-
-        .problem-text h2 {
-            font-size: 42px;
-            font-weight: 600;
-            color: #2DD4BF;
-            margin-bottom: 20px;
-            opacity: 0;
-        }
-
-        .problem-text h2.visible {
-            animation: fadeUp 0.6s ease-out forwards;
-        }
-
-        .problem-text p {
-            font-size: 56px;
-            font-weight: 700;
-            color: #fff;
-            opacity: 0;
-        }
-
-        .problem-text p.visible {
-            animation: fadeUp 0.6s ease-out 0.3s forwards;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Scene 3: Logo Reveal */
-        .scene-3 {
-            background: radial-gradient(ellipse at center, #0F172A 0%, #020617 100%);
-        }
-
-        .logo-reveal {
-            text-align: center;
-            opacity: 0;
-            transform: scale(0.8);
-        }
-
-        .logo-reveal.visible {
-            animation: logoReveal 1.2s ease-out forwards;
-        }
-
-        @keyframes logoReveal {
-            0% { opacity: 0; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .logo-reveal img {
-            height: 100px;
-            margin-bottom: 30px;
-            filter: brightness(1.3);
-        }
-
-        .logo-reveal h1 {
-            font-size: 52px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .logo-reveal .tagline {
-            font-size: 28px;
-            color: #64748B;
-            font-weight: 400;
-        }
-
-        /* Scene 4+: Product Demo */
-        .scene-demo {
-            background: #0F172A;
-            padding: 60px;
-        }
-
-        .browser-frame {
-            width: 1600px;
-            height: 900px;
-            background: #1E293B;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
-        }
-
-        .browser-header {
-            height: 50px;
-            background: #0F172A;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 8px;
-        }
-
-        .browser-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .browser-dot.red { background: #EF4444; }
-        .browser-dot.yellow { background: #F59E0B; }
-        .browser-dot.green { background: #22C55E; }
-
-        .browser-url {
-            flex: 1;
-            margin-left: 20px;
-            height: 30px;
-            background: #1E293B;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            color: #64748B;
-            font-size: 14px;
-        }
-
-        .browser-content {
-            height: calc(100% - 50px);
-            background: #0F172A;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Calculator Mock */
-        .calculator-mock {
-            padding: 40px;
-            height: 100%;
-            display: flex;
-            gap: 40px;
-        }
-
-        .calc-left {
-            flex: 1;
-        }
-
-        .calc-right {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .calc-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-
-        .calc-field {
-            margin-bottom: 24px;
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        .calc-field.visible {
-            animation: slideIn 0.4s ease-out forwards;
-        }
-
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .calc-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #64748B;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-
-        .calc-select {
-            width: 100%;
-            padding: 16px 20px;
-            background: #1E293B;
-            border: 2px solid #334155;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .calc-select.highlighted {
-            border-color: #14B8A6;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
-        }
-
-        .calc-select.filled {
-            background: rgba(20, 184, 166, 0.1);
-            border-color: #14B8A6;
-        }
-
-        .calc-btn {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: all 0.3s;
-        }
-
-        .calc-btn.visible {
-            animation: btnReveal 0.5s ease-out forwards;
-        }
-
-        .calc-btn.pulse {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes btnReveal {
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(20, 184, 166, 0); }
-        }
-
-        /* Results Panel */
-        .results-panel {
-            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 30px;
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        .results-panel.visible {
-            animation: resultsIn 0.6s ease-out forwards;
-        }
-
-        @keyframes resultsIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .results-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #64748B;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #334155;
-        }
-
-        .result-row:last-child {
-            border-bottom: none;
-            padding-top: 20px;
-            margin-top: 10px;
-            border-top: 2px solid #14B8A6;
-        }
-
-        .result-label {
-            font-size: 16px;
-            color: #94A3B8;
-        }
-
-        .result-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .result-row:last-child .result-value {
-            font-size: 32px;
-            color: #2DD4BF;
-        }
-
-        .result-value .counting {
-            display: inline-block;
-        }
-
-        /* Sensitivity Panel */
-        .sensitivity-panel {
-            background: #1E293B;
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: 20px;
-            opacity: 0;
-        }
-
-        .sensitivity-panel.visible {
-            animation: fadeUp 0.5s ease-out forwards;
-        }
-
-        .sensitivity-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .sensitivity-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .impact-badge {
-            padding: 6px 12px;
-            background: rgba(239, 68, 68, 0.2);
-            color: #F87171;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .sensitivity-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sensitivity-option {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #0F172A;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .sensitivity-option.selected {
-            border-color: #14B8A6;
-            background: rgba(20, 184, 166, 0.1);
-        }
-
-        .sensitivity-option.highlight {
-            animation: optionPulse 0.5s ease-out;
-        }
-
-        @keyframes optionPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(20, 184, 166, 0.5); }
-            100% { transform: scale(1); }
-        }
-
-        .option-radio {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid #475569;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .option-radio.checked {
-            border-color: #14B8A6;
-        }
-
-        .option-radio.checked::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background: #14B8A6;
-            border-radius: 50%;
-        }
-
-        .option-label {
-            flex: 1;
-            font-size: 16px;
-            color: #fff;
-        }
-
-        .option-value {
-            text-align: right;
-        }
-
-        .option-amount {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .option-delta {
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .option-delta.positive {
-            color: #22C55E;
-        }
-
-        .option-delta.negative {
-            color: #F59E0B;
-        }
-
-        .option-delta.neutral {
-            color: #64748B;
-        }
-
-        /* Value Change Animation */
-        .value-change {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .value-change.visible {
-            animation: valueChangeAnim 1.5s ease-out forwards;
-        }
-
-        @keyframes valueChangeAnim {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .value-change-text {
-            font-size: 120px;
-            font-weight: 800;
-            color: #22C55E;
-            text-shadow: 0 0 60px rgba(34, 197, 94, 0.5);
-        }
-
-        /* Scene: Stats */
-        .scene-stats {
-            background: radial-gradient(ellipse at center, #0F172A 0%, #020617 100%);
-        }
-
-        .stats-grid {
-            display: flex;
-            gap: 60px;
-        }
-
-        .stat-card {
-            text-align: center;
-            opacity: 0;
-            transform: translateY(40px);
-        }
-
-        .stat-card.visible {
-            animation: statIn 0.6s ease-out forwards;
-        }
-
-        @keyframes statIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .stat-value {
-            font-size: 80px;
-            font-weight: 800;
-            color: #2DD4BF;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 20px;
-            color: #64748B;
-            font-weight: 500;
-        }
-
-        /* Scene: Final CTA */
-        .scene-cta {
-            background: radial-gradient(ellipse at 50% 100%, rgba(20, 184, 166, 0.15) 0%, #020617 60%);
-        }
-
-        .cta-content {
-            text-align: center;
-        }
-
-        .cta-content h1 {
-            font-size: 72px;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 20px;
-            opacity: 0;
-        }
-
-        .cta-content h1.visible {
-            animation: fadeUp 0.8s ease-out forwards;
-        }
-
-        .cta-content h2 {
-            font-size: 48px;
-            font-weight: 600;
-            color: #94A3B8;
-            margin-bottom: 60px;
-            opacity: 0;
-        }
-
-        .cta-content h2.visible {
-            animation: fadeUp 0.8s ease-out 0.3s forwards;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            padding: 24px 48px;
-            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
-            border-radius: 16px;
-            color: #fff;
-            font-size: 24px;
-            font-weight: 700;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .cta-button.visible {
-            animation: fadeUp 0.6s ease-out 0.6s forwards;
-        }
-
-        .cta-url {
-            margin-top: 30px;
-            font-size: 20px;
-            color: #64748B;
-            opacity: 0;
-        }
-
-        .cta-url.visible {
-            animation: fadeUp 0.5s ease-out 0.9s forwards;
-        }
-
-        /* End Card */
-        .scene-end {
-            background: #020617;
-        }
-
-        .end-content {
-            text-align: center;
-            opacity: 0;
-        }
-
-        .end-content.visible {
-            animation: fadeUp 1s ease-out forwards;
-        }
-
-        .end-content img {
-            height: 80px;
-            margin-bottom: 30px;
-            filter: brightness(1.2);
-        }
-
-        .end-content .tagline {
-            font-size: 24px;
-            color: #475569;
-        }
-
-        /* Cursor */
-        .fake-cursor {
-            position: fixed;
-            width: 24px;
-            height: 24px;
-            background: #fff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            opacity: 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            transition: transform 0.1s ease-out;
-        }
-
-        .fake-cursor.visible {
-            opacity: 1;
-        }
-
-        .fake-cursor.clicking {
-            transform: scale(0.8);
-        }
-
         /* Progress Bar */
-        .progress-bar {
-            position: fixed;
+        .progress-container {
+            position: absolute;
             bottom: 0;
             left: 0;
+            width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, #14B8A6, #06B6D4);
-            width: 0%;
-            z-index: 10000;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
         }
 
-        /* Play Button Overlay */
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #14B8A6 0%, #06B6D4 50%, #6366F1 100%);
+            transition: width 0.1s linear;
+        }
+
+        /* Play Overlay */
         .play-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(2, 6, 23, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10001;
+            z-index: 2000;
             cursor: pointer;
+            transition: opacity 0.5s;
         }
 
         .play-overlay.hidden {
-            display: none;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .play-button {
@@ -778,397 +165,1194 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 60px rgba(20, 184, 166, 0.5), 0 0 120px rgba(20, 184, 166, 0.3);
+            animation: playPulse 2s infinite;
         }
 
-        .play-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 60px rgba(20, 184, 166, 0.5);
-        }
-
-        .play-button svg {
-            width: 50px;
-            height: 50px;
-            fill: #fff;
+        .play-button::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 35px solid white;
+            border-top: 22px solid transparent;
+            border-bottom: 22px solid transparent;
             margin-left: 8px;
         }
 
+        @keyframes playPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(20, 184, 166, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(20, 184, 166, 0.7); }
+        }
+
         .play-text {
+            margin-top: 30px;
             font-size: 24px;
+            color: #64748B;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+        }
+
+        /* Caption System */
+        .caption {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            z-index: 500;
+            pointer-events: none;
+        }
+
+        .caption.visible {
+            animation: captionIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .caption.hiding {
+            animation: captionOut 0.4s ease-in forwards;
+        }
+
+        @keyframes captionIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes captionOut {
+            from { opacity: 1; transform: translateX(-50%) translateY(0); }
+            to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .caption-text {
+            font-size: 52px;
+            font-weight: 600;
+            color: #FFFFFF;
+            text-shadow: 0 4px 40px rgba(0,0,0,0.9), 0 2px 20px rgba(0,0,0,0.7);
+            line-height: 1.4;
+            max-width: 1600px;
+            letter-spacing: -0.02em;
+        }
+
+        .caption-text .highlight {
+            background: linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .caption-text .subtle {
+            display: block;
+            font-weight: 400;
+            color: #94A3B8;
+            font-size: 36px;
+            margin-top: 15px;
+        }
+
+        /* ===================== */
+        /* SCENE 1: COLD OPEN    */
+        /* ===================== */
+        .scene-1 {
+            background: transparent;
+        }
+
+        .cold-open-content {
+            text-align: center;
+        }
+
+        .big-question {
+            font-size: 84px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .big-question.visible {
+            animation: heroReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes heroReveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .big-question .accent {
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 50%, #6366F1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scenario-text {
+            font-size: 36px;
+            color: #64748B;
+            margin-top: 40px;
+            opacity: 0;
+            font-weight: 400;
+        }
+
+        .scenario-text.visible {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===================== */
+        /* SCENE 2: LOGO REVEAL  */
+        /* ===================== */
+        .scene-2 {
+            background: transparent;
+        }
+
+        .logo-container {
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .logo-container.visible {
+            animation: logoReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes logoReveal {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Logo Card - White background for visibility */
+        .logo-card {
+            display: inline-block;
+            background: #FFFFFF;
+            padding: 50px 80px;
+            border-radius: 24px;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.2),
+                0 25px 80px rgba(0,0,0,0.5),
+                0 0 120px rgba(20, 184, 166, 0.2);
+            margin-bottom: 50px;
+        }
+
+        .logo-card img {
+            height: 80px;
+            display: block;
+        }
+
+        .product-name {
+            font-size: 42px;
+            font-weight: 300;
+            color: #E2E8F0;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-top: 20px;
+            opacity: 0;
+        }
+
+        .product-name.visible {
+            animation: fadeUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .product-tagline {
+            font-size: 28px;
+            color: #64748B;
+            font-weight: 400;
+            margin-top: 20px;
+            opacity: 0;
+        }
+
+        .product-tagline.visible {
+            animation: fadeUp 0.8s ease-out 0.5s forwards;
+        }
+
+        /* ===================== */
+        /* SCENE 3: CALCULATOR   */
+        /* ===================== */
+        .scene-3 {
+            background: transparent;
+            padding: 50px;
+        }
+
+        .browser-window {
+            width: 1700px;
+            height: 920px;
+            background: #0F172A;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.1),
+                0 60px 140px rgba(0,0,0,0.6),
+                0 0 100px rgba(20, 184, 166, 0.1);
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+        }
+
+        .browser-window.visible {
+            animation: browserIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes browserIn {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .browser-chrome {
+            height: 52px;
+            background: linear-gradient(180deg, #1E293B 0%, #172033 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .browser-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red { background: linear-gradient(135deg, #FF6B6B 0%, #EE5A5A 100%); }
+        .browser-dot.yellow { background: linear-gradient(135deg, #FFD93D 0%, #F0C929 100%); }
+        .browser-dot.green { background: linear-gradient(135deg, #6BCB77 0%, #5AB868 100%); }
+
+        .browser-address {
+            flex: 1;
+            margin-left: 80px;
+            height: 32px;
+            background: #0F172A;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 10px;
+        }
+
+        .browser-lock {
+            color: #22C55E;
+            font-size: 12px;
+        }
+
+        .browser-url {
+            color: #64748B;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .browser-url span {
+            color: #94A3B8;
+        }
+
+        .browser-body {
+            height: calc(100% - 52px);
+            background: linear-gradient(180deg, #0F172A 0%, #0B1120 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Calculator Layout */
+        .calc-container {
+            display: flex;
+            height: 100%;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .calc-form {
+            flex: 1;
+            max-width: 700px;
+        }
+
+        .calc-results {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .calc-header {
+            margin-bottom: 35px;
+        }
+
+        .calc-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .calc-header p {
+            font-size: 18px;
+            color: #64748B;
+            margin-top: 8px;
+        }
+
+        /* Form Fields */
+        .form-field {
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        .form-field.visible {
+            animation: fieldIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fieldIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .field-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .field-select {
+            width: 100%;
+            padding: 18px 24px;
+            background: #1E293B;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            color: #64748B;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .field-select.active {
+            border-color: #14B8A6;
+            box-shadow: 0 0 30px rgba(20, 184, 166, 0.25);
+        }
+
+        .field-select.filled {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border-color: #14B8A6;
+            color: #fff;
+        }
+
+        .calc-button {
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            box-shadow: 0 20px 40px rgba(20, 184, 166, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-button.visible {
+            animation: btnIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes btnIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calc-button.clicked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            to { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        /* Results Panel */
+        .results-card {
+            background: linear-gradient(135deg, #1E293B 0%, #172033 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 35px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .results-card.visible {
+            animation: cardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 25px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-name {
+            font-size: 17px;
+            color: #94A3B8;
+        }
+
+        .result-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .result-item.total {
+            margin-top: 15px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(20, 184, 166, 0.5);
+            border-bottom: none;
+        }
+
+        .result-item.total .result-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #E2E8F0;
+        }
+
+        .result-item.total .result-value {
+            font-size: 36px;
+            background: linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Sensitivity Analysis */
+        .sensitivity-card {
+            background: linear-gradient(135deg, #1E293B 0%, #172033 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .sensitivity-card.visible {
+            animation: cardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .sensitivity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sensitivity-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .impact-label {
+            padding: 6px 14px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #F87171;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sensitivity-row {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: #0F172A;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+        }
+
+        .sensitivity-row.selected {
+            border-color: #14B8A6;
+            background: rgba(20, 184, 166, 0.1);
+        }
+
+        .sensitivity-radio {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #475569;
+            border-radius: 50%;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .sensitivity-row.selected .sensitivity-radio {
+            border-color: #14B8A6;
+        }
+
+        .sensitivity-row.selected .sensitivity-radio::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #14B8A6;
+            border-radius: 50%;
+        }
+
+        .sensitivity-label {
+            flex: 1;
+            font-size: 16px;
+            color: #E2E8F0;
+        }
+
+        .sensitivity-impact {
+            font-size: 18px;
+            font-weight: 700;
+            color: #22C55E;
+            opacity: 0;
+        }
+
+        .sensitivity-impact.visible {
+            animation: impactReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes impactReveal {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===================== */
+        /* SCENE 4: BIG IMPACT   */
+        /* ===================== */
+        .scene-4 {
+            background: transparent;
+        }
+
+        .impact-content {
+            text-align: center;
+        }
+
+        .impact-number {
+            font-size: 180px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, #22C55E 0%, #2DD4BF 50%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            transform: scale(0.5);
+            text-shadow: none;
+            filter: drop-shadow(0 0 60px rgba(34, 197, 94, 0.5));
+        }
+
+        .impact-number.visible {
+            animation: impactBoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes impactBoom {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .impact-context {
+            font-size: 36px;
+            color: #94A3B8;
+            margin-top: 20px;
+            opacity: 0;
+        }
+
+        .impact-context.visible {
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+
+        .impact-context span {
             color: #fff;
             font-weight: 600;
         }
 
-        .play-hint {
-            font-size: 16px;
-            color: #64748B;
+        /* ===================== */
+        /* SCENE 5: STATS        */
+        /* ===================== */
+        .scene-5 {
+            background: transparent;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 60px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 50px 70px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .stat-card.visible {
+            animation: statIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .stat-card:nth-child(2).visible { animation-delay: 0.1s; }
+        .stat-card:nth-child(3).visible { animation-delay: 0.2s; }
+
+        @keyframes statIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-number {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 20px;
+            color: #94A3B8;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* ===================== */
+        /* SCENE 6: CTA          */
+        /* ===================== */
+        .scene-6 {
+            background: transparent;
+        }
+
+        .cta-content {
+            text-align: center;
+        }
+
+        .cta-headline {
+            font-size: 72px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .cta-headline.visible {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .cta-subhead {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 50%, #6366F1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
             margin-top: 10px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .cta-subhead.visible {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 60px;
+            padding: 24px 50px;
+            background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            box-shadow: 0 25px 60px rgba(20, 184, 166, 0.4);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .cta-button.visible {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .cta-button svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .cta-note {
+            font-size: 20px;
+            color: #64748B;
+            margin-top: 25px;
+            opacity: 0;
+        }
+
+        .cta-note.visible {
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+
+        /* ===================== */
+        /* SCENE 7: END CARD     */
+        /* ===================== */
+        .scene-7 {
+            background: transparent;
+        }
+
+        .end-content {
+            text-align: center;
+            opacity: 0;
+        }
+
+        .end-content.visible {
+            animation: endReveal 1s ease-out forwards;
+        }
+
+        @keyframes endReveal {
+            to { opacity: 1; }
+        }
+
+        .end-logo-card {
+            display: inline-block;
+            background: #FFFFFF;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            margin-bottom: 40px;
+        }
+
+        .end-logo-card img {
+            height: 60px;
+        }
+
+        .end-url {
+            font-size: 28px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .end-url span {
+            color: #2DD4BF;
+        }
+
+        /* Cursor */
+        .cursor {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .cursor.visible {
+            opacity: 1;
+        }
+
+        .cursor::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(20, 184, 166, 0.5);
+            border-radius: 50%;
+            opacity: 0;
+            animation: cursorRing 1.5s infinite;
+        }
+
+        @keyframes cursorRing {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .cursor.clicking {
+            transform: scale(0.8);
         }
     </style>
 </head>
 <body>
-    <div class="video-container" id="video">
-        <!-- Play Overlay -->
-        <div class="play-overlay" id="playOverlay">
-            <div class="play-button">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-            <div class="play-text">Click to Play Demo</div>
-            <div class="play-hint">75 seconds · No audio · Full screen recommended</div>
+    <div class="video-container">
+        <!-- Animated Background -->
+        <div class="animated-bg"></div>
+
+        <!-- Particles -->
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
         </div>
-
-        <!-- Progress Bar -->
-        <div class="progress-bar" id="progress"></div>
-
-        <!-- Fake Cursor -->
-        <div class="fake-cursor" id="cursor"></div>
 
         <!-- Scene 1: Cold Open -->
-        <div class="scene scene-1" id="scene1">
-            <div class="typewriter" id="typewriter">
-                <span id="typeText"></span><span class="cursor"></span>
+        <div class="scene scene-1 active" id="scene1">
+            <div class="cold-open-content">
+                <div class="big-question" id="bigQuestion">
+                    What's your <span class="accent">drug asset</span> worth?
+                </div>
+                <div class="scenario-text" id="scenarioText">
+                    Phase 2 ADC. Oncology. Global rights. What should you ask for?
+                </div>
             </div>
         </div>
 
-        <!-- Scene 2: Problem -->
+        <!-- Scene 2: Logo Reveal -->
         <div class="scene scene-2" id="scene2">
-            <div class="chaos-numbers" id="chaosNumbers"></div>
-            <div class="problem-text">
-                <h2 id="problemLine1">Phase 2 ADC. Oncology. Global rights.</h2>
-                <p id="problemLine2">What should you ask for?</p>
+            <div class="logo-container" id="logoContainer">
+                <div class="logo-card">
+                    <img src="/logo.png" alt="Ambrosia Ventures">
+                </div>
+                <div class="product-name" id="productName">DEAL CALCULATOR</div>
+                <div class="product-tagline" id="productTagline">Benchmark any deal in 60 seconds</div>
             </div>
         </div>
 
-        <!-- Scene 3: Logo Reveal -->
+        <!-- Scene 3: Calculator Demo -->
         <div class="scene scene-3" id="scene3">
-            <div class="logo-reveal" id="logoReveal">
-                <img src="/logo.png" alt="Ambrosia Ventures">
-                <h1>Life Sciences Deal Calculator</h1>
-                <div class="tagline">Data-driven deal intelligence</div>
-            </div>
-        </div>
-
-        <!-- Scene 4: Calculator Demo -->
-        <div class="scene scene-demo" id="scene4">
-            <div class="browser-frame">
-                <div class="browser-header">
+            <div class="browser-window" id="browserWindow">
+                <div class="browser-chrome">
                     <div class="browser-dot red"></div>
                     <div class="browser-dot yellow"></div>
                     <div class="browser-dot green"></div>
-                    <div class="browser-url">ambrosia-benchmarker.vercel.app/calculator</div>
+                    <div class="browser-address">
+                        <span class="browser-lock">🔒</span>
+                        <span class="browser-url">ambrosia-benchmarker.vercel.app<span>/calculator</span></span>
+                    </div>
                 </div>
-                <div class="browser-content">
-                    <div class="calculator-mock">
-                        <div class="calc-left">
-                            <div class="calc-title">Deal Calculator</div>
-
-                            <div class="calc-field" id="field1">
-                                <div class="calc-label">Development Phase</div>
-                                <div class="calc-select" id="select1">Select phase...</div>
+                <div class="browser-body">
+                    <div class="calc-container">
+                        <div class="calc-form">
+                            <div class="calc-header">
+                                <h1>Deal Calculator</h1>
+                                <p>Enter your asset details for instant benchmarks</p>
                             </div>
 
-                            <div class="calc-field" id="field2">
-                                <div class="calc-label">Modality</div>
-                                <div class="calc-select" id="select2">Select modality...</div>
+                            <div class="form-field" id="field1">
+                                <div class="field-label">Development Phase</div>
+                                <div class="field-select" id="select1">Select phase...</div>
                             </div>
 
-                            <div class="calc-field" id="field3">
-                                <div class="calc-label">Indication</div>
-                                <div class="calc-select" id="select3">Select indication...</div>
+                            <div class="form-field" id="field2">
+                                <div class="field-label">Modality</div>
+                                <div class="field-select" id="select2">Select modality...</div>
                             </div>
 
-                            <div class="calc-field" id="field4">
-                                <div class="calc-label">Territory</div>
-                                <div class="calc-select" id="select4">Select territory...</div>
+                            <div class="form-field" id="field3">
+                                <div class="field-label">Therapeutic Area</div>
+                                <div class="field-select" id="select3">Select indication...</div>
                             </div>
 
-                            <button class="calc-btn" id="calcBtn">Calculate Deal Value</button>
+                            <div class="form-field" id="field4">
+                                <div class="field-label">Territory Rights</div>
+                                <div class="field-select" id="select4">Select territory...</div>
+                            </div>
+
+                            <button class="calc-button" id="calcBtn">Calculate Deal Value</button>
                         </div>
 
-                        <div class="calc-right">
-                            <div class="results-panel" id="resultsPanel">
-                                <div class="results-title">Estimated Deal Terms</div>
-                                <div class="result-row">
-                                    <span class="result-label">Upfront Payment</span>
-                                    <span class="result-value" id="upfrontValue">-</span>
+                        <div class="calc-results">
+                            <div class="results-card" id="resultsCard">
+                                <div class="results-label">Benchmark Results</div>
+                                <div class="result-item">
+                                    <span class="result-name">Upfront Payment</span>
+                                    <span class="result-value" id="upfront">--</span>
                                 </div>
-                                <div class="result-row">
-                                    <span class="result-label">Development Milestones</span>
-                                    <span class="result-value" id="devMilestones">-</span>
+                                <div class="result-item">
+                                    <span class="result-name">Development Milestones</span>
+                                    <span class="result-value" id="milestones">--</span>
                                 </div>
-                                <div class="result-row">
-                                    <span class="result-label">Commercial Milestones</span>
-                                    <span class="result-value" id="commMilestones">-</span>
+                                <div class="result-item">
+                                    <span class="result-name">Sales Milestones</span>
+                                    <span class="result-value" id="salesMilestones">--</span>
                                 </div>
-                                <div class="result-row">
-                                    <span class="result-label">Royalty Rate</span>
-                                    <span class="result-value" id="royaltyRate">-</span>
-                                </div>
-                                <div class="result-row">
-                                    <span class="result-label">Total Deal Value</span>
-                                    <span class="result-value" id="totalValue">-</span>
+                                <div class="result-item total">
+                                    <span class="result-name">Total Deal Value</span>
+                                    <span class="result-value" id="totalValue">--</span>
                                 </div>
                             </div>
 
-                            <div class="sensitivity-panel" id="sensitivityPanel">
+                            <div class="sensitivity-card" id="sensitivityCard">
                                 <div class="sensitivity-header">
-                                    <div class="sensitivity-title">Sensitivity Analysis</div>
-                                    <div class="impact-badge">HIGH IMPACT</div>
+                                    <span class="sensitivity-title">Sensitivity Analysis</span>
+                                    <span class="impact-label">High Impact</span>
                                 </div>
-                                <div class="sensitivity-options">
-                                    <div class="sensitivity-option" id="opt1">
-                                        <div class="option-radio"></div>
-                                        <div class="option-label">Phase 1</div>
-                                        <div class="option-value">
-                                            <div class="option-amount">$420M</div>
-                                            <div class="option-delta negative">-$780M</div>
-                                        </div>
-                                    </div>
-                                    <div class="sensitivity-option selected" id="opt2">
-                                        <div class="option-radio checked"></div>
-                                        <div class="option-label">Phase 2</div>
-                                        <div class="option-value">
-                                            <div class="option-amount">$1.2B</div>
-                                            <div class="option-delta neutral">Current</div>
-                                        </div>
-                                    </div>
-                                    <div class="sensitivity-option" id="opt3">
-                                        <div class="option-radio"></div>
-                                        <div class="option-label">Phase 3</div>
-                                        <div class="option-value">
-                                            <div class="option-amount">$2.8B</div>
-                                            <div class="option-delta positive">+$1.6B</div>
-                                        </div>
-                                    </div>
+                                <div class="sensitivity-row" id="sensRow1">
+                                    <div class="sensitivity-radio"></div>
+                                    <span class="sensitivity-label">Current: Phase 2</span>
+                                    <span class="sensitivity-impact" id="sensImpact1">Base</span>
+                                </div>
+                                <div class="sensitivity-row" id="sensRow2">
+                                    <div class="sensitivity-radio"></div>
+                                    <span class="sensitivity-label">If Phase 3</span>
+                                    <span class="sensitivity-impact" id="sensImpact2">+$1.6B</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Value Change Popup -->
-            <div class="value-change" id="valueChange">
-                <div class="value-change-text">+$1.6B</div>
+        <!-- Scene 4: Big Impact Reveal -->
+        <div class="scene scene-4" id="scene4">
+            <div class="impact-content">
+                <div class="impact-number" id="impactNumber">+$1.6B</div>
+                <div class="impact-context" id="impactContext">
+                    Phase advancement adds <span>$1.6 billion</span> to deal value
+                </div>
             </div>
         </div>
 
         <!-- Scene 5: Stats -->
-        <div class="scene scene-stats" id="scene5">
+        <div class="scene scene-5" id="scene5">
             <div class="stats-grid">
                 <div class="stat-card" id="stat1">
-                    <div class="stat-value">$150B+</div>
-                    <div class="stat-label">Deal Value Analyzed</div>
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Real Transactions</div>
                 </div>
                 <div class="stat-card" id="stat2">
-                    <div class="stat-value">500+</div>
-                    <div class="stat-label">Transactions Indexed</div>
+                    <div class="stat-number">60s</div>
+                    <div class="stat-label">Instant Benchmarks</div>
                 </div>
                 <div class="stat-card" id="stat3">
-                    <div class="stat-value">Weekly</div>
-                    <div class="stat-label">Data Updates</div>
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Data-Driven</div>
                 </div>
             </div>
         </div>
 
         <!-- Scene 6: CTA -->
-        <div class="scene scene-cta" id="scene6">
+        <div class="scene scene-6" id="scene6">
             <div class="cta-content">
-                <h1 id="ctaLine1">Stop guessing.</h1>
-                <h2 id="ctaLine2">Start negotiating with data.</h2>
+                <div class="cta-headline" id="ctaHead1">Stop guessing.</div>
+                <div class="cta-subhead" id="ctaHead2">Start negotiating with data.</div>
                 <div class="cta-button" id="ctaBtn">
-                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
                     Try Free Today
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
                 </div>
-                <div class="cta-url" id="ctaUrl">No credit card required</div>
+                <div class="cta-note" id="ctaNote">No credit card required</div>
             </div>
         </div>
 
         <!-- Scene 7: End Card -->
-        <div class="scene scene-end" id="scene7">
+        <div class="scene scene-7" id="scene7">
             <div class="end-content" id="endContent">
-                <img src="/logo.png" alt="Ambrosia Ventures">
-                <div class="tagline">Deal Intelligence for Life Sciences</div>
+                <div class="end-logo-card">
+                    <img src="/logo.png" alt="Ambrosia Ventures">
+                </div>
+                <div class="end-url">ambrosia-benchmarker.vercel.app</div>
             </div>
         </div>
 
-        <!-- Caption Container -->
+        <!-- Caption -->
         <div class="caption" id="caption">
             <div class="caption-text" id="captionText"></div>
+        </div>
+
+        <!-- Cursor -->
+        <div class="cursor" id="cursor"></div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+
+        <!-- Play Overlay -->
+        <div class="play-overlay" id="playOverlay">
+            <div class="play-button"></div>
+            <div class="play-text">CLICK TO PLAY</div>
         </div>
     </div>
 
     <script>
-        const video = document.getElementById('video');
+        const TOTAL_DURATION = 75000;
+        let startTime = 0;
+        let isPlaying = false;
+
         const playOverlay = document.getElementById('playOverlay');
         const progress = document.getElementById('progress');
-        const cursor = document.getElementById('cursor');
         const caption = document.getElementById('caption');
         const captionText = document.getElementById('captionText');
-
-        let isPlaying = false;
-        let startTime = 0;
-        const TOTAL_DURATION = 75000; // 75 seconds
-
-        // Generate chaos numbers for scene 2
-        const chaosNumbers = document.getElementById('chaosNumbers');
-        const dealTerms = ['$50M', '$100M', '$250M', '$500M', '$1B', '$2B', '8%', '12%', '15%', '20%'];
-        for (let i = 0; i < 30; i++) {
-            const num = document.createElement('div');
-            num.className = 'chaos-number';
-            num.textContent = dealTerms[Math.floor(Math.random() * dealTerms.length)];
-            num.style.left = Math.random() * 100 + '%';
-            num.style.animationDelay = Math.random() * 10 + 's';
-            num.style.animationDuration = (8 + Math.random() * 6) + 's';
-            chaosNumbers.appendChild(num);
-        }
+        const cursor = document.getElementById('cursor');
 
         // Timeline
         const timeline = [
-            // Scene 1: Typewriter (0-4s)
-            { time: 0, action: () => showScene('scene1') },
-            { time: 100, action: () => typeText("What's your drug asset worth?", 80) },
+            // Scene 1: Cold Open (0-8s)
+            { time: 500, action: () => document.getElementById('bigQuestion').classList.add('visible') },
+            { time: 3000, action: () => document.getElementById('scenarioText').classList.add('visible') },
 
-            // Scene 2: Problem (4-8s)
-            { time: 4000, action: () => showScene('scene2') },
-            { time: 4200, action: () => document.getElementById('problemLine1').classList.add('visible') },
-            { time: 4800, action: () => document.getElementById('problemLine2').classList.add('visible') },
-
-            // Scene 3: Logo Reveal (8-12s)
-            { time: 8000, action: () => showScene('scene3') },
-            { time: 8200, action: () => document.getElementById('logoReveal').classList.add('visible') },
-            { time: 9000, action: () => showCaption('Life Sciences Deal Calculator') },
-            { time: 11500, action: () => hideCaption() },
-
-            // Scene 4: Calculator Demo (12-55s)
-            { time: 12000, action: () => showScene('scene4') },
-            { time: 12500, action: () => showCaption('Benchmark any deal in 60 seconds') },
-
-            // Show fields one by one
-            { time: 13000, action: () => {
-                document.getElementById('field1').classList.add('visible');
-                showCursor(400, 280);
+            // Scene 2: Logo Reveal (8-14s)
+            { time: 8000, action: () => {
+                showScene('scene2');
+                document.getElementById('logoContainer').classList.add('visible');
             }},
+            { time: 9500, action: () => document.getElementById('productName').classList.add('visible') },
+            { time: 10500, action: () => document.getElementById('productTagline').classList.add('visible') },
+
+            // Scene 3: Calculator Demo (14-42s)
             { time: 14000, action: () => {
-                document.getElementById('field2').classList.add('visible');
+                showScene('scene3');
+                document.getElementById('browserWindow').classList.add('visible');
             }},
-            { time: 14500, action: () => {
-                document.getElementById('field3').classList.add('visible');
-            }},
-            { time: 15000, action: () => {
-                document.getElementById('field4').classList.add('visible');
-                hideCaption();
-            }},
-
-            // Fill in fields
+            { time: 15500, action: () => showCaption('Start with <span class="highlight">battle-tested templates</span>') },
             { time: 16000, action: () => {
-                showCaption('Customize every variable');
-                moveCursor(400, 280);
+                document.getElementById('field1').classList.add('visible');
+                document.getElementById('field2').classList.add('visible');
+                document.getElementById('field3').classList.add('visible');
+                document.getElementById('field4').classList.add('visible');
             }},
-            { time: 16500, action: () => clickAndFill('select1', 'Phase 2') },
-            { time: 18000, action: () => moveCursor(400, 370) },
-            { time: 18500, action: () => clickAndFill('select2', 'ADC (Antibody-Drug Conjugate)') },
-            { time: 20000, action: () => moveCursor(400, 460) },
-            { time: 20500, action: () => clickAndFill('select3', 'Breast Cancer (HER2+)') },
-            { time: 22000, action: () => moveCursor(400, 550) },
-            { time: 22500, action: () => clickAndFill('select4', 'Global (Worldwide)') },
 
-            // Calculate button
-            { time: 24000, action: () => {
+            // Show cursor and fill fields
+            { time: 18000, action: () => {
+                hideCaption();
+                showCursor(450, 365);
+            }},
+            { time: 18500, action: () => {
+                showCaption('Customize <span class="highlight">every variable</span>');
+            }},
+            { time: 19000, action: () => {
+                document.getElementById('select1').classList.add('active');
+            }},
+            { time: 19500, action: () => {
+                clickAndFill('select1', 'Phase 2');
+                document.getElementById('select1').classList.remove('active');
+            }},
+            { time: 20500, action: () => moveCursor(450, 450) },
+            { time: 21000, action: () => document.getElementById('select2').classList.add('active') },
+            { time: 21500, action: () => {
+                clickAndFill('select2', 'ADC (Antibody-Drug Conjugate)');
+                document.getElementById('select2').classList.remove('active');
+            }},
+            { time: 22500, action: () => moveCursor(450, 535) },
+            { time: 23000, action: () => document.getElementById('select3').classList.add('active') },
+            { time: 23500, action: () => {
+                clickAndFill('select3', 'Oncology');
+                document.getElementById('select3').classList.remove('active');
+            }},
+            { time: 24500, action: () => moveCursor(450, 620) },
+            { time: 25000, action: () => document.getElementById('select4').classList.add('active') },
+            { time: 25500, action: () => {
+                clickAndFill('select4', 'Global (Worldwide)');
+                document.getElementById('select4').classList.remove('active');
+            }},
+
+            // Show calculate button
+            { time: 27000, action: () => {
                 hideCaption();
                 document.getElementById('calcBtn').classList.add('visible');
+                moveCursor(450, 720);
             }},
-            { time: 24500, action: () => {
-                document.getElementById('calcBtn').classList.add('pulse');
-                moveCursor(400, 650);
-            }},
-            { time: 25500, action: () => showCaption('One click.') },
-            { time: 26500, action: () => {
+            { time: 28000, action: () => showCaption('<span class="highlight">One click.</span> Instant benchmarks.') },
+            { time: 29000, action: () => {
                 cursorClick();
-                document.getElementById('calcBtn').classList.remove('pulse');
+                document.getElementById('calcBtn').classList.add('clicked');
             }},
+            { time: 29500, action: () => hideCursor() },
 
             // Show results
-            { time: 27500, action: () => {
+            { time: 30000, action: () => {
                 hideCaption();
-                hideCursor();
-                document.getElementById('resultsPanel').classList.add('visible');
+                document.getElementById('resultsCard').classList.add('visible');
             }},
-            { time: 28000, action: () => showCaption('Instant benchmarks') },
-            { time: 28500, action: () => countUp('upfrontValue', '$85M - $140M') },
-            { time: 29000, action: () => countUp('devMilestones', '$250M - $400M') },
-            { time: 29500, action: () => countUp('commMilestones', '$200M - $350M') },
-            { time: 30000, action: () => countUp('royaltyRate', '8% - 15%') },
-            { time: 30500, action: () => countUp('totalValue', '$1.2B - $2.1B') },
+            { time: 30500, action: () => document.getElementById('upfront').textContent = '$85M' },
+            { time: 31000, action: () => document.getElementById('milestones').textContent = '$450M' },
+            { time: 31500, action: () => document.getElementById('salesMilestones').textContent = '$1.2B' },
+            { time: 32000, action: () => document.getElementById('totalValue').textContent = '$1.74B' },
+            { time: 32500, action: () => showCaption('Powered by <span class="highlight">500+ real deals</span>') },
 
-            { time: 32000, action: () => {
+            // Sensitivity analysis
+            { time: 35000, action: () => {
                 hideCaption();
-                showCaption('Powered by 500+ real deals');
+                document.getElementById('sensitivityCard').classList.add('visible');
             }},
+            { time: 36000, action: () => showCaption('See what <span class="highlight">moves the needle</span>') },
+            { time: 37000, action: () => {
+                document.getElementById('sensRow1').classList.add('selected');
+                document.getElementById('sensImpact1').classList.add('visible');
+            }},
+            { time: 39000, action: () => {
+                document.getElementById('sensRow1').classList.remove('selected');
+                document.getElementById('sensRow2').classList.add('selected');
+                document.getElementById('sensImpact2').classList.add('visible');
+            }},
+            { time: 40000, action: () => hideCaption() },
 
-            // Sensitivity Analysis
-            { time: 36000, action: () => {
-                hideCaption();
-                document.getElementById('sensitivityPanel').classList.add('visible');
-                showCaption('See what moves the needle');
+            // Scene 4: Big Impact (42-48s)
+            { time: 42000, action: () => {
+                showScene('scene4');
+                document.getElementById('impactNumber').classList.add('visible');
             }},
+            { time: 43500, action: () => document.getElementById('impactContext').classList.add('visible') },
+            { time: 44500, action: () => showCaption('Phase change: <span class="highlight">+$1.6 billion</span>') },
 
-            // Click Phase 3
-            { time: 40000, action: () => {
-                hideCaption();
-                showCursor(1350, 620);
-            }},
-            { time: 41000, action: () => {
-                cursorClick();
-                document.getElementById('opt2').classList.remove('selected');
-                document.getElementById('opt2').querySelector('.option-radio').classList.remove('checked');
-                document.getElementById('opt3').classList.add('selected', 'highlight');
-                document.getElementById('opt3').querySelector('.option-radio').classList.add('checked');
-            }},
-            { time: 41500, action: () => {
-                document.getElementById('totalValue').textContent = '$2.8B - $4.2B';
-                document.getElementById('totalValue').style.color = '#22C55E';
-                document.getElementById('valueChange').classList.add('visible');
-                showCaption('<span class="highlight">Phase change: +$1.6 billion</span>');
-            }},
-            { time: 44000, action: () => {
-                document.getElementById('valueChange').classList.remove('visible');
-                hideCursor();
-            }},
-
-            { time: 46000, action: () => {
-                hideCaption();
-                showCaption('Explore unlimited scenarios');
-            }},
-
-            // Scene 5: Stats (50-58s)
-            { time: 50000, action: () => {
+            // Scene 5: Stats (48-55s)
+            { time: 48000, action: () => {
                 hideCaption();
                 showScene('scene5');
             }},
-            { time: 50500, action: () => document.getElementById('stat1').classList.add('visible') },
-            { time: 51200, action: () => document.getElementById('stat2').classList.add('visible') },
-            { time: 51900, action: () => document.getElementById('stat3').classList.add('visible') },
+            { time: 48500, action: () => document.getElementById('stat1').classList.add('visible') },
+            { time: 49200, action: () => document.getElementById('stat2').classList.add('visible') },
+            { time: 49900, action: () => document.getElementById('stat3').classList.add('visible') },
 
-            // Scene 6: CTA (58-70s)
-            { time: 58000, action: () => showScene('scene6') },
-            { time: 58500, action: () => document.getElementById('ctaLine1').classList.add('visible') },
-            { time: 60500, action: () => document.getElementById('ctaLine2').classList.add('visible') },
-            { time: 63000, action: () => document.getElementById('ctaBtn').classList.add('visible') },
-            { time: 64500, action: () => document.getElementById('ctaUrl').classList.add('visible') },
+            // Scene 6: CTA (55-67s)
+            { time: 55000, action: () => showScene('scene6') },
+            { time: 55500, action: () => document.getElementById('ctaHead1').classList.add('visible') },
+            { time: 57000, action: () => document.getElementById('ctaHead2').classList.add('visible') },
+            { time: 59500, action: () => document.getElementById('ctaBtn').classList.add('visible') },
+            { time: 61000, action: () => document.getElementById('ctaNote').classList.add('visible') },
 
-            // Scene 7: End Card (70-75s)
-            { time: 70000, action: () => showScene('scene7') },
-            { time: 70500, action: () => document.getElementById('endContent').classList.add('visible') },
+            // Scene 7: End Card (67-75s)
+            { time: 67000, action: () => showScene('scene7') },
+            { time: 67500, action: () => document.getElementById('endContent').classList.add('visible') },
 
             // End
-            { time: 75000, action: () => {
-                // Video complete
-            }}
+            { time: 75000, action: () => {} }
         ];
 
         let timelineIndex = 0;
@@ -1189,20 +1373,6 @@
             caption.classList.remove('visible');
         }
 
-        function typeText(text, speed) {
-            const typeEl = document.getElementById('typeText');
-            let i = 0;
-            typeEl.textContent = '';
-            const interval = setInterval(() => {
-                if (i < text.length) {
-                    typeEl.textContent += text[i];
-                    i++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, speed);
-        }
-
         function showCursor(x, y) {
             cursor.style.left = x + 'px';
             cursor.style.top = y + 'px';
@@ -1214,14 +1384,14 @@
         }
 
         function moveCursor(x, y) {
-            cursor.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
+            cursor.style.transition = 'left 0.5s cubic-bezier(0.16, 1, 0.3, 1), top 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
             cursor.style.left = x + 'px';
             cursor.style.top = y + 'px';
         }
 
         function cursorClick() {
             cursor.classList.add('clicking');
-            setTimeout(() => cursor.classList.remove('clicking'), 150);
+            setTimeout(() => cursor.classList.remove('clicking'), 200);
         }
 
         function clickAndFill(selectId, value) {
@@ -1233,19 +1403,12 @@
             }, 150);
         }
 
-        function countUp(elementId, finalText) {
-            const el = document.getElementById(elementId);
-            el.textContent = finalText;
-            el.style.animation = 'fadeUp 0.3s ease-out';
-        }
-
         function updateProgress() {
             if (!isPlaying) return;
             const elapsed = Date.now() - startTime;
             const percent = Math.min((elapsed / TOTAL_DURATION) * 100, 100);
             progress.style.width = percent + '%';
 
-            // Process timeline events
             while (timelineIndex < timeline.length && elapsed >= timeline[timelineIndex].time) {
                 timeline[timelineIndex].action();
                 timelineIndex++;
@@ -1264,12 +1427,10 @@
             updateProgress();
         }
 
-        // Click to start
         playOverlay.addEventListener('click', startVideo);
-
-        // Keyboard shortcut
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && !isPlaying) {
+                e.preventDefault();
                 startVideo();
             }
         });
