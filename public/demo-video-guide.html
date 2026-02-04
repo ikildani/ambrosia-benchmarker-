@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambrosia Ventures - Demo Video Production Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --teal-400: #2DD4BF;
+            --teal-500: #14B8A6;
+            --teal-600: #0D9488;
+            --navy-800: #1E293B;
+            --navy-900: #0F172A;
+            --navy-950: #020617;
+            --slate-300: #CBD5E1;
+            --slate-400: #94A3B8;
+            --slate-500: #64748B;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1E293B;
+            --white: #FFFFFF;
+            --gradient-teal: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+            --gradient-dark: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--navy-950);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(20, 184, 166, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%),
+                var(--navy-950);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .logo-container img {
+            height: 60px;
+            filter: brightness(1.2);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--white) 0%, var(--slate-300) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: var(--slate-400);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--teal-400);
+        }
+
+        .hero-stat-label {
+            font-size: 0.875rem;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            color: var(--slate-500);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: all 0.3s ease;
+        }
+
+        .nav.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-logo img {
+            height: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--teal-400);
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(20, 184, 166, 0.1);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            border-radius: 100px;
+            color: var(--teal-400);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--slate-400);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--teal-500), var(--navy-800));
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: calc(50% - 3rem);
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: auto;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: auto;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1rem;
+            height: 1rem;
+            background: var(--teal-500);
+            border-radius: 50%;
+            border: 3px solid var(--navy-950);
+            z-index: 1;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--teal-400);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-description {
+            color: var(--slate-400);
+            font-size: 0.9375rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-visual {
+            background: rgba(0,0,0,0.3);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.8125rem;
+            color: var(--slate-300);
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        .timeline-caption {
+            background: rgba(20, 184, 166, 0.1);
+            border-left: 3px solid var(--teal-500);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .timeline-caption-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: var(--teal-400);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-caption-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        /* Shot Cards */
+        .shots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .shot-card {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .shot-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .shot-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .shot-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--gradient-teal);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .shot-meta {
+            flex: 1;
+        }
+
+        .shot-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .shot-duration {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+        }
+
+        .shot-body {
+            padding: 1.5rem;
+        }
+
+        .shot-description {
+            color: var(--slate-400);
+            font-size: 0.9375rem;
+            margin-bottom: 1rem;
+        }
+
+        .shot-visual-preview {
+            background: rgba(0,0,0,0.4);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .shot-visual-preview pre {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.6875rem;
+            color: var(--slate-300);
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .shot-caption {
+            background: rgba(20, 184, 166, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .shot-caption-text {
+            font-weight: 500;
+            color: var(--teal-400);
+        }
+
+        /* Caption Library */
+        .caption-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .caption-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .caption-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--teal-500);
+        }
+
+        .caption-card::after {
+            content: 'Click to copy';
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 0.625rem;
+            color: var(--slate-500);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .caption-card:hover::after {
+            opacity: 1;
+        }
+
+        .caption-card.copied::after {
+            content: 'Copied!';
+            color: var(--teal-400);
+        }
+
+        .caption-timestamp {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--teal-400);
+            margin-bottom: 0.5rem;
+        }
+
+        .caption-text {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Specs Section */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .spec-card {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .spec-icon {
+            width: 3rem;
+            height: 3rem;
+            background: rgba(20, 184, 166, 0.1);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--teal-400);
+        }
+
+        .spec-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec-value {
+            color: var(--slate-400);
+            font-size: 0.9375rem;
+        }
+
+        /* Color Palette */
+        .colors-grid {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .color-swatch {
+            text-align: center;
+        }
+
+        .color-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .color-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .color-hex {
+            font-size: 0.6875rem;
+            color: var(--slate-500);
+            font-family: monospace;
+        }
+
+        /* Checklist */
+        .checklist {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .checklist-item.checked {
+            opacity: 0.5;
+        }
+
+        .checklist-checkbox {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--slate-600);
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .checklist-item.checked .checklist-checkbox {
+            background: var(--teal-500);
+            border-color: var(--teal-500);
+        }
+
+        .checklist-checkbox svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            color: white;
+        }
+
+        .checklist-item.checked .checklist-checkbox svg {
+            opacity: 1;
+        }
+
+        .checklist-text {
+            flex: 1;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            background:
+                radial-gradient(ellipse at 50% 100%, rgba(20, 184, 166, 0.1) 0%, transparent 50%),
+                var(--navy-950);
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-subtitle {
+            color: var(--slate-400);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--gradient-teal);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--slate-500);
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 1rem;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                flex-direction: column;
+            }
+
+            .timeline-content {
+                width: 100%;
+                margin-left: 2.5rem !important;
+            }
+
+            .timeline-dot {
+                left: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .nav, .scroll-indicator {
+                display: none;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-logo">
+            <img src="/logo.png" alt="Ambrosia Ventures">
+        </div>
+        <div class="nav-links">
+            <a href="#overview">Overview</a>
+            <a href="#shots">Shot List</a>
+            <a href="#captions">Captions</a>
+            <a href="#specs">Specs</a>
+            <a href="#checklist">Checklist</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="logo-container">
+            <img src="/logo.png" alt="Ambrosia Ventures">
+        </div>
+        <h1>Demo Video<br>Production Guide</h1>
+        <p class="subtitle">A world-class, cinematic product demo with storytelling captions. No audio required.</p>
+
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value">75s</div>
+                <div class="hero-stat-label">Duration</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">14</div>
+                <div class="hero-stat-label">Shots</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">18</div>
+                <div class="hero-stat-label">Captions</div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section class="section" id="overview">
+        <div class="section-header">
+            <span class="section-label">The Story Arc</span>
+            <h2 class="section-title">Video Timeline</h2>
+            <p class="section-subtitle">A cinematic journey from problem to solution in 75 seconds</p>
+        </div>
+
+        <div class="timeline">
+            <!-- Act 1: The Problem -->
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-time">0:00 - 0:08</div>
+                    <div class="timeline-title">ACT I: The Problem</div>
+                    <div class="timeline-description">
+                        Open with tension. Dark, moody visuals. The chaos of deal-making without data.
+                    </div>
+                    <div class="timeline-caption">
+                        <div class="timeline-caption-label">Caption</div>
+                        <div class="timeline-caption-text">"What's your drug asset worth?"</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+
+            <!-- Act 2: The Solution -->
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-time">0:08 - 0:15</div>
+                    <div class="timeline-title">ACT II: The Reveal</div>
+                    <div class="timeline-description">
+                        Logo animation. Light emerges. The DNA helix assembles, gear rotates into place.
+                    </div>
+                    <div class="timeline-caption">
+                        <div class="timeline-caption-label">Caption</div>
+                        <div class="timeline-caption-text">"Life Sciences Deal Calculator"</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+
+            <!-- Act 3: The Demo -->
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-time">0:15 - 0:55</div>
+                    <div class="timeline-title">ACT III: The Product</div>
+                    <div class="timeline-description">
+                        The hero section. Show the calculator in action: templates, customization, results, sensitivity analysis.
+                    </div>
+                    <div class="timeline-visual">
+Templates → Customize → Calculate → Results → Sensitivity
+    ↓           ↓           ↓          ↓           ↓
+  5 sec      8 sec       4 sec      8 sec       10 sec</div>
+                    <div class="timeline-caption">
+                        <div class="timeline-caption-label">Key Moment</div>
+                        <div class="timeline-caption-text">"Phase change: +$1.6 billion"</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+
+            <!-- Act 4: Credibility -->
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-time">0:55 - 1:05</div>
+                    <div class="timeline-title">ACT IV: The Proof</div>
+                    <div class="timeline-description">
+                        Build trust with data. 500+ deals, $150B+ analyzed, weekly updates.
+                    </div>
+                    <div class="timeline-caption">
+                        <div class="timeline-caption-label">Caption</div>
+                        <div class="timeline-caption-text">"Powered by 500+ real deals"</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+
+            <!-- Act 5: CTA -->
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-time">1:05 - 1:15</div>
+                    <div class="timeline-title">ACT V: The Close</div>
+                    <div class="timeline-description">
+                        Emotional hook. Clear call to action. Logo lockup with URL.
+                    </div>
+                    <div class="timeline-caption">
+                        <div class="timeline-caption-label">Caption</div>
+                        <div class="timeline-caption-text">"Stop guessing. Start negotiating with data."</div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shot List Section -->
+    <section class="section" id="shots">
+        <div class="section-header">
+            <span class="section-label">Production Ready</span>
+            <h2 class="section-title">Shot-by-Shot Breakdown</h2>
+            <p class="section-subtitle">Every frame planned for maximum impact</p>
+        </div>
+
+        <div class="shots-grid">
+            <!-- Shot 1 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">01</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Cold Open</div>
+                        <div class="shot-duration">0:00 - 0:04 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Black screen. Text types in character by character. Cursor blinks.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+┌─────────────────────────────────┐
+│                                 │
+│  "What's your drug asset       │
+│   worth?"│                      │
+│                                 │
+└─────────────────────────────────┘</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"What's your drug asset worth?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 2 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">02</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">The Struggle</div>
+                        <div class="shot-duration">0:04 - 0:08 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Quick cuts: spreadsheet chaos, deal tombstones, scattered numbers converging into light.</div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Phase 2 ADC. Oncology. Global rights.<br>What should you ask for?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 3 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">03</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Logo Reveal</div>
+                        <div class="shot-duration">0:08 - 0:11 (3s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Premium animation: DNA helix draws, gear rotates, "Ambrosia Ventures" fades in.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+Frame 1: Teal particle expands
+Frame 2: DNA helix assembles
+Frame 3: Gear rotates into place
+Frame 4: Text fades in</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Life Sciences Deal Calculator"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 4 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">04</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Landing Page</div>
+                        <div class="shot-duration">0:11 - 0:14 (3s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Screen recording. Show hero section with subtle scroll to reveal CTA button.</div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Benchmark any deal in 60 seconds"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 5 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">05</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Template Selection</div>
+                        <div class="shot-duration">0:14 - 0:19 (5s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Cursor moves to "Phase 2 ADC" template. Click. Form auto-fills with animation.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+Cursor enters → Hover template →
+Click → Fields animate → Hold</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Start with battle-tested templates"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 6 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">06</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Customization</div>
+                        <div class="shot-duration">0:19 - 0:27 (8s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Show parameter flexibility. Click through: Modality → Indication → Phase → Toggle designation.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+Modality: "ADC" ✓
+Indication: "Breast (HER2+)" ✓
+Phase: "Phase 2" ✓
+Breakthrough: ON ✓</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Customize every variable"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 7 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">07</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">The Calculate Moment</div>
+                        <div class="shot-duration">0:27 - 0:31 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Build anticipation. Cursor hovers (button pulses), click, loading shimmer.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+Hover (0.5s) → Click (0.5s) →
+Loading (1s) → Results slide up</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"One click."</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 8 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">08</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Results Reveal</div>
+                        <div class="shot-duration">0:31 - 0:39 (8s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">THE MONEY SHOT. Numbers count up. Spotlight on Total Value: $1.2B - $2.1B</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+UPFRONT      $85M - $140M
+MILESTONES   $450M - $750M
+ROYALTIES    8% - 15%
+─────────────────────────
+TOTAL VALUE  $1.2B - $2.1B</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Instant benchmarks"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 9 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">09</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Sensitivity Analysis</div>
+                        <div class="shot-duration">0:39 - 0:49 (10s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">THE WOW MOMENT. Click Phase 3. Watch value jump from $1.2B to $2.8B. Green delta: +$1.6B</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+Phase: Phase 2 → Phase 3
+Value: $1.2B → $2.8B
+Delta: +$1.6B ↑</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Phase change: +$1.6 billion"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 10 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">10</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Partner Matching</div>
+                        <div class="shot-duration">0:49 - 0:53 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Tease Pro feature. Show blurred partner cards with "Upgrade" CTA glowing.</div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Find partners actively seeking your modality"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 11 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">11</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Deal Browser</div>
+                        <div class="shot-duration">0:53 - 0:57 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Quick tour of Deals page. Filter by ADC. Show real transaction cards.</div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Explore 500+ comparable transactions"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 12 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">12</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Trust Stats</div>
+                        <div class="shot-duration">0:57 - 1:01 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Motion graphic. Three stat cards animate in with counting numbers.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│ $150B+  │ │  500+   │ │ Weekly  │
+│  deals  │ │  deals  │ │ updates │
+└─────────┘ └─────────┘ └─────────┘</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 13 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">13</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">Final CTA</div>
+                        <div class="shot-duration">1:01 - 1:11 (10s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Two-beat close. "Stop guessing." pause. "Start negotiating with data." Logo + URL.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+[Beat 1] "Stop guessing."
+[Beat 2] "Start negotiating
+          with data."
+[Hold]   Logo + CTA button</pre>
+                    </div>
+                    <div class="shot-caption">
+                        <div class="shot-caption-text">"Try Free Today"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shot 14 -->
+            <div class="shot-card">
+                <div class="shot-header">
+                    <div class="shot-number">14</div>
+                    <div class="shot-meta">
+                        <div class="shot-title">End Card</div>
+                        <div class="shot-duration">1:11 - 1:15 (4s)</div>
+                    </div>
+                </div>
+                <div class="shot-body">
+                    <div class="shot-description">Logo centered. Tagline below. Hold 3 seconds. Fade to black.</div>
+                    <div class="shot-visual-preview">
+                        <pre>
+    [AMBROSIA LOGO]
+"Deal Intelligence for
+   Life Sciences"</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Captions Section -->
+    <section class="section" id="captions">
+        <div class="section-header">
+            <span class="section-label">Copy Ready</span>
+            <h2 class="section-title">Caption Library</h2>
+            <p class="section-subtitle">Click any caption to copy. Paste directly into your editor.</p>
+        </div>
+
+        <div class="caption-library">
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:00 - 0:04</div>
+                <div class="caption-text">What's your drug asset worth?</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:04 - 0:08</div>
+                <div class="caption-text">Phase 2 ADC. Oncology. Global rights.<br>What should you ask for?</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:08 - 0:11</div>
+                <div class="caption-text">Life Sciences Deal Calculator</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:11 - 0:14</div>
+                <div class="caption-text">Benchmark any deal in 60 seconds</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:14 - 0:19</div>
+                <div class="caption-text">Start with battle-tested templates</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:19 - 0:23</div>
+                <div class="caption-text">Customize every variable</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:23 - 0:27</div>
+                <div class="caption-text">Your deal. Your terms.</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:27 - 0:31</div>
+                <div class="caption-text">One click.</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:31 - 0:35</div>
+                <div class="caption-text">Instant benchmarks</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:35 - 0:39</div>
+                <div class="caption-text">Powered by 500+ real deals</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:39 - 0:43</div>
+                <div class="caption-text">See what moves the needle</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:43 - 0:47</div>
+                <div class="caption-text">Phase change: +$1.6 billion</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:47 - 0:49</div>
+                <div class="caption-text">Explore unlimited scenarios</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:49 - 0:53</div>
+                <div class="caption-text">Find partners actively seeking your modality</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">0:53 - 0:57</div>
+                <div class="caption-text">Explore 500+ comparable transactions</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">1:01 - 1:04</div>
+                <div class="caption-text">Stop guessing.</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">1:04 - 1:08</div>
+                <div class="caption-text">Start negotiating with data.</div>
+            </div>
+            <div class="caption-card" onclick="copyCaption(this)">
+                <div class="caption-timestamp">1:08 - 1:15</div>
+                <div class="caption-text">Try Free Today<br>No credit card required.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specs Section -->
+    <section class="section" id="specs">
+        <div class="section-header">
+            <span class="section-label">Technical</span>
+            <h2 class="section-title">Video Specifications</h2>
+            <p class="section-subtitle">Export settings for maximum quality</p>
+        </div>
+
+        <div class="specs-grid">
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21" stroke-width="2"/>
+                        <line x1="12" y1="17" x2="12" y2="21" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Resolution</div>
+                <div class="spec-value">1920 × 1080 (Full HD)<br>Record at 4K for crisp text</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        <polyline points="12,6 12,12 16,14" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Duration</div>
+                <div class="spec-value">75 seconds (1:15)<br>30s short version available</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" stroke-width="2"/>
+                        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Frame Rate</div>
+                <div class="spec-value">30 fps (export)<br>60 fps for UI recordings</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Codec</div>
+                <div class="spec-value">H.264 or H.265<br>20-30 Mbps bitrate</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Format</div>
+                <div class="spec-value">MP4 (web)<br>MOV (editing)</div>
+            </div>
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="spec-title">Audio</div>
+                <div class="spec-value">None (silent)<br>Caption-driven storytelling</div>
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="section-header" style="margin-top: 4rem;">
+            <h3 class="section-title" style="font-size: 1.5rem;">Brand Colors</h3>
+        </div>
+        <div class="colors-grid">
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #14B8A6;"></div>
+                <div class="color-name">Teal 500</div>
+                <div class="color-hex">#14B8A6</div>
+            </div>
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #2DD4BF;"></div>
+                <div class="color-name">Teal 400</div>
+                <div class="color-hex">#2DD4BF</div>
+            </div>
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #06B6D4;"></div>
+                <div class="color-name">Cyan 500</div>
+                <div class="color-hex">#06B6D4</div>
+            </div>
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #1E293B;"></div>
+                <div class="color-name">Navy 800</div>
+                <div class="color-hex">#1E293B</div>
+            </div>
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #0F172A;"></div>
+                <div class="color-name">Navy 900</div>
+                <div class="color-hex">#0F172A</div>
+            </div>
+            <div class="color-swatch">
+                <div class="color-preview" style="background: #FFFFFF; border: 1px solid #334155;"></div>
+                <div class="color-name">White</div>
+                <div class="color-hex">#FFFFFF</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist Section -->
+    <section class="section" id="checklist">
+        <div class="section-header">
+            <span class="section-label">Production</span>
+            <h2 class="section-title">Pre-Flight Checklist</h2>
+            <p class="section-subtitle">Click to mark items complete</p>
+        </div>
+
+        <div class="checklist">
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Browser set to 1920×1080, bookmarks hidden</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Logged into Pro account for full features</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Notifications disabled (Do Not Disturb)</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Screen recording software ready (OBS/ScreenFlow)</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Logo animation file prepared</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Inter font installed for captions</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Shot list printed/visible during recording</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Practice run completed (cursor movements smooth)</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">All screen recordings captured</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Captions added with correct timing</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Color grade applied (contrast, teal tint)</div>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)">
+                <div class="checklist-checkbox">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="checklist-text">Final export at 1080p, 30fps, H.264</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2 class="cta-title">Ready to Create?</h2>
+        <p class="cta-subtitle">This guide contains everything you need to produce a world-class demo video.</p>
+        <a href="/calculator" class="cta-button">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            View Live Product
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Ambrosia Ventures · Demo Video Production Guide</p>
+        <p style="margin-top: 0.5rem; opacity: 0.6;">Created with precision for world-class storytelling</p>
+    </footer>
+
+    <script>
+        // Navigation visibility on scroll
+        const nav = document.getElementById('nav');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 100) {
+                nav.classList.add('visible');
+            } else {
+                nav.classList.remove('visible');
+            }
+
+            lastScroll = currentScroll;
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Copy caption functionality
+        function copyCaption(element) {
+            const text = element.querySelector('.caption-text').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                element.classList.add('copied');
+                setTimeout(() => element.classList.remove('copied'), 1500);
+            });
+        }
+
+        // Checklist toggle
+        function toggleCheck(element) {
+            element.classList.toggle('checked');
+
+            // Save to localStorage
+            const items = document.querySelectorAll('.checklist-item');
+            const state = Array.from(items).map(item => item.classList.contains('checked'));
+            localStorage.setItem('checklist-state', JSON.stringify(state));
+        }
+
+        // Load checklist state
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('checklist-state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const items = document.querySelectorAll('.checklist-item');
+                items.forEach((item, i) => {
+                    if (state[i]) item.classList.add('checked');
+                });
+            }
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.shot-card, .spec-card, .caption-card, .timeline-content').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
