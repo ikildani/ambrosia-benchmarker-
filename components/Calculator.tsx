@@ -30,6 +30,7 @@ import {
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import { useTracking } from './TrackingProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import Results from './Results';
 import PaywallModal from './PaywallModal';
 import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
@@ -170,6 +171,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
   // Tracking
   const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
+  const { user, isAuthenticated } = useAuth();
   const calculationCountRef = useRef(0);
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
@@ -294,6 +296,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             body: JSON.stringify({
               session_id: sessionId,
               anonymous_id: anonymousId,
+              user_id: isAuthenticated && user?.id ? user.id : null,
               modality,
               development_phase: phase,
               indication_category: indication.split('_')[0],

@@ -236,3 +236,50 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// DELETE endpoint to remove a calculation
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = createServiceClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const userId = searchParams.get('user_id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'user_id is required for deletion' },
+        { status: 400 }
+      );
+    }
+
+    // Delete only if the calculation belongs to this user
+    const { error } = await supabase
+      .from('calculations')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Calculation delete error:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete calculation' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Calculation API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

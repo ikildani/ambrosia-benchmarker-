@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getHistory, deleteHistoryItem, clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
+import { clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
+import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
 import { useTheme } from '@/lib/theme';
 import HistoryDetailModal from './HistoryDetailModal';
 
@@ -127,7 +128,7 @@ export default function Dashboard({
   onUpgrade,
   onSignOut,
 }: DashboardProps) {
-  const [history, setHistory] = useState<CalculationHistoryItem[]>([]);
+  const { history, loading: historyLoading, deleteItem: deleteHistoryItem } = useCalculationHistory();
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'settings'>('overview');
   const [editName, setEditName] = useState(userName);
   const [editCompany, setEditCompany] = useState('');
@@ -145,7 +146,6 @@ export default function Dashboard({
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
 
   useEffect(() => {
-    setHistory(getHistory());
     // Load user data from localStorage
     const userData = localStorage.getItem('user_data');
     if (userData) {
@@ -172,9 +172,12 @@ export default function Dashboard({
     return 'Good evening';
   };
 
-  const handleDeleteHistory = (id: string) => {
-    deleteHistoryItem(id);
-    setHistory(getHistory());
+  const handleDeleteHistory = async (id: string) => {
+    try {
+      await deleteHistoryItem(id);
+    } catch (error) {
+      console.error('Failed to delete history item:', error);
+    }
   };
 
   const handleHistoryClick = (item: CalculationHistoryItem) => {
@@ -715,7 +718,17 @@ export default function Dashboard({
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
             </div>
 
-            {history.length > 0 ? (
+            {historyLoading ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                  <svg className="w-8 h-8 text-slate-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500 dark:text-slate-400">Loading your calculation history...</p>
+              </div>
+            ) : history.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
                 {history.map((item) => (
                   <div key={item.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors history-item-clickable group">

@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 
 interface User {
+  id: string;  // Unique user identifier (UUID)
   email: string;
   name: string;
   company?: string;
@@ -19,6 +20,7 @@ function isValidUserData(data: unknown): data is User {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
   return (
+    typeof obj.id === 'string' &&
     typeof obj.email === 'string' &&
     typeof obj.name === 'string' &&
     (obj.company === undefined || typeof obj.company === 'string') &&
@@ -30,12 +32,40 @@ function isValidUserData(data: unknown): data is User {
   );
 }
 
-// Safe JSON parse with validation
+// Migration: add id to legacy user data
+function migrateUserData(data: Record<string, unknown>): User | null {
+  // If data has email and name but no id, generate one
+  if (typeof data.email === 'string' && typeof data.name === 'string' && !data.id) {
+    return {
+      id: crypto.randomUUID(),
+      email: data.email,
+      name: data.name,
+      company: typeof data.company === 'string' ? data.company : undefined,
+      title: typeof data.title === 'string' ? data.title : undefined,
+      phone: typeof data.phone === 'string' ? data.phone : undefined,
+      linkedIn: typeof data.linkedIn === 'string' ? data.linkedIn : undefined,
+      role: typeof data.role === 'string' ? data.role : undefined,
+      createdAt: typeof data.createdAt === 'string' ? data.createdAt : undefined,
+    };
+  }
+  return null;
+}
+
+// Safe JSON parse with validation and migration
 function safeParseUserData(jsonString: string): User | null {
   try {
     const parsed = JSON.parse(jsonString);
     if (isValidUserData(parsed)) {
       return parsed;
+    }
+    // Try to migrate legacy data without id
+    if (typeof parsed === 'object' && parsed !== null) {
+      const migrated = migrateUserData(parsed as Record<string, unknown>);
+      if (migrated) {
+        // Save migrated data back to localStorage
+        localStorage.setItem('user_data', JSON.stringify(migrated));
+        return migrated;
+      }
     }
     console.warn('Invalid user data structure in localStorage');
     return null;
@@ -143,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : name;
 
     const newUser: User = {
+      id: profileData.id || crypto.randomUUID(), // Use cached id or generate new one
       email,
       name: displayName,
       createdAt: new Date().toISOString(),
@@ -170,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user?.email) {
       const emailKey = `profile_cache_${user.email.toLowerCase().trim()}`;
       const profileToCache = {
+        id: user.id, // Persist user id across sign-outs
         name: user.name,
         company: user.company,
         title: user.title,
