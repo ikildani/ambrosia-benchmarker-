@@ -53,8 +53,8 @@ export default function DashboardPage() {
     router.push('/#pricing');
   };
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     router.push('/');
   };
 

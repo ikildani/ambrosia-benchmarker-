@@ -315,20 +315,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(emailKey, JSON.stringify(profileToCache));
     }
 
-    // Sign out from Supabase if configured
-    if (isSupabaseConfigured()) {
-      const supabase = createClient();
-      if (supabase) {
-        await supabase.auth.signOut();
-      }
-    }
-
+    // Clear local state first (ensures UI updates even if Supabase fails)
     setIsAuthenticated(false);
     setUser(null);
     setTierState('free');
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_tier');
+
+    // Sign out from Supabase if configured
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      if (supabase) {
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('[Auth] Supabase signOut error:', error);
+          }
+        } catch (err) {
+          console.error('[Auth] SignOut exception:', err);
+        }
+      }
+    }
   }, [user]);
 
   const updateUser = useCallback((data: Partial<User>) => {

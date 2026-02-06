@@ -111,8 +111,8 @@ export default function AdminLayout({
             {user?.email}
           </div>
           <button
-            onClick={() => {
-              signOut();
+            onClick={async () => {
+              await signOut();
               router.push('/');
             }}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
