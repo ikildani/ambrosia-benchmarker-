@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 interface User {
   id: string;  // Unique user identifier (UUID)
@@ -109,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize from localStorage on mount
+  // Initialize from localStorage and listen to Supabase auth state
   useEffect(() => {
     // SECURITY: Removed URL parameter tier upgrade (?success=true)
     // Tier upgrades should ONLY happen via verified Stripe webhook
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTierState('pro'); // UI hint only - server will verify
     }
 
-    // Load auth state
+    // Load auth state from localStorage first
     const authState = localStorage.getItem('is_authenticated');
     const userData = localStorage.getItem('user_data');
 
@@ -148,6 +149,101 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Invalid stored data, clear it
         localStorage.removeItem('is_authenticated');
         localStorage.removeItem('user_data');
+      }
+    }
+
+    // Listen to Supabase auth state changes (for OAuth, etc.)
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      if (supabase) {
+        // Check current session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            const supabaseUser = session.user;
+            const userName = supabaseUser.user_metadata?.name ||
+                           supabaseUser.user_metadata?.full_name ||
+                           supabaseUser.email?.split('@')[0] ||
+                           'User';
+
+            // Sync Supabase session to our auth context
+            const newUser: User = {
+              id: supabaseUser.id,
+              email: supabaseUser.email || '',
+              name: userName,
+              company: supabaseUser.user_metadata?.company,
+              createdAt: supabaseUser.created_at,
+            };
+
+            setIsAuthenticated(true);
+            setUser(newUser);
+            localStorage.setItem('is_authenticated', 'true');
+            localStorage.setItem('user_data', JSON.stringify(newUser));
+
+            // Auto-upgrade pro users by email
+            if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+              setTierState('pro');
+              localStorage.setItem('user_tier', 'pro');
+            }
+          }
+          setIsLoading(false);
+        });
+
+        // Listen for auth state changes (sign in, sign out, token refresh)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log('[Auth] State change:', event);
+
+          if (event === 'SIGNED_IN' && session?.user) {
+            const supabaseUser = session.user;
+            const userName = supabaseUser.user_metadata?.name ||
+                           supabaseUser.user_metadata?.full_name ||
+                           supabaseUser.email?.split('@')[0] ||
+                           'User';
+
+            const newUser: User = {
+              id: supabaseUser.id,
+              email: supabaseUser.email || '',
+              name: userName,
+              company: supabaseUser.user_metadata?.company,
+              createdAt: supabaseUser.created_at,
+            };
+
+            setIsAuthenticated(true);
+            setUser(newUser);
+            setShowAuthModal(false);
+            localStorage.setItem('is_authenticated', 'true');
+            localStorage.setItem('user_data', JSON.stringify(newUser));
+
+            // Auto-upgrade pro users by email
+            if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+              setTierState('pro');
+              localStorage.setItem('user_tier', 'pro');
+            }
+
+            // Create user profile if it doesn't exist (for OAuth users)
+            supabase.from('user_profiles').upsert({
+              id: supabaseUser.id,
+              email: supabaseUser.email,
+              company_name: supabaseUser.user_metadata?.company || null,
+              tier: 'free',
+              email_verified: true,
+            }, { onConflict: 'id' }).then(({ error }) => {
+              if (error) console.error('[Auth] Profile upsert error:', error);
+            });
+          }
+
+          if (event === 'SIGNED_OUT') {
+            setIsAuthenticated(false);
+            setUser(null);
+            setTierState('free');
+            localStorage.removeItem('is_authenticated');
+            localStorage.removeItem('user_data');
+            localStorage.removeItem('user_tier');
+          }
+        });
+
+        return () => {
+          subscription.unsubscribe();
+        };
       }
     }
 
@@ -196,7 +292,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
     // Cache profile data before signing out (so it persists for next sign-in)
     if (user?.email) {
       const emailKey = `profile_cache_${user.email.toLowerCase().trim()}`;
@@ -210,6 +306,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: user.role,
       };
       localStorage.setItem(emailKey, JSON.stringify(profileToCache));
+    }
+
+    // Sign out from Supabase if configured
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
     }
 
     setIsAuthenticated(false);
