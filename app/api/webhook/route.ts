@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 
+// In-memory set to track processed webhook events (prevents duplicate processing)
+// In production at scale, use Redis or database for persistence across instances
+const processedEvents = new Set<string>();
+const MAX_PROCESSED_EVENTS = 10000;
+
+// Cleanup old events periodically
+function trackProcessedEvent(eventId: string): boolean {
+  if (processedEvents.has(eventId)) {
+    return false; // Already processed
+  }
+
+  // Cleanup if too many events stored
+  if (processedEvents.size >= MAX_PROCESSED_EVENTS) {
+    const eventsArray = Array.from(processedEvents);
+    eventsArray.slice(0, MAX_PROCESSED_EVENTS / 2).forEach(id => processedEvents.delete(id));
+  }
+
+  processedEvents.add(eventId);
+  return true; // First time seeing this event
+}
+
 // Stripe Webhook Handler
 // To enable webhooks:
 // 1. Set STRIPE_WEBHOOK_SECRET in .env.local
@@ -34,6 +55,12 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+    }
+
+    // Idempotency check - prevent duplicate processing
+    if (!trackProcessedEvent(event.id)) {
+      console.log('Webhook: Duplicate event, skipping:', event.id);
+      return NextResponse.json({ received: true, duplicate: true });
     }
 
     const supabase = createServiceClient();
@@ -82,14 +109,14 @@ export async function POST(request: NextRequest) {
             console.log('User upgraded to pro:', customerEmail);
           }
 
-          // Track upgrade event
+          // Track upgrade event (SECURITY: Don't store email in event_data, only customer ID)
           await supabase.from('events').insert({
             user_id: userId || null,
             event_type: 'subscription_created',
             event_data: {
+              stripe_event_id: event.id,
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
-              email: customerEmail,
               amount_total: session.amount_total,
               currency: session.currency,
             },

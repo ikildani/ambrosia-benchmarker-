@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 // Valid event types
 const VALID_EVENT_TYPES = [
@@ -45,6 +46,17 @@ interface EventRequest {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = checkRateLimit(identifier, 'events', RATE_LIMIT_CONFIGS.events);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const body: EventRequest = await request.json();

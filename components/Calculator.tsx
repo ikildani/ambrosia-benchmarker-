@@ -27,7 +27,7 @@ import {
   dataQualityOptions,
   regulatoryDesignationOptions,
 } from '@/lib/calculations';
-import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT } from '@/lib/usage';
+import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import { useTracking } from './TrackingProvider';
 import { useAuth } from '@/contexts/AuthContext';
@@ -176,9 +176,27 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
 
+  // Refresh remaining uses when tier changes or user authenticates
+  // When user signs in, sync from database to get accurate count
   useEffect(() => {
-    setRemainingUses(getRemainingUses(tier));
-  }, [tier]);
+    let cancelled = false;
+
+    const updateUsage = async () => {
+      if (isAuthenticated && user?.id) {
+        // Sync from database to get accurate count for this user
+        await syncUsageFromDatabase(user.id);
+      }
+      if (!cancelled) {
+        setRemainingUses(getRemainingUses(tier));
+      }
+    };
+
+    updateUsage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tier, isAuthenticated, user?.id]);
 
   // Check if onboarding should show for first-time users
   useEffect(() => {

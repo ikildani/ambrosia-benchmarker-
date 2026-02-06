@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { timingSafeEqual } from 'crypto';
 
 // Vercel Cron: Run every 6 hours
 // Add to vercel.json: { "crons": [{ "path": "/api/cron/lead-scores", "schedule": "0 */6 * * *" }] }
@@ -51,7 +52,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  // Use constant-time comparison to prevent timing attacks
+  const expectedToken = `Bearer ${cronSecret}`;
+  const providedToken = authHeader || '';
+
+  // Ensure both strings are same length for timing-safe comparison
+  const isValidLength = providedToken.length === expectedToken.length;
+  const tokenToCompare = isValidLength ? providedToken : expectedToken;
+
+  const isValid = isValidLength && timingSafeEqual(
+    Buffer.from(tokenToCompare),
+    Buffer.from(expectedToken)
+  );
+
+  if (!isValid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

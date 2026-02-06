@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 // GET - List saved scenarios for a user
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
@@ -70,6 +82,17 @@ export async function GET(request: NextRequest) {
 
 // POST - Save a new scenario
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const body = await request.json();
