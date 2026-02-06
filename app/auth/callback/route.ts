@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
-// Handle auth callbacks (email verification, password reset, magic links)
+// User-friendly error messages
+const ERROR_MESSAGES: Record<string, string> = {
+  'invalid_grant': 'This link has expired. Please try signing in again.',
+  'access_denied': 'Access was denied. Please try again.',
+  'server_error': 'Authentication service is temporarily unavailable.',
+  'unauthorized_client': 'This application is not authorized. Please contact support.',
+  'invalid_request': 'Invalid request. Please try signing in again.',
+};
+
+// Handle auth callbacks (email verification, password reset, magic links, OAuth)
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
@@ -13,15 +22,24 @@ export async function GET(request: NextRequest) {
     hasCode: !!code,
     type,
     error_description,
-    url: request.url,
+    // DO NOT log full URL - contains sensitive auth code
   });
 
   // Handle error from Supabase (e.g., expired link, invalid redirect)
   if (error_description) {
-    console.error('[Auth Callback] Supabase error:', error_description);
+    const errorCode = requestUrl.searchParams.get('error') || 'unknown';
+    console.error('[Auth Callback] Supabase error:', {
+      code: errorCode,
+      description: error_description,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Map to user-friendly message
+    const userMessage = ERROR_MESSAGES[errorCode] || 'An authentication error occurred. Please try again.';
+
     const errorUrl = new URL('/', requestUrl.origin);
     errorUrl.searchParams.set('auth_error', 'true');
-    errorUrl.searchParams.set('error_message', error_description);
+    errorUrl.searchParams.set('error_message', userMessage);
     return NextResponse.redirect(errorUrl);
   }
 
@@ -68,13 +86,15 @@ export async function GET(request: NextRequest) {
     // Redirect to the app with success message
     const successUrl = new URL('/', requestUrl.origin);
     successUrl.searchParams.set('verified', 'true');
-    return NextResponse.redirect(successUrl);
+
+    const response = NextResponse.redirect(successUrl);
+    // Prevent caching of auth callback
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+    return response;
   }
 
-  // No code provided
-  console.error('[Auth Callback] No code provided in callback URL');
-  const errorUrl = new URL('/', requestUrl.origin);
-  errorUrl.searchParams.set('auth_error', 'true');
-  errorUrl.searchParams.set('error_message', 'No verification code provided');
-  return NextResponse.redirect(errorUrl);
+  // No code provided - redirect to home (prevents manual navigation to callback)
+  console.log('[Auth Callback] No code provided, redirecting to home');
+  return NextResponse.redirect(new URL('/', requestUrl.origin));
 }

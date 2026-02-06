@@ -6,6 +6,9 @@ import type { User } from '@supabase/supabase-js';
 
 const ANONYMOUS_ID_KEY = 'ambrosia_anonymous_id';
 
+// Mutex to prevent race conditions during auth state changes
+let isProcessingAuthChange = false;
+
 interface SignUpData {
   email: string;
   password: string;
@@ -57,9 +60,17 @@ export function useAuth() {
         setUser(session?.user ?? null);
 
         // On sign in, ensure profile exists then link anonymous data
-        if (event === 'SIGNED_IN' && session?.user) {
-          await ensureUserProfile(session.user);
-          await linkAnonymousData(session.user.id);
+        // Use mutex to prevent race conditions from rapid auth events
+        if (event === 'SIGNED_IN' && session?.user && !isProcessingAuthChange) {
+          isProcessingAuthChange = true;
+          try {
+            await ensureUserProfile(session.user);
+            await linkAnonymousData(session.user.id);
+          } catch (err) {
+            console.error('[Auth] Post-signin setup failed:', err);
+          } finally {
+            isProcessingAuthChange = false;
+          }
         }
       }
     );
@@ -91,7 +102,7 @@ export function useAuth() {
     if (!anonymousId) return;
 
     try {
-      await fetch('/api/auth/link-anonymous', {
+      const response = await fetch('/api/auth/link-anonymous', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,9 +111,16 @@ export function useAuth() {
         }),
       });
 
-      // Clear anonymous ID after linking
-      // (Keep it for now to continue session tracking)
-      // localStorage.removeItem(ANONYMOUS_ID_KEY);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Link anonymous failed:', response.status, errorData);
+        return; // Don't throw - this is non-critical
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('[Auth] Linked anonymous data:', data.linked);
+      }
     } catch (err) {
       console.error('Failed to link anonymous data:', err);
     }
