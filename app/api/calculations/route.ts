@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to retrieve user's calculation history
+// GET endpoint to retrieve user's calculation history or count
 export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
@@ -170,6 +170,8 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('user_id');
     const anonymousId = searchParams.get('anonymous_id');
     const sessionId = searchParams.get('session_id');
+    const countOnly = searchParams.get('count') === 'true';
+    const monthOnly = searchParams.get('month') === 'true'; // Get count for current month only
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
 
     if (!userId && !anonymousId) {
@@ -177,6 +179,37 @@ export async function GET(request: NextRequest) {
         { error: 'user_id or anonymous_id is required' },
         { status: 400 }
       );
+    }
+
+    // If count only is requested, return just the count
+    if (countOnly && userId) {
+      const now = new Date();
+      let query = supabase
+        .from('calculations')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      // Filter to current month if requested
+      if (monthOnly) {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        query = query.gte('created_at', startOfMonth.toISOString());
+      }
+
+      const { count, error } = await query;
+
+      if (error) {
+        console.error('Calculation count error:', error);
+        return NextResponse.json(
+          { error: 'Failed to count calculations' },
+          { status: 500 }
+        );
+      }
+
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return NextResponse.json({
+        count: count || 0,
+        month: monthOnly ? currentMonth : undefined
+      });
     }
 
     // SECURITY: For anonymous_id queries, require session_id for verification

@@ -38,6 +38,22 @@ export function getUsage(): UsageData {
   }
 }
 
+export function setUsageCount(count: number): UsageData {
+  if (typeof window === 'undefined') {
+    return { count: 0, month: getCurrentMonth() };
+  }
+
+  const newUsage = { count, month: getCurrentMonth() };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
+  } catch {
+    // Silently fail if localStorage is full or unavailable
+  }
+
+  return newUsage;
+}
+
 export function incrementUsage(): UsageData {
   if (typeof window === 'undefined') {
     return { count: 0, month: getCurrentMonth() };
@@ -82,6 +98,34 @@ export function resetUsage(): void {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Silently fail
+  }
+}
+
+// Sync usage from database for authenticated users
+export async function syncUsageFromDatabase(userId: string): Promise<UsageData> {
+  if (typeof window === 'undefined') {
+    return { count: 0, month: getCurrentMonth() };
+  }
+
+  try {
+    const response = await fetch(`/api/calculations?user_id=${encodeURIComponent(userId)}&count=true&month=true`);
+
+    if (!response.ok) {
+      console.error('Failed to sync usage from database');
+      return getUsage(); // Fall back to localStorage
+    }
+
+    const data = await response.json();
+    const count = data.count || 0;
+
+    // Update localStorage with database count
+    const newUsage = { count, month: getCurrentMonth() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
+
+    return newUsage;
+  } catch (error) {
+    console.error('Error syncing usage from database:', error);
+    return getUsage(); // Fall back to localStorage
   }
 }
 

@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { syncUsageFromDatabase } from '@/lib/usage';
 
 interface User {
   id: string;  // Unique user identifier (UUID)
@@ -184,6 +185,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setTierState('pro');
               localStorage.setItem('user_tier', 'pro');
             }
+
+            // Sync usage count from database
+            syncUsageFromDatabase(supabaseUser.id).catch(console.error);
           }
           setIsLoading(false);
         });
@@ -218,6 +222,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setTierState('pro');
               localStorage.setItem('user_tier', 'pro');
             }
+
+            // Sync usage count from database (so it persists across devices)
+            syncUsageFromDatabase(supabaseUser.id).catch(console.error);
 
             // Create user profile if it doesn't exist (for OAuth users)
             supabase.from('user_profiles').upsert({
