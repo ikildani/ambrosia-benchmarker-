@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Pricing from '@/components/Pricing';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
+import FAQSection from '@/components/FAQSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
@@ -373,6 +374,9 @@ export default function Home() {
 
       {/* Pricing Section */}
       <Pricing currentTier={tier} onSelectTier={handleTierChange} />
+
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* About Section */}
       <section id="about" className="py-16 sm:py-20 lg:py-24 px-4 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
