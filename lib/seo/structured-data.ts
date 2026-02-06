@@ -174,3 +174,55 @@ export function generateBreadcrumbSchema(
     })),
   };
 }
+
+export interface DatasetSchema {
+  '@context': 'https://schema.org';
+  '@type': 'Dataset';
+  name: string;
+  description: string;
+  url: string;
+  keywords: string[];
+  creator: {
+    '@type': 'Organization';
+    name: string;
+    url: string;
+  };
+  temporalCoverage: string;
+  variableMeasured: string[];
+}
+
+export function generateDatasetSchema(): DatasetSchema {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'Biotech & Pharma Licensing Deal Database',
+    description: 'Comprehensive database of 500+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, rare disease, and other therapeutic areas.',
+    url: `${BASE_URL}/deals`,
+    keywords: [
+      'biotech deals',
+      'pharma licensing',
+      'drug licensing',
+      'upfront payments',
+      'milestone payments',
+      'royalty rates',
+      'oncology deals',
+      'biopharma transactions',
+    ],
+    creator: {
+      '@type': 'Organization',
+      name: 'Ambrosia Ventures',
+      url: BASE_URL,
+    },
+    temporalCoverage: '2018/2025',
+    variableMeasured: [
+      'Upfront Payment (USD)',
+      'Total Deal Value (USD)',
+      'Milestone Payments',
+      'Royalty Rates',
+      'Development Phase',
+      'Therapeutic Area',
+      'Modality',
+      'Territory',
+    ],
+  };
+}

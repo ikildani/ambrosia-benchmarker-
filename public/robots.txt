@@ -3,5 +3,15 @@ Allow: /
 Disallow: /api/
 Disallow: /dashboard
 Disallow: /admin/
+Disallow: /auth/
+Disallow: /share/
+
+# Googlebot - no delay for faster indexing
+User-agent: Googlebot
+Allow: /
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
 
 Sitemap: https://calculator.ambrosiaventures.co/sitemap.xml
