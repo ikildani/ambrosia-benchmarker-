@@ -56,8 +56,9 @@ export function useAuth() {
       async (event, session) => {
         setUser(session?.user ?? null);
 
-        // On sign in, link anonymous data
+        // On sign in, ensure profile exists then link anonymous data
         if (event === 'SIGNED_IN' && session?.user) {
+          await ensureUserProfile(session.user);
           await linkAnonymousData(session.user.id);
         }
       }
@@ -67,6 +68,23 @@ export function useAuth() {
       subscription.unsubscribe();
     };
   }, [supabaseEnabled]);
+
+  const ensureUserProfile = async (user: User) => {
+    if (!supabase) return;
+
+    // Create user profile if it doesn't exist (for OAuth users)
+    const { error } = await supabase.from('user_profiles').upsert({
+      id: user.id,
+      email: user.email,
+      company_name: user.user_metadata?.company || null,
+      tier: 'free',
+      email_verified: true,
+    }, { onConflict: 'id', ignoreDuplicates: true });
+
+    if (error) {
+      console.error('Profile upsert error:', error);
+    }
+  };
 
   const linkAnonymousData = async (userId: string) => {
     const anonymousId = localStorage.getItem(ANONYMOUS_ID_KEY);
