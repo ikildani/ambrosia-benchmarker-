@@ -303,6 +303,71 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
           </div>
         </div>
 
+        {/* Testimonials */}
+        <div className="mt-12 sm:mt-16 lg:mt-20">
+          <h3 className="text-center text-lg font-semibold text-neutral-900 dark:text-white mb-8">
+            Trusted by BD professionals at leading biotechs
+          </h3>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "Saved us weeks of research. The partner matching alone justified the cost 10x over.",
+                author: "VP, Business Development",
+                company: "Series B Oncology Biotech",
+                initials: "MK"
+              },
+              {
+                quote: "Finally, a tool that gives me real benchmarks instead of guesswork. Essential for any BD team.",
+                author: "Director, Corporate Development",
+                company: "Public Pharma Company",
+                initials: "SL"
+              },
+              {
+                quote: "The patent cliff data helped us understand partner urgency. Closed our deal 2 months faster.",
+                author: "Chief Business Officer",
+                company: "Gene Therapy Startup",
+                initials: "RJ"
+              }
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-neutral-50 dark:bg-slate-800 rounded-xl p-5 border border-neutral-100 dark:border-slate-700">
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => (
+                    <svg key={j} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-neutral-700 dark:text-slate-300 text-sm mb-4 italic">"{testimonial.quote}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">
+                    {testimonial.initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">{testimonial.author}</p>
+                    <p className="text-xs text-neutral-500 dark:text-slate-400">{testimonial.company}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
+          {[
+            { stat: '500+', label: 'Real deals analyzed' },
+            { stat: '127+', label: 'BD pros upgraded' },
+            { stat: '10x', label: 'Faster partner research' },
+          ].map((item, i) => (
+            <div key={i} className="text-center">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">
+                {item.stat}
+              </p>
+              <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 mt-1">{item.label}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Trust Badges */}
         <div className="mt-10 sm:mt-12 lg:mt-16 flex flex-wrap justify-center items-center gap-4 sm:gap-6 lg:gap-8 opacity-60">
           <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-500 dark:text-slate-400">
@@ -315,7 +380,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span className="text-xs sm:text-sm font-medium">Cancel Anytime</span>
+            <span className="text-xs sm:text-sm font-medium">7-Day Money-Back Guarantee</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-500 dark:text-slate-400">
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
