@@ -6,13 +6,14 @@ export type TherapeuticArea = 'oncology' | 'neurology';
 // Phase types
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
 
-// Modality types (17 oncology + 3 neurology = 20 options)
+// Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
   | 'smallMolecule' | 'mab' | 'adc' | 'bispecific' | 'tCellEngager'
   | 'carT_heme' | 'carT_solid' | 'cellTherapy' | 'geneTherapy'
   | 'radiopharmaceutical' | 'mrna' | 'rnai' | 'protac'
   | 'molecularGlue' | 'peptide' | 'therapeuticVaccine' | 'oncolyticVirus'
-  | 'bbbPlatform' | 'aso' | 'psychedelic';
+  | 'bbbPlatform' | 'aso' | 'psychedelic'
+  | 'ionChannel' | 'tauTargeting' | 'stemCell';
 
 // Indication types
 export type SolidTumorIndication =
@@ -27,7 +28,9 @@ export type HematologicIndication =
 
 export type NeurologyIndication =
   | 'alzheimers' | 'parkinsons' | 'schizophrenia' | 'depression'
-  | 'pain' | 'ms' | 'epilepsy' | 'rareNeuro';
+  | 'als' | 'huntingtons' | 'migraine' | 'narcolepsy'
+  | 'pain' | 'ms' | 'epilepsy' | 'tremor' | 'tbi' | 'addiction'
+  | 'rareNeuro';
 
 export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication;
 
@@ -141,7 +144,9 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
   ];
   const neurologyIndications: NeurologyIndication[] = [
     'alzheimers', 'parkinsons', 'schizophrenia', 'depression',
-    'pain', 'ms', 'epilepsy', 'rareNeuro'
+    'als', 'huntingtons', 'migraine', 'narcolepsy',
+    'pain', 'ms', 'epilepsy', 'tremor', 'tbi', 'addiction',
+    'rareNeuro'
   ];
   if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
   if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
@@ -340,18 +345,39 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   }
   regulatoryBonus = Math.min(regulatoryBonus, regConfig.maxBonus);
 
-  // Apply diminishing multiplier stacking
-  // modality^1.0 × indication^0.8 × territory^1.0 × competitive^0.7 × dataQuality^0.5
+  // Look up modality × indication interaction bonus
+  let interactionBonus = 0;
+  if (isNeurology) {
+    const interactionTerms = (benchmarks as any).interactionTerms || {};
+    const key = `${input.modality}+${input.indication}`;
+    if (interactionTerms[key]) {
+      interactionBonus = interactionTerms[key].bonus;
+      modifiers.push({
+        name: `${modalityData?.label ?? input.modality} × ${indicationData?.label ?? input.indication} synergy`,
+        multiplier: 1 + interactionBonus,
+        context: interactionTerms[key].context
+      });
+    }
+  }
+
+  // Apply diminishing multiplier stacking with therapeutic-area-specific exponents
+  // Neurology: combo dampening reduced (CNS drugs are inherently combination-limited by BBB)
+  // Neurology: indication exponent higher (indication choice matters more in neuro)
+  const comboExp = isNeurology ? 0.90 : 0.75;
+  const indicationExp = isNeurology ? 0.90 : 0.80;
+  const lotExp = isNeurology ? 0.90 : 0.85;
+
   const effectiveMultiplier =
     Math.pow(modalityMultiplier, 1.0) *
-    Math.pow(indicationMultiplier, 0.8) *
+    Math.pow(indicationMultiplier, indicationExp) *
     Math.pow(biomarkerMultiplier, 0.9) *
-    Math.pow(lotMultiplier, 0.85) *
-    Math.pow(comboMultiplier, 0.75) *
+    Math.pow(lotMultiplier, lotExp) *
+    Math.pow(comboMultiplier, comboExp) *
     Math.pow(territoryMultiplier, 1.0) *
     Math.pow(competitiveMultiplier, 0.7) *
     Math.pow(dataQualityMultiplier, 0.5) *
-    (1 + regulatoryBonus);
+    (1 + regulatoryBonus) *
+    (1 + interactionBonus);
 
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
@@ -382,7 +408,12 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   };
 
   // Calculate milestone allocations
-  const milestoneAlloc = phaseConfig.milestoneAllocations[input.phase];
+  // Disease-modifying neurology assets use rebalanced milestones (more dev-weighted)
+  const dmPhaseAdjust = (benchmarks as any).neurologyDiseaseModifyingPhaseAdjustment;
+  const useDMRebalance = isNeurology && input.treatmentApproach === 'diseaseModifying' && dmPhaseAdjust;
+  const milestoneAlloc = useDMRebalance
+    ? dmPhaseAdjust.milestoneRebalance[input.phase]
+    : phaseConfig.milestoneAllocations[input.phase];
   const totalMilestones = {
     low: totalDealValue.low - upfront.low,
     median: totalDealValue.median - upfront.median,
@@ -765,16 +796,25 @@ export const neurologyIndicationOptions = [
   { group: 'Neurodegeneration', options: [
     { value: 'alzheimers', label: "Alzheimer's Disease" },
     { value: 'parkinsons', label: "Parkinson's Disease" },
-    { value: 'rareNeuro', label: 'Rare Neurological (ALS, Huntington\'s, etc.)' },
+    { value: 'als', label: 'ALS (Amyotrophic Lateral Sclerosis)' },
+    { value: 'huntingtons', label: "Huntington's Disease" },
   ]},
   { group: 'Psychiatry', options: [
     { value: 'schizophrenia', label: 'Schizophrenia / Psychosis' },
     { value: 'depression', label: 'Depression / MDD' },
+    { value: 'addiction', label: 'Addiction / Substance Use Disorders' },
+  ]},
+  { group: 'Movement & Seizure', options: [
+    { value: 'epilepsy', label: 'Epilepsy' },
+    { value: 'tremor', label: 'Movement Disorders (Tremor / Dystonia)' },
   ]},
   { group: 'Other CNS', options: [
     { value: 'pain', label: 'Pain (Chronic / Neuropathic)' },
     { value: 'ms', label: 'Multiple Sclerosis' },
-    { value: 'epilepsy', label: 'Epilepsy' },
+    { value: 'migraine', label: 'Migraine / Headache' },
+    { value: 'narcolepsy', label: 'Narcolepsy / Sleep Disorders' },
+    { value: 'tbi', label: 'Traumatic Brain Injury / Stroke Recovery' },
+    { value: 'rareNeuro', label: 'Other Rare Neurological' },
   ]},
 ];
 
@@ -782,10 +822,12 @@ export const neurologyIndicationOptions = [
 export const neurologyModalityOptions = [
   { group: 'Small Molecules', options: [
     { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'ionChannel', label: 'Ion Channel Modulator' },
     { value: 'protac', label: 'PROTAC / Degrader' },
   ]},
   { group: 'Biologics', options: [
     { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'tauTargeting', label: 'Tau-targeting Therapy' },
     { value: 'peptide', label: 'Peptide' },
   ]},
   { group: 'CNS Delivery & Platforms', options: [
@@ -796,9 +838,10 @@ export const neurologyModalityOptions = [
     { value: 'aso', label: 'Antisense Oligonucleotide (ASO)' },
     { value: 'rnai', label: 'RNAi / siRNA' },
   ]},
-  { group: 'Emerging', options: [
+  { group: 'Cell & Emerging', options: [
+    { value: 'stemCell', label: 'Neural Stem Cell / Progenitor' },
     { value: 'psychedelic', label: 'Psychedelic / Neuroplastogen' },
-    { value: 'cellTherapy', label: 'Cell Therapy' },
+    { value: 'cellTherapy', label: 'Cell Therapy (other)' },
   ]},
 ];
 
