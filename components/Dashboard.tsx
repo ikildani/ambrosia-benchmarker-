@@ -294,11 +294,11 @@ export default function Dashboard({
             {/* Logo */}
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
               <Image
-                src="/logo.png"
+                src="/logo-color.png"
                 alt="Ambrosia Ventures"
-                width={180}
-                height={48}
-                className="h-9 sm:h-10 w-auto object-contain dark:[filter:brightness(2.2)_contrast(1.3)_saturate(1.4)_drop-shadow(0_0_15px_rgba(255,255,255,0.8))_drop-shadow(0_0_30px_rgba(255,255,255,0.5))_drop-shadow(0_0_45px_rgba(255,255,255,0.3))]"
+                width={220}
+                height={46}
+                className="h-10 w-auto"
                 priority
               />
             </button>

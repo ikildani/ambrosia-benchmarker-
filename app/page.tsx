@@ -423,11 +423,11 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 pb-8 sm:pb-12 border-b border-navy-800">
             <div className="flex items-center">
               <Image
-                src="/logo.png"
+                src="/logo-white.png"
                 alt="Ambrosia Ventures"
-                width={320}
-                height={90}
-                className="h-20 sm:h-28 lg:h-32 w-auto object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity"
+                width={180}
+                height={38}
+                className="h-8 w-auto"
               />
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm">

@@ -70,13 +70,11 @@ export default function DealsPage() {
             {/* Logo */}
             <Link href="/" className="flex items-center">
               <Image
-                src="/logo.png"
+                src={scrolled ? "/logo-color.png" : "/logo-white.png"}
                 alt="Ambrosia Ventures"
-                width={900}
-                height={248}
-                className={`h-10 sm:h-14 lg:h-20 w-auto object-contain transition-all ${
-                  scrolled ? '' : 'brightness-0 invert'
-                }`}
+                width={220}
+                height={46}
+                className="h-10 w-auto"
                 priority
               />
             </Link>

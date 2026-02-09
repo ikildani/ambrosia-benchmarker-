@@ -104,11 +104,11 @@ export default function CalculatorPage() {
               <div className="hidden sm:block w-px h-5 sm:h-6 bg-slate-200" />
               <Link href="/" className="flex items-center">
                 <Image
-                  src="/logo.png"
+                  src="/logo-color.png"
                   alt="Ambrosia Ventures"
-                  width={360}
-                  height={100}
-                  className="h-12 sm:h-14 lg:h-18 w-auto object-contain"
+                  width={220}
+                  height={46}
+                  className="h-10 w-auto"
                   priority
                 />
               </Link>

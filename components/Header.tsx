@@ -139,12 +139,11 @@ export default function Header({
             className="flex items-center group"
           >
             <Image
-              src="/logo.png"
+              src="/logo-color.png"
               alt="Ambrosia Ventures"
-              width={900}
-              height={248}
-              className="h-14 sm:h-20 md:h-28 lg:h-36 w-auto object-contain transition-all duration-300 hover:opacity-80
-                         dark:[filter:brightness(2.2)_contrast(1.3)_saturate(1.4)_drop-shadow(0_0_15px_rgba(255,255,255,0.8))_drop-shadow(0_0_30px_rgba(255,255,255,0.5))_drop-shadow(0_0_45px_rgba(255,255,255,0.3))]"
+              width={220}
+              height={46}
+              className="h-10 w-auto"
               priority
             />
           </Link>

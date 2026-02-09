@@ -14,11 +14,11 @@ export default function PrivacyPage() {
           <div className="flex items-center justify-between h-16 sm:h-18">
             <Link href="/" className="flex items-center touch-feedback">
               <Image
-                src="/logo.png"
+                src="/logo-color.png"
                 alt="Ambrosia Ventures"
-                width={320}
-                height={90}
-                className="h-14 sm:h-16 lg:h-20 w-auto object-contain"
+                width={220}
+                height={46}
+                className="h-10 w-auto"
                 priority
               />
             </Link>
