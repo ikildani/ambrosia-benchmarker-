@@ -3,7 +3,7 @@
 const faqs = [
   {
     question: "How does the calculator work?",
-    answer: "Our proprietary algorithm benchmarks your asset against a curated dataset of 500+ publicly disclosed biopharma licensing transactions. It matches on modality, development phase, indication, and territory to generate percentile-based ranges for upfront payments, development and commercial milestones, and royalty rates — giving you a data-driven starting point for any deal conversation."
+    answer: "Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes 500+ real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. You get a data-driven starting point for any deal conversation in seconds."
   },
   {
     question: "What data sources power the benchmarks?",
@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     question: "Is my data kept confidential?",
-    answer: "Absolutely. Your inputs are never stored, shared, or used to train any models. All calculations are processed in a secure environment, your asset details remain completely private, and no third party ever has access to your data."
+    answer: "Yes. We don't store or sell your data. Your inputs and asset details remain completely private."
   },
 ];
 
