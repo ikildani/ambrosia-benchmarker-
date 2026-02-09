@@ -6,7 +6,7 @@ interface AmbrosiaLogoProps {
 }
 
 export default function AmbrosiaLogo({ variant, height = 40 }: AmbrosiaLogoProps) {
-  const src = variant === "color" ? "/logo-color.png" : "/logo-white.png";
+  const src = variant === "color" ? "/logo-color.svg" : "/logo-white.svg";
 
   return (
     <img
