@@ -9,14 +9,17 @@ import {
   Modality,
   DataQuality,
   LineOfTherapy,
+  TreatmentApproach,
   BiomarkerStatus,
   CombinationPotential,
   phaseOptions,
   territoryOptions,
   competitivePositionOptions,
   modalityOptions,
+  neurologyModalityOptions,
   dataQualityOptions,
   lineOfTherapyOptions,
+  treatmentApproachOptions,
   biomarkerOptions,
   combinationPotentialOptions,
 } from './calculations';
@@ -68,6 +71,7 @@ const parameterLabels: Record<string, string> = {
   modality: 'Modality',
   dataQuality: 'Data Quality',
   lineOfTherapy: 'Line of Therapy',
+  treatmentApproach: 'Treatment Approach',
   biomarker: 'Biomarker Status',
   combinationPotential: 'Combination Potential',
 };
@@ -79,9 +83,10 @@ function flattenOptions(
   return groupedOptions.flatMap(g => g.options);
 }
 
-// Get options for a parameter
+// Get options for a parameter (therapeutic-area-aware)
 function getOptionsForParameter(
-  parameterKey: keyof CalculationInput
+  parameterKey: keyof CalculationInput,
+  isNeurology: boolean = false
 ): Array<{ value: string; label: string }> {
   switch (parameterKey) {
     case 'phase':
@@ -91,11 +96,13 @@ function getOptionsForParameter(
     case 'competitivePosition':
       return competitivePositionOptions;
     case 'modality':
-      return flattenOptions(modalityOptions);
+      return flattenOptions(isNeurology ? neurologyModalityOptions : modalityOptions);
     case 'dataQuality':
       return dataQualityOptions;
     case 'lineOfTherapy':
       return lineOfTherapyOptions;
+    case 'treatmentApproach':
+      return treatmentApproachOptions;
     case 'biomarker':
       return biomarkerOptions;
     case 'combinationPotential':
@@ -112,11 +119,12 @@ function computeParameterSensitivity(
   parameterKey: keyof CalculationInput
 ): ParameterSensitivity | null {
   // Skip regulatory designations (boolean flags, handled differently)
-  if (parameterKey === 'regulatoryDesignations' || parameterKey === 'indication') {
+  if (parameterKey === 'regulatoryDesignations' || parameterKey === 'indication' || parameterKey === 'therapeuticArea') {
     return null;
   }
 
-  const options = getOptionsForParameter(parameterKey);
+  const isNeurology = baseInputs.therapeuticArea === 'neurology';
+  const options = getOptionsForParameter(parameterKey, isNeurology);
   if (options.length === 0) return null;
 
   const currentValue = String(baseInputs[parameterKey]);
@@ -227,13 +235,14 @@ export function computeSensitivityAnalysis(
   inputs: CalculationInput,
   result: CalculationResult
 ): SensitivityData {
+  const isNeurology = inputs.therapeuticArea === 'neurology';
   const parametersToAnalyze: Array<keyof CalculationInput> = [
     'phase',
     'territory',
     'competitivePosition',
     'modality',
     'dataQuality',
-    'lineOfTherapy',
+    isNeurology ? 'treatmentApproach' : 'lineOfTherapy',
     'biomarker',
     'combinationPotential',
   ];

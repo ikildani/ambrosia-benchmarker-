@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: "We launched with oncology — the most active and data-rich therapeutic area in biopharma licensing — giving you the deepest benchmarking dataset available. Additional therapeutic areas including immunology, neurology, rare diseases, and more are actively in development and will be released soon."
+    answer: "We currently cover oncology and neurology/CNS — the two most active therapeutic areas in biopharma licensing. Oncology benchmarks draw from 500+ deals, while our neurology module is calibrated against 88 R&D partnerships totaling $45.9B (2024-2025), covering indications from Alzheimer's to rare neurological diseases. Additional therapeutic areas including immunology and cardiometabolic are in development."
   },
   {
     question: "Is my data kept confidential?",

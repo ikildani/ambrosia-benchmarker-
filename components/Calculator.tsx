@@ -129,6 +129,105 @@ const DEAL_TEMPLATES: DealTemplate[] = [
   },
 ];
 
+const NEUROLOGY_TEMPLATES: DealTemplate[] = [
+  {
+    id: 'neuro-alzheimers-bbb',
+    name: "Alzheimer's BBB Platform",
+    description: 'High-value CNS delivery',
+    icon: 'highValue',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'phase1',
+      modality: 'bbbPlatform' as Modality,
+      indication: 'alzheimers' as Indication,
+      territory: 'global',
+      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+  {
+    id: 'neuro-phase2-depression',
+    name: 'Phase 2 Depression',
+    description: 'Psychiatry pipeline',
+    icon: 'standard',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'phase2',
+      modality: 'smallMolecule',
+      indication: 'depression' as Indication,
+      territory: 'global',
+      treatmentApproach: 'symptomatic' as TreatmentApproach,
+      competitivePosition: 'racing',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'neuro-rare-gene-therapy',
+    name: 'Rare Neuro Gene Therapy',
+    description: 'Orphan + gene therapy premium',
+    icon: 'platform',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'phase1',
+      modality: 'geneTherapy',
+      indication: 'rareNeuro' as Indication,
+      territory: 'global',
+      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+  {
+    id: 'neuro-parkinsons-bestinclass',
+    name: "Parkinson's Best-in-Class",
+    description: 'Disease-modifying potential',
+    icon: 'premium',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'phase2',
+      modality: 'mab',
+      indication: 'parkinsons' as Indication,
+      territory: 'global',
+      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'neuro-schizophrenia-novel',
+    name: 'Schizophrenia Novel MOA',
+    description: 'KarXT-era paradigm shift',
+    icon: 'premium',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'phase2',
+      modality: 'smallMolecule',
+      indication: 'schizophrenia' as Indication,
+      territory: 'global',
+      treatmentApproach: 'symptomatic' as TreatmentApproach,
+      competitivePosition: 'firstInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'neuro-epilepsy-aso',
+    name: 'Epilepsy ASO',
+    description: 'Genetic epilepsy target',
+    icon: 'platform',
+    values: {
+      therapeuticArea: 'neurology',
+      phase: 'preclinical',
+      modality: 'aso' as Modality,
+      indication: 'epilepsy' as Indication,
+      territory: 'global',
+      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
+      competitivePosition: 'firstInClass',
+      dataQuality: 'limited',
+    },
+  },
+];
+
 const TEMPLATE_ICONS: Record<DealTemplate['icon'], React.ComponentType<{ className?: string }>> = {
   standard: Circle,
   premium: Star,
@@ -327,6 +426,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               session_id: sessionId,
               anonymous_id: anonymousId,
               user_id: isAuthenticated && user?.id ? user.id : null,
+              therapeutic_area: therapeuticArea,
               modality,
               development_phase: phase,
               indication_category: indication.split('_')[0],
@@ -547,11 +647,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           <div className="p-4 sm:p-6 lg:p-8 border-b border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-900">
             <div className="mb-4">
               <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
-              <p className="text-sm text-neutral-500 dark:text-slate-400">Based on 500+ analyzed deals</p>
+              <p className="text-sm text-neutral-500 dark:text-slate-400">
+                {therapeuticArea === 'neurology' ? 'Based on 88+ neurology R&D partnerships' : 'Based on 500+ analyzed deals'}
+              </p>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              {DEAL_TEMPLATES.map((template) => {
+              {(therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
                 const IconComponent = TEMPLATE_ICONS[template.icon];
                 return (
                   <button
@@ -614,6 +716,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         setLineOfTherapy('2L');
                       }
                       setResult(null);
+                      setShowTemplates(true);
                     }
                   }}
                   className={`px-4 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${

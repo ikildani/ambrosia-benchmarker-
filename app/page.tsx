@@ -122,7 +122,7 @@ export default function Home() {
             Data-driven estimates for upfront payments, milestones, and royalties
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
-            for oncology licensing and M&A transactions
+            for oncology and neurology licensing deals
           </p>
 
           {/* CTA Buttons */}
@@ -223,7 +223,7 @@ export default function Home() {
               {
                 step: '1',
                 title: 'Enter Asset Details',
-                description: 'Select development phase, modality, indication, and other key parameters for your oncology asset.',
+                description: 'Select therapeutic area, development phase, modality, indication, and other key parameters for your asset.',
                 icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
               },
               {

@@ -149,7 +149,7 @@ export default function OnboardingModal({
               Get deal terms in 60 seconds
             </h2>
             <p className="text-neutral-600 mb-6">
-              Based on 500+ real oncology transactions, our calculator estimates:
+              Based on 500+ real biopharma licensing deals across oncology and neurology, our calculator estimates:
             </p>
 
             <div className="text-left space-y-3 mb-8 max-w-sm mx-auto">

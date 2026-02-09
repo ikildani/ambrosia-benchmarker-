@@ -8,6 +8,7 @@ interface CalculationRequest {
   user_id?: string;
 
   // Input parameters
+  therapeutic_area?: string;
   modality: string;
   development_phase: string;
   indication_category?: string;
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
       user_id: body.user_id || null,
       session_id: body.session_id || null,
       anonymous_id: body.anonymous_id || null,
+      therapeutic_area: body.therapeutic_area || 'oncology',
       modality: body.modality,
       development_phase: body.development_phase,
       indication_category: body.indication_category || null,
@@ -123,6 +125,7 @@ export async function POST(request: NextRequest) {
       event_type: 'calculation_completed',
       event_data: {
         calculation_id: calculation.id,
+        therapeutic_area: body.therapeutic_area || 'oncology',
         modality: body.modality,
         development_phase: body.development_phase,
         indication_category: body.indication_category,

@@ -190,6 +190,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             syncUsageFromDatabase(supabaseUser.id).catch(console.error);
           }
           setIsLoading(false);
+        }).catch((error) => {
+          console.error('[Auth] getSession failed:', error);
+          setIsLoading(false);
         });
 
         // Listen for auth state changes (sign in, sign out, token refresh)

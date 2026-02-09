@@ -51,13 +51,16 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   'antibody': ['adc', 'bispecific'],
   'car_t': ['cell_therapy', 'gene_therapy', 'antibody'],
   'cell_therapy': ['car_t', 'gene_therapy'],
-  'gene_therapy': ['cell_therapy', 'mrna', 'oligonucleotide'],
+  'gene_therapy': ['cell_therapy', 'mrna', 'oligonucleotide', 'aso'],
   'mrna': ['gene_therapy', 'vaccine', 'oligonucleotide'],
   'radiopharm': ['antibody', 'small_molecule', 'peptide'],
   'small_molecule': ['peptide'],
-  'oligonucleotide': ['gene_therapy', 'mrna'],
+  'oligonucleotide': ['gene_therapy', 'mrna', 'aso'],
   'peptide': ['small_molecule', 'antibody'],
   'vaccine': ['mrna', 'antibody'],
+  'aso': ['oligonucleotide', 'gene_therapy', 'rnai'],
+  'bbb_platform': ['antibody', 'gene_therapy', 'aso'],
+  'psychedelic': ['small_molecule'],
 };
 
 // Indication category adjacency
@@ -65,7 +68,7 @@ const INDICATION_ADJACENCY: Record<string, string[]> = {
   'solid_tumor': ['hematological'],
   'hematological': ['solid_tumor', 'autoimmune'],
   'autoimmune': ['hematological', 'dermatology', 'rare_disease'],
-  'cns': ['rare_disease'],
+  'cns': ['rare_disease', 'autoimmune'],
   'rare_disease': ['cns', 'metabolic'],
   'infectious': ['vaccine'],
   'metabolic': ['cardiovascular', 'rare_disease'],
@@ -494,6 +497,9 @@ function formatModality(modality: string): string {
     'oligonucleotide': 'Oligonucleotides',
     'peptide': 'Peptides',
     'vaccine': 'Vaccines',
+    'aso': 'Antisense Oligonucleotides',
+    'bbb_platform': 'BBB Delivery Platforms',
+    'psychedelic': 'Psychedelics / Neuroplastogens',
   };
   return labels[modality] || modality;
 }

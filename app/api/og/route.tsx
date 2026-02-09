@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
             marginBottom: 48,
           }}
         >
-          Data-driven estimates for oncology licensing deals
+          Data-driven deal estimates across oncology and neurology
         </div>
 
         {/* Ambrosia Ventures branding */}

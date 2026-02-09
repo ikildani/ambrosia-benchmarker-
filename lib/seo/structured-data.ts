@@ -97,7 +97,7 @@ export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for oncology asset licensing deals with data-driven benchmarks.',
+    description: 'Estimate upfront payments, milestones, and royalties for oncology and neurology asset licensing deals with data-driven benchmarks.',
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',

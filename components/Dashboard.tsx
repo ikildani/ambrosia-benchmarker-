@@ -743,6 +743,11 @@ export default function Dashboard({
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <p className="font-semibold text-slate-900 dark:text-white">{item.labels.phase}</p>
+                            {item.inputs.therapeuticArea === 'neurology' && (
+                              <span className="px-2 py-0.5 bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
+                                Neuro
+                              </span>
+                            )}
                             {item.hasPDF && (
                               <span className="px-2 py-0.5 bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-medium rounded-full">
                                 PDF
