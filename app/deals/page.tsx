@@ -188,7 +188,7 @@ export default function DealsPage() {
               Biotech Deal Database
             </h1>
             <p className="text-lg sm:text-xl text-neutral-300 mb-6">
-              Browse real licensing deals across oncology, rare disease, and autoimmune.
+              Browse real licensing deals across oncology, neurology/CNS, rare disease, and autoimmune.
               Filter by modality, phase, indication, and financial terms.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
