@@ -12,6 +12,9 @@ import {
   TreatmentApproach,
   BiomarkerStatus,
   CombinationPotential,
+  BBBPenetration,
+  DiseaseProgression,
+  BiomarkerValidation,
   phaseOptions,
   territoryOptions,
   competitivePositionOptions,
@@ -22,6 +25,9 @@ import {
   treatmentApproachOptions,
   biomarkerOptions,
   combinationPotentialOptions,
+  bbbPenetrationOptions,
+  diseaseProgressionOptions,
+  biomarkerValidationOptions,
 } from './calculations';
 
 // Types for sensitivity analysis
@@ -74,6 +80,9 @@ const parameterLabels: Record<string, string> = {
   treatmentApproach: 'Treatment Approach',
   biomarker: 'Biomarker Status',
   combinationPotential: 'Combination Potential',
+  bbbPenetration: 'BBB Penetration',
+  diseaseProgression: 'Disease Progression',
+  biomarkerValidation: 'Biomarker Validation',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -107,6 +116,12 @@ function getOptionsForParameter(
       return biomarkerOptions;
     case 'combinationPotential':
       return combinationPotentialOptions;
+    case 'bbbPenetration':
+      return bbbPenetrationOptions;
+    case 'diseaseProgression':
+      return diseaseProgressionOptions;
+    case 'biomarkerValidation':
+      return biomarkerValidationOptions;
     default:
       return [];
   }
@@ -245,6 +260,7 @@ export function computeSensitivityAnalysis(
     isNeurology ? 'treatmentApproach' : 'lineOfTherapy',
     'biomarker',
     'combinationPotential',
+    ...(isNeurology ? ['bbbPenetration', 'diseaseProgression', 'biomarkerValidation'] as Array<keyof CalculationInput> : []),
   ];
 
   const parameters: ParameterSensitivity[] = parametersToAnalyze

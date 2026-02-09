@@ -168,7 +168,7 @@ export default function HistoryDetailModal({
 
   const handleDownloadPDF = useCallback(() => {
     if (result) {
-      generatePDFReport(result, item?.id, partnerMatches);
+      generatePDFReport(result, item?.id, partnerMatches, item?.inputs?.therapeuticArea);
     }
   }, [result, item, partnerMatches]);
 

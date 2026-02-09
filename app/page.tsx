@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import { SITE_CONFIG } from '@/lib/constants';
 import Pricing from '@/components/Pricing';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
@@ -357,10 +358,10 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {[
-              { value: '500+', label: 'Deals Analyzed' },
-              { value: '$2B+', label: 'Deal Value Estimated' },
-              { value: '50+', label: 'Companies Served' },
-              { value: '99%', label: 'User Satisfaction' },
+              { value: SITE_CONFIG.dealsAnalyzed, label: 'Deals Analyzed' },
+              { value: SITE_CONFIG.dealValueEstimated, label: 'Deal Value Estimated' },
+              { value: SITE_CONFIG.companiesServed, label: 'Companies Served' },
+              { value: SITE_CONFIG.userSatisfaction, label: 'User Satisfaction' },
             ].map((stat, idx) => (
               <div key={idx} className="text-center group">
                 <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">

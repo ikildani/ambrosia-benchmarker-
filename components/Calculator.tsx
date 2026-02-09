@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { SITE_CONFIG } from '@/lib/constants';
 import { Circle, Star, Hexagon, Dna, Globe2, CheckCircle } from 'lucide-react';
 import {
   TherapeuticArea,
@@ -15,6 +16,9 @@ import {
   CompetitivePosition,
   DataQuality,
   RegulatoryDesignations,
+  BBBPenetration,
+  DiseaseProgression,
+  BiomarkerValidation,
   CalculationInput,
   CalculationResult,
   calculateDealTerms,
@@ -32,10 +36,15 @@ import {
   competitivePositionOptions,
   dataQualityOptions,
   regulatoryDesignationOptions,
+  bbbPenetrationOptions,
+  diseaseProgressionOptions,
+  biomarkerValidationOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import { useTracking } from './TrackingProvider';
+import ResultsSkeleton from './ResultsSkeleton';
+import ConfirmSwitchModal from './ConfirmSwitchModal';
 import { useAuth } from '@/contexts/AuthContext';
 import Results from './Results';
 import PaywallModal from './PaywallModal';
@@ -251,6 +260,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [biomarker, setBiomarker] = useState<BiomarkerStatus>('unselected');
   const [lineOfTherapy, setLineOfTherapy] = useState<LineOfTherapy>('2L');
   const [treatmentApproach, setTreatmentApproach] = useState<TreatmentApproach>('symptomatic');
+  const [bbbPenetration, setBbbPenetration] = useState<BBBPenetration>('unproven');
+  const [diseaseProgression, setDiseaseProgression] = useState<DiseaseProgression>('moderateProgressive');
+  const [biomarkerValidation, setBiomarkerValidation] = useState<BiomarkerValidation>('noBiomarker');
   const [combinationPotential, setCombinationPotential] = useState<CombinationPotential>('some');
   const [competitivePosition, setCompetitivePosition] = useState<CompetitivePosition>('racing');
   const [dataQuality, setDataQuality] = useState<DataQuality>('promising');
@@ -260,6 +272,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     orphan: false,
     prime: false,
   });
+
+  const [pendingAreaSwitch, setPendingAreaSwitch] = useState<TherapeuticArea | null>(null);
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -282,6 +296,36 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const calculationCountRef = useRef(0);
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
+
+  // Check if user has modified inputs from oncology defaults
+  const hasUserModifiedInputs = () => {
+    if (therapeuticArea === 'oncology') {
+      return phase !== 'phase2' || modality !== 'smallMolecule' || indication !== 'lung_nsclc' ||
+        territory !== 'global' || biomarker !== 'unselected' || result !== null;
+    }
+    // neurology defaults
+    return phase !== 'phase2' || modality !== 'smallMolecule' || indication !== ('alzheimers' as Indication) ||
+      territory !== 'global' || biomarker !== 'unselected' || result !== null;
+  };
+
+  const performAreaSwitch = (newArea: TherapeuticArea) => {
+    trackParameterChange('therapeuticArea', therapeuticArea, newArea);
+    setTherapeuticArea(newArea);
+    if (newArea === 'neurology') {
+      setIndication('alzheimers' as Indication);
+      setModality('smallMolecule');
+      setTreatmentApproach('symptomatic');
+      setBbbPenetration('unproven');
+      setDiseaseProgression('moderateProgressive');
+      setBiomarkerValidation('noBiomarker');
+    } else {
+      setIndication('lung_nsclc' as Indication);
+      setModality('smallMolecule');
+      setLineOfTherapy('2L');
+    }
+    setResult(null);
+    setShowTemplates(true);
+  };
 
   // Refresh remaining uses when tier changes or user authenticates
   // When user signs in, sync from database to get accurate count
@@ -387,6 +431,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             competitivePosition,
             dataQuality,
             regulatoryDesignations,
+            ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
           };
           const calculatedResult = calculateDealTerms(input);
           setResult(calculatedResult);
@@ -635,7 +680,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   {therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
-                  2025-2026 Market Benchmarks
+                  {SITE_CONFIG.benchmarkPeriod}
                 </p>
               </div>
             </div>
@@ -648,7 +693,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             <div className="mb-4">
               <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
               <p className="text-sm text-neutral-500 dark:text-slate-400">
-                {therapeuticArea === 'neurology' ? 'Based on 88+ neurology R&D partnerships' : 'Based on 500+ analyzed deals'}
+                {therapeuticArea === 'neurology' ? `Based on ${SITE_CONFIG.neurologyPartnerships} neurology R&D partnerships` : `Based on ${SITE_CONFIG.dealsAnalyzed} analyzed deals`}
               </p>
             </div>
 
@@ -703,20 +748,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   onClick={() => {
                     const newArea = option.value as TherapeuticArea;
                     if (newArea !== therapeuticArea) {
-                      trackParameterChange('therapeuticArea', therapeuticArea, newArea);
-                      setTherapeuticArea(newArea);
-                      // Reset indication and modality to first option for new area
-                      if (newArea === 'neurology') {
-                        setIndication('alzheimers' as Indication);
-                        setModality('smallMolecule');
-                        setTreatmentApproach('symptomatic');
+                      if (hasUserModifiedInputs()) {
+                        setPendingAreaSwitch(newArea);
                       } else {
-                        setIndication('lung_nsclc' as Indication);
-                        setModality('smallMolecule');
-                        setLineOfTherapy('2L');
+                        performAreaSwitch(newArea);
                       }
-                      setResult(null);
-                      setShowTemplates(true);
                     }
                   }}
                   className={`px-4 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
@@ -827,6 +863,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 </h3>
                 <div className="space-y-4">
                   {therapeuticArea === 'neurology' ? (
+                    <>
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Treatment Approach</label>
                       <select
@@ -843,6 +880,64 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         ))}
                       </select>
                     </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                        BBB Penetration
+                        <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">NEURO</span>
+                      </label>
+                      <select
+                        value={bbbPenetration}
+                        onChange={(e) => {
+                          const newValue = e.target.value as BBBPenetration;
+                          trackParameterChange('bbbPenetration', bbbPenetration, newValue);
+                          setBbbPenetration(newValue);
+                        }}
+                        className="select-field"
+                      >
+                        {bbbPenetrationOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                        Disease Progression
+                        <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">NEURO</span>
+                      </label>
+                      <select
+                        value={diseaseProgression}
+                        onChange={(e) => {
+                          const newValue = e.target.value as DiseaseProgression;
+                          trackParameterChange('diseaseProgression', diseaseProgression, newValue);
+                          setDiseaseProgression(newValue);
+                        }}
+                        className="select-field"
+                      >
+                        {diseaseProgressionOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                        Biomarker Validation
+                        <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">NEURO</span>
+                      </label>
+                      <select
+                        value={biomarkerValidation}
+                        onChange={(e) => {
+                          const newValue = e.target.value as BiomarkerValidation;
+                          trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
+                          setBiomarkerValidation(newValue);
+                        }}
+                        className="select-field"
+                      >
+                        {biomarkerValidationOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    </>
                   ) : (
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
@@ -1078,7 +1173,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       </div>
 
       {/* Results */}
-      {result && (
+      {isCalculating && (
+        <div className="mt-8 animate-fade-in results-container">
+          <ResultsSkeleton />
+        </div>
+      )}
+      {result && !isCalculating && (
         <div className="mt-8 animate-fade-in results-container">
           <Results
             result={result}
@@ -1103,6 +1203,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               competitivePosition,
               dataQuality,
               regulatoryDesignations,
+              ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
             }}
             onApplyNewInputs={handleSensitivityApply}
           />
@@ -1128,6 +1229,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           setOnboardingStep(null);
         }}
         onStepChange={setOnboardingStep}
+      />
+
+      <ConfirmSwitchModal
+        isOpen={pendingAreaSwitch !== null}
+        targetArea={pendingAreaSwitch === 'neurology' ? 'Neurology / CNS' : 'Oncology'}
+        onConfirm={() => {
+          if (pendingAreaSwitch) performAreaSwitch(pendingAreaSwitch);
+          setPendingAreaSwitch(null);
+        }}
+        onCancel={() => setPendingAreaSwitch(null)}
       />
     </div>
   );

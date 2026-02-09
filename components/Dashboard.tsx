@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import { SITE_CONFIG } from '@/lib/constants';
 import { clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
 import { useTheme } from '@/lib/theme';
@@ -145,6 +146,62 @@ export default function Dashboard({
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
+
+  // History filter/sort state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterArea, setFilterArea] = useState<'all' | 'oncology' | 'neurology'>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'value'>('date');
+
+  const filteredHistory = useMemo(() => {
+    let items = [...history];
+
+    // Text search across labels
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter((item) =>
+        item.labels.phase.toLowerCase().includes(q) ||
+        item.labels.modality.toLowerCase().includes(q) ||
+        item.labels.indication.toLowerCase().includes(q) ||
+        (item.inputs.therapeuticArea || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Therapeutic area filter
+    if (filterArea !== 'all') {
+      items = items.filter((item) => item.inputs.therapeuticArea === filterArea);
+    }
+
+    // Sort
+    if (sortBy === 'value') {
+      items.sort((a, b) => b.results.totalValueMedian - a.results.totalValueMedian);
+    } else {
+      items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }
+
+    return items;
+  }, [history, searchQuery, filterArea, sortBy]);
+
+  const handleExportCSV = () => {
+    if (filteredHistory.length === 0) return;
+    const headers = ['Date', 'Therapeutic Area', 'Phase', 'Modality', 'Indication', 'Upfront (Median)', 'Total Value (Median)'];
+    const rows = filteredHistory.map((item) => [
+      new Date(String(item.timestamp)).toLocaleDateString(),
+      item.inputs.therapeuticArea || 'oncology',
+      item.labels.phase,
+      item.labels.modality,
+      item.labels.indication,
+      item.results.upfrontMedian,
+      item.results.totalValueMedian,
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `deal-calculations-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     // Load user data from localStorage
@@ -640,7 +697,7 @@ export default function Dashboard({
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       {tier === 'pro'
                         ? 'Full access to all features'
-                        : 'Limited to 2 calculations per month'
+                        : `Limited to ${SITE_CONFIG.freeCalculationsLabel}`
                       }
                     </p>
                   </div>
@@ -708,8 +765,59 @@ export default function Dashboard({
         {activeTab === 'history' && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
+                </div>
+                {history.length > 0 && (
+                  <button
+                    onClick={handleExportCSV}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export CSV
+                  </button>
+                )}
+              </div>
+
+              {/* Filter bar */}
+              {history.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  <input
+                    type="text"
+                    placeholder="Search calculations..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 min-w-[180px] px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                  <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+                    {(['all', 'oncology', 'neurology'] as const).map((area) => (
+                      <button
+                        key={area}
+                        onClick={() => setFilterArea(area)}
+                        className={`px-3 py-2 text-xs font-medium transition-colors ${
+                          filterArea === area
+                            ? 'bg-teal-500 text-white'
+                            : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        {area === 'all' ? 'All' : area === 'oncology' ? 'Oncology' : 'Neurology'}
+                      </button>
+                    ))}
+                  </div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'date' | 'value')}
+                    className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                  >
+                    <option value="date">Newest first</option>
+                    <option value="value">Highest value</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             {historyLoading ? (
@@ -723,8 +831,9 @@ export default function Dashboard({
                 <p className="text-slate-500 dark:text-slate-400">Loading your calculation history...</p>
               </div>
             ) : history.length > 0 ? (
+              filteredHistory.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                {history.map((item) => (
+                {filteredHistory.map((item) => (
                   <div key={item.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors history-item-clickable group">
                     <div
                       onClick={() => handleHistoryClick(item)}
@@ -789,6 +898,12 @@ export default function Dashboard({
                   </div>
                 ))}
               </div>
+              ) : (
+                <div className="p-12 text-center">
+                  <p className="text-slate-500 dark:text-slate-400">No calculations match your filters</p>
+                  <button onClick={() => { setSearchQuery(''); setFilterArea('all'); }} className="mt-2 text-sm text-teal-600 dark:text-teal-400 hover:underline">Clear filters</button>
+                </div>
+              )
             ) : (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
@@ -1044,7 +1159,7 @@ export default function Dashboard({
                     </div>
                     <div>
                       <p className="text-lg font-bold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? '$99/month • Billed monthly' : 'Free forever'}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? SITE_CONFIG.proPriceBilling : 'Free forever'}</p>
                     </div>
                   </div>
                   {tier === 'free' && (
@@ -1060,7 +1175,7 @@ export default function Dashboard({
               <div className="grid sm:grid-cols-2 gap-3">
                 {(tier === 'pro'
                   ? ['Unlimited calculations', 'PDF report generation', 'Full history access', 'Priority support', 'Advanced analytics', 'API access coming soon']
-                  : ['2 calculations per month', 'Basic deal estimates', 'Calculation history']
+                  : [SITE_CONFIG.freeCalculationsLabel, 'Basic deal estimates', 'Calculation history']
                 ).map((feature, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

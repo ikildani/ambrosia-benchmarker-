@@ -5,6 +5,8 @@ import { ParameterSensitivity, ParameterOption, formatDelta } from '@/lib/sensit
 import { formatCurrency } from '@/lib/calculations';
 import ImpactBadge from './ImpactBadge';
 
+const NEURO_PARAMS = new Set(['bbbPenetration', 'diseaseProgression', 'biomarkerValidation']);
+
 interface ParameterSelectorProps {
   sensitivity: ParameterSensitivity;
   selectedValue: string;
@@ -31,8 +33,11 @@ export default function ParameterSelector({
     <div className="border border-neutral-200 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
-        <h4 className="text-sm font-semibold text-neutral-800 dark:text-slate-200 uppercase tracking-wide">
+        <h4 className="text-sm font-semibold text-neutral-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-1.5">
           {label}
+          {NEURO_PARAMS.has(sensitivity.parameterKey) && (
+            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded normal-case tracking-normal">NEURO</span>
+          )}
         </h4>
         <ImpactBadge level={impactLevel} />
       </div>

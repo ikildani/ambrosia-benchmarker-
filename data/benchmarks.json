@@ -287,6 +287,23 @@
       "symptomatic": { "multiplier": 1.00, "label": "Symptomatic / Acute", "context": "Manages symptoms without altering progression; standard baseline" },
       "adjunctive": { "multiplier": 0.85, "label": "Adjunctive / Supportive", "context": "Add-on to existing therapies; smaller addressable positioning" }
     },
+    "bbbPenetration": {
+      "provenCNS": { "multiplier": 1.30, "label": "Proven CNS penetration", "context": "Demonstrated BBB crossing with therapeutic CNS levels; significant de-risking" },
+      "promisingPreclinical": { "multiplier": 1.15, "label": "Promising preclinical BBB data", "context": "Preclinical evidence of CNS exposure; needs clinical confirmation" },
+      "unproven": { "multiplier": 1.00, "label": "Unproven / standard", "context": "No specific BBB data; standard risk assumption" },
+      "peripheralOnly": { "multiplier": 0.85, "label": "Peripheral only", "context": "Does not cross BBB; limited to peripheral targets" }
+    },
+    "diseaseProgression": {
+      "slowProgressive": { "multiplier": 1.15, "label": "Slow progressive", "context": "Alzheimer's, Parkinson's; long treatment duration drives lifetime value" },
+      "moderateProgressive": { "multiplier": 1.00, "label": "Moderate progressive", "context": "Standard progressive neurological disease" },
+      "rapidProgressive": { "multiplier": 0.90, "label": "Rapid progressive", "context": "ALS, aggressive MS; shorter treatment window but high unmet need" },
+      "episodic": { "multiplier": 1.05, "label": "Episodic / relapsing", "context": "Migraine, epilepsy; recurring use with large addressable market" }
+    },
+    "biomarkerValidation": {
+      "validatedSurrogate": { "multiplier": 1.25, "label": "Validated surrogate endpoint", "context": "FDA-accepted biomarker (e.g., amyloid PET); accelerated pathway possible" },
+      "exploratory": { "multiplier": 1.10, "label": "Exploratory biomarker", "context": "Promising but not validated; supports patient selection" },
+      "noBiomarker": { "multiplier": 1.00, "label": "No biomarker", "context": "Clinical endpoints only; standard neurology trial design" }
+    },
     "regulatoryDesignations": {
       "breakthrough": { "bonus": 0.12, "label": "Breakthrough Therapy" },
       "fastTrack": { "bonus": 0.06, "label": "Fast Track" },
@@ -372,5 +389,115 @@
       "median": "Expected",
       "high": "Optimistic"
     }
-  }
+  },
+  "comparableDeals": [
+    {
+      "id": "novartis-point",
+      "parties": "Novartis / Point Biopharma",
+      "totalValue": 4900,
+      "upfront": 4900,
+      "year": 2024,
+      "phase": "phase2",
+      "modalities": ["radiopharmaceutical"],
+      "indications": ["prostate", "lung_nsclc"],
+      "therapeuticArea": "oncology",
+      "context": "Acquisition; full buyout of radiopharmaceutical pipeline including Phase 2 prostate cancer asset"
+    },
+    {
+      "id": "bms-rayzebio",
+      "parties": "BMS / RayzeBio",
+      "totalValue": 4100,
+      "upfront": 4100,
+      "year": 2024,
+      "phase": "phase2",
+      "modalities": ["radiopharmaceutical"],
+      "indications": ["lung_nsclc", "gastric"],
+      "therapeuticArea": "oncology",
+      "context": "Acquisition; radiopharmaceutical platform with multiple solid tumor programs"
+    },
+    {
+      "id": "az-jcr",
+      "parties": "AstraZeneca / JCR Pharmaceuticals",
+      "totalValue": 825,
+      "upfront": 100,
+      "year": 2024,
+      "phase": "phase1",
+      "modalities": ["bbbPlatform"],
+      "indications": ["rareNeuro"],
+      "therapeuticArea": "neurology",
+      "context": "BBB-penetrating platform for CNS rare diseases; milestone-heavy structure reflects CNS development risk"
+    },
+    {
+      "id": "abl-gsk",
+      "parties": "ABL Bio / GSK",
+      "totalValue": 2700,
+      "upfront": 100,
+      "year": 2024,
+      "phase": "phase1",
+      "modalities": ["bispecific"],
+      "indications": ["alzheimers"],
+      "therapeuticArea": "neurology",
+      "context": "Bispecific antibody targeting alpha-synuclein; milestone-heavy deal reflecting neurodegen risk"
+    },
+    {
+      "id": "bms-karuna",
+      "parties": "BMS / Karuna Therapeutics",
+      "totalValue": 14000,
+      "upfront": 14000,
+      "year": 2024,
+      "phase": "phase3",
+      "modalities": ["smallMolecule"],
+      "indications": ["schizophrenia"],
+      "therapeuticArea": "neurology",
+      "context": "Acquisition; KarXT (xanomeline-trospium) for schizophrenia with Phase 3 data. Largest CNS deal in recent history"
+    },
+    {
+      "id": "abbvie-gilgamesh",
+      "parties": "AbbVie / Gilgamesh Pharmaceuticals",
+      "totalValue": 1200,
+      "upfront": 1200,
+      "year": 2024,
+      "phase": "phase1",
+      "modalities": ["smallMolecule"],
+      "indications": ["depression"],
+      "therapeuticArea": "neurology",
+      "context": "Acquisition of psychedelic-inspired neuropsychiatric pipeline for treatment-resistant depression"
+    },
+    {
+      "id": "novartis-ptc",
+      "parties": "Novartis / PTC Therapeutics",
+      "totalValue": 1000,
+      "upfront": 1000,
+      "year": 2024,
+      "phase": "approved",
+      "modalities": ["geneTherapy"],
+      "indications": ["rareNeuro"],
+      "therapeuticArea": "neurology",
+      "context": "Gene therapy for rare neuromuscular disease (SMA). Approved asset with established commercial revenue"
+    },
+    {
+      "id": "merck-daiichi",
+      "parties": "Merck / Daiichi Sankyo",
+      "totalValue": 22000,
+      "upfront": 4000,
+      "year": 2023,
+      "phase": "phase3",
+      "modalities": ["adc"],
+      "indications": ["lung_nsclc", "breast_her2"],
+      "therapeuticArea": "oncology",
+      "context": "Three ADC co-development programs; largest biopharma licensing deal of 2023"
+    },
+    {
+      "id": "pfizer-seagen",
+      "parties": "Pfizer / Seagen",
+      "totalValue": 43000,
+      "upfront": 43000,
+      "year": 2023,
+      "phase": "approved",
+      "modalities": ["adc"],
+      "indications": ["breast_her2", "bladder"],
+      "therapeuticArea": "oncology",
+      "context": "Full acquisition of ADC leader; multiple approved and late-stage oncology assets"
+    }
+  ]
 }

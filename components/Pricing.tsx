@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { SITE_CONFIG } from '@/lib/constants';
 
 interface PricingProps {
   currentTier: 'free' | 'pro';
@@ -204,7 +205,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
             </div>
 
             <div className="mb-6 sm:mb-8">
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">$99</span>
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{SITE_CONFIG.proPriceDisplay}</span>
               <span className="text-neutral-400 ml-2 text-sm sm:text-base">/month</span>
             </div>
 
@@ -306,7 +307,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
         {/* Stats */}
         <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
           {[
-            { stat: '500+', label: 'Real deals analyzed' },
+            { stat: SITE_CONFIG.dealsAnalyzed, label: 'Real deals analyzed' },
             { stat: '127+', label: 'BD pros upgraded' },
             { stat: '10x', label: 'Faster partner research' },
           ].map((item, i) => (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FREE_LIMIT } from '@/lib/usage';
+import { SITE_CONFIG } from '@/lib/constants';
 import { useTracking } from './TrackingProvider';
 
 interface PaywallModalProps {
@@ -151,7 +152,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
           <div className="space-y-3 mb-6">
             {[
               { icon: '🎯', text: 'Find ideal partners 10x faster', subtext: 'AI-matched to your asset' },
-              { icon: '💰', text: 'Benchmark with 500+ real deals', subtext: 'Know your worth before negotiating' },
+              { icon: '💰', text: `Benchmark with ${SITE_CONFIG.dealsAnalyzed} real deals`, subtext: 'Know your worth before negotiating' },
               { icon: '📊', text: 'Patent cliff & pipeline insights', subtext: 'Understand partner motivation' },
               { icon: '📄', text: 'Board-ready PDF reports', subtext: 'Professional deliverables in seconds' },
             ].map((item, idx) => (
@@ -172,7 +173,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
               <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">50% OFF</span>
             </div>
             <div className="flex items-baseline justify-center gap-1">
-              <span className="text-4xl font-bold text-slate-900">$99</span>
+              <span className="text-4xl font-bold text-slate-900">{SITE_CONFIG.proPriceDisplay}</span>
               <span className="text-slate-500">/month</span>
             </div>
             <p className="text-xs text-slate-500 mt-1">Less than one hour of consultant time</p>

@@ -12,7 +12,8 @@ export interface PartnerForPDF {
 export function generatePDFReport(
   result: CalculationResult,
   historyId?: string,
-  partnerMatches?: PartnerForPDF[]
+  partnerMatches?: PartnerForPDF[],
+  therapeuticArea?: string
 ): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
@@ -169,8 +170,8 @@ export function generatePDFReport(
 
     .cover-meta-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
       margin-top: 60px;
       padding: 32px;
       background: var(--gray-50);
@@ -860,6 +861,10 @@ export function generatePDFReport(
         <h1 class="cover-title">Deal Terms<br/><span class="cover-title-highlight">Analysis Report</span></h1>
 
         <div class="cover-meta-grid">
+          <div class="cover-meta-item">
+            <label>Therapeutic Area</label>
+            <span style="color: ${therapeuticArea === 'neurology' ? '#7c3aed' : '#0d9488'}">${therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'}</span>
+          </div>
           <div class="cover-meta-item">
             <label>Development Phase</label>
             <span>${labels.phase}</span>

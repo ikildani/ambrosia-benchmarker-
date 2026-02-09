@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { SITE_CONFIG } from '@/lib/constants';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { SensitivityAnalysis } from './sensitivity';
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
@@ -12,6 +13,7 @@ import ShareModal from './ShareModal';
 import NegotiationPlaybookModal from './NegotiationPlaybookModal';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
+import ComparableDeals from './ComparableDeals';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -380,7 +382,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    generatePDFReport(result, undefined, partnerMatches);
+    generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea);
   };
 
   const handleDownloadExcel = () => {
@@ -522,6 +524,23 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
             </div>
           </div>
         </div>
+
+        {/* Neurology Milestone Explanation */}
+        {result.neurologyMilestoneExplanation && (
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700/50">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-soft flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-purple-800 dark:text-purple-300 mb-1 text-sm sm:text-base">Why Neurology Deal Structures Differ</h4>
+                <p className="text-xs sm:text-sm text-purple-900 dark:text-purple-200">{result.neurologyMilestoneExplanation}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Negotiation Insight - Pro Feature */}
         <div className="relative mb-4 sm:mb-6">
@@ -825,6 +844,11 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
           />
         )}
 
+        {/* Comparable Deals */}
+        {fullInputs && (
+          <ComparableDeals inputs={fullInputs} isPro={isPro} />
+        )}
+
         {/* Negotiation Playbook CTA */}
         <div className="relative mt-6 sm:mt-8">
           <div className={`p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl ${!isPro ? 'blur-sm pointer-events-none' : ''}`}>
@@ -905,7 +929,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               onClick={handleUpgradeClick}
               className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow w-full sm:w-auto"
             >
-              <span>Upgrade to Pro - $99/month</span>
+              <span>Upgrade to Pro - {SITE_CONFIG.proPriceWithPeriod}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>

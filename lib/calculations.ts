@@ -44,6 +44,11 @@ export type CombinationPotential = 'strong' | 'some' | 'standalone';
 export type CompetitivePosition = 'firstInClass' | 'firstToPivotal' | 'bestInClass' | 'racing' | 'behind' | 'crowded';
 export type DataQuality = 'pivotalReady' | 'strongPhase2' | 'promising' | 'mixed' | 'limited';
 
+// Neurology-specific types
+export type BBBPenetration = 'provenCNS' | 'promisingPreclinical' | 'unproven' | 'peripheralOnly';
+export type DiseaseProgression = 'slowProgressive' | 'moderateProgressive' | 'rapidProgressive' | 'episodic';
+export type BiomarkerValidation = 'validatedSurrogate' | 'exploratory' | 'noBiomarker';
+
 export interface RegulatoryDesignations {
   breakthrough: boolean;
   fastTrack: boolean;
@@ -85,6 +90,10 @@ export interface CalculationInput {
   competitivePosition: CompetitivePosition;
   dataQuality: DataQuality;
   regulatoryDesignations: RegulatoryDesignations;
+  // Neurology-specific optional fields
+  bbbPenetration?: BBBPenetration;
+  diseaseProgression?: DiseaseProgression;
+  biomarkerValidation?: BiomarkerValidation;
 }
 
 // Drill-down data for expanded metric views
@@ -129,6 +138,7 @@ export interface CalculationResult {
   };
   drillDown: DrillDownCollection;
   phase: Phase;
+  neurologyMilestoneExplanation?: string;
 }
 
 // Helper to get indication category
@@ -298,6 +308,36 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     }
   }
 
+  // Get neurology-specific multipliers (BBB, disease progression, biomarker validation)
+  let bbbMultiplier = 1.0;
+  let diseaseProgMultiplier = 1.0;
+  let biomarkerValMultiplier = 1.0;
+  if (isNeurology) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mc = benchmarks.multiplierConfig as any;
+
+    const bbbKey = input.bbbPenetration || 'unproven';
+    const bbbData = mc.bbbPenetration?.[bbbKey] as { multiplier: number; label: string; context?: string } | undefined;
+    bbbMultiplier = bbbData?.multiplier ?? 1.0;
+    if (bbbMultiplier !== 1.0) {
+      modifiers.push({ name: bbbData?.label ?? bbbKey, multiplier: bbbMultiplier, context: bbbData?.context });
+    }
+
+    const dpKey = input.diseaseProgression || 'moderateProgressive';
+    const dpData = mc.diseaseProgression?.[dpKey] as { multiplier: number; label: string; context?: string } | undefined;
+    diseaseProgMultiplier = dpData?.multiplier ?? 1.0;
+    if (diseaseProgMultiplier !== 1.0) {
+      modifiers.push({ name: dpData?.label ?? dpKey, multiplier: diseaseProgMultiplier, context: dpData?.context });
+    }
+
+    const bvKey = input.biomarkerValidation || 'noBiomarker';
+    const bvData = mc.biomarkerValidation?.[bvKey] as { multiplier: number; label: string; context?: string } | undefined;
+    biomarkerValMultiplier = bvData?.multiplier ?? 1.0;
+    if (biomarkerValMultiplier !== 1.0) {
+      modifiers.push({ name: bvData?.label ?? bvKey, multiplier: biomarkerValMultiplier, context: bvData?.context });
+    }
+  }
+
   // Get combination potential multiplier
   const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential] as { multiplier: number; label: string; context?: string } | undefined;
   const comboMultiplier = comboData?.multiplier ?? 1.0;
@@ -351,6 +391,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     Math.pow(territoryMultiplier, 1.0) *
     Math.pow(competitiveMultiplier, 0.7) *
     Math.pow(dataQualityMultiplier, 0.5) *
+    Math.pow(bbbMultiplier, 0.8) *
+    Math.pow(diseaseProgMultiplier, 0.7) *
+    Math.pow(biomarkerValMultiplier, 0.75) *
     (1 + regulatoryBonus);
 
   // Calculate total deal value
@@ -472,7 +515,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       indication: indicationData?.label ?? input.indication
     },
     drillDown,
-    phase: input.phase
+    phase: input.phase,
+    ...(isNeurology ? {
+      neurologyMilestoneExplanation: generateNeuroMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {})
   };
 }
 
@@ -601,8 +647,40 @@ function calculateBreakdownValue(
   };
 }
 
+function generateNeuroMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const neuroUpfrontRanges: Record<Phase, string> = {
+    preclinical: '5-12%',
+    phase1: '8-18%',
+    phase2: '12-25%',
+    phase3: '20-35%',
+    approved: '30-50%',
+  };
+  const oncoUpfrontRanges: Record<Phase, string> = {
+    preclinical: '8-18%',
+    phase1: '12-25%',
+    phase2: '18-35%',
+    phase3: '25-45%',
+    approved: '35-60%',
+  };
+  return `Neurology deals at ${phase.replace('phase', 'Phase ')} typically allocate ${neuroUpfrontRanges[phase]} upfront (vs ${oncoUpfrontRanges[phase]} in oncology). ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the higher clinical risk in CNS programs — longer trials, complex endpoints, and historically lower approval rates shift value toward milestone-based structures that reward de-risking.`;
+}
+
 function generateRationale(input: CalculationInput, riskScore: number): string {
   const phaseLabel = benchmarks.labels.phases[input.phase];
+  const isNeuro = input.therapeuticArea === 'neurology';
+
+  if (isNeuro) {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} CNS asset with proven BBB penetration and strong data justifies a higher upfront component, though milestone-heavy structures remain the norm in neurology.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} neurology asset with moderate risk. CNS programs typically favor milestone-weighted deals to account for longer development timelines and endpoint complexity.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage CNS asset with clinical uncertainty. Neurology deal structures favor heavy milestone weighting tied to clinical and regulatory de-risking events.`;
+    } else {
+      return `High-risk CNS profile. Expect minimal upfront with significant milestone potential tied to BBB penetration proof, clinical endpoints, and regulatory milestones.`;
+    }
+  }
 
   if (riskScore < 25) {
     return `De-risked ${phaseLabel} asset with strong competitive position justifies higher upfront.`;
@@ -807,4 +885,24 @@ export const treatmentApproachOptions = [
   { value: 'diseaseModifying', label: 'Disease-modifying' },
   { value: 'symptomatic', label: 'Symptomatic / Acute' },
   { value: 'adjunctive', label: 'Adjunctive / Supportive' },
+];
+
+export const bbbPenetrationOptions = [
+  { value: 'provenCNS', label: 'Proven CNS penetration' },
+  { value: 'promisingPreclinical', label: 'Promising preclinical BBB data' },
+  { value: 'unproven', label: 'Unproven / standard' },
+  { value: 'peripheralOnly', label: 'Peripheral only' },
+];
+
+export const diseaseProgressionOptions = [
+  { value: 'slowProgressive', label: 'Slow progressive' },
+  { value: 'moderateProgressive', label: 'Moderate progressive' },
+  { value: 'rapidProgressive', label: 'Rapid progressive' },
+  { value: 'episodic', label: 'Episodic / relapsing' },
+];
+
+export const biomarkerValidationOptions = [
+  { value: 'validatedSurrogate', label: 'Validated surrogate endpoint' },
+  { value: 'exploratory', label: 'Exploratory biomarker' },
+  { value: 'noBiomarker', label: 'No biomarker' },
 ];

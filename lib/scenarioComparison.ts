@@ -56,6 +56,16 @@ const POSITION_LABELS: Record<string, string> = {
 export const COMPARISON_METRICS: ComparisonMetric[] = [
   // Deal Info Section
   {
+    key: 'therapeuticArea',
+    label: 'Therapeutic Area',
+    category: 'dealInfo',
+    format: 'text',
+    getValue: (s) => {
+      const area = s.inputs?.therapeuticArea;
+      return area === 'neurology' ? 'Neurology / CNS' : 'Oncology';
+    },
+  },
+  {
     key: 'phase',
     label: 'Phase',
     category: 'dealInfo',

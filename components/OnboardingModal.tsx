@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Target, Check, ChevronRight, ChevronLeft } from 'lucide-react';
+import { SITE_CONFIG } from '@/lib/constants';
 
 export type OnboardingStep = 'welcome' | 'big-three' | 'modifiers' | 'ready';
 
@@ -149,7 +150,7 @@ export default function OnboardingModal({
               Get deal terms in 60 seconds
             </h2>
             <p className="text-neutral-600 mb-6">
-              Based on 500+ real biopharma licensing deals across oncology and neurology, our calculator estimates:
+              Based on {SITE_CONFIG.dealsDescription}, our calculator estimates:
             </p>
 
             <div className="text-left space-y-3 mb-8 max-w-sm mx-auto">
