@@ -165,22 +165,6 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
             ))}
           </div>
 
-          {/* Testimonial */}
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-100 rounded-xl p-4 mb-6">
-            <p className="text-slate-700 text-sm italic mb-3">
-              "Saved us weeks of research. The partner matching alone justified the cost 10x over."
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
-                VP
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">VP, Business Development</p>
-                <p className="text-xs text-slate-500">Series B Biotech</p>
-              </div>
-            </div>
-          </div>
-
           {/* Pricing with anchor */}
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-2 mb-1">

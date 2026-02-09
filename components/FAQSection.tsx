@@ -2,24 +2,24 @@
 
 const faqs = [
   {
-    question: "How does the deal calculator work?",
-    answer: "Our calculator analyzes 500+ real biopharma licensing deals to provide benchmark ranges for upfront payments, milestones, and royalties based on your asset's modality, phase, indication, and territory."
+    question: "How does the calculator work?",
+    answer: "Our proprietary algorithm benchmarks your asset against a curated dataset of 500+ publicly disclosed biopharma licensing transactions. It matches on modality, development phase, indication, and territory to generate percentile-based ranges for upfront payments, development and commercial milestones, and royalty rates — giving you a data-driven starting point for any deal conversation."
   },
   {
     question: "What data sources power the benchmarks?",
-    answer: "We aggregate publicly disclosed deal terms from SEC filings, press releases, and industry databases. All data is verified and updated regularly to reflect current market conditions."
+    answer: "Every benchmark is grounded in real transaction data drawn from SEC filings (10-K, 10-Q, 8-K), public deal announcements, and verified industry sources. Our dataset is continuously updated as new deals are disclosed, so you're always working with the most current market intelligence available."
   },
   {
     question: "How accurate are the deal estimates?",
-    answer: "Our estimates represent the 25th-75th percentile range of comparable deals. Actual terms vary based on asset differentiation, competitive landscape, and negotiation dynamics."
+    answer: "The ranges we surface represent the 25th–75th percentile of where comparable deals actually transacted — this is deal intelligence, not a prediction. Final terms will always depend on asset differentiation, competitive dynamics, and negotiation leverage. Think of our estimates as a strategic starting point grounded in market reality."
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: "We cover all major therapeutic areas including oncology, immunology, neurology, rare diseases, infectious diseases, and cardiovascular, with the deepest data in oncology and rare disease."
+    answer: "We launched with oncology — the most active and data-rich therapeutic area in biopharma licensing — giving you the deepest benchmarking dataset available. Additional therapeutic areas including immunology, neurology, rare diseases, and more are actively in development and will be released soon."
   },
   {
     question: "Is my data kept confidential?",
-    answer: "Yes. We never share, sell, or disclose your inputs. All calculations are processed securely and your asset details remain completely private."
+    answer: "Absolutely. Your inputs are never stored, shared, or used to train any models. All calculations are processed in a secure environment, your asset details remain completely private, and no third party ever has access to your data."
   },
 ];
 
