@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useSensitivityAnalysis } from '@/lib/hooks/useSensitivityAnalysis';
-import { getTopParameters } from '@/lib/sensitivity';
+import { getTopParameters, NeurologyInsight } from '@/lib/sensitivity';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import KeyInsightBox from './KeyInsightBox';
 import ParameterSelector from './ParameterSelector';
@@ -196,6 +196,50 @@ export default function SensitivityAnalysis({
                     );
                   })}
                 </div>
+
+                {/* Neurology Insights */}
+                {sensitivityData.neurologyInsights.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-slate-600">
+                    <h4 className="text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                      <span className="w-5 h-5 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center text-xs">🧠</span>
+                      Neurology Risk Factors
+                    </h4>
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      {sensitivityData.neurologyInsights.map((insight: NeurologyInsight) => {
+                        const colorMap = {
+                          'VERY HIGH': 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
+                          'HIGH': 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20',
+                          'MEDIUM': 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20',
+                          'LOW': 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20',
+                        };
+                        const badgeMap = {
+                          'VERY HIGH': 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400',
+                          'HIGH': 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400',
+                          'MEDIUM': 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400',
+                          'LOW': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400',
+                        };
+                        return (
+                          <div
+                            key={insight.category}
+                            className={`rounded-lg border p-3 ${colorMap[insight.impactLevel]}`}
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <h5 className="text-xs font-semibold text-neutral-800 dark:text-slate-200">
+                                {insight.title}
+                              </h5>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${badgeMap[insight.impactLevel]}`}>
+                                {insight.impactLevel}
+                              </span>
+                            </div>
+                            <p className="text-xs text-neutral-600 dark:text-slate-400 leading-relaxed">
+                              {insight.description}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-neutral-200 dark:border-slate-600">

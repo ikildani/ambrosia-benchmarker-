@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
+import { PRICING } from '@/lib/config/constants';
 import { useTheme } from '@/lib/theme';
 import HistoryDetailModal from './HistoryDetailModal';
 
@@ -145,6 +146,48 @@ export default function Dashboard({
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyAreaFilter, setHistoryAreaFilter] = useState<'all' | 'oncology' | 'neurology'>('all');
+  const [historySort, setHistorySort] = useState<'newest' | 'oldest' | 'highest_value' | 'highest_upfront'>('newest');
+
+  // Filtered and sorted history
+  const filteredHistory = useMemo(() => {
+    let filtered = [...history];
+
+    // Area filter
+    if (historyAreaFilter !== 'all') {
+      filtered = filtered.filter(item => item.inputs.therapeuticArea === historyAreaFilter);
+    }
+
+    // Search filter
+    if (historySearch.trim()) {
+      const query = historySearch.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.labels.phase.toLowerCase().includes(query) ||
+        item.labels.modality.toLowerCase().includes(query) ||
+        item.labels.indication.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort
+    switch (historySort) {
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        break;
+      case 'highest_value':
+        filtered.sort((a, b) => b.results.totalValueMedian - a.results.totalValueMedian);
+        break;
+      case 'highest_upfront':
+        filtered.sort((a, b) => b.results.upfrontMedian - a.results.upfrontMedian);
+        break;
+      case 'newest':
+      default:
+        filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        break;
+    }
+
+    return filtered;
+  }, [history, historySearch, historyAreaFilter, historySort]);
 
   useEffect(() => {
     // Load user data from localStorage
@@ -707,9 +750,59 @@ export default function Dashboard({
 
         {activeTab === 'history' && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
+              </div>
+
+              {/* Search & Controls */}
+              {history.length > 0 && (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search by phase, modality, indication..."
+                      value={historySearch}
+                      onChange={(e) => setHistorySearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
+
+                  {/* Area Filter Chips */}
+                  <div className="flex items-center gap-1.5">
+                    {([['all', 'All Areas'], ['oncology', 'Oncology'], ['neurology', 'Neurology']] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        onClick={() => setHistoryAreaFilter(value)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                          historyAreaFilter === value
+                            ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Sort Dropdown */}
+                  <select
+                    value={historySort}
+                    onChange={(e) => setHistorySort(e.target.value as typeof historySort)}
+                    className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="highest_value">Highest value</option>
+                    <option value="highest_upfront">Highest upfront</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             {historyLoading ? (
@@ -723,8 +816,9 @@ export default function Dashboard({
                 <p className="text-slate-500 dark:text-slate-400">Loading your calculation history...</p>
               </div>
             ) : history.length > 0 ? (
+              filteredHistory.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                {history.map((item) => (
+                {filteredHistory.map((item) => (
                   <div key={item.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors history-item-clickable group">
                     <div
                       onClick={() => handleHistoryClick(item)}
@@ -789,6 +883,17 @@ export default function Dashboard({
                   </div>
                 ))}
               </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-slate-500 dark:text-slate-400 mb-3">No calculations match your filters</p>
+                  <button
+                    onClick={() => { setHistorySearch(''); setHistoryAreaFilter('all'); }}
+                    className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )
             ) : (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
@@ -1044,7 +1149,7 @@ export default function Dashboard({
                     </div>
                     <div>
                       <p className="text-lg font-bold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? '$99/month • Billed monthly' : 'Free forever'}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? `${PRICING.PRO_MONTHLY} • Billed monthly` : 'Free forever'}</p>
                     </div>
                   </div>
                   {tier === 'free' && (

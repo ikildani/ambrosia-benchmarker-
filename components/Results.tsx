@@ -12,6 +12,7 @@ import ShareModal from './ShareModal';
 import NegotiationPlaybookModal from './NegotiationPlaybookModal';
 import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
+import { PRICING } from '@/lib/config/constants';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -369,6 +370,35 @@ function MethodologySection() {
   );
 }
 
+export function ResultsSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      {/* Header gradient skeleton */}
+      <div className="rounded-2xl bg-gradient-to-r from-neutral-200 to-neutral-100 h-32" />
+
+      {/* Deal structure bar skeleton */}
+      <div className="h-12 bg-neutral-100 rounded-xl" />
+
+      {/* Metric cards grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white border border-neutral-100 rounded-xl p-5 space-y-3">
+            <div className="h-3 bg-neutral-100 rounded w-2/3" />
+            <div className="h-7 bg-neutral-200 rounded w-full" />
+            <div className="h-3 bg-neutral-100 rounded w-1/2" />
+          </div>
+        ))}
+      </div>
+
+      {/* Chart area skeleton */}
+      <div className="bg-white border border-neutral-100 rounded-xl p-6">
+        <div className="h-4 bg-neutral-100 rounded w-1/4 mb-4" />
+        <div className="h-48 bg-neutral-50 rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
 export default function Results({ result, tier = 'free', onUpgrade, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
@@ -380,7 +410,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    generatePDFReport(result, undefined, partnerMatches);
+    generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
   };
 
   const handleDownloadExcel = () => {
@@ -392,7 +422,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
       deals_last_12mo: p.deals_last_12mo,
       hq_country: p.hq_country,
     }));
-    generateExcelReport(result, inputs, partnersForExcel);
+    generateExcelReport(result, inputs, partnersForExcel, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
   };
 
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
@@ -905,7 +935,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               onClick={handleUpgradeClick}
               className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow w-full sm:w-auto"
             >
-              <span>Upgrade to Pro - $99/month</span>
+              <span>Upgrade to Pro - {PRICING.PRO_MONTHLY}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>

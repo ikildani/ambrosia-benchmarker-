@@ -35,9 +35,10 @@ import {
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
+import { PRICING, DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
 import { useAuth } from '@/contexts/AuthContext';
-import Results from './Results';
+import Results, { ResultsSkeleton } from './Results';
 import PaywallModal from './PaywallModal';
 import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
@@ -267,6 +268,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
   const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [pendingAreaSwitch, setPendingAreaSwitch] = useState<TherapeuticArea | null>(null);
 
   // Onboarding state
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -508,6 +510,22 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   };
 
   // Handle sensitivity analysis changes - updates inputs and triggers recalculation
+  const performAreaSwitch = (newArea: TherapeuticArea) => {
+    trackParameterChange('therapeuticArea', therapeuticArea, newArea);
+    setTherapeuticArea(newArea);
+    if (newArea === 'neurology') {
+      setIndication('alzheimers' as Indication);
+      setModality('smallMolecule');
+      setTreatmentApproach('symptomatic');
+    } else {
+      setIndication('lung_nsclc' as Indication);
+      setModality('smallMolecule');
+      setLineOfTherapy('2L');
+    }
+    setResult(null);
+    setShowTemplates(true);
+  };
+
   const handleSensitivityApply = (newInputs: Partial<CalculationInput>) => {
     try {
       // Merge new inputs with current state values to get complete input
@@ -635,7 +653,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   {therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
-                  2025-2026 Market Benchmarks
+                  {BENCHMARK_VERSION.LABEL}
                 </p>
               </div>
             </div>
@@ -648,7 +666,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             <div className="mb-4">
               <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
               <p className="text-sm text-neutral-500 dark:text-slate-400">
-                {therapeuticArea === 'neurology' ? 'Based on 88+ neurology R&D partnerships' : 'Based on 500+ analyzed deals'}
+                {therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
               </p>
             </div>
 
@@ -703,20 +721,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   onClick={() => {
                     const newArea = option.value as TherapeuticArea;
                     if (newArea !== therapeuticArea) {
-                      trackParameterChange('therapeuticArea', therapeuticArea, newArea);
-                      setTherapeuticArea(newArea);
-                      // Reset indication and modality to first option for new area
-                      if (newArea === 'neurology') {
-                        setIndication('alzheimers' as Indication);
-                        setModality('smallMolecule');
-                        setTreatmentApproach('symptomatic');
+                      if (result) {
+                        setPendingAreaSwitch(newArea);
                       } else {
-                        setIndication('lung_nsclc' as Indication);
-                        setModality('smallMolecule');
-                        setLineOfTherapy('2L');
+                        performAreaSwitch(newArea);
                       }
-                      setResult(null);
-                      setShowTemplates(true);
                     }
                   }}
                   className={`px-4 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
@@ -1077,6 +1086,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         </div>
       </div>
 
+      {/* Loading Skeleton */}
+      {isCalculating && !result && (
+        <div className="mt-8">
+          <ResultsSkeleton />
+        </div>
+      )}
+
       {/* Results */}
       {result && (
         <div className="mt-8 animate-fade-in results-container">
@@ -1106,6 +1122,36 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             }}
             onApplyNewInputs={handleSensitivityApply}
           />
+        </div>
+      )}
+
+      {/* Area Switch Confirmation */}
+      {pendingAreaSwitch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPendingAreaSwitch(null)} />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Switch Therapeutic Area?</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+              Switching to <strong>{pendingAreaSwitch === 'neurology' ? 'Neurology / CNS' : 'Oncology'}</strong> will clear your current results. Your calculation history is still saved.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setPendingAreaSwitch(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  performAreaSwitch(pendingAreaSwitch);
+                  setPendingAreaSwitch(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all"
+              >
+                Switch Area
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

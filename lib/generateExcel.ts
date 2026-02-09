@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { CalculationResult, formatCurrency } from './calculations';
+import { getRelevantDeals } from './comparableDeals';
 
 export interface PartnerForExcel {
   company_name: string;
@@ -17,7 +18,9 @@ export function generateExcelReport(
     indication: string;
     territory: string;
   },
-  partners?: PartnerForExcel[]
+  partners?: PartnerForExcel[],
+  therapeuticArea?: string,
+  treatmentApproach?: string
 ): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
@@ -30,6 +33,7 @@ export function generateExcelReport(
     [`Report Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`],
     [''],
     ['ASSET PROFILE'],
+    ['Therapeutic Area', therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'],
     ['Development Phase', labels.phase],
     ['Modality', labels.modality],
     ['Indication', labels.indication],
@@ -69,6 +73,24 @@ export function generateExcelReport(
     ['Mid-Tier', `${tieredRoyalties.midTier.low}%`, `${tieredRoyalties.midTier.high}%`, '$500M - $1B annual sales', ''],
     ['High-Tier', `${tieredRoyalties.highTier.low}%`, `${tieredRoyalties.highTier.high}%`, '>$1B annual sales', ''],
   ];
+
+  // Add neurology context rows if applicable
+  if (therapeuticArea === 'neurology') {
+    termsData.push(
+      [''],
+      ['NEUROLOGY DEAL CONTEXT'],
+      [''],
+      ['Factor', 'Detail', '', '', ''],
+      ['Development Milestones (~55% vs ~50%)', 'Longer clinical timelines and BBB penetration challenges shift value toward development milestones in CNS deals', '', '', ''],
+      ['Commercial Milestones (~17% vs ~20%)', 'CNS payer uncertainty and slower uptake curves reduce commercial milestone weighting', '', '', ''],
+      ['Regulatory Milestones (~28%)', 'Comparable to oncology — similar FDA/EMA approval pathway costs', '', '', ''],
+    );
+    if (treatmentApproach === 'diseaseModifying') {
+      termsData.push(
+        ['Disease-Modifying Premium (~58% dev)', 'Disease-modifying therapies command higher development milestone share due to longer, more expensive trials', '', '', ''],
+      );
+    }
+  }
 
   const termsSheet = XLSX.utils.aoa_to_sheet(termsData);
   termsSheet['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
@@ -114,7 +136,31 @@ export function generateExcelReport(
     XLSX.utils.book_append_sheet(wb, partnersSheet, 'Partners');
   }
 
-  // Sheet 5: Methodology & Disclaimer
+  // Comparable Deals Sheet
+  const comparableDeals = getRelevantDeals(
+    (therapeuticArea as 'oncology' | 'neurology') || 'oncology',
+    labels.modality,
+    labels.indication
+  );
+  if (comparableDeals.length > 0) {
+    const comparableData = [
+      ['COMPARABLE TRANSACTIONS'],
+      [''],
+      ['Licensor', 'Licensee', 'Deal Value', 'Year', 'Relevance'],
+      ...comparableDeals.map(deal => [
+        deal.licensor,
+        deal.licensee,
+        deal.value,
+        deal.year.toString(),
+        deal.relevance,
+      ]),
+    ];
+    const comparableSheet = XLSX.utils.aoa_to_sheet(comparableData);
+    comparableSheet['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 8 }, { wch: 50 }];
+    XLSX.utils.book_append_sheet(wb, comparableSheet, 'Comparable Deals');
+  }
+
+  // Methodology & Disclaimer
   const methodologyData = [
     ['METHODOLOGY'],
     [''],

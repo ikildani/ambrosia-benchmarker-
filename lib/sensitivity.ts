@@ -55,11 +55,19 @@ export interface TopValueDriver {
   insightText: string;
 }
 
+export interface NeurologyInsight {
+  title: string;
+  description: string;
+  impactLevel: ImpactLevel;
+  category: 'bbb_penetration' | 'disease_progression' | 'biomarker_validation';
+}
+
 export interface SensitivityData {
   currentUpfront: number;
   currentTotalValue: number;
   parameters: ParameterSensitivity[];
   topValueDriver: TopValueDriver;
+  neurologyInsights: NeurologyInsight[];
   computedAt: number;
 }
 
@@ -230,6 +238,73 @@ function findTopValueDriver(parameters: ParameterSensitivity[]): TopValueDriver 
   };
 }
 
+// Generate neurology-specific insights based on asset characteristics
+function generateNeurologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'neurology') return [];
+
+  const insights: NeurologyInsight[] = [];
+
+  // BBB Penetration Risk — based on modality
+  const highBBBModalities = ['bbbPlatform', 'aso', 'geneTherapy', 'aav_gene_therapy'];
+  const mediumBBBModalities = ['antibody', 'adc', 'bispecific'];
+  const bbbLevel: ImpactLevel = highBBBModalities.includes(inputs.modality)
+    ? 'HIGH'
+    : mediumBBBModalities.includes(inputs.modality)
+    ? 'MEDIUM'
+    : 'LOW';
+
+  insights.push({
+    title: 'BBB Penetration Risk',
+    description: bbbLevel === 'HIGH'
+      ? 'This modality faces significant blood-brain barrier delivery challenges. Deals for BBB-crossing platforms command higher upfronts but carry elevated technical risk, impacting milestone probability.'
+      : bbbLevel === 'MEDIUM'
+      ? 'Large-molecule modalities have moderate BBB penetration hurdles. Consider platform enhancements or intrathecal delivery when structuring milestone triggers.'
+      : 'Small molecules have favorable BBB penetration profiles. This reduces delivery risk and may support more milestone-weighted deal structures.',
+    impactLevel: bbbLevel,
+    category: 'bbb_penetration',
+  });
+
+  // Disease Progression Assumptions — based on treatment approach
+  const progressionLevel: ImpactLevel = inputs.treatmentApproach === 'diseaseModifying'
+    ? 'VERY HIGH'
+    : inputs.treatmentApproach === 'adjunctive'
+    ? 'MEDIUM'
+    : 'LOW';
+
+  insights.push({
+    title: 'Disease Progression Assumptions',
+    description: progressionLevel === 'VERY HIGH'
+      ? 'Disease-modifying endpoints require very long trials (18-36+ months) with validated biomarkers. Expect higher development milestones but significant regulatory and market access uncertainty.'
+      : progressionLevel === 'MEDIUM'
+      ? 'Adjunctive therapies face moderate endpoint complexity. Clear differentiation from standard of care is critical for commercial milestone achievement.'
+      : 'Symptomatic endpoints are well-established with shorter trial timelines. This supports more predictable milestone schedules and lower development risk.',
+    impactLevel: progressionLevel,
+    category: 'disease_progression',
+  });
+
+  // Biomarker Validation Status — based on indication
+  const establishedBiomarkerIndications = ['alzheimers', 'parkinsons', 'huntingtons'];
+  const emergingBiomarkerIndications = ['als', 'ms', 'depression'];
+  const biomarkerLevel: ImpactLevel = establishedBiomarkerIndications.includes(inputs.indication)
+    ? 'MEDIUM'
+    : emergingBiomarkerIndications.includes(inputs.indication)
+    ? 'HIGH'
+    : 'VERY HIGH';
+
+  insights.push({
+    title: 'Biomarker Validation Status',
+    description: biomarkerLevel === 'MEDIUM'
+      ? 'This indication has established biomarkers (e.g., amyloid PET, tau, neurofilament light). This supports accelerated approval pathways and can justify higher deal valuations.'
+      : biomarkerLevel === 'HIGH'
+      ? 'Emerging biomarkers exist but regulatory acceptance varies. Trial design should incorporate biomarker endpoints to de-risk and potentially accelerate development.'
+      : 'Limited validated biomarkers for this indication. Deals may be structured with more back-loaded milestones pending clinical endpoint validation.',
+    impactLevel: biomarkerLevel,
+    category: 'biomarker_validation',
+  });
+
+  return insights;
+}
+
 // Main function to compute full sensitivity analysis
 export function computeSensitivityAnalysis(
   inputs: CalculationInput,
@@ -257,11 +332,15 @@ export function computeSensitivityAnalysis(
   // Find top value driver
   const topValueDriver = findTopValueDriver(parameters);
 
+  // Generate neurology-specific insights
+  const neurologyInsights = generateNeurologyInsights(inputs);
+
   return {
     currentUpfront: result.terms.upfront.median,
     currentTotalValue: result.terms.totalDealValue.median,
     parameters,
     topValueDriver,
+    neurologyInsights,
     computedAt: Date.now(),
   };
 }

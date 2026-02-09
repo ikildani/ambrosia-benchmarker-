@@ -1,5 +1,6 @@
 import { CalculationResult, formatCurrency, formatRange } from './calculations';
 import { markPDFGenerated, getHistory } from './history';
+import { getRelevantDeals, ComparableDeal } from './comparableDeals';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -12,7 +13,9 @@ export interface PartnerForPDF {
 export function generatePDFReport(
   result: CalculationResult,
   historyId?: string,
-  partnerMatches?: PartnerForPDF[]
+  partnerMatches?: PartnerForPDF[],
+  therapeuticArea?: string,
+  treatmentApproach?: string
 ): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
@@ -169,7 +172,7 @@ export function generatePDFReport(
 
     .cover-meta-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 32px;
       margin-top: 60px;
       padding: 32px;
@@ -744,6 +747,93 @@ export function generatePDFReport(
       color: var(--gray-500);
     }
 
+    /* Neurology Context Box */
+    .neuro-context {
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+      border: 1px solid #8b5cf6;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .neuro-context-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5b21b6;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .neuro-context-items {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .neuro-context-item {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #4c1d95;
+      padding: 10px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 8px;
+    }
+
+    .neuro-context-item strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    /* Comparable Deals */
+    .comparable-deals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .comparable-deal-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .comparable-deal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .comparable-deal-parties {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .comparable-deal-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal-dark);
+      white-space: nowrap;
+    }
+
+    .comparable-deal-year {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+    }
+
+    .comparable-deal-relevance {
+      font-size: 11px;
+      color: var(--gray-600);
+      line-height: 1.4;
+      font-style: italic;
+    }
+
     /* Disclaimer */
     .disclaimer {
       background: linear-gradient(135deg, var(--gray-50) 0%, #f1f5f9 100%);
@@ -860,6 +950,10 @@ export function generatePDFReport(
         <h1 class="cover-title">Deal Terms<br/><span class="cover-title-highlight">Analysis Report</span></h1>
 
         <div class="cover-meta-grid">
+          <div class="cover-meta-item">
+            <label>Therapeutic Area</label>
+            <span>${therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'}</span>
+          </div>
           <div class="cover-meta-item">
             <label>Development Phase</label>
             <span>${labels.phase}</span>
@@ -1117,6 +1211,73 @@ export function generatePDFReport(
       </div>
     </div>
     ` : ''}
+
+    ${therapeuticArea === 'neurology' ? `
+    <!-- Neurology Milestone Context -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <h3 class="section-title">Neurology Deal Context</h3>
+      </div>
+      <div class="neuro-context">
+        <div class="neuro-context-title">🧠 Why Neurology Milestone Allocations Differ</div>
+        <div class="neuro-context-items">
+          <div class="neuro-context-item">
+            <strong>Higher Development Milestones (~55% vs ~50%)</strong>
+            Longer clinical timelines, BBB penetration challenges, and complex trial designs shift value toward development milestones in CNS deals.
+          </div>
+          <div class="neuro-context-item">
+            <strong>Lower Commercial Milestones (~17% vs ~20%)</strong>
+            CNS payer uncertainty, slower uptake curves, and diagnostic challenges reduce the weighting of commercial milestones.
+          </div>
+          ${treatmentApproach === 'diseaseModifying' ? `
+          <div class="neuro-context-item">
+            <strong>Disease-Modifying Premium (~58% dev)</strong>
+            Disease-modifying therapies command even higher development milestone share due to longer, more expensive trials and higher regulatory hurdles.
+          </div>
+          ` : ''}
+          <div class="neuro-context-item">
+            <strong>Regulatory Milestone Parity (~28%)</strong>
+            Regulatory milestones remain comparable to oncology, reflecting similar FDA/EMA approval pathway costs regardless of therapeutic area.
+          </div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    ${(() => {
+      const comparableDeals = getRelevantDeals(
+        therapeuticArea as 'oncology' | 'neurology' || 'oncology',
+        labels.modality,
+        labels.indication
+      );
+      if (comparableDeals.length === 0) return '';
+      return `
+    <!-- Comparable Deals -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+        </div>
+        <h3 class="section-title">Comparable Transactions</h3>
+      </div>
+      <div class="comparable-deals-grid">
+        ${comparableDeals.map((deal: ComparableDeal) => `
+          <div class="comparable-deal-card">
+            <div class="comparable-deal-header">
+              <div class="comparable-deal-parties">${deal.licensor} → ${deal.licensee}</div>
+              <div class="comparable-deal-value">${deal.value}</div>
+            </div>
+            <div class="comparable-deal-year">${deal.year}</div>
+            <div class="comparable-deal-relevance">${deal.relevance}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+      `;
+    })()}
 
     <!-- Disclaimer -->
     <div class="disclaimer">

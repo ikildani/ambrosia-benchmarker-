@@ -1,9 +1,11 @@
 'use client';
 
+import { DEAL_STATS } from '@/lib/config/constants';
+
 const faqs = [
   {
     question: "How does the calculator work?",
-    answer: "Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes 500+ real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. You get a data-driven starting point for any deal conversation in seconds."
+    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. You get a data-driven starting point for any deal conversation in seconds.`
   },
   {
     question: "What data sources power the benchmarks?",
@@ -15,7 +17,7 @@ const faqs = [
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: "We currently cover oncology and neurology/CNS — the two most active therapeutic areas in biopharma licensing. Oncology benchmarks draw from 500+ deals, while our neurology module is calibrated against 88 R&D partnerships totaling $45.9B (2024-2025), covering indications from Alzheimer's to rare neurological diseases. Additional therapeutic areas including immunology and cardiometabolic are in development."
+    answer: `We currently cover oncology and neurology/CNS — the two most active therapeutic areas in biopharma licensing. Oncology benchmarks draw from ${DEAL_STATS.TOTAL_DEALS} deals, while our neurology module is calibrated against ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION} totaling ${DEAL_STATS.NEUROLOGY_TOTAL_VALUE} (${DEAL_STATS.NEUROLOGY_TIMEFRAME}), covering indications from Alzheimer's to rare neurological diseases. Additional therapeutic areas including immunology and cardiometabolic are in development.`
   },
   {
     question: "Is my data kept confidential?",
