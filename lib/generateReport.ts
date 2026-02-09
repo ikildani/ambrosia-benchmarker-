@@ -28,7 +28,7 @@ export function generatePDFReport(
 
   // Get the origin for logo URL
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const logoUrl = `${origin}/logo.png`;
+  const logoUrl = `${origin}/logo-color.png`;
 
   // Generate unique report ID
   const reportId = `AV-${Date.now().toString(36).toUpperCase()}`;
