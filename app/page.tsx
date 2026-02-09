@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import Pricing from '@/components/Pricing';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
@@ -422,13 +423,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 pb-8 sm:pb-12 border-b border-navy-800">
             <div className="flex items-center">
-              <Image
-                src="/logo-white.png"
-                alt="Ambrosia Ventures"
-                width={180}
-                height={38}
-                className="h-8 w-auto"
-              />
+              <AmbrosiaLogo variant="reversed" height={32} />
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm">
               {[

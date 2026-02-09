@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { useState, useEffect, useRef } from 'react';
 import DealBrowser from '@/components/deals/DealBrowser';
 import AuthModal from '@/components/AuthModal';
@@ -69,14 +70,7 @@ export default function DealsPage() {
           <div className="flex justify-between items-center h-14 sm:h-16 lg:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <Image
-                src={scrolled ? "/logo-color.png" : "/logo-white.png"}
-                alt="Ambrosia Ventures"
-                width={220}
-                height={46}
-                className="h-10 w-auto"
-                priority
-              />
+              <AmbrosiaLogo variant={scrolled ? "color" : "reversed"} height={40} />
             </Link>
 
             {/* Navigation */}

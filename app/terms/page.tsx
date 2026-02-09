@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 
 export default function TermsPage() {
   const lastUpdated = 'February 1, 2025';
@@ -13,14 +13,7 @@ export default function TermsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             <Link href="/" className="flex items-center touch-feedback">
-              <Image
-                src="/logo-color.png"
-                alt="Ambrosia Ventures"
-                width={220}
-                height={46}
-                className="h-10 w-auto"
-                priority
-              />
+              <AmbrosiaLogo variant="color" height={40} />
             </Link>
             <Link
               href="/"

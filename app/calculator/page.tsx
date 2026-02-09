@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { useState, useEffect, useRef } from 'react';
 import Calculator from '@/components/Calculator';
 import AuthModal from '@/components/AuthModal';
@@ -103,14 +104,7 @@ export default function CalculatorPage() {
               </Link>
               <div className="hidden sm:block w-px h-5 sm:h-6 bg-slate-200" />
               <Link href="/" className="flex items-center">
-                <Image
-                  src="/logo-color.png"
-                  alt="Ambrosia Ventures"
-                  width={220}
-                  height={46}
-                  className="h-10 w-auto"
-                  priority
-                />
+                <AmbrosiaLogo variant="color" height={40} />
               </Link>
             </div>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
 import { useTheme } from '@/lib/theme';
@@ -293,14 +294,7 @@ export default function Dashboard({
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
-              <Image
-                src="/logo-color.png"
-                alt="Ambrosia Ventures"
-                width={220}
-                height={46}
-                className="h-10 w-auto"
-                priority
-              />
+              <AmbrosiaLogo variant="color" height={40} />
             </button>
 
             {/* Desktop Navigation */}

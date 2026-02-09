@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -138,14 +138,7 @@ export default function Header({
             href="/"
             className="flex items-center group"
           >
-            <Image
-              src="/logo-color.png"
-              alt="Ambrosia Ventures"
-              width={220}
-              height={46}
-              className="h-10 w-auto"
-              priority
-            />
+            <AmbrosiaLogo variant="color" height={40} />
           </Link>
 
           {/* Desktop Navigation */}
