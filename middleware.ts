@@ -5,23 +5,9 @@ export async function middleware(request: NextRequest) {
   // Generate a nonce for CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
-  // Build CSP with nonce instead of unsafe-inline/unsafe-eval
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
-  const cspHeader = isApiRoute
-    ? '' // API routes don't need CSP
-    : [
-        "default-src 'self'",
-        `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://vercel.live`,
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https: http:",
-        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live",
-        "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
-        "frame-ancestors 'self'",
-        "form-action 'self'",
-        "base-uri 'self'",
-        "upgrade-insecure-requests",
-      ].join('; ');
+  // CSP disabled — Next.js inline scripts require unsafe-inline which negates nonce benefits.
+  // TODO: Re-enable with next/headers nonce propagation when upgrading to Next.js 15+
+  const cspHeader = '';
 
   // Set the nonce in request headers so Server Components can read it
   const requestHeaders = new Headers(request.headers);
