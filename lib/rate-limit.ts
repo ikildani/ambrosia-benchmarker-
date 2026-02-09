@@ -1,36 +1,13 @@
 /**
- * Simple in-memory rate limiter for API endpoints.
- * For production at scale, consider using Redis-based solution like @upstash/ratelimit.
+ * Rate limiter with Upstash Redis backend.
+ * Falls back to in-memory for local development when env vars are missing.
  */
 
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-// In-memory store for rate limit tracking
-// Keys are formatted as `${identifier}:${endpoint}`
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-// Clean up expired entries every 5 minutes
-const CLEANUP_INTERVAL = 5 * 60 * 1000;
-
-// Auto-cleanup of expired entries
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of rateLimitStore.entries()) {
-      if (now > entry.resetTime) {
-        rateLimitStore.delete(key);
-      }
-    }
-  }, CLEANUP_INTERVAL);
-}
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 export interface RateLimitConfig {
-  // Maximum number of requests allowed in the window
   limit: number;
-  // Time window in seconds
   windowSeconds: number;
 }
 
@@ -43,78 +20,110 @@ export interface RateLimitResult {
 
 // Default configurations for different endpoint types
 export const RATE_LIMIT_CONFIGS = {
-  // Standard API endpoints
   default: { limit: 60, windowSeconds: 60 } as RateLimitConfig,
-  // High-traffic read endpoints
   deals: { limit: 30, windowSeconds: 60 } as RateLimitConfig,
-  // Computation-heavy endpoints
   calculations: { limit: 20, windowSeconds: 60 } as RateLimitConfig,
-  // Partner matching (expensive queries)
   partnerMatch: { limit: 10, windowSeconds: 60 } as RateLimitConfig,
-  // Event tracking (high volume expected)
   events: { limit: 100, windowSeconds: 60 } as RateLimitConfig,
-  // AI generation (very expensive)
   aiGeneration: { limit: 5, windowSeconds: 60 } as RateLimitConfig,
 };
 
-/**
- * Check and update rate limit for a given identifier and endpoint.
- *
- * @param identifier - Unique identifier (IP address, user ID, or anonymous ID)
- * @param endpoint - Endpoint name for separate limits
- * @param config - Rate limit configuration
- * @returns RateLimitResult with success status and limit info
- */
-export function checkRateLimit(
+// --- Upstash Redis-backed rate limiter ---
+
+const isUpstashConfigured = () =>
+  !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+
+let redis: Redis | null = null;
+const ratelimiters = new Map<string, Ratelimit>();
+
+function getRedis(): Redis {
+  if (!redis) {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    });
+  }
+  return redis;
+}
+
+function getUpstashLimiter(endpoint: string, config: RateLimitConfig): Ratelimit {
+  const key = `${endpoint}:${config.limit}:${config.windowSeconds}`;
+  let limiter = ratelimiters.get(key);
+  if (!limiter) {
+    limiter = new Ratelimit({
+      redis: getRedis(),
+      limiter: Ratelimit.slidingWindow(config.limit, `${config.windowSeconds} s`),
+      prefix: `rl:${endpoint}`,
+    });
+    ratelimiters.set(key, limiter);
+  }
+  return limiter;
+}
+
+// --- In-memory fallback for local dev ---
+
+interface InMemoryEntry {
+  count: number;
+  resetTime: number;
+}
+
+const inMemoryStore = new Map<string, InMemoryEntry>();
+
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of inMemoryStore.entries()) {
+      if (now > entry.resetTime) {
+        inMemoryStore.delete(key);
+      }
+    }
+  }, 5 * 60 * 1000);
+}
+
+function checkInMemory(identifier: string, endpoint: string, config: RateLimitConfig): RateLimitResult {
+  const key = `${identifier}:${endpoint}`;
+  const now = Date.now();
+  let entry = inMemoryStore.get(key);
+
+  if (!entry || now > entry.resetTime) {
+    entry = { count: 1, resetTime: now + config.windowSeconds * 1000 };
+    inMemoryStore.set(key, entry);
+    return { success: true, limit: config.limit, remaining: config.limit - 1, resetTime: entry.resetTime };
+  }
+
+  entry.count++;
+  if (entry.count > config.limit) {
+    return { success: false, limit: config.limit, remaining: 0, resetTime: entry.resetTime };
+  }
+  return { success: true, limit: config.limit, remaining: config.limit - entry.count, resetTime: entry.resetTime };
+}
+
+// --- Public API (same signatures as before) ---
+
+export async function checkRateLimit(
   identifier: string,
   endpoint: string,
   config: RateLimitConfig = RATE_LIMIT_CONFIGS.default
-): RateLimitResult {
-  const key = `${identifier}:${endpoint}`;
-  const now = Date.now();
-
-  let entry = rateLimitStore.get(key);
-
-  // If no entry or window expired, create new entry
-  if (!entry || now > entry.resetTime) {
-    entry = {
-      count: 1,
-      resetTime: now + config.windowSeconds * 1000,
-    };
-    rateLimitStore.set(key, entry);
-
-    return {
-      success: true,
-      limit: config.limit,
-      remaining: config.limit - 1,
-      resetTime: entry.resetTime,
-    };
+): Promise<RateLimitResult> {
+  if (isUpstashConfigured()) {
+    try {
+      const limiter = getUpstashLimiter(endpoint, config);
+      const result = await limiter.limit(`${identifier}:${endpoint}`);
+      return {
+        success: result.success,
+        limit: result.limit,
+        remaining: result.remaining,
+        resetTime: result.reset,
+      };
+    } catch (error) {
+      console.error('[RateLimit] Upstash error, falling back to in-memory:', error);
+      return checkInMemory(identifier, endpoint, config);
+    }
   }
 
-  // Increment count
-  entry.count++;
-
-  // Check if over limit
-  if (entry.count > config.limit) {
-    return {
-      success: false,
-      limit: config.limit,
-      remaining: 0,
-      resetTime: entry.resetTime,
-    };
-  }
-
-  return {
-    success: true,
-    limit: config.limit,
-    remaining: config.limit - entry.count,
-    resetTime: entry.resetTime,
-  };
+  return checkInMemory(identifier, endpoint, config);
 }
 
-/**
- * Get rate limit headers for response.
- */
 export function getRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   return {
     'X-RateLimit-Limit': result.limit.toString(),
@@ -123,12 +132,7 @@ export function getRateLimitHeaders(result: RateLimitResult): Record<string, str
   };
 }
 
-/**
- * Extract identifier from request for rate limiting.
- * Prioritizes: user_id > anonymous_id > session_id > IP address
- */
 export function getIdentifier(request: Request): string {
-  // Try to get user/session identifiers from query params or headers
   const url = new URL(request.url);
   const userId = url.searchParams.get('user_id');
   const anonymousId = url.searchParams.get('anonymous_id');
@@ -138,7 +142,6 @@ export function getIdentifier(request: Request): string {
   if (anonymousId) return `anon:${anonymousId}`;
   if (sessionId) return `session:${sessionId}`;
 
-  // Fall back to IP address
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
   return `ip:${ip}`;

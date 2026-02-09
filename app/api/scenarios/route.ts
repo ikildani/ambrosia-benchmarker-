@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
+  const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
+  const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(

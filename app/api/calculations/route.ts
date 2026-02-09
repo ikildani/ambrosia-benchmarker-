@@ -37,7 +37,7 @@ interface CalculationRequest {
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
+  const rateLimitResult = await checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(

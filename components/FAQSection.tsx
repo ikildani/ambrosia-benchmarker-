@@ -21,6 +21,22 @@ const faqs = [
     question: "Is my data kept confidential?",
     answer: "Yes. We don't store or sell your data. Your inputs and asset details remain completely private."
   },
+  {
+    question: "What's the difference between Free and Pro?",
+    answer: "The free tier gives you basic deal estimates with core parameters. Pro unlocks the full platform — partner matching, deal history, patent cliff data, PDF exports, and expanded benchmarking across additional modalities and deal structures."
+  },
+  {
+    question: "How often is the data updated?",
+    answer: "Continuously. Our dataset is refreshed as new deals are publicly disclosed through SEC filings and deal announcements. You're always benchmarking against the most current market data available."
+  },
+  {
+    question: "Can I share my results with my team?",
+    answer: "Pro users can export results as PDF reports to share within their organization. We just ask that you don't redistribute the underlying benchmark data externally."
+  },
+  {
+    question: "Is this available for academic or research use?",
+    answer: "Yes. The free tier is available to academic researchers and students. For institutional access or bulk research needs, reach out to us at info@ambrosiaventures.co."
+  },
 ];
 
 export default function FAQSection() {

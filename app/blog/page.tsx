@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/server';
 import BlogList from '@/components/blog/BlogList';
 import { BlogPost } from '@/types/content';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Microscope, BookOpen, BarChart3 } from 'lucide-react';
+import { NewsletterSignup } from '@/components/blog/NewsletterSignup';
 
 export const metadata: Metadata = {
   title: 'Biotech Licensing Insights | Ambrosia Ventures Blog',
@@ -86,24 +87,49 @@ export default async function BlogPage() {
           {posts.length > 0 ? (
             <BlogList posts={posts} />
           ) : (
-            <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-full mb-6">
-                <svg className="w-10 h-10 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                </svg>
+            <div className="max-w-2xl mx-auto">
+              {/* Coming Soon Hero */}
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 px-8 mb-8">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-full mb-6">
+                  <svg className="w-10 h-10 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-semibold text-slate-900 mb-3">
+                  Launching Soon
+                </h2>
+                <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                  We&apos;re building a library of data-driven insights for life sciences dealmakers. Be the first to know when we publish.
+                </p>
+
+                {/* Upcoming Topics */}
+                <div className="grid sm:grid-cols-2 gap-3 text-left mb-8">
+                  {[
+                    { icon: TrendingUp, label: 'Deal Trends', desc: 'Market shifts in licensing valuations' },
+                    { icon: Microscope, label: 'Modality Insights', desc: 'ADC, gene therapy, and mRNA deal benchmarks' },
+                    { icon: BookOpen, label: 'Educational', desc: 'Guides to structuring biotech deals' },
+                    { icon: BarChart3, label: 'Industry Analysis', desc: 'Quarterly deal activity and forecasts' },
+                  ].map((topic) => (
+                    <div key={topic.label} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+                      <topic.icon className="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{topic.label}</p>
+                        <p className="text-xs text-slate-500">{topic.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Link
+                  href="/calculator"
+                  className="inline-flex items-center justify-center px-6 py-3 text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                >
+                  Try the Calculator &rarr;
+                </Link>
               </div>
-              <h2 className="text-2xl font-semibold text-slate-900 mb-3">
-                Coming Soon
-              </h2>
-              <p className="text-slate-600 mb-8 max-w-md mx-auto">
-                We&apos;re preparing expert insights on biotech licensing deals. Check back soon for data-driven analysis.
-              </p>
-              <Link
-                href="/calculator"
-                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
-              >
-                Try the Calculator
-              </Link>
+
+              {/* Newsletter Signup */}
+              <NewsletterSignup />
             </div>
           )}
         </div>

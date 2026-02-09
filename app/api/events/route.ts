@@ -48,7 +48,7 @@ interface EventRequest {
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'events', RATE_LIMIT_CONFIGS.events);
+  const rateLimitResult = await checkRateLimit(identifier, 'events', RATE_LIMIT_CONFIGS.events);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
