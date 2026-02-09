@@ -1,7 +1,7 @@
 {
   "metadata": {
     "lastUpdated": "2026-02",
-    "version": "3.1",
+    "version": "3.2",
     "nextUpdate": "2026-03",
     "updateFrequency": "monthly",
     "sources": [
@@ -10,8 +10,20 @@
       "2024-2026 mega-deal analysis"
     ],
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
-    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Strategic urgency around LOE cliffs and competitive pressure for differentiated assets maintaining elevated valuations.",
+    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS added as second therapeutic area, calibrated against 88 R&D partnerships totaling $45.9B (2024-Q2 2025). CNS resurgence driven by BBB delivery platforms, muscarinic agonists, and renewed Alzheimer's investment.",
     "changelog": [
+      {
+        "date": "2026-02-09",
+        "version": "3.2",
+        "summary": "Neurology/CNS Expansion",
+        "changes": [
+          "Added Neurology/CNS as second therapeutic area with 8 sub-indications",
+          "Added neurology-specific phase baselines reflecting higher total values and lower upfront ratios",
+          "Added BBB Delivery Platform, ASO, and Psychedelic/Neuroplastogen modalities",
+          "Added treatment approach multiplier for neurology (disease-modifying vs symptomatic)",
+          "Neurology benchmarks calibrated against 88 disclosed R&D partnerships (2024-Q2 2025)"
+        ]
+      },
       {
         "date": "2026-01-15",
         "version": "3.0",
@@ -89,6 +101,33 @@
       "royalty": { "base": 18, "max": 28 }
     }
   },
+  "neurologyPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 15, "median": 30, "high": 55 },
+      "totalValue": { "low": 300, "median": 550, "high": 1000 },
+      "royalty": { "base": 4, "max": 8 }
+    },
+    "phase1": {
+      "upfront": { "low": 25, "median": 45, "high": 80 },
+      "totalValue": { "low": 450, "median": 800, "high": 1500 },
+      "royalty": { "base": 6, "max": 12 }
+    },
+    "phase2": {
+      "upfront": { "low": 75, "median": 165, "high": 400 },
+      "totalValue": { "low": 800, "median": 1500, "high": 2900 },
+      "royalty": { "base": 10, "max": 16 }
+    },
+    "phase3": {
+      "upfront": { "low": 125, "median": 275, "high": 500 },
+      "totalValue": { "low": 1000, "median": 2000, "high": 3800 },
+      "royalty": { "base": 13, "max": 20 }
+    },
+    "approved": {
+      "upfront": { "low": 250, "median": 500, "high": 1200 },
+      "totalValue": { "low": 1800, "median": 3500, "high": 7000 },
+      "royalty": { "base": 16, "max": 25 }
+    }
+  },
   "phaseConfig": {
     "rangeWidths": {
       "preclinical": 0.60,
@@ -112,6 +151,29 @@
       "approved": { "dev": 0.05, "reg": 0.25, "comm": 0.70 }
     }
   },
+  "neurologyPhaseConfig": {
+    "rangeWidths": {
+      "preclinical": 0.65,
+      "phase1": 0.50,
+      "phase2": 0.40,
+      "phase3": 0.30,
+      "approved": 0.18
+    },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.03, "high": 0.06 },
+      "phase1": { "low": 0.05, "high": 0.09 },
+      "phase2": { "low": 0.08, "high": 0.14 },
+      "phase3": { "low": 0.14, "high": 0.22 },
+      "approved": { "low": 0.22, "high": 0.35 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.55, "reg": 0.28, "comm": 0.17 },
+      "phase1": { "dev": 0.45, "reg": 0.32, "comm": 0.23 },
+      "phase2": { "dev": 0.28, "reg": 0.38, "comm": 0.34 },
+      "phase3": { "dev": 0.12, "reg": 0.33, "comm": 0.55 },
+      "approved": { "dev": 0.05, "reg": 0.25, "comm": 0.70 }
+    }
+  },
   "modalities": {
     "smallMolecule": { "multiplier": 1.00, "label": "Small Molecule", "context": "Baseline" },
     "mab": { "multiplier": 1.03, "label": "Monoclonal Antibody (naked)", "context": "Mature, commoditizing" },
@@ -129,7 +191,10 @@
     "molecularGlue": { "multiplier": 1.40, "label": "Molecular Glue", "context": "Hot emerging category" },
     "peptide": { "multiplier": 1.05, "label": "Peptide", "context": "" },
     "therapeuticVaccine": { "multiplier": 1.15, "label": "Therapeutic Vaccine (non-mRNA)", "context": "" },
-    "oncolyticVirus": { "multiplier": 1.10, "label": "Oncolytic Virus", "context": "Niche interest" }
+    "oncolyticVirus": { "multiplier": 1.10, "label": "Oncolytic Virus", "context": "Niche interest" },
+    "bbbPlatform": { "multiplier": 1.50, "label": "BBB Delivery Platform", "context": "2-3x premium for multi-program optionality; AZ/JCR $825M, ABL/GSK $2.7B" },
+    "aso": { "multiplier": 1.15, "label": "Antisense Oligonucleotide (ASO)", "context": "Established in neuro (Biogen/Ionis); genetic precision, proven path" },
+    "psychedelic": { "multiplier": 1.20, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B for MDD" }
   },
   "indications": {
     "solidTumor": {
@@ -164,6 +229,16 @@
       "mds": { "multiplier": 1.15, "label": "MDS", "context": "HMA backbone, high unmet need" },
       "mpn": { "multiplier": 1.10, "label": "MPN", "context": "JAK inhibitor standard" },
       "tCellLymphoma": { "multiplier": 1.20, "label": "T-cell Lymphomas", "context": "High unmet need, few options" }
+    },
+    "neurology": {
+      "alzheimers": { "multiplier": 1.30, "label": "Alzheimer's Disease", "context": "Anti-amyloid approvals reset market; BBB delivery premium; $15B+ projected TAM" },
+      "parkinsons": { "multiplier": 1.20, "label": "Parkinson's Disease", "context": "Gene therapy + novel mechanisms; $5.6B market; large unmet need" },
+      "schizophrenia": { "multiplier": 1.15, "label": "Schizophrenia / Psychosis", "context": "KarXT paradigm shift; muscarinic agonists hot; BMS/Karuna $14B" },
+      "depression": { "multiplier": 1.05, "label": "Depression / MDD", "context": "Largest patient population; psychedelics emerging; competitive landscape" },
+      "pain": { "multiplier": 1.00, "label": "Pain (Chronic / Neuropathic)", "context": "Mature market; novel Nav1.8 mechanisms attracting interest" },
+      "ms": { "multiplier": 0.95, "label": "Multiple Sclerosis", "context": "Well-served market with multiple approved therapies; fewer novel deals" },
+      "epilepsy": { "multiplier": 1.10, "label": "Epilepsy", "context": "Gene therapy interest; rare epilepsy syndromes carry orphan value" },
+      "rareNeuro": { "multiplier": 1.25, "label": "Rare Neurological (ALS, Huntington's, etc.)", "context": "High unmet need; orphan premiums; Novartis/PTC $1B upfront for HD" }
     }
   },
   "territories": {
@@ -206,6 +281,11 @@
       "promising": { "multiplier": 1.00, "label": "Promising early data", "context": "Encouraging but needs confirmation" },
       "mixed": { "multiplier": 0.85, "label": "Mixed / inconsistent results", "context": "Efficacy uncertainty remains" },
       "limited": { "multiplier": 0.75, "label": "Limited data", "context": "High clinical risk" }
+    },
+    "treatmentApproach": {
+      "diseaseModifying": { "multiplier": 1.25, "label": "Disease-modifying", "context": "Alters disease course; commands significant premium in neurodegeneration" },
+      "symptomatic": { "multiplier": 1.00, "label": "Symptomatic / Acute", "context": "Manages symptoms without altering progression; standard baseline" },
+      "adjunctive": { "multiplier": 0.85, "label": "Adjunctive / Supportive", "context": "Add-on to existing therapies; smaller addressable positioning" }
     },
     "regulatoryDesignations": {
       "breakthrough": { "bonus": 0.12, "label": "Breakthrough Therapy" },
@@ -252,6 +332,22 @@
       },
       "regulatory": {
         "breakthrough": "Breakthrough designation adds credibility and expedited pathway. Use as negotiation leverage."
+      },
+      "neurologyModality": {
+        "bbbPlatform": "BBB delivery platforms command 2-3x premiums due to multi-program optionality. Leverage AZ/JCR ($825M) and ABL/GSK ($2.7B) as comparables.",
+        "aso": "ASOs have a proven regulatory path in neuro (Spinraza precedent). Emphasize genetic target validation and manufacturing scalability.",
+        "psychedelic": "Psychedelic/neuroplastogen deals are nascent but high-value. AbbVie/Gilgamesh ($1.2B) sets the benchmark for differentiated Phase 2 assets.",
+        "geneTherapy": "CNS gene therapy commands higher premiums than oncology gene therapy due to curative potential for monogenic disorders. Expect scrutiny on BBB penetration and durability."
+      },
+      "neurologyIndication": {
+        "alzheimers": "Alzheimer's commands the highest CNS premiums. Anti-amyloid approvals validated the space. BBB-crossing assets at significant premium.",
+        "schizophrenia": "Schizophrenia deals reset by KarXT/Cobenfy approval. Novel mechanisms (muscarinic agonists) commanding premium over D2-based approaches.",
+        "rareNeuro": "Rare neurological diseases carry orphan drug premiums. The Novartis/PTC $1B upfront for Huntington's sets a high bar for Phase 2 assets.",
+        "depression": "MDD is a large but competitive market. Differentiation (novel MOA, rapid onset, reduced side effects) is critical for premium terms."
+      },
+      "treatmentApproach": {
+        "diseaseModifying": "Disease-modifying status significantly increases value in neurodegeneration. Emphasize biomarker evidence of disease modification in negotiations.",
+        "adjunctive": "Adjunctive positioning limits standalone commercial potential. Consider demonstrating disease-modifying potential or earlier-line data."
       }
     }
   },

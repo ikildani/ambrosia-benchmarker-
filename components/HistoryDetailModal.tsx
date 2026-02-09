@@ -7,8 +7,8 @@ import {
   CalculationInput,
   CalculationResult,
   Phase, Modality, Indication, Territory,
-  BiomarkerStatus, LineOfTherapy, CombinationPotential,
-  CompetitivePosition, DataQuality
+  BiomarkerStatus, LineOfTherapy, TreatmentApproach, CombinationPotential,
+  CompetitivePosition, DataQuality, TherapeuticArea
 } from '@/lib/calculations';
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
 import Results from './Results';
@@ -79,12 +79,14 @@ export default function HistoryDetailModal({
 
       // Build full input from stored data
       const input: CalculationInput = {
+        therapeuticArea: (itemWithDefaults.inputs.therapeuticArea as TherapeuticArea) || 'oncology',
         phase: itemWithDefaults.inputs.phase as Phase,
         modality: itemWithDefaults.inputs.modality as Modality,
         indication: itemWithDefaults.inputs.indication as Indication,
         territory: itemWithDefaults.inputs.territory as Territory,
         biomarker: itemWithDefaults.inputs.biomarker as BiomarkerStatus,
         lineOfTherapy: itemWithDefaults.inputs.lineOfTherapy as LineOfTherapy,
+        treatmentApproach: (itemWithDefaults.inputs.treatmentApproach as TreatmentApproach) || 'symptomatic',
         combinationPotential: itemWithDefaults.inputs.combinationPotential as CombinationPotential,
         competitivePosition: itemWithDefaults.inputs.competitivePosition as CompetitivePosition,
         dataQuality: itemWithDefaults.inputs.dataQuality as DataQuality,

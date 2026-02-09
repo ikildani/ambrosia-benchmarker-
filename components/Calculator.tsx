@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Circle, Star, Hexagon, Dna, Globe2, CheckCircle } from 'lucide-react';
 import {
+  TherapeuticArea,
   Phase,
   Modality,
   Indication,
   Territory,
   BiomarkerStatus,
   LineOfTherapy,
+  TreatmentApproach,
   CombinationPotential,
   CompetitivePosition,
   DataQuality,
@@ -16,12 +18,16 @@ import {
   CalculationInput,
   CalculationResult,
   calculateDealTerms,
+  therapeuticAreaOptions,
   phaseOptions,
   modalityOptions,
+  neurologyModalityOptions,
   indicationOptions,
+  neurologyIndicationOptions,
   territoryOptions,
   biomarkerOptions,
   lineOfTherapyOptions,
+  treatmentApproachOptions,
   combinationPotentialOptions,
   competitivePositionOptions,
   dataQualityOptions,
@@ -138,12 +144,14 @@ interface CalculatorProps {
 }
 
 export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
+  const [therapeuticArea, setTherapeuticArea] = useState<TherapeuticArea>('oncology');
   const [phase, setPhase] = useState<Phase>('phase2');
   const [modality, setModality] = useState<Modality>('smallMolecule');
   const [indication, setIndication] = useState<Indication>('lung_nsclc');
   const [territory, setTerritory] = useState<Territory>('global');
   const [biomarker, setBiomarker] = useState<BiomarkerStatus>('unselected');
   const [lineOfTherapy, setLineOfTherapy] = useState<LineOfTherapy>('2L');
+  const [treatmentApproach, setTreatmentApproach] = useState<TreatmentApproach>('symptomatic');
   const [combinationPotential, setCombinationPotential] = useState<CombinationPotential>('some');
   const [competitivePosition, setCompetitivePosition] = useState<CompetitivePosition>('racing');
   const [dataQuality, setDataQuality] = useState<DataQuality>('promising');
@@ -216,12 +224,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     if (prefill && mounted) {
       try {
         const inputs = JSON.parse(prefill);
+        if (inputs.therapeuticArea) setTherapeuticArea(inputs.therapeuticArea as TherapeuticArea);
         if (inputs.phase) setPhase(inputs.phase as Phase);
         if (inputs.modality) setModality(inputs.modality as Modality);
         if (inputs.indication) setIndication(inputs.indication as Indication);
         if (inputs.territory) setTerritory(inputs.territory as Territory);
         if (inputs.biomarker) setBiomarker(inputs.biomarker as BiomarkerStatus);
         if (inputs.lineOfTherapy) setLineOfTherapy(inputs.lineOfTherapy as LineOfTherapy);
+        if (inputs.treatmentApproach) setTreatmentApproach(inputs.treatmentApproach as TreatmentApproach);
         if (inputs.combinationPotential) setCombinationPotential(inputs.combinationPotential as CombinationPotential);
         if (inputs.competitivePosition) setCompetitivePosition(inputs.competitivePosition as CompetitivePosition);
         if (inputs.dataQuality) setDataQuality(inputs.dataQuality as DataQuality);
@@ -266,12 +276,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setTimeout(async () => {
         try {
           const input: CalculationInput = {
+            therapeuticArea,
             phase,
             modality,
             indication,
             territory,
             biomarker,
             lineOfTherapy,
+            treatmentApproach,
             combinationPotential,
             competitivePosition,
             dataQuality,
@@ -347,12 +359,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       // Save to local history with ALL inputs for recalculation
       addToHistory({
         inputs: {
+          therapeuticArea,
           phase,
           modality,
           indication,
           territory,
           biomarker,
           lineOfTherapy,
+          treatmentApproach,
           combinationPotential,
           competitivePosition,
           dataQuality,
@@ -398,12 +412,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     try {
       // Merge new inputs with current state values to get complete input
       const mergedInputs: CalculationInput = {
+        therapeuticArea: (newInputs.therapeuticArea as TherapeuticArea) || therapeuticArea,
         phase: (newInputs.phase as Phase) || phase,
         modality: (newInputs.modality as Modality) || modality,
         indication: (newInputs.indication as Indication) || indication,
         territory: (newInputs.territory as Territory) || territory,
         biomarker: (newInputs.biomarker as BiomarkerStatus) || biomarker,
         lineOfTherapy: (newInputs.lineOfTherapy as LineOfTherapy) || lineOfTherapy,
+        treatmentApproach: (newInputs.treatmentApproach as TreatmentApproach) || treatmentApproach,
         combinationPotential: (newInputs.combinationPotential as CombinationPotential) || combinationPotential,
         competitivePosition: (newInputs.competitivePosition as CompetitivePosition) || competitivePosition,
         dataQuality: (newInputs.dataQuality as DataQuality) || dataQuality,
@@ -411,12 +427,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       };
 
       // Update state variables for UI sync
+      if (newInputs.therapeuticArea) setTherapeuticArea(newInputs.therapeuticArea as TherapeuticArea);
       if (newInputs.phase) setPhase(newInputs.phase as Phase);
       if (newInputs.modality) setModality(newInputs.modality as Modality);
       if (newInputs.indication) setIndication(newInputs.indication as Indication);
       if (newInputs.territory) setTerritory(newInputs.territory as Territory);
       if (newInputs.biomarker) setBiomarker(newInputs.biomarker as BiomarkerStatus);
       if (newInputs.lineOfTherapy) setLineOfTherapy(newInputs.lineOfTherapy as LineOfTherapy);
+      if (newInputs.treatmentApproach) setTreatmentApproach(newInputs.treatmentApproach as TreatmentApproach);
       if (newInputs.combinationPotential) setCombinationPotential(newInputs.combinationPotential as CombinationPotential);
       if (newInputs.competitivePosition) setCompetitivePosition(newInputs.competitivePosition as CompetitivePosition);
       if (newInputs.dataQuality) setDataQuality(newInputs.dataQuality as DataQuality);
@@ -470,12 +488,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     const { values } = template;
     const fieldsSet = new Set<string>();
 
+    if (values.therapeuticArea) { setTherapeuticArea(values.therapeuticArea); fieldsSet.add('therapeuticArea'); }
     if (values.phase) { setPhase(values.phase); fieldsSet.add('phase'); }
     if (values.modality) { setModality(values.modality); fieldsSet.add('modality'); }
     if (values.indication) { setIndication(values.indication); fieldsSet.add('indication'); }
     if (values.territory) { setTerritory(values.territory); fieldsSet.add('territory'); }
     if (values.biomarker) { setBiomarker(values.biomarker); fieldsSet.add('biomarker'); }
     if (values.lineOfTherapy) { setLineOfTherapy(values.lineOfTherapy); fieldsSet.add('lineOfTherapy'); }
+    if (values.treatmentApproach) { setTreatmentApproach(values.treatmentApproach); fieldsSet.add('treatmentApproach'); }
     if (values.combinationPotential) { setCombinationPotential(values.combinationPotential); fieldsSet.add('combinationPotential'); }
     if (values.competitivePosition) { setCompetitivePosition(values.competitivePosition); fieldsSet.add('competitivePosition'); }
     if (values.dataQuality) { setDataQuality(values.dataQuality); fieldsSet.add('dataQuality'); }
@@ -511,9 +531,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 </svg>
               </div>
               <div className="min-w-0">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">Oncology Deal Terms Calculator</h2>
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
+                  {therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'} Deal Terms Calculator
+                </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
-                  2025 Market Benchmarks
+                  2025-2026 Market Benchmarks
                 </p>
               </div>
             </div>
@@ -569,6 +591,43 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
         {/* Form */}
         <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
+          {/* Therapeutic Area Selector */}
+          <div className="mb-6 lg:mb-8">
+            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
+            <div className="grid grid-cols-2 gap-3">
+              {therapeuticAreaOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    const newArea = option.value as TherapeuticArea;
+                    if (newArea !== therapeuticArea) {
+                      trackParameterChange('therapeuticArea', therapeuticArea, newArea);
+                      setTherapeuticArea(newArea);
+                      // Reset indication and modality to first option for new area
+                      if (newArea === 'neurology') {
+                        setIndication('alzheimers' as Indication);
+                        setModality('smallMolecule');
+                        setTreatmentApproach('symptomatic');
+                      } else {
+                        setIndication('lung_nsclc' as Indication);
+                        setModality('smallMolecule');
+                        setLineOfTherapy('2L');
+                      }
+                      setResult(null);
+                    }
+                  }}
+                  className={`px-4 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
+                    therapeuticArea === option.value
+                      ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm'
+                      : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Left Column */}
             <div className="space-y-6 lg:space-y-8">
@@ -607,7 +666,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {modalityOptions.map((group) => (
+                      {(therapeuticArea === 'neurology' ? neurologyModalityOptions : modalityOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -628,7 +687,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {indicationOptions.map((group) => (
+                      {(therapeuticArea === 'neurology' ? neurologyIndicationOptions : indicationOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -664,22 +723,41 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   Target Profile
                 </h3>
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
-                    <select
-                      value={lineOfTherapy}
-                      onChange={(e) => {
-                        const newValue = e.target.value as LineOfTherapy;
-                        trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
-                        setLineOfTherapy(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('lineOfTherapy') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {lineOfTherapyOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
+                  {therapeuticArea === 'neurology' ? (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Treatment Approach</label>
+                      <select
+                        value={treatmentApproach}
+                        onChange={(e) => {
+                          const newValue = e.target.value as TreatmentApproach;
+                          trackParameterChange('treatmentApproach', treatmentApproach, newValue);
+                          setTreatmentApproach(newValue);
+                        }}
+                        className={`select-field transition-all duration-300 ${highlightedFields.has('treatmentApproach') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
+                      >
+                        {treatmentApproachOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
+                      <select
+                        value={lineOfTherapy}
+                        onChange={(e) => {
+                          const newValue = e.target.value as LineOfTherapy;
+                          trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
+                          setLineOfTherapy(newValue);
+                        }}
+                        className={`select-field transition-all duration-300 ${highlightedFields.has('lineOfTherapy') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
+                      >
+                        {lineOfTherapyOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Combination Potential</label>
@@ -910,12 +988,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               territory,
             }}
             fullInputs={{
+              therapeuticArea,
               phase,
               modality,
               indication,
               territory,
               biomarker,
               lineOfTherapy,
+              treatmentApproach,
               combinationPotential,
               competitivePosition,
               dataQuality,

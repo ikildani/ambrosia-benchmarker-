@@ -244,7 +244,7 @@ export default function CalculatorPage() {
               Deal Terms Calculator
             </h1>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto px-2">
-              Data-driven estimates for upfront payments, milestones, and royalties for oncology licensing deals
+              Data-driven estimates for upfront payments, milestones, and royalties across oncology and neurology licensing deals
             </p>
           </div>
         </div>

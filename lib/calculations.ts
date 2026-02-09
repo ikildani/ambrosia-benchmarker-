@@ -1,14 +1,18 @@
 import benchmarks from '@/data/benchmarks.json';
 
+// Therapeutic area type
+export type TherapeuticArea = 'oncology' | 'neurology';
+
 // Phase types
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
 
-// Modality types (17 options)
+// Modality types (17 oncology + 3 neurology = 20 options)
 export type Modality =
   | 'smallMolecule' | 'mab' | 'adc' | 'bispecific' | 'tCellEngager'
   | 'carT_heme' | 'carT_solid' | 'cellTherapy' | 'geneTherapy'
   | 'radiopharmaceutical' | 'mrna' | 'rnai' | 'protac'
-  | 'molecularGlue' | 'peptide' | 'therapeuticVaccine' | 'oncolyticVirus';
+  | 'molecularGlue' | 'peptide' | 'therapeuticVaccine' | 'oncolyticVirus'
+  | 'bbbPlatform' | 'aso' | 'psychedelic';
 
 // Indication types
 export type SolidTumorIndication =
@@ -21,7 +25,11 @@ export type HematologicIndication =
   | 'aml' | 'all' | 'cll' | 'myeloma' | 'dlbcl' | 'follicular'
   | 'mantleCell' | 'mds' | 'mpn' | 'tCellLymphoma';
 
-export type Indication = SolidTumorIndication | HematologicIndication;
+export type NeurologyIndication =
+  | 'alzheimers' | 'parkinsons' | 'schizophrenia' | 'depression'
+  | 'pain' | 'ms' | 'epilepsy' | 'rareNeuro';
+
+export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication;
 
 // Territory types (9 options)
 export type Territory =
@@ -31,6 +39,7 @@ export type Territory =
 // New multiplier types
 export type BiomarkerStatus = 'selected' | 'unselected';
 export type LineOfTherapy = '1L' | '2L' | '3L+';
+export type TreatmentApproach = 'diseaseModifying' | 'symptomatic' | 'adjunctive';
 export type CombinationPotential = 'strong' | 'some' | 'standalone';
 export type CompetitivePosition = 'firstInClass' | 'firstToPivotal' | 'bestInClass' | 'racing' | 'behind' | 'crowded';
 export type DataQuality = 'pivotalReady' | 'strongPhase2' | 'promising' | 'mixed' | 'limited';
@@ -64,12 +73,14 @@ export interface DealRecommendation {
 }
 
 export interface CalculationInput {
+  therapeuticArea: TherapeuticArea;
   phase: Phase;
   modality: Modality;
   indication: Indication;
   territory: Territory;
   biomarker: BiomarkerStatus;
   lineOfTherapy: LineOfTherapy;
+  treatmentApproach: TreatmentApproach;
   combinationPotential: CombinationPotential;
   competitivePosition: CompetitivePosition;
   dataQuality: DataQuality;
@@ -121,14 +132,20 @@ export interface CalculationResult {
 }
 
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' {
+function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' {
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
     'gastric', 'liver', 'renal', 'gbm', 'bladder', 'headNeck',
     'cholangiocarcinoma', 'mesothelioma', 'sarcoma'
   ];
-  return solidTumors.includes(indication as SolidTumorIndication) ? 'solidTumor' : 'hematologic';
+  const neurologyIndications: NeurologyIndication[] = [
+    'alzheimers', 'parkinsons', 'schizophrenia', 'depression',
+    'pain', 'ms', 'epilepsy', 'rareNeuro'
+  ];
+  if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
+  if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
+  return 'hematologic';
 }
 
 // Calculate risk score (0-100, higher = more risk)
@@ -172,6 +189,23 @@ function calculateRiskScore(input: CalculationInput): number {
 // Get negotiation insight based on inputs
 function getNegotiationInsight(input: CalculationInput): string {
   const insights = benchmarks.marketContext.negotiationInsights;
+  const isNeurology = input.therapeuticArea === 'neurology';
+
+  // For neurology, check neurology-specific insights first
+  if (isNeurology) {
+    const neuroModalityInsights = (insights as Record<string, Record<string, string>>).neurologyModality;
+    if (neuroModalityInsights?.[input.modality]) {
+      return neuroModalityInsights[input.modality];
+    }
+    const neuroIndicationInsights = (insights as Record<string, Record<string, string>>).neurologyIndication;
+    if (neuroIndicationInsights?.[input.indication]) {
+      return neuroIndicationInsights[input.indication];
+    }
+    const taInsights = (insights as Record<string, Record<string, string>>).treatmentApproach;
+    if (taInsights?.[input.treatmentApproach]) {
+      return taInsights[input.treatmentApproach];
+    }
+  }
 
   // Priority order: modality > line of therapy > competitive > territory > data quality
 
@@ -181,9 +215,9 @@ function getNegotiationInsight(input: CalculationInput): string {
     return modalityInsights[input.modality];
   }
 
-  // Line of therapy insights
+  // Line of therapy insights (oncology only)
   const lotInsights = insights.lineOfTherapy as Record<string, string>;
-  if (lotInsights[input.lineOfTherapy]) {
+  if (!isNeurology && lotInsights[input.lineOfTherapy]) {
     return lotInsights[input.lineOfTherapy];
   }
 
@@ -214,10 +248,15 @@ function getNegotiationInsight(input: CalculationInput): string {
 
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const modifiers: { name: string; multiplier: number; context?: string }[] = [];
+  const isNeurology = input.therapeuticArea === 'neurology';
 
-  // Get phase baselines
-  const phaseBaseline = benchmarks.phaseBaselines[input.phase];
-  const phaseConfig = benchmarks.phaseConfig;
+  // Get phase baselines (neurology vs oncology)
+  const phaseBaseline = isNeurology
+    ? (benchmarks.neurologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    : benchmarks.phaseBaselines[input.phase];
+  const phaseConfig = isNeurology
+    ? (benchmarks.neurologyPhaseConfig as typeof benchmarks.phaseConfig)
+    : benchmarks.phaseConfig;
 
   // Get multipliers from benchmarks
   const modalityData = benchmarks.modalities[input.modality] as { multiplier: number; label: string; context?: string } | undefined;
@@ -243,11 +282,20 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier, context: biomarkerData?.context });
   }
 
-  // Get line of therapy multiplier
-  const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy] as { multiplier: number; label: string; context?: string } | undefined;
-  const lotMultiplier = lotData?.multiplier ?? 1.0;
-  if (lotMultiplier !== 1.0) {
-    modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier, context: lotData?.context });
+  // Get line of therapy / treatment approach multiplier (depends on therapeutic area)
+  let lotMultiplier = 1.0;
+  if (isNeurology) {
+    const taData = (benchmarks.multiplierConfig.treatmentApproach as Record<string, { multiplier: number; label: string; context?: string }>)[input.treatmentApproach];
+    lotMultiplier = taData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: taData?.label ?? input.treatmentApproach, multiplier: lotMultiplier, context: taData?.context });
+    }
+  } else {
+    const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy] as { multiplier: number; label: string; context?: string } | undefined;
+    lotMultiplier = lotData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier, context: lotData?.context });
+    }
   }
 
   // Get combination potential multiplier
@@ -704,4 +752,59 @@ export const regulatoryDesignationOptions = [
   { value: 'fastTrack', label: 'Fast Track' },
   { value: 'orphan', label: 'Orphan Drug' },
   { value: 'prime', label: 'PRIME (EU)' },
+];
+
+// Therapeutic area options
+export const therapeuticAreaOptions = [
+  { value: 'oncology', label: 'Oncology' },
+  { value: 'neurology', label: 'Neurology / CNS' },
+];
+
+// Neurology-specific indication options
+export const neurologyIndicationOptions = [
+  { group: 'Neurodegeneration', options: [
+    { value: 'alzheimers', label: "Alzheimer's Disease" },
+    { value: 'parkinsons', label: "Parkinson's Disease" },
+    { value: 'rareNeuro', label: 'Rare Neurological (ALS, Huntington\'s, etc.)' },
+  ]},
+  { group: 'Psychiatry', options: [
+    { value: 'schizophrenia', label: 'Schizophrenia / Psychosis' },
+    { value: 'depression', label: 'Depression / MDD' },
+  ]},
+  { group: 'Other CNS', options: [
+    { value: 'pain', label: 'Pain (Chronic / Neuropathic)' },
+    { value: 'ms', label: 'Multiple Sclerosis' },
+    { value: 'epilepsy', label: 'Epilepsy' },
+  ]},
+];
+
+// Neurology-specific modality options
+export const neurologyModalityOptions = [
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'protac', label: 'PROTAC / Degrader' },
+  ]},
+  { group: 'Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+  { group: 'CNS Delivery & Platforms', options: [
+    { value: 'bbbPlatform', label: 'BBB Delivery Platform' },
+    { value: 'geneTherapy', label: 'Gene Therapy / Gene Editing' },
+  ]},
+  { group: 'RNA Therapeutics', options: [
+    { value: 'aso', label: 'Antisense Oligonucleotide (ASO)' },
+    { value: 'rnai', label: 'RNAi / siRNA' },
+  ]},
+  { group: 'Emerging', options: [
+    { value: 'psychedelic', label: 'Psychedelic / Neuroplastogen' },
+    { value: 'cellTherapy', label: 'Cell Therapy' },
+  ]},
+];
+
+// Treatment approach options (neurology replacement for line of therapy)
+export const treatmentApproachOptions = [
+  { value: 'diseaseModifying', label: 'Disease-modifying' },
+  { value: 'symptomatic', label: 'Symptomatic / Acute' },
+  { value: 'adjunctive', label: 'Adjunctive / Supportive' },
 ];

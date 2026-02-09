@@ -11,6 +11,7 @@ export interface CalculationHistoryItem {
   id: string;
   timestamp: string;
   inputs: {
+    therapeuticArea?: string;
     phase: string;
     modality: string;
     indication: string;
@@ -18,6 +19,7 @@ export interface CalculationHistoryItem {
     // Extended inputs for full recalculation
     biomarker?: string;
     lineOfTherapy?: string;
+    treatmentApproach?: string;
     combinationPotential?: string;
     competitivePosition?: string;
     dataQuality?: string;
@@ -132,8 +134,10 @@ export function formatDate(isoString: string): string {
 
 // Default values for legacy history items missing extended inputs
 export const DEFAULT_EXTENDED_INPUTS = {
+  therapeuticArea: 'oncology' as const,
   biomarker: 'unselected' as const,
   lineOfTherapy: '2L' as const,
+  treatmentApproach: 'symptomatic' as const,
   combinationPotential: 'some' as const,
   competitivePosition: 'racing' as const,
   dataQuality: 'promising' as const,
@@ -151,8 +155,10 @@ export function getHistoryItemWithDefaults(item: CalculationHistoryItem): Calcul
     ...item,
     inputs: {
       ...item.inputs,
+      therapeuticArea: item.inputs.therapeuticArea ?? DEFAULT_EXTENDED_INPUTS.therapeuticArea,
       biomarker: item.inputs.biomarker ?? DEFAULT_EXTENDED_INPUTS.biomarker,
       lineOfTherapy: item.inputs.lineOfTherapy ?? DEFAULT_EXTENDED_INPUTS.lineOfTherapy,
+      treatmentApproach: item.inputs.treatmentApproach ?? DEFAULT_EXTENDED_INPUTS.treatmentApproach,
       combinationPotential: item.inputs.combinationPotential ?? DEFAULT_EXTENDED_INPUTS.combinationPotential,
       competitivePosition: item.inputs.competitivePosition ?? DEFAULT_EXTENDED_INPUTS.competitivePosition,
       dataQuality: item.inputs.dataQuality ?? DEFAULT_EXTENDED_INPUTS.dataQuality,

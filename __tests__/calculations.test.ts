@@ -16,12 +16,14 @@ import {
 
 // Base input for consistent testing
 const baseInput: CalculationInput = {
+  therapeuticArea: 'oncology',
   phase: 'phase2' as Phase,
   modality: 'smallMolecule' as Modality,
   indication: 'lung_nsclc' as Indication,
   territory: 'global' as Territory,
   biomarker: 'unselected' as BiomarkerStatus,
   lineOfTherapy: '2L' as LineOfTherapy,
+  treatmentApproach: 'symptomatic',
   combinationPotential: 'some' as CombinationPotential,
   competitivePosition: 'racing' as CompetitivePosition,
   dataQuality: 'promising' as DataQuality,
