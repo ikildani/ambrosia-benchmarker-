@@ -157,8 +157,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSupabaseConfigured()) {
       const supabase = createClient();
       if (supabase) {
-        // Check current session
+        // Check current session with a timeout to prevent infinite loading
+        const sessionTimeout = setTimeout(() => {
+          console.warn('[Auth] getSession timed out after 5s, proceeding with localStorage auth');
+          setIsLoading(false);
+        }, 5000);
+
         supabase.auth.getSession().then(({ data: { session } }) => {
+          clearTimeout(sessionTimeout);
           if (session?.user) {
             const supabaseUser = session.user;
             const userName = supabaseUser.user_metadata?.name ||
@@ -191,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setIsLoading(false);
         }).catch((error) => {
+          clearTimeout(sessionTimeout);
           console.error('[Auth] getSession failed:', error);
           setIsLoading(false);
         });
