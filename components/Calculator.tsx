@@ -32,6 +32,12 @@ import {
   competitivePositionOptions,
   dataQualityOptions,
   regulatoryDesignationOptions,
+  BBBPenetration,
+  DiseaseProgression,
+  BiomarkerValidation,
+  bbbPenetrationOptions,
+  diseaseProgressionOptions,
+  biomarkerValidationOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
@@ -261,6 +267,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     orphan: false,
     prime: false,
   });
+  const [bbbPenetration, setBbbPenetration] = useState<BBBPenetration>('unproven');
+  const [diseaseProgression, setDiseaseProgression] = useState<DiseaseProgression>('moderateProgressive');
+  const [biomarkerValidation, setBiomarkerValidation] = useState<BiomarkerValidation>('noBiomarker');
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -389,6 +398,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             competitivePosition,
             dataQuality,
             regulatoryDesignations,
+            ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
           };
           const calculatedResult = calculateDealTerms(input);
           setResult(calculatedResult);
@@ -542,6 +552,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         competitivePosition: (newInputs.competitivePosition as CompetitivePosition) || competitivePosition,
         dataQuality: (newInputs.dataQuality as DataQuality) || dataQuality,
         regulatoryDesignations: newInputs.regulatoryDesignations || regulatoryDesignations,
+        ...(therapeuticArea === 'neurology' ? {
+          bbbPenetration: (newInputs.bbbPenetration as BBBPenetration) || bbbPenetration,
+          diseaseProgression: (newInputs.diseaseProgression as DiseaseProgression) || diseaseProgression,
+          biomarkerValidation: (newInputs.biomarkerValidation as BiomarkerValidation) || biomarkerValidation,
+        } : {}),
       };
 
       // Update state variables for UI sync
@@ -871,6 +886,68 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     </div>
                   )}
 
+                  {therapeuticArea === 'neurology' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          BBB Penetration
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
+                        </label>
+                        <select
+                          value={bbbPenetration}
+                          onChange={(e) => {
+                            const newValue = e.target.value as BBBPenetration;
+                            trackParameterChange('bbbPenetration', bbbPenetration, newValue);
+                            setBbbPenetration(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {bbbPenetrationOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Disease Progression
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
+                        </label>
+                        <select
+                          value={diseaseProgression}
+                          onChange={(e) => {
+                            const newValue = e.target.value as DiseaseProgression;
+                            trackParameterChange('diseaseProgression', diseaseProgression, newValue);
+                            setDiseaseProgression(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {diseaseProgressionOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Biomarker Validation
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
+                        </label>
+                        <select
+                          value={biomarkerValidation}
+                          onChange={(e) => {
+                            const newValue = e.target.value as BiomarkerValidation;
+                            trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
+                            setBiomarkerValidation(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {biomarkerValidationOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Combination Potential</label>
                     <select
@@ -1119,6 +1196,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               competitivePosition,
               dataQuality,
               regulatoryDesignations,
+              ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
             }}
             onApplyNewInputs={handleSensitivityApply}
           />

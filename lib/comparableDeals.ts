@@ -29,6 +29,60 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Ionis/Biogen', licensee: 'N/A', value: '$1.8B+ revenue', year: 2024, relevance: 'ASO in rare neuro (tofersen/SOD1 ALS)', modalities: ['aso'], indications: ['als'], therapeuticArea: 'neurology' },
 ];
 
+// Extended interface for web UI component
+export interface ComparableDealForUI {
+  id: string;
+  parties: string;
+  totalValue: string;
+  upfront?: string;
+  year: number;
+  phase?: string;
+  relevanceReasons: string[];
+}
+
+// Find comparable deals scored by relevance to current inputs (for web UI)
+export function findComparableDeals(
+  inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string },
+  maxDeals: number = 5
+): ComparableDealForUI[] {
+  const scored = COMPARABLE_DEALS.map((deal, idx) => {
+    let score = 0;
+    const reasons: string[] = [];
+
+    if (deal.therapeuticArea === inputs.therapeuticArea || deal.therapeuticArea === 'both') {
+      score += 3;
+      reasons.push(`Same therapeutic area`);
+    }
+    if (inputs.modality && deal.modalities?.includes(inputs.modality)) {
+      score += 4;
+      reasons.push(`Same modality`);
+    }
+    if (inputs.indication && deal.indications?.includes(inputs.indication)) {
+      score += 3;
+      reasons.push(`Same indication`);
+    }
+
+    return {
+      deal,
+      score,
+      reasons,
+      id: `deal-${idx}`,
+    };
+  });
+
+  return scored
+    .filter(s => s.score >= 2)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxDeals)
+    .map(s => ({
+      id: s.id,
+      parties: `${s.deal.licensor} / ${s.deal.licensee}`,
+      totalValue: s.deal.value,
+      year: s.deal.year,
+      relevanceReasons: s.reasons,
+    }));
+}
+
 export function getRelevantDeals(
   therapeuticArea: string,
   modality?: string,

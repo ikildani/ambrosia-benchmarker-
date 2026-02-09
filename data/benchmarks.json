@@ -312,6 +312,23 @@
       "symptomatic": { "multiplier": 1.00, "label": "Symptomatic / Acute", "context": "Manages symptoms without altering progression; standard baseline" },
       "adjunctive": { "multiplier": 0.85, "label": "Adjunctive / Supportive", "context": "Add-on to existing therapies; smaller addressable positioning" }
     },
+    "bbbPenetration": {
+      "provenCNS": { "multiplier": 1.30, "label": "Proven CNS penetration", "context": "Demonstrated BBB crossing in human studies — major de-risk" },
+      "promisingPreclinical": { "multiplier": 1.15, "label": "Promising preclinical BBB data", "context": "Animal PK shows CNS exposure; human data pending" },
+      "unproven": { "multiplier": 1.00, "label": "Unproven / standard", "context": "Standard assumption for BBB penetration" },
+      "peripheralOnly": { "multiplier": 0.85, "label": "Peripheral only", "context": "No CNS penetration; limited to peripheral targets" }
+    },
+    "diseaseProgression": {
+      "slowProgressive": { "multiplier": 1.15, "label": "Slow progressive", "context": "Slow progression enables longer trial timelines but larger commercial window" },
+      "moderateProgressive": { "multiplier": 1.00, "label": "Moderate progressive", "context": "Standard progression rate baseline" },
+      "rapidProgressive": { "multiplier": 0.90, "label": "Rapid progressive", "context": "Faster endpoints but smaller treatment window" },
+      "episodic": { "multiplier": 1.05, "label": "Episodic / relapsing", "context": "Relapsing patterns may allow enriched trial designs" }
+    },
+    "biomarkerValidation": {
+      "validatedSurrogate": { "multiplier": 1.25, "label": "Validated surrogate endpoint", "context": "FDA-accepted surrogate enables accelerated approval pathway" },
+      "exploratory": { "multiplier": 1.10, "label": "Exploratory biomarker", "context": "Biomarker used for enrichment but not regulatory endpoint" },
+      "noBiomarker": { "multiplier": 1.00, "label": "No biomarker", "context": "Clinical endpoints only; standard CNS trial design" }
+    },
     "regulatoryDesignations": {
       "breakthrough": { "bonus": 0.12, "label": "Breakthrough Therapy" },
       "fastTrack": { "bonus": 0.06, "label": "Fast Track" },
