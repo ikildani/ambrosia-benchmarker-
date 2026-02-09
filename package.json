@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "analyze": "ANALYZE=true next build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -17,8 +18,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
+    "@sentry/nextjs": "^10.38.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.2",
     "@vercel/analytics": "^1.6.1",
     "dompurify": "^3.3.1",
     "lucide-react": "^0.563.0",
@@ -33,6 +37,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.58.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

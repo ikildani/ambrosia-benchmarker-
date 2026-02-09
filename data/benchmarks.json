@@ -14,6 +14,21 @@
     "changelog": [
       {
         "date": "2026-02-09",
+        "version": "3.3",
+        "summary": "World-Class Neurology Enhancement",
+        "changes": [
+          "Expanded neurology indications from 8 to 15: added ALS, Huntington's, migraine, narcolepsy, tremor/dystonia, TBI, addiction",
+          "Added 3 new neurology modalities: ion channel modulators, tau-targeting therapies, neural stem cell",
+          "Introduced modality × indication interaction terms for 13 key CNS combinations",
+          "Recalibrated schizophrenia multiplier to 1.22x reflecting KarXT/Cobenfy $14B reset",
+          "Disease-modifying neurology assets now use adjusted milestone allocations reflecting longer development",
+          "Neurology multiplier stacking uses therapeutic-area-specific dampening exponents",
+          "Partner matching rebalanced: strategic need weighted equally with deal activity",
+          "Added neurology-specific watch-outs: CMC risk, regulatory history, reimbursement uncertainty"
+        ]
+      },
+      {
+        "date": "2026-02-09",
         "version": "3.2",
         "summary": "Neurology/CNS Expansion",
         "changes": [
@@ -194,7 +209,10 @@
     "oncolyticVirus": { "multiplier": 1.10, "label": "Oncolytic Virus", "context": "Niche interest" },
     "bbbPlatform": { "multiplier": 1.50, "label": "BBB Delivery Platform", "context": "2-3x premium for multi-program optionality; AZ/JCR $825M, ABL/GSK $2.7B" },
     "aso": { "multiplier": 1.15, "label": "Antisense Oligonucleotide (ASO)", "context": "Established in neuro (Biogen/Ionis); genetic precision, proven path" },
-    "psychedelic": { "multiplier": 1.20, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B for MDD" }
+    "psychedelic": { "multiplier": 1.20, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B for MDD" },
+    "ionChannel": { "multiplier": 1.10, "label": "Ion Channel Modulator", "context": "Nav1.8, CaV, HCN targets; emerging in pain and epilepsy; Praxis, Xenon active" },
+    "tauTargeting": { "multiplier": 1.25, "label": "Tau-targeting Therapy", "context": "Hot emerging category; tau degraders, immunotherapy, PET imaging; post-amyloid wave" },
+    "stemCell": { "multiplier": 1.15, "label": "Neural Stem Cell / Progenitor", "context": "BlueRock/Bayer precedent; iPSC-derived neurons; PD and stroke applications" }
   },
   "indications": {
     "solidTumor": {
@@ -232,13 +250,20 @@
     },
     "neurology": {
       "alzheimers": { "multiplier": 1.30, "label": "Alzheimer's Disease", "context": "Anti-amyloid approvals reset market; BBB delivery premium; $15B+ projected TAM" },
-      "parkinsons": { "multiplier": 1.20, "label": "Parkinson's Disease", "context": "Gene therapy + novel mechanisms; $5.6B market; large unmet need" },
-      "schizophrenia": { "multiplier": 1.15, "label": "Schizophrenia / Psychosis", "context": "KarXT paradigm shift; muscarinic agonists hot; BMS/Karuna $14B" },
-      "depression": { "multiplier": 1.05, "label": "Depression / MDD", "context": "Largest patient population; psychedelics emerging; competitive landscape" },
+      "parkinsons": { "multiplier": 1.20, "label": "Parkinson's Disease", "context": "Gene therapy + novel mechanisms; $5.6B market; LRRK2/GBA targets hot" },
+      "schizophrenia": { "multiplier": 1.22, "label": "Schizophrenia / Psychosis", "context": "KarXT paradigm shift; muscarinic agonists hot; BMS/Karuna $14B reset valuations" },
+      "depression": { "multiplier": 1.08, "label": "Depression / MDD", "context": "Largest patient population; psychedelics emerging; rapid-onset premium" },
+      "als": { "multiplier": 1.32, "label": "ALS (Amyotrophic Lateral Sclerosis)", "context": "Critical unmet need; orphan premiums; ASO/gene therapy approaches; Biogen/Ionis precedent" },
+      "huntingtons": { "multiplier": 1.28, "label": "Huntington's Disease", "context": "Orphan drug; Novartis/PTC $1B upfront benchmark; gene therapy/ASO focus; genetically validated" },
+      "migraine": { "multiplier": 0.98, "label": "Migraine / Headache", "context": "Large market but CGRP well-established; differentiation needed for premium terms" },
+      "narcolepsy": { "multiplier": 1.15, "label": "Narcolepsy / Sleep Disorders", "context": "Orphan-adjacent; Jazz/Harmony established; orexin biology expanding" },
       "pain": { "multiplier": 1.00, "label": "Pain (Chronic / Neuropathic)", "context": "Mature market; novel Nav1.8 mechanisms attracting interest" },
       "ms": { "multiplier": 0.95, "label": "Multiple Sclerosis", "context": "Well-served market with multiple approved therapies; fewer novel deals" },
-      "epilepsy": { "multiplier": 1.10, "label": "Epilepsy", "context": "Gene therapy interest; rare epilepsy syndromes carry orphan value" },
-      "rareNeuro": { "multiplier": 1.25, "label": "Rare Neurological (ALS, Huntington's, etc.)", "context": "High unmet need; orphan premiums; Novartis/PTC $1B upfront for HD" }
+      "epilepsy": { "multiplier": 1.12, "label": "Epilepsy", "context": "Gene therapy interest; rare epilepsy syndromes carry orphan value; ion channels hot" },
+      "tremor": { "multiplier": 1.10, "label": "Movement Disorders (Tremor / Dystonia)", "context": "Emerging BD activity; essential tremor and dystonia underserved; Neurocrine active" },
+      "tbi": { "multiplier": 1.18, "label": "Traumatic Brain Injury / Stroke Recovery", "context": "High unmet need; no approved disease-modifying treatments; neuroprotection premium" },
+      "addiction": { "multiplier": 1.05, "label": "Addiction / Substance Use Disorders", "context": "Growing interest; psychedelic overlap; opioid use disorder expanding" },
+      "rareNeuro": { "multiplier": 1.25, "label": "Other Rare Neurological", "context": "Catch-all for rare genetic CNS; orphan premiums; SMA, Rett, ataxia, lysosomal storage" }
     }
   },
   "territories": {
@@ -295,6 +320,32 @@
       "maxBonus": 0.20
     }
   },
+  "interactionTerms": {
+    "_description": "Modality × indication synergy bonuses that replace simple multiplication. Applied as additive bonus to the combined multiplier.",
+    "bbbPlatform+alzheimers": { "bonus": 0.10, "context": "BBB platform + AD is the premier combo: multi-program optionality in largest CNS market" },
+    "bbbPlatform+parkinsons": { "bonus": 0.08, "context": "BBB crossing critical for PD targets (alpha-synuclein, LRRK2)" },
+    "aso+huntingtons": { "bonus": 0.12, "context": "ASO is the leading modality for HD (allele-selective silencing); Wave, uniQure, Ionis" },
+    "aso+als": { "bonus": 0.10, "context": "ASO validated in ALS (tofersen/SOD1); genetic subtype targeting" },
+    "geneTherapy+rareNeuro": { "bonus": 0.12, "context": "Gene therapy + rare CNS is curative potential; Zolgensma precedent; monogenic validation" },
+    "geneTherapy+huntingtons": { "bonus": 0.10, "context": "One-time gene therapy for HD; uniQure AMT-130 benchmark" },
+    "geneTherapy+epilepsy": { "bonus": 0.08, "context": "Gene therapy for rare epilepsy syndromes; Dravet, Angelman interest" },
+    "tauTargeting+alzheimers": { "bonus": 0.08, "context": "Tau is the next wave after amyloid validation; tau PET-guided treatment" },
+    "psychedelic+depression": { "bonus": 0.06, "context": "Psychedelic + MDD is the prime use case; psilocybin, MDMA-assisted, neuroplastogens" },
+    "ionChannel+epilepsy": { "bonus": 0.08, "context": "Ion channels are validated targets in epilepsy; genetic epilepsy syndromes" },
+    "ionChannel+pain": { "bonus": 0.06, "context": "Nav1.8 is a validated non-opioid pain target; Vertex precedent" },
+    "stemCell+parkinsons": { "bonus": 0.10, "context": "Dopaminergic neuron replacement is the holy grail for PD; BlueRock/Bayer lead" },
+    "stemCell+tbi": { "bonus": 0.08, "context": "Neural progenitors for brain injury repair; emerging neuroprotection" }
+  },
+  "neurologyDiseaseModifyingPhaseAdjustment": {
+    "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",
+    "milestoneRebalance": {
+      "preclinical": { "dev": 0.58, "reg": 0.26, "comm": 0.16 },
+      "phase1": { "dev": 0.50, "reg": 0.30, "comm": 0.20 },
+      "phase2": { "dev": 0.33, "reg": 0.36, "comm": 0.31 },
+      "phase3": { "dev": 0.15, "reg": 0.33, "comm": 0.52 },
+      "approved": { "dev": 0.05, "reg": 0.25, "comm": 0.70 }
+    }
+  },
   "marketContext": {
     "tooltips": [
       "Radiopharmaceuticals commanding 50-60% premiums after Novartis/Point ($4.9B) and BMS/RayzeBio ($4.1B) acquisitions",
@@ -337,13 +388,21 @@
         "bbbPlatform": "BBB delivery platforms command 2-3x premiums due to multi-program optionality. Leverage AZ/JCR ($825M) and ABL/GSK ($2.7B) as comparables.",
         "aso": "ASOs have a proven regulatory path in neuro (Spinraza precedent). Emphasize genetic target validation and manufacturing scalability.",
         "psychedelic": "Psychedelic/neuroplastogen deals are nascent but high-value. AbbVie/Gilgamesh ($1.2B) sets the benchmark for differentiated Phase 2 assets.",
-        "geneTherapy": "CNS gene therapy commands higher premiums than oncology gene therapy due to curative potential for monogenic disorders. Expect scrutiny on BBB penetration and durability."
+        "geneTherapy": "CNS gene therapy commands higher premiums than oncology gene therapy due to curative potential for monogenic disorders. Expect scrutiny on BBB penetration and durability.",
+        "ionChannel": "Ion channel modulators are gaining traction in epilepsy and pain. Nav1.8 (Vertex precedent) and genetic epilepsy channels command differentiated terms. Emphasize selectivity data.",
+        "tauTargeting": "Tau-targeting therapies are the next wave after amyloid validation. Tau PET-guided patient selection and disease modification data are key negotiation leverage points.",
+        "stemCell": "Neural stem cell/progenitor therapies command premiums for curative potential. BlueRock/Bayer ($1B+) sets the benchmark. CMC and scalability are critical discussion points."
       },
       "neurologyIndication": {
         "alzheimers": "Alzheimer's commands the highest CNS premiums. Anti-amyloid approvals validated the space. BBB-crossing assets at significant premium.",
         "schizophrenia": "Schizophrenia deals reset by KarXT/Cobenfy approval. Novel mechanisms (muscarinic agonists) commanding premium over D2-based approaches.",
-        "rareNeuro": "Rare neurological diseases carry orphan drug premiums. The Novartis/PTC $1B upfront for Huntington's sets a high bar for Phase 2 assets.",
-        "depression": "MDD is a large but competitive market. Differentiation (novel MOA, rapid onset, reduced side effects) is critical for premium terms."
+        "als": "ALS carries maximum orphan premiums with critical unmet need. ASO/gene therapy approaches lead. Biogen/Ionis tofersen (SOD1) validates genetic targeting in ALS.",
+        "huntingtons": "Huntington's is a validated genetic target with orphan premiums. Novartis/PTC $1B upfront sets the benchmark. Allele-selective silencing commands premium.",
+        "narcolepsy": "Narcolepsy is an orphan-adjacent market dominated by Jazz and Harmony. Orexin biology expanding. Novel mechanisms can command premium for differentiation.",
+        "epilepsy": "Epilepsy gene therapy and ion channel approaches attract orphan premiums for rare epilepsy syndromes. Broad epilepsy is competitive — differentiate on mechanism.",
+        "tbi": "TBI/stroke recovery has zero approved disease-modifying treatments. Massive unmet need but regulatory path uncertain. Neuroprotection/regeneration data is key.",
+        "depression": "MDD is a large but competitive market. Differentiation (novel MOA, rapid onset, reduced side effects) is critical for premium terms.",
+        "rareNeuro": "Rare neurological diseases carry orphan drug premiums. Gene therapy and ASO approaches for monogenic CNS disorders can command curative-potential premiums."
       },
       "treatmentApproach": {
         "diseaseModifying": "Disease-modifying status significantly increases value in neurodegeneration. Emphasize biomarker evidence of disease modification in negotiations.",

@@ -1,3 +1,8 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -44,23 +49,8 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()'
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live",
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
-              "frame-ancestors 'self'",
-              "form-action 'self'",
-              "base-uri 'self'",
-              "upgrade-insecure-requests"
-            ].join('; ')
           }
+          // CSP is now handled per-request in middleware.ts with nonces
         ],
       },
       {
@@ -91,4 +81,13 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(withBundleAnalyzer(nextConfig), {
+  // Suppress source map upload warnings when SENTRY_AUTH_TOKEN is not set
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+  // Hide source maps from users
+  hideSourceMaps: true,
+  // Disable Sentry logger to reduce bundle size
+  disableLogger: true,
+});

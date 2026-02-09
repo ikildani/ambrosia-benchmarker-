@@ -46,7 +46,7 @@ export interface DetailedScoreBreakdown {
 // ============================================================================
 
 export type WatchOutSeverity = 'low' | 'medium' | 'high';
-export type WatchOutCategory = 'timing' | 'structure' | 'competition' | 'strategic';
+export type WatchOutCategory = 'timing' | 'structure' | 'competition' | 'strategic' | 'operational' | 'regulatory' | 'commercial';
 
 export interface WatchOutFactor {
   title: string;

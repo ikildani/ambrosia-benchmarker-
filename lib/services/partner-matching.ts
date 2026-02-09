@@ -13,7 +13,7 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 
-// Scoring weights - tuned for deal relevance
+// Scoring weights - tuned for deal relevance with strategic need parity
 const WEIGHTS = {
   // Modality alignment (max 40 points)
   modality_exact: 40,
@@ -25,15 +25,21 @@ const WEIGHTS = {
   indication_category_exact: 20,
   indication_category_adjacent: 10,
 
-  // Phase preference (max 15 points)
+  // Phase preference (max 18 points) - increased, with sweet-spot bonus
   phase_in_range: 15,
+  phase_sweet_spot: 18,  // When asset is in the company's preferred phase range center
   phase_adjacent: 8,
 
-  // Activity signals (max 25 points)
-  deal_last_6mo: 15,
-  deal_last_12mo: 10,
-  deal_last_24mo: 5,
-  active_trials_relevant: 10,
+  // Activity signals (max 20 points) - reduced from 25 to balance with strategic need
+  deal_last_6mo: 12,
+  deal_last_12mo: 8,
+  deal_last_24mo: 4,
+  active_trials_relevant: 8,
+
+  // Strategic need (max 20 points) - NEW: patent cliff urgency and pipeline gaps
+  strategic_patent_cliff: 15,
+  strategic_pipeline_gap: 10,
+  strategic_priority_match: 8,
 
   // Territory alignment (max 10 points)
   territory_match: 10,
@@ -48,34 +54,53 @@ const WEIGHTS = {
 const MODALITY_ADJACENCY: Record<string, string[]> = {
   'adc': ['antibody', 'bispecific', 'small_molecule'],
   'bispecific': ['antibody', 'adc'],
-  'antibody': ['adc', 'bispecific'],
+  'antibody': ['adc', 'bispecific', 'tau_targeting'],
   'car_t': ['cell_therapy', 'gene_therapy', 'antibody'],
-  'cell_therapy': ['car_t', 'gene_therapy'],
-  'gene_therapy': ['cell_therapy', 'mrna', 'oligonucleotide', 'aso'],
+  'cell_therapy': ['car_t', 'gene_therapy', 'stem_cell'],
+  'gene_therapy': ['cell_therapy', 'mrna', 'oligonucleotide', 'aso', 'stem_cell'],
   'mrna': ['gene_therapy', 'vaccine', 'oligonucleotide'],
   'radiopharm': ['antibody', 'small_molecule', 'peptide'],
-  'small_molecule': ['peptide'],
+  'small_molecule': ['peptide', 'ion_channel', 'psychedelic'],
   'oligonucleotide': ['gene_therapy', 'mrna', 'aso'],
   'peptide': ['small_molecule', 'antibody'],
   'vaccine': ['mrna', 'antibody'],
   'aso': ['oligonucleotide', 'gene_therapy', 'rnai'],
-  'bbb_platform': ['antibody', 'gene_therapy', 'aso'],
-  'psychedelic': ['small_molecule'],
+  'bbb_platform': ['antibody', 'gene_therapy', 'aso', 'small_molecule', 'peptide'],
+  'psychedelic': ['small_molecule', 'ion_channel'],
+  'ion_channel': ['small_molecule', 'psychedelic', 'peptide'],
+  'tau_targeting': ['antibody', 'small_molecule', 'aso'],
+  'stem_cell': ['cell_therapy', 'gene_therapy'],
 };
 
-// Indication category adjacency
+// Indication category adjacency (includes neurology sub-indication cross-links)
 const INDICATION_ADJACENCY: Record<string, string[]> = {
   'solid_tumor': ['hematological'],
   'hematological': ['solid_tumor', 'autoimmune'],
-  'autoimmune': ['hematological', 'dermatology', 'rare_disease'],
-  'cns': ['rare_disease', 'autoimmune'],
-  'rare_disease': ['cns', 'metabolic'],
+  'autoimmune': ['hematological', 'dermatology', 'rare_disease', 'cns'],
+  'cns': ['rare_disease', 'autoimmune', 'cardiovascular', 'metabolic', 'pain'],
+  'rare_disease': ['cns', 'metabolic', 'rare_neurological'],
   'infectious': ['vaccine'],
-  'metabolic': ['cardiovascular', 'rare_disease'],
-  'cardiovascular': ['metabolic'],
+  'metabolic': ['cardiovascular', 'rare_disease', 'cns'],
+  'cardiovascular': ['metabolic', 'cns'],
   'respiratory': ['infectious', 'autoimmune'],
   'dermatology': ['autoimmune'],
-  'ophthalmology': ['rare_disease'],
+  'ophthalmology': ['rare_disease', 'cns'],
+  // Neurology sub-indication adjacency
+  'alzheimers': ['parkinsons', 'rare_neurological', 'cns'],
+  'parkinsons': ['alzheimers', 'tremor', 'rare_neurological', 'cns'],
+  'schizophrenia': ['depression', 'addiction', 'cns'],
+  'depression': ['schizophrenia', 'addiction', 'pain', 'cns'],
+  'pain': ['depression', 'cns', 'epilepsy', 'migraine'],
+  'multiple_sclerosis': ['autoimmune', 'rare_neurological', 'cns'],
+  'epilepsy': ['rare_neurological', 'pain', 'cns'],
+  'rare_neurological': ['alzheimers', 'parkinsons', 'epilepsy', 'rare_disease', 'cns'],
+  'als': ['rare_neurological', 'parkinsons', 'cns'],
+  'huntingtons': ['rare_neurological', 'als', 'cns'],
+  'migraine': ['pain', 'cns'],
+  'narcolepsy': ['depression', 'cns'],
+  'tremor': ['parkinsons', 'epilepsy', 'cns'],
+  'tbi': ['pain', 'rare_neurological', 'cns'],
+  'addiction': ['depression', 'schizophrenia', 'pain', 'cns'],
 };
 
 // Phase ranking for comparison
@@ -143,6 +168,7 @@ export interface ScoreBreakdown {
   indication: number;
   phase: number;
   activity: number;
+  strategic: number;
   territory: number;
   quality: number;
   total: number;
@@ -302,6 +328,7 @@ function calculateMatchScore(
     indication: 0,
     phase: 0,
     activity: 0,
+    strategic: 0,
     territory: 0,
     quality: 0,
     total: 0,
@@ -372,18 +399,33 @@ function calculateMatchScore(
     }
   }
 
-  // 3. PHASE PREFERENCE MATCHING
+  // 3. PHASE PREFERENCE MATCHING (with sweet-spot bonus)
   const inputPhaseRank = PHASE_RANK[input.development_phase] ?? 2;
   const minPhaseRank = PHASE_RANK[company.phase_preference_min] ?? 0;
   const maxPhaseRank = PHASE_RANK[company.phase_preference_max] ?? 5;
 
   if (inputPhaseRank >= minPhaseRank && inputPhaseRank <= maxPhaseRank) {
-    breakdown.phase = WEIGHTS.phase_in_range;
-    reasons.push({
-      category: 'phase',
-      reason: `Licenses at ${formatPhase(input.development_phase)}`,
-      strength: 'strong',
-    });
+    // Check if asset is in the sweet spot (center of company's preferred range)
+    const rangeSize = maxPhaseRank - minPhaseRank;
+    const rangeMid = minPhaseRank + rangeSize / 2;
+    const distFromCenter = Math.abs(inputPhaseRank - rangeMid);
+
+    if (rangeSize <= 1 || distFromCenter <= rangeSize * 0.25) {
+      // Sweet spot: narrow range or within center 50% of range
+      breakdown.phase = WEIGHTS.phase_sweet_spot;
+      reasons.push({
+        category: 'phase',
+        reason: `${formatPhase(input.development_phase)} is their licensing sweet spot`,
+        strength: 'strong',
+      });
+    } else {
+      breakdown.phase = WEIGHTS.phase_in_range;
+      reasons.push({
+        category: 'phase',
+        reason: `Licenses at ${formatPhase(input.development_phase)}`,
+        strength: 'strong',
+      });
+    }
   } else if (Math.abs(inputPhaseRank - minPhaseRank) <= 1 || Math.abs(inputPhaseRank - maxPhaseRank) <= 1) {
     breakdown.phase = WEIGHTS.phase_adjacent;
     reasons.push({
@@ -434,7 +476,75 @@ function calculateMatchScore(
     });
   }
 
-  // 5. TERRITORY MATCHING
+  // 5. STRATEGIC NEED (patent cliffs, pipeline gaps, strategic priority match)
+  const patentCliffs = parsePatentCliffs(company.patent_cliffs);
+
+  // Patent cliff urgency: upcoming cliffs in related indication = buying pressure
+  const relevantCliffs = patentCliffs.filter((cliff: PatentCliff) => {
+    const cliffIndication = cliff.indication?.toLowerCase() || '';
+    return (
+      (input.indication_category && cliffIndication.includes(input.indication_category.toLowerCase())) ||
+      (input.indication_specific && cliffIndication.includes(input.indication_specific.toLowerCase())) ||
+      (cliff.expiry_year <= 2028 && cliff.revenue_usd >= 1_000_000_000)
+    );
+  });
+
+  if (relevantCliffs.length > 0) {
+    breakdown.strategic += WEIGHTS.strategic_patent_cliff;
+    reasons.push({
+      category: 'strategic',
+      reason: `Patent cliff creates acquisition urgency`,
+      strength: 'strong',
+    });
+  } else if (company.revenue_at_risk_2027 > 2_000_000_000) {
+    breakdown.strategic += Math.round(WEIGHTS.strategic_patent_cliff * 0.6);
+    reasons.push({
+      category: 'strategic',
+      reason: `Significant revenue at risk by 2027`,
+      strength: 'moderate',
+    });
+  }
+
+  // Strategic priority match: company's stated priorities align with asset
+  const priorities = company.strategic_priorities || [];
+  const hasPriorityMatch = priorities.some((p: string) => {
+    const lower = p.toLowerCase();
+    return (
+      (input.indication_category && lower.includes(input.indication_category.toLowerCase())) ||
+      (input.indication_specific && lower.includes(input.indication_specific.toLowerCase())) ||
+      (input.modality && lower.includes(input.modality.replace(/_/g, ' ').toLowerCase()))
+    );
+  });
+
+  if (hasPriorityMatch) {
+    breakdown.strategic += WEIGHTS.strategic_priority_match;
+    reasons.push({
+      category: 'strategic',
+      reason: `Matches stated strategic priorities`,
+      strength: 'strong',
+    });
+  }
+
+  // Pipeline gap from patent cliffs in target indication
+  const pipelineGaps = patentCliffs
+    .filter((c: PatentCliff) => c.expiry_year <= 2028 && c.indication)
+    .map((c: PatentCliff) => c.indication!.toLowerCase());
+
+  const hasGapMatch = pipelineGaps.some((gap: string) =>
+    (input.indication_category && gap.includes(input.indication_category.toLowerCase())) ||
+    (input.indication_specific && gap.includes(input.indication_specific.toLowerCase()))
+  );
+
+  if (hasGapMatch && relevantCliffs.length === 0) {
+    breakdown.strategic += WEIGHTS.strategic_pipeline_gap;
+    reasons.push({
+      category: 'strategic',
+      reason: `Pipeline gap in target indication`,
+      strength: 'moderate',
+    });
+  }
+
+  // 6. TERRITORY MATCHING
   const companyTerritories = company.territory_focus || [];
 
   if (input.territory_scope) {
@@ -448,7 +558,7 @@ function calculateMatchScore(
     }
   }
 
-  // 6. QUALITY BONUSES
+  // 7. QUALITY BONUSES
   if (company.data_quality_score >= 70) {
     breakdown.quality += WEIGHTS.data_quality_high;
   }
@@ -463,9 +573,11 @@ function calculateMatchScore(
   const maxPossibleScore =
     WEIGHTS.modality_exact +
     WEIGHTS.indication_specific_exact +
-    WEIGHTS.phase_in_range +
+    WEIGHTS.phase_sweet_spot +
     WEIGHTS.deal_last_6mo +
     WEIGHTS.active_trials_relevant +
+    WEIGHTS.strategic_patent_cliff +
+    WEIGHTS.strategic_priority_match +
     WEIGHTS.territory_match +
     WEIGHTS.data_quality_high +
     WEIGHTS.actively_acquiring;
@@ -500,6 +612,9 @@ function formatModality(modality: string): string {
     'aso': 'Antisense Oligonucleotides',
     'bbb_platform': 'BBB Delivery Platforms',
     'psychedelic': 'Psychedelics / Neuroplastogens',
+    'ion_channel': 'Ion Channel Modulators',
+    'tau_targeting': 'Tau-Targeting Therapies',
+    'stem_cell': 'Stem Cell Therapies',
   };
   return labels[modality] || modality;
 }
@@ -955,6 +1070,41 @@ export function calculateWatchOuts(
       description: 'Currently showing selective deal appetite. May have budget constraints.',
       severity: 'low',
       category: 'timing',
+    });
+  }
+
+  // 7. CNS Manufacturing Complexity - advanced modalities with CNS delivery challenges
+  const complexCnsModalities = ['gene_therapy', 'cell_therapy', 'car_t', 'stem_cell', 'bbb_platform', 'aso'];
+  if (complexCnsModalities.includes(input.modality) && input.indication_category === 'cns') {
+    watchOuts.push({
+      title: 'CNS Manufacturing Complexity',
+      impact: -3,
+      description: `${formatModality(input.modality)} for CNS requires specialized manufacturing (e.g., BBB-penetrant formulation, viral vector GMP). Ensure CMC readiness for diligence.`,
+      severity: 'low',
+      category: 'operational',
+    });
+  }
+
+  // 8. CNS Regulatory Complexity - indications with historically high FDA attrition
+  const highAttritionCns = ['alzheimers', 'schizophrenia', 'depression', 'addiction', 'tbi'];
+  if (input.indication_category === 'cns' && input.indication_specific && highAttritionCns.includes(input.indication_specific)) {
+    watchOuts.push({
+      title: 'CNS Regulatory Complexity',
+      impact: -2,
+      description: `${formatIndication(input.indication_specific)} has historically high FDA attrition. Partners may require robust biomarker strategy or validated endpoints.`,
+      severity: 'low',
+      category: 'regulatory',
+    });
+  }
+
+  // 9. Novel Mechanism Reimbursement Risk - psychedelics and novel CNS mechanisms
+  if (['psychedelic', 'ion_channel'].includes(input.modality)) {
+    watchOuts.push({
+      title: 'Reimbursement Uncertainty',
+      impact: -4,
+      description: `Novel mechanism classes like ${formatModality(input.modality)} face payer scrutiny. Partners may want health economics data or REMS strategy.`,
+      severity: 'medium',
+      category: 'commercial',
     });
   }
 

@@ -13,7 +13,7 @@ const MATCH_LIMITS = {
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'partnerMatch', RATE_LIMIT_CONFIGS.partnerMatch);
+  const rateLimitResult = await checkRateLimit(identifier, 'partnerMatch', RATE_LIMIT_CONFIGS.partnerMatch);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
@@ -106,16 +106,16 @@ export async function POST(request: NextRequest) {
     // Prepare response based on tier
     const responseMatches = matchesToShow.map((match, index) => {
       if (userTier === 'free') {
-        // Free tier: names and match score only, profile data hidden
+        // Free tier: names, match score, and top 2 reasons (profile data hidden)
         return {
           rank: index + 1,
           company_id: match.company_id,
           company_name: match.company_name,
           company_type: match.company_type,
           match_score: match.match_score,
+          match_reasons: match.match_reasons.slice(0, 2),
           profile_locked: true,
           // Blurred/hidden fields
-          match_reasons: null,
           modalities_active: null,
           indications_active: null,
           deals_last_12mo: null,

@@ -2,9 +2,42 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Generate a nonce for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+
+  // Build CSP with nonce instead of unsafe-inline/unsafe-eval
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+  const cspHeader = isApiRoute
+    ? '' // API routes don't need CSP
+    : [
+        "default-src 'self'",
+        `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://vercel.live`,
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https: http:",
+        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live",
+        "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
+        "frame-ancestors 'self'",
+        "form-action 'self'",
+        "base-uri 'self'",
+        "upgrade-insecure-requests",
+      ].join('; ');
+
+  // Set the nonce in request headers so Server Components can read it
+  const requestHeaders = new Headers(request.headers);
+  if (cspHeader) {
+    requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('Content-Security-Policy', cspHeader);
+  }
+
   let supabaseResponse = NextResponse.next({
-    request,
+    request: { headers: requestHeaders },
   });
+
+  // Set CSP on the response
+  if (cspHeader) {
+    supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -23,8 +56,12 @@ export async function middleware(request: NextRequest) {
           request.cookies.set(name, value)
         );
         supabaseResponse = NextResponse.next({
-          request,
+          request: { headers: requestHeaders },
         });
+        // Re-apply CSP after creating new response
+        if (cspHeader) {
+          supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
+        }
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         );

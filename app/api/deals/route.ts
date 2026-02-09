@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
-  const rateLimitResult = checkRateLimit(identifier, 'deals', RATE_LIMIT_CONFIGS.deals);
+  const rateLimitResult = await checkRateLimit(identifier, 'deals', RATE_LIMIT_CONFIGS.deals);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
