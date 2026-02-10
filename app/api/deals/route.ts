@@ -181,6 +181,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit),
       userTier,
       filters: filterOptions,
+      _v: 'rpc-v2',
     });
   } catch (error) {
     console.error('Deals API error:', error);
