@@ -181,7 +181,6 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit),
       userTier,
       filters: filterOptions,
-      _v: 'rpc-v2',
     });
   } catch (error) {
     console.error('Deals API error:', error);
@@ -193,20 +192,20 @@ export async function GET(request: NextRequest) {
 }
 
 async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>) {
-  // Use RPC function for efficient DISTINCT queries (avoids PostgREST 1000-row limit)
-  const { data, error } = await supabase.rpc('get_deal_filter_options');
-
-  if (error || !data) {
-    console.error('Failed to get filter options via RPC:', error);
-    return { modalities: [], phases: [], indications: [], dealTypes: [], therapeuticAreas: [], _rpcError: error?.message || 'no data' };
-  }
+  // Order by each column to ensure all distinct values appear within PostgREST's row limit
+  const [modalities, phases, indications, dealTypes, therapeuticAreas] = await Promise.all([
+    supabase.from('deals').select('modality').not('modality', 'is', null).order('modality').limit(1000),
+    supabase.from('deals').select('phase_at_signing').not('phase_at_signing', 'is', null).order('phase_at_signing').limit(1000),
+    supabase.from('deals').select('indication_category').not('indication_category', 'is', null).order('indication_category').limit(1000),
+    supabase.from('deals').select('deal_type').not('deal_type', 'is', null).order('deal_type').limit(1000),
+    supabase.from('deals').select('therapeutic_area').not('therapeutic_area', 'is', null).order('therapeutic_area').limit(1000),
+  ]);
 
   return {
-    modalities: (data.modalities || []).filter(Boolean),
-    phases: (data.phases || []).filter(Boolean),
-    indications: (data.indications || []).filter(Boolean),
-    dealTypes: (data.dealTypes || []).filter(Boolean),
-    therapeuticAreas: (data.therapeuticAreas || []).filter(Boolean),
-    _rpcRaw: data,
+    modalities: [...new Set((modalities.data || []).map(d => d.modality))].filter(Boolean).sort(),
+    phases: [...new Set((phases.data || []).map(d => d.phase_at_signing))].filter(Boolean).sort(),
+    indications: [...new Set((indications.data || []).map(d => d.indication_category))].filter(Boolean).sort(),
+    dealTypes: [...new Set((dealTypes.data || []).map(d => d.deal_type))].filter(Boolean).sort(),
+    therapeuticAreas: [...new Set((therapeuticAreas.data || []).map(d => d.therapeutic_area))].filter(Boolean).sort(),
   };
 }
