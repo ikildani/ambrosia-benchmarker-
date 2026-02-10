@@ -39,7 +39,7 @@ import {
   diseaseProgressionOptions,
   biomarkerValidationOptions,
 } from '@/lib/calculations';
-import { canUseCalculator, incrementUsage, getRemainingUses, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
+import { canUseCalculator, incrementUsage, getRemainingUses, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import { PRICING, DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
@@ -290,7 +290,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
   // Tracking
   const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, openAuthModal } = useAuth();
   const calculationCountRef = useRef(0);
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
@@ -407,6 +407,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   }, []);
 
   const handleCalculate = () => {
+    // Gate 2nd+ calculation behind account creation for anonymous users
+    if (!isAuthenticated && getUsage().count >= 1) {
+      openAuthModal('signup');
+      return;
+    }
+
     // Check usage limits for free tier
     if (!canUseCalculator(tier)) {
       setPaywallReason('limit_reached');
