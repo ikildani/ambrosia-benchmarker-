@@ -103,11 +103,24 @@ export async function POST(request: NextRequest) {
       calculation_version: '1.0.0',
     };
 
-    const { data: calculation, error: calcError } = await supabase
+    let { data: calculation, error: calcError } = await supabase
       .from('calculations')
       .insert(calculationData)
       .select('id')
       .single();
+
+    // If insert failed (likely FK violation on session_id), retry without session_id
+    if (calcError && calculationData.session_id) {
+      console.warn('Calculation insert failed, retrying without session_id:', calcError.message);
+      calculationData.session_id = null;
+      const retry = await supabase
+        .from('calculations')
+        .insert(calculationData)
+        .select('id')
+        .single();
+      calculation = retry.data;
+      calcError = retry.error;
+    }
 
     if (calcError) {
       console.error('Calculation save error:', calcError);
@@ -117,14 +130,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Also fire the calculation_completed event
+    // Fire event and update session count (non-blocking — don't let these fail the response)
+    const validSessionId = calculationData.session_id;
+
     const eventData = {
       user_id: body.user_id || null,
-      session_id: body.session_id || null,
+      session_id: validSessionId,
       anonymous_id: body.anonymous_id || null,
       event_type: 'calculation_completed',
       event_data: {
-        calculation_id: calculation.id,
+        calculation_id: calculation!.id,
         therapeutic_area: body.therapeutic_area || 'oncology',
         modality: body.modality,
         development_phase: body.development_phase,
@@ -143,18 +158,21 @@ export async function POST(request: NextRequest) {
       user_tier: userTier,
     };
 
-    await supabase.from('events').insert(eventData);
+    supabase.from('events').insert(eventData).then(({ error }) => {
+      if (error) console.error('Event insert error:', error.message);
+    });
 
-    // Update session calculation count
-    if (body.session_id) {
-      await supabase.rpc('increment_session_calculations', {
-        p_session_id: body.session_id,
+    if (validSessionId) {
+      supabase.rpc('increment_session_calculations', {
+        p_session_id: validSessionId,
+      }).then(({ error }) => {
+        if (error) console.error('Session increment error:', error.message);
       });
     }
 
     return NextResponse.json({
       success: true,
-      calculation_id: calculation.id,
+      calculation_id: calculation!.id,
     });
   } catch (error) {
     console.error('Calculation API error:', error);
