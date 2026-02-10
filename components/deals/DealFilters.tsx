@@ -38,7 +38,14 @@ export default function DealFilters({
 }: DealFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const therapeuticAreaLabels: Record<string, string> = {
+    oncology: 'Oncology',
+    neurology: 'Neurology / CNS',
+    other: 'Other',
+  };
+
   const hasActiveFilters =
+    filters.therapeuticArea.length > 0 ||
     filters.modality.length > 0 ||
     filters.phase.length > 0 ||
     filters.indication.length > 0 ||
@@ -49,7 +56,7 @@ export default function DealFilters({
     filters.search !== '';
 
   const toggleArrayFilter = (
-    key: 'modality' | 'phase' | 'indication' | 'dealType',
+    key: 'therapeuticArea' | 'modality' | 'phase' | 'indication' | 'dealType',
     value: string
   ) => {
     const current = filters[key];
@@ -61,6 +68,38 @@ export default function DealFilters({
 
   return (
     <div className="bg-white rounded-xl border border-neutral-200 shadow-soft overflow-hidden">
+      {/* Therapeutic Area Chips */}
+      {filterOptions.therapeuticAreas.length > 0 && (
+        <div className="px-4 pt-4 pb-2 flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mr-1">
+            Therapeutic Area
+          </span>
+          <button
+            onClick={() => onFilterChange({ therapeuticArea: [] })}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all ${
+              filters.therapeuticArea.length === 0
+                ? 'bg-navy-800 text-white'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+            }`}
+          >
+            All
+          </button>
+          {filterOptions.therapeuticAreas.map((area) => (
+            <button
+              key={area}
+              onClick={() => onFilterChange({ therapeuticArea: [area] })}
+              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all ${
+                filters.therapeuticArea.includes(area)
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+              }`}
+            >
+              {therapeuticAreaLabels[area] || area}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="p-4 border-b border-neutral-100">
         <div className="flex items-center gap-3">
@@ -103,6 +142,7 @@ export default function DealFilters({
               <span className="px-1.5 py-0.5 bg-teal-500 text-white text-xs rounded-full">
                 {
                   [
+                    ...filters.therapeuticArea,
                     ...filters.modality,
                     ...filters.phase,
                     ...filters.indication,
@@ -303,6 +343,17 @@ export default function DealFilters({
       {/* Active Filter Tags */}
       {hasActiveFilters && !isExpanded && (
         <div className="p-3 border-t border-neutral-100 flex flex-wrap items-center gap-2">
+          {filters.therapeuticArea.map((ta) => (
+            <span
+              key={ta}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-navy-100 text-navy-700 text-xs font-medium rounded-full"
+            >
+              {therapeuticAreaLabels[ta] || ta}
+              <button onClick={() => toggleArrayFilter('therapeuticArea', ta)} className="hover:text-navy-900">
+                ×
+              </button>
+            </span>
+          ))}
           {filters.modality.map((m) => (
             <span
               key={m}

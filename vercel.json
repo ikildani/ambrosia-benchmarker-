@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/lead-scores",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/deals-update",
+      "schedule": "0 4 * * 1"
     }
   ]
 }

@@ -30,6 +30,7 @@ export interface Deal {
 }
 
 export interface Filters {
+  therapeuticArea: string[];
   modality: string[];
   phase: string[];
   indication: string[];
@@ -47,9 +48,11 @@ export interface FilterOptions {
   phases: string[];
   indications: string[];
   dealTypes: string[];
+  therapeuticAreas: string[];
 }
 
 const initialFilters: Filters = {
+  therapeuticArea: [],
   modality: [],
   phase: [],
   indication: [],
@@ -73,6 +76,7 @@ export default function DealBrowser() {
     phases: [],
     indications: [],
     dealTypes: [],
+    therapeuticAreas: [],
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -93,6 +97,7 @@ export default function DealBrowser() {
       params.set('sort_by', sortBy);
       params.set('sort_order', sortOrder);
 
+      if (filters.therapeuticArea.length > 0) params.set('therapeutic_area', filters.therapeuticArea.join(','));
       if (filters.modality.length > 0) params.set('modality', filters.modality.join(','));
       if (filters.phase.length > 0) params.set('phase', filters.phase.join(','));
       if (filters.indication.length > 0) params.set('indication', filters.indication.join(','));

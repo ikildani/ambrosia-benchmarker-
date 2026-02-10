@@ -37,6 +37,7 @@ interface Deal {
   source_url: string | null;
   terms_disclosed: boolean;
   confidence_score: number;
+  therapeutic_area: string;
 }
 
 // ============================================
@@ -70,6 +71,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "LaNova Medicines",
@@ -97,6 +99,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Kelun-Biotech",
@@ -124,6 +127,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Zymeworks",
@@ -151,6 +155,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 98,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Biotheus",
@@ -178,6 +183,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 90,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Autolus Therapeutics",
@@ -205,6 +211,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
 
   // ==================== 2023 DEALS ====================
@@ -234,6 +241,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 98,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Daiichi Sankyo",
@@ -261,6 +269,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 99,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "RayzeBio",
@@ -288,6 +297,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Point Biopharma",
@@ -315,6 +325,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Hansoh Pharma",
@@ -342,6 +353,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Seagen",
@@ -369,6 +381,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Duality Bio",
@@ -396,6 +409,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Ambrx",
@@ -423,6 +437,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
 
   // ==================== 2022 DEALS ====================
@@ -452,6 +467,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Agenus",
@@ -479,6 +495,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 90,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Legend Biotech",
@@ -506,6 +523,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 98,
+    therapeutic_area: "oncology",
   },
 
   // ==================== 2021 DEALS ====================
@@ -535,6 +553,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Regeneron",
@@ -562,6 +581,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: false,
     confidence_score: 85,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Relay Therapeutics",
@@ -589,6 +609,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 92,
+    therapeutic_area: "oncology",
   },
 
   // ==================== 2020 DEALS ====================
@@ -618,6 +639,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Forty Seven",
@@ -645,6 +667,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Y-mAbs Therapeutics",
@@ -672,6 +695,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 90,
+    therapeutic_area: "oncology",
   },
 
   // ==================== 2019 DEALS ====================
@@ -701,6 +725,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 99,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "bluebird bio",
@@ -728,6 +753,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 95,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Array BioPharma",
@@ -755,6 +781,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Loxo Oncology",
@@ -782,6 +809,7 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
   },
   {
     licensor_name: "Celgene",
@@ -809,6 +837,401 @@ const CURATED_DEALS: Deal[] = [
     source_url: null,
     terms_disclosed: true,
     confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+
+  // ==================== NEUROLOGY / CNS DEALS ====================
+  {
+    licensor_name: "Karuna Therapeutics",
+    licensee_name: "Bristol-Myers Squibb",
+    asset_name: "KarXT (xanomeline-trospium)",
+    asset_description: "Muscarinic receptor agonist for schizophrenia",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Schizophrenia",
+    target: "M1/M4 muscarinic",
+    mechanism_of_action: "Muscarinic agonist with peripheral anticholinergic",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 14000000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 14000000000,
+    announced_date: "2023-12-22",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Cerevel Therapeutics",
+    licensee_name: "AbbVie",
+    asset_name: "Cerevel Portfolio",
+    asset_description: "Neuroscience portfolio including emraclidine (M4 agonist)",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Schizophrenia, Mood disorders",
+    target: "M4 muscarinic",
+    mechanism_of_action: "Selective muscarinic receptor agonist",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 8700000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 8700000000,
+    announced_date: "2023-12-04",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Biohaven Pharmaceutical",
+    licensee_name: "Pfizer",
+    asset_name: "Nurtec ODT (rimegepant)",
+    asset_description: "CGRP receptor antagonist for migraine",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Migraine",
+    target: "CGRP",
+    mechanism_of_action: "CGRP receptor antagonist",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 11600000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 11600000000,
+    announced_date: "2022-05-10",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "GW Pharmaceuticals",
+    licensee_name: "Jazz Pharmaceuticals",
+    asset_name: "Epidiolex (cannabidiol)",
+    asset_description: "CBD-based treatment for epilepsy syndromes",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Epilepsy (Dravet, LGS, TSC)",
+    target: "Multiple (cannabinoid pathways)",
+    mechanism_of_action: "Cannabinoid receptor modulation",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 7200000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 7200000000,
+    announced_date: "2021-02-03",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Sage Therapeutics",
+    licensee_name: "Biogen",
+    asset_name: "Zuranolone (SAGE-217)",
+    asset_description: "Neuroactive steroid for depression",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Major Depressive Disorder, PPD",
+    target: "GABA-A",
+    mechanism_of_action: "Positive allosteric modulator of GABA-A receptors",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 875000000,
+    milestones_total_usd: 1325000000,
+    milestones_development_usd: 400000000,
+    milestones_regulatory_usd: 425000000,
+    milestones_commercial_usd: 500000000,
+    royalty_low_pct: 15,
+    royalty_high_pct: 22,
+    total_deal_value_usd: 2200000000,
+    announced_date: "2020-11-03",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Prothena",
+    licensee_name: "Roche",
+    asset_name: "PRX005",
+    asset_description: "Anti-TDP-43 antibody for neurodegeneration",
+    modality: "mab",
+    indication_category: "cns",
+    indication_specific: "ALS, FTD",
+    target: "TDP-43",
+    mechanism_of_action: "Protein aggregate clearance",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 100000000,
+    milestones_total_usd: 2000000000,
+    milestones_development_usd: 800000000,
+    milestones_regulatory_usd: 600000000,
+    milestones_commercial_usd: 600000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 2100000000,
+    announced_date: "2023-03-07",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Zogenix",
+    licensee_name: "UCB",
+    asset_name: "Fintepla (fenfluramine)",
+    asset_description: "Serotonin modulator for epilepsy",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Dravet Syndrome, LGS",
+    target: "5-HT2",
+    mechanism_of_action: "Serotonin receptor modulation",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1900000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1900000000,
+    announced_date: "2022-03-08",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Gilgamesh Pharmaceuticals",
+    licensee_name: "AbbVie",
+    asset_name: "GM-1020",
+    asset_description: "Psychedelic-derived neuropsychiatric compound",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Treatment-resistant Depression",
+    target: "5-HT2A",
+    mechanism_of_action: "Serotonin 2A receptor agonist",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1200000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1200000000,
+    announced_date: "2022-12-13",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "PTC Therapeutics",
+    licensee_name: "Novartis",
+    asset_name: "PTC518",
+    asset_description: "HTT-lowering splicing modifier for Huntington's",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Huntington's Disease",
+    target: "HTT (huntingtin)",
+    mechanism_of_action: "Splicing modifier / gene silencing",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "license",
+    upfront_usd: 100000000,
+    milestones_total_usd: 900000000,
+    milestones_development_usd: 350000000,
+    milestones_regulatory_usd: 250000000,
+    milestones_commercial_usd: 300000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 18,
+    total_deal_value_usd: 1000000000,
+    announced_date: "2023-06-28",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Prevail Therapeutics",
+    licensee_name: "Eli Lilly",
+    asset_name: "PR001, PR006",
+    asset_description: "AAV gene therapies for Parkinson's and FTD",
+    modality: "gene_therapy",
+    indication_category: "cns",
+    indication_specific: "Parkinson's Disease, FTD",
+    target: "GBA1, GRN",
+    mechanism_of_action: "AAV-mediated gene replacement",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1040000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1040000000,
+    announced_date: "2021-01-05",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "JCR Pharmaceuticals",
+    licensee_name: "AstraZeneca",
+    asset_name: "BBB-crossing antibody platform",
+    asset_description: "Blood-brain barrier crossing antibody technology",
+    modality: "mab",
+    indication_category: "cns",
+    indication_specific: "Neurodegeneration (multiple)",
+    target: "Transferrin receptor (BBB shuttle)",
+    mechanism_of_action: "BBB-penetrating bispecific platform",
+    phase_at_signing: "preclinical",
+    territory: "Global ex-Japan",
+    deal_type: "license",
+    upfront_usd: 30000000,
+    milestones_total_usd: 795000000,
+    milestones_development_usd: 300000000,
+    milestones_regulatory_usd: 245000000,
+    milestones_commercial_usd: 250000000,
+    royalty_low_pct: 5,
+    royalty_high_pct: 12,
+    total_deal_value_usd: 825000000,
+    announced_date: "2023-07-10",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "ABL Bio",
+    licensee_name: "GSK",
+    asset_name: "ABL301",
+    asset_description: "Bispecific antibody for alpha-synuclein with BBB shuttle",
+    modality: "bispecific",
+    indication_category: "cns",
+    indication_specific: "Parkinson's Disease",
+    target: "Alpha-synuclein/TfR1",
+    mechanism_of_action: "BBB-crossing bispecific antibody",
+    phase_at_signing: "phase_1",
+    territory: "Global ex-Korea",
+    deal_type: "license",
+    upfront_usd: 50000000,
+    milestones_total_usd: 2650000000,
+    milestones_development_usd: 1000000000,
+    milestones_regulatory_usd: 750000000,
+    milestones_commercial_usd: 900000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 2700000000,
+    announced_date: "2023-12-08",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Eisai",
+    licensee_name: "Biogen",
+    asset_name: "Leqembi (lecanemab)",
+    asset_description: "Anti-amyloid beta protofibril antibody",
+    modality: "mab",
+    indication_category: "cns",
+    indication_specific: "Alzheimer's Disease",
+    target: "Amyloid-beta",
+    mechanism_of_action: "Amyloid protofibril clearance",
+    phase_at_signing: "approved",
+    territory: "Global (co-commercialization)",
+    deal_type: "co_development",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2023-01-06",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 90,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Ionis Pharmaceuticals",
+    licensee_name: "Biogen",
+    asset_name: "Tofersen (BIIB067)",
+    asset_description: "Antisense oligonucleotide targeting SOD1",
+    modality: "oligonucleotide",
+    indication_category: "cns",
+    indication_specific: "ALS (SOD1 mutation)",
+    target: "SOD1",
+    mechanism_of_action: "Antisense oligonucleotide gene silencing",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: null,
+    milestones_total_usd: 1050000000,
+    milestones_development_usd: 400000000,
+    milestones_regulatory_usd: 350000000,
+    milestones_commercial_usd: 300000000,
+    royalty_low_pct: 15,
+    royalty_high_pct: 25,
+    total_deal_value_usd: 1050000000,
+    announced_date: "2018-06-28",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "neurology",
   },
 ];
 
@@ -912,6 +1335,54 @@ const MOAS: Record<string, string[]> = {
   "protac": ["PROTAC degrader", "Molecular glue degrader", "Heterobifunctional degrader"]
 };
 
+// ============================================
+// NEUROLOGY / CNS GENERATION DATA
+// ============================================
+
+const CNS_MODALITIES = [
+  "small_molecule", "mab", "gene_therapy", "oligonucleotide", "peptide",
+  "cell_therapy", "bispecific", "adc"
+];
+
+const CNS_INDICATIONS = [
+  "Alzheimer's Disease", "Parkinson's Disease", "ALS", "Huntington's Disease",
+  "Multiple Sclerosis", "Epilepsy", "Migraine", "Schizophrenia",
+  "Major Depressive Disorder", "Bipolar Disorder", "SMA",
+  "Frontotemporal Dementia", "Neuropathic Pain", "Narcolepsy",
+  "Essential Tremor", "PTSD", "OCD", "Duchenne (CNS)"
+];
+
+const CNS_TARGETS = [
+  "Tau", "Amyloid-beta", "LRRK2", "Alpha-synuclein", "SOD1", "C9orf72",
+  "HTT", "BACE1", "NMDA", "GABA-A", "5-HT2A", "D2", "SV2A", "CGRP",
+  "Nav1.7", "TREM2", "TDP-43", "GBA1", "SMN", "Orexin", "GluN2B", "mGluR5",
+  "M1/M4 muscarinic", "BMP receptor", "LINGO-1", "Nogo receptor", "CD33 (neuro)"
+];
+
+const CNS_BIOTECH_LICENSORS = [
+  "Denali Therapeutics", "Passage Bio", "Voyager Therapeutics", "Prothena",
+  "Cerevel Therapeutics", "Karuna Therapeutics", "Sage Therapeutics",
+  "Intra-Cellular Therapies", "Alector", "Ionis Pharmaceuticals",
+  "Wave Life Sciences", "Biohaven Pharmaceutical", "Acadia Pharmaceuticals",
+  "Axsome Therapeutics", "Neurocrine Biosciences", "Annovis Bio",
+  "Athira Pharma", "Prevail Therapeutics", "Neumora Therapeutics",
+  "Longboard Pharmaceuticals", "Arcus Biosciences", "Ultragenyx",
+  "PTC Therapeutics", "Cortexyme", "INmune Bio",
+  "ProMIS Neurosciences", "Cassava Sciences", "Vaxxinity",
+  "AC Immune", "Anavex Life Sciences", "Vigil Neuroscience"
+];
+
+const CNS_MOAS: Record<string, string[]> = {
+  "small_molecule": ["Kinase inhibitor", "Ion channel modulator", "Receptor agonist", "Receptor antagonist", "PROTAC degrader", "Allosteric modulator", "Splicing modifier"],
+  "mab": ["BBB-crossing antibody", "Protein aggregate clearance", "Neuroinflammation modulator", "Microglial checkpoint inhibitor"],
+  "gene_therapy": ["AAV-mediated gene replacement", "AAV gene silencing", "Intrathecal gene delivery", "CNS-tropic AAV vector"],
+  "oligonucleotide": ["Antisense oligonucleotide", "siRNA gene knockdown", "miRNA modulator", "Splice-switching oligonucleotide"],
+  "bispecific": ["BBB-penetrating bispecific", "Dual-target neurodegeneration", "Brain-shuttled bispecific"],
+  "peptide": ["Neuropeptide analog", "BBB-penetrating peptide", "Receptor-selective peptide"],
+  "cell_therapy": ["iPSC-derived neurons", "Neural stem cell therapy", "Engineered microglia"],
+  "adc": ["BBB-crossing ADC", "Brain-targeted antibody conjugate"],
+};
+
 function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -1009,7 +1480,60 @@ function generateRoyalties(phase: string): { low: number | null; high: number | 
   return { low, high };
 }
 
-function generateDeal(): Deal {
+function generateDeal(therapeuticArea: 'oncology' | 'neurology' = 'oncology'): Deal {
+  if (therapeuticArea === 'neurology') {
+    const modality = randomChoice(CNS_MODALITIES);
+    const phase = randomChoice(PHASES);
+    const target = randomChoice(CNS_TARGETS);
+
+    const upfront = generateUpfront(phase, modality);
+    const milestones = generateMilestones(upfront, phase);
+    const royalties = generateRoyalties(phase);
+
+    const totalValue = upfront && milestones.total
+      ? upfront + milestones.total
+      : (upfront || milestones.total || null);
+
+    const licensor = randomChoice(CNS_BIOTECH_LICENSORS);
+    const licensee = randomChoice(MAJOR_PHARMA);
+
+    const prefixes = ["", "Anti-", "", ""];
+    const suffixes = ["-001", "-101", "-201", "-301", "-mab", "-nib", "-stat", ""];
+    const assetName = `${randomChoice(prefixes)}${target}${randomChoice(suffixes)}`.replace("--", "-");
+
+    const moaOptions = CNS_MOAS[modality] || ["CNS-targeted therapy"];
+
+    return {
+      licensor_name: licensor,
+      licensee_name: licensee,
+      asset_name: assetName,
+      asset_description: `${target}-targeting ${modality.replace("_", " ")} for CNS`,
+      modality: modality,
+      indication_category: "cns",
+      indication_specific: randomChoice(CNS_INDICATIONS),
+      target: target,
+      mechanism_of_action: randomChoice(moaOptions),
+      phase_at_signing: phase,
+      territory: randomChoice(TERRITORIES),
+      deal_type: randomChoice(DEAL_TYPES),
+      upfront_usd: upfront,
+      milestones_total_usd: milestones.total,
+      milestones_development_usd: milestones.development,
+      milestones_regulatory_usd: milestones.regulatory,
+      milestones_commercial_usd: milestones.commercial,
+      royalty_low_pct: royalties.low,
+      royalty_high_pct: royalties.high,
+      total_deal_value_usd: totalValue,
+      announced_date: generateRandomDate(2019, 2026),
+      source_type: randomChoice(["sec_8k", "press_release", "sec_10k"]),
+      source_url: null,
+      terms_disclosed: upfront !== null || milestones.total !== null,
+      confidence_score: randomInt(60, 95),
+      therapeutic_area: "neurology",
+    };
+  }
+
+  // Oncology generation (existing logic)
   const isHematologic = Math.random() < 0.3;
   const category = isHematologic ? "hematologic" : "solid_tumor";
   const indications = isHematologic ? HEMATOLOGIC_INDICATIONS : SOLID_TUMOR_INDICATIONS;
@@ -1061,6 +1585,7 @@ function generateDeal(): Deal {
     source_url: null,
     terms_disclosed: upfront !== null || milestones.total !== null,
     confidence_score: randomInt(60, 95),
+    therapeutic_area: "oncology",
   };
 }
 
@@ -1107,28 +1632,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 2: Generate and insert additional deals
+    // Step 2: Generate and insert additional deals (split between oncology and neurology)
     const remainingDeals = TARGET_DEALS - CURATED_DEALS.length - (existingCount || 0);
 
     if (remainingDeals > 0) {
-      console.log(`Generating ${remainingDeals} additional deals...`);
+      const oncologyDeals = Math.ceil(remainingDeals / 2);
+      const neurologyDeals = remainingDeals - oncologyDeals;
 
-      for (let i = 0; i < remainingDeals; i += batchSize) {
+      // Generate oncology deals
+      console.log(`Generating ${oncologyDeals} oncology deals...`);
+      for (let i = 0; i < oncologyDeals; i += batchSize) {
         const batch: Deal[] = [];
-        const batchEnd = Math.min(i + batchSize, remainingDeals);
-
+        const batchEnd = Math.min(i + batchSize, oncologyDeals);
         for (let j = i; j < batchEnd; j++) {
-          batch.push(generateDeal());
+          batch.push(generateDeal('oncology'));
         }
-
-        const { error } = await supabase
-          .from('deals')
-          .insert(batch);
-
+        const { error } = await supabase.from('deals').insert(batch);
         if (error) {
-          console.error(`Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error);
+          console.error(`Error inserting oncology batch ${Math.floor(i / batchSize) + 1}:`, error);
         } else {
-          console.log(`Inserted batch ${Math.floor(i / batchSize) + 1}: ${batchEnd} deals`);
+          console.log(`Inserted oncology batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
+        }
+      }
+
+      // Generate neurology deals
+      console.log(`Generating ${neurologyDeals} neurology deals...`);
+      for (let i = 0; i < neurologyDeals; i += batchSize) {
+        const batch: Deal[] = [];
+        const batchEnd = Math.min(i + batchSize, neurologyDeals);
+        for (let j = i; j < batchEnd; j++) {
+          batch.push(generateDeal('neurology'));
+        }
+        const { error } = await supabase.from('deals').insert(batch);
+        if (error) {
+          console.error(`Error inserting neurology batch ${Math.floor(i / batchSize) + 1}:`, error);
+        } else {
+          console.log(`Inserted neurology batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
         }
       }
     }

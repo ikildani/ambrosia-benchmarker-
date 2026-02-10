@@ -62,10 +62,16 @@ export async function GET(request: NextRequest) {
         royalty_low_pct,
         royalty_high_pct,
         announced_date,
-        terms_disclosed
+        terms_disclosed,
+        therapeutic_area
       `, { count: 'exact' });
 
     // Apply filters
+    const therapeuticArea = searchParams.get('therapeutic_area');
+    if (therapeuticArea) {
+      query = query.in('therapeutic_area', therapeuticArea.split(','));
+    }
+
     const modality = searchParams.get('modality');
     if (modality) {
       query = query.in('modality', modality.split(','));
@@ -187,11 +193,12 @@ export async function GET(request: NextRequest) {
 
 async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>) {
   // Get distinct values for filters - use limit to ensure we get all rows
-  const [modalities, phases, indications, dealTypes] = await Promise.all([
+  const [modalities, phases, indications, dealTypes, therapeuticAreas] = await Promise.all([
     supabase.from('deals').select('modality').not('modality', 'is', null).limit(5000),
     supabase.from('deals').select('phase_at_signing').not('phase_at_signing', 'is', null).limit(5000),
     supabase.from('deals').select('indication_category').not('indication_category', 'is', null).limit(5000),
     supabase.from('deals').select('deal_type').not('deal_type', 'is', null).limit(5000),
+    supabase.from('deals').select('therapeutic_area').not('therapeutic_area', 'is', null).limit(5000),
   ]);
 
   return {
@@ -199,5 +206,6 @@ async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>
     phases: [...new Set((phases.data || []).map(d => d.phase_at_signing))].filter(Boolean).sort(),
     indications: [...new Set((indications.data || []).map(d => d.indication_category))].filter(Boolean).sort(),
     dealTypes: [...new Set((dealTypes.data || []).map(d => d.deal_type))].filter(Boolean).sort(),
+    therapeuticAreas: [...new Set((therapeuticAreas.data || []).map(d => d.therapeutic_area))].filter(Boolean).sort(),
   };
 }

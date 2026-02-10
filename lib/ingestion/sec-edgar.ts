@@ -116,6 +116,7 @@ export interface ExtractedDeal {
   option_exercise_fee: number | null;
   confidence_score: number;
   extraction_notes: string | null;
+  therapeutic_area: string | null;
 }
 
 export async function searchRecentFilings(daysBack: number = 1): Promise<SECFiling[]> {
@@ -423,6 +424,9 @@ export async function runDailyIngestion(
           const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
           const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
 
+          // Derive therapeutic_area from indication_category
+          const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
+
           // Insert deal
           const { error: insertError } = await supabase.from('deals').insert({
             licensor_name: deal.licensor,
@@ -462,6 +466,7 @@ export async function runDailyIngestion(
             confidence_score: deal.confidence_score,
             extraction_model: 'claude-sonnet-4-20250514',
             extraction_timestamp: new Date().toISOString(),
+            therapeutic_area: therapeuticArea,
           });
 
           if (insertError) {
@@ -526,6 +531,19 @@ function formatDate(date: Date): string {
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function deriveTherapeuticArea(indicationCategory: string | null): string {
+  if (!indicationCategory) return 'oncology';
+  switch (indicationCategory) {
+    case 'solid_tumor':
+    case 'hematological':
+      return 'oncology';
+    case 'cns':
+      return 'neurology';
+    default:
+      return 'other';
+  }
 }
 
 function normalizeCompanyName(name: string): string {
