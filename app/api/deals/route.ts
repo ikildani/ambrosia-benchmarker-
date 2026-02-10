@@ -198,7 +198,7 @@ async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>
 
   if (error || !data) {
     console.error('Failed to get filter options via RPC:', error);
-    return { modalities: [], phases: [], indications: [], dealTypes: [], therapeuticAreas: [] };
+    return { modalities: [], phases: [], indications: [], dealTypes: [], therapeuticAreas: [], _rpcError: error?.message || 'no data' };
   }
 
   return {
@@ -207,5 +207,6 @@ async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>
     indications: (data.indications || []).filter(Boolean),
     dealTypes: (data.dealTypes || []).filter(Boolean),
     therapeuticAreas: (data.therapeuticAreas || []).filter(Boolean),
+    _rpcRaw: data,
   };
 }
