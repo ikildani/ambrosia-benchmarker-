@@ -1,3 +1,21 @@
+# AI Crawlers - Explicit Allow
+User-agent: GPTBot
+Allow: /
+Allow: /benchmarks/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Default rules
 User-agent: *
 Allow: /
 Disallow: /api/

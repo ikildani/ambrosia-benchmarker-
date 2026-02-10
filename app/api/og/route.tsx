@@ -9,12 +9,132 @@ export async function GET(request: NextRequest) {
   const subtitle = searchParams.get('subtitle');
   const type = searchParams.get('type') || 'default';
 
+  const stat = searchParams.get('stat');
+
+  // Insight type: bold stat + title for LinkedIn sharing
+  if (type === 'insight' && stat) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#020617',
+            padding: '60px',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '800px',
+              height: '800px',
+              background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 60%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '40px',
+              left: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                backgroundColor: '#14b8a6',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                color: 'white',
+                fontWeight: 'bold',
+              }}
+            >
+              A
+            </div>
+            <span style={{ color: '#64748b', fontSize: '20px', fontWeight: 600 }}>
+              Ambrosia Ventures
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+            <div
+              style={{
+                fontSize: '96px',
+                fontWeight: 'bold',
+                color: '#f59e0b',
+                lineHeight: 1,
+                textAlign: 'center',
+              }}
+            >
+              {stat}
+            </div>
+            <div
+              style={{
+                fontSize: '36px',
+                fontWeight: 600,
+                color: 'white',
+                textAlign: 'center',
+                lineHeight: 1.3,
+                maxWidth: '900px',
+              }}
+            >
+              {title}
+            </div>
+            {subtitle && (
+              <div style={{ fontSize: '22px', color: '#94a3b8', textAlign: 'center' }}>
+                {subtitle}
+              </div>
+            )}
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#475569',
+              fontSize: '18px',
+            }}
+          >
+            calculator.ambrosiaventures.co
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '6px',
+              background: 'linear-gradient(90deg, #f59e0b, #14b8a6)',
+            }}
+          />
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
+  }
+
   // If custom title provided, use dynamic template
   if (title) {
     const colors = {
       default: { bg: '#0f172a', accent: '#14b8a6' },
       blog: { bg: '#1e293b', accent: '#06b6d4' },
       landing: { bg: '#0f172a', accent: '#14b8a6' },
+      insight: { bg: '#020617', accent: '#f59e0b' },
     };
     const scheme = colors[type as keyof typeof colors] || colors.default;
 

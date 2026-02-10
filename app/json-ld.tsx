@@ -1,8 +1,9 @@
-import { generateOrganizationSchema, generateSoftwareApplicationSchema } from '@/lib/seo/structured-data';
+import { generateOrganizationSchema, generateSoftwareApplicationSchema, generateDatasetSchema } from '@/lib/seo/structured-data';
 
 export function GlobalJsonLd() {
   const organizationSchema = generateOrganizationSchema();
   const softwareSchema = generateSoftwareApplicationSchema();
+  const datasetSchema = generateDatasetSchema();
 
   return (
     <>
@@ -13,6 +14,10 @@ export function GlobalJsonLd() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }}
       />
     </>
   );

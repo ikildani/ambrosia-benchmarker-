@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
@@ -8,7 +8,145 @@ import Pricing from '@/components/Pricing';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
 import FAQSection from '@/components/FAQSection';
+import ExitIntentCapture from '@/components/ExitIntentCapture';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  calculateDealTerms,
+  formatCurrency,
+  phaseOptions,
+  modalityOptions,
+  indicationOptions,
+  type Phase,
+  type Modality,
+  type Indication,
+  type CalculationInput,
+} from '@/lib/calculations';
+
+// Flatten grouped options for the demo selects
+const flatModalities = modalityOptions.flatMap(g => g.options);
+const flatIndications = indicationOptions.flatMap(g => g.options);
+
+function LiveDemoSection() {
+  const [demoPhase, setDemoPhase] = useState<Phase>('phase2');
+  const [demoModality, setDemoModality] = useState<Modality>('adc');
+  const [demoIndication, setDemoIndication] = useState<Indication>('breast_tnbc');
+
+  const result = useMemo(() => {
+    const input: CalculationInput = {
+      therapeuticArea: 'oncology',
+      phase: demoPhase,
+      modality: demoModality,
+      indication: demoIndication,
+      territory: 'global',
+      biomarker: 'unselected',
+      lineOfTherapy: '2L',
+      treatmentApproach: 'symptomatic',
+      combinationPotential: 'some',
+      competitivePosition: 'racing',
+      dataQuality: 'promising',
+      regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+    };
+    return calculateDealTerms(input);
+  }, [demoPhase, demoModality, demoIndication]);
+
+  const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all cursor-pointer appearance-none";
+
+  return (
+    <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-4">
+            <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+            <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Live Preview</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
+            See Your Deal Terms Instantly
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+            Pick a phase, modality, and indication — get benchmark deal terms in real time
+          </p>
+        </div>
+
+        {/* 3 Selectors */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto mb-8">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Phase</label>
+            <select value={demoPhase} onChange={(e) => setDemoPhase(e.target.value as Phase)} className={selectClass}>
+              {phaseOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Modality</label>
+            <select value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={selectClass}>
+              {modalityOptions.map(g => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Indication</label>
+            <select value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={selectClass}>
+              {indicationOptions.map(g => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Result Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
+          {[
+            {
+              label: 'Upfront Payment',
+              value: `${formatCurrency(result.terms.upfront.low)} - ${formatCurrency(result.terms.upfront.high)}`,
+              median: formatCurrency(result.terms.upfront.median),
+              gradient: 'from-teal-500 to-cyan-500',
+            },
+            {
+              label: 'Total Deal Value',
+              value: `${formatCurrency(result.terms.totalDealValue.low)} - ${formatCurrency(result.terms.totalDealValue.high)}`,
+              median: formatCurrency(result.terms.totalDealValue.median),
+              gradient: 'from-cyan-500 to-teal-500',
+            },
+            {
+              label: 'Royalty Rate',
+              value: `${result.tieredRoyalties.base.low}% - ${result.tieredRoyalties.base.high}%`,
+              median: `${((result.tieredRoyalties.base.low + result.tieredRoyalties.base.high) / 2).toFixed(1)}%`,
+              gradient: 'from-teal-400 to-cyan-400',
+            },
+          ].map((card, idx) => (
+            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 hover:-translate-y-1">
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{card.label}</div>
+              <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
+                {card.value}
+              </div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">Median: {card.median}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <Link
+            href={`/calculator?phase=${demoPhase}&modality=${demoModality}&indication=${demoIndication}`}
+            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl
+                     shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
+          >
+            <span>Get Full Analysis with Milestones & Partner Matching</span>
+            <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </Link>
+          <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">Free to use. No account required.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   const {
@@ -119,10 +257,10 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className={`text-sm sm:text-lg lg:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 leading-relaxed font-light transition-all duration-700 delay-300 px-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Data-driven estimates for upfront payments, milestones, and royalties
+            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">500+ real deals</strong>.
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
-            for oncology and neurology licensing deals
+            Upfront payments, milestones, royalties & partner matching.
           </p>
 
           {/* CTA Buttons */}
@@ -167,9 +305,9 @@ export default function Home() {
           {/* Feature Pills */}
           <div className={`flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
-              { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: 'Public deal data' },
-              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: 'All modalities' },
-              { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Instant results' },
+              { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '500+ deals analyzed' },
+              { icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', text: 'AI partner matching' },
+              { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Results in 3 seconds' },
             ].map((feature, idx) => (
               <div
                 key={idx}
@@ -199,6 +337,9 @@ export default function Home() {
 
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-50 dark:from-slate-800 to-transparent" />
       </section>
+
+      {/* Live Demo Section */}
+      <LiveDemoSection />
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 px-4 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
@@ -338,6 +479,59 @@ export default function Home() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Partner Discovery Preview Section */}
+      <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center gap-2 bg-cyan-50 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30 rounded-full px-4 py-1.5 mb-4">
+              <svg className="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">AI Partner Matching</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
+              Find Your Ideal Licensing Partner
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+              Our AI matches your asset profile against 50+ pharma companies to find the best strategic fit
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
+            {[
+              { name: 'Major Pharma Co.', score: 92, focus: 'Oncology, ADC expertise', deals: '12 deals in 12mo' },
+              { name: 'Global BioPharma', score: 87, focus: 'Late-stage licensing', deals: '8 deals in 12mo' },
+              { name: 'Specialty Pharma', score: 84, focus: 'Niche indications', deals: '6 deals in 12mo' },
+            ].map((partner, idx) => (
+              <div key={idx} className="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-soft overflow-hidden">
+                <div className="absolute inset-0 backdrop-blur-[2px] bg-white/40 dark:bg-slate-800/40 z-10 flex items-center justify-center">
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-700/80 px-3 py-1 rounded-full">Run analysis to reveal</span>
+                </div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700" />
+                  <span className="text-lg font-bold text-teal-600">{partner.score}%</span>
+                </div>
+                <div className="font-semibold text-sm text-slate-800 dark:text-white mb-1">{partner.name}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{partner.focus}</div>
+                <div className="text-xs text-teal-600 dark:text-teal-400 mt-1">{partner.deals}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/calculator"
+              className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
+            >
+              <span>See Your Partner Matches</span>
+              <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
           </div>
         </div>
       </section>
@@ -496,6 +690,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <ExitIntentCapture />
     </main>
   );
 }

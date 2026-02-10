@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
+import { getAllInsightSlugs } from '@/lib/insightPages';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
@@ -110,5 +112,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  return [...staticPages, ...blogPages, ...landingPages];
+  // Benchmark pages (statically generated)
+  const benchmarkSlugs = getAllBenchmarkSlugs();
+  const benchmarkPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/benchmarks`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    ...benchmarkSlugs.map((slug) => ({
+      url: `${baseUrl}/benchmarks/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+  ];
+
+  // Insight pages (statically generated, social-friendly)
+  const insightSlugs = getAllInsightSlugs();
+  const insightPages: MetadataRoute.Sitemap = insightSlugs.map((slug) => ({
+    url: `${baseUrl}/insights/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages];
 }
