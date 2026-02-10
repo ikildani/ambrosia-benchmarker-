@@ -191,21 +191,44 @@ export async function GET(request: NextRequest) {
   }
 }
 
+async function getDistinctValues(
+  supabase: ReturnType<typeof createServiceClient>,
+  column: string
+): Promise<string[]> {
+  const values = new Set<string>();
+  let offset = 0;
+  const pageSize = 1000;
+
+  // Paginate to overcome PostgREST max_rows limit
+  for (let page = 0; page < 5; page++) {
+    const { data } = await supabase
+      .from('deals')
+      .select(column)
+      .not(column, 'is', null)
+      .order(column)
+      .range(offset, offset + pageSize - 1);
+
+    if (!data || data.length === 0) break;
+    for (const row of data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const val = (row as any)[column];
+      if (val) values.add(val as string);
+    }
+    if (data.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return [...values].sort();
+}
+
 async function getFilterOptions(supabase: ReturnType<typeof createServiceClient>) {
-  // Order by each column to ensure all distinct values appear within PostgREST's row limit
   const [modalities, phases, indications, dealTypes, therapeuticAreas] = await Promise.all([
-    supabase.from('deals').select('modality').not('modality', 'is', null).order('modality').limit(1000),
-    supabase.from('deals').select('phase_at_signing').not('phase_at_signing', 'is', null).order('phase_at_signing').limit(1000),
-    supabase.from('deals').select('indication_category').not('indication_category', 'is', null).order('indication_category').limit(1000),
-    supabase.from('deals').select('deal_type').not('deal_type', 'is', null).order('deal_type').limit(1000),
-    supabase.from('deals').select('therapeutic_area').not('therapeutic_area', 'is', null).order('therapeutic_area').limit(1000),
+    getDistinctValues(supabase, 'modality'),
+    getDistinctValues(supabase, 'phase_at_signing'),
+    getDistinctValues(supabase, 'indication_category'),
+    getDistinctValues(supabase, 'deal_type'),
+    getDistinctValues(supabase, 'therapeutic_area'),
   ]);
 
-  return {
-    modalities: [...new Set((modalities.data || []).map(d => d.modality))].filter(Boolean).sort(),
-    phases: [...new Set((phases.data || []).map(d => d.phase_at_signing))].filter(Boolean).sort(),
-    indications: [...new Set((indications.data || []).map(d => d.indication_category))].filter(Boolean).sort(),
-    dealTypes: [...new Set((dealTypes.data || []).map(d => d.deal_type))].filter(Boolean).sort(),
-    therapeuticAreas: [...new Set((therapeuticAreas.data || []).map(d => d.therapeutic_area))].filter(Boolean).sort(),
-  };
+  return { modalities, phases, indications, dealTypes, therapeuticAreas };
 }
