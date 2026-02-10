@@ -6,6 +6,7 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { useState, useEffect, useRef } from 'react';
 import Calculator from '@/components/Calculator';
 import AuthModal from '@/components/AuthModal';
+import ExitIntentCapture from '@/components/ExitIntentCapture';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function CalculatorPage() {
@@ -308,6 +309,8 @@ export default function CalculatorPage() {
         onSuccess={handleAuthSuccess}
         initialMode={authModalMode}
       />
+
+      <ExitIntentCapture />
     </div>
   );
 }

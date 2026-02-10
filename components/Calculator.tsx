@@ -285,6 +285,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
   // Template selection state
   const [showTemplates, setShowTemplates] = useState(true);
+  const [quickMode, setQuickMode] = useState(true);
   const [highlightedFields, setHighlightedFields] = useState<Set<string>>(new Set());
 
   // Tracking
@@ -293,6 +294,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const calculationCountRef = useRef(0);
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
+  const hadPrefillRef = useRef(false);
 
   // Refresh remaining uses when tier changes or user authenticates
   // When user signs in, sync from database to get accurate count
@@ -332,6 +334,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
     const prefill = sessionStorage.getItem('prefill_calculation');
     if (prefill && mounted) {
+      hadPrefillRef.current = true;
       try {
         const inputs = JSON.parse(prefill);
         if (inputs.therapeuticArea) setTherapeuticArea(inputs.therapeuticArea as TherapeuticArea);
@@ -357,6 +360,50 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     return () => {
       mounted = false;
     };
+  }, []);
+
+  // Read URL params (from LiveDemo CTA) and auto-calculate on first visit
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (hadPrefillRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlPhase = params.get('phase');
+    const urlModality = params.get('modality');
+    const urlIndication = params.get('indication');
+
+    if (urlPhase || urlModality || urlIndication) {
+      if (urlPhase) setPhase(urlPhase as Phase);
+      if (urlModality) setModality(urlModality as Modality);
+      if (urlIndication) setIndication(urlIndication as Indication);
+      setShowTemplates(false);
+      setQuickMode(false);
+      const input: CalculationInput = {
+        therapeuticArea,
+        phase: (urlPhase as Phase) || phase,
+        modality: (urlModality as Modality) || modality,
+        indication: (urlIndication as Indication) || indication,
+        territory, biomarker, lineOfTherapy, treatmentApproach,
+        combinationPotential, competitivePosition, dataQuality,
+        regulatoryDesignations,
+      };
+      setResult(calculateDealTerms(input));
+      return;
+    }
+
+    // Auto-calculate for first-time visitors with default values
+    if (!sessionStorage.getItem('has_auto_calculated')) {
+      sessionStorage.setItem('has_auto_calculated', 'true');
+      const input: CalculationInput = {
+        therapeuticArea, phase, modality, indication,
+        territory, biomarker, lineOfTherapy, treatmentApproach,
+        combinationPotential, competitivePosition, dataQuality,
+        regulatoryDesignations,
+      };
+      setResult(calculateDealTerms(input));
+      setShowTemplates(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCalculate = () => {
@@ -636,6 +683,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
     setHighlightedFields(fieldsSet);
     setShowTemplates(false);
+    setQuickMode(false);
 
     // Clear highlight after animation
     setTimeout(() => setHighlightedFields(new Set()), 2000);
@@ -755,7 +803,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className={`grid ${quickMode ? 'max-w-xl mx-auto' : 'lg:grid-cols-2'} gap-6 lg:gap-8`}>
             {/* Left Column */}
             <div className="space-y-6 lg:space-y-8">
               {/* Asset Details Section */}
@@ -824,6 +872,19 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     </select>
                   </div>
 
+                  {quickMode && (
+                    <button
+                      onClick={() => setQuickMode(false)}
+                      className="flex items-center gap-2 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium mt-1 group"
+                    >
+                      <span>Show Advanced Options</span>
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  )}
+
+                  {!quickMode && (
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status</label>
                     <select
@@ -840,9 +901,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       ))}
                     </select>
                   </div>
+                  )}
                 </div>
               </div>
 
+              {!quickMode && (
+              <>
               {/* Target Profile Section */}
               <div>
                 <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
@@ -966,9 +1030,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   </div>
                 </div>
               </div>
+              </>
+              )}
             </div>
 
             {/* Right Column */}
+            {!quickMode && (
             <div className="space-y-6 lg:space-y-8">
               {/* Competitive Landscape Section */}
               <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
@@ -1080,6 +1147,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Usage Counter for Free Tier */}

@@ -408,6 +408,62 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showPlaybookModal, setShowPlaybookModal] = useState(false);
+  const [emailForResults, setEmailForResults] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [showEmailGate, setShowEmailGate] = useState(false);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailForResults || emailSubmitting) return;
+    setEmailSubmitting(true);
+    try {
+      // Send to Formspree
+      await fetch('https://formspree.io/f/maqbwgbq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailForResults,
+          source: 'results_email_capture',
+          analysis: `${labels.phase} ${labels.modality} ${labels.indication}`,
+          upfront: `${formatCurrency(terms.upfront.low)} - ${formatCurrency(terms.upfront.high)}`,
+          totalDealValue: `${formatCurrency(terms.totalDealValue.low)} - ${formatCurrency(terms.totalDealValue.high)}`,
+        }),
+      });
+      // Also save to newsletter API
+      fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailForResults, source: 'results' }),
+      }).catch(() => {});
+      setEmailSubmitted(true);
+      sessionStorage.setItem('email_captured', 'true');
+      // If this was triggered by PDF gate, generate PDF now
+      if (showEmailGate) {
+        setShowEmailGate(false);
+        generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+      }
+    } catch {
+      // Still mark as submitted for UX
+      setEmailSubmitted(true);
+    } finally {
+      setEmailSubmitting(false);
+    }
+  };
+
+  const handleFreePDFClick = () => {
+    if (sessionStorage.getItem('email_captured') || emailSubmitted) {
+      generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+    } else {
+      setShowEmailGate(true);
+    }
+  };
+
+  const handleLinkedInShare = () => {
+    const text = `${labels.phase} ${labels.modality} deals for ${labels.indication}: Upfront ${formatCurrency(terms.upfront.low)}-${formatCurrency(terms.upfront.high)}, Total value up to ${formatCurrency(terms.totalDealValue.high)}.\n\nBenchmark your deal terms: https://calculator.ambrosiaventures.co/calculator`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://calculator.ambrosiaventures.co/calculator')}&summary=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'width=600,height=500');
+  };
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
@@ -501,10 +557,31 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               <BenchmarkInfo />
             </div>
           </div>
-          {isPro && (
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {isPro ? (
+              <>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>PDF</span>
+                </button>
+                <button
+                  onClick={handleDownloadExcel}
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 text-sm font-medium rounded-xl transition-all duration-200 border border-teal-400/30 hover:border-teal-400/50 w-full sm:w-auto"
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Excel</span>
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleDownloadPDF}
+                onClick={handleFreePDFClick}
                 className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,28 +589,94 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
                 </svg>
                 <span>PDF</span>
               </button>
-              <button
-                onClick={handleDownloadExcel}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 text-sm font-medium rounded-xl transition-all duration-200 border border-teal-400/30 hover:border-teal-400/50 w-full sm:w-auto"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Excel</span>
-              </button>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-100 text-sm font-medium rounded-xl transition-all duration-200 border border-cyan-400/30 hover:border-cyan-400/50 w-full sm:w-auto"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                <span>Share</span>
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-100 text-sm font-medium rounded-xl transition-all duration-200 border border-cyan-400/30 hover:border-cyan-400/50 w-full sm:w-auto"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              <span>Share</span>
+            </button>
+            <button
+              onClick={handleLinkedInShare}
+              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#0A66C2]/20 hover:bg-[#0A66C2]/30 text-blue-200 text-sm font-medium rounded-xl transition-all duration-200 border border-[#0A66C2]/30 hover:border-[#0A66C2]/50 w-full sm:w-auto"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span className="hidden sm:inline">LinkedIn</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Email Capture Bar */}
+      {!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && (
+        <div className="px-4 sm:px-6 lg:px-8 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-b border-teal-100 dark:border-teal-800">
+          <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 max-w-xl mx-auto">
+            <div className="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-400 flex-shrink-0">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium">Email me my results</span>
+            </div>
+            <input
+              type="email"
+              value={emailForResults}
+              onChange={(e) => setEmailForResults(e.target.value)}
+              placeholder="your@email.com"
+              required
+              className="flex-1 w-full sm:w-auto px-3 py-1.5 text-sm rounded-lg border border-teal-200 dark:border-teal-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+            <button
+              type="submit"
+              disabled={emailSubmitting}
+              className="px-4 py-1.5 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 flex-shrink-0"
+            >
+              {emailSubmitting ? 'Sending...' : 'Send'}
+            </button>
+          </form>
+        </div>
+      )}
+      {emailSubmitted && (
+        <div className="px-4 sm:px-6 lg:px-8 py-2.5 bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-800 text-center">
+          <span className="text-sm text-teal-700 dark:text-teal-400 font-medium">Results sent! Check your inbox.</span>
+        </div>
+      )}
+
+      {/* Email Gate Modal for Free PDF */}
+      {showEmailGate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowEmailGate(false)} />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Download Your PDF Report</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Enter your email to receive the PDF and get weekly deal insights.</p>
+            <form onSubmit={handleEmailSubmit} className="space-y-3">
+              <input
+                type="email"
+                value={emailForResults}
+                onChange={(e) => setEmailForResults(e.target.value)}
+                placeholder="your@email.com"
+                required
+                autoFocus
+                className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <button
+                type="submit"
+                disabled={emailSubmitting}
+                className="w-full py-2.5 text-sm font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all disabled:opacity-50"
+              >
+                {emailSubmitting ? 'Processing...' : 'Get PDF Report'}
+              </button>
+            </form>
+            <button onClick={() => setShowEmailGate(false)} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
@@ -553,6 +696,22 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
             </div>
           </div>
         </div>
+
+        {/* Partner Matches - Elevated position for visibility */}
+        {inputs && (
+          <div className="mb-4 sm:mb-6">
+            <PartnerMatchesContainer
+              modality={inputs.modality}
+              phase={inputs.phase}
+              indicationCategory={getIndicationCategory(inputs.indication)}
+              indicationSpecific={inputs.indication}
+              territory={inputs.territory}
+              tier={tier}
+              onUpgrade={onUpgrade || (() => {})}
+              onMatchesLoaded={handlePartnerMatchesLoaded}
+            />
+          </div>
+        )}
 
         {/* Negotiation Insight - Pro Feature */}
         <div className="relative mb-4 sm:mb-6">
@@ -962,20 +1121,6 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               </svg>
             </button>
           </div>
-        )}
-
-        {/* Partner Matches */}
-        {inputs && (
-          <PartnerMatchesContainer
-            modality={inputs.modality}
-            phase={inputs.phase}
-            indicationCategory={getIndicationCategory(inputs.indication)}
-            indicationSpecific={inputs.indication}
-            territory={inputs.territory}
-            tier={tier}
-            onUpgrade={onUpgrade || (() => {})}
-            onMatchesLoaded={handlePartnerMatchesLoaded}
-          />
         )}
 
         {/* Methodology Section */}

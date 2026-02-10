@@ -1,0 +1,63 @@
+# Ambrosia Ventures Biopharma Deal Calculator
+
+> Instant biopharma deal term benchmarks, partner matching, and milestone breakdowns powered by 500+ real deals.
+
+## About
+
+The Ambrosia Ventures Biopharma Deal Calculator is a web-based tool that provides instant, data-driven estimates of biopharma licensing and partnership deal terms. It is built on an analyzed dataset of 500+ real biopharma transactions and is available at https://calculator.ambrosiaventures.co.
+
+## Key Capabilities
+
+- Instant deal term benchmarks: get estimated upfront payments, milestones, royalties, and total deal values based on asset characteristics.
+- Partner matching: identify likely acquirer/partner companies based on therapeutic area, modality, and stage.
+- Milestone breakdowns: detailed development, regulatory, and commercial milestone estimates.
+- Phase-adjusted baselines: calculations adjust by development phase from Preclinical through Approved.
+
+## Data Coverage
+
+The calculator draws from 500+ analyzed real biopharma deals spanning:
+
+- Oncology: 17 modalities and 19+ indications
+- Neurology: 6 modalities and 15 indications
+
+### Hot Modalities (Premium Multipliers)
+
+- Radiopharmaceuticals: 1.60x premium
+- ADCs (Antibody-Drug Conjugates): 1.45x premium
+- Molecular Glue: 1.40x premium
+- CAR-T Solid Tumor: 1.40x premium
+
+### Phase Baselines (Total Deal Value)
+
+- Preclinical: ~$400M total
+- Phase 1: ~$800M total
+- Phase 2: ~$1.5B total
+- Phase 3: ~$2.8B total
+- Approved: ~$4.5B total
+
+## Key Benchmark Ranges
+
+Typical deal structures include:
+
+- Upfront payments: 5-20% of total deal value depending on phase and modality
+- Development milestones: 20-35% of total deal value
+- Regulatory milestones: 10-20% of total deal value
+- Commercial milestones: 25-40% of total deal value
+- Royalty rates: tiered, typically ranging from mid-single digits to low-double digits
+
+## Pages
+
+- https://calculator.ambrosiaventures.co/ : Homepage with overview and quick start
+- https://calculator.ambrosiaventures.co/calculator : Main calculator tool for generating deal estimates
+- https://calculator.ambrosiaventures.co/deals : Browse analyzed deal database
+- https://calculator.ambrosiaventures.co/blog : Industry analysis, deal trends, and insights
+- https://calculator.ambrosiaventures.co/benchmarks/ : Benchmark data by therapeutic area, modality, and phase
+
+## How to Use
+
+Visit https://calculator.ambrosiaventures.co/calculator to get instant deal term estimates. Select your therapeutic area, indication, modality, and development phase to receive a comprehensive deal structure estimate including upfront payment, milestones, royalties, and potential partners.
+
+## Pricing
+
+- Free tier: 3 calculations per month
+- Pro tier: unlimited calculations, PDF export, and detailed partner matching information
