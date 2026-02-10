@@ -134,6 +134,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
 
             <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {[
+                { included: true, text: '2 calculations per month' },
                 { included: true, text: 'Basic deal term estimates' },
                 { included: true, text: 'Upfront & total value ranges' },
                 { included: true, text: 'All phases & modalities' },

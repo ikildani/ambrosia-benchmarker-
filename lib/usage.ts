@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'deal_calculator_usage';
-const FREE_TIER_LIMIT = 5;
+const FREE_TIER_LIMIT = 2;
 
 interface UsageData {
   count: number;
