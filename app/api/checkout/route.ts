@@ -39,10 +39,12 @@ export async function POST(request: NextRequest) {
     // Get customer info from request body (optional)
     let customerEmail: string | undefined;
     let userId: string | undefined;
+    let promoCode: string | undefined;
     try {
       const body = await request.json();
       customerEmail = body.email;
       userId = body.userId;
+      promoCode = body.promoCode;
     } catch {
       // No body provided, will collect email in checkout
     }
@@ -59,23 +61,50 @@ export async function POST(request: NextRequest) {
       ],
       success_url: `${appUrl}?session_id={CHECKOUT_SESSION_ID}&success=true`,
       cancel_url: `${appUrl}?canceled=true`,
-      // Collect billing address for invoices
       billing_address_collection: 'required',
-      // Allow promotion codes
-      allow_promotion_codes: true,
-      // Tax ID collection for business customers
       tax_id_collection: { enabled: true },
       subscription_data: {
         metadata: {
           product: 'deal-calculator-pro',
           user_id: userId || '',
+          promo_code: promoCode || '',
         },
       },
       metadata: {
         product: 'deal-calculator-pro',
         user_id: userId || '',
+        promo_code: promoCode || '',
       },
     };
+
+    // Stripe's `discounts` and `allow_promotion_codes` are mutually exclusive.
+    // When a specific promo code is provided, pre-apply it via discounts[].
+    // Otherwise, let Stripe show its built-in promo code input.
+    if (promoCode) {
+      let promoId = promoCode;
+
+      // If it's a code name (not a promo_xxx ID), look it up in Stripe
+      if (!promoCode.startsWith('promo_')) {
+        const normalizedCode = promoCode.trim().toUpperCase();
+        const promoCodes = await stripe.promotionCodes.list({
+          code: normalizedCode,
+          active: true,
+          limit: 1,
+        });
+
+        if (promoCodes.data.length === 0) {
+          return NextResponse.json(
+            { error: 'Invalid or expired promo code. Please try again without the code.' },
+            { status: 400 }
+          );
+        }
+        promoId = promoCodes.data[0].id;
+      }
+
+      sessionOptions.discounts = [{ promotion_code: promoId }];
+    } else {
+      sessionOptions.allow_promotion_codes = true;
+    }
 
     // Pre-fill email if provided
     if (customerEmail) {

@@ -4,17 +4,21 @@ import { useState, useEffect } from 'react';
 import { FREE_LIMIT } from '@/lib/usage';
 import { useTracking } from './TrackingProvider';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import { usePromoCode } from '@/lib/hooks/usePromoCode';
 
 interface PaywallModalProps {
   isOpen: boolean;
   onClose: () => void;
   reason: 'limit_reached' | 'pro_feature';
+  promoCode?: string;
 }
 
-export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalProps) {
+export default function PaywallModal({ isOpen, onClose, reason, promoCode: initialPromo }: PaywallModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
   const { trackUpgradeCtaClick, trackPaywallDismissed } = useTracking();
+  const { promoId, promoStatus, promoDiscount } = usePromoCode(initialPromo);
+  const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
 
   // Countdown timer for urgency
   useEffect(() => {
@@ -44,6 +48,9 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promoCode: promoId || undefined,
+        }),
       });
       const data = await response.json();
       if (data.url) {
@@ -168,15 +175,33 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
 
           {/* Pricing with anchor */}
           <div className="text-center mb-6">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-lg text-slate-400 line-through">$199</span>
-              <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">50% OFF</span>
-            </div>
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-4xl font-bold text-slate-900">{PRICING.PRO_PRICE}</span>
-              <span className="text-slate-500">/month</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">Less than one hour of consultant time</p>
+            {hasValidPromo ? (
+              <>
+                <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-full px-4 py-2 mb-3">
+                  <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-teal-700 text-sm font-semibold">1 Month Free Applied</span>
+                </div>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-4xl font-bold text-slate-900">$0</span>
+                  <span className="text-slate-500">/first month</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">Then $99/month. Cancel anytime.</p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="text-lg text-slate-400 line-through">$199</span>
+                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">50% OFF</span>
+                </div>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-4xl font-bold text-slate-900">{PRICING.PRO_PRICE}</span>
+                  <span className="text-slate-500">/month</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">Less than one hour of consultant time</p>
+              </>
+            )}
           </div>
 
           {/* CTA Button */}
@@ -199,7 +224,7 @@ export default function PaywallModal({ isOpen, onClose, reason }: PaywallModalPr
               </>
             ) : (
               <>
-                <span>Start Pro Trial</span>
+                <span>{hasValidPromo ? 'Start Free Month' : 'Start Pro Trial'}</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>

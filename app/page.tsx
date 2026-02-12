@@ -164,9 +164,25 @@ export default function Home() {
   } = useAuth();
 
   const [isVisible, setIsVisible] = useState(false);
+  const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setIsVisible(true);
+
+    // Read ?code= param for promo code (email campaign link)
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get('code');
+    if (codeParam) {
+      setUrlPromoCode(codeParam.toUpperCase());
+      // Clean the code param from URL but preserve hash
+      const url = new URL(window.location.href);
+      url.searchParams.delete('code');
+      window.history.replaceState({}, '', url.toString());
+      // Auto-scroll to pricing section
+      setTimeout(() => {
+        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+    }
   }, []);
 
   const handleTierChange = (newTier: 'free' | 'pro') => {
@@ -568,7 +584,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <Pricing currentTier={tier} onSelectTier={handleTierChange} />
+      <Pricing currentTier={tier} onSelectTier={handleTierChange} userEmail={user?.email} userId={user?.id} initialPromoCode={urlPromoCode} />
 
       {/* FAQ Section */}
       <FAQSection />

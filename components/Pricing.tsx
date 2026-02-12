@@ -2,18 +2,26 @@
 
 import { useState } from 'react';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import { usePromoCode } from '@/lib/hooks/usePromoCode';
 
 interface PricingProps {
   currentTier: 'free' | 'pro';
   onSelectTier: (tier: 'free' | 'pro') => void;
   userEmail?: string;
   userId?: string;
+  initialPromoCode?: string;
 }
 
-export default function Pricing({ currentTier, onSelectTier, userEmail, userId }: PricingProps) {
+export default function Pricing({ currentTier, onSelectTier, userEmail, userId, initialPromoCode }: PricingProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isManageLoading, setIsManageLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const {
+    promoCode, setPromoCode, promoStatus, promoDiscount, promoId, promoError,
+    validatePromoCode, clearPromo,
+  } = usePromoCode(initialPromoCode);
+
+  const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
 
   const handleUpgrade = async () => {
     setIsLoading(true);
@@ -25,6 +33,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
         body: JSON.stringify({
           email: userEmail,
           userId: userId,
+          promoCode: promoId || undefined,
         }),
       });
       const data = await response.json();
@@ -205,9 +214,100 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
               <p className="text-neutral-400 text-xs sm:text-sm">Complete deal intelligence</p>
             </div>
 
+            {/* Promo Code Section */}
+            {currentTier !== 'pro' && (
+              <div className="mb-4">
+                {promoStatus === 'valid' ? (
+                  <div className="flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-xl px-4 py-3">
+                    <div className="w-5 h-5 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-teal-300 text-sm font-semibold">1 Month Free Applied</p>
+                      <p className="text-teal-400/70 text-xs">Code: {promoCode}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); clearPromo(); }}
+                      className="text-teal-400/50 hover:text-teal-300 transition-colors"
+                      aria-label="Remove promo code"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value);
+                          if (promoStatus !== 'idle') {
+                            clearPromo();
+                            setPromoCode(e.target.value);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            validatePromoCode(promoCode);
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Promo code"
+                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm
+                                   placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-teal-500
+                                   focus:border-transparent transition-all"
+                        maxLength={20}
+                      />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); validatePromoCode(promoCode); }}
+                        disabled={!promoCode.trim() || promoStatus === 'validating'}
+                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm
+                                   font-medium hover:bg-white/20 transition-all disabled:opacity-40
+                                   disabled:cursor-not-allowed flex items-center gap-1.5"
+                      >
+                        {promoStatus === 'validating' ? (
+                          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                        ) : (
+                          'Apply'
+                        )}
+                      </button>
+                    </div>
+                    {promoStatus === 'invalid' && promoError && (
+                      <p className="text-red-400 text-xs mt-1.5 ml-1">{promoError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Price Display */}
             <div className="mb-6 sm:mb-8">
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{PRICING.PRO_PRICE}</span>
-              <span className="text-neutral-400 ml-2 text-sm sm:text-base">/month</span>
+              {hasValidPromo ? (
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">$0</span>
+                    <span className="text-neutral-400 text-sm sm:text-base">/first month</span>
+                  </div>
+                  <p className="text-teal-400 text-sm font-medium mt-1">
+                    Then {PRICING.PRO_MONTHLY} after trial
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{PRICING.PRO_PRICE}</span>
+                  <span className="text-neutral-400 ml-2 text-sm sm:text-base">/month</span>
+                </>
+              )}
             </div>
 
             <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
@@ -272,7 +372,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId }
                   </>
                 ) : (
                   <>
-                    <span>Upgrade to Pro</span>
+                    <span>{hasValidPromo ? 'Start Free Month' : 'Upgrade to Pro'}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

@@ -119,6 +119,9 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id: subscriptionId,
               amount_total: session.amount_total,
               currency: session.currency,
+              promo_code: session.metadata?.promo_code || null,
+              discount_applied: (session.total_details?.amount_discount || 0) > 0,
+              discount_amount: session.total_details?.amount_discount || 0,
             },
             user_tier: 'pro',
           });
