@@ -4119,16 +4119,79 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 3: Get final count
+    // Step 3: Link deals to companies by name matching
+    console.log('Step 3: Linking deals to companies...');
+    let linkedLicensees = 0;
+    let linkedLicensors = 0;
+
+    // Fetch all companies with name_variations for matching
+    const { data: allCompanies } = await supabase
+      .from('companies')
+      .select('id, name, name_variations');
+
+    if (allCompanies && allCompanies.length > 0) {
+      // Build lookup maps: exact name → id, and variation → id
+      const nameToId = new Map<string, string>();
+      for (const c of allCompanies) {
+        nameToId.set(c.name.toLowerCase(), c.id);
+        if (c.name_variations) {
+          for (const v of c.name_variations) {
+            nameToId.set(v.toLowerCase(), c.id);
+          }
+        }
+      }
+
+      // Link licensees
+      const { data: unlinkedLicensees } = await supabase
+        .from('deals')
+        .select('id, licensee_name')
+        .is('licensee_id', null)
+        .not('licensee_name', 'is', null);
+
+      if (unlinkedLicensees) {
+        for (const deal of unlinkedLicensees) {
+          // Strip "(Proprietary)" suffix for matching
+          const cleanName = deal.licensee_name.replace(/\s*\(Proprietary\)\s*$/, '');
+          const companyId = nameToId.get(deal.licensee_name.toLowerCase())
+            || nameToId.get(cleanName.toLowerCase());
+          if (companyId) {
+            await supabase.from('deals').update({ licensee_id: companyId }).eq('id', deal.id);
+            linkedLicensees++;
+          }
+        }
+      }
+
+      // Link licensors
+      const { data: unlinkedLicensors } = await supabase
+        .from('deals')
+        .select('id, licensor_name')
+        .is('licensor_id', null)
+        .not('licensor_name', 'is', null);
+
+      if (unlinkedLicensors) {
+        for (const deal of unlinkedLicensors) {
+          const companyId = nameToId.get(deal.licensor_name.toLowerCase());
+          if (companyId) {
+            await supabase.from('deals').update({ licensor_id: companyId }).eq('id', deal.id);
+            linkedLicensors++;
+          }
+        }
+      }
+    }
+
+    console.log(`Linked ${linkedLicensees} licensee IDs + ${linkedLicensors} licensor IDs`);
+
+    // Step 4: Get final count
     const { count: finalCount } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true });
 
     return NextResponse.json({
       success: true,
-      message: 'Deals database populated with curated deals',
+      message: 'Deals database populated with curated deals and linked to companies',
       curatedDeals: CURATED_DEALS.length,
-      totalDeals: finalCount
+      totalDeals: finalCount,
+      linked: { licensees: linkedLicensees, licensors: linkedLicensors },
     });
 
   } catch (error) {
