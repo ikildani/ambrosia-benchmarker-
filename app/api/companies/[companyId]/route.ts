@@ -38,11 +38,14 @@ export async function GET(
     // Fetch recent deals (last 12 months)
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
+    // Match deals by ID or by company name (fallback for unlinked deals)
+    const companyName = company.name;
+
     const [dealsResult, trialsResult] = await Promise.all([
       supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category')
-        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId}`)
+        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.${companyName},licensor_name.ilike.${companyName}`)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(20),

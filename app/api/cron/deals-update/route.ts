@@ -102,6 +102,60 @@ export async function GET(request: NextRequest) {
       counts[area] = count;
     }
 
+    // Step 5: Link deals to companies by name matching
+    console.log('Step 5: Linking deals to companies...');
+    let linkedLicensees = 0;
+    let linkedLicensors = 0;
+
+    const { data: unlinkedLicensees } = await supabase
+      .from('deals')
+      .select('id, licensee_name')
+      .is('licensee_id', null)
+      .not('licensee_name', 'is', null);
+
+    if (unlinkedLicensees && unlinkedLicensees.length > 0) {
+      const names = [...new Set(unlinkedLicensees.map(d => d.licensee_name.toLowerCase()))];
+      const { data: matchedCompanies } = await supabase
+        .from('companies')
+        .select('id, name');
+
+      if (matchedCompanies) {
+        const nameToId = new Map(matchedCompanies.map(c => [c.name.toLowerCase(), c.id]));
+        for (const deal of unlinkedLicensees) {
+          const companyId = nameToId.get(deal.licensee_name.toLowerCase());
+          if (companyId) {
+            await supabase.from('deals').update({ licensee_id: companyId }).eq('id', deal.id);
+            linkedLicensees++;
+          }
+        }
+      }
+    }
+
+    const { data: unlinkedLicensors } = await supabase
+      .from('deals')
+      .select('id, licensor_name')
+      .is('licensor_id', null)
+      .not('licensor_name', 'is', null);
+
+    if (unlinkedLicensors && unlinkedLicensors.length > 0) {
+      const { data: matchedCompanies } = await supabase
+        .from('companies')
+        .select('id, name');
+
+      if (matchedCompanies) {
+        const nameToId = new Map(matchedCompanies.map(c => [c.name.toLowerCase(), c.id]));
+        for (const deal of unlinkedLicensors) {
+          const companyId = nameToId.get(deal.licensor_name.toLowerCase());
+          if (companyId) {
+            await supabase.from('deals').update({ licensor_id: companyId }).eq('id', deal.id);
+            linkedLicensors++;
+          }
+        }
+      }
+    }
+
+    console.log(`Linked ${linkedLicensees} licensee IDs + ${linkedLicensors} licensor IDs`);
+
     const countsSummary = Object.entries(counts)
       .filter(([, v]) => v && v > 0)
       .map(([k, v]) => `${k}: ${v}`)
@@ -117,6 +171,7 @@ export async function GET(request: NextRequest) {
         errors: edgarResult.errors.length,
       },
       backfillErrors,
+      linked: { licensees: linkedLicensees, licensors: linkedLicensors },
       counts,
     });
   } catch (error) {
