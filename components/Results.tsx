@@ -960,14 +960,14 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
           onUpgrade={onUpgrade}
         />
 
-        {/* Neurology Milestone Explanation */}
+        {/* Therapeutic Area Milestone Explanation */}
         {result.neurologyMilestoneExplanation && (
           <div className="mt-6 p-4 sm:p-5 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800/50 rounded-xl">
             <h4 className="text-sm font-bold text-purple-900 dark:text-purple-200 mb-2 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Why Neurology Deal Structures Differ
+              {fullInputs?.therapeuticArea === 'immunology' ? 'Why Immunology Deal Structures Differ' : 'Why Neurology Deal Structures Differ'}
             </h4>
             <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">
               {result.neurologyMilestoneExplanation}

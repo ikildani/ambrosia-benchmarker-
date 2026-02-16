@@ -446,7 +446,9 @@ export function computeSensitivityAnalysis(
   // Generate therapeutic-area-specific insights
   const neurologyInsights = isImmunology
     ? generateImmunologyInsights(inputs)
-    : generateNeurologyInsights(inputs);
+    : isNeurology
+    ? generateNeurologyInsights(inputs)
+    : [];
 
   return {
     currentUpfront: result.terms.upfront.median,
