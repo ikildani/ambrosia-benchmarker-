@@ -108,20 +108,19 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             Choose Your Plan
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Get instant deal benchmarks for free, or unlock comprehensive insights with Pro
+            Unlimited free calculations. Pay only when you need the full picture.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
+        {/* Pricing Cards - Three columns */}
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 max-w-5xl mx-auto">
           {/* Free Tier */}
           <div
-            className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 transition-all duration-300 cursor-pointer ${
+            className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
               currentTier === 'free'
                 ? 'ring-2 ring-teal-500 shadow-glow-lg'
-                : 'border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-neutral-300 dark:hover:border-slate-600'
+                : 'border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg'
             }`}
-            onClick={() => onSelectTier('free')}
           >
             {currentTier === 'free' && (
               <div className="absolute -top-3 left-6">
@@ -131,43 +130,42 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               </div>
             )}
 
-            <div className="mb-4 sm:mb-6">
-              <h3 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white mb-1 sm:mb-2">Free</h3>
-              <p className="text-neutral-500 dark:text-slate-400 text-xs sm:text-sm">Perfect for initial exploration</p>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-1">Free</h3>
+              <p className="text-neutral-500 dark:text-slate-400 text-xs">Explore and calculate</p>
             </div>
 
-            <div className="mb-6 sm:mb-8">
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-white">$0</span>
-              <span className="text-neutral-500 dark:text-slate-400 ml-2 text-sm sm:text-base">forever</span>
+            <div className="mb-5">
+              <span className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white">$0</span>
+              <span className="text-neutral-500 dark:text-slate-400 ml-1.5 text-sm">forever</span>
             </div>
 
-            <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+            <ul className="space-y-2.5 mb-6">
               {[
-                { included: true, text: '2 calculations per month' },
-                { included: true, text: 'Basic deal term estimates' },
-                { included: true, text: 'Upfront & total value ranges' },
-                { included: true, text: 'All phases & modalities' },
-                { included: true, text: '2 partner matches (names only)' },
-                { included: false, text: 'Full milestone breakdowns' },
-                { included: false, text: 'Royalty rate analysis' },
-                { included: false, text: 'Partner profiles & deal history' },
-                { included: false, text: 'PDF reports' },
+                { included: true, text: 'Unlimited calculations' },
+                { included: true, text: 'All metric headlines' },
+                { included: true, text: 'Upfront card drill-down' },
+                { included: true, text: '3 comparable deals' },
+                { included: true, text: 'Top 2 sensitivity params' },
+                { included: true, text: 'Risk factors' },
+                { included: false, text: 'AI deal memo' },
+                { included: false, text: 'Premium PDF / Excel' },
               ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2 sm:gap-3">
+                <li key={idx} className="flex items-start gap-2">
                   {item.included ? (
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-success-100 dark:bg-success-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-success-600 dark:text-success-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-4 h-4 rounded-full bg-success-100 dark:bg-success-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-2.5 h-2.5 text-success-600 dark:text-success-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   ) : (
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-neutral-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-neutral-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-4 h-4 rounded-full bg-neutral-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-2.5 h-2.5 text-neutral-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
                   )}
-                  <span className={`text-sm sm:text-base ${item.included ? 'text-neutral-700 dark:text-slate-200' : 'text-neutral-400 dark:text-slate-500'}`}>
+                  <span className={`text-sm ${item.included ? 'text-neutral-700 dark:text-slate-200' : 'text-neutral-400 dark:text-slate-500'}`}>
                     {item.text}
                   </span>
                 </li>
@@ -176,7 +174,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
             <button
               onClick={(e) => { e.stopPropagation(); onSelectTier('free'); }}
-              className={`w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 ${
+              className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
                 currentTier === 'free'
                   ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-500 dark:text-slate-400 cursor-default'
                   : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
@@ -186,18 +184,69 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             </button>
           </div>
 
+          {/* Deal Report Tier */}
+          <div className="relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 border-2 border-purple-300 dark:border-purple-500 shadow-soft transition-all duration-300">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft whitespace-nowrap">
+                Per Calculation
+              </span>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-1">{PRICING.REPORT_LABEL}</h3>
+              <p className="text-neutral-500 dark:text-slate-400 text-xs">Board-ready deliverable</p>
+            </div>
+
+            <div className="mb-5">
+              <span className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
+              <span className="text-neutral-500 dark:text-slate-400 ml-1.5 text-sm">one-time</span>
+            </div>
+
+            <ul className="space-y-2.5 mb-6">
+              {[
+                'AI-powered deal memo',
+                'All card drill-downs',
+                'Full comparable deals (15+)',
+                'Complete sensitivity analysis',
+                'Negotiation playbook',
+                'Branded PDF report',
+                'Excel data export',
+                'Shareable link',
+              ].map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <div className="w-4 h-4 rounded-full bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-neutral-700 dark:text-slate-200">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p className="text-xs text-neutral-400 dark:text-slate-500 mb-3 text-center">Available after running a calculation</p>
+
+            <button
+              className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 shadow-soft"
+              onClick={() => {
+                document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Run Calculation First
+            </button>
+          </div>
+
           {/* Pro Tier */}
           <div
-            className={`relative bg-gradient-to-br from-navy-900 to-navy-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 transition-all duration-300 cursor-pointer ${
+            className={`relative bg-gradient-to-br from-navy-900 to-navy-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
               currentTier === 'pro'
                 ? 'ring-2 ring-teal-500 shadow-glow-lg'
                 : 'shadow-soft-xl hover:shadow-soft-xl hover:-translate-y-1'
             }`}
-            onClick={() => handleUpgrade()}
           >
-            <div className="absolute -top-3 right-6">
-              <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-soft">
-                Most Popular
+            <div className="absolute -top-3 right-4">
+              <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft">
+                Best Value
               </span>
             </div>
 
@@ -209,128 +258,112 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               </div>
             )}
 
-            <div className="mb-4 sm:mb-6">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">Pro</h3>
-              <p className="text-neutral-400 text-xs sm:text-sm">Complete deal intelligence</p>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-1">Pro</h3>
+              <p className="text-neutral-400 text-xs">Complete deal intelligence</p>
             </div>
 
             {/* Promo Code Section */}
             {currentTier !== 'pro' && (
-              <div className="mb-4">
+              <div className="mb-3">
                 {promoStatus === 'valid' ? (
-                  <div className="flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-xl px-4 py-3">
-                    <div className="w-5 h-5 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-lg px-3 py-2">
+                    <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-teal-300 text-sm font-semibold">1 Month Free Applied</p>
-                      <p className="text-teal-400/70 text-xs">Code: {promoCode}</p>
-                    </div>
+                    <span className="text-teal-300 text-xs font-semibold flex-1">1 Month Free</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); clearPromo(); }}
-                      className="text-teal-400/50 hover:text-teal-300 transition-colors"
+                      className="text-teal-400/50 hover:text-teal-300"
                       aria-label="Remove promo code"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
                 ) : (
-                  <div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={promoCode}
-                        onChange={(e) => {
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value);
+                        if (promoStatus !== 'idle') {
+                          clearPromo();
                           setPromoCode(e.target.value);
-                          if (promoStatus !== 'idle') {
-                            clearPromo();
-                            setPromoCode(e.target.value);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            validatePromoCode(promoCode);
-                          }
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Promo code"
-                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm
-                                   placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-teal-500
-                                   focus:border-transparent transition-all"
-                        maxLength={20}
-                      />
-                      <button
-                        onClick={(e) => { e.stopPropagation(); validatePromoCode(promoCode); }}
-                        disabled={!promoCode.trim() || promoStatus === 'validating'}
-                        className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm
-                                   font-medium hover:bg-white/20 transition-all disabled:opacity-40
-                                   disabled:cursor-not-allowed flex items-center gap-1.5"
-                      >
-                        {promoStatus === 'validating' ? (
-                          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        ) : (
-                          'Apply'
-                        )}
-                      </button>
-                    </div>
-                    {promoStatus === 'invalid' && promoError && (
-                      <p className="text-red-400 text-xs mt-1.5 ml-1">{promoError}</p>
-                    )}
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          validatePromoCode(promoCode);
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="Promo code"
+                      className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xs
+                                 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-teal-500
+                                 focus:border-transparent transition-all"
+                      maxLength={20}
+                    />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); validatePromoCode(promoCode); }}
+                      disabled={!promoCode.trim() || promoStatus === 'validating'}
+                      className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-xs
+                                 font-medium hover:bg-white/20 transition-all disabled:opacity-40
+                                 disabled:cursor-not-allowed"
+                    >
+                      {promoStatus === 'validating' ? '...' : 'Apply'}
+                    </button>
                   </div>
+                )}
+                {promoStatus === 'invalid' && promoError && (
+                  <p className="text-red-400 text-xs mt-1 ml-1">{promoError}</p>
                 )}
               </div>
             )}
 
-            {/* Price Display */}
-            <div className="mb-6 sm:mb-8">
+            <div className="mb-5">
               {hasValidPromo ? (
                 <div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">$0</span>
-                    <span className="text-neutral-400 text-sm sm:text-base">/first month</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">$0</span>
+                    <span className="text-neutral-400 text-sm">/first mo</span>
                   </div>
-                  <p className="text-teal-400 text-sm font-medium mt-1">
-                    Then {PRICING.PRO_MONTHLY} after trial
+                  <p className="text-teal-400 text-xs font-medium mt-0.5">
+                    Then {PRICING.PRO_MONTHLY}
                   </p>
                 </div>
               ) : (
                 <>
-                  <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{PRICING.PRO_PRICE}</span>
-                  <span className="text-neutral-400 ml-2 text-sm sm:text-base">/month</span>
+                  <span className="text-3xl sm:text-4xl font-bold text-white">{PRICING.PRO_PRICE}</span>
+                  <span className="text-neutral-400 ml-1.5 text-sm">/month</span>
                 </>
               )}
             </div>
 
-            <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+            <ul className="space-y-2.5 mb-6">
               {[
-                'Everything in Free, plus:',
-                '5 partner matches with full profiles',
-                'Partner deal history & activity signals',
-                'Therapeutic focus & patent cliff data',
-                'Full milestone breakdowns',
-                'Royalty rate analysis',
-                'Downloadable PDF reports',
-                'Unlimited calculations',
-                'Weekly Market Pulse email',
-                'Watchlist with deal alerts',
-                'Company competitive tracker',
+                'Everything in Report',
+                'Unlimited full reports',
+                'Scenario comparison',
+                'Watchlist & deal alerts',
+                'Weekly market digest',
+                'Full partner profiles',
+                'Priority support',
+                'Cancel anytime',
               ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2 sm:gap-3">
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li key={idx} className="flex items-start gap-2">
+                  <div className="w-4 h-4 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-2.5 h-2.5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-neutral-200 text-sm sm:text-base">{item}</span>
+                  <span className="text-neutral-200 text-sm">{item}</span>
                 </li>
               ))}
             </ul>
@@ -339,54 +372,23 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               <button
                 onClick={(e) => { e.stopPropagation(); handleManageSubscription(); }}
                 disabled={isManageLoading}
-                className="w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white/10 text-white hover:bg-white/20 border border-white/20"
               >
-                {isManageLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>Manage Subscription</span>
-                  </>
-                )}
+                {isManageLoading ? 'Loading...' : 'Manage Subscription'}
               </button>
             ) : (
               <button
                 onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
                 disabled={isLoading}
-                className="w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
+                className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg"
               >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{hasValidPromo ? 'Start Free Month' : 'Upgrade to Pro'}</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </>
-                )}
+                {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`}
               </button>
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg">
-                <p className="text-red-200 text-sm text-center">{error}</p>
+              <div className="mt-3 p-2.5 bg-red-500/20 border border-red-400/30 rounded-lg">
+                <p className="text-red-200 text-xs text-center">{error}</p>
               </div>
             )}
           </div>
@@ -449,4 +451,3 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
     </section>
   );
 }
-// Trigger rebuild 1770012057

@@ -71,14 +71,51 @@ export async function POST(request: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log('Checkout completed:', session.id);
 
-        // Get customer email from session
+        // --- ONE-TIME DEAL REPORT PURCHASE ---
+        if (session.metadata?.product === 'deal-report') {
+          const reportPurchaseId = session.metadata.report_purchase_id;
+          const reportUserId = session.metadata.user_id;
+
+          if (reportPurchaseId) {
+            const { error: reportError } = await supabase
+              .from('report_purchases')
+              .update({
+                status: 'completed',
+                stripe_session_id: session.id,
+                stripe_payment_intent_id: session.payment_intent as string,
+                purchased_at: new Date().toISOString(),
+              })
+              .eq('id', reportPurchaseId);
+
+            if (reportError) {
+              console.error('Failed to update report purchase:', reportError);
+            } else {
+              console.log('Report purchase completed:', reportPurchaseId);
+            }
+
+            // Track purchase event
+            await supabase.from('events').insert({
+              user_id: reportUserId || null,
+              event_type: 'report_purchased',
+              event_data: {
+                stripe_event_id: event.id,
+                report_purchase_id: reportPurchaseId,
+                amount_total: session.amount_total,
+                currency: session.currency,
+              },
+              user_tier: 'free',
+            });
+          }
+          break;
+        }
+
+        // --- SUBSCRIPTION PURCHASE ---
         const customerEmail = session.customer_email || session.customer_details?.email;
         const userId = session.metadata?.user_id;
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
 
         if (customerEmail) {
-          // Update user tier in database
           const { error: updateError } = await supabase
             .from('user_profiles')
             .update({
@@ -92,7 +129,6 @@ export async function POST(request: NextRequest) {
 
           if (updateError) {
             console.error('Failed to update user tier:', updateError);
-            // Try by user_id if email lookup failed
             if (userId) {
               await supabase
                 .from('user_profiles')
@@ -109,7 +145,6 @@ export async function POST(request: NextRequest) {
             console.log('User upgraded to pro:', customerEmail);
           }
 
-          // Track upgrade event (SECURITY: Don't store email in event_data, only customer ID)
           await supabase.from('events').insert({
             user_id: userId || null,
             event_type: 'subscription_created',

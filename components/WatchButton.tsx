@@ -9,7 +9,7 @@ interface WatchButtonProps {
   itemValue: string;
   companyId?: string;
   size?: 'sm' | 'md';
-  tier?: 'free' | 'pro';
+  tier?: 'free' | 'pro' | 'report';
   onPaywall?: () => void;
 }
 

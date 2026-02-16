@@ -12,17 +12,20 @@ interface SensitivityAnalysisProps {
   currentInputs: CalculationInput;
   currentResult: CalculationResult;
   onApplyChanges: (newInputs: Partial<CalculationInput>) => void;
-  isPro?: boolean;
+  tier?: 'free' | 'report' | 'pro';
   onUpgrade?: () => void;
+  onBuyReport?: () => void;
 }
 
 export default function SensitivityAnalysis({
   currentInputs,
   currentResult,
   onApplyChanges,
-  isPro = true,
+  tier = 'pro',
   onUpgrade,
+  onBuyReport,
 }: SensitivityAnalysisProps) {
+  const hasFullAccess = tier === 'pro' || tier === 'report';
   const [isExpanded, setIsExpanded] = useState(true);
   const [pendingChanges, setPendingChanges] = useState<Partial<CalculationInput>>({});
   const isMobile = useIsMobile();
@@ -90,8 +93,8 @@ export default function SensitivityAnalysis({
     setPendingChanges({});
   };
 
-  // Pro gate
-  if (!isPro) {
+  // Access gate — free users see blurred preview
+  if (!hasFullAccess) {
     return (
       <div className="mt-8">
         <div className="relative">
@@ -126,10 +129,10 @@ export default function SensitivityAnalysis({
                 See exactly how each variable impacts your deal value. Explore &quot;what-if&quot; scenarios instantly.
               </p>
               <button
-                onClick={onUpgrade}
+                onClick={() => onBuyReport ? onBuyReport() : onUpgrade?.()}
                 className="inline-flex items-center px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors"
               >
-                Upgrade to Pro
+                Unlock Full Analysis
               </button>
             </div>
           </div>

@@ -49,7 +49,7 @@ import {
   diseaseSeverityOptions,
   treatmentGoalOptions,
 } from '@/lib/calculations';
-import { canUseCalculator, incrementUsage, getRemainingUses, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
+import { canUseCalculator, incrementUsage, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import { PRICING, DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
@@ -323,6 +323,8 @@ interface CalculatorProps {
   onUpgrade?: () => void;
 }
 
+type EffectiveTier = 'free' | 'report' | 'pro';
+
 export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
   const [therapeuticArea, setTherapeuticArea] = useState<TherapeuticArea>('oncology');
   const [phase, setPhase] = useState<Phase>('phase2');
@@ -352,9 +354,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
-  const [paywallReason, setPaywallReason] = useState<'limit_reached' | 'pro_feature'>('limit_reached');
-  const [remainingUses, setRemainingUses] = useState<number>(FREE_LIMIT);
+  const [paywallReason, setPaywallReason] = useState<'report_upsell' | 'pro_feature'>('report_upsell');
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [reportPurchaseId, setReportPurchaseId] = useState<string | null>(null);
+  const [reportVerified, setReportVerified] = useState(false);
   const [pendingAreaSwitch, setPendingAreaSwitch] = useState<TherapeuticArea | null>(null);
 
   // Onboarding state
@@ -374,27 +377,23 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const calculatingRef = useRef(false);
   const hadPrefillRef = useRef(false);
 
-  // Refresh remaining uses when tier changes or user authenticates
-  // When user signs in, sync from database to get accurate count
+  // Check for report purchase from URL params (after Stripe redirect)
   useEffect(() => {
-    let cancelled = false;
-
-    const updateUsage = async () => {
-      if (isAuthenticated && user?.id) {
-        // Sync from database to get accurate count for this user
-        await syncUsageFromDatabase(user.id);
-      }
-      if (!cancelled) {
-        setRemainingUses(getRemainingUses(tier));
-      }
-    };
-
-    updateUsage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [tier, isAuthenticated, user?.id]);
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const reportId = params.get('report');
+    if (reportId) {
+      setReportPurchaseId(reportId);
+      fetch(`/api/report-purchase/${reportId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'completed') {
+            setReportVerified(true);
+          }
+        })
+        .catch(() => {/* Report verification failed, stay on free tier */});
+    }
+  }, []);
 
   // Check if onboarding should show for first-time users
   useEffect(() => {
@@ -488,19 +487,6 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     // Gate 2nd+ calculation behind account creation for anonymous users
     if (!isAuthenticated && getUsage().count >= 1) {
       openAuthModal('signup');
-      return;
-    }
-
-    // Check usage limits for free tier
-    if (!canUseCalculator(tier)) {
-      setPaywallReason('limit_reached');
-      setShowPaywall(true);
-      // Track paywall hit
-      trackPaywallHit('calculation_limit', {
-        modality,
-        phase,
-        indication,
-      });
       return;
     }
 
@@ -631,7 +617,6 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           // Increment usage after successful calculation (only for free tier)
           if (tier === 'free') {
             incrementUsage();
-            setRemainingUses(getRemainingUses(tier));
           }
 
           // Scroll to results
@@ -1330,32 +1315,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             )}
           </div>
 
-          {/* Usage Counter for Free Tier */}
-          {tier === 'free' && (
-            <div className="mt-6 lg:mt-8 p-3 sm:p-4 rounded-xl bg-neutral-50 dark:bg-slate-800 border border-neutral-200 dark:border-slate-700">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-xs sm:text-sm text-neutral-600 dark:text-slate-400">
-                    <span className="font-semibold text-navy-800 dark:text-white">{remainingUses}</span> of {FREE_LIMIT} free calculations remaining
-                  </span>
-                </div>
-                {remainingUses === 0 && (
-                  <button
-                    onClick={() => {
-                      setPaywallReason('limit_reached');
-                      setShowPaywall(true);
-                    }}
-                    className="text-xs sm:text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
-                  >
-                    Upgrade to Pro
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Removed: Usage counter — calculations are now unlimited */}
 
           {/* Save Error Warning */}
           {saveError && (
@@ -1406,7 +1366,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           </button>
 
           <p className="text-center text-xs text-neutral-500 mt-4">
-            Free tier includes upfront payment and total deal value estimates
+            Free — unlimited calculations with headline estimates
           </p>
         </div>
       </div>
@@ -1424,8 +1384,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         <div className="mt-8 animate-fade-in results-container">
           <Results
             result={result}
-            tier={tier}
+            tier={(tier === 'pro' ? 'pro' : (reportPurchaseId && reportVerified) ? 'report' : 'free') as EffectiveTier}
             onUpgrade={onUpgrade}
+            onBuyReport={() => {
+              setPaywallReason('report_upsell');
+              setShowPaywall(true);
+            }}
+            reportId={reportPurchaseId || undefined}
             inputs={{
               modality,
               phase,
@@ -1487,6 +1452,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         reason={paywallReason}
+        calculationData={result ? {
+          inputs: {
+            therapeuticArea, phase, modality, indication, territory,
+            biomarker, lineOfTherapy, treatmentApproach,
+            combinationPotential, competitivePosition, dataQuality,
+            regulatoryDesignations,
+            ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
+          },
+          results: result,
+        } : undefined}
       />
 
       <OnboardingModal

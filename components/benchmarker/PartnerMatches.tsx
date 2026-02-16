@@ -148,7 +148,7 @@ interface PartnerMatchesProps {
   matches: PartnerMatch[];
   totalMatches: number;
   matchesShown: number;
-  userTier: 'free' | 'pro';
+  userTier: 'free' | 'pro' | 'report';
   upgradeCta?: UpgradeCTA | null;
   advisoryCta?: AdvisoryCTA | null;
   onUpgradeClick: () => void;

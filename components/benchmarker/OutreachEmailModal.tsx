@@ -21,7 +21,7 @@ interface OutreachEmailModalProps {
   userId?: string;
   userEmail?: string;
   sessionId?: string;
-  tier?: 'free' | 'pro';
+  tier?: 'free' | 'pro' | 'report';
 }
 
 export function OutreachEmailModal({

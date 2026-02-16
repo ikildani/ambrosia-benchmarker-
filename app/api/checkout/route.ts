@@ -1,64 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createServiceClient } from '@/lib/supabase/server';
 
 // Stripe Checkout Session API
-// To enable Stripe payments:
-// 1. Add your Stripe keys to .env.local:
-//    STRIPE_SECRET_KEY=sk_...
-//    STRIPE_PRICE_ID=price_... (create a $99/month recurring price in Stripe Dashboard)
-//    NEXT_PUBLIC_APP_URL=https://calculator.ambrosiaventures.co
-// 2. Enable "Email customers for successful payments" in Stripe Dashboard > Settings > Customer emails
+// Supports two purchase types:
+// 1. 'subscription' — $99/month Pro plan (default)
+// 2. 'report' — $149 one-time Deal Report
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Stripe is configured
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
-    const priceId = process.env.STRIPE_PRICE_ID?.trim();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
 
-    if (!stripeSecretKey || !priceId) {
-      // Stripe not configured - return demo mode response
+    if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
       return NextResponse.json({
         demo: true,
         message: 'Stripe not configured. Running in demo mode.',
-        hasKey: !!stripeSecretKey,
-        hasPrice: !!priceId,
       });
-    }
-
-    // Verify key format
-    if (!stripeSecretKey.startsWith('sk_')) {
-      return NextResponse.json({
-        error: 'Invalid Stripe key format',
-        keyPrefix: stripeSecretKey.substring(0, 10),
-      }, { status: 500 });
     }
 
     const stripe = new Stripe(stripeSecretKey);
 
-    // Get customer info from request body (optional)
-    let customerEmail: string | undefined;
-    let userId: string | undefined;
-    let promoCode: string | undefined;
+    let body: Record<string, unknown> = {};
     try {
-      const body = await request.json();
-      customerEmail = body.email;
-      userId = body.userId;
-      promoCode = body.promoCode;
+      body = await request.json();
     } catch {
-      // No body provided, will collect email in checkout
+      // No body provided
     }
 
-    // Create Checkout Session with enhanced options
+    const customerEmail = body.email as string | undefined;
+    const userId = body.userId as string | undefined;
+    const promoCode = body.promoCode as string | undefined;
+    const purchaseType = (body.purchaseType as string) || 'subscription';
+
+    // --- ONE-TIME DEAL REPORT ($149) ---
+    if (purchaseType === 'report') {
+      const reportPriceId = process.env.STRIPE_REPORT_PRICE_ID?.trim();
+      if (!reportPriceId) {
+        return NextResponse.json(
+          { error: 'Report pricing not configured' },
+          { status: 500 }
+        );
+      }
+
+      const calculationData = body.calculationData as {
+        inputs: Record<string, unknown>;
+        results: Record<string, unknown>;
+      } | undefined;
+
+      if (!calculationData?.inputs || !calculationData?.results) {
+        return NextResponse.json(
+          { error: 'Calculation data required for report purchase' },
+          { status: 400 }
+        );
+      }
+
+      // Create report_purchase record
+      const supabase = createServiceClient();
+      const { data: reportPurchase, error: insertError } = await supabase
+        .from('report_purchases')
+        .insert({
+          user_id: userId || null,
+          email: customerEmail || null,
+          calculation_inputs: calculationData.inputs,
+          calculation_results: calculationData.results,
+          status: 'pending',
+        })
+        .select('id')
+        .single();
+
+      if (insertError || !reportPurchase) {
+        console.error('Failed to create report purchase:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to initiate report purchase' },
+          { status: 500 }
+        );
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{ price: reportPriceId, quantity: 1 }],
+        success_url: `${appUrl}/calculator?report=${reportPurchase.id}&success=true`,
+        cancel_url: `${appUrl}/calculator?canceled=true`,
+        metadata: {
+          product: 'deal-report',
+          report_purchase_id: reportPurchase.id,
+          user_id: userId || '',
+        },
+        ...(customerEmail ? { customer_email: customerEmail } : {}),
+      });
+
+      return NextResponse.json({ url: session.url, reportId: reportPurchase.id });
+    }
+
+    // --- SUBSCRIPTION ($99/month Pro) ---
+    const priceId = process.env.STRIPE_PRICE_ID?.trim();
+    if (!priceId) {
+      return NextResponse.json({
+        demo: true,
+        message: 'Stripe subscription not configured.',
+      });
+    }
+
     const sessionOptions: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${appUrl}?session_id={CHECKOUT_SESSION_ID}&success=true`,
       cancel_url: `${appUrl}?canceled=true`,
       billing_address_collection: 'required',
@@ -77,13 +125,9 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // Stripe's `discounts` and `allow_promotion_codes` are mutually exclusive.
-    // When a specific promo code is provided, pre-apply it via discounts[].
-    // Otherwise, let Stripe show its built-in promo code input.
+    // Promo code handling (subscription only)
     if (promoCode) {
       let promoId = promoCode;
-
-      // If it's a code name (not a promo_xxx ID), look it up in Stripe
       if (!promoCode.startsWith('promo_')) {
         const normalizedCode = promoCode.trim().toUpperCase();
         const promoCodes = await stripe.promotionCodes.list({
@@ -91,7 +135,6 @@ export async function POST(request: NextRequest) {
           active: true,
           limit: 1,
         });
-
         if (promoCodes.data.length === 0) {
           return NextResponse.json(
             { error: 'Invalid or expired promo code. Please try again without the code.' },
@@ -100,23 +143,19 @@ export async function POST(request: NextRequest) {
         }
         promoId = promoCodes.data[0].id;
       }
-
       sessionOptions.discounts = [{ promotion_code: promoId }];
     } else {
       sessionOptions.allow_promotion_codes = true;
     }
 
-    // Pre-fill email if provided
     if (customerEmail) {
       sessionOptions.customer_email = customerEmail;
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
-
     return NextResponse.json({ url: session.url });
   } catch (error: unknown) {
     console.error('Checkout error:', error);
-    // Log detailed error server-side but return generic message to client
     if (error instanceof Stripe.errors.StripeError) {
       console.error('Stripe error type:', error.type, 'message:', error.message);
     }

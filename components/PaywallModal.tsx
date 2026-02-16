@@ -1,38 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FREE_LIMIT } from '@/lib/usage';
+import { useState } from 'react';
+import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useTracking } from './TrackingProvider';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PaywallModalProps {
   isOpen: boolean;
   onClose: () => void;
-  reason: 'limit_reached' | 'pro_feature';
+  reason: 'report_upsell' | 'pro_feature';
   promoCode?: string;
+  calculationData?: {
+    inputs: CalculationInput;
+    results: CalculationResult;
+  };
 }
 
-export default function PaywallModal({ isOpen, onClose, reason, promoCode: initialPromo }: PaywallModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
+export default function PaywallModal({ isOpen, onClose, reason, promoCode: initialPromo, calculationData }: PaywallModalProps) {
+  const [isReportLoading, setIsReportLoading] = useState(false);
+  const [isProLoading, setIsProLoading] = useState(false);
   const { trackUpgradeCtaClick, trackPaywallDismissed } = useTracking();
   const { promoId, promoStatus, promoDiscount } = usePromoCode(initialPromo);
+  const { user } = useAuth();
   const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
-
-  // Countdown timer for urgency
-  useEffect(() => {
-    if (!isOpen) return;
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -41,14 +33,48 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
     onClose();
   };
 
-  const handleUpgrade = async () => {
-    trackUpgradeCtaClick('paywall_modal');
-    setIsLoading(true);
+  const handleBuyReport = async () => {
+    if (!calculationData) return;
+    trackUpgradeCtaClick('paywall_report');
+    setIsReportLoading(true);
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          purchaseType: 'report',
+          userId: user?.id,
+          email: user?.email,
+          calculationData: {
+            inputs: calculationData.inputs,
+            results: calculationData.results,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        console.error('Report checkout error:', data.error);
+      }
+    } catch {
+      console.error('Report checkout failed');
+    } finally {
+      setIsReportLoading(false);
+    }
+  };
+
+  const handleUpgradePro = async () => {
+    trackUpgradeCtaClick('paywall_pro');
+    setIsProLoading(true);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          purchaseType: 'subscription',
+          userId: user?.id,
+          email: user?.email,
           promoCode: promoId || undefined,
         }),
       });
@@ -67,14 +93,14 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
         document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } finally {
-      setIsLoading(false);
+      setIsProLoading(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -83,10 +109,10 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
         role="dialog"
         aria-modal="true"
         aria-labelledby="paywall-modal-title"
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
+        className="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
       >
-        {/* Header with gradient */}
-        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-8 overflow-hidden">
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-6 py-6 overflow-hidden">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(20, 184, 166, 0.4) 1px, transparent 0)`,
@@ -106,134 +132,129 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
           </button>
 
           <div className="relative text-center">
-            {/* Icon */}
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 mb-5 shadow-lg shadow-teal-500/30">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 mb-4 shadow-lg shadow-teal-500/30">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-
-            <h2 id="paywall-modal-title" className="text-2xl font-bold text-white mb-2">
-              {reason === 'limit_reached'
-                ? 'You\'re on a Roll!'
-                : 'Unlock Full Access'}
+            <h2 id="paywall-modal-title" className="text-xl font-bold text-white mb-1">
+              Unlock Full Analysis
             </h2>
             <p className="text-slate-300 text-sm">
-              {reason === 'limit_reached'
-                ? `You've used your ${FREE_LIMIT} free calculations. Upgrade to keep the momentum going.`
-                : 'Get the complete picture with Pro features.'}
+              AI deal memo, full comparable deals, sensitivity analysis, and board-ready reports
             </p>
-
-            {/* Urgency Timer */}
-            <div className="mt-5 inline-flex items-center gap-2 bg-amber-500/20 border border-amber-400/30 rounded-full px-4 py-2">
-              <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-amber-300 text-sm font-medium">
-                Special offer ends in {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {/* Social Proof */}
-          <div className="flex items-center justify-center gap-2 mb-6 pb-6 border-b border-slate-100">
-            <div className="flex -space-x-2">
-              {['IK', 'CZ', 'ML', 'RJ'].map((initials, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold border-2 border-white"
-                >
-                  {initials}
-                </div>
-              ))}
-            </div>
-            <p className="text-sm text-slate-600">
-              <span className="font-semibold text-slate-900">127+ BD professionals</span> upgraded this month
-            </p>
-          </div>
-
-          {/* Value Props with specific outcomes */}
-          <div className="space-y-3 mb-6">
-            {[
-              { icon: '🎯', text: 'Find ideal partners 10x faster', subtext: 'AI-matched to your asset' },
-              { icon: '💰', text: `Benchmark with ${DEAL_STATS.TOTAL_DEALS} real deals`, subtext: 'Know your worth before negotiating' },
-              { icon: '📊', text: 'Patent cliff & pipeline insights', subtext: 'Understand partner motivation' },
-              { icon: '📄', text: 'Board-ready PDF reports', subtext: 'Professional deliverables in seconds' },
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
-                <span className="text-xl">{item.icon}</span>
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm">{item.text}</p>
-                  <p className="text-xs text-slate-500">{item.subtext}</p>
-                </div>
+        {/* Two-option cards */}
+        <div className="p-5 sm:p-6">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* Report Card */}
+            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-5 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Get This Report</h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className="text-2xl font-bold text-slate-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">one-time</span>
               </div>
-            ))}
-          </div>
+              <ul className="space-y-2 mb-5 text-sm">
+                {[
+                  'AI-powered deal memo',
+                  'Full comparable deals',
+                  'Complete sensitivity analysis',
+                  'Negotiation playbook',
+                  'Board-ready branded PDF',
+                  'Excel data export',
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">For this calculation only</p>
+              <button
+                onClick={handleBuyReport}
+                disabled={isReportLoading || !calculationData}
+                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
+                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2 text-sm"
+              >
+                {isReportLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  `Get Full Report — ${PRICING.REPORT_PRICE}`
+                )}
+              </button>
+            </div>
 
-          {/* Pricing with anchor */}
-          <div className="text-center mb-6">
-            {hasValidPromo ? (
-              <>
-                <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-full px-4 py-2 mb-3">
-                  <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-teal-700 text-sm font-semibold">1 Month Free Applied</span>
-                </div>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-slate-900">$0</span>
-                  <span className="text-slate-500">/first month</span>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">Then $99/month. Cancel anytime.</p>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="text-lg text-slate-400 line-through">$199</span>
-                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">50% OFF</span>
-                </div>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-slate-900">{PRICING.PRO_PRICE}</span>
-                  <span className="text-slate-500">/month</span>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">Less than one hour of consultant time</p>
-              </>
-            )}
+            {/* Pro Card */}
+            <div className="relative border-2 border-teal-400 dark:border-teal-500 rounded-xl p-5 bg-gradient-to-b from-teal-50/50 to-white dark:from-teal-900/10 dark:to-slate-800">
+              <div className="absolute -top-3 right-4">
+                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  Best Value
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Go Pro</h3>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className="text-2xl font-bold text-slate-900 dark:text-white">{PRICING.PRO_PRICE}</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">/month</span>
+              </div>
+              <ul className="space-y-2 mb-5 text-sm">
+                {[
+                  'Everything in Report, plus:',
+                  'Unlimited full reports',
+                  'Scenario comparison tool',
+                  'Watchlist & deal alerts',
+                  'Weekly market digest',
+                  'Full partner profiles',
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">For all your calculations</p>
+              <button
+                onClick={handleUpgradePro}
+                disabled={isProLoading}
+                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
+                         hover:from-teal-600 hover:to-cyan-600 transition-all shadow-soft hover:shadow-glow
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2 text-sm"
+              >
+                {isProLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    {hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-
-          {/* CTA Button */}
-          <button
-            onClick={handleUpgrade}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold py-4 px-6 rounded-xl
-                     shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-200
-                     hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
-                     disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
-                     flex items-center justify-center gap-3 text-lg"
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <span>{hasValidPromo ? 'Start Free Month' : 'Start Pro Trial'}</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </>
-            )}
-          </button>
 
           {/* Trust Signals */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 dark:text-slate-500">
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -244,7 +265,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Secure checkout</span>
+              <span>Secure checkout via Stripe</span>
             </div>
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,10 +275,27 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
             </div>
           </div>
 
-          {/* Alternative CTA */}
+          {/* Social proof */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="flex -space-x-2">
+              {['IK', 'CZ', 'ML'].map((initials, i) => (
+                <div
+                  key={i}
+                  className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-bold border-2 border-white dark:border-slate-800"
+                >
+                  {initials}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Based on <span className="font-semibold text-slate-700 dark:text-slate-300">{DEAL_STATS.TOTAL_DEALS}</span> analyzed deals
+            </p>
+          </div>
+
+          {/* Close */}
           <button
             onClick={handleClose}
-            className="w-full mt-4 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+            className="w-full mt-4 text-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
             Maybe later
           </button>

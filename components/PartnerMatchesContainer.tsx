@@ -22,7 +22,7 @@ interface PartnerMatchesContainerProps {
   territory: string;
 
   // User context
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   onUpgrade: () => void;
 
   // Callback when matches are loaded (for PDF export)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { SensitivityAnalysis } from './sensitivity';
 import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
@@ -15,11 +15,14 @@ import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesCon
 import { PRICING } from '@/lib/config/constants';
 import ComparableDeals from './ComparableDeals';
 import WatchButton from './WatchButton';
+import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 
 interface ResultsProps {
   result: CalculationResult;
-  tier?: 'free' | 'pro';
+  tier?: 'free' | 'report' | 'pro';
   onUpgrade?: () => void;
+  onBuyReport?: () => void;
+  reportId?: string;
   inputs?: {
     modality: string;
     phase: string;
@@ -401,9 +404,11 @@ export function ResultsSkeleton() {
   );
 }
 
-export default function Results({ result, tier = 'free', onUpgrade, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
+export default function Results({ result, tier = 'free', onUpgrade, onBuyReport, reportId, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
+  const isReport = tier === 'report';
+  const hasFullAccess = isPro || isReport;
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
@@ -413,6 +418,36 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [showEmailGate, setShowEmailGate] = useState(false);
+  const [dealMemo, setDealMemo] = useState<DealMemo | null>(null);
+  const [memoLoading, setMemoLoading] = useState(false);
+  const [memoError, setMemoError] = useState<string | null>(null);
+
+  const handleGenerateMemo = useCallback(async () => {
+    if (memoLoading || dealMemo) return;
+    setMemoLoading(true);
+    setMemoError(null);
+    try {
+      const response = await fetch('/api/deal-memo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: reportId || undefined,
+          inputs: fullInputs,
+          results: result,
+          labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to generate memo');
+      }
+      const data = await response.json();
+      setDealMemo(data.memo || data);
+    } catch {
+      setMemoError('Unable to generate memo. Please try again.');
+    } finally {
+      setMemoLoading(false);
+    }
+  }, [memoLoading, dealMemo, reportId, fullInputs, result, labels]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -511,7 +546,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
 
   // Determine if a card can be expanded (free users can only expand upfront)
   const canExpandCard = (cardId: string) => {
-    if (isPro) return true;
+    if (hasFullAccess) return true;
     return cardId === 'upfront';
   };
 
@@ -560,7 +595,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {isPro ? (
+            {hasFullAccess ? (
               <>
                 <button
                   onClick={handleDownloadPDF}
@@ -759,12 +794,12 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
         )}
 
         {/* Expandable hint for free users */}
-        {!isPro && (
+        {!hasFullAccess && (
           <div className="mb-4 flex items-center gap-2 text-xs text-neutral-500 dark:text-slate-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Click on Upfront Payment to see detailed breakdown. Upgrade to Pro for full analysis.</span>
+            <span>Click on Upfront Payment to see detailed breakdown. Get Full Report for complete analysis.</span>
           </div>
         )}
 
@@ -956,7 +991,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
           terms={terms}
           tieredRoyalties={tieredRoyalties}
           modifiers={modifiers}
-          isPro={isPro}
+          isPro={hasFullAccess}
           onUpgrade={onUpgrade}
         />
 
@@ -981,15 +1016,195 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
             currentInputs={fullInputs}
             currentResult={result}
             onApplyChanges={onApplyNewInputs}
-            isPro={isPro}
+            tier={tier}
             onUpgrade={onUpgrade}
+            onBuyReport={onBuyReport}
           />
         )}
 
         {/* Comparable Deals */}
         {fullInputs && (
-          <ComparableDeals inputs={fullInputs} isPro={isPro} />
+          <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
         )}
+
+        {/* AI Deal Memo */}
+        <div className="mt-6 sm:mt-8">
+          {hasFullAccess ? (
+            <div className="border border-purple-200 dark:border-purple-800/50 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
+              <div className="px-4 sm:px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-purple-200 dark:border-purple-800/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-soft">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
+                      <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
+                    </div>
+                  </div>
+                  {!dealMemo && !memoLoading && (
+                    <button
+                      onClick={handleGenerateMemo}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-sm font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all shadow-soft"
+                    >
+                      Generate Memo
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-6">
+                {memoLoading && (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-2 border-purple-200 dark:border-purple-800" />
+                        <div className="absolute inset-0 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+                      </div>
+                      <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Generating deal memo...</p>
+                      <p className="text-xs text-neutral-500 dark:text-slate-500">Analyzing asset profile, comps, and market dynamics</p>
+                    </div>
+                  </div>
+                )}
+
+                {memoError && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-700 dark:text-red-400">{memoError}</p>
+                    <button onClick={handleGenerateMemo} className="mt-2 text-sm text-red-600 dark:text-red-400 underline">
+                      Try again
+                    </button>
+                  </div>
+                )}
+
+                {dealMemo && (
+                  <div className="space-y-5">
+                    {/* Executive Summary */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Executive Summary</h4>
+                      <p className="text-sm text-neutral-800 dark:text-slate-200 leading-relaxed">{dealMemo.executive_summary}</p>
+                    </div>
+
+                    {/* Valuation Rationale */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Valuation Rationale</h4>
+                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.valuation_rationale}</p>
+                    </div>
+
+                    {/* Market Context */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Market Context</h4>
+                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.market_context}</p>
+                    </div>
+
+                    {/* Risk Factors + Negotiation Priorities side by side */}
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Risks</h4>
+                        <ul className="space-y-1.5">
+                          {dealMemo.risk_factors.map((risk, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-neutral-700 dark:text-slate-300">
+                              <span className="text-amber-500 mt-0.5 flex-shrink-0">&#9679;</span>
+                              {risk}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Negotiation Priorities</h4>
+                        <ul className="space-y-1.5">
+                          {dealMemo.negotiation_priorities.map((point, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-neutral-700 dark:text-slate-300">
+                              <span className="text-teal-500 mt-0.5 flex-shrink-0">&#9679;</span>
+                              {point}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Comparable Analysis */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Comparable Deal Analysis</h4>
+                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.comparable_analysis}</p>
+                    </div>
+
+                    {/* Confidence */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-neutral-200 dark:border-slate-700">
+                      <span className="text-xs text-neutral-500 dark:text-slate-400">Confidence:</span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        dealMemo.confidence_level === 'high' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                        dealMemo.confidence_level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      }`}>
+                        {dealMemo.confidence_level.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {!dealMemo && !memoLoading && !memoError && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-neutral-500 dark:text-slate-400">
+                      Click &quot;Generate Memo&quot; to create an AI-powered deal analysis for your asset profile.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Free tier teaser */
+            <div className="relative">
+              <div className="border border-purple-200 dark:border-purple-800/50 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
+                <div className="px-4 sm:px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-purple-200 dark:border-purple-800/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-soft">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
+                      <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 sm:p-6">
+                  {/* Blurred preview */}
+                  <div className="filter blur-sm select-none pointer-events-none space-y-3">
+                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-3/4" />
+                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-full" />
+                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-5/6" />
+                    <div className="h-12 bg-neutral-100 dark:bg-slate-700/50 rounded-lg mt-4" />
+                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-2/3" />
+                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-full" />
+                  </div>
+                </div>
+              </div>
+              {/* Overlay CTA */}
+              <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl">
+                <div className="text-center px-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-neutral-800 dark:text-white mb-1">AI Deal Memo</h4>
+                  <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 max-w-xs">
+                    Get an AI-generated deal analysis with executive summary, risk factors, and negotiation priorities.
+                  </p>
+                  <button
+                    onClick={() => onBuyReport?.()}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all shadow-soft"
+                  >
+                    Get Full Report — {PRICING.REPORT_PRICE}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Partner Matches */}
         {inputs && (
@@ -1009,7 +1224,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
 
         {/* Negotiation Insight - Pro Feature */}
         <div className="relative mb-4 sm:mb-6">
-          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
+          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!hasFullAccess ? 'blur-sm' : ''}`}>
             <div className="flex items-start gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1022,16 +1237,16 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               </div>
             </div>
           </div>
-          {!isPro && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+          {!hasFullAccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl">
               <button
-                onClick={() => handleProFeatureClick('comparable_deals')}
+                onClick={() => onBuyReport ? onBuyReport() : handleProFeatureClick('comparable_deals')}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                Unlock with Pro
+                Unlock Full Analysis
               </button>
             </div>
           )}
@@ -1039,7 +1254,7 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
 
         {/* Negotiation Playbook CTA */}
         <div className="relative mt-6 sm:mt-8">
-          <div className={`p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl ${!isPro ? 'blur-sm pointer-events-none' : ''}`}>
+          <div className={`p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl ${!hasFullAccess ? 'blur-sm pointer-events-none' : ''}`}>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow flex-shrink-0">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1060,16 +1275,16 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
               </button>
             </div>
           </div>
-          {!isPro && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+          {!hasFullAccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl">
               <button
-                onClick={() => handleProFeatureClick('negotiation_playbook')}
+                onClick={() => onBuyReport ? onBuyReport() : handleProFeatureClick('negotiation_playbook')}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                Unlock with Pro
+                Unlock Full Analysis
               </button>
             </div>
           )}
@@ -1107,21 +1322,30 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
         )}
 
         {/* Upgrade CTA for Free Users */}
-        {!isPro && (
+        {!hasFullAccess && (
           <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
             <h4 className="text-base sm:text-lg font-bold text-white mb-2">Unlock Full Analysis</h4>
-            <p className="text-neutral-300 text-xs sm:text-sm mb-3 sm:mb-4 max-w-md mx-auto">
-              Get detailed breakdowns for all metrics, negotiation insights, and downloadable PDF reports
+            <p className="text-neutral-300 text-xs sm:text-sm mb-4 sm:mb-5 max-w-md mx-auto">
+              AI deal memo, full comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF
             </p>
-            <button
-              onClick={handleUpgradeClick}
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow w-full sm:w-auto"
-            >
-              <span>Upgrade to Pro - {PRICING.PRO_MONTHLY}</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => onBuyReport?.()}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-white text-navy-900 text-sm font-semibold rounded-xl hover:bg-neutral-100 transition-all shadow-soft w-full sm:w-auto"
+              >
+                <span>Get Full Report — {PRICING.REPORT_PRICE}</span>
+              </button>
+              <span className="text-neutral-500 text-xs">or</span>
+              <button
+                onClick={handleUpgradeClick}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow w-full sm:w-auto"
+              >
+                <span>Go Pro — {PRICING.PRO_MONTHLY}</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 

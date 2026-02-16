@@ -5,6 +5,9 @@ export const PRICING = {
   PRO_MONTHLY: '$99/month',
   PRO_PRICE: '$99',
   PRO_PRICE_NUM: 99,
+  REPORT_PRICE: '$149',
+  REPORT_PRICE_NUM: 149,
+  REPORT_LABEL: 'Deal Report',
 } as const;
 
 export const DEAL_STATS = {

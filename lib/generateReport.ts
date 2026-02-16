@@ -1,6 +1,7 @@
 import { CalculationResult, formatCurrency, formatRange } from './calculations';
 import { markPDFGenerated, getHistory } from './history';
 import { getRelevantDeals, ComparableDeal } from './comparableDeals';
+import type { DealMemo } from './ai/deal-memo-generator';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -15,7 +16,8 @@ export function generatePDFReport(
   historyId?: string,
   partnerMatches?: PartnerForPDF[],
   therapeuticArea?: string,
-  treatmentApproach?: string
+  treatmentApproach?: string,
+  memoContent?: DealMemo
 ): void {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
 
@@ -832,6 +834,157 @@ export function generatePDFReport(
       color: var(--gray-600);
       line-height: 1.4;
       font-style: italic;
+    }
+
+    /* AI Deal Memo */
+    .memo-section {
+      page-break-before: always;
+    }
+
+    .memo-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e2a6e 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .memo-header::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(0, 199, 199, 0.25) 0%, transparent 70%);
+    }
+
+    .memo-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 199, 199, 0.2);
+      border: 1px solid rgba(0, 199, 199, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+
+    .memo-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      position: relative;
+    }
+
+    .memo-header p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      position: relative;
+    }
+
+    .memo-block {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .memo-block-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .memo-block-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .memo-block-text {
+      font-size: 12px;
+      color: var(--gray-700);
+      line-height: 1.8;
+    }
+
+    .memo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .memo-list li {
+      font-size: 12px;
+      color: var(--gray-700);
+      line-height: 1.6;
+      padding: 8px 0 8px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      position: relative;
+    }
+
+    .memo-list li:last-child {
+      border-bottom: none;
+    }
+
+    .memo-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .memo-list.risks li::before {
+      background: #ef4444;
+    }
+
+    .memo-list.priorities li::before {
+      background: var(--teal);
+    }
+
+    .memo-confidence {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .memo-confidence.high {
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    .memo-confidence.medium {
+      background: var(--amber-light);
+      color: #92400e;
+    }
+
+    .memo-confidence.low {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     /* Disclaimer */

@@ -1,16 +1,23 @@
 'use client';
 
 import { CalculationInput } from '@/lib/calculations';
-import { findComparableDeals, ComparableDeal } from '@/lib/comparableDeals';
+import { findComparableDeals } from '@/lib/comparableDeals';
+import { PRICING } from '@/lib/config/constants';
 
 interface ComparableDealsProps {
   inputs: CalculationInput;
-  isPro: boolean;
+  tier: 'free' | 'report' | 'pro';
+  onBuyReport?: () => void;
 }
 
-export default function ComparableDeals({ inputs, isPro }: ComparableDealsProps) {
+export default function ComparableDeals({ inputs, tier, onBuyReport }: ComparableDealsProps) {
   const deals = findComparableDeals(inputs);
   if (deals.length === 0) return null;
+
+  const hasFullAccess = tier === 'pro' || tier === 'report';
+  const FREE_DEAL_LIMIT = 3;
+  const visibleDeals = hasFullAccess ? deals : deals.slice(0, FREE_DEAL_LIMIT);
+  const hiddenCount = hasFullAccess ? 0 : Math.max(0, deals.length - FREE_DEAL_LIMIT);
 
   return (
     <div className="mt-6">
@@ -21,12 +28,10 @@ export default function ComparableDeals({ inputs, isPro }: ComparableDealsProps)
         Recent deals with similar characteristics to your asset profile
       </p>
       <div className="space-y-3">
-        {deals.map((deal, idx) => (
+        {visibleDeals.map((deal, idx) => (
           <div
             key={deal.id || idx}
-            className={`relative p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg ${
-              !isPro && idx > 0 ? 'blur-sm select-none pointer-events-none' : ''
-            }`}
+            className="relative p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg"
           >
             <div className="flex items-start justify-between">
               <div>
@@ -62,10 +67,18 @@ export default function ComparableDeals({ inputs, isPro }: ComparableDealsProps)
             )}
           </div>
         ))}
-        {!isPro && deals.length > 1 && (
-          <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
-            Upgrade to Pro to see all comparable deals
-          </p>
+        {!hasFullAccess && hiddenCount > 0 && (
+          <button
+            onClick={() => onBuyReport?.()}
+            className="w-full p-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg text-center hover:border-teal-300 dark:hover:border-teal-600 transition-colors group"
+          >
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400">
+              +{hiddenCount} more comparable deals
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              Get Full Report ({PRICING.REPORT_PRICE}) to see all comparables
+            </p>
+          </button>
         )}
       </div>
     </div>
