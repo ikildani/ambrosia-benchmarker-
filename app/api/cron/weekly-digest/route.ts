@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     // Step 2: Fetch Pro users who want the weekly digest
     const { data: proUsers, error: usersError } = await supabase
       .from('user_profiles')
-      .select('id, email, display_name')
+      .select('id, email')
       .eq('tier', 'pro');
 
     if (usersError) {
@@ -92,10 +92,11 @@ export async function GET(request: NextRequest) {
             .select('item_type, item_value')
             .eq('user_id', user.id);
 
+          const userName = user.email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
           const html = buildWeeklyDigestHtml(
             snapshot,
             watchlistItems || [],
-            user.display_name || 'there'
+            userName
           );
 
           const result = await sendEmail({
