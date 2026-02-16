@@ -477,7 +477,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       // If this was triggered by PDF gate, generate PDF now
       if (showEmailGate) {
         setShowEmailGate(false);
-        generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+        generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
       }
     } catch {
       // Still mark as submitted for UX
@@ -489,7 +489,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   const handleFreePDFClick = () => {
     if (sessionStorage.getItem('email_captured') || emailSubmitted) {
-      generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+      generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
     } else {
       setShowEmailGate(true);
     }
@@ -503,7 +503,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+    generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
   };
 
   const handleDownloadExcel = () => {

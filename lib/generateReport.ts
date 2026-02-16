@@ -1178,6 +1178,78 @@ export function generatePDFReport(
       </div>
     </div>
 
+    ${memoContent ? `
+    <!-- AI Deal Memo -->
+    <div class="memo-section">
+      <div class="content-page">
+        <div class="page-header">
+          <div class="page-info-left">
+            <span class="page-title">AI Deal Memo</span>
+          </div>
+          <div class="page-info">
+            Report ID: ${reportId}<br/>
+            ${reportDate}
+          </div>
+        </div>
+
+        <div class="memo-header">
+          <div class="memo-header-badge">AI-Generated Analysis</div>
+          <h2>Deal Memo</h2>
+          <p>Powered by Ambrosia AI — based on ${labels.modality} ${labels.phase} benchmarks</p>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Executive Summary</div>
+          <div class="memo-block-text">${memoContent.executive_summary}</div>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Valuation Rationale</div>
+          <div class="memo-block-text">${memoContent.valuation_rationale}</div>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Market Context</div>
+          <div class="memo-block-text">${memoContent.market_context}</div>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Risk Factors</div>
+          <ul class="memo-list risks">
+            ${memoContent.risk_factors.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Negotiation Priorities</div>
+          <ul class="memo-list priorities">
+            ${memoContent.negotiation_priorities.map(p => `<li>${p}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="memo-block">
+          <div class="memo-block-title"><span class="dot"></span> Comparable Deal Analysis</div>
+          <div class="memo-block-text">${memoContent.comparable_analysis}</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+          <div class="memo-confidence ${memoContent.confidence_level}">
+            Confidence: ${memoContent.confidence_level}
+          </div>
+          <div style="font-size: 10px; color: var(--gray-400);">
+            Generated ${new Date(memoContent.generatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <div class="footer-brand"><img src="${logoUrl}" alt="Ambrosia Ventures" /></div>
+          <div class="footer-url">calculator.ambrosiaventures.co</div>
+          <div class="footer-copyright">© ${new Date().getFullYear()} Ambrosia Ventures</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Deal Value Breakdown -->
     <div class="section">
       <div class="section-header">
