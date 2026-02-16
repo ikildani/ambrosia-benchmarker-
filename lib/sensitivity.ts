@@ -74,7 +74,7 @@ export interface NeurologyInsight {
   title: string;
   description: string;
   impactLevel: ImpactLevel;
-  category: 'bbb_penetration' | 'disease_progression' | 'biomarker_validation';
+  category: 'bbb_penetration' | 'disease_progression' | 'biomarker_validation' | 'competitive_landscape' | 'line_of_therapy' | 'combination_strategy';
 }
 
 export interface SensitivityData {
@@ -413,6 +413,73 @@ function generateImmunologyInsights(inputs: CalculationInput): NeurologyInsight[
   return insights;
 }
 
+// Generate oncology-specific insights based on asset characteristics
+function generateOncologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'oncology') return [];
+
+  const insights: NeurologyInsight[] = [];
+
+  // Competitive Landscape Risk — based on competitivePosition
+  const cpLevel: ImpactLevel = inputs.competitivePosition === 'crowded'
+    ? 'VERY HIGH'
+    : inputs.competitivePosition === 'behind' || inputs.competitivePosition === 'racing'
+    ? 'HIGH'
+    : inputs.competitivePosition === 'bestInClass'
+    ? 'MEDIUM'
+    : 'LOW';
+
+  insights.push({
+    title: 'Competitive Landscape Risk',
+    description: cpLevel === 'VERY HIGH'
+      ? 'Crowded competitive space with multiple late-stage programs. Differentiation is critical — without clear superiority data, commercial milestones face significant execution risk. Deals may shift value toward upfront payments.'
+      : cpLevel === 'HIGH'
+      ? 'Racing or behind in a competitive landscape. Speed to approval is paramount. Expect partners to negotiate higher milestones tied to being first or second to market, with commercial clawbacks if timing slips.'
+      : cpLevel === 'MEDIUM'
+      ? 'Best-in-class positioning with differentiated data. Strong negotiating position for premium milestones, but partners will require head-to-head data or clear mechanistic advantages to justify top-tier terms.'
+      : 'First-in-class mechanism with a clear differentiation window. Commands the highest premiums — partners pay for exclusivity and novel biology. Upfronts typically 15-25% above market averages.',
+    impactLevel: cpLevel,
+    category: 'competitive_landscape',
+  });
+
+  // Line of Therapy Risk — based on lineOfTherapy
+  const lotLevel: ImpactLevel = inputs.lineOfTherapy === '1L'
+    ? 'VERY HIGH'
+    : inputs.lineOfTherapy === '2L'
+    ? 'MEDIUM'
+    : 'HIGH';
+
+  insights.push({
+    title: 'Line of Therapy Risk',
+    description: lotLevel === 'VERY HIGH'
+      ? 'First-line oncology trials require large, long Phase 3 studies with OS/PFS endpoints against standard of care. Highest commercial payoff but longest and most expensive development path. Expect milestone-heavy deal structures.'
+      : lotLevel === 'MEDIUM'
+      ? 'Second-line has well-defined patient populations and established endpoints. Moderate trial size with clearer regulatory path. Balanced deal structures between upfront and milestones.'
+      : 'Third-line and beyond targets smaller, heavily pretreated populations. Faster trials with accelerated approval potential, but smaller commercial opportunity limits total deal value. Higher upfront percentage typical.',
+    impactLevel: lotLevel,
+    category: 'line_of_therapy',
+  });
+
+  // Combination Strategy Risk — based on combinationPotential
+  const combLevel: ImpactLevel = inputs.combinationPotential === 'strong'
+    ? 'LOW'
+    : inputs.combinationPotential === 'some'
+    ? 'MEDIUM'
+    : 'HIGH';
+
+  insights.push({
+    title: 'Combination Strategy Risk',
+    description: combLevel === 'LOW'
+      ? 'Strong combination potential significantly expands addressable market. IO combinations, ADC + checkpoint, and bispecific + chemo regimens are driving the largest oncology deals. Partners value platform optionality.'
+      : combLevel === 'MEDIUM'
+      ? 'Some combination potential exists but requires clinical validation. Partners may structure milestone payments around combination study readouts. Consider co-development structures for combination trials.'
+      : 'Standalone therapy positioning limits addressable market expansion. Monotherapy-only programs face higher commercial risk, especially in IO-dominant indications. Partners may discount commercial milestones accordingly.',
+    impactLevel: combLevel,
+    category: 'combination_strategy',
+  });
+
+  return insights;
+}
+
 // Main function to compute full sensitivity analysis
 export function computeSensitivityAnalysis(
   inputs: CalculationInput,
@@ -448,7 +515,7 @@ export function computeSensitivityAnalysis(
     ? generateImmunologyInsights(inputs)
     : isNeurology
     ? generateNeurologyInsights(inputs)
-    : [];
+    : generateOncologyInsights(inputs);
 
   return {
     currentUpfront: result.terms.upfront.median,

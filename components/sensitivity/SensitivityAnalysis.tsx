@@ -202,9 +202,9 @@ export default function SensitivityAnalysis({
                   <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-slate-600">
                     <h4 className="text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                       <span className="w-5 h-5 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center text-xs">
-                        {currentInputs.therapeuticArea === 'immunology' ? '🛡️' : '🧠'}
+                        {currentInputs.therapeuticArea === 'immunology' ? '🛡️' : currentInputs.therapeuticArea === 'neurology' ? '🧠' : '🎯'}
                       </span>
-                      {currentInputs.therapeuticArea === 'immunology' ? 'Immunology Risk Factors' : 'Neurology Risk Factors'}
+                      {currentInputs.therapeuticArea === 'immunology' ? 'Immunology Risk Factors' : currentInputs.therapeuticArea === 'neurology' ? 'Neurology Risk Factors' : 'Oncology Risk Factors'}
                     </h4>
                     <div className="grid sm:grid-cols-3 gap-3">
                       {sensitivityData.neurologyInsights.map((insight: NeurologyInsight) => {

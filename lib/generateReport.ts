@@ -1247,6 +1247,39 @@ export function generatePDFReport(
     </div>
     ` : ''}
 
+    ${therapeuticArea === 'immunology' ? `
+    <!-- Immunology Milestone Context -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <h3 class="section-title">Immunology Deal Context</h3>
+      </div>
+      <div class="neuro-context">
+        <div class="neuro-context-title">Why Immunology Deal Structures Differ</div>
+        <div class="neuro-context-items">
+          <div class="neuro-context-item">
+            <strong>Higher Commercial Milestones (~45-75%)</strong>
+            Autoimmune drugs generate massive recurring chronic-use revenue (Humira $21B peak, Dupixent $13B+, Skyrizi $11.7B). Commercial milestones carry the bulk of deal value.
+          </div>
+          <div class="neuro-context-item">
+            <strong>Lower Development Milestones (~10-45%)</strong>
+            Better-validated clinical endpoints and established regulatory pathways reduce development risk compared to CNS. The share decreases sharply as phase advances.
+          </div>
+          <div class="neuro-context-item">
+            <strong>Higher Upfront Ratios</strong>
+            Competitive intensity for validated targets (TL1A, FcRn, complement) drives larger upfront payments. Merck paid $10.8B for Prometheus and Roche paid $7.1B for Telavant — both primarily upfront.
+          </div>
+          <div class="neuro-context-item">
+            <strong>Curative vs Chronic Treatment Dynamic</strong>
+            CAR-T and immune-resetting approaches (1.4-1.65x premium) command fundamentally different deal structures than chronic oral therapies — higher upfronts but less predictable commercial milestones.
+          </div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
     ${(() => {
       const comparableDeals = getRelevantDeals(
         therapeuticArea as 'oncology' | 'neurology' | 'immunology' || 'oncology',

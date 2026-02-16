@@ -167,7 +167,7 @@ export interface CalculationResult {
   };
   drillDown: DrillDownCollection;
   phase: Phase;
-  neurologyMilestoneExplanation?: string;
+  milestoneExplanation?: string;
 }
 
 // Helper to get indication category
@@ -655,10 +655,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     drillDown,
     phase: input.phase,
     ...(isNeurology ? {
-      neurologyMilestoneExplanation: generateNeuroMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+      milestoneExplanation: generateNeuroMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {}),
     ...(isImmunology ? {
-      neurologyMilestoneExplanation: generateImmunologyMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+      milestoneExplanation: generateImmunologyMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {})
   };
 }

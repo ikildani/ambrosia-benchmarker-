@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Deal Terms Calculator | Biotech & Pharma Licensing | Ambrosia Ventures',
-  description: 'Calculate upfront payments, milestone payments, and royalties for biotech and pharma licensing deals. Powered by 500+ real transactions from oncology, neurology, rare disease, and more.',
+  description: 'Calculate upfront payments, milestone payments, and royalties for biotech and pharma licensing deals across oncology, immunology/autoimmune, and neurology/CNS. Powered by 600+ real transactions.',
   keywords: [
     'biotech deal calculator',
     'pharma licensing calculator',
@@ -12,10 +12,18 @@ export const metadata: Metadata = {
     'licensing deal terms',
     'biopharma deal valuation',
     'drug licensing calculator',
+    'immunology deal calculator',
+    'autoimmune licensing deals',
+    'CAR-T deal valuation',
+    'oncology licensing terms',
+    'neurology CNS deal calculator',
+    'biologics deal benchmarks',
+    'anti-TL1A deal terms',
+    'cell therapy licensing',
   ],
   openGraph: {
     title: 'Deal Terms Calculator | Biotech & Pharma Licensing',
-    description: 'Calculate upfront payments, milestones, and royalties based on 500+ real biopharma deals. Free instant estimates.',
+    description: 'Calculate upfront payments, milestones, and royalties for oncology, immunology, and neurology deals. Powered by 600+ real biopharma transactions.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/calculator',
     images: [
@@ -30,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Deal Terms Calculator | Biotech & Pharma Licensing',
-    description: 'Calculate upfront payments, milestones, and royalties based on 500+ real biopharma deals.',
+    description: 'Calculate upfront payments, milestones, and royalties for oncology, immunology, and neurology deals. Powered by 600+ real biopharma transactions.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/calculator',

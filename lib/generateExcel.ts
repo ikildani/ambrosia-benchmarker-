@@ -92,6 +92,29 @@ export function generateExcelReport(
     }
   }
 
+  // Add immunology context rows if applicable
+  if (therapeuticArea === 'immunology') {
+    termsData.push(
+      [''],
+      ['IMMUNOLOGY DEAL CONTEXT'],
+      [''],
+      ['Factor', 'Detail', '', '', ''],
+      ['Commercial Milestones (~45-75%)', 'Autoimmune drugs generate recurring chronic-use revenue (Humira $21B peak, Dupixent $13B+), heavily weighting commercial milestones', '', '', ''],
+      ['Development Milestones (~10-45%)', 'Better-validated endpoints than CNS reduce development risk; share decreases as phase advances', '', '', ''],
+      ['Regulatory Milestones (~20-35%)', 'Well-established FDA pathways for autoimmune; biologics and cell therapies may require REMS programs', '', '', ''],
+    );
+    if (inputs?.modality && ['carT_autoimmune', 'inVivoCarT', 'carTreg'].includes(inputs.modality)) {
+      termsData.push(
+        ['CAR-T / Cell Therapy Premium', 'Curative-intent autoimmune CAR-T commands 1.4-1.65x multipliers; manufacturing scalability and durability data are key value drivers', '', '', ''],
+      );
+    }
+    if (inputs?.modality === 'tl1aInhibitor') {
+      termsData.push(
+        ['Anti-TL1A Market Reset', 'Merck/Prometheus ($10.8B) and Roche/Telavant ($7.1B) reset the IBD deal market; anti-TL1A commands significant premiums', '', '', ''],
+      );
+    }
+  }
+
   const termsSheet = XLSX.utils.aoa_to_sheet(termsData);
   termsSheet['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
   XLSX.utils.book_append_sheet(wb, termsSheet, 'Deal Terms');
