@@ -63,7 +63,9 @@ export async function GET(request: NextRequest) {
         royalty_high_pct,
         announced_date,
         terms_disclosed,
-        therapeutic_area
+        therapeutic_area,
+        licensee_id,
+        licensor_id
       `, { count: 'exact' });
 
     // Apply filters

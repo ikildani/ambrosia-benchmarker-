@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { Deal } from './DealBrowser';
+import WatchButton from '@/components/WatchButton';
 
 interface DealCardProps {
   deal: Deal;
@@ -41,14 +43,27 @@ export default function DealCard({ deal, tier }: DealCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-navy-800 truncate">{deal.licensee_name}</h3>
+          <h3 className="font-semibold text-navy-800 truncate">
+            {deal.licensee_id ? (
+              <Link href={`/companies/${deal.licensee_id}`} className="hover:text-teal-600 transition-colors">
+                {deal.licensee_name}
+              </Link>
+            ) : deal.licensee_name}
+          </h3>
           <p className="text-sm text-neutral-500 truncate">
-            {deal.licensor_name}
+            {deal.licensor_id ? (
+              <Link href={`/companies/${deal.licensor_id}`} className="hover:text-teal-600 transition-colors">
+                {deal.licensor_name}
+              </Link>
+            ) : deal.licensor_name}
           </p>
         </div>
-        <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded">
-          {formatDate(deal.announced_date)}
-        </span>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <WatchButton itemType="modality" itemValue={deal.modality} size="sm" tier={tier} />
+          <span className="px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded">
+            {formatDate(deal.announced_date)}
+          </span>
+        </div>
       </div>
 
       {/* Asset Name */}

@@ -320,6 +320,9 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                 'Royalty rate analysis',
                 'Downloadable PDF reports',
                 'Unlimited calculations',
+                'Weekly Market Pulse email',
+                'Watchlist with deal alerts',
+                'Company competitive tracker',
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2 sm:gap-3">
                   <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">

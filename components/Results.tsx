@@ -14,6 +14,7 @@ import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 import { PRICING } from '@/lib/config/constants';
 import ComparableDeals from './ComparableDeals';
+import WatchButton from './WatchButton';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -546,8 +547,9 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
                 {labels.phase}
               </span>
               <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
+              <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[140px] sm:max-w-none">
                 {labels.modality}
+                <WatchButton itemType="modality" itemValue={inputs?.modality || ''} size="sm" tier={tier} />
               </span>
               <span className="text-neutral-500 hidden sm:inline">&bull;</span>
               <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">

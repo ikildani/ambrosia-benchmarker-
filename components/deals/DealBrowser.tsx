@@ -7,6 +7,7 @@ import { PRICING } from '@/lib/config/constants';
 import DealTable from './DealTable';
 import DealCard from './DealCard';
 import { generateDealsExcel, DealForExcel } from '@/lib/generateExcel';
+import { WatchlistProvider } from '@/contexts/WatchlistContext';
 
 export interface Deal {
   id: string;
@@ -27,6 +28,8 @@ export interface Deal {
   announced_date: string;
   terms_disclosed: boolean;
   blurred?: boolean;
+  licensee_id?: string | null;
+  licensor_id?: string | null;
 }
 
 export interface Filters {
@@ -156,6 +159,7 @@ export default function DealBrowser() {
   };
 
   return (
+    <WatchlistProvider tier={tier}>
     <div className="space-y-6">
       {/* Filters */}
       <DealFilters
@@ -334,5 +338,6 @@ export default function DealBrowser() {
         </>
       )}
     </div>
+    </WatchlistProvider>
   );
 }

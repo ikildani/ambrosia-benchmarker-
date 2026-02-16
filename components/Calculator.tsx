@@ -45,6 +45,7 @@ import { PRICING, DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import Results, { ResultsSkeleton } from './Results';
+import { WatchlistProvider } from '@/contexts/WatchlistContext';
 import PaywallModal from './PaywallModal';
 import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
@@ -1246,6 +1247,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
       {/* Results */}
       {result && (
+        <WatchlistProvider tier={tier}>
         <div className="mt-8 animate-fade-in results-container">
           <Results
             result={result}
@@ -1275,6 +1277,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             onApplyNewInputs={handleSensitivityApply}
           />
         </div>
+        </WatchlistProvider>
       )}
 
       {/* Area Switch Confirmation */}
