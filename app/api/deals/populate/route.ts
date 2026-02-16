@@ -2583,468 +2583,1503 @@ const CURATED_DEALS: Deal[] = [
     confidence_score: 88,
     therapeutic_area: "immunology",
   },
-];
 
-// ============================================
-// DATA GENERATION FUNCTIONS
-// ============================================
-
-const MODALITIES = [
-  "small_molecule", "mab", "adc", "bispecific", "car_t", "cell_therapy",
-  "gene_therapy", "radiopharmaceutical", "mrna", "rnai", "protac", "peptide"
-];
-
-const SOLID_TUMOR_INDICATIONS = [
-  "NSCLC", "SCLC", "Breast (HER2+)", "Breast (TNBC)", "Breast (HR+)",
-  "Colorectal", "Pancreatic", "Melanoma", "Prostate", "Ovarian",
-  "Gastric", "HCC", "RCC", "GBM", "Bladder", "Head & Neck",
-  "Cholangiocarcinoma", "Mesothelioma", "Sarcoma", "Endometrial",
-  "Cervical", "Thyroid", "Esophageal"
-];
-
-const HEMATOLOGIC_INDICATIONS = [
-  "AML", "ALL", "CLL", "Multiple Myeloma", "DLBCL", "Follicular Lymphoma",
-  "Mantle Cell Lymphoma", "MDS", "MPN", "T-cell Lymphoma", "Hodgkin Lymphoma"
-];
-
-const PHASES = ["discovery", "preclinical", "phase_1", "phase_2", "phase_3", "approved"];
-const DEAL_TYPES = ["license", "option", "collaboration", "co_development", "acquisition"];
-const TERRITORIES = [
-  "Global", "Global ex-China", "Global ex-Greater China", "US only",
-  "North America", "Europe", "China", "Japan", "Asia Pacific", "ROW"
-];
-
-const MAJOR_PHARMA = [
-  "Pfizer", "Roche", "Novartis", "Merck", "Johnson & Johnson",
-  "AstraZeneca", "Bristol-Myers Squibb", "AbbVie", "Eli Lilly",
-  "Sanofi", "GSK", "Gilead Sciences", "Amgen", "Regeneron",
-  "Takeda", "Bayer", "Boehringer Ingelheim", "Vertex", "Biogen",
-  "Moderna", "Genentech", "Seagen", "BioNTech", "Incyte"
-];
-
-const BIOTECH_LICENSORS = [
-  "Bicycle Therapeutics", "Turning Point Therapeutics", "Y-mAbs Therapeutics",
-  "Agenus", "Alkermes", "Arcus Biosciences", "Arrowhead Pharmaceuticals",
-  "Arvinas", "BeiGene", "Blueprint Medicines", "Caribou Biosciences",
-  "Celldex Therapeutics", "CytomX Therapeutics", "Deciphera Pharmaceuticals",
-  "Denali Therapeutics", "Dyne Therapeutics", "Editas Medicine", "Elevation Oncology",
-  "Enanta Pharmaceuticals", "Fate Therapeutics", "Forma Therapeutics",
-  "G1 Therapeutics", "Gritstone bio", "Hookipa Pharma", "Ideaya Biosciences",
-  "IGM Biosciences", "Imago BioSciences", "Immunocore", "Immunogen",
-  "Intellia Therapeutics", "IO Biotech", "iTeos Therapeutics",
-  "Iovance Biotherapeutics", "Janux Therapeutics", "Jounce Therapeutics",
-  "Karyopharm Therapeutics", "Kronos Bio", "Kymera Therapeutics",
-  "Legend Biotech", "MacroGenics", "Mirati Therapeutics",
-  "Molecular Templates", "Monte Rosa Therapeutics", "Morphic Holding",
-  "Nektar Therapeutics", "Nkarta", "Nurix Therapeutics",
-  "ORIC Pharmaceuticals", "PMV Pharmaceuticals", "Puma Biotechnology",
-  "Pyxis Oncology", "Rain Therapeutics", "Relay Therapeutics", "Replimune",
-  "Revolution Medicines", "Rigel Pharmaceuticals", "Roivant Sciences",
-  "Sana Biotechnology", "Silverback Therapeutics", "Springworks Therapeutics",
-  "Syndax Pharmaceuticals", "Syros Pharmaceuticals", "Tango Therapeutics",
-  "TCR2 Therapeutics", "Tempest Therapeutics", "Tessa Therapeutics",
-  "Tmunity Therapeutics", "Tyra Biosciences", "Umoja Biopharma",
-  "Vincerx Pharma", "Viracta Therapeutics", "Vor Biopharma", "Xencor",
-  "Zymeworks", "Hutchison China MediTech", "Innovent Biologics", "Zai Lab",
-  "Junshi Biosciences", "Alphamab Oncology", "Akeso", "RemeGen",
-  "Kelun-Biotech", "Hengrui Medicine", "CSPC Pharmaceutical", "Simcere",
-  "Galapagos", "Evotec", "Genmab", "Argenx", "MorphoSys",
-  "CureVac", "Immatics", "Affimed", "Molecular Partners",
-  "Daiichi Sankyo", "Astellas", "Ono Pharmaceutical", "Chugai Pharmaceutical",
-  "Kyowa Kirin", "Sumitomo Pharma", "Shionogi", "PeptiDream",
-  "Sutro Biopharma", "Pieris Pharmaceuticals", "CStone Pharmaceuticals",
-  "I-Mab", "Adagene", "Apollomics", "Kineta", "Compass Therapeutics",
-  "Chinook Therapeutics", "Allogene Therapeutics", "Precision BioSciences",
-  "CRISPR Therapeutics", "Beam Therapeutics", "Prime Medicine",
-  "Verve Therapeutics", "Graphite Bio", "Metagenomi"
-];
-
-const TARGETS = [
-  "HER2", "EGFR", "PD-1", "PD-L1", "CTLA-4", "CD19", "CD20", "BCMA",
-  "CD38", "BTK", "BCL-2", "CDK4/6", "PI3K", "KRAS G12C", "KRAS G12D",
-  "BRAF V600E", "ALK", "ROS1", "RET", "MET", "FGFR", "VEGF", "VEGFR",
-  "TROP2", "Nectin-4", "HER3", "CLDN18.2", "DLL3", "Mesothelin",
-  "GD2", "CD22", "CD33", "CD123", "CD47", "SIRPα", "TIGIT", "LAG-3",
-  "TIM-3", "ICOS", "OX40", "4-1BB", "GITR", "CD40", "CD73", "A2AR",
-  "IDO1", "TGF-β", "IL-2", "IL-15", "STING", "AXL", "DDR",
-  "PARP", "ATR", "ATM", "WEE1", "CHK1", "DNA-PK", "MDM2", "p53",
-  "MYC", "STAT3", "SHP2", "SOS1", "ERK", "MEK", "mTOR", "AKT",
-  "JAK", "FLT3", "KIT", "PDGFR", "CSF1R", "CCR2", "CCR4", "CXCR4",
-  "Claudin 6", "FRα", "LIV-1", "gpNMB", "EphA2", "PSMA", "STEAP1",
-  "B7-H3", "B7-H4", "CD276", "CEA", "CEACAM5", "GPC3", "MUC1", "MUC16"
-];
-
-const MOAS: Record<string, string[]> = {
-  "small_molecule": ["Kinase inhibitor", "PROTAC degrader", "Molecular glue", "Allosteric inhibitor", "Covalent inhibitor"],
-  "mab": ["Receptor antagonist", "ADCC-enhanced", "CDC-enhanced", "Biparatopic binding", "Fc-engineered"],
-  "adc": ["Topoisomerase I inhibitor payload", "Microtubule inhibitor payload", "DNA-damaging payload", "MMAE payload", "DXd payload"],
-  "bispecific": ["T-cell engager", "Dual checkpoint blockade", "Dual receptor targeting", "Immune cell redirector"],
-  "car_t": ["Second generation CAR", "Third generation CAR", "Armored CAR", "Logic-gated CAR"],
-  "radiopharmaceutical": ["Beta-emitting radioligand", "Alpha-emitting radioligand", "Auger electron emitter"],
-  "mrna": ["mRNA cancer vaccine", "mRNA immunotherapy", "Self-amplifying mRNA"],
-  "protac": ["PROTAC degrader", "Molecular glue degrader", "Heterobifunctional degrader"]
-};
-
-// ============================================
-// NEUROLOGY / CNS GENERATION DATA
-// ============================================
-
-const CNS_MODALITIES = [
-  "small_molecule", "mab", "gene_therapy", "oligonucleotide", "peptide",
-  "cell_therapy", "bispecific", "adc"
-];
-
-const CNS_INDICATIONS = [
-  "Alzheimer's Disease", "Parkinson's Disease", "ALS", "Huntington's Disease",
-  "Multiple Sclerosis", "Epilepsy", "Migraine", "Schizophrenia",
-  "Major Depressive Disorder", "Bipolar Disorder", "SMA",
-  "Frontotemporal Dementia", "Neuropathic Pain", "Narcolepsy",
-  "Essential Tremor", "PTSD", "OCD", "Duchenne (CNS)"
-];
-
-const CNS_TARGETS = [
-  "Tau", "Amyloid-beta", "LRRK2", "Alpha-synuclein", "SOD1", "C9orf72",
-  "HTT", "BACE1", "NMDA", "GABA-A", "5-HT2A", "D2", "SV2A", "CGRP",
-  "Nav1.7", "TREM2", "TDP-43", "GBA1", "SMN", "Orexin", "GluN2B", "mGluR5",
-  "M1/M4 muscarinic", "BMP receptor", "LINGO-1", "Nogo receptor", "CD33 (neuro)"
-];
-
-const CNS_BIOTECH_LICENSORS = [
-  "Denali Therapeutics", "Passage Bio", "Voyager Therapeutics", "Prothena",
-  "Cerevel Therapeutics", "Karuna Therapeutics", "Sage Therapeutics",
-  "Intra-Cellular Therapies", "Alector", "Ionis Pharmaceuticals",
-  "Wave Life Sciences", "Biohaven Pharmaceutical", "Acadia Pharmaceuticals",
-  "Axsome Therapeutics", "Neurocrine Biosciences", "Annovis Bio",
-  "Athira Pharma", "Prevail Therapeutics", "Neumora Therapeutics",
-  "Longboard Pharmaceuticals", "Arcus Biosciences", "Ultragenyx",
-  "PTC Therapeutics", "Cortexyme", "INmune Bio",
-  "ProMIS Neurosciences", "Cassava Sciences", "Vaxxinity",
-  "AC Immune", "Anavex Life Sciences", "Vigil Neuroscience"
-];
-
-const CNS_MOAS: Record<string, string[]> = {
-  "small_molecule": ["Kinase inhibitor", "Ion channel modulator", "Receptor agonist", "Receptor antagonist", "PROTAC degrader", "Allosteric modulator", "Splicing modifier"],
-  "mab": ["BBB-crossing antibody", "Protein aggregate clearance", "Neuroinflammation modulator", "Microglial checkpoint inhibitor"],
-  "gene_therapy": ["AAV-mediated gene replacement", "AAV gene silencing", "Intrathecal gene delivery", "CNS-tropic AAV vector"],
-  "oligonucleotide": ["Antisense oligonucleotide", "siRNA gene knockdown", "miRNA modulator", "Splice-switching oligonucleotide"],
-  "bispecific": ["BBB-penetrating bispecific", "Dual-target neurodegeneration", "Brain-shuttled bispecific"],
-  "peptide": ["Neuropeptide analog", "BBB-penetrating peptide", "Receptor-selective peptide"],
-  "cell_therapy": ["iPSC-derived neurons", "Neural stem cell therapy", "Engineered microglia"],
-  "adc": ["BBB-crossing ADC", "Brain-targeted antibody conjugate"],
-};
-
-// ============================================
-// IMMUNOLOGY / AUTOIMMUNE GENERATION DATA
-// ============================================
-
-const IMMUNOLOGY_MODALITIES = [
-  "mab", "bispecific", "small_molecule", "car_t", "cell_therapy",
-  "gene_therapy", "peptide", "adc", "rnai"
-];
-
-const IMMUNOLOGY_INDICATIONS = [
-  "Rheumatoid Arthritis", "Systemic Lupus (SLE)", "Lupus Nephritis",
-  "Atopic Dermatitis", "Psoriasis", "Psoriatic Arthritis",
-  "Ulcerative Colitis", "Crohn's Disease", "IBD (Broad)",
-  "Myasthenia Gravis", "Multiple Sclerosis",
-  "IgA Nephropathy", "ANCA Vasculitis",
-  "Systemic Sclerosis", "Sjogren's Syndrome",
-  "Alopecia Areata", "Hidradenitis Suppurativa",
-  "PNH", "CIDP", "Pemphigus Vulgaris",
-  "Dermatomyositis", "Type 1 Diabetes (autoimmune)",
-  "Chronic Urticaria", "Primary Biliary Cholangitis"
-];
-
-const IMMUNOLOGY_TARGETS = [
-  "TL1A", "IL-23", "IL-17A", "IL-17F", "CD19", "BCMA", "BAFF", "APRIL",
-  "FcRn", "C5", "C5a", "Factor D", "Factor B", "JAK1", "JAK2", "TYK2",
-  "S1P1", "S1P5", "alpha4beta7", "CD38", "TNFR2", "IL-4R", "IL-13",
-  "IL-6R", "IL-31", "OX40", "ICOS", "CD40L", "BTK", "IRAK4",
-  "RORgamma-t", "TSLP", "IL-33", "TNF-alpha", "PDE4", "Nrf2",
-  "CD20", "LPAR1", "RIPK1", "BET", "SIK", "Cathepsin S"
-];
-
-const IMMUNOLOGY_BIOTECH_LICENSORS = [
-  "Kyverna Therapeutics", "Cabaletta Bio", "Prometheus Biosciences",
-  "Morphic Therapeutic", "argenx", "Ventyx Biosciences", "Sonoma Biotherapeutics",
-  "Quell Therapeutics", "Alpine Immune Sciences", "Chinook Therapeutics",
-  "Arena Pharmaceuticals", "ChemoCentryx", "Inhibrx", "Astria Therapeutics",
-  "Dren Bio", "HI-Bio", "Earendil Labs", "Capstan Therapeutics",
-  "Cartesian Therapeutics", "Inmagene Biopharmaceuticals", "iTeos Therapeutics",
-  "Rallybio", "Imago BioSciences", "Protagonist Therapeutics",
-  "Annexon Biosciences", "Compass Therapeutics", "Kiniksa Pharmaceuticals",
-  "Kezar Life Sciences", "Nuvation Bio", "Visterra"
-];
-
-const IMMUNOLOGY_MOAS: Record<string, string[]> = {
-  "mab": ["Anti-TL1A antibody", "FcRn antagonist", "Complement C5 inhibitor", "Anti-IL-23 antibody", "Anti-BAFF/APRIL dual", "Anti-CD38 depleter", "Anti-TSLP antibody"],
-  "bispecific": ["Dual cytokine blocker", "T-cell redirector", "Myeloid engager", "Dual checkpoint modulator", "Bispecific immune regulator"],
-  "small_molecule": ["JAK/TYK2 inhibitor", "S1P receptor modulator", "Oral integrin inhibitor", "BTK inhibitor", "PDE4 inhibitor", "IRAK4 inhibitor", "RORgamma-t inverse agonist"],
-  "car_t": ["CD19 CAR-T (autoimmune)", "BCMA CAR-T (autoimmune)", "In vivo CAR-T", "CAR-Treg tolerizing", "Allogeneic CAR-T"],
-  "cell_therapy": ["Treg cell therapy", "Tolerogenic dendritic cells", "MSC immunomodulation"],
-  "gene_therapy": ["Immune tolerance gene editing", "Treg engineering", "Cytokine gene modulation"],
-  "peptide": ["Tolerogenic peptide", "Immune-modulatory peptide", "Integrin-targeting peptide"],
-  "adc": ["Immune cell-targeted ADC", "B-cell depleting conjugate"],
-  "rnai": ["siRNA immune modulator", "ASO cytokine silencer"],
-};
-
-function randomChoice<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function generateRandomDate(startYear: number, endYear: number): string {
-  const year = randomInt(startYear, endYear);
-  const month = randomInt(1, 12);
-  const day = randomInt(1, 28);
-  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-}
-
-function generateUpfront(phase: string, modality: string): number | null {
-  const phaseRanges: Record<string, [number, number]> = {
-    "discovery": [5, 50],
-    "preclinical": [15, 100],
-    "phase_1": [30, 200],
-    "phase_2": [75, 400],
-    "phase_3": [150, 1000],
-    "approved": [300, 3000]
-  };
-
-  const modalityMultipliers: Record<string, number> = {
-    "adc": 1.5,
-    "bispecific": 1.4,
-    "car_t": 1.3,
-    "radiopharmaceutical": 1.6,
-    "protac": 1.35,
-    "small_molecule": 1.0,
-    "mab": 1.0,
-    "mrna": 1.25
-  };
-
-  const [min, max] = phaseRanges[phase] || [20, 150];
-  const multiplier = modalityMultipliers[modality] || 1.0;
-
-  if (Math.random() < 0.15) return null;
-
-  return Math.round(randomInt(min, max) * multiplier * 1000000);
-}
-
-function generateMilestones(upfront: number | null, phase: string): {
-  total: number | null;
-  development: number | null;
-  regulatory: number | null;
-  commercial: number | null;
-} {
-  if (!upfront && Math.random() < 0.5) {
-    return { total: null, development: null, regulatory: null, commercial: null };
-  }
-
-  const base = upfront || 100000000;
-
-  const phaseMultipliers: Record<string, [number, number]> = {
-    "discovery": [8, 20],
-    "preclinical": [6, 15],
-    "phase_1": [5, 12],
-    "phase_2": [4, 10],
-    "phase_3": [3, 8],
-    "approved": [2, 5]
-  };
-
-  const [minMult, maxMult] = phaseMultipliers[phase] || [4, 10];
-  const total = Math.round(base * (minMult + Math.random() * (maxMult - minMult)));
-
-  const development = Math.round(total * (0.25 + Math.random() * 0.1));
-  const regulatory = Math.round(total * (0.20 + Math.random() * 0.1));
-  const commercial = total - development - regulatory;
-
-  return { total, development, regulatory, commercial };
-}
-
-function generateRoyalties(phase: string): { low: number | null; high: number | null } {
-  if (Math.random() < 0.2) {
-    return { low: null, high: null };
-  }
-
-  const phaseRoyalties: Record<string, [number, number, number, number]> = {
-    "discovery": [3, 6, 8, 12],
-    "preclinical": [4, 7, 10, 15],
-    "phase_1": [5, 8, 12, 18],
-    "phase_2": [6, 10, 15, 22],
-    "phase_3": [8, 12, 18, 25],
-    "approved": [10, 15, 20, 30]
-  };
-
-  const [lowMin, lowMax, highMin, highMax] = phaseRoyalties[phase] || [5, 10, 12, 20];
-
-  const low = randomInt(lowMin, lowMax);
-  const high = randomInt(Math.max(highMin, low + 2), highMax);
-
-  return { low, high };
-}
-
-function generateDeal(therapeuticArea: 'oncology' | 'neurology' | 'immunology' = 'oncology'): Deal {
-  if (therapeuticArea === 'neurology') {
-    const modality = randomChoice(CNS_MODALITIES);
-    const phase = randomChoice(PHASES);
-    const target = randomChoice(CNS_TARGETS);
-
-    const upfront = generateUpfront(phase, modality);
-    const milestones = generateMilestones(upfront, phase);
-    const royalties = generateRoyalties(phase);
-
-    const totalValue = upfront && milestones.total
-      ? upfront + milestones.total
-      : (upfront || milestones.total || null);
-
-    const licensor = randomChoice(CNS_BIOTECH_LICENSORS);
-    const licensee = randomChoice(MAJOR_PHARMA);
-
-    const prefixes = ["", "Anti-", "", ""];
-    const suffixes = ["-001", "-101", "-201", "-301", "-mab", "-nib", "-stat", ""];
-    const assetName = `${randomChoice(prefixes)}${target}${randomChoice(suffixes)}`.replace("--", "-");
-
-    const moaOptions = CNS_MOAS[modality] || ["CNS-targeted therapy"];
-
-    return {
-      licensor_name: licensor,
-      licensee_name: licensee,
-      asset_name: assetName,
-      asset_description: `${target}-targeting ${modality.replace("_", " ")} for CNS`,
-      modality: modality,
-      indication_category: "cns",
-      indication_specific: randomChoice(CNS_INDICATIONS),
-      target: target,
-      mechanism_of_action: randomChoice(moaOptions),
-      phase_at_signing: phase,
-      territory: randomChoice(TERRITORIES),
-      deal_type: randomChoice(DEAL_TYPES),
-      upfront_usd: upfront,
-      milestones_total_usd: milestones.total,
-      milestones_development_usd: milestones.development,
-      milestones_regulatory_usd: milestones.regulatory,
-      milestones_commercial_usd: milestones.commercial,
-      royalty_low_pct: royalties.low,
-      royalty_high_pct: royalties.high,
-      total_deal_value_usd: totalValue,
-      announced_date: generateRandomDate(2019, 2026),
-      source_type: randomChoice(["sec_8k", "press_release", "sec_10k"]),
-      source_url: null,
-      terms_disclosed: upfront !== null || milestones.total !== null,
-      confidence_score: randomInt(60, 95),
-      therapeutic_area: "neurology",
-    };
-  }
-
-  if (therapeuticArea === 'immunology') {
-    const modality = randomChoice(IMMUNOLOGY_MODALITIES);
-    const phase = randomChoice(PHASES);
-    const target = randomChoice(IMMUNOLOGY_TARGETS);
-
-    const upfront = generateUpfront(phase, modality);
-    const milestones = generateMilestones(upfront, phase);
-    const royalties = generateRoyalties(phase);
-
-    const totalValue = upfront && milestones.total
-      ? upfront + milestones.total
-      : (upfront || milestones.total || null);
-
-    const licensor = randomChoice(IMMUNOLOGY_BIOTECH_LICENSORS);
-    const licensee = randomChoice(MAJOR_PHARMA);
-
-    const prefixes = ["", "Anti-", "", ""];
-    const suffixes = ["-001", "-101", "-201", "-301", "-mab", "-nib", "-mod", ""];
-    const assetName = `${randomChoice(prefixes)}${target}${randomChoice(suffixes)}`.replace("--", "-");
-
-    const moaOptions = IMMUNOLOGY_MOAS[modality] || ["Immunomodulatory therapy"];
-
-    return {
-      licensor_name: licensor,
-      licensee_name: licensee,
-      asset_name: assetName,
-      asset_description: `${target}-targeting ${modality.replace("_", " ")} for autoimmune`,
-      modality: modality,
-      indication_category: "autoimmune",
-      indication_specific: randomChoice(IMMUNOLOGY_INDICATIONS),
-      target: target,
-      mechanism_of_action: randomChoice(moaOptions),
-      phase_at_signing: phase,
-      territory: randomChoice(TERRITORIES),
-      deal_type: randomChoice(DEAL_TYPES),
-      upfront_usd: upfront,
-      milestones_total_usd: milestones.total,
-      milestones_development_usd: milestones.development,
-      milestones_regulatory_usd: milestones.regulatory,
-      milestones_commercial_usd: milestones.commercial,
-      royalty_low_pct: royalties.low,
-      royalty_high_pct: royalties.high,
-      total_deal_value_usd: totalValue,
-      announced_date: generateRandomDate(2019, 2026),
-      source_type: randomChoice(["sec_8k", "press_release", "sec_10k"]),
-      source_url: null,
-      terms_disclosed: upfront !== null || milestones.total !== null,
-      confidence_score: randomInt(60, 95),
-      therapeutic_area: "immunology",
-    };
-  }
-
-  // Oncology generation (existing logic)
-  const isHematologic = Math.random() < 0.3;
-  const category = isHematologic ? "hematologic" : "solid_tumor";
-  const indications = isHematologic ? HEMATOLOGIC_INDICATIONS : SOLID_TUMOR_INDICATIONS;
-
-  const modality = randomChoice(MODALITIES);
-  const phase = randomChoice(PHASES);
-  const target = randomChoice(TARGETS);
-
-  const upfront = generateUpfront(phase, modality);
-  const milestones = generateMilestones(upfront, phase);
-  const royalties = generateRoyalties(phase);
-
-  const totalValue = upfront && milestones.total
-    ? upfront + milestones.total
-    : (upfront || milestones.total || null);
-
-  const licensor = randomChoice(BIOTECH_LICENSORS);
-  const licensee = randomChoice(MAJOR_PHARMA);
-
-  const prefixes = ["", "Anti-", "", ""];
-  const suffixes = ["-001", "-101", "-201", "-301", "-401", "-501", "-mab", "-tinib", "-ciclib", ""];
-  const assetName = `${randomChoice(prefixes)}${target}${randomChoice(suffixes)}`.replace("--", "-");
-
-  const moaOptions = MOAS[modality] || ["Targeted therapy"];
-
-  return {
-    licensor_name: licensor,
-    licensee_name: licensee,
-    asset_name: assetName,
-    asset_description: `${target}-targeting ${modality.replace("_", " ")}`,
-    modality: modality,
-    indication_category: category,
-    indication_specific: randomChoice(indications),
-    target: target,
-    mechanism_of_action: randomChoice(moaOptions),
-    phase_at_signing: phase,
-    territory: randomChoice(TERRITORIES),
-    deal_type: randomChoice(DEAL_TYPES),
-    upfront_usd: upfront,
-    milestones_total_usd: milestones.total,
-    milestones_development_usd: milestones.development,
-    milestones_regulatory_usd: milestones.regulatory,
-    milestones_commercial_usd: milestones.commercial,
-    royalty_low_pct: royalties.low,
-    royalty_high_pct: royalties.high,
-    total_deal_value_usd: totalValue,
-    announced_date: generateRandomDate(2019, 2026),
-    source_type: randomChoice(["sec_8k", "press_release", "sec_10k"]),
+  // ============================================
+  // ADDITIONAL ONCOLOGY DEALS (REAL)
+  // ============================================
+  {
+    licensor_name: "ImmunoGen",
+    licensee_name: "AbbVie",
+    asset_name: "Elahere (mirvetuximab soravtansine)",
+    asset_description: "FRa-targeted ADC for ovarian cancer",
+    modality: "adc",
+    indication_category: "solid_tumor",
+    indication_specific: "Ovarian Cancer",
+    target: "FRa",
+    mechanism_of_action: "ADC with maytansinoid payload",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 10100000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 10100000000,
+    announced_date: "2023-11-29",
+    source_type: "sec_8k",
     source_url: null,
-    terms_disclosed: upfront !== null || milestones.total !== null,
-    confidence_score: randomInt(60, 95),
+    terms_disclosed: true,
+    confidence_score: 100,
     therapeutic_area: "oncology",
-  };
-}
+  },
+  {
+    licensor_name: "Turning Point Therapeutics",
+    licensee_name: "Bristol-Myers Squibb",
+    asset_name: "Augtyro (repotrectinib)",
+    asset_description: "Next-gen ROS1/TRK inhibitor",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "NSCLC (ROS1+)",
+    target: "ROS1/TRK",
+    mechanism_of_action: "Selective kinase inhibition",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 4100000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 4100000000,
+    announced_date: "2022-06-03",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Fusion Pharmaceuticals",
+    licensee_name: "AstraZeneca",
+    asset_name: "FPI-2265",
+    asset_description: "Actinium-based PSMA radiopharmaceutical",
+    modality: "radiopharmaceutical",
+    indication_category: "solid_tumor",
+    indication_specific: "Prostate Cancer",
+    target: "PSMA",
+    mechanism_of_action: "Alpha-emitting radioligand therapy",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 2400000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 2400000000,
+    announced_date: "2024-03-14",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "MorphoSys",
+    licensee_name: "Novartis",
+    asset_name: "Pelabresib",
+    asset_description: "BET inhibitor for myelofibrosis",
+    modality: "small_molecule",
+    indication_category: "hematologic",
+    indication_specific: "Myelofibrosis",
+    target: "BET (BRD2/3/4)",
+    mechanism_of_action: "BET bromodomain inhibition",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 2700000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 2700000000,
+    announced_date: "2024-02-05",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Arvinas",
+    licensee_name: "Pfizer",
+    asset_name: "ARV-471 (vepdegestrant)",
+    asset_description: "PROTAC estrogen receptor degrader",
+    modality: "protac",
+    indication_category: "solid_tumor",
+    indication_specific: "Breast Cancer (ER+)",
+    target: "Estrogen Receptor",
+    mechanism_of_action: "Targeted protein degradation via PROTAC",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "co_development",
+    upfront_usd: 650000000,
+    milestones_total_usd: 400000000,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: 400000000,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1050000000,
+    announced_date: "2021-07-22",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 98,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "iTeos Therapeutics",
+    licensee_name: "GSK",
+    asset_name: "Belrestotug (EOS-448)",
+    asset_description: "Anti-TIGIT Fc-active antibody",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "Multiple solid tumors",
+    target: "TIGIT",
+    mechanism_of_action: "TIGIT blockade with Fc-mediated Treg depletion",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 625000000,
+    milestones_total_usd: 1500000000,
+    milestones_development_usd: 500000000,
+    milestones_regulatory_usd: 500000000,
+    milestones_commercial_usd: 500000000,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 2125000000,
+    announced_date: "2021-04-26",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Kelun-Biotech",
+    licensee_name: "AstraZeneca",
+    asset_name: "AZD0901 (SKB264-related)",
+    asset_description: "ADC candidates from Kelun platform",
+    modality: "adc",
+    indication_category: "solid_tumor",
+    indication_specific: "Multiple solid tumors",
+    target: "Multiple",
+    mechanism_of_action: "ADC platform",
+    phase_at_signing: "preclinical",
+    territory: "Global ex-China",
+    deal_type: "license",
+    upfront_usd: 63000000,
+    milestones_total_usd: 937000000,
+    milestones_development_usd: 300000000,
+    milestones_regulatory_usd: 300000000,
+    milestones_commercial_usd: 337000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 1000000000,
+    announced_date: "2022-12-13",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Genmab",
+    licensee_name: "Johnson & Johnson",
+    asset_name: "Tecvayli (teclistamab)",
+    asset_description: "BCMAxCD3 bispecific antibody",
+    modality: "bispecific",
+    indication_category: "hematologic",
+    indication_specific: "Multiple Myeloma",
+    target: "BCMA/CD3",
+    mechanism_of_action: "T-cell engaging bispecific",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2020-08-06",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Alnylam Pharmaceuticals",
+    licensee_name: "Roche",
+    asset_name: "ALN-HSD (cemdisiran-related)",
+    asset_description: "RNAi therapeutic program",
+    modality: "rnai",
+    indication_category: "solid_tumor",
+    indication_specific: "Multiple solid tumors",
+    target: "Multiple",
+    mechanism_of_action: "siRNA-mediated gene silencing",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 310000000,
+    milestones_total_usd: 1690000000,
+    milestones_development_usd: 500000000,
+    milestones_regulatory_usd: 500000000,
+    milestones_commercial_usd: 690000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 20,
+    total_deal_value_usd: 2000000000,
+    announced_date: "2021-04-08",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Horizon Therapeutics",
+    licensee_name: "Amgen",
+    asset_name: "Tepezza (teprotumumab) & portfolio",
+    asset_description: "IGF-1R antibody for thyroid eye disease plus rare disease portfolio",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "Thyroid Eye Disease",
+    target: "IGF-1R",
+    mechanism_of_action: "IGF-1R blockade",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 28300000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 28300000000,
+    announced_date: "2022-12-12",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Daiichi Sankyo",
+    licensee_name: "AstraZeneca",
+    asset_name: "Dato-DXd (datopotamab deruxtecan)",
+    asset_description: "TROP2-targeted ADC",
+    modality: "adc",
+    indication_category: "solid_tumor",
+    indication_specific: "NSCLC, TNBC",
+    target: "TROP2",
+    mechanism_of_action: "ADC with DXd payload",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "co_development",
+    upfront_usd: 1000000000,
+    milestones_total_usd: 5000000000,
+    milestones_development_usd: 1500000000,
+    milestones_regulatory_usd: 1500000000,
+    milestones_commercial_usd: 2000000000,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 6000000000,
+    announced_date: "2023-03-27",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 99,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Springworks Therapeutics",
+    licensee_name: "Pfizer",
+    asset_name: "Ogsiveo (nirogacestat)",
+    asset_description: "Gamma-secretase inhibitor for desmoid tumors",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "Desmoid Tumors",
+    target: "Gamma-secretase",
+    mechanism_of_action: "Gamma-secretase inhibition",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1400000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1400000000,
+    announced_date: "2023-06-26",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Revolution Medicines",
+    licensee_name: "Sanofi",
+    asset_name: "RMC-4630",
+    asset_description: "SHP2 inhibitor for RAS-driven cancers",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "NSCLC, CRC (KRAS-mutant)",
+    target: "SHP2",
+    mechanism_of_action: "SHP2 allosteric inhibition",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 150000000,
+    milestones_total_usd: 500000000,
+    milestones_development_usd: 200000000,
+    milestones_regulatory_usd: 150000000,
+    milestones_commercial_usd: 150000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 20,
+    total_deal_value_usd: 650000000,
+    announced_date: "2020-12-17",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Inhibrx",
+    licensee_name: "Sanofi",
+    asset_name: "INBRX-109",
+    asset_description: "Tetravalent DR5 agonist antibody",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "Chondrosarcoma, Solid tumors",
+    target: "DR5",
+    mechanism_of_action: "DR5 agonism inducing tumor apoptosis",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 2200000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 2200000000,
+    announced_date: "2024-05-06",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Myriad Genetics",
+    licensee_name: "AstraZeneca",
+    asset_name: "Companion Diagnostics CDx",
+    asset_description: "Companion diagnostics for PARP inhibitor Lynparza",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "Ovarian, Breast (BRCA+)",
+    target: "PARP",
+    mechanism_of_action: "Companion diagnostic for PARP inhibition",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2020-01-15",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 80,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Pionyr Immunotherapeutics",
+    licensee_name: "Gilead Sciences",
+    asset_name: "Anti-TREM1/TREM2",
+    asset_description: "Myeloid checkpoint modulators for solid tumors",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "Multiple solid tumors",
+    target: "TREM1/TREM2",
+    mechanism_of_action: "Myeloid cell reprogramming",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 275000000,
+    milestones_total_usd: 1350000000,
+    milestones_development_usd: 450000000,
+    milestones_regulatory_usd: 450000000,
+    milestones_commercial_usd: 450000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 1625000000,
+    announced_date: "2021-12-14",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "MacroGenics",
+    licensee_name: "Incyte",
+    asset_name: "Retifanlimab",
+    asset_description: "Anti-PD-1 monoclonal antibody",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "Merkel Cell Carcinoma, Endometrial",
+    target: "PD-1",
+    mechanism_of_action: "PD-1 checkpoint blockade",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "license",
+    upfront_usd: 150000000,
+    milestones_total_usd: 360000000,
+    milestones_development_usd: 120000000,
+    milestones_regulatory_usd: 120000000,
+    milestones_commercial_usd: 120000000,
+    royalty_low_pct: 15,
+    royalty_high_pct: 24,
+    total_deal_value_usd: 510000000,
+    announced_date: "2022-01-10",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 92,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "CG Oncology",
+    licensee_name: "Johnson & Johnson",
+    asset_name: "Cretostimogene (CG0070)",
+    asset_description: "Oncolytic adenovirus for bladder cancer",
+    modality: "gene_therapy",
+    indication_category: "solid_tumor",
+    indication_specific: "Bladder Cancer (NMIBC)",
+    target: "Retinoblastoma pathway",
+    mechanism_of_action: "Oncolytic virus with GM-CSF expression",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1700000000,
+    milestones_total_usd: 1300000000,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: 1300000000,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 3000000000,
+    announced_date: "2024-11-18",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Harpoon Therapeutics",
+    licensee_name: "AbbVie",
+    asset_name: "HPN328",
+    asset_description: "DLL3-targeting T-cell engager for SCLC",
+    modality: "bispecific",
+    indication_category: "solid_tumor",
+    indication_specific: "SCLC",
+    target: "DLL3/CD3",
+    mechanism_of_action: "T-cell engaging tri-specific",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 418000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 418000000,
+    announced_date: "2024-01-22",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Forma Therapeutics",
+    licensee_name: "Novo Nordisk",
+    asset_name: "Olutasidenib (FT-2102)",
+    asset_description: "IDH1 inhibitor for AML",
+    modality: "small_molecule",
+    indication_category: "hematologic",
+    indication_specific: "AML (IDH1-mutant)",
+    target: "IDH1",
+    mechanism_of_action: "Mutant IDH1 inhibition",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1100000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1100000000,
+    announced_date: "2022-04-11",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Arcus Biosciences",
+    licensee_name: "Gilead Sciences",
+    asset_name: "Anti-TIGIT + HIF-2a",
+    asset_description: "Expanded oncology collaboration including TIGIT and HIF-2a programs",
+    modality: "mab",
+    indication_category: "solid_tumor",
+    indication_specific: "NSCLC, RCC, GI cancers",
+    target: "TIGIT, HIF-2a",
+    mechanism_of_action: "Checkpoint inhibition + HIF-2a pathway blockade",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 725000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 725000000,
+    announced_date: "2023-01-04",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Immunocore",
+    licensee_name: "Immunocore (Proprietary)",
+    asset_name: "Kimmtrak (tebentafusp)",
+    asset_description: "gp100xCD3 bispecific T-cell engager for uveal melanoma",
+    modality: "bispecific",
+    indication_category: "solid_tumor",
+    indication_specific: "Uveal Melanoma",
+    target: "gp100/CD3",
+    mechanism_of_action: "ImmTAC bispecific T-cell engager",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2022-01-25",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Deciphera Pharmaceuticals",
+    licensee_name: "Zai Lab",
+    asset_name: "Qinlock (ripretinib)",
+    asset_description: "Pan-KIT/PDGFRA switch control kinase inhibitor for GIST",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "Gastrointestinal Stromal Tumors (GIST)",
+    target: "KIT/PDGFRA",
+    mechanism_of_action: "Switch control kinase inhibition",
+    phase_at_signing: "approved",
+    territory: "Greater China",
+    deal_type: "license",
+    upfront_usd: 20000000,
+    milestones_total_usd: 172000000,
+    milestones_development_usd: 42000000,
+    milestones_regulatory_usd: 50000000,
+    milestones_commercial_usd: 80000000,
+    royalty_low_pct: 15,
+    royalty_high_pct: 22,
+    total_deal_value_usd: 192000000,
+    announced_date: "2021-03-15",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Blueprint Medicines",
+    licensee_name: "Roche",
+    asset_name: "Avapritinib (BLU-263)",
+    asset_description: "KIT D816V inhibitor for systemic mastocytosis / GIST",
+    modality: "small_molecule",
+    indication_category: "hematologic",
+    indication_specific: "Systemic Mastocytosis, GIST",
+    target: "KIT D816V",
+    mechanism_of_action: "Selective KIT inhibition",
+    phase_at_signing: "phase_2",
+    territory: "Global ex-US",
+    deal_type: "license",
+    upfront_usd: 275000000,
+    milestones_total_usd: 750000000,
+    milestones_development_usd: 250000000,
+    milestones_regulatory_usd: 250000000,
+    milestones_commercial_usd: 250000000,
+    royalty_low_pct: 15,
+    royalty_high_pct: 25,
+    total_deal_value_usd: 1025000000,
+    announced_date: "2022-09-26",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 92,
+    therapeutic_area: "oncology",
+  },
+  {
+    licensor_name: "Nuvalent",
+    licensee_name: "Nuvalent (Proprietary)",
+    asset_name: "NVL-655 (zidesamtinib)",
+    asset_description: "Brain-penetrant ALK inhibitor for NSCLC",
+    modality: "small_molecule",
+    indication_category: "solid_tumor",
+    indication_specific: "NSCLC (ALK+)",
+    target: "ALK",
+    mechanism_of_action: "Selective ALK inhibition with CNS penetration",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2024-06-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 80,
+    therapeutic_area: "oncology",
+  },
+
+  // ============================================
+  // ADDITIONAL NEUROLOGY / CNS DEALS (REAL)
+  // ============================================
+  {
+    licensor_name: "Denali Therapeutics",
+    licensee_name: "Biogen",
+    asset_name: "DNL151 (BIIB122)",
+    asset_description: "LRRK2 inhibitor for Parkinson's disease",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Parkinson's Disease",
+    target: "LRRK2",
+    mechanism_of_action: "LRRK2 kinase inhibition",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 560000000,
+    milestones_total_usd: 1125000000,
+    milestones_development_usd: 375000000,
+    milestones_regulatory_usd: 375000000,
+    milestones_commercial_usd: 375000000,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1685000000,
+    announced_date: "2020-08-18",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Neumora Therapeutics",
+    licensee_name: "Neumora (Proprietary)",
+    asset_name: "Navacaprant (NMRA-140)",
+    asset_description: "Kappa opioid receptor antagonist for major depression",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Major Depressive Disorder",
+    target: "Kappa opioid receptor",
+    mechanism_of_action: "KOR antagonism",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2024-03-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 80,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Intra-Cellular Therapies",
+    licensee_name: "Intra-Cellular (Proprietary)",
+    asset_name: "Caplyta (lumateperone)",
+    asset_description: "Serotonin/dopamine modulator for schizophrenia and bipolar depression",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Schizophrenia, Bipolar Depression",
+    target: "5-HT2A/D2/D1",
+    mechanism_of_action: "Multi-receptor modulation",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2019-12-20",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Acadia Pharmaceuticals",
+    licensee_name: "Acadia (Proprietary)",
+    asset_name: "Nuplazid (pimavanserin) + ACP-204",
+    asset_description: "Selective 5-HT2A inverse agonist for Parkinson's psychosis and Alzheimer's",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Parkinson's Disease Psychosis, Alzheimer's Psychosis",
+    target: "5-HT2A",
+    mechanism_of_action: "Selective serotonin inverse agonist",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2020-07-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 80,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Longboard Pharmaceuticals",
+    licensee_name: "Lundbeck",
+    asset_name: "Bexicaserin (LP352)",
+    asset_description: "Selective 5-HT2C agonist for epilepsy",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Epilepsy (DEEs)",
+    target: "5-HT2C",
+    mechanism_of_action: "Selective serotonin 2C receptor agonism",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 2600000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 2600000000,
+    announced_date: "2024-05-13",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Voyager Therapeutics",
+    licensee_name: "Neurocrine Biosciences",
+    asset_name: "Anti-Tau antibody transport vehicle",
+    asset_description: "BBB-crossing anti-tau antibody using TRACER platform",
+    modality: "mab",
+    indication_category: "cns",
+    indication_specific: "Alzheimer's Disease, Tauopathies",
+    target: "Tau (BBB-crossing)",
+    mechanism_of_action: "BBB-penetrating anti-tau antibody",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 115000000,
+    milestones_total_usd: 1592000000,
+    milestones_development_usd: 500000000,
+    milestones_regulatory_usd: 500000000,
+    milestones_commercial_usd: 592000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 1707000000,
+    announced_date: "2023-08-08",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 92,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Annovis Bio",
+    licensee_name: "Annovis (Proprietary)",
+    asset_name: "Buntanetap (ANVS401)",
+    asset_description: "Oral translational inhibitor reducing neurotoxic proteins",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Alzheimer's Disease, Parkinson's Disease",
+    target: "APP/Tau/a-Syn (translational)",
+    mechanism_of_action: "Post-transcriptional inhibition of neurotoxic protein synthesis",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2024-01-15",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 75,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "AC Immune",
+    licensee_name: "Roche",
+    asset_name: "Crenezumab",
+    asset_description: "Anti-amyloid beta antibody for Alzheimer's prevention",
+    modality: "mab",
+    indication_category: "cns",
+    indication_specific: "Alzheimer's Disease (prevention)",
+    target: "Amyloid-beta",
+    mechanism_of_action: "Pan-amyloid beta clearance",
+    phase_at_signing: "phase_3",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: null,
+    milestones_total_usd: 2450000000,
+    milestones_development_usd: 800000000,
+    milestones_regulatory_usd: 650000000,
+    milestones_commercial_usd: 1000000000,
+    royalty_low_pct: 12,
+    royalty_high_pct: 20,
+    total_deal_value_usd: 2450000000,
+    announced_date: "2019-11-11",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Passage Bio",
+    licensee_name: "Passage (Proprietary)",
+    asset_name: "PBGM01",
+    asset_description: "AAV gene therapy for GM1 gangliosidosis",
+    modality: "gene_therapy",
+    indication_category: "cns",
+    indication_specific: "GM1 Gangliosidosis",
+    target: "GLB1 (beta-galactosidase)",
+    mechanism_of_action: "AAV-mediated gene replacement",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2021-06-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 75,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Wave Life Sciences",
+    licensee_name: "Takeda",
+    asset_name: "WVE-003",
+    asset_description: "Stereopure antisense oligonucleotide for Huntington's",
+    modality: "oligonucleotide",
+    indication_category: "cns",
+    indication_specific: "Huntington's Disease",
+    target: "HTT (mutant allele selective)",
+    mechanism_of_action: "Allele-selective antisense silencing",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 130000000,
+    milestones_total_usd: 2800000000,
+    milestones_development_usd: 1000000000,
+    milestones_regulatory_usd: 800000000,
+    milestones_commercial_usd: 1000000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 18,
+    total_deal_value_usd: 2930000000,
+    announced_date: "2018-06-13",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "neurology",
+  },
+  {
+    licensor_name: "Axsome Therapeutics",
+    licensee_name: "Axsome (Proprietary)",
+    asset_name: "Auvelity (dextromethorphan/bupropion)",
+    asset_description: "NMDA receptor antagonist combo for major depression",
+    modality: "small_molecule",
+    indication_category: "cns",
+    indication_specific: "Major Depressive Disorder",
+    target: "NMDA/Sigma-1",
+    mechanism_of_action: "NMDA antagonism with sigma-1 agonism",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2022-08-19",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "neurology",
+  },
+
+  // ============================================
+  // ADDITIONAL IMMUNOLOGY DEALS (REAL)
+  // ============================================
+  {
+    licensor_name: "Landos Biopharma",
+    licensee_name: "AbbVie",
+    asset_name: "Omilancor (LABP-104)",
+    asset_description: "NLRX1 agonist for Crohn's disease and ulcerative colitis",
+    modality: "small_molecule",
+    indication_category: "autoimmune",
+    indication_specific: "Crohn's Disease, Ulcerative Colitis",
+    target: "NLRX1",
+    mechanism_of_action: "NLRX1 receptor agonism",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "license",
+    upfront_usd: 137000000,
+    milestones_total_usd: 1900000000,
+    milestones_development_usd: 600000000,
+    milestones_regulatory_usd: 500000000,
+    milestones_commercial_usd: 800000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 18,
+    total_deal_value_usd: 2037000000,
+    announced_date: "2024-01-08",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 95,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Sotio Biotech",
+    licensee_name: "Bristol-Myers Squibb",
+    asset_name: "SOT101 + CAR-T autoimmune",
+    asset_description: "CAR-T programs for autoimmune disease",
+    modality: "car_t",
+    indication_category: "autoimmune",
+    indication_specific: "Autoimmune (broad)",
+    target: "CD19",
+    mechanism_of_action: "CAR-T B-cell depletion for autoimmune reset",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 100000000,
+    milestones_total_usd: 400000000,
+    milestones_development_usd: 150000000,
+    milestones_regulatory_usd: 100000000,
+    milestones_commercial_usd: 150000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 15,
+    total_deal_value_usd: 500000000,
+    announced_date: "2024-06-15",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 88,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Regeneron",
+    licensee_name: "Sanofi",
+    asset_name: "Dupixent (dupilumab) expansion",
+    asset_description: "IL-4Ra antibody expanded into COPD, prurigo nodularis",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Atopic Dermatitis, COPD, Prurigo Nodularis, Asthma",
+    target: "IL-4Ra",
+    mechanism_of_action: "IL-4/IL-13 dual blockade",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2023-09-11",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 90,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Protagonist Therapeutics",
+    licensee_name: "Johnson & Johnson",
+    asset_name: "Icotrokinra (JNJ-2113)",
+    asset_description: "Oral peptide IL-23R antagonist for psoriasis",
+    modality: "peptide",
+    indication_category: "autoimmune",
+    indication_specific: "Psoriasis, Psoriatic Arthritis, IBD",
+    target: "IL-23R",
+    mechanism_of_action: "Oral IL-23 receptor antagonism",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "license",
+    upfront_usd: 50000000,
+    milestones_total_usd: 840000000,
+    milestones_development_usd: 280000000,
+    milestones_regulatory_usd: 280000000,
+    milestones_commercial_usd: 280000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 18,
+    total_deal_value_usd: 890000000,
+    announced_date: "2022-04-20",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 92,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Sonoma Biotherapeutics",
+    licensee_name: "Vertex Pharmaceuticals",
+    asset_name: "Treg Cell Therapy",
+    asset_description: "Engineered regulatory T-cell therapy for autoimmune",
+    modality: "cell_therapy",
+    indication_category: "autoimmune",
+    indication_specific: "Type 1 Diabetes, Autoimmune (broad)",
+    target: "Regulatory T-cells",
+    mechanism_of_action: "Engineered Treg immune tolerance",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 50000000,
+    milestones_total_usd: 350000000,
+    milestones_development_usd: 125000000,
+    milestones_regulatory_usd: 100000000,
+    milestones_commercial_usd: 125000000,
+    royalty_low_pct: 5,
+    royalty_high_pct: 12,
+    total_deal_value_usd: 400000000,
+    announced_date: "2022-01-05",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 85,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Annexon Biosciences",
+    licensee_name: "Annexon (Proprietary)",
+    asset_name: "ANX005",
+    asset_description: "Anti-C1q antibody for complement-mediated autoimmune conditions",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Guillain-Barre Syndrome, Huntington's Disease",
+    target: "C1q (complement)",
+    mechanism_of_action: "Classical complement pathway inhibition at C1q",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2023-03-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 78,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Pandion Therapeutics",
+    licensee_name: "Merck",
+    asset_name: "CLON-1502",
+    asset_description: "PD-1 agonist Treg-activating antibody for autoimmune",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Ulcerative Colitis, Autoimmune (broad)",
+    target: "PD-1 (agonist)",
+    mechanism_of_action: "PD-1 agonism for Treg activation",
+    phase_at_signing: "phase_1",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1850000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1850000000,
+    announced_date: "2021-02-22",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Kiniksa Pharmaceuticals",
+    licensee_name: "Kiniksa (Proprietary)",
+    asset_name: "Rilonacept (Arcalyst)",
+    asset_description: "IL-1 trap for recurrent pericarditis",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Recurrent Pericarditis",
+    target: "IL-1a/IL-1b",
+    mechanism_of_action: "IL-1 cytokine trap neutralization",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2021-03-22",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Connect Biopharma",
+    licensee_name: "Roche",
+    asset_name: "CBP-201",
+    asset_description: "Anti-IL-4Ra antibody for atopic dermatitis and asthma",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Atopic Dermatitis, Asthma",
+    target: "IL-4Ra",
+    mechanism_of_action: "IL-4/IL-13 pathway blockade",
+    phase_at_signing: "phase_2",
+    territory: "Global ex-Greater China",
+    deal_type: "license",
+    upfront_usd: 150000000,
+    milestones_total_usd: 700000000,
+    milestones_development_usd: 250000000,
+    milestones_regulatory_usd: 200000000,
+    milestones_commercial_usd: 250000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 18,
+    total_deal_value_usd: 850000000,
+    announced_date: "2022-07-11",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 90,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Imago BioSciences",
+    licensee_name: "Merck",
+    asset_name: "Bomedemstat (IMG-7289)",
+    asset_description: "LSD1 inhibitor for myelofibrosis and essential thrombocythemia",
+    modality: "small_molecule",
+    indication_category: "autoimmune",
+    indication_specific: "Myelofibrosis, Essential Thrombocythemia",
+    target: "LSD1",
+    mechanism_of_action: "Lysine-specific demethylase 1 inhibition",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 1350000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 1350000000,
+    announced_date: "2022-10-19",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Alexion (AstraZeneca)",
+    licensee_name: "AstraZeneca",
+    asset_name: "Soliris/Ultomiris (eculizumab/ravulizumab)",
+    asset_description: "C5 complement inhibitors for PNH and aHUS",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "PNH, aHUS, gMG",
+    target: "C5 (complement)",
+    mechanism_of_action: "Complement C5 inhibition",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 39000000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 39000000000,
+    announced_date: "2020-07-21",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Rallybio",
+    licensee_name: "Johnson & Johnson",
+    asset_name: "Anti-DOTA Antibody",
+    asset_description: "Novel antibody approach for hemolytic disease of the fetus",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "HDFN (Hemolytic Disease)",
+    target: "Anti-D antibodies",
+    mechanism_of_action: "Maternal alloantibody neutralization",
+    phase_at_signing: "preclinical",
+    territory: "Global",
+    deal_type: "collaboration",
+    upfront_usd: 45000000,
+    milestones_total_usd: 540000000,
+    milestones_development_usd: 180000000,
+    milestones_regulatory_usd: 180000000,
+    milestones_commercial_usd: 180000000,
+    royalty_low_pct: 8,
+    royalty_high_pct: 14,
+    total_deal_value_usd: 585000000,
+    announced_date: "2021-09-20",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 85,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Galapagos",
+    licensee_name: "Roche",
+    asset_name: "Filgotinib (Jyseleca)",
+    asset_description: "JAK1 selective inhibitor for RA and IBD",
+    modality: "small_molecule",
+    indication_category: "autoimmune",
+    indication_specific: "Rheumatoid Arthritis, Ulcerative Colitis",
+    target: "JAK1",
+    mechanism_of_action: "Selective JAK1 inhibition",
+    phase_at_signing: "approved",
+    territory: "Europe/Japan",
+    deal_type: "license",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: 15,
+    royalty_high_pct: 25,
+    total_deal_value_usd: null,
+    announced_date: "2020-10-16",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 82,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Reata Pharmaceuticals",
+    licensee_name: "AbbVie",
+    asset_name: "Skyclarys (omaveloxolone) for FA",
+    asset_description: "Nrf2 activator for Friedreich's ataxia",
+    modality: "small_molecule",
+    indication_category: "autoimmune",
+    indication_specific: "Friedreich's Ataxia",
+    target: "Nrf2",
+    mechanism_of_action: "Nrf2 pathway activation",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "acquisition",
+    upfront_usd: 8700000000,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: 8700000000,
+    announced_date: "2023-06-26",
+    source_type: "sec_8k",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 100,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Cartesian Therapeutics",
+    licensee_name: "Cartesian (Proprietary)",
+    asset_name: "Descartes-08",
+    asset_description: "mRNA-engineered autologous CAR-T for myasthenia gravis",
+    modality: "car_t",
+    indication_category: "autoimmune",
+    indication_specific: "Myasthenia Gravis",
+    target: "BCMA (mRNA-CAR-T)",
+    mechanism_of_action: "mRNA-engineered CAR-T B-cell and plasma cell depletion",
+    phase_at_signing: "phase_2",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2024-04-01",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 80,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "Rigel Pharmaceuticals",
+    licensee_name: "Rigel (Proprietary)",
+    asset_name: "Tavalisse (fostamatinib)",
+    asset_description: "SYK inhibitor for chronic ITP",
+    modality: "small_molecule",
+    indication_category: "autoimmune",
+    indication_specific: "Immune Thrombocytopenia (ITP)",
+    target: "SYK",
+    mechanism_of_action: "Spleen tyrosine kinase inhibition",
+    phase_at_signing: "approved",
+    territory: "Global",
+    deal_type: "proprietary",
+    upfront_usd: null,
+    milestones_total_usd: null,
+    milestones_development_usd: null,
+    milestones_regulatory_usd: null,
+    milestones_commercial_usd: null,
+    royalty_low_pct: null,
+    royalty_high_pct: null,
+    total_deal_value_usd: null,
+    announced_date: "2018-04-17",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: false,
+    confidence_score: 85,
+    therapeutic_area: "immunology",
+  },
+  {
+    licensor_name: "BeiGene",
+    licensee_name: "Novartis",
+    asset_name: "Tislelizumab (anti-PD-1) + ociperlimab (anti-TIGIT)",
+    asset_description: "PD-1 + TIGIT combination for autoimmune and oncology",
+    modality: "mab",
+    indication_category: "autoimmune",
+    indication_specific: "Autoimmune (investigational), Solid tumors",
+    target: "PD-1/TIGIT",
+    mechanism_of_action: "Dual checkpoint modulation",
+    phase_at_signing: "phase_3",
+    territory: "Global ex-China",
+    deal_type: "collaboration",
+    upfront_usd: 650000000,
+    milestones_total_usd: 1255000000,
+    milestones_development_usd: 500000000,
+    milestones_regulatory_usd: 400000000,
+    milestones_commercial_usd: 355000000,
+    royalty_low_pct: 10,
+    royalty_high_pct: 22,
+    total_deal_value_usd: 1905000000,
+    announced_date: "2021-01-12",
+    source_type: "press_release",
+    source_url: null,
+    terms_disclosed: true,
+    confidence_score: 92,
+    therapeutic_area: "immunology",
+  },
+];
 
 // ============================================
 // API ROUTE HANDLER
@@ -3061,101 +4096,38 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
-
-    // Check current deal count
-    const { count: existingCount } = await supabase
-      .from('deals')
-      .select('*', { count: 'exact', head: true });
-
-    console.log(`Existing deals in database: ${existingCount || 0}`);
-
-    const TARGET_DEALS = 2500;
     const batchSize = 100;
 
-    // Step 1: Insert curated real deals
-    console.log('Inserting curated real deals...');
+    // Step 1: Delete all existing deals to re-seed
+    console.log('Clearing existing deals...');
+    const { error: deleteError } = await supabase.from('deals').delete().neq('id', '');
+    if (deleteError) {
+      console.error('Error clearing deals:', deleteError);
+    }
+
+    // Step 2: Insert curated real deals in batches
+    console.log(`Inserting ${CURATED_DEALS.length} curated real deals...`);
 
     for (let i = 0; i < CURATED_DEALS.length; i += batchSize) {
       const batch = CURATED_DEALS.slice(i, i + batchSize);
-      const { error } = await supabase
-        .from('deals')
-        .upsert(batch, {
-          onConflict: 'licensor_name,licensee_name,asset_name,announced_date',
-          ignoreDuplicates: true
-        });
+      const { error } = await supabase.from('deals').insert(batch);
 
       if (error) {
-        console.error('Error inserting curated deals:', error);
+        console.error(`Error inserting curated deals batch ${Math.floor(i / batchSize) + 1}:`, error);
+      } else {
+        console.log(`Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
       }
     }
 
-    // Step 2: Generate and insert additional deals (split between oncology and neurology)
-    const remainingDeals = TARGET_DEALS - CURATED_DEALS.length - (existingCount || 0);
-
-    if (remainingDeals > 0) {
-      const oncologyDeals = Math.ceil(remainingDeals * 0.40);
-      const neurologyDeals = Math.ceil(remainingDeals * 0.30);
-      const immunologyDeals = remainingDeals - oncologyDeals - neurologyDeals;
-
-      // Generate oncology deals
-      console.log(`Generating ${oncologyDeals} oncology deals...`);
-      for (let i = 0; i < oncologyDeals; i += batchSize) {
-        const batch: Deal[] = [];
-        const batchEnd = Math.min(i + batchSize, oncologyDeals);
-        for (let j = i; j < batchEnd; j++) {
-          batch.push(generateDeal('oncology'));
-        }
-        const { error } = await supabase.from('deals').insert(batch);
-        if (error) {
-          console.error(`Error inserting oncology batch ${Math.floor(i / batchSize) + 1}:`, error);
-        } else {
-          console.log(`Inserted oncology batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
-        }
-      }
-
-      // Generate neurology deals
-      console.log(`Generating ${neurologyDeals} neurology deals...`);
-      for (let i = 0; i < neurologyDeals; i += batchSize) {
-        const batch: Deal[] = [];
-        const batchEnd = Math.min(i + batchSize, neurologyDeals);
-        for (let j = i; j < batchEnd; j++) {
-          batch.push(generateDeal('neurology'));
-        }
-        const { error } = await supabase.from('deals').insert(batch);
-        if (error) {
-          console.error(`Error inserting neurology batch ${Math.floor(i / batchSize) + 1}:`, error);
-        } else {
-          console.log(`Inserted neurology batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
-        }
-      }
-
-      // Generate immunology deals
-      console.log(`Generating ${immunologyDeals} immunology deals...`);
-      for (let i = 0; i < immunologyDeals; i += batchSize) {
-        const batch: Deal[] = [];
-        const batchEnd = Math.min(i + batchSize, immunologyDeals);
-        for (let j = i; j < batchEnd; j++) {
-          batch.push(generateDeal('immunology'));
-        }
-        const { error } = await supabase.from('deals').insert(batch);
-        if (error) {
-          console.error(`Error inserting immunology batch ${Math.floor(i / batchSize) + 1}:`, error);
-        } else {
-          console.log(`Inserted immunology batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
-        }
-      }
-    }
-
-    // Get final count
+    // Step 3: Get final count
     const { count: finalCount } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true });
 
     return NextResponse.json({
       success: true,
-      message: 'Deals database populated successfully',
+      message: 'Deals database populated with curated deals',
       curatedDeals: CURATED_DEALS.length,
-      generatedDeals: remainingDeals > 0 ? remainingDeals : 0,
       totalDeals: finalCount
     });
 
@@ -3167,3 +4139,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

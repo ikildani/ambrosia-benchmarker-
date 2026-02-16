@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     url: 'https://calculator.ambrosiaventures.co/calculator',
     images: [
       {
-        url: '/api/og?title=Deal%20Terms%20Calculator&subtitle=Powered%20by%20500%2B%20Real%20Transactions',
+        url: '/api/og?title=Deal%20Terms%20Calculator&subtitle=Powered%20by%20600%2B%20Real%20Transactions',
         width: 1200,
         height: 630,
         alt: 'Ambrosia Ventures Deal Calculator',

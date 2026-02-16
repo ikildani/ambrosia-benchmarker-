@@ -273,7 +273,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className={`text-sm sm:text-lg lg:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 leading-relaxed font-light transition-all duration-700 delay-300 px-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">500+ real deals</strong>.
+            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong>.
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
             Upfront payments, milestones, royalties & partner matching.
@@ -321,7 +321,7 @@ export default function Home() {
           {/* Feature Pills */}
           <div className={`flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
-              { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '500+ deals analyzed' },
+              { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '600+ deals analyzed' },
               { icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', text: 'AI partner matching' },
               { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Results in 3 seconds' },
             ].map((feature, idx) => (
@@ -567,7 +567,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {[
-              { value: '500+', label: 'Deals Analyzed' },
+              { value: '600+', label: 'Deals Analyzed' },
               { value: '$2B+', label: 'Deal Value Estimated' },
               { value: '50+', label: 'Companies Served' },
               { value: '99%', label: 'User Satisfaction' },

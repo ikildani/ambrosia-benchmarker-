@@ -334,7 +334,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Ready to Calculate Your Deal Terms?
             </h2>
             <p className="text-slate-300 mb-8">
-              Get instant, customized benchmarks based on real market data from 500+ biopharma licensing deals.
+              Get instant, customized benchmarks based on real market data from 600+ biopharma licensing deals.
             </p>
             <Link
               href={calculatorUrl}
