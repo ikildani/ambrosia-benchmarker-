@@ -4,7 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { runDailyIngestion } from '@/lib/ingestion/sec-edgar';
 import { runWeeklyIngestion } from '@/lib/ingestion/clinical-trials';
 
-export const maxDuration = 540; // 9 minutes max (SEC EDGAR + Clinical Trials)
+export const maxDuration = 300; // 5 minutes max (hobby plan limit)
 export const dynamic = 'force-dynamic';
 
 // Therapeutic area mapping from indication_category
