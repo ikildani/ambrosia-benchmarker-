@@ -197,7 +197,7 @@ export function generateDatasetSchema(): DatasetSchema {
     '@type': 'Dataset',
     name: 'Biotech & Pharma Licensing Deal Database',
     description: 'Comprehensive database of 500+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, rare disease, and other therapeutic areas.',
-    url: `${BASE_URL}/deals`,
+    url: `${BASE_URL}/pulse`,
     keywords: [
       'biotech deals',
       'pharma licensing',

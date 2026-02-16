@@ -49,7 +49,6 @@ Typical deal structures include:
 
 - https://calculator.ambrosiaventures.co/ : Homepage with overview and quick start
 - https://calculator.ambrosiaventures.co/calculator : Main calculator tool for generating deal estimates
-- https://calculator.ambrosiaventures.co/deals : Browse analyzed deal database
 - https://calculator.ambrosiaventures.co/blog : Industry analysis, deal trends, and insights
 - https://calculator.ambrosiaventures.co/benchmarks/ : Benchmark data by therapeutic area, modality, and phase
 

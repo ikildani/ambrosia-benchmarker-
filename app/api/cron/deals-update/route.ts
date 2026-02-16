@@ -2,9 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runDailyIngestion } from '@/lib/ingestion/sec-edgar';
+import { runWeeklyIngestion } from '@/lib/ingestion/clinical-trials';
 
-export const maxDuration = 300; // 5 minutes max
+export const maxDuration = 540; // 9 minutes max (SEC EDGAR + Clinical Trials)
 export const dynamic = 'force-dynamic';
+
+// Therapeutic area mapping from indication_category
+const THERAPEUTIC_AREA_MAP: Record<string, string> = {
+  solid_tumor: 'oncology',
+  hematological: 'oncology',
+  cns: 'neurology',
+  autoimmune: 'autoimmune',
+  cardiovascular: 'cardiovascular',
+  infectious: 'infectious',
+  metabolic: 'metabolic',
+  rare_disease: 'rare_disease',
+  respiratory: 'respiratory',
+  dermatology: 'dermatology',
+  ophthalmology: 'ophthalmology',
+};
 
 export async function GET(request: NextRequest) {
   // Security: Require cron secret
@@ -40,49 +56,69 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 1: Run SEC EDGAR ingestion for past 7 days
-    console.log('Starting weekly deals update...');
+    console.log('Starting weekly data update...');
+    console.log('Step 1: SEC EDGAR ingestion...');
     const edgarResult = await runDailyIngestion(supabase, anthropicApiKey, 7);
 
-    // Step 2: Backfill therapeutic_area on any deals missing it
-    console.log('Backfilling therapeutic_area...');
+    // Step 2: Run ClinicalTrials.gov ingestion
+    console.log('Step 2: ClinicalTrials.gov ingestion...');
+    let trialsResult = { companies: 0, trials: 0, errors: [] as string[] };
+    try {
+      trialsResult = await runWeeklyIngestion(supabase);
+    } catch (trialsError) {
+      console.error('Clinical trials ingestion failed (non-fatal):', trialsError);
+      trialsResult.errors.push(String(trialsError));
+    }
 
-    const { error: backfillNeuroError } = await supabase
-      .from('deals')
-      .update({ therapeutic_area: 'neurology' })
-      .eq('indication_category', 'cns')
-      .is('therapeutic_area', null);
+    // Step 3: Backfill therapeutic_area on all deals with expanded mapping
+    console.log('Step 3: Backfilling therapeutic_area (expanded mapping)...');
+    const backfillErrors: string[] = [];
 
-    const { error: backfillOncoError } = await supabase
-      .from('deals')
-      .update({ therapeutic_area: 'oncology' })
-      .in('indication_category', ['solid_tumor', 'hematological'])
-      .is('therapeutic_area', null);
+    for (const [indicationCategory, therapeuticArea] of Object.entries(THERAPEUTIC_AREA_MAP)) {
+      const { error } = await supabase
+        .from('deals')
+        .update({ therapeutic_area: therapeuticArea })
+        .eq('indication_category', indicationCategory)
+        .is('therapeutic_area', null);
 
+      if (error) {
+        backfillErrors.push(`${indicationCategory}: ${error.message}`);
+      }
+    }
+
+    // Catch-all: any deals still without therapeutic_area get 'other'
     const { error: backfillDefaultError } = await supabase
       .from('deals')
       .update({ therapeutic_area: 'other' })
       .is('therapeutic_area', null);
 
-    const backfillErrors = [backfillNeuroError, backfillOncoError, backfillDefaultError]
-      .filter(Boolean)
-      .map(e => e!.message);
+    if (backfillDefaultError) {
+      backfillErrors.push(`default: ${backfillDefaultError.message}`);
+    }
 
-    // Get current deal counts by therapeutic area
+    // Step 4: Get current deal counts by all therapeutic areas
+    console.log('Step 4: Counting deals by therapeutic area...');
     const { count: totalDeals } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true });
 
-    const { count: oncologyCount } = await supabase
-      .from('deals')
-      .select('*', { count: 'exact', head: true })
-      .eq('therapeutic_area', 'oncology');
+    const allAreas = ['oncology', 'neurology', 'autoimmune', 'cardiovascular', 'infectious', 'metabolic', 'rare_disease', 'respiratory', 'dermatology', 'ophthalmology', 'other'];
+    const counts: Record<string, number | null> = { total: totalDeals };
 
-    const { count: neurologyCount } = await supabase
-      .from('deals')
-      .select('*', { count: 'exact', head: true })
-      .eq('therapeutic_area', 'neurology');
+    for (const area of allAreas) {
+      const { count } = await supabase
+        .from('deals')
+        .select('*', { count: 'exact', head: true })
+        .eq('therapeutic_area', area);
+      counts[area] = count;
+    }
 
-    console.log(`Weekly deals update complete. Total: ${totalDeals}, Oncology: ${oncologyCount}, Neurology: ${neurologyCount}`);
+    const countsSummary = Object.entries(counts)
+      .filter(([, v]) => v && v > 0)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ');
+
+    console.log(`Weekly data update complete. ${countsSummary}`);
 
     return NextResponse.json({
       success: true,
@@ -91,15 +127,16 @@ export async function GET(request: NextRequest) {
         deals: edgarResult.deals,
         errors: edgarResult.errors.length,
       },
-      backfillErrors,
-      counts: {
-        total: totalDeals,
-        oncology: oncologyCount,
-        neurology: neurologyCount,
+      clinicalTrials: {
+        companies: trialsResult.companies,
+        trials: trialsResult.trials,
+        errors: trialsResult.errors.length,
       },
+      backfillErrors,
+      counts,
     });
   } catch (error) {
-    console.error('Weekly deals update error:', error);
+    console.error('Weekly data update error:', error);
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
