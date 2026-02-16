@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 // Deduplicate company list
 const UNIQUE_COMPANIES = [...new Set(COMPANIES_TO_TRACK)];
-const BATCH_SIZE = 15;
+const BATCH_SIZE = 5;
 
 export async function GET(request: NextRequest) {
   // Auth: require CRON_SECRET or ADMIN_API_KEY
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
       results.push({ company: companyName, trials: upsertCount });
 
       // Rate limit between companies
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 500));
 
     } catch (error) {
       results.push({ company: companyName, trials: 0, error: String(error) });
