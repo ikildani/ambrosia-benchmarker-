@@ -33,7 +33,7 @@ export function generateExcelReport(
     [`Report Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`],
     [''],
     ['ASSET PROFILE'],
-    ['Therapeutic Area', therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'],
+    ['Therapeutic Area', therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'],
     ['Development Phase', labels.phase],
     ['Modality', labels.modality],
     ['Indication', labels.indication],
@@ -138,7 +138,7 @@ export function generateExcelReport(
 
   // Comparable Deals Sheet
   const comparableDeals = getRelevantDeals(
-    (therapeuticArea as 'oncology' | 'neurology') || 'oncology',
+    (therapeuticArea as 'oncology' | 'neurology' | 'immunology') || 'oncology',
     labels.modality,
     labels.indication
   );

@@ -9,7 +9,7 @@ export interface ComparableDeal {
   relevance: string;
   modalities?: string[];
   indications?: string[];
-  therapeuticArea: 'oncology' | 'neurology' | 'both';
+  therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'both';
 }
 
 const COMPARABLE_DEALS: ComparableDeal[] = [
@@ -27,6 +27,22 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Gilgamesh', licensee: 'AbbVie', value: '$1.2B', year: 2024, relevance: 'Neuroplastogen (Phase 2)', modalities: ['psychedelic'], indications: ['depression'], therapeuticArea: 'neurology' },
   { licensor: 'PTC Therapeutics', licensee: 'Novartis', value: '$1B upfront', year: 2024, relevance: "Huntington's gene therapy", modalities: ['geneTherapy'], indications: ['huntingtons'], therapeuticArea: 'neurology' },
   { licensor: 'Ionis/Biogen', licensee: 'N/A', value: '$1.8B+ revenue', year: 2024, relevance: 'ASO in rare neuro (tofersen/SOD1 ALS)', modalities: ['aso'], indications: ['als'], therapeuticArea: 'neurology' },
+  // Immunology / Autoimmune
+  { licensor: 'Prometheus Biosciences', licensee: 'Merck', value: '$10.8B', year: 2023, relevance: 'Anti-TL1A (IBD)', modalities: ['tl1aInhibitor'], indications: ['crohns', 'ulcerativeColitis'], therapeuticArea: 'immunology' },
+  { licensor: 'Telavant', licensee: 'Roche', value: '$7.1B', year: 2024, relevance: 'Anti-TL1A (IBD)', modalities: ['tl1aInhibitor'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
+  { licensor: 'Arena Pharmaceuticals', licensee: 'Pfizer', value: '$6.7B', year: 2022, relevance: 'S1P modulator (UC)', modalities: ['s1pModulator'], indications: ['ulcerativeColitis'], therapeuticArea: 'immunology' },
+  { licensor: 'Momenta Pharmaceuticals', licensee: 'J&J', value: '$6.5B', year: 2020, relevance: 'FcRn antagonist (MG, HDFN)', modalities: ['fcrnAntagonist'], indications: ['myastheniaGravis'], therapeuticArea: 'immunology' },
+  { licensor: 'Alpine Immune Sciences', licensee: 'Vertex', value: '$4.9B', year: 2024, relevance: 'BAFF/APRIL dual antagonist (IgAN)', modalities: ['dualAntagonist'], indications: ['igan'], therapeuticArea: 'immunology' },
+  { licensor: 'Galapagos', licensee: 'Gilead', value: '$5.1B', year: 2019, relevance: 'JAK1 inhibitor (RA, IBD)', modalities: ['jakInhibitor'], indications: ['rheumatoidArthritis'], therapeuticArea: 'immunology' },
+  { licensor: 'Morphic Therapeutic', licensee: 'Eli Lilly', value: '$3.2B', year: 2024, relevance: 'Oral integrin inhibitor (IBD)', modalities: ['oralIntegrin'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
+  { licensor: 'ChemoCentryx', licensee: 'Amgen', value: '$3.7B', year: 2022, relevance: 'C5aR inhibitor (vasculitis)', modalities: ['complementInhibitor'], indications: ['aancaVasculitis'], therapeuticArea: 'immunology' },
+  { licensor: 'Capstan Therapeutics', licensee: 'AbbVie', value: '$2.1B', year: 2025, relevance: 'In vivo CAR-T (autoimmune)', modalities: ['inVivoCarT'], indications: ['sle_lupus'], therapeuticArea: 'immunology' },
+  { licensor: 'Dren Bio', licensee: 'Sanofi', value: '$1.9B', year: 2024, relevance: 'Bispecific myeloid engager (lupus)', modalities: ['bispecific'], indications: ['sle_lupus'], therapeuticArea: 'immunology' },
+  { licensor: 'Ventyx Biosciences', licensee: 'Eli Lilly', value: '$1.2B', year: 2024, relevance: 'TYK2+S1P dual (Crohn\'s, psoriasis)', modalities: ['jakInhibitor', 's1pModulator'], indications: ['crohns', 'psoriasis'], therapeuticArea: 'immunology' },
+  { licensor: 'HI-Bio', licensee: 'Biogen', value: '$1.8B', year: 2024, relevance: 'Anti-CD38 (IgAN, AMR)', modalities: ['mab'], indications: ['igan'], therapeuticArea: 'immunology' },
+  { licensor: 'Harbour BioMed', licensee: 'AstraZeneca', value: '$4.575B', year: 2024, relevance: 'Bispecific platform (autoimmune)', modalities: ['bispecific'], therapeuticArea: 'immunology' },
+  { licensor: 'Earendil Labs', licensee: 'Sanofi', value: '$2.56B', year: 2025, relevance: 'AI-designed bispecifics (IBD)', modalities: ['bispecific'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
+  { licensor: 'RemeGen', licensee: 'Vor Bio', value: '$4B+', year: 2024, relevance: 'BAFF/APRIL (MG, SLE, RA)', modalities: ['dualAntagonist'], indications: ['myastheniaGravis', 'sle_lupus'], therapeuticArea: 'immunology' },
 ];
 
 // Extended interface for web UI component

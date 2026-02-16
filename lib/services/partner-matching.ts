@@ -72,18 +72,18 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   'stem_cell': ['cell_therapy', 'gene_therapy'],
 };
 
-// Indication category adjacency (includes neurology sub-indication cross-links)
+// Indication category adjacency (includes neurology and immunology sub-indication cross-links)
 const INDICATION_ADJACENCY: Record<string, string[]> = {
   'solid_tumor': ['hematological'],
   'hematological': ['solid_tumor', 'autoimmune'],
-  'autoimmune': ['hematological', 'dermatology', 'rare_disease', 'cns'],
-  'cns': ['rare_disease', 'autoimmune', 'cardiovascular', 'metabolic', 'pain'],
-  'rare_disease': ['cns', 'metabolic', 'rare_neurological'],
+  'autoimmune': ['hematological', 'dermatology', 'rare_disease', 'cns', 'ibd', 'nephrology', 'rheumatology', 'neuromuscular'],
+  'cns': ['rare_disease', 'autoimmune', 'cardiovascular', 'metabolic', 'pain', 'neuromuscular'],
+  'rare_disease': ['cns', 'metabolic', 'rare_neurological', 'nephrology'],
   'infectious': ['vaccine'],
   'metabolic': ['cardiovascular', 'rare_disease', 'cns'],
   'cardiovascular': ['metabolic', 'cns'],
   'respiratory': ['infectious', 'autoimmune'],
-  'dermatology': ['autoimmune'],
+  'dermatology': ['autoimmune', 'rheumatology'],
   'ophthalmology': ['rare_disease', 'cns'],
   // Neurology sub-indication adjacency
   'alzheimers': ['parkinsons', 'rare_neurological', 'cns'],
@@ -91,7 +91,7 @@ const INDICATION_ADJACENCY: Record<string, string[]> = {
   'schizophrenia': ['depression', 'addiction', 'cns'],
   'depression': ['schizophrenia', 'addiction', 'pain', 'cns'],
   'pain': ['depression', 'cns', 'epilepsy', 'migraine'],
-  'multiple_sclerosis': ['autoimmune', 'rare_neurological', 'cns'],
+  'multiple_sclerosis': ['autoimmune', 'rare_neurological', 'cns', 'neuromuscular'],
   'epilepsy': ['rare_neurological', 'pain', 'cns'],
   'rare_neurological': ['alzheimers', 'parkinsons', 'epilepsy', 'rare_disease', 'cns'],
   'als': ['rare_neurological', 'parkinsons', 'cns'],
@@ -101,6 +101,12 @@ const INDICATION_ADJACENCY: Record<string, string[]> = {
   'tremor': ['parkinsons', 'epilepsy', 'cns'],
   'tbi': ['pain', 'rare_neurological', 'cns'],
   'addiction': ['depression', 'schizophrenia', 'pain', 'cns'],
+  // Immunology sub-indication adjacency
+  'ibd': ['autoimmune', 'rheumatology', 'dermatology'],
+  'rheumatology': ['autoimmune', 'dermatology', 'ibd', 'nephrology'],
+  'nephrology': ['autoimmune', 'rare_disease', 'rheumatology', 'hematological'],
+  'neuromuscular': ['autoimmune', 'cns', 'rare_disease', 'multiple_sclerosis'],
+  'complement': ['autoimmune', 'hematological', 'nephrology', 'rare_disease'],
 };
 
 // Phase ranking for comparison

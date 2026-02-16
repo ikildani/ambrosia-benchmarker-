@@ -541,6 +541,8 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
       return 'oncology';
     case 'cns':
       return 'neurology';
+    case 'autoimmune':
+      return 'immunology';
     default:
       return 'other';
   }

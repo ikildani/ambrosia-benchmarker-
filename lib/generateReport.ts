@@ -952,7 +952,7 @@ export function generatePDFReport(
         <div class="cover-meta-grid">
           <div class="cover-meta-item">
             <label>Therapeutic Area</label>
-            <span>${therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'}</span>
+            <span>${therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'}</span>
           </div>
           <div class="cover-meta-item">
             <label>Development Phase</label>
@@ -1249,7 +1249,7 @@ export function generatePDFReport(
 
     ${(() => {
       const comparableDeals = getRelevantDeals(
-        therapeuticArea as 'oncology' | 'neurology' || 'oncology',
+        therapeuticArea as 'oncology' | 'neurology' | 'immunology' || 'oncology',
         labels.modality,
         labels.indication
       );

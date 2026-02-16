@@ -28,6 +28,15 @@ import {
   bbbPenetrationOptions,
   diseaseProgressionOptions,
   biomarkerValidationOptions,
+  immunologyModalityOptions,
+  immuneResetOptions,
+  targetSpecificityOptions,
+  diseaseSeverityOptions,
+  treatmentGoalOptions,
+  ImmuneResetPotential,
+  TargetSpecificity,
+  DiseaseSeverity,
+  ImmunologyTreatmentGoal,
 } from './calculations';
 
 // Types for sensitivity analysis
@@ -91,6 +100,10 @@ const parameterLabels: Record<string, string> = {
   bbbPenetration: 'BBB Penetration',
   diseaseProgression: 'Disease Progression',
   biomarkerValidation: 'Biomarker Validation',
+  immuneResetPotential: 'Immune Reset Potential',
+  targetSpecificity: 'Target Specificity',
+  diseaseSeverity: 'Disease Severity',
+  treatmentGoal: 'Treatment Goal',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -103,7 +116,8 @@ function flattenOptions(
 // Get options for a parameter (therapeutic-area-aware)
 function getOptionsForParameter(
   parameterKey: keyof CalculationInput,
-  isNeurology: boolean = false
+  isNeurology: boolean = false,
+  isImmunology: boolean = false
 ): Array<{ value: string; label: string }> {
   switch (parameterKey) {
     case 'phase':
@@ -113,7 +127,7 @@ function getOptionsForParameter(
     case 'competitivePosition':
       return competitivePositionOptions;
     case 'modality':
-      return flattenOptions(isNeurology ? neurologyModalityOptions : modalityOptions);
+      return flattenOptions(isImmunology ? immunologyModalityOptions : isNeurology ? neurologyModalityOptions : modalityOptions);
     case 'dataQuality':
       return dataQualityOptions;
     case 'lineOfTherapy':
@@ -130,6 +144,14 @@ function getOptionsForParameter(
       return diseaseProgressionOptions;
     case 'biomarkerValidation':
       return biomarkerValidationOptions;
+    case 'immuneResetPotential':
+      return immuneResetOptions;
+    case 'targetSpecificity':
+      return targetSpecificityOptions;
+    case 'diseaseSeverity':
+      return diseaseSeverityOptions;
+    case 'treatmentGoal':
+      return treatmentGoalOptions;
     default:
       return [];
   }
@@ -147,7 +169,8 @@ function computeParameterSensitivity(
   }
 
   const isNeurology = baseInputs.therapeuticArea === 'neurology';
-  const options = getOptionsForParameter(parameterKey, isNeurology);
+  const isImmunology = baseInputs.therapeuticArea === 'immunology';
+  const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology);
   if (options.length === 0) return null;
 
   const currentValue = String(baseInputs[parameterKey]);
@@ -320,22 +343,94 @@ function generateNeurologyInsights(inputs: CalculationInput): NeurologyInsight[]
   return insights;
 }
 
+// Generate immunology-specific insights based on asset characteristics
+function generateImmunologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'immunology') return [];
+
+  const insights: NeurologyInsight[] = [];
+
+  // Immune Reset Risk — based on immuneResetPotential
+  const irKey = inputs.immuneResetPotential || 'chronicTreatment';
+  const irLevel: ImpactLevel = irKey === 'curativeIntent'
+    ? 'VERY HIGH'
+    : irKey === 'durableRemission'
+    ? 'HIGH'
+    : 'LOW';
+
+  insights.push({
+    title: 'Immune Reset Risk',
+    description: irLevel === 'VERY HIGH'
+      ? 'Curative-intent approaches (CAR-T, tolerance induction) aim for drug-free remission. These command the highest premiums but carry significant manufacturing, durability, and safety risk. Milestone structures tied to remission durability are critical.'
+      : irLevel === 'HIGH'
+      ? 'Durable remission approaches (deep B-cell depletion, immune resetting) offer months-to-years of disease control. Development milestones are weighted toward durability endpoints and relapse-free survival.'
+      : 'Chronic treatment models provide predictable recurring revenue. Lower risk profile but face biosimilar/generic pressure. Commercial milestones dominate deal value.',
+    impactLevel: irLevel,
+    category: 'bbb_penetration', // reusing category structure
+  });
+
+  // Target Specificity Assessment — based on targetSpecificity
+  const tsKey = inputs.targetSpecificity || 'pathwayTargeted';
+  const tsLevel: ImpactLevel = tsKey === 'antigenSpecific'
+    ? 'HIGH'
+    : tsKey === 'broadImmunosuppression'
+    ? 'VERY HIGH'
+    : 'MEDIUM';
+
+  insights.push({
+    title: 'Target Specificity Assessment',
+    description: tsLevel === 'HIGH'
+      ? 'Antigen-specific approaches (CAR-Treg, tolerizing therapies) represent the next frontier — targeting only disease-driving antigens with minimal immunosuppression. Premium valuations for differentiated safety profiles.'
+      : tsLevel === 'VERY HIGH'
+      ? 'Broad immunosuppression faces commoditization pressure and infection risk concerns. Box warnings on JAK inhibitors cooled the market. Differentiation via selectivity or novel mechanism is critical for premium terms.'
+      : 'Pathway-targeted approaches (IL-23, TL1A, complement) are the standard for autoimmune. Well-validated mechanisms with established regulatory pathways support predictable deal structures.',
+    impactLevel: tsLevel,
+    category: 'disease_progression',
+  });
+
+  // Disease Severity Impact — based on diseaseSeverity
+  const dsKey = inputs.diseaseSeverity || 'moderateSevere';
+  const dsLevel: ImpactLevel = dsKey === 'refractory'
+    ? 'VERY HIGH'
+    : dsKey === 'severe'
+    ? 'HIGH'
+    : dsKey === 'moderateSevere'
+    ? 'MEDIUM'
+    : 'LOW';
+
+  insights.push({
+    title: 'Disease Severity Impact',
+    description: dsLevel === 'VERY HIGH'
+      ? 'Multi-refractory patients who have failed multiple lines represent the highest unmet need. CAR-T and novel mechanisms are most appropriate. Orphan-like pricing and premium deal terms expected.'
+      : dsLevel === 'HIGH'
+      ? 'Severe/refractory disease justifies aggressive therapies with higher risk profiles. Biologic and cell therapy approaches are appropriate. Premium pricing and orphan-adjacent market dynamics apply.'
+      : dsLevel === 'MEDIUM'
+      ? 'Moderate-to-severe is the sweet spot: large enough population for blockbuster potential, high enough need to justify premium therapies. Most autoimmune deals target this segment.'
+      : 'Mild-moderate disease has the largest patient population but lower willingness to use aggressive or expensive therapies. Oral and topical approaches preferred. Price sensitivity limits deal premiums.',
+    impactLevel: dsLevel,
+    category: 'biomarker_validation',
+  });
+
+  return insights;
+}
+
 // Main function to compute full sensitivity analysis
 export function computeSensitivityAnalysis(
   inputs: CalculationInput,
   result: CalculationResult
 ): SensitivityData {
   const isNeurology = inputs.therapeuticArea === 'neurology';
+  const isImmunology = inputs.therapeuticArea === 'immunology';
   const parametersToAnalyze: Array<keyof CalculationInput> = [
     'phase',
     'territory',
     'competitivePosition',
     'modality',
     'dataQuality',
-    isNeurology ? 'treatmentApproach' : 'lineOfTherapy',
+    isNeurology ? 'treatmentApproach' : isImmunology ? 'treatmentGoal' : 'lineOfTherapy',
     'biomarker',
     'combinationPotential',
     ...(isNeurology ? ['bbbPenetration' as keyof CalculationInput, 'diseaseProgression' as keyof CalculationInput, 'biomarkerValidation' as keyof CalculationInput] : []),
+    ...(isImmunology ? ['immuneResetPotential' as keyof CalculationInput, 'targetSpecificity' as keyof CalculationInput, 'diseaseSeverity' as keyof CalculationInput] : []),
   ];
 
   const parameters: ParameterSensitivity[] = parametersToAnalyze
@@ -348,8 +443,10 @@ export function computeSensitivityAnalysis(
   // Find top value driver
   const topValueDriver = findTopValueDriver(parameters);
 
-  // Generate neurology-specific insights
-  const neurologyInsights = generateNeurologyInsights(inputs);
+  // Generate therapeutic-area-specific insights
+  const neurologyInsights = isImmunology
+    ? generateImmunologyInsights(inputs)
+    : generateNeurologyInsights(inputs);
 
   return {
     currentUpfront: result.terms.upfront.median,

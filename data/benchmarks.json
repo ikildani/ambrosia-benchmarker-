@@ -1,17 +1,32 @@
 {
   "metadata": {
     "lastUpdated": "2026-02",
-    "version": "3.2",
+    "version": "4.0",
     "nextUpdate": "2026-03",
     "updateFrequency": "monthly",
     "sources": [
       "Publicly announced deal terms (SEC filings, press releases)",
       "Industry benchmark reports",
-      "2024-2026 mega-deal analysis"
+      "2024-2026 mega-deal analysis",
+      "48 immunology/autoimmune R&D partnerships (2019-2026)"
     ],
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
-    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS added as second therapeutic area, calibrated against 88 R&D partnerships totaling $45.9B (2024-Q2 2025). CNS resurgence driven by BBB delivery platforms, muscarinic agonists, and renewed Alzheimer's investment.",
+    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area — the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts.",
     "changelog": [
+      {
+        "date": "2026-02-16",
+        "version": "4.0",
+        "summary": "Immunology/Autoimmune Expansion + Oncology Oligonucleotides",
+        "changes": [
+          "Added Immunology/Autoimmune & Inflammation as third therapeutic area with 20 indications across IBD, rheumatology, dermatology, neuromuscular, and renal",
+          "Added 10 immunology-specific modalities: CAR-T autoimmune, in vivo CAR-T, CAR-Treg, FcRn antagonist, complement inhibitor, JAK/TYK2, S1P modulator, oral integrin, dual BAFF/APRIL antagonist, anti-TL1A",
+          "Added 4 immunology-specific parameters: immune reset potential, target specificity, disease severity, treatment goal",
+          "Immunology baselines calibrated against 48 real deals including Merck/Prometheus $10.8B, Roche/Telavant $7.1B, Pfizer/Arena $6.7B",
+          "Added 10 immunology modality × indication interaction terms",
+          "Added Oligonucleotide (ASO/siRNA) as oncology modality at 1.18x multiplier",
+          "15 immunology comparable deals added for report generation"
+        ]
+      },
       {
         "date": "2026-02-09",
         "version": "3.3",
@@ -143,6 +158,33 @@
       "royalty": { "base": 16, "max": 25 }
     }
   },
+  "immunologyPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 20, "median": 45, "high": 100 },
+      "totalValue": { "low": 300, "median": 650, "high": 1200 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase1": {
+      "upfront": { "low": 50, "median": 100, "high": 200 },
+      "totalValue": { "low": 500, "median": 950, "high": 1800 },
+      "royalty": { "base": 8, "max": 14 }
+    },
+    "phase2": {
+      "upfront": { "low": 150, "median": 350, "high": 800 },
+      "totalValue": { "low": 900, "median": 1800, "high": 4000 },
+      "royalty": { "base": 12, "max": 20 }
+    },
+    "phase3": {
+      "upfront": { "low": 300, "median": 600, "high": 1200 },
+      "totalValue": { "low": 1500, "median": 3000, "high": 6500 },
+      "royalty": { "base": 16, "max": 25 }
+    },
+    "approved": {
+      "upfront": { "low": 500, "median": 1000, "high": 2500 },
+      "totalValue": { "low": 3000, "median": 5500, "high": 11000 },
+      "royalty": { "base": 20, "max": 30 }
+    }
+  },
   "phaseConfig": {
     "rangeWidths": {
       "preclinical": 0.60,
@@ -189,6 +231,29 @@
       "approved": { "dev": 0.05, "reg": 0.25, "comm": 0.70 }
     }
   },
+  "immunologyPhaseConfig": {
+    "rangeWidths": {
+      "preclinical": 0.55,
+      "phase1": 0.45,
+      "phase2": 0.38,
+      "phase3": 0.28,
+      "approved": 0.16
+    },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.05, "high": 0.09 },
+      "phase1": { "low": 0.08, "high": 0.13 },
+      "phase2": { "low": 0.14, "high": 0.22 },
+      "phase3": { "low": 0.20, "high": 0.28 },
+      "approved": { "low": 0.28, "high": 0.42 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.45, "reg": 0.30, "comm": 0.25 },
+      "phase1": { "dev": 0.35, "reg": 0.35, "comm": 0.30 },
+      "phase2": { "dev": 0.20, "reg": 0.35, "comm": 0.45 },
+      "phase3": { "dev": 0.10, "reg": 0.30, "comm": 0.60 },
+      "approved": { "dev": 0.05, "reg": 0.20, "comm": 0.75 }
+    }
+  },
   "modalities": {
     "smallMolecule": { "multiplier": 1.00, "label": "Small Molecule", "context": "Baseline" },
     "mab": { "multiplier": 1.03, "label": "Monoclonal Antibody (naked)", "context": "Mature, commoditizing" },
@@ -212,7 +277,18 @@
     "psychedelic": { "multiplier": 1.20, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B for MDD" },
     "ionChannel": { "multiplier": 1.10, "label": "Ion Channel Modulator", "context": "Nav1.8, CaV, HCN targets; emerging in pain and epilepsy; Praxis, Xenon active" },
     "tauTargeting": { "multiplier": 1.25, "label": "Tau-targeting Therapy", "context": "Hot emerging category; tau degraders, immunotherapy, PET imaging; post-amyloid wave" },
-    "stemCell": { "multiplier": 1.15, "label": "Neural Stem Cell / Progenitor", "context": "BlueRock/Bayer precedent; iPSC-derived neurons; PD and stroke applications" }
+    "stemCell": { "multiplier": 1.15, "label": "Neural Stem Cell / Progenitor", "context": "BlueRock/Bayer precedent; iPSC-derived neurons; PD and stroke applications" },
+    "oligonucleotide": { "multiplier": 1.18, "label": "Oligonucleotide (ASO / siRNA)", "context": "Emerging in oncology; delivery to tumors remains key challenge; imetelstat (MDS) only approved; Ionis STAT3/KRAS programs, Novo/Dicerna PD-L1 siRNA" },
+    "carT_autoimmune": { "multiplier": 1.55, "label": "CAR-T (Autoimmune)", "context": "Hottest modality in biopharma 2025-2026; Kyverna filing H1 2026; curative potential; AbbVie/Capstan $2.1B" },
+    "inVivoCarT": { "multiplier": 1.65, "label": "In Vivo CAR-T (LNP)", "context": "Next frontier; no apheresis required; AbbVie/Capstan landmark; scalability breakthrough" },
+    "carTreg": { "multiplier": 1.30, "label": "CAR-Treg / Tolerizing Therapy", "context": "Antigen-specific tolerance; Sonoma, Quell pioneering; curative without immunosuppression" },
+    "fcrnAntagonist": { "multiplier": 1.25, "label": "FcRn Antagonist", "context": "argenx Vyvgart platform validated; J&J/Momenta $6.5B; expanding to 10+ indications" },
+    "complementInhibitor": { "multiplier": 1.20, "label": "Complement Inhibitor", "context": "AZ/Alexion $39B franchise; Amgen/ChemoCentryx $3.7B; oral complement emerging" },
+    "jakInhibitor": { "multiplier": 1.10, "label": "JAK / TYK2 Inhibitor", "context": "Established (Rinvoq $6B+, Xeljanz) but safety box warnings cooling; TYK2 allosteric next wave" },
+    "s1pModulator": { "multiplier": 1.15, "label": "S1P Receptor Modulator", "context": "Pfizer/Arena $6.7B; etrasimod approved UC; next-gen selectivity" },
+    "oralIntegrin": { "multiplier": 1.35, "label": "Oral Integrin Inhibitor", "context": "Lilly/Morphic $3.2B; oral vedolizumab mechanism; high-conviction deal class" },
+    "dualAntagonist": { "multiplier": 1.30, "label": "Dual BAFF/APRIL Antagonist", "context": "Vertex/Alpine $4.9B; Vor/RemeGen $4B+; IgAN and lupus nephritis applications" },
+    "tl1aInhibitor": { "multiplier": 1.45, "label": "Anti-TL1A", "context": "Hottest target 2023-2024; Merck/Prometheus $10.8B and Roche/Telavant $7.1B reset market" }
   },
   "indications": {
     "solidTumor": {
@@ -264,6 +340,28 @@
       "tbi": { "multiplier": 1.18, "label": "Traumatic Brain Injury / Stroke Recovery", "context": "High unmet need; no approved disease-modifying treatments; neuroprotection premium" },
       "addiction": { "multiplier": 1.05, "label": "Addiction / Substance Use Disorders", "context": "Growing interest; psychedelic overlap; opioid use disorder expanding" },
       "rareNeuro": { "multiplier": 1.25, "label": "Other Rare Neurological", "context": "Catch-all for rare genetic CNS; orphan premiums; SMA, Rett, ataxia, lysosomal storage" }
+    },
+    "immunology": {
+      "ulcerativeColitis": { "multiplier": 1.20, "label": "Ulcerative Colitis", "context": "Largest IBD market; S1P, JAK, TL1A, integrin all competing" },
+      "crohns": { "multiplier": 1.22, "label": "Crohn's Disease", "context": "High unmet need; anti-TL1A hot; oral approaches premium" },
+      "ibd_broad": { "multiplier": 1.18, "label": "IBD (Broad)", "context": "Combined UC+CD programs; platform value" },
+      "sle_lupus": { "multiplier": 1.25, "label": "Systemic Lupus (SLE)", "context": "CAR-T showing dramatic responses; large unmet need; belimumab only targeted therapy" },
+      "lupusNephritis": { "multiplier": 1.28, "label": "Lupus Nephritis", "context": "Severe manifestation; voclosporin + belimumab established; CAR-T transformative" },
+      "rheumatoidArthritis": { "multiplier": 1.00, "label": "Rheumatoid Arthritis", "context": "Well-served market; TNF, JAK, IL-6 established; differentiation required" },
+      "atopicderm": { "multiplier": 1.15, "label": "Atopic Dermatitis", "context": "Dupixent dominance; JAK, IL-13, OX40 expanding; large population" },
+      "psoriasis": { "multiplier": 1.05, "label": "Psoriasis", "context": "Crowded with IL-17/IL-23; Skyrizi/Bimzelx dominant; TYK2 oral differentiator" },
+      "psoriaticArthritis": { "multiplier": 1.08, "label": "Psoriatic Arthritis", "context": "IL-17/IL-23 expanding; dual skin+joint endpoint" },
+      "myastheniaGravis": { "multiplier": 1.30, "label": "Myasthenia Gravis", "context": "FcRn breakthrough; complement expanding; CAR-T potential; high unmet need" },
+      "multipleSclerosisMod": { "multiplier": 1.10, "label": "Multiple Sclerosis", "context": "Well-treated but high-efficacy gap; BTK, CAR-T for refractory; S1P next-gen" },
+      "igan": { "multiplier": 1.32, "label": "IgA Nephropathy", "context": "Vertex/Alpine $4.9B; BAFF/APRIL validated; complement and endothelin expanding" },
+      "aancaVasculitis": { "multiplier": 1.25, "label": "ANCA Vasculitis", "context": "Amgen/ChemoCentryx $3.7B (avacopan); complement validated; orphan premiums" },
+      "systemicSclerosis": { "multiplier": 1.22, "label": "Systemic Sclerosis", "context": "High unmet need; CAR-T dramatic responses; limited approved therapies" },
+      "sjogrens": { "multiplier": 1.18, "label": "Sjogren's Syndrome", "context": "No approved treatment; multiple Phase 2/3 programs; high pharma interest" },
+      "alopecia": { "multiplier": 0.95, "label": "Alopecia Areata", "context": "JAK inhibitors approved; lower severity perception limits premium" },
+      "hidradenitis": { "multiplier": 1.15, "label": "Hidradenitis Suppurativa", "context": "Humira/Cosentyx established; unmet need in moderate-severe" },
+      "pnh": { "multiplier": 1.28, "label": "PNH (Paroxysmal Nocturnal Hemoglobinuria)", "context": "Complement cornerstone; AZ/Alexion franchise; oral C5 emerging" },
+      "cidp": { "multiplier": 1.20, "label": "CIDP", "context": "FcRn validated; IVIg replacement opportunity; argenx expanding" },
+      "rareAutoimmune": { "multiplier": 1.25, "label": "Other Rare Autoimmune", "context": "Catch-all for rare autoimmune conditions; orphan premiums; pemphigus, myositis, stiff-person" }
     }
   },
   "territories": {
@@ -335,6 +433,27 @@
       "orphan": { "bonus": 0.08, "label": "Orphan Drug" },
       "prime": { "bonus": 0.05, "label": "PRIME (EU)" },
       "maxBonus": 0.20
+    },
+    "immuneResetPotential": {
+      "curativeIntent": { "multiplier": 1.40, "label": "Curative intent (drug-free remission)", "context": "CAR-T/tolerance approaches aiming for durable drug-free remission; highest premium" },
+      "durableRemission": { "multiplier": 1.15, "label": "Durable remission (years)", "context": "Deep B-cell depletion, immune resetting; months-to-years duration" },
+      "chronicTreatment": { "multiplier": 1.00, "label": "Chronic treatment", "context": "Standard ongoing therapy model; recurring revenue" }
+    },
+    "targetSpecificity": {
+      "antigenSpecific": { "multiplier": 1.20, "label": "Antigen-specific", "context": "Targets disease-driving antigen only; minimal immunosuppression; CAR-Treg, tolerizing" },
+      "pathwayTargeted": { "multiplier": 1.05, "label": "Pathway-targeted", "context": "Targets specific immune pathway (IL-23, TL1A, complement); standard" },
+      "broadImmunosuppression": { "multiplier": 0.90, "label": "Broad immunosuppression", "context": "Non-selective immune suppression; infection risk; commoditizing" }
+    },
+    "diseaseSeverity": {
+      "mildModerate": { "multiplier": 0.90, "label": "Mild-moderate", "context": "Large population but lower willingness to use aggressive therapies" },
+      "moderateSevere": { "multiplier": 1.10, "label": "Moderate-severe", "context": "Sweet spot: large enough population, high enough need for premium therapies" },
+      "severe": { "multiplier": 1.20, "label": "Severe / refractory", "context": "Highest unmet need; orphan-like pricing; biologic/cell therapy appropriate" },
+      "refractory": { "multiplier": 1.30, "label": "Multi-refractory", "context": "Failed multiple lines; CAR-T and novel mechanisms most relevant; premium pricing" }
+    },
+    "treatmentGoal": {
+      "remissionInduction": { "multiplier": 1.15, "label": "Remission induction", "context": "Achieving disease control; highest near-term value" },
+      "maintenance": { "multiplier": 1.05, "label": "Maintenance / prevention", "context": "Preventing relapse; chronic recurring revenue model" },
+      "flareControl": { "multiplier": 0.95, "label": "Acute flare control", "context": "Episodic use; smaller per-patient revenue" }
     }
   },
   "interactionTerms": {
@@ -351,7 +470,17 @@
     "ionChannel+epilepsy": { "bonus": 0.08, "context": "Ion channels are validated targets in epilepsy; genetic epilepsy syndromes" },
     "ionChannel+pain": { "bonus": 0.06, "context": "Nav1.8 is a validated non-opioid pain target; Vertex precedent" },
     "stemCell+parkinsons": { "bonus": 0.10, "context": "Dopaminergic neuron replacement is the holy grail for PD; BlueRock/Bayer lead" },
-    "stemCell+tbi": { "bonus": 0.08, "context": "Neural progenitors for brain injury repair; emerging neuroprotection" }
+    "stemCell+tbi": { "bonus": 0.08, "context": "Neural progenitors for brain injury repair; emerging neuroprotection" },
+    "carT_autoimmune+sle_lupus": { "bonus": 0.12, "context": "CAR-T + SLE is the paradigm case; dramatic DORIS remissions in trials; Kyverna, Cabaletta leading" },
+    "carT_autoimmune+systemicSclerosis": { "bonus": 0.10, "context": "CAR-T showing skin score improvements in SSc; high unmet need overlap" },
+    "carT_autoimmune+myastheniaGravis": { "bonus": 0.08, "context": "CD19 CAR-T depleting pathogenic B cells; Cartesian mRNA CAR-T approach" },
+    "tl1aInhibitor+crohns": { "bonus": 0.10, "context": "Anti-TL1A + Crohn's is the highest-conviction combo; Prometheus/Merck $10.8B" },
+    "tl1aInhibitor+ulcerativeColitis": { "bonus": 0.08, "context": "Anti-TL1A showing strong UC data; fibrosis reduction differentiator" },
+    "fcrnAntagonist+myastheniaGravis": { "bonus": 0.10, "context": "FcRn + MG is the validated paradigm; Vyvgart blockbuster; expanding to generalized" },
+    "complementInhibitor+pnh": { "bonus": 0.12, "context": "Complement + PNH is the cornerstone pairing; Soliris/Ultomiris franchise; oral next-gen" },
+    "dualAntagonist+igan": { "bonus": 0.10, "context": "BAFF/APRIL + IgAN is the validated mechanism; Vertex/Alpine $4.9B acquisition" },
+    "oralIntegrin+ulcerativeColitis": { "bonus": 0.08, "context": "Oral alpha4beta7 + UC is the oral vedolizumab thesis; Lilly/Morphic $3.2B" },
+    "inVivoCarT+sle_lupus": { "bonus": 0.15, "context": "In vivo CAR-T + SLE is the most transformative combination; scalable curative potential" }
   },
   "neurologyDiseaseModifyingPhaseAdjustment": {
     "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",
@@ -424,6 +553,33 @@
       "treatmentApproach": {
         "diseaseModifying": "Disease-modifying status significantly increases value in neurodegeneration. Emphasize biomarker evidence of disease modification in negotiations.",
         "adjunctive": "Adjunctive positioning limits standalone commercial potential. Consider demonstrating disease-modifying potential or earlier-line data."
+      },
+      "immunologyModality": {
+        "carT_autoimmune": "CAR-T for autoimmune is the hottest modality in biopharma. Leverage Kyverna's regulatory path and dramatic DORIS remission data. Curative potential commands massive premiums.",
+        "inVivoCarT": "In vivo CAR-T eliminates apheresis and manufacturing bottlenecks. AbbVie/Capstan $2.1B validates the approach. Emphasize scalability and cost-of-goods advantage.",
+        "carTreg": "CAR-Treg represents antigen-specific tolerance without immunosuppression. Still early-stage; emphasize differentiation from broad immunosuppression approaches.",
+        "fcrnAntagonist": "FcRn antagonists are a validated platform (Vyvgart $3B+ revenue). J&J/Momenta $6.5B sets the benchmark. Highlight multi-indication expansion potential.",
+        "complementInhibitor": "Complement inhibitors have AZ/Alexion's $39B franchise as precedent. Oral complement is the next wave. Emphasize differentiation from Soliris/Ultomiris.",
+        "tl1aInhibitor": "Anti-TL1A is the hottest target class in autoimmune. Merck/Prometheus $10.8B and Roche/Telavant $7.1B reset market expectations entirely.",
+        "oralIntegrin": "Oral integrin inhibitors represent the oral vedolizumab thesis. Lilly/Morphic $3.2B acquisition validates. Emphasize oral convenience advantage.",
+        "dualAntagonist": "BAFF/APRIL dual antagonists are validated by Vertex/Alpine $4.9B. IgAN and lupus nephritis applications carry premium. Multi-mechanism MOA is the differentiator."
+      },
+      "immunologyIndication": {
+        "sle_lupus": "SLE is being transformed by CAR-T showing drug-free remissions. Belimumab was the only targeted therapy for decades. Novel approaches command massive premiums.",
+        "crohns": "Crohn's Disease is the premier anti-TL1A indication. Merck/Prometheus $10.8B deal validates. Oral approaches and fibrosis reduction are key differentiators.",
+        "ulcerativeColitis": "UC has multiple competing mechanisms (S1P, JAK, TL1A, integrin) but remains high-value. Oral convenience is a major differentiator over biologics.",
+        "myastheniaGravis": "MG was transformed by FcRn antagonists (Vyvgart). Complement and CAR-T approaches expanding. High unmet need in refractory patients.",
+        "igan": "IgA Nephropathy validated by Vertex/Alpine $4.9B acquisition. BAFF/APRIL mechanism established. Complement and endothelin approaches expanding.",
+        "pnh": "PNH is the cornerstone complement indication. AZ/Alexion franchise ($6B+ revenue). Oral C5 and next-gen complement targets are the frontier.",
+        "rareAutoimmune": "Rare autoimmune conditions carry orphan drug premiums. Pemphigus, myositis, stiff-person syndrome — all attracting CAR-T and novel biologic approaches."
+      },
+      "immuneResetPotential": {
+        "curativeIntent": "Curative intent (drug-free remission) is the holy grail in autoimmune. CAR-T and tolerizing approaches command 40%+ premiums. Emphasize DORIS remission data.",
+        "chronicTreatment": "Chronic treatment models have predictable recurring revenue but face biosimilar/generic pressure. Differentiation and adherence advantages are key."
+      },
+      "targetSpecificity": {
+        "antigenSpecific": "Antigen-specific approaches (CAR-Treg, tolerizing) avoid broad immunosuppression. This is the next frontier — emphasize safety advantage over broad immunosuppressants.",
+        "broadImmunosuppression": "Broad immunosuppression faces commoditization pressure. Infection risk concerns limit use in milder disease. Focus on rapid onset and bridge-to-maintenance positioning."
       }
     }
   },

@@ -41,6 +41,7 @@ export default function DealFilters({
   const therapeuticAreaLabels: Record<string, string> = {
     oncology: 'Oncology',
     neurology: 'Neurology / CNS',
+    immunology: 'Immunology / Autoimmune',
     other: 'Other',
   };
 

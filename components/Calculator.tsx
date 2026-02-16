@@ -38,6 +38,16 @@ import {
   bbbPenetrationOptions,
   diseaseProgressionOptions,
   biomarkerValidationOptions,
+  immunologyModalityOptions,
+  immunologyIndicationOptions,
+  ImmuneResetPotential,
+  TargetSpecificity,
+  DiseaseSeverity,
+  ImmunologyTreatmentGoal,
+  immuneResetOptions,
+  targetSpecificityOptions,
+  diseaseSeverityOptions,
+  treatmentGoalOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getRemainingUses, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
@@ -236,6 +246,69 @@ const NEUROLOGY_TEMPLATES: DealTemplate[] = [
   },
 ];
 
+const IMMUNOLOGY_TEMPLATES: DealTemplate[] = [
+  {
+    id: 'immuno-tl1a-ibd',
+    name: 'Phase 2 Anti-TL1A (IBD)',
+    description: 'Hottest autoimmune target',
+    icon: 'highValue',
+    values: {
+      therapeuticArea: 'immunology',
+      phase: 'phase2',
+      modality: 'tl1aInhibitor' as Modality,
+      indication: 'crohns' as Indication,
+      territory: 'global',
+      competitivePosition: 'racing',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'immuno-cart-lupus',
+    name: 'Autoimmune CAR-T (Lupus)',
+    description: 'Curative potential',
+    icon: 'platform',
+    values: {
+      therapeuticArea: 'immunology',
+      phase: 'phase1',
+      modality: 'carT_autoimmune' as Modality,
+      indication: 'sle_lupus' as Indication,
+      territory: 'global',
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+  {
+    id: 'immuno-oral-integrin',
+    name: 'Oral Integrin (UC)',
+    description: 'Oral vedolizumab thesis',
+    icon: 'premium',
+    values: {
+      therapeuticArea: 'immunology',
+      phase: 'phase2',
+      modality: 'oralIntegrin' as Modality,
+      indication: 'ulcerativeColitis' as Indication,
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'immuno-fcrn-mg',
+    name: 'FcRn Antagonist (MG)',
+    description: 'Validated platform',
+    icon: 'commercial',
+    values: {
+      therapeuticArea: 'immunology',
+      phase: 'phase2',
+      modality: 'fcrnAntagonist' as Modality,
+      indication: 'myastheniaGravis' as Indication,
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+];
+
 const TEMPLATE_ICONS: Record<DealTemplate['icon'], React.ComponentType<{ className?: string }>> = {
   standard: Circle,
   premium: Star,
@@ -271,6 +344,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [bbbPenetration, setBbbPenetration] = useState<BBBPenetration>('unproven');
   const [diseaseProgression, setDiseaseProgression] = useState<DiseaseProgression>('moderateProgressive');
   const [biomarkerValidation, setBiomarkerValidation] = useState<BiomarkerValidation>('noBiomarker');
+  const [immuneResetPotential, setImmuneResetPotential] = useState<ImmuneResetPotential>('chronicTreatment');
+  const [targetSpecificity, setTargetSpecificity] = useState<TargetSpecificity>('pathwayTargeted');
+  const [diseaseSeverity, setDiseaseSeverity] = useState<DiseaseSeverity>('moderateSevere');
+  const [treatmentGoal, setTreatmentGoal] = useState<ImmunologyTreatmentGoal>('remissionInduction');
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -453,6 +530,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             dataQuality,
             regulatoryDesignations,
             ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
+            ...(therapeuticArea === 'immunology' ? { immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal } : {}),
           };
           const calculatedResult = calculateDealTerms(input);
           setResult(calculatedResult);
@@ -581,6 +659,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setIndication('alzheimers' as Indication);
       setModality('smallMolecule');
       setTreatmentApproach('symptomatic');
+    } else if (newArea === 'immunology') {
+      setIndication('ulcerativeColitis' as Indication);
+      setModality('mab' as Modality);
+      setTreatmentGoal('remissionInduction');
+      setImmuneResetPotential('chronicTreatment');
+      setTargetSpecificity('pathwayTargeted');
+      setDiseaseSeverity('moderateSevere');
     } else {
       setIndication('lung_nsclc' as Indication);
       setModality('smallMolecule');
@@ -610,6 +695,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           bbbPenetration: (newInputs.bbbPenetration as BBBPenetration) || bbbPenetration,
           diseaseProgression: (newInputs.diseaseProgression as DiseaseProgression) || diseaseProgression,
           biomarkerValidation: (newInputs.biomarkerValidation as BiomarkerValidation) || biomarkerValidation,
+        } : {}),
+        ...(therapeuticArea === 'immunology' ? {
+          immuneResetPotential: (newInputs.immuneResetPotential as ImmuneResetPotential) || immuneResetPotential,
+          targetSpecificity: (newInputs.targetSpecificity as TargetSpecificity) || targetSpecificity,
+          diseaseSeverity: (newInputs.diseaseSeverity as DiseaseSeverity) || diseaseSeverity,
+          treatmentGoal: (newInputs.treatmentGoal as ImmunologyTreatmentGoal) || treatmentGoal,
         } : {}),
       };
 
@@ -720,7 +811,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
-                  {therapeuticArea === 'neurology' ? 'Neurology / CNS' : 'Oncology'} Deal Terms Calculator
+                  {therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
                   {BENCHMARK_VERSION.LABEL}
@@ -736,12 +827,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             <div className="mb-4">
               <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
               <p className="text-sm text-neutral-500 dark:text-slate-400">
-                {therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
+                {therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : therapeuticArea === 'immunology' ? `Based on 48 immunology/autoimmune R&D partnerships (2019-2026)` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
               </p>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              {(therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
+              {(therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : therapeuticArea === 'immunology' ? IMMUNOLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
                 const IconComponent = TEMPLATE_ICONS[template.icon];
                 return (
                   <button
@@ -784,7 +875,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           {/* Therapeutic Area Selector */}
           <div className="mb-6 lg:mb-8">
             <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {therapeuticAreaOptions.map((option) => (
                 <button
                   key={option.value}
@@ -848,7 +939,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {(therapeuticArea === 'neurology' ? neurologyModalityOptions : modalityOptions).map((group) => (
+                      {(therapeuticArea === 'neurology' ? neurologyModalityOptions : therapeuticArea === 'immunology' ? immunologyModalityOptions : modalityOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -869,7 +960,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {(therapeuticArea === 'neurology' ? neurologyIndicationOptions : indicationOptions).map((group) => (
+                      {(therapeuticArea === 'neurology' ? neurologyIndicationOptions : therapeuticArea === 'immunology' ? immunologyIndicationOptions : indicationOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -934,6 +1025,26 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         className={`select-field transition-all duration-300 ${highlightedFields.has('treatmentApproach') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                       >
                         {treatmentApproachOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : therapeuticArea === 'immunology' ? (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                        Treatment Goal
+                        <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
+                      </label>
+                      <select
+                        value={treatmentGoal}
+                        onChange={(e) => {
+                          const newValue = e.target.value as ImmunologyTreatmentGoal;
+                          trackParameterChange('treatmentGoal', treatmentGoal, newValue);
+                          setTreatmentGoal(newValue);
+                        }}
+                        className="select-field"
+                      >
+                        {treatmentGoalOptions.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                       </select>
@@ -1012,6 +1123,68 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           className="select-field"
                         >
                           {biomarkerValidationOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {therapeuticArea === 'immunology' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Immune Reset Potential
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
+                        </label>
+                        <select
+                          value={immuneResetPotential}
+                          onChange={(e) => {
+                            const newValue = e.target.value as ImmuneResetPotential;
+                            trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
+                            setImmuneResetPotential(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {immuneResetOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Target Specificity
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
+                        </label>
+                        <select
+                          value={targetSpecificity}
+                          onChange={(e) => {
+                            const newValue = e.target.value as TargetSpecificity;
+                            trackParameterChange('targetSpecificity', targetSpecificity, newValue);
+                            setTargetSpecificity(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {targetSpecificityOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Disease Severity
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
+                        </label>
+                        <select
+                          value={diseaseSeverity}
+                          onChange={(e) => {
+                            const newValue = e.target.value as DiseaseSeverity;
+                            trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
+                            setDiseaseSeverity(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {diseaseSeverityOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                           ))}
                         </select>

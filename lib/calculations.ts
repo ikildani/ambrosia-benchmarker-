@@ -1,7 +1,7 @@
 import benchmarks from '@/data/benchmarks.json';
 
 // Therapeutic area type
-export type TherapeuticArea = 'oncology' | 'neurology';
+export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology';
 
 // Phase types
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
@@ -13,7 +13,11 @@ export type Modality =
   | 'radiopharmaceutical' | 'mrna' | 'rnai' | 'protac'
   | 'molecularGlue' | 'peptide' | 'therapeuticVaccine' | 'oncolyticVirus'
   | 'bbbPlatform' | 'aso' | 'psychedelic'
-  | 'ionChannel' | 'tauTargeting' | 'stemCell';
+  | 'ionChannel' | 'tauTargeting' | 'stemCell'
+  | 'oligonucleotide'
+  | 'carT_autoimmune' | 'inVivoCarT' | 'carTreg'
+  | 'fcrnAntagonist' | 'complementInhibitor' | 'jakInhibitor'
+  | 's1pModulator' | 'oralIntegrin' | 'dualAntagonist' | 'tl1aInhibitor';
 
 // Indication types
 export type SolidTumorIndication =
@@ -32,7 +36,18 @@ export type NeurologyIndication =
   | 'pain' | 'ms' | 'epilepsy' | 'tremor' | 'tbi' | 'addiction'
   | 'rareNeuro';
 
-export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication;
+export type ImmunologyIndication =
+  | 'rheumatoidArthritis' | 'sle_lupus' | 'lupusNephritis'
+  | 'atopicderm' | 'psoriasis' | 'psoriaticArthritis'
+  | 'ulcerativeColitis' | 'crohns' | 'ibd_broad'
+  | 'myastheniaGravis' | 'multipleSclerosisMod'
+  | 'igan' | 'aancaVasculitis'
+  | 'systemicSclerosis' | 'sjogrens'
+  | 'alopecia' | 'hidradenitis'
+  | 'pnh' | 'cidp'
+  | 'rareAutoimmune';
+
+export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication;
 
 // Territory types (9 options)
 export type Territory =
@@ -51,6 +66,12 @@ export type DataQuality = 'pivotalReady' | 'strongPhase2' | 'promising' | 'mixed
 export type BBBPenetration = 'provenCNS' | 'promisingPreclinical' | 'unproven' | 'peripheralOnly';
 export type DiseaseProgression = 'slowProgressive' | 'moderateProgressive' | 'rapidProgressive' | 'episodic';
 export type BiomarkerValidation = 'validatedSurrogate' | 'exploratory' | 'noBiomarker';
+
+// Immunology-specific types
+export type ImmuneResetPotential = 'curativeIntent' | 'durableRemission' | 'chronicTreatment';
+export type TargetSpecificity = 'antigenSpecific' | 'pathwayTargeted' | 'broadImmunosuppression';
+export type DiseaseSeverity = 'mildModerate' | 'moderateSevere' | 'severe' | 'refractory';
+export type ImmunologyTreatmentGoal = 'remissionInduction' | 'maintenance' | 'flareControl';
 
 export interface RegulatoryDesignations {
   breakthrough: boolean;
@@ -97,6 +118,11 @@ export interface CalculationInput {
   bbbPenetration?: BBBPenetration;
   diseaseProgression?: DiseaseProgression;
   biomarkerValidation?: BiomarkerValidation;
+  // Immunology-specific optional fields
+  immuneResetPotential?: ImmuneResetPotential;
+  targetSpecificity?: TargetSpecificity;
+  diseaseSeverity?: DiseaseSeverity;
+  treatmentGoal?: ImmunologyTreatmentGoal;
 }
 
 // Drill-down data for expanded metric views
@@ -145,7 +171,7 @@ export interface CalculationResult {
 }
 
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' {
+function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' {
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
@@ -158,8 +184,20 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'pain', 'ms', 'epilepsy', 'tremor', 'tbi', 'addiction',
     'rareNeuro'
   ];
+  const immunologyIndications: ImmunologyIndication[] = [
+    'rheumatoidArthritis', 'sle_lupus', 'lupusNephritis',
+    'atopicderm', 'psoriasis', 'psoriaticArthritis',
+    'ulcerativeColitis', 'crohns', 'ibd_broad',
+    'myastheniaGravis', 'multipleSclerosisMod',
+    'igan', 'aancaVasculitis',
+    'systemicSclerosis', 'sjogrens',
+    'alopecia', 'hidradenitis',
+    'pnh', 'cidp',
+    'rareAutoimmune'
+  ];
   if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
   if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
+  if (immunologyIndications.includes(indication as ImmunologyIndication)) return 'immunology';
   return 'hematologic';
 }
 
@@ -205,6 +243,27 @@ function calculateRiskScore(input: CalculationInput): number {
 function getNegotiationInsight(input: CalculationInput): string {
   const insights = benchmarks.marketContext.negotiationInsights;
   const isNeurology = input.therapeuticArea === 'neurology';
+  const isImmunology = input.therapeuticArea === 'immunology';
+
+  // For immunology, check immunology-specific insights first
+  if (isImmunology) {
+    const immunoModalityInsights = (insights as Record<string, Record<string, string>>).immunologyModality;
+    if (immunoModalityInsights?.[input.modality]) {
+      return immunoModalityInsights[input.modality];
+    }
+    const immunoIndicationInsights = (insights as Record<string, Record<string, string>>).immunologyIndication;
+    if (immunoIndicationInsights?.[input.indication]) {
+      return immunoIndicationInsights[input.indication];
+    }
+    const irInsights = (insights as Record<string, Record<string, string>>).immuneResetPotential;
+    if (input.immuneResetPotential && irInsights?.[input.immuneResetPotential]) {
+      return irInsights[input.immuneResetPotential];
+    }
+    const tsInsights = (insights as Record<string, Record<string, string>>).targetSpecificity;
+    if (input.targetSpecificity && tsInsights?.[input.targetSpecificity]) {
+      return tsInsights[input.targetSpecificity];
+    }
+  }
 
   // For neurology, check neurology-specific insights first
   if (isNeurology) {
@@ -232,7 +291,7 @@ function getNegotiationInsight(input: CalculationInput): string {
 
   // Line of therapy insights (oncology only)
   const lotInsights = insights.lineOfTherapy as Record<string, string>;
-  if (!isNeurology && lotInsights[input.lineOfTherapy]) {
+  if (!isNeurology && !isImmunology && lotInsights[input.lineOfTherapy]) {
     return lotInsights[input.lineOfTherapy];
   }
 
@@ -264,12 +323,17 @@ function getNegotiationInsight(input: CalculationInput): string {
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const modifiers: { name: string; multiplier: number; context?: string }[] = [];
   const isNeurology = input.therapeuticArea === 'neurology';
+  const isImmunology = input.therapeuticArea === 'immunology';
 
-  // Get phase baselines (neurology vs oncology)
-  const phaseBaseline = isNeurology
+  // Get phase baselines (immunology vs neurology vs oncology)
+  const phaseBaseline = isImmunology
+    ? ((benchmarks as any).immunologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    : isNeurology
     ? (benchmarks.neurologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
     : benchmarks.phaseBaselines[input.phase];
-  const phaseConfig = isNeurology
+  const phaseConfig = isImmunology
+    ? ((benchmarks as any).immunologyPhaseConfig as typeof benchmarks.phaseConfig)
+    : isNeurology
     ? (benchmarks.neurologyPhaseConfig as typeof benchmarks.phaseConfig)
     : benchmarks.phaseConfig;
 
@@ -297,9 +361,18 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier, context: biomarkerData?.context });
   }
 
-  // Get line of therapy / treatment approach multiplier (depends on therapeutic area)
+  // Get line of therapy / treatment approach / treatment goal multiplier (depends on therapeutic area)
   let lotMultiplier = 1.0;
-  if (isNeurology) {
+  if (isImmunology) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mc = benchmarks.multiplierConfig as any;
+    const tgKey = input.treatmentGoal || 'remissionInduction';
+    const tgData = mc.treatmentGoal?.[tgKey] as { multiplier: number; label: string; context?: string } | undefined;
+    lotMultiplier = tgData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: tgData?.label ?? tgKey, multiplier: lotMultiplier, context: tgData?.context });
+    }
+  } else if (isNeurology) {
     const taData = (benchmarks.multiplierConfig.treatmentApproach as Record<string, { multiplier: number; label: string; context?: string }>)[input.treatmentApproach];
     lotMultiplier = taData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
@@ -355,9 +428,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   }
   regulatoryBonus = Math.min(regulatoryBonus, regConfig.maxBonus);
 
-  // Look up modality × indication interaction bonus
+  // Look up modality × indication interaction bonus (neurology and immunology)
   let interactionBonus = 0;
-  if (isNeurology) {
+  if (isNeurology || isImmunology) {
     const interactionTerms = (benchmarks as any).interactionTerms || {};
     const key = `${input.modality}+${input.indication}`;
     if (interactionTerms[key]) {
@@ -400,12 +473,43 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     }
   }
 
+  // Get immunology-specific multipliers
+  let immuneResetMultiplier = 1.0;
+  let targetSpecMultiplier = 1.0;
+  let diseaseSevMultiplier = 1.0;
+  if (isImmunology) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mc = benchmarks.multiplierConfig as any;
+
+    const irKey = input.immuneResetPotential || 'chronicTreatment';
+    const irData = mc.immuneResetPotential?.[irKey] as { multiplier: number; label: string; context?: string } | undefined;
+    immuneResetMultiplier = irData?.multiplier ?? 1.0;
+    if (immuneResetMultiplier !== 1.0) {
+      modifiers.push({ name: irData?.label ?? irKey, multiplier: immuneResetMultiplier, context: irData?.context });
+    }
+
+    const tsKey = input.targetSpecificity || 'pathwayTargeted';
+    const tsData = mc.targetSpecificity?.[tsKey] as { multiplier: number; label: string; context?: string } | undefined;
+    targetSpecMultiplier = tsData?.multiplier ?? 1.0;
+    if (targetSpecMultiplier !== 1.0) {
+      modifiers.push({ name: tsData?.label ?? tsKey, multiplier: targetSpecMultiplier, context: tsData?.context });
+    }
+
+    const dsKey = input.diseaseSeverity || 'moderateSevere';
+    const dsData = mc.diseaseSeverity?.[dsKey] as { multiplier: number; label: string; context?: string } | undefined;
+    diseaseSevMultiplier = dsData?.multiplier ?? 1.0;
+    if (diseaseSevMultiplier !== 1.0) {
+      modifiers.push({ name: dsData?.label ?? dsKey, multiplier: diseaseSevMultiplier, context: dsData?.context });
+    }
+  }
+
   // Apply diminishing multiplier stacking with therapeutic-area-specific exponents
   // Neurology: combo dampening reduced (CNS drugs are inherently combination-limited by BBB)
   // Neurology: indication exponent higher (indication choice matters more in neuro)
-  const comboExp = isNeurology ? 0.90 : 0.75;
-  const indicationExp = isNeurology ? 0.90 : 0.80;
-  const lotExp = isNeurology ? 0.90 : 0.85;
+  // Immunology: combo therapies very relevant; indication and disease severity matter highly
+  const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : 0.75;
+  const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : 0.80;
+  const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : 0.85;
 
   const effectiveMultiplier =
     Math.pow(modalityMultiplier, 1.0) *
@@ -419,6 +523,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     Math.pow(bbbMultiplier, 0.8) *
     Math.pow(diseaseProgMultiplier, 0.7) *
     Math.pow(biomarkerValMultiplier, 0.75) *
+    Math.pow(immuneResetMultiplier, 0.85) *
+    Math.pow(targetSpecMultiplier, 0.7) *
+    Math.pow(diseaseSevMultiplier, 0.75) *
     (1 + regulatoryBonus) *
     (1 + interactionBonus);
 
@@ -549,6 +656,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     phase: input.phase,
     ...(isNeurology ? {
       neurologyMilestoneExplanation: generateNeuroMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isImmunology ? {
+      neurologyMilestoneExplanation: generateImmunologyMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {})
   };
 }
@@ -570,6 +680,19 @@ function generateNeuroMilestoneExplanation(phase: Phase, upfrontPercent: number)
   };
   return `Neurology deals at ${phase.replace('phase', 'Phase ')} typically allocate ${neuroUpfrontRanges[phase]} upfront (vs ${oncoUpfrontRanges[phase]} in oncology). ` +
     `Your estimated ${upfrontPercent}% upfront reflects the higher clinical risk in CNS programs — longer trials, complex endpoints, and historically lower approval rates shift value toward milestone-based structures that reward de-risking.`;
+}
+
+function generateImmunologyMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const immunoUpfrontRanges: Record<Phase, string> = {
+    preclinical: '5-9%',
+    phase1: '8-13%',
+    phase2: '14-22%',
+    phase3: '20-28%',
+    approved: '28-42%',
+  };
+  return `Immunology/autoimmune deals at ${phase.replace('phase', 'Phase ')} typically allocate ${immunoUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the chronic-disease commercial model — autoimmune drugs generate recurring revenue (Humira $21B peak, Dupixent $13B+), ` +
+    `so deal structures weight commercial milestones heavily, with upfronts higher than neurology but structured to reward market access and formulary wins.`;
 }
 
 function generateDrillDownData(
@@ -700,6 +823,19 @@ function calculateBreakdownValue(
 function generateRationale(input: CalculationInput, riskScore: number): string {
   const phaseLabel = benchmarks.labels.phases[input.phase];
   const isNeuro = input.therapeuticArea === 'neurology';
+  const isImmuno = input.therapeuticArea === 'immunology';
+
+  if (isImmuno) {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} autoimmune asset with validated mechanism justifies higher upfront. Commercial milestones dominate — chronic autoimmune drugs generate blockbuster recurring revenue.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} immunology asset with moderate risk. Autoimmune deals increasingly favor commercial milestone-heavy structures given the proven chronic-use revenue model.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage autoimmune asset with clinical uncertainty. Deals are structured with development milestones tied to endpoint validation and regulatory de-risking.`;
+    } else {
+      return `High-risk autoimmune profile. Expect minimal upfront with milestone potential tied to immune reset durability, endpoint validation, and regulatory milestones.`;
+    }
+  }
 
   if (isNeuro) {
     if (riskScore < 25) {
@@ -765,6 +901,7 @@ export const modalityOptions = [
   { group: 'RNA & Vaccines', options: [
     { value: 'mrna', label: 'mRNA (Oncology Vaccine)' },
     { value: 'rnai', label: 'RNAi / siRNA' },
+    { value: 'oligonucleotide', label: 'Oligonucleotide (ASO / siRNA for Tumors)' },
     { value: 'therapeuticVaccine', label: 'Therapeutic Vaccine (non-mRNA)' },
   ]},
   { group: 'Other', options: [
@@ -867,6 +1004,7 @@ export const regulatoryDesignationOptions = [
 export const therapeuticAreaOptions = [
   { value: 'oncology', label: 'Oncology' },
   { value: 'neurology', label: 'Neurology / CNS' },
+  { value: 'immunology', label: 'Immunology / Autoimmune' },
 ];
 
 // Neurology-specific indication options
@@ -948,4 +1086,95 @@ export const biomarkerValidationOptions = [
   { value: 'validatedSurrogate', label: 'Validated surrogate endpoint' },
   { value: 'exploratory', label: 'Exploratory biomarker' },
   { value: 'noBiomarker', label: 'No biomarker' },
+];
+
+// Immunology-specific modality options
+export const immunologyModalityOptions = [
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'jakInhibitor', label: 'JAK / TYK2 Inhibitor' },
+    { value: 's1pModulator', label: 'S1P Receptor Modulator' },
+    { value: 'oralIntegrin', label: 'Oral Integrin Inhibitor' },
+  ]},
+  { group: 'Antibodies & Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'bispecific', label: 'Bispecific Antibody' },
+    { value: 'tl1aInhibitor', label: 'Anti-TL1A' },
+    { value: 'fcrnAntagonist', label: 'FcRn Antagonist' },
+    { value: 'dualAntagonist', label: 'Dual BAFF/APRIL Antagonist' },
+    { value: 'complementInhibitor', label: 'Complement Inhibitor' },
+  ]},
+  { group: 'Cell Therapy', options: [
+    { value: 'carT_autoimmune', label: 'CAR-T (Autoimmune)' },
+    { value: 'inVivoCarT', label: 'In Vivo CAR-T (LNP)' },
+    { value: 'carTreg', label: 'CAR-Treg / Tolerizing' },
+    { value: 'cellTherapy', label: 'Cell Therapy (other)' },
+  ]},
+  { group: 'RNA & Gene', options: [
+    { value: 'rnai', label: 'RNAi / siRNA' },
+    { value: 'geneTherapy', label: 'Gene Therapy' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+];
+
+// Immunology-specific indication options
+export const immunologyIndicationOptions = [
+  { group: 'Inflammatory Bowel', options: [
+    { value: 'ulcerativeColitis', label: 'Ulcerative Colitis' },
+    { value: 'crohns', label: "Crohn's Disease" },
+    { value: 'ibd_broad', label: 'IBD (Broad UC + CD)' },
+  ]},
+  { group: 'Rheumatologic', options: [
+    { value: 'rheumatoidArthritis', label: 'Rheumatoid Arthritis' },
+    { value: 'sle_lupus', label: 'Systemic Lupus (SLE)' },
+    { value: 'lupusNephritis', label: 'Lupus Nephritis' },
+    { value: 'systemicSclerosis', label: 'Systemic Sclerosis' },
+    { value: 'sjogrens', label: "Sjogren's Syndrome" },
+    { value: 'aancaVasculitis', label: 'ANCA Vasculitis' },
+  ]},
+  { group: 'Dermatologic', options: [
+    { value: 'atopicderm', label: 'Atopic Dermatitis' },
+    { value: 'psoriasis', label: 'Psoriasis' },
+    { value: 'psoriaticArthritis', label: 'Psoriatic Arthritis' },
+    { value: 'alopecia', label: 'Alopecia Areata' },
+    { value: 'hidradenitis', label: 'Hidradenitis Suppurativa' },
+  ]},
+  { group: 'Neuromuscular & Hematologic', options: [
+    { value: 'myastheniaGravis', label: 'Myasthenia Gravis' },
+    { value: 'cidp', label: 'CIDP' },
+    { value: 'multipleSclerosisMod', label: 'Multiple Sclerosis' },
+    { value: 'pnh', label: 'PNH' },
+  ]},
+  { group: 'Renal & Other', options: [
+    { value: 'igan', label: 'IgA Nephropathy' },
+    { value: 'rareAutoimmune', label: 'Other Rare Autoimmune' },
+  ]},
+];
+
+// Immunology-specific parameter options
+export const immuneResetOptions = [
+  { value: 'curativeIntent', label: 'Curative intent (drug-free remission)' },
+  { value: 'durableRemission', label: 'Durable remission (years)' },
+  { value: 'chronicTreatment', label: 'Chronic treatment' },
+];
+
+export const targetSpecificityOptions = [
+  { value: 'antigenSpecific', label: 'Antigen-specific' },
+  { value: 'pathwayTargeted', label: 'Pathway-targeted' },
+  { value: 'broadImmunosuppression', label: 'Broad immunosuppression' },
+];
+
+export const diseaseSeverityOptions = [
+  { value: 'mildModerate', label: 'Mild-moderate' },
+  { value: 'moderateSevere', label: 'Moderate-severe' },
+  { value: 'severe', label: 'Severe / refractory' },
+  { value: 'refractory', label: 'Multi-refractory' },
+];
+
+export const treatmentGoalOptions = [
+  { value: 'remissionInduction', label: 'Remission induction' },
+  { value: 'maintenance', label: 'Maintenance / prevention' },
+  { value: 'flareControl', label: 'Acute flare control' },
 ];
