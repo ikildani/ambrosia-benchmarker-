@@ -66,7 +66,7 @@ export default function PressPage() {
               { stat: '600+', label: 'Deals Analyzed' },
               { stat: '50+', label: 'Therapeutic Areas' },
               { stat: '15+', label: 'Modalities Covered' },
-              { stat: '2018-2025', label: 'Data Coverage' },
+              { stat: '2018-2026', label: 'Data Coverage' },
             ].map((item, i) => (
               <div key={i} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 text-center">
                 <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">

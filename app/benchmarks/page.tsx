@@ -23,9 +23,22 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026',
     description:
-      'Comprehensive licensing deal benchmarks across oncology, neurology, and all major modalities.',
+      'Comprehensive licensing deal benchmarks across oncology, neurology, immunology, and all major modalities.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/benchmarks',
+    images: [
+      {
+        url: '/api/og?title=Biopharma%20Deal%20Benchmarks%202026&subtitle=Oncology%20%E2%80%A2%20Neurology%20%E2%80%A2%20Immunology',
+        width: 1200,
+        height: 630,
+        alt: 'Biopharma Deal Benchmarks 2026',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Biopharma Deal Benchmarks 2026',
+    description: 'Comprehensive licensing deal benchmarks across oncology, neurology, immunology, and all major modalities.',
   },
 };
 
@@ -50,7 +63,7 @@ const CATEGORY_META: Record<
   },
   overview: {
     label: 'Market Overviews',
-    description: 'Comprehensive 2026 deal landscape analysis across oncology and neurology therapeutic areas.',
+    description: 'Comprehensive 2026 deal landscape analysis across oncology, neurology, and immunology therapeutic areas.',
     icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
   },
 };

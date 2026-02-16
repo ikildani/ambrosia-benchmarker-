@@ -11,16 +11,19 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Life Sciences Deal Calculator | Ambrosia Ventures",
-  description: "Estimate upfront payments, milestones, and royalties for biopharma licensing deals across oncology and neurology. Powered by Ambrosia Ventures.",
-  keywords: ["biotech", "licensing", "deal terms", "oncology", "neurology", "CNS", "milestones", "royalties", "M&A", "life sciences"],
+  description: "Estimate upfront payments, milestones, and royalties for biopharma licensing deals across oncology, neurology, and immunology. Powered by Ambrosia Ventures.",
+  keywords: ["biotech", "licensing", "deal terms", "oncology", "neurology", "CNS", "immunology", "autoimmune", "milestones", "royalties", "M&A", "life sciences"],
   authors: [{ name: "Ambrosia Ventures" }],
   metadataBase: new URL("https://calculator.ambrosiaventures.co"),
   verification: {
     google: "iAzMTWYwwCcC_foIWu0oPFBXKfYOT61aCgqs3vQ0r4c",
   },
+  alternates: {
+    canonical: "https://calculator.ambrosiaventures.co",
+  },
   openGraph: {
     title: "Life Sciences Deal Calculator",
-    description: "Data-driven estimates for biopharma licensing deals",
+    description: "Data-driven estimates for biopharma licensing deals across oncology, neurology, and immunology",
     type: "website",
     url: "https://calculator.ambrosiaventures.co",
     siteName: "Ambrosia Ventures",

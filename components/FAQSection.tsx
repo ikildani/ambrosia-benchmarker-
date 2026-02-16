@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: `We currently cover oncology and neurology/CNS — the two most active therapeutic areas in biopharma licensing. Oncology benchmarks draw from ${DEAL_STATS.TOTAL_DEALS} deals, while our neurology module is calibrated against ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION} totaling ${DEAL_STATS.NEUROLOGY_TOTAL_VALUE} (${DEAL_STATS.NEUROLOGY_TIMEFRAME}), covering indications from Alzheimer's to rare neurological diseases. Additional therapeutic areas including immunology and cardiometabolic are in development.`
+    answer: `We cover oncology, neurology/CNS, and immunology/autoimmune — the three most active therapeutic areas in biopharma licensing. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, and more. Additional therapeutic areas including cardiometabolic and rare disease are in development.`
   },
   {
     question: "Is my data kept confidential?",

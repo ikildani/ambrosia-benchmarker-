@@ -9,11 +9,27 @@ import { NewsletterSignup } from '@/components/blog/NewsletterSignup';
 export const metadata: Metadata = {
   title: 'Biotech Licensing Insights | Ambrosia Ventures Blog',
   description: 'Expert analysis of biotech licensing deals, modality trends, and negotiation strategies for life sciences professionals.',
+  alternates: {
+    canonical: 'https://calculator.ambrosiaventures.co/blog',
+  },
   openGraph: {
     title: 'Biotech Licensing Insights | Ambrosia Ventures Blog',
     description: 'Expert analysis of biotech licensing deals, modality trends, and negotiation strategies.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/blog',
+    images: [
+      {
+        url: '/api/og?title=Biotech%20Licensing%20Insights&subtitle=Expert%20Deal%20Analysis%20%26%20Trends',
+        width: 1200,
+        height: 630,
+        alt: 'Ambrosia Ventures Blog',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Biotech Licensing Insights | Ambrosia Ventures Blog',
+    description: 'Expert analysis of biotech licensing deals, modality trends, and negotiation strategies.',
   },
 };
 

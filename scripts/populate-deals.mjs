@@ -2,7 +2,7 @@
  * Oncology Deal Database Population Script
  * Run with: node scripts/populate-deals.mjs
  *
- * Populates ~2,500 oncology licensing deals into Supabase
+ * Populates curated oncology licensing deals into Supabase
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -375,254 +375,23 @@ const CURATED_DEALS = [
 ];
 
 // ============================================
-// DATA GENERATION
-// ============================================
-const MODALITIES = [
-  "small_molecule", "mab", "adc", "bispecific", "car_t", "cell_therapy",
-  "gene_therapy", "radiopharmaceutical", "mrna", "rnai", "protac", "peptide"
-];
-
-const SOLID_TUMOR_INDICATIONS = [
-  "NSCLC", "SCLC", "Breast (HER2+)", "Breast (TNBC)", "Breast (HR+)",
-  "Colorectal", "Pancreatic", "Melanoma", "Prostate", "Ovarian",
-  "Gastric", "HCC", "RCC", "GBM", "Bladder", "Head & Neck",
-  "Cholangiocarcinoma", "Mesothelioma", "Sarcoma", "Endometrial"
-];
-
-const HEMATOLOGIC_INDICATIONS = [
-  "AML", "ALL", "CLL", "Multiple Myeloma", "DLBCL", "Follicular Lymphoma",
-  "Mantle Cell Lymphoma", "MDS", "MPN", "T-cell Lymphoma"
-];
-
-const PHASES = ["discovery", "preclinical", "phase_1", "phase_2", "phase_3", "approved"];
-const DEAL_TYPES = ["license", "option", "collaboration", "co_development", "acquisition"];
-const TERRITORIES = [
-  "Global", "Global ex-China", "Global ex-Greater China", "US only",
-  "North America", "Europe", "China", "Japan", "Asia Pacific"
-];
-
-const MAJOR_PHARMA = [
-  "Pfizer", "Roche", "Novartis", "Merck", "Johnson & Johnson",
-  "AstraZeneca", "Bristol-Myers Squibb", "AbbVie", "Eli Lilly",
-  "Sanofi", "GSK", "Gilead Sciences", "Amgen", "Regeneron",
-  "Takeda", "Bayer", "Boehringer Ingelheim", "Vertex", "Biogen", "Moderna"
-];
-
-const BIOTECH_LICENSORS = [
-  "Bicycle Therapeutics", "Turning Point Therapeutics", "Y-mAbs Therapeutics",
-  "Agenus", "Alkermes", "Arcus Biosciences", "Arrowhead Pharmaceuticals",
-  "Arvinas", "BeiGene", "Blueprint Medicines", "Caribou Biosciences",
-  "Celldex Therapeutics", "CytomX Therapeutics", "Deciphera Pharmaceuticals",
-  "Denali Therapeutics", "Editas Medicine", "Elevation Oncology",
-  "Fate Therapeutics", "Forma Therapeutics", "G1 Therapeutics",
-  "Gritstone bio", "Hookipa Pharma", "Ideaya Biosciences",
-  "IGM Biosciences", "Immunocore", "Immunogen", "Intellia Therapeutics",
-  "iTeos Therapeutics", "Iovance Biotherapeutics", "Janux Therapeutics",
-  "Karyopharm Therapeutics", "Kronos Bio", "Kymera Therapeutics",
-  "Legend Biotech", "MacroGenics", "Mirati Therapeutics",
-  "Monte Rosa Therapeutics", "Nektar Therapeutics", "Nkarta",
-  "Nurix Therapeutics", "ORIC Pharmaceuticals", "PMV Pharmaceuticals",
-  "Pyxis Oncology", "Relay Therapeutics", "Replimune", "Revolution Medicines",
-  "Roivant Sciences", "Sana Biotechnology", "Springworks Therapeutics",
-  "Syndax Pharmaceuticals", "Syros Pharmaceuticals", "Tango Therapeutics",
-  "TCR2 Therapeutics", "Tyra Biosciences", "Umoja Biopharma",
-  "Vor Biopharma", "Xencor", "Zymeworks", "Innovent Biologics", "Zai Lab",
-  "Junshi Biosciences", "Alphamab Oncology", "Akeso", "RemeGen",
-  "Kelun-Biotech", "Hengrui Medicine", "Galapagos", "Genmab", "Argenx",
-  "MorphoSys", "BioNTech", "CureVac", "Immatics", "Affimed",
-  "Daiichi Sankyo", "Astellas", "Ono Pharmaceutical", "Chugai Pharmaceutical",
-  "Allogene Therapeutics", "CRISPR Therapeutics", "Beam Therapeutics"
-];
-
-const TARGETS = [
-  "HER2", "EGFR", "PD-1", "PD-L1", "CTLA-4", "CD19", "CD20", "BCMA",
-  "CD38", "BTK", "BCL-2", "CDK4/6", "PI3K", "KRAS G12C", "KRAS G12D",
-  "BRAF V600E", "ALK", "ROS1", "RET", "MET", "FGFR", "VEGF", "VEGFR",
-  "TROP2", "Nectin-4", "HER3", "CLDN18.2", "DLL3", "Mesothelin",
-  "GD2", "CD22", "CD33", "CD123", "CD47", "SIRPα", "TIGIT", "LAG-3",
-  "TIM-3", "ICOS", "OX40", "4-1BB", "CD40", "CD73", "TGF-β",
-  "PARP", "ATR", "WEE1", "MDM2", "SHP2", "ERK", "MEK", "mTOR",
-  "JAK", "FLT3", "KIT", "CSF1R", "Claudin 6", "FRα", "LIV-1",
-  "B7-H3", "B7-H4", "CEA", "GPC3", "MUC1", "MUC16", "PSMA"
-];
-
-const MOAS = {
-  "small_molecule": ["Kinase inhibitor", "PROTAC degrader", "Molecular glue", "Allosteric inhibitor", "Covalent inhibitor"],
-  "mab": ["Receptor antagonist", "ADCC-enhanced", "CDC-enhanced", "Fc-engineered"],
-  "adc": ["Topoisomerase I inhibitor payload", "Microtubule inhibitor payload", "DNA-damaging payload", "MMAE payload", "DXd payload"],
-  "bispecific": ["T-cell engager", "Dual checkpoint blockade", "Dual receptor targeting"],
-  "car_t": ["Second generation CAR", "Third generation CAR", "Armored CAR"],
-  "radiopharmaceutical": ["Beta-emitting radioligand", "Alpha-emitting radioligand"],
-  "mrna": ["mRNA cancer vaccine", "mRNA immunotherapy"],
-  "protac": ["PROTAC degrader", "Molecular glue degrader"]
-};
-
-function randomChoice(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function generateRandomDate(startYear, endYear) {
-  const year = randomInt(startYear, endYear);
-  const month = randomInt(1, 12);
-  const day = randomInt(1, 28);
-  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-}
-
-function generateUpfront(phase, modality) {
-  const phaseRanges = {
-    "discovery": [5, 50],
-    "preclinical": [15, 100],
-    "phase_1": [30, 200],
-    "phase_2": [75, 400],
-    "phase_3": [150, 1000],
-    "approved": [300, 3000]
-  };
-
-  const modalityMultipliers = {
-    "adc": 1.5,
-    "bispecific": 1.4,
-    "car_t": 1.3,
-    "radiopharmaceutical": 1.6,
-    "protac": 1.35,
-    "small_molecule": 1.0,
-    "mab": 1.0,
-    "mrna": 1.25
-  };
-
-  const [min, max] = phaseRanges[phase] || [20, 150];
-  const multiplier = modalityMultipliers[modality] || 1.0;
-
-  if (Math.random() < 0.15) return null;
-
-  return Math.round(randomInt(min, max) * multiplier * 1000000);
-}
-
-function generateMilestones(upfront, phase) {
-  if (!upfront && Math.random() < 0.5) {
-    return { total: null, development: null, regulatory: null, commercial: null };
-  }
-
-  const base = upfront || 100000000;
-
-  const phaseMultipliers = {
-    "discovery": [8, 20],
-    "preclinical": [6, 15],
-    "phase_1": [5, 12],
-    "phase_2": [4, 10],
-    "phase_3": [3, 8],
-    "approved": [2, 5]
-  };
-
-  const [minMult, maxMult] = phaseMultipliers[phase] || [4, 10];
-  const total = Math.round(base * (minMult + Math.random() * (maxMult - minMult)));
-
-  const development = Math.round(total * (0.25 + Math.random() * 0.1));
-  const regulatory = Math.round(total * (0.20 + Math.random() * 0.1));
-  const commercial = total - development - regulatory;
-
-  return { total, development, regulatory, commercial };
-}
-
-function generateRoyalties(phase) {
-  if (Math.random() < 0.2) {
-    return { low: null, high: null };
-  }
-
-  const phaseRoyalties = {
-    "discovery": [3, 6, 8, 12],
-    "preclinical": [4, 7, 10, 15],
-    "phase_1": [5, 8, 12, 18],
-    "phase_2": [6, 10, 15, 22],
-    "phase_3": [8, 12, 18, 25],
-    "approved": [10, 15, 20, 30]
-  };
-
-  const [lowMin, lowMax, highMin, highMax] = phaseRoyalties[phase] || [5, 10, 12, 20];
-
-  const low = randomInt(lowMin, lowMax);
-  const high = randomInt(Math.max(highMin, low + 2), highMax);
-
-  return { low, high };
-}
-
-function generateDeal() {
-  const isHematologic = Math.random() < 0.3;
-  const category = isHematologic ? "hematologic" : "solid_tumor";
-  const indications = isHematologic ? HEMATOLOGIC_INDICATIONS : SOLID_TUMOR_INDICATIONS;
-
-  const modality = randomChoice(MODALITIES);
-  const phase = randomChoice(PHASES);
-  const target = randomChoice(TARGETS);
-
-  const upfront = generateUpfront(phase, modality);
-  const milestones = generateMilestones(upfront, phase);
-  const royalties = generateRoyalties(phase);
-
-  const totalValue = upfront && milestones.total
-    ? upfront + milestones.total
-    : (upfront || milestones.total || null);
-
-  const licensor = randomChoice(BIOTECH_LICENSORS);
-  const licensee = randomChoice(MAJOR_PHARMA);
-
-  const prefixes = ["", "Anti-", "", ""];
-  const suffixes = ["-001", "-101", "-201", "-301", "-mab", "-tinib", ""];
-  const assetName = `${randomChoice(prefixes)}${target}${randomChoice(suffixes)}`.replace("--", "-");
-
-  const moaOptions = MOAS[modality] || ["Targeted therapy"];
-
-  return {
-    licensor_name: licensor,
-    licensee_name: licensee,
-    asset_name: assetName,
-    asset_description: `${target}-targeting ${modality.replace("_", " ")}`,
-    modality: modality,
-    indication_category: category,
-    indication_specific: randomChoice(indications),
-    target: target,
-    mechanism_of_action: randomChoice(moaOptions),
-    phase_at_signing: phase,
-    territory: randomChoice(TERRITORIES),
-    deal_type: randomChoice(DEAL_TYPES),
-    upfront_usd: upfront,
-    milestones_total_usd: milestones.total,
-    milestones_development_usd: milestones.development,
-    milestones_regulatory_usd: milestones.regulatory,
-    milestones_commercial_usd: milestones.commercial,
-    royalty_low_pct: royalties.low,
-    royalty_high_pct: royalties.high,
-    total_deal_value_usd: totalValue,
-    announced_date: generateRandomDate(2019, 2026),
-    source_type: randomChoice(["sec_8k", "press_release", "sec_10k"]),
-    source_url: null,
-    terms_disclosed: upfront !== null || milestones.total !== null,
-    confidence_score: randomInt(60, 95),
-  };
-}
-
-// ============================================
 // MAIN EXECUTION
 // ============================================
 async function main() {
-  console.log('🚀 Starting oncology deal database population...\n');
+  console.log('Starting oncology deal database population...\n');
 
   // Check existing count
   const { count: existingCount } = await supabase
     .from('deals')
     .select('*', { count: 'exact', head: true });
 
-  console.log(`📊 Existing deals in database: ${existingCount || 0}`);
+  console.log(`Existing deals in database: ${existingCount || 0}`);
 
-  const TARGET_DEALS = 2500;
   const batchSize = 100;
   let totalInserted = 0;
 
-  // Step 1: Insert curated real deals
-  console.log('\n📋 Step 1: Inserting curated real deals...');
+  // Insert curated real deals
+  console.log('\nInserting curated real deals...');
 
   for (let i = 0; i < CURATED_DEALS.length; i += batchSize) {
     const batch = CURATED_DEALS.slice(i, i + batchSize);
@@ -634,39 +403,11 @@ async function main() {
       });
 
     if (error) {
-      console.error('❌ Error inserting curated deals:', error.message);
+      console.error('Error inserting curated deals:', error.message);
     } else {
       totalInserted += batch.length;
-      console.log(`  ✓ Inserted ${batch.length} curated deals`);
+      console.log(`  Inserted ${batch.length} curated deals`);
     }
-  }
-
-  // Step 2: Generate and insert additional deals
-  const remainingDeals = TARGET_DEALS - totalInserted - (existingCount || 0);
-
-  if (remainingDeals > 0) {
-    console.log(`\n🔧 Step 2: Generating ${remainingDeals} additional deals...`);
-
-    for (let i = 0; i < remainingDeals; i += batchSize) {
-      const batch = [];
-      const batchEnd = Math.min(i + batchSize, remainingDeals);
-
-      for (let j = i; j < batchEnd; j++) {
-        batch.push(generateDeal());
-      }
-
-      const { error } = await supabase
-        .from('deals')
-        .insert(batch);
-
-      if (error) {
-        console.error(`❌ Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error.message);
-      } else {
-        totalInserted += batch.length;
-        process.stdout.write(`  ✓ Progress: ${totalInserted}/${TARGET_DEALS} deals\r`);
-      }
-    }
-    console.log('');
   }
 
   // Get final count
@@ -674,8 +415,8 @@ async function main() {
     .from('deals')
     .select('*', { count: 'exact', head: true });
 
-  console.log('\n✅ Database population complete!');
-  console.log(`📈 Total deals in database: ${finalCount}`);
+  console.log('\nDatabase population complete!');
+  console.log(`Total deals in database: ${finalCount}`);
 }
 
 main().catch(err => {

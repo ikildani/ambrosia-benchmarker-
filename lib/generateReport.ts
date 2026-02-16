@@ -1282,7 +1282,7 @@ export function generatePDFReport(
 
     ${(() => {
       const comparableDeals = getRelevantDeals(
-        therapeuticArea as 'oncology' | 'neurology' | 'immunology' || 'oncology',
+        (therapeuticArea as 'oncology' | 'neurology' | 'immunology') || 'oncology',
         labels.modality,
         labels.indication
       );

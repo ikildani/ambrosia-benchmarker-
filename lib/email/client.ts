@@ -205,7 +205,7 @@ export async function sendUpgradeConfirmation(to: string, name: string) {
             <li><strong>Save & compare scenarios</strong> side-by-side</li>
             <li><strong>Share calculations</strong> with your team</li>
             <li><strong>Interactive charts</strong> and visualizations</li>
-            <li><strong>Complete deal database</strong> access (2,500+ deals)</li>
+            <li><strong>Complete deal database</strong> access (600+ deals)</li>
             <li><strong>Partner matching</strong> with detailed company profiles</li>
           </ul>
 

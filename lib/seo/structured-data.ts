@@ -97,7 +97,7 @@ export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for oncology and neurology asset licensing deals with data-driven benchmarks.',
+    description: 'Estimate upfront payments, milestones, and royalties for oncology, neurology, and immunology asset licensing deals with data-driven benchmarks.',
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
@@ -196,7 +196,7 @@ export function generateDatasetSchema(): DatasetSchema {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Biotech & Pharma Licensing Deal Database',
-    description: 'Comprehensive database of 500+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, rare disease, and other therapeutic areas.',
+    description: 'Comprehensive database of 600+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, immunology, and other therapeutic areas.',
     url: `${BASE_URL}/pulse`,
     keywords: [
       'biotech deals',
@@ -213,7 +213,7 @@ export function generateDatasetSchema(): DatasetSchema {
       name: 'Ambrosia Ventures',
       url: BASE_URL,
     },
-    temporalCoverage: '2018/2025',
+    temporalCoverage: '2018/2026',
     variableMeasured: [
       'Upfront Payment (USD)',
       'Total Deal Value (USD)',

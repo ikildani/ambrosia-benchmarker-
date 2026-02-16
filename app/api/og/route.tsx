@@ -352,7 +352,7 @@ export async function GET(request: NextRequest) {
             marginBottom: 48,
           }}
         >
-          Data-driven deal estimates across oncology and neurology
+          Data-driven deal estimates across oncology, neurology, and immunology
         </div>
 
         {/* Ambrosia Ventures branding */}

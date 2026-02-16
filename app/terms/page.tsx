@@ -4,7 +4,7 @@ import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 
 export default function TermsPage() {
-  const lastUpdated = 'February 1, 2025';
+  const lastUpdated = 'February 16, 2026';
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">

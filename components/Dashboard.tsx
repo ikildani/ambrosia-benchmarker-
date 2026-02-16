@@ -156,7 +156,7 @@ export default function Dashboard({
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
   const [historySearch, setHistorySearch] = useState('');
-  const [historyAreaFilter, setHistoryAreaFilter] = useState<'all' | 'oncology' | 'neurology'>('all');
+  const [historyAreaFilter, setHistoryAreaFilter] = useState<'all' | 'oncology' | 'neurology' | 'immunology'>('all');
   const [historySort, setHistorySort] = useState<'newest' | 'oldest' | 'highest_value' | 'highest_upfront'>('newest');
   const [watchlistNewCount, setWatchlistNewCount] = useState(0);
 
@@ -823,7 +823,7 @@ export default function Dashboard({
 
                   {/* Area Filter Chips */}
                   <div className="flex items-center gap-1.5">
-                    {([['all', 'All Areas'], ['oncology', 'Oncology'], ['neurology', 'Neurology']] as const).map(([value, label]) => (
+                    {([['all', 'All Areas'], ['oncology', 'Oncology'], ['neurology', 'Neurology'], ['immunology', 'Immunology']] as const).map(([value, label]) => (
                       <button
                         key={value}
                         onClick={() => setHistoryAreaFilter(value)}
