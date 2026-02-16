@@ -1367,17 +1367,25 @@ const allCompanies = [
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient();
-    const body = await request.json();
-    const { user_email } = body;
+    // Accept either Bearer token or admin email auth
+    const authHeader = request.headers.get('authorization');
+    const adminKey = process.env.ADMIN_API_KEY;
+    const isTokenAuth = adminKey && authHeader === `Bearer ${adminKey}`;
 
-    // Verify admin access
-    if (!isAdminEmail(user_email)) {
+    let isAuthed = isTokenAuth;
+    if (!isAuthed) {
+      const body = await request.json().catch(() => ({}));
+      isAuthed = isAdminEmail(body?.user_email);
+    }
+
+    if (!isAuthed) {
       return NextResponse.json(
         { error: 'Unauthorized - admin access required' },
         { status: 403 }
       );
     }
+
+    const supabase = createServiceClient();
 
     const results: { updated: string[]; created: string[]; failed: string[] } = {
       updated: [],
