@@ -4,10 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import CompanyProfileCard from '@/components/competitive/CompanyProfileCard';
+import CompanySummary from '@/components/competitive/CompanySummary';
 import CompanyDealHistory from '@/components/competitive/CompanyDealHistory';
+import DealFlowChart from '@/components/competitive/DealFlowChart';
 import CompanyPipelineChart from '@/components/competitive/CompanyPipelineChart';
+import PipelineByIndication from '@/components/competitive/PipelineByIndication';
 import CompanyBenchmarkComparison from '@/components/competitive/CompanyBenchmarkComparison';
 import PatentCliffTimeline from '@/components/competitive/PatentCliffTimeline';
+import CompetitivePeers from '@/components/competitive/CompetitivePeers';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -19,7 +23,6 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
     user,
     tier,
     signIn,
-    signOut,
     openAuthModal,
     closeAuthModal,
     showAuthModal,
@@ -66,6 +69,7 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Calculator</Link>
+              <Link href="/companies" className="text-sm font-medium text-teal-600 dark:text-teal-400">Companies</Link>
               <Link href="/pulse" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Pulse</Link>
             </nav>
             <div className="flex items-center gap-3">
@@ -81,11 +85,11 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back link */}
-        <Link href="/pulse" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mb-6 transition-colors">
+        <Link href="/companies" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mb-6 transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Pulse
+          Back to Companies
         </Link>
 
         {loading ? (
@@ -98,8 +102,23 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
           </div>
         ) : data ? (
           <div className="space-y-6">
-            <CompanyProfileCard company={data.company} isPro={isPro} />
+            {/* Company header card */}
+            <CompanyProfileCard
+              company={data.company}
+              isPro={isPro}
+              marketPosition={data.market_position}
+              dealFlowTrend={data.deal_flow_trend}
+            />
 
+            {/* AI-generated summary */}
+            {data.summary && (
+              <CompanySummary
+                summary={data.summary}
+                marketPosition={data.market_position}
+              />
+            )}
+
+            {/* Pro upgrade banner */}
             {!isPro && (
               <div className="bg-gradient-to-r from-navy-900 to-navy-800 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
@@ -115,9 +134,10 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
               </div>
             )}
 
+            {/* Deal flow chart + benchmark comparison row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <CompanyDealHistory deals={data.recent_deals} isPro={isPro} />
+                <DealFlowChart trend={data.deal_flow_trend || []} isPro={isPro} />
               </div>
               <div className="space-y-6">
                 <CompanyPipelineChart pipeline={data.pipeline_by_phase} />
@@ -127,7 +147,27 @@ export default function CompanyPage({ params }: { params: { companyId: string } 
               </div>
             </div>
 
-            <PatentCliffTimeline cliffs={data.company.patent_cliffs || []} />
+            {/* Deal history table */}
+            <CompanyDealHistory
+              deals={data.recent_deals}
+              isPro={isPro}
+              dealsByModality={data.deals_by_modality}
+            />
+
+            {/* Pipeline by indication matrix */}
+            {data.pipeline_by_indication && Object.keys(data.pipeline_by_indication).length > 0 && (
+              <PipelineByIndication data={data.pipeline_by_indication} isPro={isPro} />
+            )}
+
+            {/* Patent cliffs — only show if data exists */}
+            {data.company.patent_cliffs && data.company.patent_cliffs.length > 0 && (
+              <PatentCliffTimeline cliffs={data.company.patent_cliffs} />
+            )}
+
+            {/* Competitive peers */}
+            {data.competitive_peers && data.competitive_peers.length > 0 && (
+              <CompetitivePeers peers={data.competitive_peers} isPro={isPro} />
+            )}
           </div>
         ) : null}
       </div>
