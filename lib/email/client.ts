@@ -32,7 +32,7 @@ export async function sendEmail(options: EmailOptions) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: from || 'Ambrosia Ventures <noreply@calculator.ambrosiaventures.co>',
+      from: from || (process.env.RESEND_FROM_EMAIL || 'Ambrosia Ventures <onboarding@resend.dev>'),
       to: [to],
       subject,
       html,

@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
     // Step 3: Send emails in batches
     let emailsSent = 0;
     let emailErrors = 0;
+    const errorDetails: string[] = [];
 
     for (let i = 0; i < eligibleUsers.length; i += BATCH_SIZE) {
       const batch = eligibleUsers.slice(i, i + BATCH_SIZE);
@@ -134,6 +135,10 @@ export async function GET(request: NextRequest) {
           emailErrors++;
           if (result.status === 'rejected') {
             console.error('Digest send error:', result.reason);
+            errorDetails.push(String(result.reason));
+          } else if (result.status === 'fulfilled') {
+            console.error('Digest send failed:', result.value.error);
+            errorDetails.push(String(result.value.error));
           }
         }
       }
@@ -165,6 +170,7 @@ export async function GET(request: NextRequest) {
       },
       emails_sent: emailsSent,
       emails_errors: emailErrors,
+      email_error_details: errorDetails.length > 0 ? errorDetails : undefined,
       total_pro_users: proUsers.length,
       eligible_users: eligibleUsers.length,
     });
