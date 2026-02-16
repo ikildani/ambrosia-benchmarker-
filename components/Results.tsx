@@ -699,52 +699,6 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
           </div>
         </div>
 
-        {/* Partner Matches - Elevated position for visibility */}
-        {inputs && (
-          <div className="mb-4 sm:mb-6">
-            <PartnerMatchesContainer
-              modality={inputs.modality}
-              phase={inputs.phase}
-              indicationCategory={getIndicationCategory(inputs.indication)}
-              indicationSpecific={inputs.indication}
-              territory={inputs.territory}
-              tier={tier}
-              onUpgrade={onUpgrade || (() => {})}
-              onMatchesLoaded={handlePartnerMatchesLoaded}
-            />
-          </div>
-        )}
-
-        {/* Negotiation Insight - Pro Feature */}
-        <div className="relative mb-4 sm:mb-6">
-          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
-            <div className="flex items-start gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-amber-800 mb-1 text-sm sm:text-base">Negotiation Insight</h4>
-                <p className="text-xs sm:text-sm text-amber-900">{negotiationInsight}</p>
-              </div>
-            </div>
-          </div>
-          {!isPro && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
-              <button
-                onClick={() => handleProFeatureClick('comparable_deals')}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Unlock with Pro
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* Applied Modifiers - Horizontal scroll on mobile */}
         {modifiers.length > 0 && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
@@ -1036,6 +990,52 @@ export default function Results({ result, tier = 'free', onUpgrade, inputs, full
         {fullInputs && (
           <ComparableDeals inputs={fullInputs} isPro={isPro} />
         )}
+
+        {/* Partner Matches */}
+        {inputs && (
+          <div className="mb-4 sm:mb-6">
+            <PartnerMatchesContainer
+              modality={inputs.modality}
+              phase={inputs.phase}
+              indicationCategory={getIndicationCategory(inputs.indication)}
+              indicationSpecific={inputs.indication}
+              territory={inputs.territory}
+              tier={tier}
+              onUpgrade={onUpgrade || (() => {})}
+              onMatchesLoaded={handlePartnerMatchesLoaded}
+            />
+          </div>
+        )}
+
+        {/* Negotiation Insight - Pro Feature */}
+        <div className="relative mb-4 sm:mb-6">
+          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!isPro ? 'blur-sm' : ''}`}>
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-amber-800 mb-1 text-sm sm:text-base">Negotiation Insight</h4>
+                <p className="text-xs sm:text-sm text-amber-900">{negotiationInsight}</p>
+              </div>
+            </div>
+          </div>
+          {!isPro && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+              <button
+                onClick={() => handleProFeatureClick('comparable_deals')}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Unlock with Pro
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Negotiation Playbook CTA */}
         <div className="relative mt-6 sm:mt-8">
