@@ -76,6 +76,9 @@ export async function GET(
         .order('announced_date', { ascending: true }),
     ]);
 
+    if (allDealsResult.error) console.error('Deal query error:', JSON.stringify(allDealsResult.error));
+    if (allDealsForTrend.error) console.error('Trend query error:', JSON.stringify(allDealsForTrend.error));
+
     const deals = allDealsResult.data || [];
     const trials = trialsResult.data || [];
     const trendDeals = allDealsForTrend.data || [];
@@ -284,6 +287,12 @@ export async function GET(
       market_position: marketPosition,
       benchmark_comparison: benchmarkComparison,
       is_pro: isPro,
+      _debug: {
+        deal_query_error: allDealsResult.error || null,
+        trend_query_error: allDealsForTrend.error || null,
+        raw_deal_count: allDealsResult.data?.length ?? null,
+        raw_trend_count: allDealsForTrend.data?.length ?? null,
+      },
     });
   } catch (error) {
     console.error('Company profile error:', error);
