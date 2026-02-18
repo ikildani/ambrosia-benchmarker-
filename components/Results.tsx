@@ -481,7 +481,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       // If this was triggered by PDF gate, generate PDF now
       if (showEmailGate) {
         setShowEmailGate(false);
-        const pdfData = buildPDFData();
+        const pdfData = await buildPDFData();
         if (pdfData) generatePDFReport(pdfData);
       }
     } catch {
@@ -492,7 +492,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     }
   };
 
-  const buildPDFData = useCallback((): PDFReportData | null => {
+  const buildPDFData = useCallback(async (): Promise<PDFReportData | null> => {
     if (!fullInputs) return null;
     const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
     const riskScore = calculateRiskScore(fullInputs);
@@ -502,20 +502,45 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       indication: fullInputs.indication,
       phase: fullInputs.phase,
     }, 6);
+
+    // Auto-fetch deal memo if not already generated
+    let memo = dealMemo;
+    if (!memo && fullInputs) {
+      try {
+        const response = await fetch('/api/deal-memo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportId: reportId || undefined,
+            inputs: fullInputs,
+            results: result,
+            labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          memo = data.memo || data;
+          setDealMemo(memo);
+        }
+      } catch {
+        // Proceed without memo if fetch fails
+      }
+    }
+
     return {
       result,
       inputs: fullInputs,
       sensitivityData,
       riskScore,
       partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
-      memoData: dealMemo || undefined,
+      memoData: memo || undefined,
       comparableDeals,
     };
-  }, [result, fullInputs, partnerMatches, dealMemo]);
+  }, [result, fullInputs, partnerMatches, dealMemo, reportId, labels]);
 
-  const handleFreePDFClick = () => {
+  const handleFreePDFClick = async () => {
     if (sessionStorage.getItem('email_captured') || emailSubmitted) {
-      const pdfData = buildPDFData();
+      const pdfData = await buildPDFData();
       if (pdfData) generatePDFReport(pdfData);
     } else {
       setShowEmailGate(true);
@@ -528,9 +553,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     window.open(url, '_blank', 'width=600,height=500');
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     trackExportAttempted('pdf');
-    const pdfData = buildPDFData();
+    const pdfData = await buildPDFData();
     if (pdfData) generatePDFReport(pdfData);
   };
 
