@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { companyId: string } }
@@ -13,9 +15,14 @@ export async function GET(
     const userId = searchParams.get('user_id');
     const companyId = params.companyId;
 
+    // Validate UUID format
+    if (!UUID_REGEX.test(companyId)) {
+      return NextResponse.json({ error: 'Invalid company ID' }, { status: 400 });
+    }
+
     // Check user tier
     let userTier = 'free';
-    if (userId) {
+    if (userId && UUID_REGEX.test(userId)) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('tier')
@@ -57,14 +64,13 @@ export async function GET(
         .order('announced_date', { ascending: false })
         .limit(50),
 
-      // Active trials
+      // Active trials (no limit — need accurate count for summary)
       supabase
         .from('company_trials')
         .select('nct_id, trial_title, phase, status, modality, indication_category, start_date, primary_completion_date, enrollment_count')
         .eq('company_id', companyId)
         .in('status', ['recruiting', 'active_not_recruiting', 'enrolling_by_invitation', 'not_yet_recruiting'])
-        .order('start_date', { ascending: false })
-        .limit(100),
+        .order('start_date', { ascending: false }),
 
       // All deals for trend (3 years) — only real deals
       supabase
@@ -149,6 +155,8 @@ export async function GET(
       if (peerCandidates) {
         const myModalities = new Set<string>(company.modalities_active || []);
         const myIndications = new Set<string>(company.indications_active || []);
+        // Max possible overlap = all modalities shared (×2 weight) + all indications shared
+        const maxPossibleScore = myModalities.size * 2 + myIndications.size;
 
         competitivePeers = peerCandidates
           .map(peer => {
@@ -156,11 +164,14 @@ export async function GET(
             const peerInds = new Set<string>(peer.indications_active || []);
             const sharedMods = [...myModalities].filter(m => peerMods.has(m));
             const sharedInds = [...myIndications].filter(i => peerInds.has(i));
+            const rawScore = sharedMods.length * 2 + sharedInds.length;
+            // Normalize to 0-1 range so the frontend can display as percentage
+            const normalizedScore = maxPossibleScore > 0 ? rawScore / maxPossibleScore : 0;
             return {
               id: peer.id,
               name: peer.name,
               company_type: peer.company_type,
-              overlap_score: sharedMods.length * 2 + sharedInds.length,
+              overlap_score: Math.round(normalizedScore * 100) / 100,
               shared_modalities: sharedMods,
             };
           })
@@ -243,7 +254,7 @@ export async function GET(
       summary += '.';
     }
 
-    if (company.acquisition_appetite) {
+    if (isPro && company.acquisition_appetite) {
       const appetiteLabel = ({ aggressive: 'an aggressive', moderate: 'a moderate', selective: 'a selective' } as Record<string, string>)[company.acquisition_appetite] || 'an active';
       summary += ` ${company.name} demonstrates ${appetiteLabel} acquisition appetite based on recent deal activity.`;
     }

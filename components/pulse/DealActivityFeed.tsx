@@ -75,7 +75,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
       ) : (
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           {visibleDeals.map((deal) => (
-            <div key={deal.id} className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+            <div key={deal.id} className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">

@@ -43,7 +43,7 @@ export default function WatchlistActivityFeed({ activity }: WatchlistActivityFee
           {activity.map((item, idx) => {
             const config = matchTypeConfig[item.match_type] || matchTypeConfig.modality;
             return (
-              <div key={idx} className="px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+              <div key={idx} className="px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
                     <svg className={`w-4 h-4 ${config.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

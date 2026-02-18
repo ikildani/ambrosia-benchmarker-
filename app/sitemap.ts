@@ -52,9 +52,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Dynamic blog posts
+  // Dynamic pages
   let blogPages: MetadataRoute.Sitemap = [];
   let landingPages: MetadataRoute.Sitemap = [];
+  let companyPages: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = createServiceClient();
@@ -94,6 +95,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(page.published_at || new Date()),
         changeFrequency: 'monthly' as const,
         priority: 0.8,
+      }));
+    }
+
+    // Fetch companies for sitemap
+    const { data: companies, error: companiesError } = await supabase
+      .from('companies')
+      .select('id')
+      .order('deals_last_12mo', { ascending: false, nullsFirst: false })
+      .limit(200);
+
+    if (companiesError) {
+      console.error('Sitemap: Error fetching companies:', companiesError.message);
+    }
+
+    if (companies) {
+      companyPages = companies.map((company) => ({
+        url: `${baseUrl}/companies/${company.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
       }));
     }
   } catch (error) {
@@ -137,5 +158,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages];
+  // Companies index page
+  staticPages.push({
+    url: `${baseUrl}/companies`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  });
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages];
 }

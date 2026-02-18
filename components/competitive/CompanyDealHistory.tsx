@@ -156,7 +156,7 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-750">
+              <tr className="bg-slate-50 dark:bg-slate-800">
                 <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Counterparty</th>
                 <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Modality</th>
@@ -166,7 +166,7 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {filteredDeals.map((deal) => (
-                <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+                <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     {new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                   </td>

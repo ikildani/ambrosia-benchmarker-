@@ -51,7 +51,7 @@ function formatIndication(key: string): string {
 }
 
 function getCellIntensity(count: number, maxCount: number): string {
-  if (count === 0) return 'bg-slate-50 dark:bg-slate-750 text-slate-400 dark:text-slate-500';
+  if (count === 0) return 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500';
   const ratio = count / maxCount;
   if (ratio <= 0.25) return 'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300';
   if (ratio <= 0.5) return 'bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-200';
@@ -151,7 +151,7 @@ export default function PipelineByIndication({ data, isPro }: PipelineByIndicati
                 className={
                   idx % 2 === 0
                     ? ''
-                    : 'bg-slate-25 dark:bg-slate-750/50'
+                    : 'bg-slate-50 dark:bg-slate-800/50'
                 }
               >
                 <td className="py-2 pr-4 pl-1 text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
@@ -165,7 +165,7 @@ export default function PipelineByIndication({ data, isPro }: PipelineByIndicati
                         className={`flex items-center justify-center h-9 w-full min-w-[3rem] rounded-lg text-xs font-semibold transition-colors ${
                           isPro
                             ? getCellIntensity(cellCount, maxCellCount)
-                            : 'bg-slate-50 dark:bg-slate-750'
+                            : 'bg-slate-50 dark:bg-slate-800'
                         }`}
                       >
                         {isPro ? (
