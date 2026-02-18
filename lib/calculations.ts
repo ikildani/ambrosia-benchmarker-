@@ -202,7 +202,7 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
 }
 
 // Calculate risk score (0-100, higher = more risk)
-function calculateRiskScore(input: CalculationInput): number {
+export function calculateRiskScore(input: CalculationInput): number {
   let score = 0;
 
   // Phase risk (earlier = more risk)

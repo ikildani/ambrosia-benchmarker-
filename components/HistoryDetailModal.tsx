@@ -10,7 +10,11 @@ import {
   BiomarkerStatus, LineOfTherapy, TreatmentApproach, CombinationPotential,
   CompetitivePosition, DataQuality, TherapeuticArea
 } from '@/lib/calculations';
-import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
+import { generatePDFReport, PartnerForPDF } from '@/lib/report';
+import type { PDFReportData } from '@/lib/report';
+import { computeSensitivityAnalysis } from '@/lib/sensitivity';
+import { calculateRiskScore } from '@/lib/calculations';
+import { findComparableDeals } from '@/lib/comparableDeals';
 import Results from './Results';
 import { PartnerMatchForPDF } from './PartnerMatchesContainer';
 
@@ -167,8 +171,25 @@ export default function HistoryDetailModal({
   }, [item, onReuse]);
 
   const handleDownloadPDF = useCallback(() => {
-    if (result) {
-      generatePDFReport(result, item?.id, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+    if (result && fullInputs) {
+      const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
+      const riskScore = calculateRiskScore(fullInputs);
+      const comparableDeals = findComparableDeals({
+        therapeuticArea: fullInputs.therapeuticArea,
+        modality: fullInputs.modality,
+        indication: fullInputs.indication,
+        phase: fullInputs.phase,
+      }, 6);
+      const pdfData: PDFReportData = {
+        result,
+        inputs: fullInputs,
+        sensitivityData,
+        riskScore,
+        partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
+        comparableDeals,
+        historyId: item?.id,
+      };
+      generatePDFReport(pdfData);
     }
   }, [result, item, partnerMatches, fullInputs]);
 

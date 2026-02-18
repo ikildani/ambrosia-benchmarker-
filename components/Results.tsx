@@ -3,8 +3,12 @@
 import { useState, useCallback } from 'react';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { SensitivityAnalysis } from './sensitivity';
-import { generatePDFReport, PartnerForPDF } from '@/lib/generateReport';
+import { generatePDFReport, PartnerForPDF } from '@/lib/report';
+import type { PDFReportData } from '@/lib/report';
 import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
+import { computeSensitivityAnalysis } from '@/lib/sensitivity';
+import { calculateRiskScore } from '@/lib/calculations';
+import { findComparableDeals } from '@/lib/comparableDeals';
 import BenchmarkInfo from './BenchmarkInfo';
 import ChartSection from './charts/ChartSection';
 import ScenarioComparison from './ScenarioComparison';
@@ -477,7 +481,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       // If this was triggered by PDF gate, generate PDF now
       if (showEmailGate) {
         setShowEmailGate(false);
-        generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
+        const pdfData = buildPDFData();
+        if (pdfData) generatePDFReport(pdfData);
       }
     } catch {
       // Still mark as submitted for UX
@@ -487,9 +492,31 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     }
   };
 
+  const buildPDFData = useCallback((): PDFReportData | null => {
+    if (!fullInputs) return null;
+    const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
+    const riskScore = calculateRiskScore(fullInputs);
+    const comparableDeals = findComparableDeals({
+      therapeuticArea: fullInputs.therapeuticArea,
+      modality: fullInputs.modality,
+      indication: fullInputs.indication,
+      phase: fullInputs.phase,
+    }, 6);
+    return {
+      result,
+      inputs: fullInputs,
+      sensitivityData,
+      riskScore,
+      partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
+      memoData: dealMemo || undefined,
+      comparableDeals,
+    };
+  }, [result, fullInputs, partnerMatches, dealMemo]);
+
   const handleFreePDFClick = () => {
     if (sessionStorage.getItem('email_captured') || emailSubmitted) {
-      generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
+      const pdfData = buildPDFData();
+      if (pdfData) generatePDFReport(pdfData);
     } else {
       setShowEmailGate(true);
     }
@@ -503,10 +530,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    generatePDFReport(result, undefined, partnerMatches, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, dealMemo || undefined);
+    const pdfData = buildPDFData();
+    if (pdfData) generatePDFReport(pdfData);
   };
 
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
     trackExportAttempted('excel');
     const partnersForExcel: PartnerForExcel[] = partnerMatches.map(p => ({
       company_name: p.company_name,
@@ -515,7 +543,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       deals_last_12mo: p.deals_last_12mo,
       hq_country: p.hq_country,
     }));
-    generateExcelReport(result, inputs, partnersForExcel, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach);
+    const sensitivity = fullInputs ? computeSensitivityAnalysis(fullInputs, result) : undefined;
+    await generateExcelReport(result, inputs, partnersForExcel, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, sensitivity);
   };
 
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
