@@ -27,6 +27,8 @@ interface ResultsProps {
   onUpgrade?: () => void;
   onBuyReport?: () => void;
   reportId?: string;
+  userId?: string;
+  userEmail?: string;
   inputs?: {
     modality: string;
     phase: string;
@@ -408,7 +410,7 @@ export function ResultsSkeleton() {
   );
 }
 
-export default function Results({ result, tier = 'free', onUpgrade, onBuyReport, reportId, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
+export default function Results({ result, tier = 'free', onUpgrade, onBuyReport, reportId, userId, userEmail, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, drillDown } = result;
   const isPro = tier === 'pro';
   const isReport = tier === 'report';
@@ -436,6 +438,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportId: reportId || undefined,
+          userId: userId || undefined,
+          email: userEmail || undefined,
           inputs: fullInputs,
           results: result,
           labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
@@ -451,7 +455,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     } finally {
       setMemoLoading(false);
     }
-  }, [memoLoading, dealMemo, reportId, fullInputs, result, labels]);
+  }, [memoLoading, dealMemo, reportId, userId, userEmail, fullInputs, result, labels]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -512,6 +516,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             reportId: reportId || undefined,
+            userId: userId || undefined,
+            email: userEmail || undefined,
             inputs: fullInputs,
             results: result,
             labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
@@ -536,7 +542,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       memoData: memo || undefined,
       comparableDeals,
     };
-  }, [result, fullInputs, partnerMatches, dealMemo, reportId, labels]);
+  }, [result, fullInputs, partnerMatches, dealMemo, reportId, userId, userEmail, labels]);
 
   const handleFreePDFClick = async () => {
     if (sessionStorage.getItem('email_captured') || emailSubmitted) {

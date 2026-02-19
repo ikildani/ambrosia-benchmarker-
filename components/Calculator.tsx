@@ -1391,6 +1391,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               setShowPaywall(true);
             }}
             reportId={reportPurchaseId || undefined}
+            userId={user?.id}
+            userEmail={user?.email}
             inputs={{
               modality,
               phase,

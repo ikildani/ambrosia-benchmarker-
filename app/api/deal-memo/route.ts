@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getDealMemoGenerator, DealMemo, DealMemoInput } from '@/lib/ai/deal-memo-generator';
+import { isProEmail } from '@/lib/config/authorized-emails';
 
 export interface DealMemoRequest {
   reportId?: string;
@@ -55,9 +56,9 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
       }
     }
 
-    // Check 2: Pro tier
+    // Check 2: Pro tier (database)
     if (!authorized && (body.userId || body.email)) {
-      const query = supabase.from('user_profiles').select('tier');
+      const query = supabase.from('user_profiles').select('tier, email');
       if (body.userId) {
         query.eq('id', body.userId);
       } else if (body.email) {
@@ -67,6 +68,15 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
       if (profile?.tier === 'pro') {
         authorized = true;
       }
+      // Check email whitelist (team members, beta testers)
+      if (!authorized && profile?.email && isProEmail(profile.email)) {
+        authorized = true;
+      }
+    }
+
+    // Check 3: Email whitelist directly (if email passed but no DB profile)
+    if (!authorized && body.email && isProEmail(body.email)) {
+      authorized = true;
     }
 
     if (!authorized) {
