@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type {
   TherapeuticArea,
   Phase,
@@ -19,7 +19,9 @@ import {
   biomarkerOptions,
 } from '@/lib/calculations';
 import { phaseDescriptions } from '@/lib/optionDescriptions';
+import { getPhaseImpactBadge, getModalityImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
+import SearchableCombobox from './SearchableCombobox';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AssetDetailsSectionProps {
@@ -69,6 +71,14 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     ? immunologyIndicationOptions
     : indicationOptions;
 
+  const phaseImpactBadges = useMemo(() => {
+    const badges: Record<string, ImpactBadge> = {};
+    phaseOptions.forEach(opt => {
+      badges[opt.value] = getPhaseImpactBadge(opt.value, therapeuticArea);
+    });
+    return badges;
+  }, [therapeuticArea]);
+
   return (
     <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
       <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
@@ -81,45 +91,31 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           label="Development Phase"
           options={phaseOptions}
           descriptions={phaseDescriptions}
+          impactBadges={phaseImpactBadges}
           value={phase}
           onChange={onPhaseChange}
           highlighted={highlightedFields.has('phase')}
           columns={5}
         />
 
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Modality</label>
-          <select
-            value={modality}
-            onChange={(e) => onModalityChange(e.target.value as Modality)}
-            className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-          >
-            {modalityOptionsList.map((group) => (
-              <optgroup key={group.group} label={group.group}>
-                {group.options.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
+        <SearchableCombobox
+          id="modality-select"
+          label="Modality"
+          groups={modalityOptionsList}
+          value={modality}
+          onChange={onModalityChange}
+          highlighted={highlightedFields.has('modality')}
+          impactBadge={getModalityImpactBadge(modality)}
+        />
 
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Primary Indication</label>
-          <select
-            value={indication}
-            onChange={(e) => onIndicationChange(e.target.value as Indication)}
-            className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-          >
-            {indicationOptionsList.map((group) => (
-              <optgroup key={group.group} label={group.group}>
-                {group.options.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
+        <SearchableCombobox
+          id="indication-select"
+          label="Primary Indication"
+          groups={indicationOptionsList}
+          value={indication}
+          onChange={onIndicationChange}
+          highlighted={highlightedFields.has('indication')}
+        />
 
         {quickMode && (
           <button

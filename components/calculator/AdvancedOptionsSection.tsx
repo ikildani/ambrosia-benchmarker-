@@ -43,8 +43,23 @@ import {
   metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
 import { competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions } from '@/lib/optionDescriptions';
+import { getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
 import type { OnboardingStep } from '../OnboardingModal';
+
+// Static badges — multiplier values don't change at runtime
+const competitiveBadges: Record<string, ImpactBadge> = {};
+competitivePositionOptions.forEach(opt => {
+  competitiveBadges[opt.value] = getMultiplierImpactBadge('competitivePosition', opt.value);
+});
+const dataQualityBadges: Record<string, ImpactBadge> = {};
+dataQualityOptions.forEach(opt => {
+  dataQualityBadges[opt.value] = getMultiplierImpactBadge('dataQuality', opt.value);
+});
+const combinationBadges: Record<string, ImpactBadge> = {};
+combinationPotentialOptions.forEach(opt => {
+  combinationBadges[opt.value] = getMultiplierImpactBadge('combinationPotential', opt.value);
+});
 
 interface AdvancedOptionsSectionProps {
   therapeuticArea: TherapeuticArea;
@@ -57,8 +72,8 @@ interface AdvancedOptionsSectionProps {
   regulatoryDesignations: RegulatoryDesignations;
   highlightedFields: Set<string>;
   onboardingStep: OnboardingStep | null;
-  /** Which column portion to render: 'left' = Target Profile, 'right' = Competitive Landscape + Deal Scope */
-  column: 'left' | 'right';
+  /** Which column portion to render: 'left' = Target Profile, 'right' = Competitive Landscape + Deal Scope, 'competitive' = Competitive only, 'deal-scope' = Deal Scope only */
+  column: 'left' | 'right' | 'competitive' | 'deal-scope';
   // Neurology-specific
   bbbPenetration: BBBPenetration;
   diseaseProgression: DiseaseProgression;
@@ -143,6 +158,117 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onMetabolicTreatmentApproachChange,
   column,
 }: AdvancedOptionsSectionProps) {
+  if (column === 'competitive') {
+    return (
+      <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
+        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
+          <span className="w-6 h-6 rounded-full bg-teal-500/50 text-white text-xs flex items-center justify-center">3</span>
+          Competitive Landscape
+        </h3>
+        <div className="space-y-4">
+          <OptionCardGroup
+            id="competitive-position-select"
+            label="Competitive Position"
+            options={competitivePositionOptions}
+            descriptions={competitivePositionDescriptions}
+            impactBadges={competitiveBadges}
+            value={competitivePosition}
+            onChange={onCompetitivePositionChange}
+            highlighted={highlightedFields.has('competitivePosition')}
+            columns={6}
+          />
+          <OptionCardGroup
+            id="data-quality-select"
+            label="Data Quality"
+            options={dataQualityOptions}
+            descriptions={dataQualityDescriptions}
+            impactBadges={dataQualityBadges}
+            value={dataQuality}
+            onChange={onDataQualityChange}
+            highlighted={highlightedFields.has('dataQuality')}
+            columns={5}
+          />
+          <OptionCardGroup
+            id="combination-potential-select"
+            label="Combination Potential"
+            options={combinationPotentialOptions}
+            descriptions={combinationPotentialDescriptions}
+            impactBadges={combinationBadges}
+            value={combinationPotential}
+            onChange={onCombinationPotentialChange}
+            highlighted={highlightedFields.has('combinationPotential')}
+            columns={3}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (column === 'deal-scope') {
+    return (
+      <div>
+        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
+          <span className="w-6 h-6 rounded-full bg-teal-500/30 text-teal-700 text-xs flex items-center justify-center">4</span>
+          Deal Scope
+        </h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory</label>
+            <select
+              value={territory}
+              onChange={(e) => onTerritoryChange(e.target.value as Territory)}
+              className={`select-field transition-all duration-300 ${highlightedFields.has('territory') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
+            >
+              {territoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+              {regulatoryDesignationOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={`flex items-center gap-3 px-4 py-3.5 sm:py-3 rounded-xl border-2 cursor-pointer transition-all duration-200 touch-feedback min-h-[52px] ${
+                    regulatoryDesignations[option.value as keyof RegulatoryDesignations]
+                      ? 'border-teal-500 bg-teal-50 shadow-sm'
+                      : 'border-neutral-200 bg-white hover:border-teal-300 active:bg-teal-50/50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={regulatoryDesignations[option.value as keyof RegulatoryDesignations]}
+                    onChange={() => onRegulatoryChange(option.value as keyof RegulatoryDesignations)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
+                    regulatoryDesignations[option.value as keyof RegulatoryDesignations]
+                      ? 'bg-teal-500 border-teal-500'
+                      : 'border-neutral-300'
+                  }`}>
+                    {regulatoryDesignations[option.value as keyof RegulatoryDesignations] && (
+                      <svg className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className={`text-sm sm:text-sm font-medium ${
+                    regulatoryDesignations[option.value as keyof RegulatoryDesignations]
+                      ? 'text-teal-700'
+                      : 'text-neutral-700'
+                  }`}>
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (column === 'right') {
     return (
       <>
@@ -158,6 +284,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               label="Competitive Position"
               options={competitivePositionOptions}
               descriptions={competitivePositionDescriptions}
+              impactBadges={competitiveBadges}
               value={competitivePosition}
               onChange={onCompetitivePositionChange}
               highlighted={highlightedFields.has('competitivePosition')}
@@ -169,6 +296,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               label="Data Quality"
               options={dataQualityOptions}
               descriptions={dataQualityDescriptions}
+              impactBadges={dataQualityBadges}
               value={dataQuality}
               onChange={onDataQualityChange}
               highlighted={highlightedFields.has('dataQuality')}
@@ -482,6 +610,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             label="Combination Potential"
             options={combinationPotentialOptions}
             descriptions={combinationPotentialDescriptions}
+            impactBadges={combinationBadges}
             value={combinationPotential}
             onChange={onCombinationPotentialChange}
             highlighted={highlightedFields.has('combinationPotential')}

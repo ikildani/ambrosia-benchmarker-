@@ -5,5 +5,8 @@ export { default as AreaSwitchModal } from './AreaSwitchModal';
 export { default as AssetDetailsSection } from './AssetDetailsSection';
 export { default as AdvancedOptionsSection } from './AdvancedOptionsSection';
 export { default as OptionCardGroup } from './OptionCardGroup';
+export { default as SearchableCombobox } from './SearchableCombobox';
 export { default as LiveDealPreview } from './LiveDealPreview';
+export { default as WizardStepper } from './WizardStepper';
+export type { WizardStep } from './WizardStepper';
 export type { DealTemplate } from './types';

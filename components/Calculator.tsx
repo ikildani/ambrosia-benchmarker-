@@ -46,8 +46,21 @@ import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 
-import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview } from './calculator/index';
+import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper } from './calculator/index';
 import type { DealTemplate } from './calculator/index';
+import type { WizardStep } from './calculator/index';
+
+const FULL_STEPS: WizardStep[] = [
+  { id: 'asset', label: 'Asset Details', shortLabel: 'Asset' },
+  { id: 'target', label: 'Target Profile', shortLabel: 'Profile' },
+  { id: 'competitive', label: 'Competitive', shortLabel: 'Compete' },
+  { id: 'deal', label: 'Deal Scope', shortLabel: 'Deal' },
+];
+
+const QUICK_STEPS: WizardStep[] = [
+  { id: 'asset', label: 'Asset Details', shortLabel: 'Asset' },
+  { id: 'competitive-deal', label: 'Competitive & Deal', shortLabel: 'Compete' },
+];
 
 interface CalculatorProps {
   tier?: 'free' | 'pro';
@@ -104,6 +117,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [showTemplates, setShowTemplates] = useState(true);
   const [quickMode, setQuickMode] = useState(true);
   const [highlightedFields, setHighlightedFields] = useState<Set<string>>(new Set());
+
+  // Wizard state
+  const [wizardStep, setWizardStep] = useState(0);
+  const activeSteps = quickMode ? QUICK_STEPS : FULL_STEPS;
 
   // Tracking
   const { trackCalculation, trackParameterChange, trackPaywallHit, sessionId, anonymousId } = useTracking();
@@ -540,6 +557,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     setHighlightedFields(fieldsSet);
     setShowTemplates(false);
     setQuickMode(false);
+    setWizardStep(0);
 
     // Clear highlight after animation
     setTimeout(() => setHighlightedFields(new Set()), 2000);
@@ -600,259 +618,118 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             hasResult={!!result}
           />
 
-          <div className={`grid ${quickMode ? 'max-w-xl mx-auto' : 'md:grid-cols-2'} gap-6 lg:gap-8`}>
-            {/* Left Column */}
-            <div className="space-y-6 lg:space-y-8">
-              {/* Asset Details Section */}
-              <AssetDetailsSection
-                therapeuticArea={therapeuticArea}
-                phase={phase}
-                modality={modality}
-                indication={indication}
-                biomarker={biomarker}
-                highlightedFields={highlightedFields}
-                quickMode={quickMode}
-                onboardingStep={onboardingStep}
-                onPhaseChange={(newValue) => {
-                  trackParameterChange('phase', phase, newValue);
-                  setPhase(newValue);
-                }}
-                onModalityChange={(newValue) => {
-                  trackParameterChange('modality', modality, newValue);
-                  setModality(newValue);
-                }}
-                onIndicationChange={(newValue) => {
-                  trackParameterChange('indication', indication, newValue);
-                  setIndication(newValue);
-                }}
-                onBiomarkerChange={(newValue) => {
-                  trackParameterChange('biomarker', biomarker, newValue);
-                  setBiomarker(newValue);
-                }}
-                onShowAdvanced={() => setQuickMode(false)}
-              />
+          {/* Wizard + Live Preview layout */}
+          <div className="grid md:grid-cols-[1fr_280px] gap-6 lg:gap-8">
+            <WizardStepper
+              steps={activeSteps}
+              currentStep={wizardStep}
+              onStepChange={setWizardStep}
+              onCalculate={handleCalculate}
+              isCalculating={isCalculating}
+            >
+              {(() => {
+                const stepId = activeSteps[wizardStep]?.id;
 
-              {quickMode && (
-                <div className="mt-4">
-                  <LiveDealPreview
-                    totalDealValue={previewResult.terms.totalDealValue}
-                    upfront={previewResult.terms.upfront}
-                  />
-                </div>
-              )}
+                // Shared AdvancedOptionsSection props
+                const advancedProps = {
+                  therapeuticArea,
+                  territory,
+                  lineOfTherapy,
+                  treatmentApproach,
+                  combinationPotential,
+                  competitivePosition,
+                  dataQuality,
+                  regulatoryDesignations,
+                  highlightedFields,
+                  onboardingStep,
+                  bbbPenetration,
+                  diseaseProgression,
+                  biomarkerValidation,
+                  immuneResetPotential,
+                  targetSpecificity,
+                  diseaseSeverity,
+                  treatmentGoal,
+                  mechanismDifferentiation,
+                  weightLossEfficacy,
+                  routeOfAdministration,
+                  comorbidityBreadth,
+                  metabolicTreatmentApproach,
+                  onTerritoryChange: (newValue: Territory) => { trackParameterChange('territory', territory, newValue); setTerritory(newValue); },
+                  onLineOfTherapyChange: (newValue: LineOfTherapy) => { trackParameterChange('lineOfTherapy', lineOfTherapy, newValue); setLineOfTherapy(newValue); },
+                  onTreatmentApproachChange: (newValue: TreatmentApproach) => { trackParameterChange('treatmentApproach', treatmentApproach, newValue); setTreatmentApproach(newValue); },
+                  onCombinationPotentialChange: (newValue: CombinationPotential) => { trackParameterChange('combinationPotential', combinationPotential, newValue); setCombinationPotential(newValue); },
+                  onCompetitivePositionChange: (newValue: CompetitivePosition) => { trackParameterChange('competitivePosition', competitivePosition, newValue); setCompetitivePosition(newValue); },
+                  onDataQualityChange: (newValue: DataQuality) => { trackParameterChange('dataQuality', dataQuality, newValue); setDataQuality(newValue); },
+                  onRegulatoryChange: handleRegulatoryChange,
+                  onBbbPenetrationChange: (newValue: BBBPenetration) => { trackParameterChange('bbbPenetration', bbbPenetration, newValue); setBbbPenetration(newValue); },
+                  onDiseaseProgressionChange: (newValue: DiseaseProgression) => { trackParameterChange('diseaseProgression', diseaseProgression, newValue); setDiseaseProgression(newValue); },
+                  onBiomarkerValidationChange: (newValue: BiomarkerValidation) => { trackParameterChange('biomarkerValidation', biomarkerValidation, newValue); setBiomarkerValidation(newValue); },
+                  onImmuneResetPotentialChange: (newValue: ImmuneResetPotential) => { trackParameterChange('immuneResetPotential', immuneResetPotential, newValue); setImmuneResetPotential(newValue); },
+                  onTargetSpecificityChange: (newValue: TargetSpecificity) => { trackParameterChange('targetSpecificity', targetSpecificity, newValue); setTargetSpecificity(newValue); },
+                  onDiseaseSeverityChange: (newValue: DiseaseSeverity) => { trackParameterChange('diseaseSeverity', diseaseSeverity, newValue); setDiseaseSeverity(newValue); },
+                  onTreatmentGoalChange: (newValue: ImmunologyTreatmentGoal) => { trackParameterChange('treatmentGoal', treatmentGoal, newValue); setTreatmentGoal(newValue); },
+                  onMechanismDifferentiationChange: (newValue: MechanismDifferentiation) => { trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue); setMechanismDifferentiation(newValue); },
+                  onWeightLossEfficacyChange: (newValue: WeightLossEfficacy) => { trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue); setWeightLossEfficacy(newValue); },
+                  onRouteOfAdministrationChange: (newValue: RouteOfAdministration) => { trackParameterChange('routeOfAdministration', routeOfAdministration, newValue); setRouteOfAdministration(newValue); },
+                  onComorbidityBreadthChange: (newValue: ComorbidityBreadth) => { trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue); setComorbidityBreadth(newValue); },
+                  onMetabolicTreatmentApproachChange: (newValue: MetabolicTreatmentApproach) => { trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue); setMetabolicTreatmentApproach(newValue); },
+                } as const;
 
-              {!quickMode && (
-                <AdvancedOptionsSection
-                  column="left"
-                  therapeuticArea={therapeuticArea}
-                  territory={territory}
-                  lineOfTherapy={lineOfTherapy}
-                  treatmentApproach={treatmentApproach}
-                  combinationPotential={combinationPotential}
-                  competitivePosition={competitivePosition}
-                  dataQuality={dataQuality}
-                  regulatoryDesignations={regulatoryDesignations}
-                  highlightedFields={highlightedFields}
-                  onboardingStep={onboardingStep}
-                  bbbPenetration={bbbPenetration}
-                  diseaseProgression={diseaseProgression}
-                  biomarkerValidation={biomarkerValidation}
-                  immuneResetPotential={immuneResetPotential}
-                  targetSpecificity={targetSpecificity}
-                  diseaseSeverity={diseaseSeverity}
-                  treatmentGoal={treatmentGoal}
-                  mechanismDifferentiation={mechanismDifferentiation}
-                  weightLossEfficacy={weightLossEfficacy}
-                  routeOfAdministration={routeOfAdministration}
-                  comorbidityBreadth={comorbidityBreadth}
-                  metabolicTreatmentApproach={metabolicTreatmentApproach}
-                  onTerritoryChange={(newValue) => {
-                    trackParameterChange('territory', territory, newValue);
-                    setTerritory(newValue);
-                  }}
-                  onLineOfTherapyChange={(newValue) => {
-                    trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
-                    setLineOfTherapy(newValue);
-                  }}
-                  onTreatmentApproachChange={(newValue) => {
-                    trackParameterChange('treatmentApproach', treatmentApproach, newValue);
-                    setTreatmentApproach(newValue);
-                  }}
-                  onCombinationPotentialChange={(newValue) => {
-                    trackParameterChange('combinationPotential', combinationPotential, newValue);
-                    setCombinationPotential(newValue);
-                  }}
-                  onCompetitivePositionChange={(newValue) => {
-                    trackParameterChange('competitivePosition', competitivePosition, newValue);
-                    setCompetitivePosition(newValue);
-                  }}
-                  onDataQualityChange={(newValue) => {
-                    trackParameterChange('dataQuality', dataQuality, newValue);
-                    setDataQuality(newValue);
-                  }}
-                  onRegulatoryChange={handleRegulatoryChange}
-                  onBbbPenetrationChange={(newValue) => {
-                    trackParameterChange('bbbPenetration', bbbPenetration, newValue);
-                    setBbbPenetration(newValue);
-                  }}
-                  onDiseaseProgressionChange={(newValue) => {
-                    trackParameterChange('diseaseProgression', diseaseProgression, newValue);
-                    setDiseaseProgression(newValue);
-                  }}
-                  onBiomarkerValidationChange={(newValue) => {
-                    trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
-                    setBiomarkerValidation(newValue);
-                  }}
-                  onImmuneResetPotentialChange={(newValue) => {
-                    trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
-                    setImmuneResetPotential(newValue);
-                  }}
-                  onTargetSpecificityChange={(newValue) => {
-                    trackParameterChange('targetSpecificity', targetSpecificity, newValue);
-                    setTargetSpecificity(newValue);
-                  }}
-                  onDiseaseSeverityChange={(newValue) => {
-                    trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
-                    setDiseaseSeverity(newValue);
-                  }}
-                  onTreatmentGoalChange={(newValue) => {
-                    trackParameterChange('treatmentGoal', treatmentGoal, newValue);
-                    setTreatmentGoal(newValue);
-                  }}
-                  onMechanismDifferentiationChange={(newValue) => {
-                    trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
-                    setMechanismDifferentiation(newValue);
-                  }}
-                  onWeightLossEfficacyChange={(newValue) => {
-                    trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
-                    setWeightLossEfficacy(newValue);
-                  }}
-                  onRouteOfAdministrationChange={(newValue) => {
-                    trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
-                    setRouteOfAdministration(newValue);
-                  }}
-                  onComorbidityBreadthChange={(newValue) => {
-                    trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
-                    setComorbidityBreadth(newValue);
-                  }}
-                  onMetabolicTreatmentApproachChange={(newValue) => {
-                    trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
-                    setMetabolicTreatmentApproach(newValue);
-                  }}
-                />
-              )}
-            </div>
+                switch (stepId) {
+                  case 'asset':
+                    return (
+                      <AssetDetailsSection
+                        therapeuticArea={therapeuticArea}
+                        phase={phase}
+                        modality={modality}
+                        indication={indication}
+                        biomarker={biomarker}
+                        highlightedFields={highlightedFields}
+                        quickMode={false}
+                        onboardingStep={onboardingStep}
+                        onPhaseChange={(newValue) => { trackParameterChange('phase', phase, newValue); setPhase(newValue); }}
+                        onModalityChange={(newValue) => { trackParameterChange('modality', modality, newValue); setModality(newValue); }}
+                        onIndicationChange={(newValue) => { trackParameterChange('indication', indication, newValue); setIndication(newValue); }}
+                        onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', biomarker, newValue); setBiomarker(newValue); }}
+                        onShowAdvanced={() => { setQuickMode(false); setWizardStep(0); }}
+                      />
+                    );
+                  case 'target':
+                    return <AdvancedOptionsSection column="left" {...advancedProps} />;
+                  case 'competitive':
+                    return <AdvancedOptionsSection column="competitive" {...advancedProps} />;
+                  case 'deal':
+                    return <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
+                  case 'competitive-deal':
+                    // Quick mode: competitive + deal scope combined
+                    return (
+                      <div className="space-y-8">
+                        <AdvancedOptionsSection column="competitive" {...advancedProps} />
+                        <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
+                      </div>
+                    );
+                  default:
+                    return null;
+                }
+              })()}
+            </WizardStepper>
 
-            {/* Right Column */}
-            {!quickMode && (
-            <div className="space-y-6 lg:space-y-8">
+            {/* Desktop: Live preview sidebar */}
+            <div className="hidden md:block">
               <LiveDealPreview
                 totalDealValue={previewResult.terms.totalDealValue}
                 upfront={previewResult.terms.upfront}
               />
-              <AdvancedOptionsSection
-                column="right"
-                therapeuticArea={therapeuticArea}
-                territory={territory}
-                lineOfTherapy={lineOfTherapy}
-                treatmentApproach={treatmentApproach}
-                combinationPotential={combinationPotential}
-                competitivePosition={competitivePosition}
-                dataQuality={dataQuality}
-                regulatoryDesignations={regulatoryDesignations}
-                highlightedFields={highlightedFields}
-                onboardingStep={onboardingStep}
-                bbbPenetration={bbbPenetration}
-                diseaseProgression={diseaseProgression}
-                biomarkerValidation={biomarkerValidation}
-                immuneResetPotential={immuneResetPotential}
-                targetSpecificity={targetSpecificity}
-                diseaseSeverity={diseaseSeverity}
-                treatmentGoal={treatmentGoal}
-                mechanismDifferentiation={mechanismDifferentiation}
-                weightLossEfficacy={weightLossEfficacy}
-                routeOfAdministration={routeOfAdministration}
-                comorbidityBreadth={comorbidityBreadth}
-                metabolicTreatmentApproach={metabolicTreatmentApproach}
-                onTerritoryChange={(newValue) => {
-                  trackParameterChange('territory', territory, newValue);
-                  setTerritory(newValue);
-                }}
-                onLineOfTherapyChange={(newValue) => {
-                  trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
-                  setLineOfTherapy(newValue);
-                }}
-                onTreatmentApproachChange={(newValue) => {
-                  trackParameterChange('treatmentApproach', treatmentApproach, newValue);
-                  setTreatmentApproach(newValue);
-                }}
-                onCombinationPotentialChange={(newValue) => {
-                  trackParameterChange('combinationPotential', combinationPotential, newValue);
-                  setCombinationPotential(newValue);
-                }}
-                onCompetitivePositionChange={(newValue) => {
-                  trackParameterChange('competitivePosition', competitivePosition, newValue);
-                  setCompetitivePosition(newValue);
-                }}
-                onDataQualityChange={(newValue) => {
-                  trackParameterChange('dataQuality', dataQuality, newValue);
-                  setDataQuality(newValue);
-                }}
-                onRegulatoryChange={handleRegulatoryChange}
-                onBbbPenetrationChange={(newValue) => {
-                  trackParameterChange('bbbPenetration', bbbPenetration, newValue);
-                  setBbbPenetration(newValue);
-                }}
-                onDiseaseProgressionChange={(newValue) => {
-                  trackParameterChange('diseaseProgression', diseaseProgression, newValue);
-                  setDiseaseProgression(newValue);
-                }}
-                onBiomarkerValidationChange={(newValue) => {
-                  trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
-                  setBiomarkerValidation(newValue);
-                }}
-                onImmuneResetPotentialChange={(newValue) => {
-                  trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
-                  setImmuneResetPotential(newValue);
-                }}
-                onTargetSpecificityChange={(newValue) => {
-                  trackParameterChange('targetSpecificity', targetSpecificity, newValue);
-                  setTargetSpecificity(newValue);
-                }}
-                onDiseaseSeverityChange={(newValue) => {
-                  trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
-                  setDiseaseSeverity(newValue);
-                }}
-                onTreatmentGoalChange={(newValue) => {
-                  trackParameterChange('treatmentGoal', treatmentGoal, newValue);
-                  setTreatmentGoal(newValue);
-                }}
-                onMechanismDifferentiationChange={(newValue) => {
-                  trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
-                  setMechanismDifferentiation(newValue);
-                }}
-                onWeightLossEfficacyChange={(newValue) => {
-                  trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
-                  setWeightLossEfficacy(newValue);
-                }}
-                onRouteOfAdministrationChange={(newValue) => {
-                  trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
-                  setRouteOfAdministration(newValue);
-                }}
-                onComorbidityBreadthChange={(newValue) => {
-                  trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
-                  setComorbidityBreadth(newValue);
-                }}
-                onMetabolicTreatmentApproachChange={(newValue) => {
-                  trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
-                  setMetabolicTreatmentApproach(newValue);
-                }}
-              />
             </div>
-            )}
           </div>
 
-          {/* Removed: Usage counter — calculations are now unlimited */}
+          {/* Mobile: Live preview bottom bar */}
+          <div className="md:hidden">
+            <LiveDealPreview
+              totalDealValue={previewResult.terms.totalDealValue}
+              upfront={previewResult.terms.upfront}
+            />
+          </div>
 
           {/* Save Error Warning */}
           {saveError && (
@@ -872,35 +749,6 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               </button>
             </div>
           )}
-
-          {/* Calculate Button - Enhanced mobile touch feedback */}
-          <button
-            onClick={handleCalculate}
-            disabled={isCalculating}
-            className="mt-5 sm:mt-6 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-4 sm:py-4 px-4 sm:px-6 rounded-2xl sm:rounded-xl
-                     shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-300
-                     hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
-                     disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
-                     flex items-center justify-center gap-2.5 sm:gap-3 group text-base sm:text-base touch-feedback btn-press
-                     active:scale-[0.97] active:shadow-md"
-          >
-            {isCalculating ? (
-              <>
-                <div className="relative w-5 h-5">
-                  <div className="absolute inset-0 rounded-full border-2 border-white/30" />
-                  <div className="absolute inset-0 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                </div>
-                <span>Analyzing Market Data...</span>
-              </>
-            ) : (
-              <>
-                <span>Calculate Deal Terms</span>
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </>
-            )}
-          </button>
 
           <p className="text-center text-xs text-neutral-500 mt-4">
             Free — unlimited calculations with headline estimates
