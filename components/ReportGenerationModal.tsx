@@ -9,7 +9,7 @@ import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
 import type { PDFReportData, PartnerForPDF } from '@/lib/report';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 
-type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'preview' | 'downloading' | 'success' | 'error';
+type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'success' | 'error';
 
 interface StepDef {
   id: ModalStep;
@@ -49,27 +49,6 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/** Fallback: trigger browser print dialog via a hidden iframe (no popup blocker issues). */
-function triggerPrintFallback(html: string): void {
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;';
-  document.body.appendChild(iframe);
-  const doc = iframe.contentDocument || iframe.contentWindow?.document;
-  if (!doc) {
-    document.body.removeChild(iframe);
-    return;
-  }
-  doc.open();
-  doc.write(html);
-  doc.close();
-  // Wait for content + fonts to render, then trigger print
-  setTimeout(() => {
-    try { iframe.contentWindow?.print(); } catch { /* cross-origin fallback */ }
-    setTimeout(() => {
-      try { document.body.removeChild(iframe); } catch { /* already removed */ }
-    }, 2000);
-  }, 1500);
-}
 
 function StepIcon({ status }: { status: 'pending' | 'active' | 'done' }) {
   if (status === 'done') {
@@ -304,18 +283,34 @@ export default function ReportGenerationModal({
               const sizeMB = (pdfBlobRef.current.size / (1024 * 1024)).toFixed(1);
               setFileSize(`${sizeMB} MB`);
             } else {
-              // Server can't generate — show preview with print-to-PDF option
+              // Server can't generate — open HTML report in new tab for print-to-PDF
               if (abortRef.current) return;
               markComplete('building');
-              setCurrentStep('preview');
+              const reportTab = window.open('', '_blank');
+              if (reportTab) {
+                reportTab.document.write(html);
+                reportTab.document.close();
+              }
+              setCurrentStep('success');
+              p.onDownloadComplete();
+              await delay(2000);
+              if (!abortRef.current) p.onClose();
               return;
             }
           } catch {
             clearTimeout(timeoutId);
-            // Server timeout or network error — show preview with print-to-PDF option
+            // Server timeout — open HTML report in new tab
             if (abortRef.current) return;
             markComplete('building');
-            setCurrentStep('preview');
+            const reportTab = window.open('', '_blank');
+            if (reportTab) {
+              reportTab.document.write(html);
+              reportTab.document.close();
+            }
+            setCurrentStep('success');
+            p.onDownloadComplete();
+            await delay(2000);
+            if (!abortRef.current) p.onClose();
             return;
           }
         } catch (err) {
@@ -326,7 +321,12 @@ export default function ReportGenerationModal({
         }
         if (abortRef.current) return;
         markComplete('building');
-        setCurrentStep('preview');
+
+        // PDF ready — open in new tab for viewing
+        const pdfUrl = URL.createObjectURL(pdfBlobRef.current!);
+        window.open(pdfUrl, '_blank');
+        setCurrentStep('success');
+        p.onDownloadComplete();
       } catch (err) {
         console.error('Report generation failed:', err);
         if (!abortRef.current) {
@@ -344,30 +344,30 @@ export default function ReportGenerationModal({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- props accessed via propsRef to prevent cleanup abort
   }, [isOpen]);
 
-  const handleDownload = useCallback(() => {
+  const handleViewReport = useCallback(() => {
     if (pdfBlobRef.current) {
-      // Server-generated PDF — direct download
-      setCurrentStep('downloading');
       const url = URL.createObjectURL(pdfBlobRef.current);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      setCurrentStep('success');
-      onDownloadComplete();
-      setTimeout(() => {
-        if (!abortRef.current) onClose();
-      }, 1500);
+      window.open(url, '_blank');
     } else if (htmlStringRef.current) {
-      // No server PDF — trigger browser print dialog (Save as PDF)
-      triggerPrintFallback(htmlStringRef.current);
-      setCurrentStep('success');
-      onDownloadComplete();
+      const reportTab = window.open('', '_blank');
+      if (reportTab) {
+        reportTab.document.write(htmlStringRef.current);
+        reportTab.document.close();
+      }
     }
-  }, [labels.indication, onDownloadComplete, onClose]);
+  }, []);
+
+  const handleSaveToDevice = useCallback(() => {
+    if (!pdfBlobRef.current) return;
+    const url = URL.createObjectURL(pdfBlobRef.current);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [labels.indication]);
 
   const handleEmailReport = useCallback(async () => {
     if (!pdfBlobRef.current || !userEmail || emailSending) return;
@@ -426,8 +426,7 @@ export default function ReportGenerationModal({
 
   if (!isOpen) return null;
 
-  const isProcessing = !['preview', 'success', 'error', 'idle'].includes(currentStep);
-  const isPreview = currentStep === 'preview';
+  const isProcessing = !['success', 'error', 'idle'].includes(currentStep);
 
   return (
     <>
@@ -450,13 +449,11 @@ export default function ReportGenerationModal({
           }}
         />
 
-        {/* Modal card — expands for preview */}
+        {/* Modal card */}
         <div
           ref={modalRef}
           tabIndex={-1}
-          className={`relative w-full bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-hidden outline-none transition-all duration-300 ${
-            isPreview ? 'max-w-4xl' : 'max-w-md'
-          }`}
+          className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-hidden outline-none transition-all duration-300"
           role="dialog"
           aria-modal="true"
           aria-label="Report generation"
@@ -478,7 +475,7 @@ export default function ReportGenerationModal({
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
-                    {currentStep === 'success' ? 'Report Downloaded' : isPreview ? 'Report Preview' : 'Preparing Your Report'}
+                    {currentStep === 'success' ? 'Report Ready' : 'Preparing Your Report'}
                   </h3>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <span className="text-xs px-2 py-0.5 bg-navy-100 dark:bg-navy-800 text-navy-600 dark:text-navy-300 rounded font-medium">{labels.phase}</span>
@@ -509,170 +506,132 @@ export default function ReportGenerationModal({
           {/* Divider */}
           <div className="h-px bg-neutral-200 dark:bg-slate-700" />
 
-          {/* Preview state — two-column layout */}
-          {isPreview && htmlStringRef.current ? (
-            <div className="flex flex-col sm:flex-row">
-              {/* Left: Report preview */}
-              <div className="flex-1 sm:w-[65%] border-r border-neutral-200 dark:border-slate-700">
-                <div className="p-4">
-                  <div className="text-xs font-medium text-neutral-400 dark:text-slate-500 mb-2 uppercase tracking-wider">Preview</div>
-                  <div className="relative rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden bg-white" style={{ height: '55vh' }}>
-                    <div style={{ width: '210mm', transformOrigin: 'top left', transform: 'scale(0.48)', height: '115vh' }}>
-                      <iframe
-                        srcDoc={htmlStringRef.current}
-                        title="Report preview"
-                        className="w-full border-0"
-                        style={{ width: '210mm', height: '200vh', pointerEvents: 'none' }}
-                        sandbox=""
-                      />
+          {/* Steps + status */}
+          <div className="px-6 py-5">
+            <div className="space-y-4">
+              {steps.map((step, i) => {
+                const status = getStepStatus(step.id);
+                return (
+                  <div
+                    key={step.id}
+                    className="flex items-start gap-3.5 animate-step-fade-in"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    <StepIcon status={status} />
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <p className={`text-sm font-semibold transition-colors duration-300 ${
+                        status === 'done' ? 'text-teal-600 dark:text-teal-400' :
+                        status === 'active' ? 'text-neutral-900 dark:text-white' :
+                        'text-neutral-400 dark:text-slate-500'
+                      }`}>
+                        {step.label}
+                      </p>
+                      <p className={`text-xs mt-0.5 transition-colors duration-300 ${
+                        status === 'active' ? 'text-neutral-500 dark:text-slate-400 animate-progress-pulse' :
+                        'text-neutral-400 dark:text-slate-600'
+                      }`}>
+                        {step.sublabel}
+                      </p>
+                      {step.id === 'generating_memo' && canSkipMemo && status === 'active' && (
+                        <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <p className="text-xs text-amber-700 dark:text-amber-400">Memo generation encountered an issue.</p>
+                          <button
+                            onClick={handleSkipMemo}
+                            className="mt-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline"
+                          >
+                            Skip memo, continue anyway
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
+            </div>
 
-              {/* Right: Actions */}
-              <div className="sm:w-[35%] p-6 flex flex-col justify-between">
-                <div>
-                  <div className="text-sm font-bold text-neutral-900 dark:text-white mb-1">Your Report is Ready</div>
-                  <p className="text-xs text-neutral-400 dark:text-slate-500 mb-6">
-                    {fileSize
-                      ? `PDF \u00B7 ${fileSize} \u00B7 Consulting-grade`
-                      : 'Use Save as PDF in the print dialog'}
-                  </p>
-
-                  {/* Download button */}
-                  <button
-                    onClick={handleDownload}
-                    className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all duration-200 text-sm mb-3"
-                  >
-                    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            {/* Success — report opened in new tab */}
+            {currentStep === 'success' && (
+              <div className="mt-5 animate-step-fade-in">
+                <div className="flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg mb-4">
+                  <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0 animate-step-check">
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8.5L6.5 12L13 4" />
                     </svg>
-                    {pdfBlobRef.current ? 'Download PDF' : 'Save as PDF'}
-                  </button>
+                  </div>
+                  <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
+                    {format === 'pdf' ? 'Report opened in new tab' : 'Excel workbook saved to your downloads'}
+                  </p>
+                </div>
 
-                  {/* Email button */}
-                  {userEmail && (
+                {format === 'pdf' && (
+                  <div className="flex gap-2">
                     <button
-                      onClick={handleEmailReport}
-                      disabled={emailSending || emailSent}
-                      className={`w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
-                        emailSent
-                          ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
-                          : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
-                      }`}
+                      onClick={handleViewReport}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all text-sm"
                     >
-                      {emailSent ? (
-                        <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                      </svg>
+                      View Report
+                    </button>
+                    {pdfBlobRef.current && (
+                      <button
+                        onClick={handleSaveToDevice}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600 font-semibold rounded-xl transition-all text-sm"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Save
+                      </button>
+                    )}
+                    {userEmail && pdfBlobRef.current && (
+                      <button
+                        onClick={handleEmailReport}
+                        disabled={emailSending || emailSent}
+                        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-semibold ${
+                          emailSent
+                            ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-300'
+                            : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        {emailSent ? (
                           <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 8.5L6.5 12L13 4" />
                           </svg>
-                          Sent to {userEmail}
-                        </>
-                      ) : emailSending ? (
-                        <>
+                        ) : emailSending ? (
                           <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                           </svg>
-                          Email Report
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-neutral-200 dark:border-slate-700">
-                  <p className="text-xs text-neutral-400 dark:text-slate-500">
-                    Selectable text &middot; Inter font &middot; A4 format
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Steps (shown during processing and non-preview states) */}
-              <div className="px-6 py-5">
-                <div className="space-y-4">
-                  {steps.map((step, i) => {
-                    const status = getStepStatus(step.id);
-                    return (
-                      <div
-                        key={step.id}
-                        className="flex items-start gap-3.5 animate-step-fade-in"
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                      >
-                        <StepIcon status={status} />
-                        <div className="flex-1 min-w-0 pt-0.5">
-                          <p className={`text-sm font-semibold transition-colors duration-300 ${
-                            status === 'done' ? 'text-teal-600 dark:text-teal-400' :
-                            status === 'active' ? 'text-neutral-900 dark:text-white' :
-                            'text-neutral-400 dark:text-slate-500'
-                          }`}>
-                            {step.label}
-                          </p>
-                          <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                            status === 'active' ? 'text-neutral-500 dark:text-slate-400 animate-progress-pulse' :
-                            'text-neutral-400 dark:text-slate-600'
-                          }`}>
-                            {step.sublabel}
-                          </p>
-                          {/* Memo error with skip option */}
-                          {step.id === 'generating_memo' && canSkipMemo && status === 'active' && (
-                            <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                              <p className="text-xs text-amber-700 dark:text-amber-400">Memo generation encountered an issue.</p>
-                              <button
-                                onClick={handleSkipMemo}
-                                className="mt-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline"
-                              >
-                                Skip memo, continue anyway
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Success state */}
-                {currentStep === 'success' && (
-                  <div className="mt-5 flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg animate-step-fade-in">
-                    <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0 animate-step-check">
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 8.5L6.5 12L13 4" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
-                      {format === 'pdf' ? 'PDF report saved to your downloads' : 'Excel workbook saved to your downloads'}
-                    </p>
-                  </div>
-                )}
-
-                {/* Error state */}
-                {currentStep === 'error' && errorMessage && (
-                  <div className="mt-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-step-fade-in">
-                    <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
-                    <button
-                      onClick={() => {
-                        startedRef.current = false;
-                        setCurrentStep('idle');
-                        setCompletedSteps(new Set());
-                        setErrorMessage(null);
-                      }}
-                      className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline"
-                    >
-                      Try again
-                    </button>
+                        )}
+                        {emailSent ? 'Sent' : 'Email'}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-            </>
-          )}
+            )}
+
+            {/* Error state */}
+            {currentStep === 'error' && errorMessage && (
+              <div className="mt-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-step-fade-in">
+                <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
+                <button
+                  onClick={() => {
+                    startedRef.current = false;
+                    setCurrentStep('idle');
+                    setCompletedSteps(new Set());
+                    setErrorMessage(null);
+                  }}
+                  className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Processing indicator bar */}
           {isProcessing && (
