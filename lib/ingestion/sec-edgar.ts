@@ -331,11 +331,13 @@ export async function findOrCreateCompany(
 
   const normalizedName = normalizeCompanyName(companyName);
 
-  // Try to find existing company
+  // Try to find existing company (escape SQL pattern chars to prevent injection)
+  const safeName = escapeLikePattern(normalizedName);
+  const safeArrayName = escapeArrayLiteral(companyName);
   const { data: existing } = await supabase
     .from('companies')
     .select('id, name, name_variations')
-    .or(`name.ilike.%${normalizedName}%,name_variations.cs.{${companyName}}`)
+    .or(`name.ilike.%${safeName}%,name_variations.cs.{${safeArrayName}}`)
     .limit(1)
     .single();
 
@@ -534,7 +536,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function deriveTherapeuticArea(indicationCategory: string | null): string {
-  if (!indicationCategory) return 'oncology';
+  if (!indicationCategory) return 'other';
   switch (indicationCategory) {
     case 'solid_tumor':
     case 'hematological':
@@ -543,6 +545,8 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
       return 'neurology';
     case 'autoimmune':
       return 'immunology';
+    case 'metabolic':
+      return 'metabolic';
     default:
       return 'other';
   }
@@ -553,4 +557,12 @@ function normalizeCompanyName(name: string): string {
     .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?)$/i, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function escapeLikePattern(str: string): string {
+  return str.replace(/[%_\\]/g, '\\$&');
+}
+
+function escapeArrayLiteral(str: string): string {
+  return str.replace(/[{}"\\,]/g, '\\$&');
 }

@@ -11,7 +11,7 @@ const THERAPEUTIC_AREA_MAP: Record<string, string> = {
   solid_tumor: 'oncology',
   hematological: 'oncology',
   cns: 'neurology',
-  autoimmune: 'autoimmune',
+  autoimmune: 'immunology',
   cardiovascular: 'cardiovascular',
   infectious: 'infectious',
   metabolic: 'metabolic',
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       .from('deals')
       .select('*', { count: 'exact', head: true });
 
-    const allAreas = ['oncology', 'neurology', 'autoimmune', 'cardiovascular', 'infectious', 'metabolic', 'rare_disease', 'respiratory', 'dermatology', 'ophthalmology', 'other'];
+    const allAreas = ['oncology', 'neurology', 'immunology', 'cardiovascular', 'infectious', 'metabolic', 'rare_disease', 'respiratory', 'dermatology', 'ophthalmology', 'other'];
     const counts: Record<string, number | null> = { total: totalDeals };
 
     for (const area of allAreas) {

@@ -35,7 +35,7 @@ export const COMPANIES_TO_TRACK = [
   'LogicBio', 'Generation Bio', 'Encoded Therapeutics',
 
   // Radiopharmaceuticals
-  'Novartis', 'Bayer', 'Lantheus', 'Point Biopharma',
+  'Lantheus', 'Point Biopharma',
   'Fusion Pharmaceuticals', 'RayzeBio', 'Aktis Oncology',
 
   // Emerging/Specialty
@@ -44,7 +44,7 @@ export const COMPANIES_TO_TRACK = [
   'Relay Therapeutics', 'Recursion', 'Exscientia', 'Schrodinger',
 
   // Japanese Pharma
-  'Astellas', 'Daiichi Sankyo', 'Eisai', 'Shionogi',
+  'Eisai', 'Shionogi',
   'Chugai', 'Ono Pharmaceutical', 'Sumitomo Pharma',
 
   // Chinese Biotech
@@ -67,6 +67,7 @@ export interface CTStudy {
   startDate: string | null;
   primaryCompletionDate: string | null;
   completionDate: string | null;
+  lastUpdatePosted: string | null;
   enrollmentCount: number | null;
   locations: string[];
   hasResults: boolean;
@@ -113,6 +114,7 @@ export async function fetchCompanyTrials(
           'EnrollmentCount',
           'LocationCountry',
           'ResultsFirstPostDate',
+          'LastUpdatePostDate',
         ].join(','),
       });
 
@@ -164,6 +166,7 @@ export async function fetchCompanyTrials(
             startDate: status?.startDateStruct?.date || null,
             primaryCompletionDate: status?.primaryCompletionDateStruct?.date || null,
             completionDate: status?.completionDateStruct?.date || null,
+            lastUpdatePosted: status?.lastUpdatePostDateStruct?.date || null,
             enrollmentCount: design?.enrollmentInfo?.count || null,
             locations: Array.from(new Set(contacts?.locations?.map((l: any) => l.country) || [])),
             hasResults: !!results || !!status?.resultsFirstPostDateStruct,
@@ -446,10 +449,17 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function escapeLikePattern(str: string): string {
+  return str.replace(/[%_\\]/g, '\\$&');
+}
+
 export async function runWeeklyIngestion(
   supabase: any
 ): Promise<{ companies: number; trials: number; errors: string[] }> {
   console.log('Starting ClinicalTrials.gov weekly ingestion...');
+
+  // Deduplicate company list at runtime (safety net)
+  const uniqueCompanies = [...new Set(COMPANIES_TO_TRACK)];
 
   // Log ingestion start
   const { data: logEntry } = await supabase
@@ -457,7 +467,7 @@ export async function runWeeklyIngestion(
     .insert({
       source: 'clinicaltrials',
       run_type: 'scheduled',
-      parameters: { companies: COMPANIES_TO_TRACK.length },
+      parameters: { companies: uniqueCompanies.length },
     })
     .select('id')
     .single();
@@ -469,7 +479,7 @@ export async function runWeeklyIngestion(
   let trialsUpdated = 0;
 
   try {
-    for (const companyName of COMPANIES_TO_TRACK) {
+    for (const companyName of uniqueCompanies) {
       try {
         console.log(`Processing ${companyName}...`);
 
@@ -483,7 +493,7 @@ export async function runWeeklyIngestion(
         let { data: company } = await supabase
           .from('companies')
           .select('id')
-          .ilike('name', `%${companyName}%`)
+          .ilike('name', `%${escapeLikePattern(companyName)}%`)
           .limit(1)
           .single();
 
@@ -540,6 +550,7 @@ export async function runWeeklyIngestion(
               start_date: trial.startDate,
               primary_completion_date: trial.primaryCompletionDate,
               completion_date: trial.completionDate,
+              last_update_posted: trial.lastUpdatePosted,
               results_available: trial.hasResults,
               updated_at: new Date().toISOString(),
             }, {
@@ -623,7 +634,7 @@ export async function runWeeklyIngestion(
         .from('data_ingestion_log')
         .update({
           completed_at: new Date().toISOString(),
-          records_fetched: COMPANIES_TO_TRACK.length,
+          records_fetched: uniqueCompanies.length,
           records_processed: companiesProcessed,
           records_inserted: trialsInserted,
           records_updated: trialsUpdated,

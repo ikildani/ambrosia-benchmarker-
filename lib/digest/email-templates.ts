@@ -5,6 +5,15 @@ interface WatchlistItem {
   item_value: string;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function formatUsd(amount: number | null): string {
   if (amount == null) return 'N/A';
   if (amount >= 1e9) return `$${(amount / 1e9).toFixed(1)}B`;
@@ -51,8 +60,8 @@ export function buildWeeklyDigestHtml(
       <tr>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px;">
           <span style="display: inline-block; background: #f0fdfa; color: #0d9488; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-bottom: 4px;">${formatModality(deal.modality)}</span><br>
-          <strong>${deal.licensor_name}</strong> &rarr; ${deal.licensee_name}
-          ${deal.asset_name ? `<br><span style="color: #64748b; font-size: 12px;">${deal.asset_name}</span>` : ''}
+          <strong>${escapeHtml(deal.licensor_name)}</strong> &rarr; ${escapeHtml(deal.licensee_name)}
+          ${deal.asset_name ? `<br><span style="color: #64748b; font-size: 12px;">${escapeHtml(deal.asset_name)}</span>` : ''}
         </td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; text-align: center;">${formatPhase(deal.phase_at_signing)}</td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; text-align: right; font-weight: 600; color: #14b8a6;">${formatUsd(deal.upfront_usd)}</td>
@@ -121,7 +130,7 @@ export function buildWeeklyDigestHtml(
 
         <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none;">
 
-          <p style="font-size: 16px; margin-top: 0;">Hi ${userName},</p>
+          <p style="font-size: 16px; margin-top: 0;">Hi ${escapeHtml(userName)},</p>
 
           <!-- Stat Row -->
           <div style="display: flex; background: #f0fdfa; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">

@@ -2,27 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 
-// In-memory set to track processed webhook events (prevents duplicate processing)
-// In production at scale, use Redis or database for persistence across instances
-const processedEvents = new Set<string>();
-const MAX_PROCESSED_EVENTS = 10000;
-
-// Cleanup old events periodically
-function trackProcessedEvent(eventId: string): boolean {
-  if (processedEvents.has(eventId)) {
-    return false; // Already processed
-  }
-
-  // Cleanup if too many events stored
-  if (processedEvents.size >= MAX_PROCESSED_EVENTS) {
-    const eventsArray = Array.from(processedEvents);
-    eventsArray.slice(0, MAX_PROCESSED_EVENTS / 2).forEach(id => processedEvents.delete(id));
-  }
-
-  processedEvents.add(eventId);
-  return true; // First time seeing this event
-}
-
 // Stripe Webhook Handler
 // To enable webhooks:
 // 1. Set STRIPE_WEBHOOK_SECRET in .env.local
@@ -57,13 +36,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // Idempotency check - prevent duplicate processing
-    if (!trackProcessedEvent(event.id)) {
+    const supabase = createServiceClient();
+
+    // Idempotency check - database-backed to persist across serverless cold starts
+    const { data: existingEvent } = await supabase
+      .from('processed_webhook_events')
+      .select('stripe_event_id')
+      .eq('stripe_event_id', event.id)
+      .single();
+
+    if (existingEvent) {
       console.log('Webhook: Duplicate event, skipping:', event.id);
       return NextResponse.json({ received: true, duplicate: true });
     }
 
-    const supabase = createServiceClient();
+    // Record event before processing to prevent race conditions
+    await supabase.from('processed_webhook_events').insert({
+      stripe_event_id: event.id,
+      event_type: event.type,
+    });
 
     // Handle the event
     switch (event.type) {
@@ -110,57 +101,73 @@ export async function POST(request: NextRequest) {
         }
 
         // --- SUBSCRIPTION PURCHASE ---
+        // SECURITY: Use auth-verified userId from metadata first, then email as fallback.
+        // This prevents user impersonation via email overlap.
         const customerEmail = session.customer_email || session.customer_details?.email;
         const userId = session.metadata?.user_id;
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
 
-        if (customerEmail) {
-          const { error: updateError } = await supabase
+        const updatePayload = {
+          tier: 'pro' as const,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId,
+          subscription_status: 'active',
+          updated_at: new Date().toISOString(),
+        };
+
+        let upgraded = false;
+
+        // 1. Primary: lookup by auth-verified userId from checkout metadata
+        if (userId) {
+          const { error: userIdError } = await supabase
             .from('user_profiles')
-            .update({
-              tier: 'pro',
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId,
-              subscription_status: 'active',
-              updated_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
+            .eq('id', userId);
+
+          if (!userIdError) {
+            upgraded = true;
+            console.log('User upgraded to pro via userId:', userId);
+          } else {
+            console.warn('userId lookup failed, trying email fallback:', userId, userIdError.message);
+          }
+        }
+
+        // 2. Fallback: lookup by email (with warning)
+        if (!upgraded && customerEmail) {
+          console.warn('Using email fallback for subscription upgrade:', customerEmail);
+          const { error: emailError } = await supabase
+            .from('user_profiles')
+            .update(updatePayload)
             .eq('email', customerEmail);
 
-          if (updateError) {
-            console.error('Failed to update user tier:', updateError);
-            if (userId) {
-              await supabase
-                .from('user_profiles')
-                .update({
-                  tier: 'pro',
-                  stripe_customer_id: customerId,
-                  stripe_subscription_id: subscriptionId,
-                  subscription_status: 'active',
-                  updated_at: new Date().toISOString(),
-                })
-                .eq('id', userId);
-            }
+          if (!emailError) {
+            upgraded = true;
+            console.log('User upgraded to pro via email fallback:', customerEmail);
           } else {
-            console.log('User upgraded to pro:', customerEmail);
+            console.error('Failed to upgrade user by email:', emailError);
           }
-
-          await supabase.from('events').insert({
-            user_id: userId || null,
-            event_type: 'subscription_created',
-            event_data: {
-              stripe_event_id: event.id,
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId,
-              amount_total: session.amount_total,
-              currency: session.currency,
-              promo_code: session.metadata?.promo_code || null,
-              discount_applied: (session.total_details?.amount_discount || 0) > 0,
-              discount_amount: session.total_details?.amount_discount || 0,
-            },
-            user_tier: 'pro',
-          });
         }
+
+        if (!upgraded) {
+          console.error('Failed to upgrade any user for checkout session:', session.id);
+        }
+
+        await supabase.from('events').insert({
+          user_id: userId || null,
+          event_type: 'subscription_created',
+          event_data: {
+            stripe_event_id: event.id,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            amount_total: session.amount_total,
+            currency: session.currency,
+            promo_code: session.metadata?.promo_code || null,
+            discount_applied: (session.total_details?.amount_discount || 0) > 0,
+            discount_amount: session.total_details?.amount_discount || 0,
+          },
+          user_tier: 'pro',
+        });
         break;
       }
 
