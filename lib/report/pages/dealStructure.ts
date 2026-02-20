@@ -1,4 +1,4 @@
-// Page 3: Deal Structure & Valuation
+// Page 4: Deal Structure & Valuation
 // Waterfall chart, range bars for each term
 
 import { renderWaterfall } from '../svg-charts/waterfall';
@@ -26,7 +26,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(3, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(4, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Deal Structure & Valuation</div>
 

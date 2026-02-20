@@ -1,4 +1,4 @@
-// Page 5: Sensitivity Analysis
+// Page 6: Sensitivity Analysis
 // Top value driver callout, tornado chart, parameter impact table, TA risk factors
 
 import { renderTornado } from '../svg-charts/tornado';
@@ -24,7 +24,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(5, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(6, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Sensitivity Analysis</div>
 

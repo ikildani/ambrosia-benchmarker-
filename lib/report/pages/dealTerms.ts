@@ -1,4 +1,4 @@
-// Page 4: Deal Terms Detail
+// Page 5: Deal Terms Detail
 // Term cards with factor impacts, milestone breakdown table, royalty step chart
 
 import { renderRoyaltyStep } from '../svg-charts/royaltyStep';
@@ -22,7 +22,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
 
   return `
     <div class="report-page">
-      ${pageHeader(4, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(5, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Deal Terms Detail</div>
 

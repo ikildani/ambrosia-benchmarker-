@@ -1,4 +1,4 @@
-// Page 2: Executive Dashboard
+// Page 3: Executive Dashboard
 // 3 large KPIs, 4 smaller cards, donut chart, recommendation callout
 
 import { renderRiskGauge } from '../svg-charts/riskGauge';
@@ -28,7 +28,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(2, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(3, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Executive Dashboard</div>
 

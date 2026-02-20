@@ -21,7 +21,7 @@ const PDF_STEPS: StepDef[] = [
   { id: 'analyzing', label: 'Analyzing asset profile', sublabel: 'Sensitivity, risk factors & comparable deals' },
   { id: 'generating_memo', label: 'Generating AI deal memo', sublabel: 'Powered by Ambrosia AI' },
   { id: 'compiling', label: 'Compiling visualizations', sublabel: 'Charts, gauges & data tables' },
-  { id: 'building', label: 'Building your report', sublabel: '10-page consulting-grade analysis' },
+  { id: 'building', label: 'Rendering your report', sublabel: 'Server-side PDF with consulting-grade charts' },
 ];
 
 const EXCEL_STEPS: StepDef[] = [
@@ -232,24 +232,42 @@ export default function ReportGenerationModal({
         if (abortRef.current) return;
         markComplete('compiling');
 
-        // Step 4: Build PDF via html2pdf.js
+        // Step 4: Build PDF via server-side Chromium (with client fallback)
         setCurrentStep('building');
         try {
-          const html2pdf = (await import('html2pdf.js')).default;
-          const blob: Blob = await html2pdf()
-            .set({
-              margin: 0,
-              filename: `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
-              image: { type: 'jpeg', quality: 0.95 },
-              html2canvas: { scale: 2, useCORS: true, logging: false },
-              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-              pagebreak: { mode: ['css', 'legacy'] },
-            })
-            .from(hiddenContainerRef.current!)
-            .outputPdf('blob');
+          // Try server-side PDF generation first (higher quality)
+          const reportPayload = {
+            reportData: pdfData,
+            reportPurchaseId: reportId,
+          };
+          const serverRes = await fetch('/api/report/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportPayload),
+          });
 
-          pdfBlobRef.current = blob;
-          const sizeMB = (blob.size / (1024 * 1024)).toFixed(1);
+          if (serverRes.ok) {
+            const pdfArrayBuffer = await serverRes.arrayBuffer();
+            pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+          } else {
+            // Fallback to client-side html2pdf.js
+            console.warn('Server PDF failed, falling back to client-side generation');
+            const html2pdf = (await import('html2pdf.js')).default;
+            const blob: Blob = await html2pdf()
+              .set({
+                margin: 0,
+                filename: `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] },
+              })
+              .from(hiddenContainerRef.current!)
+              .outputPdf('blob');
+            pdfBlobRef.current = blob;
+          }
+
+          const sizeMB = (pdfBlobRef.current!.size / (1024 * 1024)).toFixed(1);
           setFileSize(`${sizeMB} MB`);
         } catch (err) {
           console.error('PDF generation failed:', err);

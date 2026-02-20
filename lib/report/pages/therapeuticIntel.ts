@@ -1,4 +1,4 @@
-// Page 9: Therapeutic Area Intelligence
+// Page 13: Therapeutic Area Intelligence
 // TA-specific context, milestone allocation comparison, key considerations
 
 import { pageHeader, pageFooter, COLORS, escapeHtml, phaseLabels, modalityLabels, getLabel, getTAColors } from '../helpers';
@@ -43,7 +43,7 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
 
   return `
     <div class="report-page">
-      ${pageHeader(9, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(13, meta.pageCount, 'Deal Valuation Report')}
 
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
         <div style="width: 8px; height: 8px; border-radius: 50%; background: ${taColors.primary};"></div>

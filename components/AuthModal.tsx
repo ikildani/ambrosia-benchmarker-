@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+import { validateEmail as checkEmail, validatePassword as checkPassword, validateName as checkName, getPasswordStrength, type PasswordStrength } from '@/lib/validation';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -27,6 +28,26 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>('weak');
+
+  const handleBlur = useCallback((field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    let result;
+    switch (field) {
+      case 'name': result = checkName(name); break;
+      case 'email': result = checkEmail(email); break;
+      case 'password': result = checkPassword(password); break;
+      case 'confirmPassword':
+        result = password !== confirmPassword
+          ? { valid: false, message: 'Passwords do not match' }
+          : { valid: true };
+        break;
+      default: return;
+    }
+    setFieldErrors(prev => ({ ...prev, [field]: result.valid ? undefined : result.message }));
+  }, [name, email, password, confirmPassword]);
 
   const supabase = createClient();
   const useSupabaseAuth = isSupabaseConfigured() && supabase;
@@ -37,8 +58,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
       setMode(initialMode);
       setError('');
       setSuccess('');
+      setTouched({});
+      setFieldErrors({});
     }
   }, [isOpen, initialMode]);
+
+  // Update password strength as user types
+  useEffect(() => {
+    if (password) setPasswordStrength(getPasswordStrength(password));
+  }, [password]);
 
   if (!isOpen) return null;
 
@@ -337,17 +365,25 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
       return (
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label htmlFor="auth-reset-email" className="block text-sm font-semibold text-neutral-700 mb-2">
               Email Address
             </label>
             <input
+              id="auth-reset-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => handleBlur('email')}
               placeholder="john@company.com"
-              className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+              aria-invalid={touched.email && !!fieldErrors.email}
+              aria-describedby={touched.email && fieldErrors.email ? 'reset-email-error' : undefined}
+              className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
+                       ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200'}`}
             />
+            {touched.email && fieldErrors.email && (
+              <p id="reset-email-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.email}</p>
+            )}
           </div>
         </div>
       );
@@ -357,49 +393,73 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
       <div className="space-y-5">
         {mode === 'signup' && (
           <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+            <label htmlFor="auth-name" className="block text-sm font-semibold text-neutral-700 mb-2">
               Full Name <span className="text-red-500" aria-hidden="true">*</span>
             </label>
             <input
+              id="auth-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onBlur={() => handleBlur('name')}
               placeholder="John Smith"
               aria-required="true"
-              className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+              aria-invalid={touched.name && !!fieldErrors.name}
+              aria-describedby={touched.name && fieldErrors.name ? 'name-error' : undefined}
+              className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
+                       ${touched.name && fieldErrors.name ? 'border-red-400' : 'border-neutral-200'}`}
             />
+            {touched.name && fieldErrors.name && (
+              <p id="name-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.name}</p>
+            )}
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2">
+          <label htmlFor="auth-email" className="block text-sm font-semibold text-neutral-700 mb-2">
             Work Email <span className="text-red-500" aria-hidden="true">*</span>
           </label>
           <input
+            id="auth-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => handleBlur('email')}
             placeholder="john@company.com"
             aria-required="true"
-            className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
-                     focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+            aria-invalid={touched.email && !!fieldErrors.email}
+            aria-describedby={touched.email && fieldErrors.email ? 'email-error' : undefined}
+            className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+                     focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
+                     ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200'}`}
           />
+          {touched.email && fieldErrors.email && (
+            <p id="email-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.email}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2">
+          <label htmlFor="auth-password" className="block text-sm font-semibold text-neutral-700 mb-2">
             Password <span className="text-red-500" aria-hidden="true">*</span>
           </label>
           <div className="relative">
             <input
+              id="auth-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => handleBlur('password')}
               placeholder={mode === 'signup' ? 'Min. 8 characters' : '••••••••'}
               aria-required="true"
-              className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all pr-12"
+              aria-invalid={touched.password && !!fieldErrors.password}
+              aria-describedby={[
+                touched.password && fieldErrors.password ? 'password-error' : '',
+                mode === 'signup' && password ? 'password-strength' : '',
+              ].filter(Boolean).join(' ') || undefined}
+              className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all pr-12
+                       ${touched.password && fieldErrors.password ? 'border-red-400' : 'border-neutral-200'}`}
             />
             <button
               type="button"
@@ -420,22 +480,45 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
               )}
             </button>
           </div>
+          {touched.password && fieldErrors.password && (
+            <p id="password-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.password}</p>
+          )}
+          {mode === 'signup' && password && (
+            <div id="password-strength" className="mt-2">
+              <div className="flex gap-1">
+                <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === 'weak' ? 'bg-red-400' : passwordStrength === 'medium' ? 'bg-amber-400' : 'bg-teal-500'}`} />
+                <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === 'medium' ? 'bg-amber-400' : passwordStrength === 'strong' ? 'bg-teal-500' : 'bg-neutral-200'}`} />
+                <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === 'strong' ? 'bg-teal-500' : 'bg-neutral-200'}`} />
+              </div>
+              <p className={`text-xs mt-1 ${passwordStrength === 'weak' ? 'text-red-500' : passwordStrength === 'medium' ? 'text-amber-600' : 'text-teal-600'}`}>
+                {passwordStrength === 'weak' ? 'Weak' : passwordStrength === 'medium' ? 'Medium' : 'Strong'} password
+              </p>
+            </div>
+          )}
         </div>
 
         {mode === 'signup' && (
           <>
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
+              <label htmlFor="auth-confirm-password" className="block text-sm font-semibold text-neutral-700 mb-2">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
               <input
+                id="auth-confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => handleBlur('confirmPassword')}
                 placeholder="••••••••"
-                className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
-                         focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                aria-invalid={touched.confirmPassword && !!fieldErrors.confirmPassword}
+                aria-describedby={touched.confirmPassword && fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
+                className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+                         focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
+                         ${touched.confirmPassword && fieldErrors.confirmPassword ? 'border-red-400' : 'border-neutral-200'}`}
               />
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <p id="confirm-password-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
 
             <div>

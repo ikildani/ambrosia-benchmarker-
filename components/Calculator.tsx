@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Circle, Star, Hexagon, Dna, Globe2, CheckCircle } from 'lucide-react';
 import {
   TherapeuticArea,
   Phase,
@@ -19,48 +18,18 @@ import {
   CalculationInput,
   CalculationResult,
   calculateDealTerms,
-  therapeuticAreaOptions,
-  phaseOptions,
-  modalityOptions,
-  neurologyModalityOptions,
-  indicationOptions,
-  neurologyIndicationOptions,
-  territoryOptions,
-  biomarkerOptions,
-  lineOfTherapyOptions,
-  treatmentApproachOptions,
-  combinationPotentialOptions,
-  competitivePositionOptions,
-  dataQualityOptions,
-  regulatoryDesignationOptions,
   BBBPenetration,
   DiseaseProgression,
   BiomarkerValidation,
-  bbbPenetrationOptions,
-  diseaseProgressionOptions,
-  biomarkerValidationOptions,
-  immunologyModalityOptions,
-  immunologyIndicationOptions,
   ImmuneResetPotential,
   TargetSpecificity,
   DiseaseSeverity,
   ImmunologyTreatmentGoal,
-  immuneResetOptions,
-  targetSpecificityOptions,
-  diseaseSeverityOptions,
-  treatmentGoalOptions,
-  metabolicModalityOptions,
-  metabolicIndicationOptions,
   MechanismDifferentiation,
   WeightLossEfficacy,
   RouteOfAdministration,
   ComorbidityBreadth,
   MetabolicTreatmentApproach,
-  mechanismDifferentiationOptions,
-  weightLossEfficacyOptions,
-  routeOfAdministrationOptions,
-  comorbidityBreadthOptions,
-  metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
@@ -73,326 +42,8 @@ import PaywallModal from './PaywallModal';
 import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 
-// Template types and data
-interface DealTemplate {
-  id: string;
-  name: string;
-  description: string;
-  icon: 'standard' | 'premium' | 'highValue' | 'platform' | 'regional' | 'commercial';
-  values: Partial<CalculationInput>;
-}
-
-const DEAL_TEMPLATES: DealTemplate[] = [
-  {
-    id: 'standard-phase2',
-    name: 'Standard Phase 2',
-    description: 'Most common deal type',
-    icon: 'standard',
-    values: {
-      phase: 'phase2',
-      modality: 'smallMolecule',
-      indication: 'lung_nsclc',
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'first-in-class',
-    name: 'First-in-Class',
-    description: 'Premium positioning',
-    icon: 'premium',
-    values: {
-      phase: 'phase1',
-      modality: 'bispecific',
-      territory: 'global',
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-  {
-    id: 'late-stage-adc',
-    name: 'Late-Stage ADC',
-    description: 'High-value acquisitions',
-    icon: 'highValue',
-    values: {
-      phase: 'phase3',
-      modality: 'adc',
-      indication: 'breast_her2',
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'pivotalReady',
-    },
-  },
-  {
-    id: 'platform-multi-asset',
-    name: 'Platform / Multi-Asset',
-    description: 'CAR-T, gene therapy',
-    icon: 'platform',
-    values: {
-      phase: 'phase1',
-      modality: 'carT_solid',
-      territory: 'global',
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-  {
-    id: 'regional-carveout',
-    name: 'Regional Carve-Out',
-    description: 'China/Japan rights only',
-    icon: 'regional',
-    values: {
-      phase: 'phase2',
-      territory: 'china',
-    },
-  },
-  {
-    id: 'commercial-asset',
-    name: 'Commercial Asset',
-    description: 'Approved products',
-    icon: 'commercial',
-    values: {
-      phase: 'approved',
-      territory: 'global',
-      dataQuality: 'pivotalReady',
-    },
-  },
-];
-
-const NEUROLOGY_TEMPLATES: DealTemplate[] = [
-  {
-    id: 'neuro-alzheimers-bbb',
-    name: "Alzheimer's BBB Platform",
-    description: 'High-value CNS delivery',
-    icon: 'highValue',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'phase1',
-      modality: 'bbbPlatform' as Modality,
-      indication: 'alzheimers' as Indication,
-      territory: 'global',
-      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-  {
-    id: 'neuro-phase2-depression',
-    name: 'Phase 2 Depression',
-    description: 'Psychiatry pipeline',
-    icon: 'standard',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'phase2',
-      modality: 'smallMolecule',
-      indication: 'depression' as Indication,
-      territory: 'global',
-      treatmentApproach: 'symptomatic' as TreatmentApproach,
-      competitivePosition: 'racing',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'neuro-rare-gene-therapy',
-    name: 'Rare Neuro Gene Therapy',
-    description: 'Orphan + gene therapy premium',
-    icon: 'platform',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'phase1',
-      modality: 'geneTherapy',
-      indication: 'rareNeuro' as Indication,
-      territory: 'global',
-      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-  {
-    id: 'neuro-parkinsons-bestinclass',
-    name: "Parkinson's Best-in-Class",
-    description: 'Disease-modifying potential',
-    icon: 'premium',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'phase2',
-      modality: 'mab',
-      indication: 'parkinsons' as Indication,
-      territory: 'global',
-      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'neuro-schizophrenia-novel',
-    name: 'Schizophrenia Novel MOA',
-    description: 'KarXT-era paradigm shift',
-    icon: 'premium',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'phase2',
-      modality: 'smallMolecule',
-      indication: 'schizophrenia' as Indication,
-      territory: 'global',
-      treatmentApproach: 'symptomatic' as TreatmentApproach,
-      competitivePosition: 'firstInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'neuro-epilepsy-aso',
-    name: 'Epilepsy ASO',
-    description: 'Genetic epilepsy target',
-    icon: 'platform',
-    values: {
-      therapeuticArea: 'neurology',
-      phase: 'preclinical',
-      modality: 'aso' as Modality,
-      indication: 'epilepsy' as Indication,
-      territory: 'global',
-      treatmentApproach: 'diseaseModifying' as TreatmentApproach,
-      competitivePosition: 'firstInClass',
-      dataQuality: 'limited',
-    },
-  },
-];
-
-const IMMUNOLOGY_TEMPLATES: DealTemplate[] = [
-  {
-    id: 'immuno-tl1a-ibd',
-    name: 'Phase 2 Anti-TL1A (IBD)',
-    description: 'Hottest autoimmune target',
-    icon: 'highValue',
-    values: {
-      therapeuticArea: 'immunology',
-      phase: 'phase2',
-      modality: 'tl1aInhibitor' as Modality,
-      indication: 'crohns' as Indication,
-      territory: 'global',
-      competitivePosition: 'racing',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'immuno-cart-lupus',
-    name: 'Autoimmune CAR-T (Lupus)',
-    description: 'Curative potential',
-    icon: 'platform',
-    values: {
-      therapeuticArea: 'immunology',
-      phase: 'phase1',
-      modality: 'carT_autoimmune' as Modality,
-      indication: 'sle_lupus' as Indication,
-      territory: 'global',
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-  {
-    id: 'immuno-oral-integrin',
-    name: 'Oral Integrin (UC)',
-    description: 'Oral vedolizumab thesis',
-    icon: 'premium',
-    values: {
-      therapeuticArea: 'immunology',
-      phase: 'phase2',
-      modality: 'oralIntegrin' as Modality,
-      indication: 'ulcerativeColitis' as Indication,
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'immuno-fcrn-mg',
-    name: 'FcRn Antagonist (MG)',
-    description: 'Validated platform',
-    icon: 'commercial',
-    values: {
-      therapeuticArea: 'immunology',
-      phase: 'phase2',
-      modality: 'fcrnAntagonist' as Modality,
-      indication: 'myastheniaGravis' as Indication,
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-];
-
-const METABOLIC_TEMPLATES: DealTemplate[] = [
-  {
-    id: 'met-oral-glp1-obesity',
-    name: 'Oral GLP-1 (Obesity)',
-    description: 'Holy grail of metabolic',
-    icon: 'highValue',
-    values: {
-      therapeuticArea: 'metabolic',
-      phase: 'phase2',
-      modality: 'oralPeptide' as Modality,
-      indication: 'obesity' as Indication,
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'met-dual-incretin',
-    name: 'Dual Incretin (Obesity)',
-    description: 'Tirzepatide-class',
-    icon: 'premium',
-    values: {
-      therapeuticArea: 'metabolic',
-      phase: 'phase2',
-      modality: 'dualIncretin' as Modality,
-      indication: 'obesity' as Indication,
-      territory: 'global',
-      competitivePosition: 'racing',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'met-mash-treatment',
-    name: 'NASH/MASH Therapy',
-    description: 'Liver disease pipeline',
-    icon: 'standard',
-    values: {
-      therapeuticArea: 'metabolic',
-      phase: 'phase2',
-      modality: 'smallMolecule' as Modality,
-      indication: 'nashMash' as Indication,
-      territory: 'global',
-      competitivePosition: 'bestInClass',
-      dataQuality: 'strongPhase2',
-    },
-  },
-  {
-    id: 'met-rare-gene-therapy',
-    name: 'Rare Metabolic Gene Therapy',
-    description: 'Orphan + curative',
-    icon: 'platform',
-    values: {
-      therapeuticArea: 'metabolic',
-      phase: 'phase1',
-      modality: 'geneTherapy' as Modality,
-      indication: 'rareMetabolic' as Indication,
-      territory: 'global',
-      competitivePosition: 'firstInClass',
-      dataQuality: 'promising',
-    },
-  },
-];
-
-const TEMPLATE_ICONS: Record<DealTemplate['icon'], React.ComponentType<{ className?: string }>> = {
-  standard: Circle,
-  premium: Star,
-  highValue: Hexagon,
-  platform: Dna,
-  regional: Globe2,
-  commercial: CheckCircle,
-};
+import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection } from './calculator/index';
+import type { DealTemplate } from './calculator/index';
 
 interface CalculatorProps {
   tier?: 'free' | 'pro';
@@ -905,610 +556,260 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
         {/* Template Selection */}
         {showTemplates && (
-          <div className="p-4 sm:p-6 lg:p-8 border-b border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="mb-4">
-              <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
-              <p className="text-sm text-neutral-500 dark:text-slate-400">
-                {therapeuticArea === 'metabolic' ? `Based on 35+ metabolic/obesity R&D partnerships (2022-2026)` : therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : therapeuticArea === 'immunology' ? `Based on 48 immunology/autoimmune R&D partnerships (2019-2026)` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              {(therapeuticArea === 'metabolic' ? METABOLIC_TEMPLATES : therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : therapeuticArea === 'immunology' ? IMMUNOLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
-                const IconComponent = TEMPLATE_ICONS[template.icon];
-                return (
-                  <button
-                    key={template.id}
-                    onClick={() => applyTemplate(template)}
-                    className="p-4 rounded-xl border-2 border-neutral-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-500
-                               bg-white dark:bg-slate-800 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-all text-left group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-neutral-100 dark:bg-slate-700 group-hover:bg-teal-100 dark:group-hover:bg-teal-900/50
-                                    flex items-center justify-center mb-3 transition-colors">
-                      <IconComponent className="w-5 h-5 text-neutral-500 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
-                    </div>
-                    <div className="font-semibold text-navy-800 dark:text-white text-sm">{template.name}</div>
-                    <div className="text-xs text-neutral-500 dark:text-slate-400 mt-1">{template.description}</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex-1 h-px bg-neutral-200 dark:bg-slate-700" />
-              <span className="text-xs text-neutral-400 dark:text-slate-500">or</span>
-              <div className="flex-1 h-px bg-neutral-200 dark:bg-slate-700" />
-            </div>
-
-            <button
-              onClick={() => setShowTemplates(false)}
-              className="mt-4 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium flex items-center gap-1 group"
-            >
-              Start from scratch
-              <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          <DealTemplatesGrid
+            therapeuticArea={therapeuticArea}
+            highlightedFields={highlightedFields}
+            onApplyTemplate={applyTemplate}
+            onHideTemplates={() => setShowTemplates(false)}
+            isCalculating={isCalculating}
+          />
         )}
 
         {/* Form */}
         <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
           {/* Therapeutic Area Selector */}
-          <div className="mb-6 lg:mb-8">
-            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {therapeuticAreaOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    const newArea = option.value as TherapeuticArea;
-                    if (newArea !== therapeuticArea) {
-                      if (result) {
-                        setPendingAreaSwitch(newArea);
-                      } else {
-                        performAreaSwitch(newArea);
-                      }
-                    }
-                  }}
-                  className={`px-4 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
-                    therapeuticArea === option.value
-                      ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm'
-                      : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <TherapeuticAreaSelector
+            therapeuticArea={therapeuticArea}
+            onSelect={performAreaSwitch}
+            onConfirmSwitch={(newArea) => setPendingAreaSwitch(newArea)}
+            hasResult={!!result}
+          />
 
           <div className={`grid ${quickMode ? 'max-w-xl mx-auto' : 'lg:grid-cols-2'} gap-6 lg:gap-8`}>
             {/* Left Column */}
             <div className="space-y-6 lg:space-y-8">
               {/* Asset Details Section */}
-              <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
-                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-500 text-white text-xs flex items-center justify-center">1</span>
-                  Asset Details
-                </h3>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Development Phase</label>
-                    <select
-                      value={phase}
-                      onChange={(e) => {
-                        const newValue = e.target.value as Phase;
-                        trackParameterChange('phase', phase, newValue);
-                        setPhase(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('phase') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {phaseOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Modality</label>
-                    <select
-                      value={modality}
-                      onChange={(e) => {
-                        const newValue = e.target.value as Modality;
-                        trackParameterChange('modality', modality, newValue);
-                        setModality(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {(therapeuticArea === 'metabolic' ? metabolicModalityOptions : therapeuticArea === 'neurology' ? neurologyModalityOptions : therapeuticArea === 'immunology' ? immunologyModalityOptions : modalityOptions).map((group) => (
-                        <optgroup key={group.group} label={group.group}>
-                          {group.options.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Primary Indication</label>
-                    <select
-                      value={indication}
-                      onChange={(e) => {
-                        const newValue = e.target.value as Indication;
-                        trackParameterChange('indication', indication, newValue);
-                        setIndication(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {(therapeuticArea === 'metabolic' ? metabolicIndicationOptions : therapeuticArea === 'neurology' ? neurologyIndicationOptions : therapeuticArea === 'immunology' ? immunologyIndicationOptions : indicationOptions).map((group) => (
-                        <optgroup key={group.group} label={group.group}>
-                          {group.options.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-
-                  {quickMode && (
-                    <button
-                      onClick={() => setQuickMode(false)}
-                      className="flex items-center gap-2 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium mt-1 group"
-                    >
-                      <span>Show Advanced Options</span>
-                      <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  )}
-
-                  {!quickMode && (
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status</label>
-                    <select
-                      value={biomarker}
-                      onChange={(e) => {
-                        const newValue = e.target.value as BiomarkerStatus;
-                        trackParameterChange('biomarker', biomarker, newValue);
-                        setBiomarker(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('biomarker') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {biomarkerOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  )}
-                </div>
-              </div>
+              <AssetDetailsSection
+                therapeuticArea={therapeuticArea}
+                phase={phase}
+                modality={modality}
+                indication={indication}
+                biomarker={biomarker}
+                highlightedFields={highlightedFields}
+                quickMode={quickMode}
+                onboardingStep={onboardingStep}
+                onPhaseChange={(newValue) => {
+                  trackParameterChange('phase', phase, newValue);
+                  setPhase(newValue);
+                }}
+                onModalityChange={(newValue) => {
+                  trackParameterChange('modality', modality, newValue);
+                  setModality(newValue);
+                }}
+                onIndicationChange={(newValue) => {
+                  trackParameterChange('indication', indication, newValue);
+                  setIndication(newValue);
+                }}
+                onBiomarkerChange={(newValue) => {
+                  trackParameterChange('biomarker', biomarker, newValue);
+                  setBiomarker(newValue);
+                }}
+                onShowAdvanced={() => setQuickMode(false)}
+              />
 
               {!quickMode && (
-              <>
-              {/* Target Profile Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-500/70 text-white text-xs flex items-center justify-center">2</span>
-                  Target Profile
-                </h3>
-                <div className="space-y-4">
-                  {therapeuticArea === 'neurology' ? (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Treatment Approach</label>
-                      <select
-                        value={treatmentApproach}
-                        onChange={(e) => {
-                          const newValue = e.target.value as TreatmentApproach;
-                          trackParameterChange('treatmentApproach', treatmentApproach, newValue);
-                          setTreatmentApproach(newValue);
-                        }}
-                        className={`select-field transition-all duration-300 ${highlightedFields.has('treatmentApproach') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                      >
-                        {treatmentApproachOptions.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : therapeuticArea === 'metabolic' ? (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                        Treatment Approach
-                        <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                      </label>
-                      <select
-                        value={metabolicTreatmentApproach}
-                        onChange={(e) => {
-                          const newValue = e.target.value as MetabolicTreatmentApproach;
-                          trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
-                          setMetabolicTreatmentApproach(newValue);
-                        }}
-                        className="select-field"
-                      >
-                        {metabolicTreatmentApproachOptions.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : therapeuticArea === 'immunology' ? (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                        Treatment Goal
-                        <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                      </label>
-                      <select
-                        value={treatmentGoal}
-                        onChange={(e) => {
-                          const newValue = e.target.value as ImmunologyTreatmentGoal;
-                          trackParameterChange('treatmentGoal', treatmentGoal, newValue);
-                          setTreatmentGoal(newValue);
-                        }}
-                        className="select-field"
-                      >
-                        {treatmentGoalOptions.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
-                      <select
-                        value={lineOfTherapy}
-                        onChange={(e) => {
-                          const newValue = e.target.value as LineOfTherapy;
-                          trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
-                          setLineOfTherapy(newValue);
-                        }}
-                        className={`select-field transition-all duration-300 ${highlightedFields.has('lineOfTherapy') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                      >
-                        {lineOfTherapyOptions.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {therapeuticArea === 'neurology' && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          BBB Penetration
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                        </label>
-                        <select
-                          value={bbbPenetration}
-                          onChange={(e) => {
-                            const newValue = e.target.value as BBBPenetration;
-                            trackParameterChange('bbbPenetration', bbbPenetration, newValue);
-                            setBbbPenetration(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {bbbPenetrationOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Disease Progression
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                        </label>
-                        <select
-                          value={diseaseProgression}
-                          onChange={(e) => {
-                            const newValue = e.target.value as DiseaseProgression;
-                            trackParameterChange('diseaseProgression', diseaseProgression, newValue);
-                            setDiseaseProgression(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {diseaseProgressionOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Biomarker Validation
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                        </label>
-                        <select
-                          value={biomarkerValidation}
-                          onChange={(e) => {
-                            const newValue = e.target.value as BiomarkerValidation;
-                            trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
-                            setBiomarkerValidation(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {biomarkerValidationOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  {therapeuticArea === 'immunology' && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Immune Reset Potential
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                        </label>
-                        <select
-                          value={immuneResetPotential}
-                          onChange={(e) => {
-                            const newValue = e.target.value as ImmuneResetPotential;
-                            trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
-                            setImmuneResetPotential(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {immuneResetOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Target Specificity
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                        </label>
-                        <select
-                          value={targetSpecificity}
-                          onChange={(e) => {
-                            const newValue = e.target.value as TargetSpecificity;
-                            trackParameterChange('targetSpecificity', targetSpecificity, newValue);
-                            setTargetSpecificity(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {targetSpecificityOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Disease Severity
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                        </label>
-                        <select
-                          value={diseaseSeverity}
-                          onChange={(e) => {
-                            const newValue = e.target.value as DiseaseSeverity;
-                            trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
-                            setDiseaseSeverity(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {diseaseSeverityOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  {therapeuticArea === 'metabolic' && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Mechanism Differentiation
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                        </label>
-                        <select
-                          value={mechanismDifferentiation}
-                          onChange={(e) => {
-                            const newValue = e.target.value as MechanismDifferentiation;
-                            trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
-                            setMechanismDifferentiation(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {mechanismDifferentiationOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Weight Loss Efficacy
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                        </label>
-                        <select
-                          value={weightLossEfficacy}
-                          onChange={(e) => {
-                            const newValue = e.target.value as WeightLossEfficacy;
-                            trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
-                            setWeightLossEfficacy(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {weightLossEfficacyOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Route of Administration
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                        </label>
-                        <select
-                          value={routeOfAdministration}
-                          onChange={(e) => {
-                            const newValue = e.target.value as RouteOfAdministration;
-                            trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
-                            setRouteOfAdministration(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {routeOfAdministrationOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                          Comorbidity Breadth
-                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                        </label>
-                        <select
-                          value={comorbidityBreadth}
-                          onChange={(e) => {
-                            const newValue = e.target.value as ComorbidityBreadth;
-                            trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
-                            setComorbidityBreadth(newValue);
-                          }}
-                          className="select-field"
-                        >
-                          {comorbidityBreadthOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Combination Potential</label>
-                    <select
-                      value={combinationPotential}
-                      onChange={(e) => {
-                        const newValue = e.target.value as CombinationPotential;
-                        trackParameterChange('combinationPotential', combinationPotential, newValue);
-                        setCombinationPotential(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('combinationPotential') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {combinationPotentialOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              </>
+                <AdvancedOptionsSection
+                  column="left"
+                  therapeuticArea={therapeuticArea}
+                  territory={territory}
+                  lineOfTherapy={lineOfTherapy}
+                  treatmentApproach={treatmentApproach}
+                  combinationPotential={combinationPotential}
+                  competitivePosition={competitivePosition}
+                  dataQuality={dataQuality}
+                  regulatoryDesignations={regulatoryDesignations}
+                  highlightedFields={highlightedFields}
+                  onboardingStep={onboardingStep}
+                  bbbPenetration={bbbPenetration}
+                  diseaseProgression={diseaseProgression}
+                  biomarkerValidation={biomarkerValidation}
+                  immuneResetPotential={immuneResetPotential}
+                  targetSpecificity={targetSpecificity}
+                  diseaseSeverity={diseaseSeverity}
+                  treatmentGoal={treatmentGoal}
+                  mechanismDifferentiation={mechanismDifferentiation}
+                  weightLossEfficacy={weightLossEfficacy}
+                  routeOfAdministration={routeOfAdministration}
+                  comorbidityBreadth={comorbidityBreadth}
+                  metabolicTreatmentApproach={metabolicTreatmentApproach}
+                  onTerritoryChange={(newValue) => {
+                    trackParameterChange('territory', territory, newValue);
+                    setTerritory(newValue);
+                  }}
+                  onLineOfTherapyChange={(newValue) => {
+                    trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
+                    setLineOfTherapy(newValue);
+                  }}
+                  onTreatmentApproachChange={(newValue) => {
+                    trackParameterChange('treatmentApproach', treatmentApproach, newValue);
+                    setTreatmentApproach(newValue);
+                  }}
+                  onCombinationPotentialChange={(newValue) => {
+                    trackParameterChange('combinationPotential', combinationPotential, newValue);
+                    setCombinationPotential(newValue);
+                  }}
+                  onCompetitivePositionChange={(newValue) => {
+                    trackParameterChange('competitivePosition', competitivePosition, newValue);
+                    setCompetitivePosition(newValue);
+                  }}
+                  onDataQualityChange={(newValue) => {
+                    trackParameterChange('dataQuality', dataQuality, newValue);
+                    setDataQuality(newValue);
+                  }}
+                  onRegulatoryChange={handleRegulatoryChange}
+                  onBbbPenetrationChange={(newValue) => {
+                    trackParameterChange('bbbPenetration', bbbPenetration, newValue);
+                    setBbbPenetration(newValue);
+                  }}
+                  onDiseaseProgressionChange={(newValue) => {
+                    trackParameterChange('diseaseProgression', diseaseProgression, newValue);
+                    setDiseaseProgression(newValue);
+                  }}
+                  onBiomarkerValidationChange={(newValue) => {
+                    trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
+                    setBiomarkerValidation(newValue);
+                  }}
+                  onImmuneResetPotentialChange={(newValue) => {
+                    trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
+                    setImmuneResetPotential(newValue);
+                  }}
+                  onTargetSpecificityChange={(newValue) => {
+                    trackParameterChange('targetSpecificity', targetSpecificity, newValue);
+                    setTargetSpecificity(newValue);
+                  }}
+                  onDiseaseSeverityChange={(newValue) => {
+                    trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
+                    setDiseaseSeverity(newValue);
+                  }}
+                  onTreatmentGoalChange={(newValue) => {
+                    trackParameterChange('treatmentGoal', treatmentGoal, newValue);
+                    setTreatmentGoal(newValue);
+                  }}
+                  onMechanismDifferentiationChange={(newValue) => {
+                    trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
+                    setMechanismDifferentiation(newValue);
+                  }}
+                  onWeightLossEfficacyChange={(newValue) => {
+                    trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
+                    setWeightLossEfficacy(newValue);
+                  }}
+                  onRouteOfAdministrationChange={(newValue) => {
+                    trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
+                    setRouteOfAdministration(newValue);
+                  }}
+                  onComorbidityBreadthChange={(newValue) => {
+                    trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
+                    setComorbidityBreadth(newValue);
+                  }}
+                  onMetabolicTreatmentApproachChange={(newValue) => {
+                    trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
+                    setMetabolicTreatmentApproach(newValue);
+                  }}
+                />
               )}
             </div>
 
             {/* Right Column */}
             {!quickMode && (
             <div className="space-y-6 lg:space-y-8">
-              {/* Competitive Landscape Section */}
-              <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
-                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-500/50 text-white text-xs flex items-center justify-center">3</span>
-                  Competitive Landscape
-                </h3>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Competitive Position</label>
-                    <select
-                      value={competitivePosition}
-                      onChange={(e) => {
-                        const newValue = e.target.value as CompetitivePosition;
-                        trackParameterChange('competitivePosition', competitivePosition, newValue);
-                        setCompetitivePosition(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('competitivePosition') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {competitivePositionOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Data Quality</label>
-                    <select
-                      value={dataQuality}
-                      onChange={(e) => {
-                        const newValue = e.target.value as DataQuality;
-                        trackParameterChange('dataQuality', dataQuality, newValue);
-                        setDataQuality(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('dataQuality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {dataQualityOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Deal Scope Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-500/30 text-teal-700 text-xs flex items-center justify-center">4</span>
-                  Deal Scope
-                </h3>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory</label>
-                    <select
-                      value={territory}
-                      onChange={(e) => {
-                        const newValue = e.target.value as Territory;
-                        trackParameterChange('territory', territory, newValue);
-                        setTerritory(newValue);
-                      }}
-                      className={`select-field transition-all duration-300 ${highlightedFields.has('territory') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-                    >
-                      {territoryOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                      {regulatoryDesignationOptions.map((option) => (
-                        <label
-                          key={option.value}
-                          className={`flex items-center gap-3 px-4 py-3.5 sm:py-3 rounded-xl border-2 cursor-pointer transition-all duration-200 touch-feedback min-h-[52px] ${
-                            regulatoryDesignations[option.value as keyof RegulatoryDesignations]
-                              ? 'border-teal-500 bg-teal-50 shadow-sm'
-                              : 'border-neutral-200 bg-white hover:border-teal-300 active:bg-teal-50/50'
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={regulatoryDesignations[option.value as keyof RegulatoryDesignations]}
-                            onChange={() => handleRegulatoryChange(option.value as keyof RegulatoryDesignations)}
-                            className="sr-only"
-                          />
-                          <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-                            regulatoryDesignations[option.value as keyof RegulatoryDesignations]
-                              ? 'bg-teal-500 border-teal-500'
-                              : 'border-neutral-300'
-                          }`}>
-                            {regulatoryDesignations[option.value as keyof RegulatoryDesignations] && (
-                              <svg className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className={`text-sm sm:text-sm font-medium ${
-                            regulatoryDesignations[option.value as keyof RegulatoryDesignations]
-                              ? 'text-teal-700'
-                              : 'text-neutral-700'
-                          }`}>
-                            {option.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <AdvancedOptionsSection
+                column="right"
+                therapeuticArea={therapeuticArea}
+                territory={territory}
+                lineOfTherapy={lineOfTherapy}
+                treatmentApproach={treatmentApproach}
+                combinationPotential={combinationPotential}
+                competitivePosition={competitivePosition}
+                dataQuality={dataQuality}
+                regulatoryDesignations={regulatoryDesignations}
+                highlightedFields={highlightedFields}
+                onboardingStep={onboardingStep}
+                bbbPenetration={bbbPenetration}
+                diseaseProgression={diseaseProgression}
+                biomarkerValidation={biomarkerValidation}
+                immuneResetPotential={immuneResetPotential}
+                targetSpecificity={targetSpecificity}
+                diseaseSeverity={diseaseSeverity}
+                treatmentGoal={treatmentGoal}
+                mechanismDifferentiation={mechanismDifferentiation}
+                weightLossEfficacy={weightLossEfficacy}
+                routeOfAdministration={routeOfAdministration}
+                comorbidityBreadth={comorbidityBreadth}
+                metabolicTreatmentApproach={metabolicTreatmentApproach}
+                onTerritoryChange={(newValue) => {
+                  trackParameterChange('territory', territory, newValue);
+                  setTerritory(newValue);
+                }}
+                onLineOfTherapyChange={(newValue) => {
+                  trackParameterChange('lineOfTherapy', lineOfTherapy, newValue);
+                  setLineOfTherapy(newValue);
+                }}
+                onTreatmentApproachChange={(newValue) => {
+                  trackParameterChange('treatmentApproach', treatmentApproach, newValue);
+                  setTreatmentApproach(newValue);
+                }}
+                onCombinationPotentialChange={(newValue) => {
+                  trackParameterChange('combinationPotential', combinationPotential, newValue);
+                  setCombinationPotential(newValue);
+                }}
+                onCompetitivePositionChange={(newValue) => {
+                  trackParameterChange('competitivePosition', competitivePosition, newValue);
+                  setCompetitivePosition(newValue);
+                }}
+                onDataQualityChange={(newValue) => {
+                  trackParameterChange('dataQuality', dataQuality, newValue);
+                  setDataQuality(newValue);
+                }}
+                onRegulatoryChange={handleRegulatoryChange}
+                onBbbPenetrationChange={(newValue) => {
+                  trackParameterChange('bbbPenetration', bbbPenetration, newValue);
+                  setBbbPenetration(newValue);
+                }}
+                onDiseaseProgressionChange={(newValue) => {
+                  trackParameterChange('diseaseProgression', diseaseProgression, newValue);
+                  setDiseaseProgression(newValue);
+                }}
+                onBiomarkerValidationChange={(newValue) => {
+                  trackParameterChange('biomarkerValidation', biomarkerValidation, newValue);
+                  setBiomarkerValidation(newValue);
+                }}
+                onImmuneResetPotentialChange={(newValue) => {
+                  trackParameterChange('immuneResetPotential', immuneResetPotential, newValue);
+                  setImmuneResetPotential(newValue);
+                }}
+                onTargetSpecificityChange={(newValue) => {
+                  trackParameterChange('targetSpecificity', targetSpecificity, newValue);
+                  setTargetSpecificity(newValue);
+                }}
+                onDiseaseSeverityChange={(newValue) => {
+                  trackParameterChange('diseaseSeverity', diseaseSeverity, newValue);
+                  setDiseaseSeverity(newValue);
+                }}
+                onTreatmentGoalChange={(newValue) => {
+                  trackParameterChange('treatmentGoal', treatmentGoal, newValue);
+                  setTreatmentGoal(newValue);
+                }}
+                onMechanismDifferentiationChange={(newValue) => {
+                  trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
+                  setMechanismDifferentiation(newValue);
+                }}
+                onWeightLossEfficacyChange={(newValue) => {
+                  trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
+                  setWeightLossEfficacy(newValue);
+                }}
+                onRouteOfAdministrationChange={(newValue) => {
+                  trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
+                  setRouteOfAdministration(newValue);
+                }}
+                onComorbidityBreadthChange={(newValue) => {
+                  trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
+                  setComorbidityBreadth(newValue);
+                }}
+                onMetabolicTreatmentApproachChange={(newValue) => {
+                  trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
+                  setMetabolicTreatmentApproach(newValue);
+                }}
+              />
             </div>
             )}
           </div>
@@ -1542,8 +843,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                      shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-300
                      hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
                      disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
-                     flex items-center justify-center gap-2.5 sm:gap-3 group text-base sm:text-base touch-feedback
-                     active:scale-[0.98] active:shadow-md"
+                     flex items-center justify-center gap-2.5 sm:gap-3 group text-base sm:text-base touch-feedback btn-press
+                     active:scale-[0.97] active:shadow-md"
           >
             {isCalculating ? (
               <>
@@ -1621,34 +922,17 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       )}
 
       {/* Area Switch Confirmation */}
-      {pendingAreaSwitch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPendingAreaSwitch(null)} />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Switch Therapeutic Area?</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-              Switching to <strong>{pendingAreaSwitch === 'metabolic' ? 'Metabolic / Obesity' : pendingAreaSwitch === 'neurology' ? 'Neurology / CNS' : pendingAreaSwitch === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'}</strong> will clear your current results. Your calculation history is still saved.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setPendingAreaSwitch(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  performAreaSwitch(pendingAreaSwitch);
-                  setPendingAreaSwitch(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all"
-              >
-                Switch Area
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AreaSwitchModal
+        isOpen={!!pendingAreaSwitch}
+        pendingArea={pendingAreaSwitch}
+        onConfirm={() => {
+          if (pendingAreaSwitch) {
+            performAreaSwitch(pendingAreaSwitch);
+            setPendingAreaSwitch(null);
+          }
+        }}
+        onCancel={() => setPendingAreaSwitch(null)}
+      />
 
       <PaywallModal
         isOpen={showPaywall}

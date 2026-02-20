@@ -3,6 +3,7 @@
 import { getReportStyles } from './styles';
 import { generateReportId, formatDate } from './helpers';
 import { renderCoverPage } from './pages/cover';
+import { renderTableOfContents } from './pages/tableOfContents';
 import { renderExecutiveDashboard } from './pages/executiveDashboard';
 import { renderDealStructurePage } from './pages/dealStructure';
 import { renderDealTermsPage } from './pages/dealTerms';
@@ -10,23 +11,29 @@ import { renderSensitivityPage } from './pages/sensitivity';
 import { renderComparablesPage } from './pages/comparables';
 import { renderPartnersPage } from './pages/partners';
 import { renderAIMemoPage } from './pages/aiMemo';
+import { renderRiskAnalysisPage } from './pages/riskAnalysis';
+import { renderDealTimelinePage } from './pages/dealTimeline';
+import { renderNegotiationPage } from './pages/negotiation';
 import { renderTherapeuticIntelPage } from './pages/therapeuticIntel';
 import { renderMethodologyPage } from './pages/methodology';
 import type { PDFReportData, ReportMeta } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
 
-/** Returns the full HTML document string for the report (10 pages with styles). */
+/** Returns the full HTML document string for the report (14 pages with styles). */
 export function generateReportHTML(data: PDFReportData): string {
+  const indication = data.result.labels.indication || data.inputs.indication;
+
   const meta: ReportMeta = {
     reportId: generateReportId(),
     generatedAt: formatDate(),
     version: '2.0',
-    pageCount: 10,
+    pageCount: 14,
   };
 
   const pages = [
     renderCoverPage(data, meta),
+    renderTableOfContents(data, meta),
     renderExecutiveDashboard(data, meta),
     renderDealStructurePage(data, meta),
     renderDealTermsPage(data, meta),
@@ -34,6 +41,9 @@ export function generateReportHTML(data: PDFReportData): string {
     renderComparablesPage(data, meta),
     renderPartnersPage(data, meta),
     renderAIMemoPage(data, meta),
+    renderRiskAnalysisPage(data, meta),
+    renderDealTimelinePage(data, meta),
+    renderNegotiationPage(data, meta),
     renderTherapeuticIntelPage(data, meta),
     renderMethodologyPage(data, meta),
   ];
@@ -44,7 +54,7 @@ export function generateReportHTML(data: PDFReportData): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Deal Valuation Report — ${data.result.labels.indication} | Ambrosia Ventures</title>
+      <title>${indication} — Deal Valuation Report | Ambrosia Ventures</title>
       <style>${getReportStyles()}</style>
     </head>
     <body>

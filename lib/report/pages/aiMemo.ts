@@ -1,4 +1,4 @@
-// Page 8: AI Strategic Analysis
+// Page 9: AI Strategic Analysis
 // AI-generated deal memo + negotiation playbook sections
 
 import { pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
@@ -11,7 +11,7 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
   if (!memoData && !playbookData) {
     return `
       <div class="report-page">
-        ${pageHeader(8, meta.pageCount, 'Deal Valuation Report')}
+        ${pageHeader(9, meta.pageCount, 'Deal Valuation Report')}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>
           <span class="ai-badge">AI-GENERATED</span>
@@ -101,7 +101,7 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
 
   return `
     <div class="report-page">
-      ${pageHeader(8, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(9, meta.pageCount, 'Deal Valuation Report')}
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>

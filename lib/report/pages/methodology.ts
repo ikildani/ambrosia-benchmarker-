@@ -1,4 +1,4 @@
-// Page 10: Methodology & Disclaimer
+// Page 14: Methodology & Disclaimer
 // How the model works, data sources, factors considered, legal disclaimer
 
 import { pageHeader, pageFooter, COLORS, formatDate, escapeHtml } from '../helpers';
@@ -9,7 +9,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(10, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(14, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Methodology & Disclaimer</div>
 

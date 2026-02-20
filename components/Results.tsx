@@ -2,11 +2,10 @@
 
 import { useState, useCallback } from 'react';
 import { toast as sonnerToast } from 'sonner';
-import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
+import { CalculationResult, CalculationInput, formatCurrency, formatRange } from '@/lib/calculations';
 import { SensitivityAnalysis } from './sensitivity';
 import type { PartnerForPDF } from '@/lib/report';
 import ReportGenerationModal from './ReportGenerationModal';
-import BenchmarkInfo from './BenchmarkInfo';
 import ChartSection from './charts/ChartSection';
 import ScenarioComparison from './ScenarioComparison';
 import ShareModal from './ShareModal';
@@ -15,8 +14,14 @@ import { useTracking } from './TrackingProvider';
 import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 import { PRICING } from '@/lib/config/constants';
 import ComparableDeals from './ComparableDeals';
-import WatchButton from './WatchButton';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
+
+// Sub-components
+import ResultsHeader from './results/ResultsHeader';
+import MetricCard from './results/MetricCard';
+import DrillDownPanel from './results/DrillDownPanel';
+import DealMemoSection from './results/DealMemoSection';
+import ResultsDisclaimer from './results/ResultsDisclaimer';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -83,223 +88,6 @@ function getIndicationCategory(indication: string): string | null {
     return 'infectious';
   }
   return null;
-}
-
-// Drill-down panel component
-function DrillDownPanel({
-  data,
-  isRoyalty = false
-}: {
-  data: DrillDownData;
-  isRoyalty?: boolean;
-}) {
-  return (
-    <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-slate-600 animate-fade-in">
-      {/* Why This Range */}
-      <div className="mb-4">
-        <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Why This Range?</h5>
-        <p className="text-sm text-neutral-600 dark:text-slate-300 leading-relaxed">{data.rangeExplanation}</p>
-      </div>
-
-      {/* Breakdown Table */}
-      {data.breakdown && data.breakdown.length > 0 && (
-        <div className="mb-4">
-          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-            {isRoyalty ? 'Royalty Tiers' : 'Breakdown'}
-          </h5>
-          <div className="bg-neutral-50 dark:bg-slate-700/50 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[320px]">
-              <thead>
-                <tr className="bg-neutral-100 dark:bg-slate-700">
-                  <th className="text-left py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">Component</th>
-                  <th className="text-center py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
-                    {isRoyalty ? 'Rate' : 'Share'}
-                  </th>
-                  <th className="text-right py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
-                    {isRoyalty ? 'Range' : 'Value'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.breakdown.map((item, idx) => (
-                  <tr key={idx} className="border-t border-neutral-200 dark:border-slate-600">
-                    <td className="py-2 px-3 text-neutral-700 dark:text-slate-200">{item.label}</td>
-                    <td className="py-2 px-3 text-center text-neutral-600 dark:text-slate-300">
-                      {isRoyalty ? `${item.value.low}% - ${item.value.high}%` : `${item.percentage}%`}
-                    </td>
-                    <td className="py-2 px-3 text-right font-medium text-neutral-800 dark:text-white">
-                      {isRoyalty
-                        ? `${item.value.low}% - ${item.value.high}%`
-                        : `${formatCurrency(item.value.low)} - ${formatCurrency(item.value.high)}`
-                      }
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Key Factors */}
-      {data.factors && data.factors.length > 0 && (
-        <div>
-          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Factors</h5>
-          <div className="space-y-1.5">
-            {data.factors.slice(0, 5).map((factor, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-sm">
-                {factor.impact === 'positive' ? (
-                  <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                ) : factor.impact === 'negative' ? (
-                  <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                ) : (
-                  <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-slate-500" />
-                  </div>
-                )}
-                <span className={factor.impact === 'positive' ? 'text-teal-700 dark:text-teal-400' : factor.impact === 'negative' ? 'text-amber-700 dark:text-amber-400' : 'text-neutral-600 dark:text-slate-300'}>
-                  {factor.name}
-                  {factor.percentage !== 0 && (
-                    <span className="font-semibold ml-1">
-                      ({factor.percentage > 0 ? '+' : ''}{factor.percentage}%)
-                    </span>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Expandable Metric Card component
-function MetricCard({
-  title,
-  icon,
-  value,
-  expected,
-  expectedColor,
-  badge,
-  badgeColor,
-  progressWidth,
-  progressColor,
-  drillDown,
-  isExpanded,
-  onToggle,
-  canExpand,
-  isPro,
-  onProClick
-}: {
-  title: string;
-  icon: React.ReactNode;
-  value: string;
-  expected: string;
-  expectedColor: string;
-  badge: string;
-  badgeColor: string;
-  progressWidth: number;
-  progressColor: string;
-  drillDown?: DrillDownData;
-  isExpanded: boolean;
-  onToggle: () => void;
-  canExpand: boolean;
-  isPro: boolean;
-  onProClick: () => void;
-}) {
-  const badgeColorClasses: Record<string, string> = {
-    teal: 'bg-teal-100 text-teal-700',
-    success: 'bg-success-100 text-success-700',
-    cyan: 'bg-cyan-100 text-cyan-700'
-  };
-
-  const iconBgClasses: Record<string, string> = {
-    teal: 'bg-gradient-to-br from-teal-500 to-cyan-500',
-    success: 'bg-gradient-to-br from-success-500 to-success-400',
-    cyan: 'bg-cyan-50 group-hover:bg-cyan-100'
-  };
-
-  const iconTextClasses: Record<string, string> = {
-    teal: 'text-white',
-    success: 'text-white',
-    cyan: 'text-cyan-600'
-  };
-
-  return (
-    <div
-      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
-    >
-      <div
-        className={`${canExpand ? 'cursor-pointer' : ''}`}
-        onClick={() => {
-          if (canExpand) {
-            onToggle();
-          } else if (!isPro) {
-            onProClick();
-          }
-        }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className={`w-10 h-10 rounded-xl ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
-              <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
-                {icon}
-              </div>
-            </div>
-            <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{title}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
-              {badge}
-            </span>
-            {canExpand && (
-              <svg
-                className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            )}
-            {!canExpand && !isPro && (
-              <div className="p-1 bg-navy-100 dark:bg-slate-600 rounded">
-                <svg className="w-3 h-3 text-navy-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-            )}
-          </div>
-        </div>
-        <p className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white mb-2 number-animate">
-          {value}
-        </p>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-neutral-500 dark:text-slate-400">
-            Expected: <span className={`font-bold ${expectedColor}`}>{expected}</span>
-          </p>
-        </div>
-        <div className="progress-bar">
-          <div
-            className={`h-full ${progressColor} rounded-full transition-all duration-500`}
-            style={{ width: `${progressWidth}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Drill-down panel */}
-      {isExpanded && drillDown && (
-        <DrillDownPanel data={drillDown} />
-      )}
-    </div>
-  );
 }
 
 // Methodology Section component
@@ -560,101 +348,18 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   return (
     <div aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden animate-slide-up">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
-            backgroundSize: '20px 20px'
-          }} />
-        </div>
-        <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl" />
-
-        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="relative flex-shrink-0">
-                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400" />
-                <div className="absolute inset-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400 animate-ping" />
-              </div>
-              <span className="text-xs font-medium text-teal-400 uppercase tracking-wider">Analysis Complete</span>
-              {isPro && (
-                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-teal-500/20 text-teal-300 text-xs font-semibold rounded-full">
-                  PRO
-                </span>
-              )}
-            </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">Estimated Deal Terms</h3>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 text-neutral-400 text-xs sm:text-sm">
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
-                {labels.phase}
-              </span>
-              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[140px] sm:max-w-none">
-                {labels.modality}
-                <WatchButton itemType="modality" itemValue={inputs?.modality || ''} size="sm" tier={tier} />
-              </span>
-              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 bg-navy-700 rounded text-xs truncate max-w-[100px] sm:max-w-none">
-                {labels.indication}
-              </span>
-              <span className="text-neutral-500 hidden sm:inline">&bull;</span>
-              <BenchmarkInfo />
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {hasFullAccess ? (
-              <>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow w-full sm:w-auto"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  <span>Download Report</span>
-                </button>
-                <button
-                  onClick={handleDownloadExcel}
-                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Excel</span>
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={handleFreePDFClick}
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow w-full sm:w-auto"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Download Report</span>
-              </button>
-            )}
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-100 text-sm font-medium rounded-xl transition-all duration-200 border border-cyan-400/30 hover:border-cyan-400/50 w-full sm:w-auto"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              <span>Share</span>
-            </button>
-            <button
-              onClick={handleLinkedInShare}
-              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#0A66C2]/20 hover:bg-[#0A66C2]/30 text-blue-200 text-sm font-medium rounded-xl transition-all duration-200 border border-[#0A66C2]/30 hover:border-[#0A66C2]/50 w-full sm:w-auto"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              <span className="hidden sm:inline">LinkedIn</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <ResultsHeader
+        labels={labels}
+        isPro={isPro}
+        hasFullAccess={hasFullAccess}
+        tier={tier}
+        inputs={inputs}
+        onDownloadPDF={handleDownloadPDF}
+        onDownloadExcel={handleDownloadExcel}
+        onFreePDFClick={handleFreePDFClick}
+        onShare={() => setShowShareModal(true)}
+        onLinkedInShare={handleLinkedInShare}
+      />
 
       {/* Email Capture Bar */}
       {!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && (
@@ -1035,183 +740,14 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* AI Deal Memo */}
-        <div className="mt-6 sm:mt-8">
-          {hasFullAccess ? (
-            <div className="border border-purple-200 dark:border-purple-800/50 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
-              <div className="px-4 sm:px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-purple-200 dark:border-purple-800/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-soft">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
-                      <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
-                    </div>
-                  </div>
-                  {!dealMemo && !memoLoading && (
-                    <button
-                      onClick={handleGenerateMemo}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-sm font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all shadow-soft"
-                    >
-                      Generate Memo
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6">
-                {memoLoading && (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="relative w-10 h-10">
-                        <div className="absolute inset-0 rounded-full border-2 border-purple-200 dark:border-purple-800" />
-                        <div className="absolute inset-0 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-                      </div>
-                      <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Generating deal memo...</p>
-                      <p className="text-xs text-neutral-500 dark:text-slate-500">Analyzing asset profile, comps, and market dynamics</p>
-                    </div>
-                  </div>
-                )}
-
-                {memoError && (
-                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-sm text-red-700 dark:text-red-400">{memoError}</p>
-                    <button onClick={handleGenerateMemo} className="mt-2 text-sm text-red-600 dark:text-red-400 underline">
-                      Try again
-                    </button>
-                  </div>
-                )}
-
-                {dealMemo && (
-                  <div className="space-y-5">
-                    {/* Executive Summary */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Executive Summary</h4>
-                      <p className="text-sm text-neutral-800 dark:text-slate-200 leading-relaxed">{dealMemo.executive_summary}</p>
-                    </div>
-
-                    {/* Valuation Rationale */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Valuation Rationale</h4>
-                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.valuation_rationale}</p>
-                    </div>
-
-                    {/* Market Context */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Market Context</h4>
-                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.market_context}</p>
-                    </div>
-
-                    {/* Risk Factors + Negotiation Priorities side by side */}
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Risks</h4>
-                        <ul className="space-y-1.5">
-                          {dealMemo.risk_factors.map((risk, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-neutral-700 dark:text-slate-300">
-                              <span className="text-amber-500 mt-0.5 flex-shrink-0">&#9679;</span>
-                              {risk}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Negotiation Priorities</h4>
-                        <ul className="space-y-1.5">
-                          {dealMemo.negotiation_priorities.map((point, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-neutral-700 dark:text-slate-300">
-                              <span className="text-teal-500 mt-0.5 flex-shrink-0">&#9679;</span>
-                              {point}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Comparable Analysis */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Comparable Deal Analysis</h4>
-                      <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.comparable_analysis}</p>
-                    </div>
-
-                    {/* Confidence */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-neutral-200 dark:border-slate-700">
-                      <span className="text-xs text-neutral-500 dark:text-slate-400">Confidence:</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        dealMemo.confidence_level === 'high' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                        dealMemo.confidence_level === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                      }`}>
-                        {dealMemo.confidence_level.toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {!dealMemo && !memoLoading && !memoError && (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-neutral-500 dark:text-slate-400">
-                      Click &quot;Generate Memo&quot; to create an AI-powered deal analysis for your asset profile.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            /* Free tier teaser */
-            <div className="relative">
-              <div className="border border-purple-200 dark:border-purple-800/50 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
-                <div className="px-4 sm:px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-purple-200 dark:border-purple-800/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-soft">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
-                      <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 sm:p-6">
-                  {/* Blurred preview */}
-                  <div className="filter blur-sm select-none pointer-events-none space-y-3">
-                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-3/4" />
-                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-full" />
-                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-5/6" />
-                    <div className="h-12 bg-neutral-100 dark:bg-slate-700/50 rounded-lg mt-4" />
-                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-2/3" />
-                    <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-full" />
-                  </div>
-                </div>
-              </div>
-              {/* Overlay CTA */}
-              <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl">
-                <div className="text-center px-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <h4 className="text-lg font-semibold text-neutral-800 dark:text-white mb-1">AI Deal Memo</h4>
-                  <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 max-w-xs">
-                    Get an AI-generated deal analysis with executive summary, risk factors, and negotiation priorities.
-                  </p>
-                  <button
-                    onClick={() => onBuyReport?.()}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all shadow-soft"
-                  >
-                    Get Full Report — {PRICING.REPORT_PRICE}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <DealMemoSection
+          hasFullAccess={hasFullAccess}
+          dealMemo={dealMemo}
+          memoLoading={memoLoading}
+          memoError={memoError}
+          onGenerateMemo={handleGenerateMemo}
+          onBuyReport={onBuyReport}
+        />
 
         {/* Partner Matches */}
         {inputs && (
@@ -1402,36 +938,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         <MethodologySection />
 
         {/* World-Class Disclaimer */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-5 bg-gradient-to-br from-slate-100 to-neutral-100 rounded-xl border border-neutral-200">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-200 flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs sm:text-sm font-bold text-slate-700 mb-1.5">Important Disclaimer</h4>
-              <p className="text-xs text-slate-500 leading-relaxed mb-2">
-                <strong className="text-slate-600">For Informational Purposes Only:</strong> These estimates are generated
-                using publicly available deal data, industry benchmarks, and algorithmic models. They are intended solely
-                for educational and planning purposes.
-              </p>
-              <p className="text-xs text-slate-500 leading-relaxed mb-2">
-                <strong className="text-slate-600">Not Professional Advice:</strong> This tool does not constitute financial,
-                legal, investment, or professional advice of any kind. Actual deal terms can vary significantly (often by
-                50% or more) based on asset-specific factors, competitive dynamics, market conditions, negotiation leverage,
-                and numerous other variables not captured by this model.
-              </p>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                <strong className="text-slate-600">Consult Professionals:</strong> Before making any business decisions,
-                consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
-                <a href="/terms" className="text-teal-600 hover:text-teal-700 ml-1 underline">Terms</a>
-                {' '}&bull;{' '}
-                <a href="/privacy" className="text-teal-600 hover:text-teal-700 underline">Privacy</a>
-              </p>
-            </div>
-          </div>
-        </div>
+        <ResultsDisclaimer />
       </div>
     </div>
   );
