@@ -242,26 +242,41 @@ export default function ReportGenerationModal({
         if (abortRef.current) return;
         markComplete('compiling');
 
-        // Step 4: Build PDF via server-side Chromium (with client fallback)
+        // Step 4: Build PDF via server-side Chromium (with 12s timeout + client fallback)
         setCurrentStep('building');
         try {
-          // Try server-side PDF generation first (higher quality)
           const reportPayload = {
             reportData: pdfData,
             reportPurchaseId: reportId,
           };
-          const serverRes = await fetch('/api/report/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportPayload),
-          });
 
-          if (serverRes.ok) {
-            const pdfArrayBuffer = await serverRes.arrayBuffer();
-            pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
-          } else {
-            // Fallback to client-side html2pdf.js
-            console.warn('Server PDF failed, falling back to client-side generation');
+          // Race server-side generation against a 12s timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          let useClientFallback = false;
+          try {
+            const serverRes = await fetch('/api/report/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(reportPayload),
+              signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+
+            if (serverRes.ok) {
+              const pdfArrayBuffer = await serverRes.arrayBuffer();
+              pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+            } else {
+              useClientFallback = true;
+            }
+          } catch {
+            clearTimeout(timeoutId);
+            useClientFallback = true;
+          }
+
+          if (useClientFallback) {
+            console.warn('Server PDF unavailable, using client-side generation');
             const html2pdf = (await import('html2pdf.js')).default;
             const blob: Blob = await html2pdf()
               .set({

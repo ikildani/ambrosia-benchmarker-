@@ -4,8 +4,18 @@ import chromium from '@sparticuz/chromium';
 /**
  * Render an HTML string to a PDF buffer using headless Chromium.
  * Designed for Vercel serverless functions with @sparticuz/chromium.
+ *
+ * Performance: Uses 'domcontentloaded' instead of 'networkidle0' to avoid
+ * waiting on Google Fonts CDN requests. Font fallback to system fonts ensures
+ * the PDF renders correctly even without the network font.
  */
 export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
+  // Strip external font requests — use system font stack for server-side PDF.
+  // This avoids a 5-10s wait for Google Fonts CDN in headless Chromium.
+  const optimizedHtml = html
+    .replace(/<link[^>]*fonts\.googleapis\.com[^>]*>/g, '')
+    .replace(/<link[^>]*fonts\.gstatic\.com[^>]*>/g, '');
+
   const browser = await puppeteer.launch({
     args: chromium.args,
     executablePath: await chromium.executablePath(),
@@ -15,13 +25,24 @@ export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
   try {
     const page = await browser.newPage();
 
-    await page.setContent(html, {
-      waitUntil: 'networkidle0',
-      timeout: 20000,
+    // Block external font/image requests to speed up rendering
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const type = req.resourceType();
+      if (type === 'font' || type === 'stylesheet') {
+        const url = req.url();
+        if (url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
+          req.abort();
+          return;
+        }
+      }
+      req.continue();
     });
 
-    // Ensure Google Fonts (Inter) are fully loaded before PDF render
-    await page.waitForFunction(() => document.fonts.ready, { timeout: 5000 }).catch(() => {});
+    await page.setContent(optimizedHtml, {
+      waitUntil: 'domcontentloaded',
+      timeout: 10000,
+    });
 
     const pdf = await page.pdf({
       format: 'A4',
