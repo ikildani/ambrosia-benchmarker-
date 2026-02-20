@@ -42,6 +42,8 @@ import {
   comorbidityBreadthOptions,
   metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
+import { competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions } from '@/lib/optionDescriptions';
+import OptionCardGroup from './OptionCardGroup';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AdvancedOptionsSectionProps {
@@ -151,31 +153,27 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             Competitive Landscape
           </h3>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Competitive Position</label>
-              <select
-                value={competitivePosition}
-                onChange={(e) => onCompetitivePositionChange(e.target.value as CompetitivePosition)}
-                className={`select-field transition-all duration-300 ${highlightedFields.has('competitivePosition') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-              >
-                {competitivePositionOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="competitive-position-select"
+              label="Competitive Position"
+              options={competitivePositionOptions}
+              descriptions={competitivePositionDescriptions}
+              value={competitivePosition}
+              onChange={onCompetitivePositionChange}
+              highlighted={highlightedFields.has('competitivePosition')}
+              columns={6}
+            />
 
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Data Quality</label>
-              <select
-                value={dataQuality}
-                onChange={(e) => onDataQualityChange(e.target.value as DataQuality)}
-                className={`select-field transition-all duration-300 ${highlightedFields.has('dataQuality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-              >
-                {dataQualityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="data-quality-select"
+              label="Data Quality"
+              options={dataQualityOptions}
+              descriptions={dataQualityDescriptions}
+              value={dataQuality}
+              onChange={onDataQualityChange}
+              highlighted={highlightedFields.has('dataQuality')}
+              columns={5}
+            />
           </div>
         </div>
 
@@ -479,18 +477,16 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             </>
           )}
 
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Combination Potential</label>
-            <select
-              value={combinationPotential}
-              onChange={(e) => onCombinationPotentialChange(e.target.value as CombinationPotential)}
-              className={`select-field transition-all duration-300 ${highlightedFields.has('combinationPotential') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-            >
-              {combinationPotentialOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
+          <OptionCardGroup
+            id="combination-potential-select"
+            label="Combination Potential"
+            options={combinationPotentialOptions}
+            descriptions={combinationPotentialDescriptions}
+            value={combinationPotential}
+            onChange={onCombinationPotentialChange}
+            highlighted={highlightedFields.has('combinationPotential')}
+            columns={3}
+          />
         </div>
       </div>
     </>

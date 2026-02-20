@@ -18,6 +18,8 @@ import {
   metabolicIndicationOptions,
   biomarkerOptions,
 } from '@/lib/calculations';
+import { phaseDescriptions } from '@/lib/optionDescriptions';
+import OptionCardGroup from './OptionCardGroup';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AssetDetailsSectionProps {
@@ -74,18 +76,16 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
         Asset Details
       </h3>
       <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Development Phase</label>
-          <select
-            value={phase}
-            onChange={(e) => onPhaseChange(e.target.value as Phase)}
-            className={`select-field transition-all duration-300 ${highlightedFields.has('phase') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-          >
-            {phaseOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
+        <OptionCardGroup
+          id="phase-select"
+          label="Development Phase"
+          options={phaseOptions}
+          descriptions={phaseDescriptions}
+          value={phase}
+          onChange={onPhaseChange}
+          highlighted={highlightedFields.has('phase')}
+          columns={5}
+        />
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Modality</label>

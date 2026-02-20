@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
   TherapeuticArea,
@@ -46,7 +46,7 @@ import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 
-import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection } from './calculator/index';
+import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview } from './calculator/index';
 import type { DealTemplate } from './calculator/index';
 
 interface CalculatorProps {
@@ -112,6 +112,27 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // Ref for race condition prevention - checked immediately before async work
   const calculatingRef = useRef(false);
   const hadPrefillRef = useRef(false);
+
+  // Live preview: recalculate deal terms on every input change (~1ms, pure sync)
+  const previewResult = useMemo(() => {
+    const input: CalculationInput = {
+      therapeuticArea, phase, modality, indication, territory, biomarker,
+      lineOfTherapy, treatmentApproach, combinationPotential,
+      competitivePosition, dataQuality, regulatoryDesignations,
+      ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
+      ...(therapeuticArea === 'immunology' ? { immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal } : {}),
+      ...(therapeuticArea === 'metabolic' ? { mechanismDifferentiation, weightLossEfficacy, routeOfAdministration, comorbidityBreadth, metabolicTreatmentApproach } : {}),
+    };
+    return calculateDealTerms(input);
+  }, [
+    therapeuticArea, phase, modality, indication, territory, biomarker,
+    lineOfTherapy, treatmentApproach, combinationPotential,
+    competitivePosition, dataQuality, regulatoryDesignations,
+    bbbPenetration, diseaseProgression, biomarkerValidation,
+    immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal,
+    mechanismDifferentiation, weightLossEfficacy, routeOfAdministration,
+    comorbidityBreadth, metabolicTreatmentApproach,
+  ]);
 
   // Check for report purchase from URL params (after Stripe redirect)
   useEffect(() => {
@@ -528,7 +549,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   };
 
   return (
-    <div id="calculator" className="w-full max-w-6xl mx-auto scroll-mt-24">
+    <div id="calculator" className="w-full max-w-6xl mx-auto scroll-mt-24 pb-20 md:pb-0">
       <div className="card-elevated overflow-hidden">
         {/* Header */}
         <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 overflow-hidden">
@@ -610,6 +631,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 }}
                 onShowAdvanced={() => setQuickMode(false)}
               />
+
+              {quickMode && (
+                <div className="mt-4">
+                  <LiveDealPreview
+                    totalDealValue={previewResult.terms.totalDealValue}
+                    upfront={previewResult.terms.upfront}
+                  />
+                </div>
+              )}
 
               {!quickMode && (
                 <AdvancedOptionsSection
@@ -716,6 +746,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             {/* Right Column */}
             {!quickMode && (
             <div className="space-y-6 lg:space-y-8">
+              <LiveDealPreview
+                totalDealValue={previewResult.terms.totalDealValue}
+                upfront={previewResult.terms.upfront}
+              />
               <AdvancedOptionsSection
                 column="right"
                 therapeuticArea={therapeuticArea}

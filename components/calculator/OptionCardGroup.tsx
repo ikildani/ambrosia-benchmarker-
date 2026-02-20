@@ -1,0 +1,105 @@
+import React, { useCallback, useRef } from 'react';
+
+interface OptionCardGroupProps<T extends string> {
+  label: string;
+  options: { value: string; label: string }[];
+  descriptions?: Record<string, string>;
+  value: T;
+  onChange: (value: T) => void;
+  highlighted?: boolean;
+  columns?: 3 | 5 | 6;
+  id: string;
+}
+
+function OptionCardGroupInner<T extends string>({
+  label,
+  options,
+  descriptions,
+  value,
+  onChange,
+  highlighted,
+  columns = 3,
+  id,
+}: OptionCardGroupProps<T>) {
+  const groupRef = useRef<HTMLDivElement>(null);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = options.findIndex(o => o.value === value);
+    let nextIndex: number | null = null;
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = (currentIndex + 1) % options.length;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = (currentIndex - 1 + options.length) % options.length;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    onChange(options[nextIndex].value as T);
+
+    const groupEl = groupRef.current;
+    if (groupEl) {
+      const buttons = groupEl.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+      buttons[nextIndex]?.focus();
+    }
+  }, [options, value, onChange]);
+
+  const gridClass = columns === 5
+    ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2'
+    : columns === 6
+    ? 'grid grid-cols-2 sm:grid-cols-3 gap-2'
+    : 'grid grid-cols-1 sm:grid-cols-3 gap-2';
+
+  return (
+    <div className="space-y-2">
+      <label id={id} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+        {label}
+      </label>
+      <div
+        ref={groupRef}
+        role="radiogroup"
+        aria-labelledby={id}
+        onKeyDown={handleKeyDown}
+        className={gridClass}
+      >
+        {options.map((option) => {
+          const isSelected = value === option.value;
+          const description = descriptions?.[option.value];
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={isSelected ? 0 : -1}
+              onClick={() => onChange(option.value as T)}
+              className={`px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-200 touch-feedback ${
+                isSelected
+                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm'
+                  : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600'
+              } ${highlighted ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
+            >
+              <div className={`text-sm font-medium ${isSelected ? 'text-teal-700 dark:text-teal-400' : 'text-neutral-800 dark:text-slate-200'}`}>
+                {option.label}
+              </div>
+              {description && (
+                <div className={`text-xs mt-0.5 leading-tight ${isSelected ? 'text-teal-600/70 dark:text-teal-400/60' : 'text-neutral-400 dark:text-slate-500'}`}>
+                  {description}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const OptionCardGroup = React.memo(OptionCardGroupInner) as typeof OptionCardGroupInner;
+export default OptionCardGroup;
