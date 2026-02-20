@@ -1,4 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { isProEmail } from '@/lib/config/authorized-emails';
 import { getPlaybookGenerator, PlaybookInput, NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 
 export interface PlaybookRequest {
@@ -22,9 +24,45 @@ export interface PlaybookResponse {
   error?: string;
 }
 
-export async function POST(request: Request): Promise<NextResponse<PlaybookResponse>> {
+export async function POST(request: NextRequest): Promise<NextResponse<PlaybookResponse>> {
   try {
-    const body = (await request.json()) as PlaybookRequest;
+    // SECURITY: Require Pro tier — this is an expensive AI endpoint
+    const supabase = createServiceClient();
+    let userTier: 'free' | 'pro' = 'free';
+
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const { createClient } = await import('@supabase/supabase-js');
+      const authClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await authClient.auth.getUser(token);
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('id', user.id)
+          .single();
+        userTier = (profile?.tier as 'free' | 'pro') || 'free';
+      }
+    }
+
+    // Fallback: check email from request body
+    const bodyText = await request.text();
+    const body = JSON.parse(bodyText) as PlaybookRequest & { email?: string };
+
+    if (userTier === 'free' && body.email && isProEmail(body.email)) {
+      userTier = 'pro';
+    }
+
+    if (userTier !== 'pro') {
+      return NextResponse.json(
+        { success: false, error: 'Negotiation playbook is a Pro feature. Upgrade to access AI-powered negotiation strategies.' },
+        { status: 403 }
+      );
+    }
 
     // Validate required fields
     if (!body.inputs || !body.results || !body.labels) {

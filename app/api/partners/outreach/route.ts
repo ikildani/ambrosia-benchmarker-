@@ -63,11 +63,8 @@ export async function POST(request: NextRequest) {
       userTier = 'pro';
     }
 
-    // Method 3: Trust client tier if passed (for localStorage-based Pro users)
-    // This handles cases where Pro status is stored in localStorage after Stripe payment
-    if (userTier === 'free' && clientTier === 'pro') {
-      userTier = 'pro';
-    }
+    // SECURITY: Removed client tier trust — never use client-provided tier for authorization.
+    // Tier is verified from database (Method 1) or PRO_EMAILS whitelist (Method 2) only.
 
     // Only Pro users can generate outreach emails
     if (userTier !== 'pro') {

@@ -69,22 +69,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user tier if user_id is provided
+    // SECURITY: Verify user_id via auth header if provided, don't trust body.user_id blindly.
+    // For anonymous events, user_id stays null (linked later via auth flow).
+    let verifiedUserId: string | null = null;
     let userTier = 'free';
-    if (body.user_id) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('tier')
-        .eq('id', body.user_id)
-        .single();
 
-      if (profile?.tier) {
-        userTier = profile.tier;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const { createClient } = await import('@supabase/supabase-js');
+      const authClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await authClient.auth.getUser(token);
+      if (user) {
+        verifiedUserId = user.id;
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('id', user.id)
+          .single();
+        if (profile?.tier) userTier = profile.tier;
       }
     }
 
     const eventData = {
-      user_id: body.user_id || null,
+      user_id: verifiedUserId,
       session_id: body.session_id || null,
       anonymous_id: body.anonymous_id || null,
       event_type: body.event_type,

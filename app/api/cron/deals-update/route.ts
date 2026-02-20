@@ -113,21 +113,26 @@ export async function GET(request: NextRequest) {
       .is('licensee_id', null)
       .not('licensee_name', 'is', null);
 
-    if (unlinkedLicensees && unlinkedLicensees.length > 0) {
-      const names = [...new Set(unlinkedLicensees.map(d => d.licensee_name.toLowerCase()))];
-      const { data: matchedCompanies } = await supabase
-        .from('companies')
-        .select('id, name');
+    // Fetch all companies once (shared between licensee and licensor linking)
+    const { data: allCompanies } = await supabase
+      .from('companies')
+      .select('id, name');
+    const nameToId = new Map((allCompanies || []).map(c => [c.name.toLowerCase(), c.id]));
 
-      if (matchedCompanies) {
-        const nameToId = new Map(matchedCompanies.map(c => [c.name.toLowerCase(), c.id]));
-        for (const deal of unlinkedLicensees) {
-          const companyId = nameToId.get(deal.licensee_name.toLowerCase());
-          if (companyId) {
-            await supabase.from('deals').update({ licensee_id: companyId }).eq('id', deal.id);
-            linkedLicensees++;
-          }
+    // PERFORMANCE: Batch updates by company_id to avoid N+1 per-deal updates
+    if (unlinkedLicensees && unlinkedLicensees.length > 0) {
+      const updatesByCompany = new Map<string, string[]>();
+      for (const deal of unlinkedLicensees) {
+        const companyId = nameToId.get(deal.licensee_name.toLowerCase());
+        if (companyId) {
+          const ids = updatesByCompany.get(companyId) || [];
+          ids.push(deal.id);
+          updatesByCompany.set(companyId, ids);
         }
+      }
+      for (const [companyId, dealIds] of updatesByCompany) {
+        await supabase.from('deals').update({ licensee_id: companyId }).in('id', dealIds);
+        linkedLicensees += dealIds.length;
       }
     }
 
@@ -138,19 +143,18 @@ export async function GET(request: NextRequest) {
       .not('licensor_name', 'is', null);
 
     if (unlinkedLicensors && unlinkedLicensors.length > 0) {
-      const { data: matchedCompanies } = await supabase
-        .from('companies')
-        .select('id, name');
-
-      if (matchedCompanies) {
-        const nameToId = new Map(matchedCompanies.map(c => [c.name.toLowerCase(), c.id]));
-        for (const deal of unlinkedLicensors) {
-          const companyId = nameToId.get(deal.licensor_name.toLowerCase());
-          if (companyId) {
-            await supabase.from('deals').update({ licensor_id: companyId }).eq('id', deal.id);
-            linkedLicensors++;
-          }
+      const updatesByCompany = new Map<string, string[]>();
+      for (const deal of unlinkedLicensors) {
+        const companyId = nameToId.get(deal.licensor_name.toLowerCase());
+        if (companyId) {
+          const ids = updatesByCompany.get(companyId) || [];
+          ids.push(deal.id);
+          updatesByCompany.set(companyId, ids);
         }
+      }
+      for (const [companyId, dealIds] of updatesByCompany) {
+        await supabase.from('deals').update({ licensor_id: companyId }).in('id', dealIds);
+        linkedLicensors += dealIds.length;
       }
     }
 

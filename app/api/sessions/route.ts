@@ -32,9 +32,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SECURITY: Never accept user_id from request body — it must come from auth.
+    // Sessions start anonymous; user_id is linked later via /api/auth/link-anonymous.
     const sessionData = {
       anonymous_id: body.anonymous_id,
-      user_id: body.user_id || null,
+      user_id: null,
       device_type: body.device_type || null,
       referrer_url: body.referrer_url || null,
       utm_source: body.utm_source || null,

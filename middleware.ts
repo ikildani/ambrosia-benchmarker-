@@ -48,22 +48,37 @@ export async function middleware(request: NextRequest) {
 
   if (isMutatingRequest && isApiRoute && !isWebhook && !isCron) {
     const origin = request.headers.get('origin');
+    const allowedOrigins = [
+      'https://calculator.ambrosiaventures.co',
+      process.env.NEXT_PUBLIC_APP_URL,
+    ].filter(Boolean);
+
+    if (process.env.NODE_ENV === 'development') {
+      allowedOrigins.push('http://localhost:3000');
+    }
+
     if (origin) {
-      const allowedOrigins = [
-        'https://calculator.ambrosiaventures.co',
-        process.env.NEXT_PUBLIC_APP_URL,
-      ].filter(Boolean);
-
-      if (process.env.NODE_ENV === 'development') {
-        allowedOrigins.push('http://localhost:3000');
-      }
-
       if (!allowedOrigins.includes(origin)) {
         return NextResponse.json(
           { error: 'Forbidden: invalid origin' },
           { status: 403 }
         );
       }
+    } else {
+      // SECURITY: When Origin header is missing (form submissions, legacy browsers),
+      // fall back to Referer header validation to prevent CSRF attacks.
+      const referer = request.headers.get('referer');
+      if (referer) {
+        const refererOrigin = new URL(referer).origin;
+        if (!allowedOrigins.includes(refererOrigin)) {
+          return NextResponse.json(
+            { error: 'Forbidden: invalid referer' },
+            { status: 403 }
+          );
+        }
+      }
+      // If neither Origin nor Referer is present, allow the request —
+      // this can happen with server-to-server calls and fetch() from same origin.
     }
   }
 

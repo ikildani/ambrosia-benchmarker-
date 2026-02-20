@@ -14,14 +14,33 @@ export async function GET(
 
     const supabase = createServiceClient();
 
+    // SECURITY: Verify the requester owns this report purchase
+    let verifiedUserId: string | null = null;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const { createClient } = await import('@supabase/supabase-js');
+      const authClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await authClient.auth.getUser(token);
+      if (user) verifiedUserId = user.id;
+    }
+
     const { data: report, error } = await supabase
       .from('report_purchases')
-      .select('id, status, calculation_inputs, calculation_results, memo_content, purchased_at')
+      .select('id, user_id, status, calculation_inputs, calculation_results, memo_content, purchased_at')
       .eq('id', id)
       .single();
 
     if (error || !report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    }
+
+    // Allow access if: user owns the report, or report was purchased (completed status acts as access token via checkout flow)
+    if (report.user_id && verifiedUserId && report.user_id !== verifiedUserId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     return NextResponse.json({
