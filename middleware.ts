@@ -1,11 +1,103 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { checkRateLimit, RATE_LIMIT_CONFIGS, getRateLimitHeaders } from '@/lib/rate-limit';
+import type { RateLimitConfig } from '@/lib/rate-limit';
+
+// Route-to-rate-limit config map
+const ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
+  '/api/checkout': { limit: 5, windowSeconds: 60 },
+  '/api/deal-memo': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/playbook': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/generate': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/calculations': RATE_LIMIT_CONFIGS.calculations,
+  '/api/deals': RATE_LIMIT_CONFIGS.deals,
+  '/api/partners': RATE_LIMIT_CONFIGS.partnerMatch,
+  '/api/scenarios': RATE_LIMIT_CONFIGS.default,
+  '/api/newsletter': { limit: 5, windowSeconds: 60 },
+  '/api/share': { limit: 10, windowSeconds: 60 },
+  '/api/billing': { limit: 10, windowSeconds: 60 },
+  '/api/email': { limit: 5, windowSeconds: 60 },
+  '/api/events': RATE_LIMIT_CONFIGS.events,
+  '/api/user': { limit: 10, windowSeconds: 60 },
+  '/api/companies': RATE_LIMIT_CONFIGS.deals,
+  '/api/content': RATE_LIMIT_CONFIGS.default,
+  '/api/landing-pages': RATE_LIMIT_CONFIGS.default,
+  '/api/report-purchase': { limit: 10, windowSeconds: 60 },
+  '/api/embed': RATE_LIMIT_CONFIGS.default,
+  '/api/watchlist': RATE_LIMIT_CONFIGS.default,
+  '/api/promo': { limit: 10, windowSeconds: 60 },
+};
+
+function getRateLimitConfig(pathname: string): RateLimitConfig | null {
+  // Check exact matches first, then prefix matches
+  for (const [route, config] of Object.entries(ROUTE_RATE_LIMITS)) {
+    if (pathname === route || pathname.startsWith(route + '/')) {
+      return config;
+    }
+  }
+  return RATE_LIMIT_CONFIGS.default;
+}
 
 export async function middleware(request: NextRequest) {
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+
+  // --- CSRF Protection: Origin validation for mutating API requests ---
+  const isMutatingRequest = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method);
+  const isWebhook = request.nextUrl.pathname === '/api/webhook';
+  const isCron = request.nextUrl.pathname.startsWith('/api/cron/');
+
+  if (isMutatingRequest && isApiRoute && !isWebhook && !isCron) {
+    const origin = request.headers.get('origin');
+    if (origin) {
+      const allowedOrigins = [
+        'https://calculator.ambrosiaventures.co',
+        process.env.NEXT_PUBLIC_APP_URL,
+      ].filter(Boolean);
+
+      if (process.env.NODE_ENV === 'development') {
+        allowedOrigins.push('http://localhost:3000');
+      }
+
+      if (!allowedOrigins.includes(origin)) {
+        return NextResponse.json(
+          { error: 'Forbidden: invalid origin' },
+          { status: 403 }
+        );
+      }
+    }
+  }
+
+  // --- Rate Limiting: apply to all API routes except webhook and cron ---
+  if (isApiRoute && !isWebhook && !isCron) {
+    const rateLimitConfig = getRateLimitConfig(request.nextUrl.pathname);
+    if (rateLimitConfig) {
+      const forwarded = request.headers.get('x-forwarded-for');
+      const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+      const identifier = `ip:${ip}`;
+
+      try {
+        const result = await checkRateLimit(identifier, request.nextUrl.pathname, rateLimitConfig);
+        if (!result.success) {
+          return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            {
+              status: 429,
+              headers: {
+                ...getRateLimitHeaders(result),
+                'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString(),
+              },
+            }
+          );
+        }
+      } catch {
+        // Rate limiting failure should not block the request
+      }
+    }
+  }
+
   // Build CSP — use 'self' + 'unsafe-inline' for scripts since Next.js App Router
   // injects inline scripts for hydration that don't carry nonces automatically.
   // TODO: Re-enable nonce-based CSP when upgrading to Next.js 15+ with next/headers nonce propagation
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
   const cspHeader = isApiRoute
     ? '' // API routes don't need CSP
     : [

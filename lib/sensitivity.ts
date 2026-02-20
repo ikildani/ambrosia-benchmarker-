@@ -37,6 +37,19 @@ import {
   TargetSpecificity,
   DiseaseSeverity,
   ImmunologyTreatmentGoal,
+  MetabolicIndication,
+  MechanismDifferentiation,
+  WeightLossEfficacy,
+  RouteOfAdministration,
+  ComorbidityBreadth,
+  MetabolicTreatmentApproach,
+  metabolicModalityOptions,
+  metabolicIndicationOptions,
+  mechanismDifferentiationOptions,
+  weightLossEfficacyOptions,
+  routeOfAdministrationOptions,
+  comorbidityBreadthOptions,
+  metabolicTreatmentApproachOptions,
 } from './calculations';
 
 // Types for sensitivity analysis
@@ -104,6 +117,11 @@ const parameterLabels: Record<string, string> = {
   targetSpecificity: 'Target Specificity',
   diseaseSeverity: 'Disease Severity',
   treatmentGoal: 'Treatment Goal',
+  mechanismDifferentiation: 'Mechanism Differentiation',
+  weightLossEfficacy: 'Weight Loss Efficacy',
+  routeOfAdministration: 'Route of Administration',
+  comorbidityBreadth: 'Comorbidity Breadth',
+  metabolicTreatmentApproach: 'Treatment Approach',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -117,7 +135,8 @@ function flattenOptions(
 function getOptionsForParameter(
   parameterKey: keyof CalculationInput,
   isNeurology: boolean = false,
-  isImmunology: boolean = false
+  isImmunology: boolean = false,
+  isMetabolic: boolean = false
 ): Array<{ value: string; label: string }> {
   switch (parameterKey) {
     case 'phase':
@@ -127,7 +146,9 @@ function getOptionsForParameter(
     case 'competitivePosition':
       return competitivePositionOptions;
     case 'modality':
-      return flattenOptions(isImmunology ? immunologyModalityOptions : isNeurology ? neurologyModalityOptions : modalityOptions);
+      return flattenOptions(isMetabolic ? metabolicModalityOptions : isImmunology ? immunologyModalityOptions : isNeurology ? neurologyModalityOptions : modalityOptions);
+    case 'indication':
+      return isMetabolic ? flattenOptions(metabolicIndicationOptions) : [];
     case 'dataQuality':
       return dataQualityOptions;
     case 'lineOfTherapy':
@@ -152,6 +173,16 @@ function getOptionsForParameter(
       return diseaseSeverityOptions;
     case 'treatmentGoal':
       return treatmentGoalOptions;
+    case 'mechanismDifferentiation':
+      return mechanismDifferentiationOptions;
+    case 'weightLossEfficacy':
+      return weightLossEfficacyOptions;
+    case 'routeOfAdministration':
+      return routeOfAdministrationOptions;
+    case 'comorbidityBreadth':
+      return comorbidityBreadthOptions;
+    case 'metabolicTreatmentApproach':
+      return metabolicTreatmentApproachOptions;
     default:
       return [];
   }
@@ -170,7 +201,8 @@ function computeParameterSensitivity(
 
   const isNeurology = baseInputs.therapeuticArea === 'neurology';
   const isImmunology = baseInputs.therapeuticArea === 'immunology';
-  const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology);
+  const isMetabolic = baseInputs.therapeuticArea === 'metabolic';
+  const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology, isMetabolic);
   if (options.length === 0) return null;
 
   const currentValue = String(baseInputs[parameterKey]);
@@ -413,6 +445,81 @@ function generateImmunologyInsights(inputs: CalculationInput): NeurologyInsight[
   return insights;
 }
 
+// Generate metabolic/obesity-specific insights based on asset characteristics
+function generateMetabolicInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'metabolic') return [];
+
+  const insights: NeurologyInsight[] = [];
+
+  // Competitive Differentiation Risk — based on mechanismDifferentiation and weightLossEfficacy
+  const mdKey = inputs.mechanismDifferentiation || 'incretinBased';
+  const wlKey = inputs.weightLossEfficacy || 'competitiveEfficacy';
+  let diffLevel: ImpactLevel;
+  if (wlKey === 'superiorEfficacy' && mdKey === 'combinationMechanism') {
+    diffLevel = 'LOW';
+  } else if (wlKey === 'competitiveEfficacy' && mdKey === 'incretinBased') {
+    diffLevel = 'MEDIUM';
+  } else if (wlKey === 'modestEfficacy') {
+    diffLevel = mdKey === 'incretinBased' ? 'VERY HIGH' : 'HIGH';
+  } else {
+    // Other combinations (e.g., superiorEfficacy + incretinBased, competitiveEfficacy + nonIncretin, etc.)
+    diffLevel = 'MEDIUM';
+  }
+
+  insights.push({
+    title: 'Competitive Differentiation Risk',
+    description: diffLevel === 'LOW'
+      ? 'Superior efficacy combined with a multi-pathway mechanism provides the strongest differentiation against GLP-1 incumbents. This profile commands premium deal terms — partners pay for clear superiority data and novel biology that extends beyond the incretin class.'
+      : diffLevel === 'MEDIUM'
+      ? 'Competitive efficacy within the incretin class faces direct comparison to semaglutide and tirzepatide. Differentiation via dosing convenience, side-effect profile, or muscle-sparing properties is critical for premium deal structures.'
+      : diffLevel === 'HIGH'
+      ? 'Modest weight loss efficacy limits competitive positioning against best-in-class GLP-1 programs. Partners will discount commercial milestones and may seek combination rights or niche indication positioning.'
+      : 'Modest efficacy in a crowded incretin landscape creates significant commercial risk. Deal structures will heavily weight milestones toward differentiation data, with limited upfront commitment from partners.',
+    impactLevel: diffLevel,
+    category: 'competitive_landscape',
+  });
+
+  // Route of Administration Impact — based on routeOfAdministration
+  const roaKey = inputs.routeOfAdministration || 'injectable';
+  const roaLevel: ImpactLevel = roaKey === 'oral'
+    ? 'LOW'
+    : roaKey === 'injectable'
+    ? 'MEDIUM'
+    : 'MEDIUM'; // implantable
+
+  insights.push({
+    title: 'Route of Administration Impact',
+    description: roaLevel === 'LOW'
+      ? 'Oral administration is the holy grail for obesity/metabolic drugs — oral semaglutide proved the concept, but best-in-class oral efficacy remains elusive. Oral delivery commands premium positioning and 20-30% higher deal terms versus injectable equivalents.'
+      : roaKey === 'injectable'
+      ? 'Injectable (subcutaneous) delivery is the current standard for GLP-1 therapies. Well-established patient acceptance and compliance profiles. Deal structures reflect standard market positioning without oral premium or implantable novelty discount.'
+      : 'Implantable / long-acting depot delivery is an emerging approach offering monthly or less frequent dosing. Novel but unproven commercial model — partners value the convenience thesis but require clinical validation of sustained efficacy and safety.',
+    impactLevel: roaLevel,
+    category: 'line_of_therapy',
+  });
+
+  // Comorbidity Expansion Potential — based on comorbidityBreadth and indication
+  const cbKey = inputs.comorbidityBreadth || 'obesityPrimary';
+  const cbLevel: ImpactLevel = cbKey === 'cardiometabolicBenefit'
+    ? 'LOW'
+    : cbKey === 'organProtective'
+    ? 'MEDIUM'
+    : 'HIGH';
+
+  insights.push({
+    title: 'Comorbidity Expansion Potential',
+    description: cbLevel === 'LOW'
+      ? 'Cardiometabolic benefit profile (CV risk reduction + metabolic improvement) enables the broadest label expansion — obesity, T2D, NASH, heart failure, CKD. This is the semaglutide playbook: each new indication multiplies commercial value. Partners structure deals with aggressive indication expansion milestones.'
+      : cbLevel === 'MEDIUM'
+      ? 'Organ-protective profile (liver, kidney, or cardiac benefit) supports targeted label expansion beyond primary indication. NASH/MASH and CKD indications add significant commercial upside. Deal structures include indication-specific milestones.'
+      : 'Obesity-primary positioning with weight loss as the sole value driver creates single-indication concentration risk. Without cardiometabolic or organ-protective data, commercial milestones are limited to weight management market only. Partners may discount total deal value accordingly.',
+    impactLevel: cbLevel,
+    category: 'combination_strategy',
+  });
+
+  return insights;
+}
+
 // Generate oncology-specific insights based on asset characteristics
 function generateOncologyInsights(inputs: CalculationInput): NeurologyInsight[] {
   if (inputs.therapeuticArea !== 'oncology') return [];
@@ -487,17 +594,19 @@ export function computeSensitivityAnalysis(
 ): SensitivityData {
   const isNeurology = inputs.therapeuticArea === 'neurology';
   const isImmunology = inputs.therapeuticArea === 'immunology';
+  const isMetabolic = inputs.therapeuticArea === 'metabolic';
   const parametersToAnalyze: Array<keyof CalculationInput> = [
     'phase',
     'territory',
     'competitivePosition',
     'modality',
     'dataQuality',
-    isNeurology ? 'treatmentApproach' : isImmunology ? 'treatmentGoal' : 'lineOfTherapy',
+    isNeurology ? 'treatmentApproach' : isImmunology ? 'treatmentGoal' : isMetabolic ? 'metabolicTreatmentApproach' : 'lineOfTherapy',
     'biomarker',
     'combinationPotential',
     ...(isNeurology ? ['bbbPenetration' as keyof CalculationInput, 'diseaseProgression' as keyof CalculationInput, 'biomarkerValidation' as keyof CalculationInput] : []),
     ...(isImmunology ? ['immuneResetPotential' as keyof CalculationInput, 'targetSpecificity' as keyof CalculationInput, 'diseaseSeverity' as keyof CalculationInput] : []),
+    ...(isMetabolic ? ['mechanismDifferentiation' as keyof CalculationInput, 'weightLossEfficacy' as keyof CalculationInput, 'routeOfAdministration' as keyof CalculationInput, 'comorbidityBreadth' as keyof CalculationInput] : []),
   ];
 
   const parameters: ParameterSensitivity[] = parametersToAnalyze
@@ -511,7 +620,9 @@ export function computeSensitivityAnalysis(
   const topValueDriver = findTopValueDriver(parameters);
 
   // Generate therapeutic-area-specific insights
-  const neurologyInsights = isImmunology
+  const neurologyInsights = isMetabolic
+    ? generateMetabolicInsights(inputs)
+    : isImmunology
     ? generateImmunologyInsights(inputs)
     : isNeurology
     ? generateNeurologyInsights(inputs)

@@ -59,7 +59,6 @@ export async function GET(
         .from('deals')
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.${companyName},licensor_name.ilike.${companyName}`)
-        .eq('is_synthetic', false)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -77,7 +76,6 @@ export async function GET(
         .from('deals')
         .select('announced_date, modality, upfront_usd, indication_category')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.${companyName},licensor_name.ilike.${companyName}`)
-        .eq('is_synthetic', false)
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);
@@ -214,7 +212,6 @@ export async function GET(
       const { data: marketAvgData } = await supabase
         .from('deals')
         .select('upfront_usd')
-        .eq('is_synthetic', false)
         .gte('announced_date', oneYearAgo)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);

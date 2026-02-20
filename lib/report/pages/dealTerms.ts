@@ -18,7 +18,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
     { key: 'commMilestones', label: 'Commercial Milestones', terms: result.terms.commMilestones, dd: drillDown.commMilestones },
   ];
 
-  const royaltyStepHtml = renderRoyaltyStep(royalties, 260, 160);
+  const royaltyStepHtml = renderRoyaltyStep(royalties, 240, 140);
 
   return `
     <div class="report-page">
@@ -27,22 +27,22 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       <div class="section-title-lg">Deal Terms Detail</div>
 
       <!-- Term Cards Grid -->
-      <div class="grid-2" style="margin-bottom: 16px;">
+      <div class="grid-2" style="margin-bottom: 14px;">
         ${termCards.map(tc => `
           <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-              <div style="font-size: 11px; font-weight: 600; color: ${COLORS.navy};">${tc.label}</div>
-              <div style="font-size: 14px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(tc.terms.median)}</div>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+              <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${tc.label}</div>
+              <div style="font-size: 13px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(tc.terms.median)}</div>
             </div>
-            <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 6px;">
+            <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 5px;">
               Range: ${formatUsd(tc.terms.low)} &ndash; ${formatUsd(tc.terms.high)}
             </div>
-            <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5; margin-bottom: 8px;">
+            <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5; margin-bottom: 6px;">
               ${escapeHtml(tc.dd.rangeExplanation)}
             </div>
             <!-- Factor impacts -->
             ${tc.dd.factors.length > 0 ? `
-            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 3px;">
               ${tc.dd.factors.slice(0, 3).map(f => {
                 const badge = f.impact === 'positive' ? 'badge-teal' : f.impact === 'negative' ? 'badge-rose' : 'badge-gray';
                 const sign = f.impact === 'positive' ? '+' : f.impact === 'negative' ? '-' : '';
@@ -59,7 +59,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
         const allBreakdowns = termCards.filter(tc => tc.dd.breakdown && tc.dd.breakdown.length > 0);
         if (allBreakdowns.length === 0) return '';
         return `
-        <div style="margin-bottom: 16px;">
+        <div style="margin-bottom: 12px;">
           <div class="section-title">Milestone Breakdown</div>
           <div class="card" style="padding: 0; overflow: hidden;">
             <table class="data-table">
@@ -73,11 +73,11 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
               </thead>
               <tbody>
                 ${allBreakdowns.map(tc =>
-                  (tc.dd.breakdown || []).slice(0, 4).map(b => `
+                  (tc.dd.breakdown || []).slice(0, 3).map(b => `
                     <tr>
-                      <td style="font-size: 10px; color: ${COLORS.gray500};">${tc.label}</td>
+                      <td style="font-size: 9px; color: ${COLORS.gray500};">${tc.label}</td>
                       <td>${escapeHtml(b.label)}</td>
-                      <td style="text-align: right;">${formatUsd(b.value.low)} - ${formatUsd(b.value.high)}</td>
+                      <td style="text-align: right;">${formatUsd(b.value.low)} \u2013 ${formatUsd(b.value.high)}</td>
                       <td class="value-cell">${b.percentage}%</td>
                     </tr>
                   `).join('')
@@ -90,9 +90,9 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       })()}
 
       <!-- Royalty Structure -->
-      <div style="display: grid; grid-template-columns: 1fr 280px; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 260px; gap: 12px;">
         <div class="card">
-          <div style="font-size: 11px; font-weight: 600; color: ${COLORS.navy}; margin-bottom: 10px;">Tiered Royalty Rates</div>
+          <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 8px;">Tiered Royalty Rates</div>
           <table class="data-table">
             <thead>
               <tr>
@@ -121,7 +121,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
           </table>
         </div>
         <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div style="font-size: 10px; font-weight: 600; color: ${COLORS.gray500}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">Royalty Step Chart</div>
+          <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Royalty Step Chart</div>
           ${royaltyStepHtml}
         </div>
       </div>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface AuthModalProps {
 type AuthMode = 'signin' | 'signup' | 'forgot-password' | 'verify-email';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signup' }: AuthModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -530,9 +533,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
   return (
     <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
       <div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
+        tabIndex={-1}
         className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up"
       >
         {/* Header */}

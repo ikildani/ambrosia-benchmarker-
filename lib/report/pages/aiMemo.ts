@@ -12,13 +12,13 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
     return `
       <div class="report-page">
         ${pageHeader(8, meta.pageCount, 'Deal Valuation Report')}
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>
           <span class="ai-badge">AI-GENERATED</span>
         </div>
         <div class="card" style="text-align: center; padding: 40px;">
-          <div style="font-size: 14px; color: ${COLORS.gray400}; margin-bottom: 8px;">AI analysis not yet generated for this report.</div>
-          <div style="font-size: 11px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to generate an AI-powered negotiation playbook and deal memo.</div>
+          <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">AI analysis not yet generated for this report.</div>
+          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to generate an AI-powered negotiation playbook and deal memo.</div>
         </div>
         ${pageFooter(meta.reportId)}
       </div>
@@ -28,10 +28,10 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
   // Build memo section
   const memoSection = memoData ? `
     <!-- Executive Summary -->
-    <div class="card" style="margin-bottom: 12px; border-left: 3px solid ${COLORS.teal};">
-      <div style="font-size: 10px; font-weight: 600; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Executive Summary</div>
-      <div style="font-size: 11px; color: ${COLORS.gray700}; line-height: 1.7;">${escapeHtml(memoData.executive_summary)}</div>
-      <div style="margin-top: 8px;">
+    <div class="card" style="margin-bottom: 10px; border-left: 3px solid ${COLORS.teal};">
+      <div style="font-size: 8px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;">Executive Summary</div>
+      <div style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">${escapeHtml(memoData.executive_summary)}</div>
+      <div style="margin-top: 6px;">
         <span class="badge ${memoData.confidence_level === 'high' ? 'badge-teal' : memoData.confidence_level === 'medium' ? 'badge-amber' : 'badge-rose'}">
           ${memoData.confidence_level.toUpperCase()} CONFIDENCE
         </span>
@@ -39,28 +39,28 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
     </div>
 
     <!-- Valuation Rationale + Market Context -->
-    <div class="grid-2" style="margin-bottom: 12px;">
+    <div class="grid-2" style="margin-bottom: 10px;">
       <div class="card-sm">
-        <div style="font-size: 10px; font-weight: 600; color: ${COLORS.navy}; margin-bottom: 4px;">Valuation Rationale</div>
-        <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.6;">${escapeHtml(memoData.valuation_rationale)}</div>
+        <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">Valuation Rationale</div>
+        <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.6;">${escapeHtml(memoData.valuation_rationale)}</div>
       </div>
       <div class="card-sm">
-        <div style="font-size: 10px; font-weight: 600; color: ${COLORS.navy}; margin-bottom: 4px;">Market Context</div>
-        <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.6;">${escapeHtml(memoData.market_context)}</div>
+        <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">Market Context</div>
+        <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.6;">${escapeHtml(memoData.market_context)}</div>
       </div>
     </div>
 
     <!-- Risk Factors + Negotiation Priorities -->
-    <div class="grid-2" style="margin-bottom: 12px;">
+    <div class="grid-2" style="margin-bottom: 10px;">
       <div class="card-sm">
-        <div style="font-size: 10px; font-weight: 600; color: ${COLORS.rose}; margin-bottom: 6px;">Risk Factors</div>
-        <ul class="bullet-list" style="font-size: 10px;">
+        <div style="font-size: 9px; font-weight: 700; color: ${COLORS.rose}; margin-bottom: 4px;">Risk Factors</div>
+        <ul class="bullet-list" style="font-size: 9px;">
           ${memoData.risk_factors.slice(0, 4).map(r => `<li>${escapeHtml(r)}</li>`).join('')}
         </ul>
       </div>
       <div class="card-sm">
-        <div style="font-size: 10px; font-weight: 600; color: ${COLORS.teal}; margin-bottom: 6px;">Negotiation Priorities</div>
-        <ul class="bullet-list" style="font-size: 10px;">
+        <div style="font-size: 9px; font-weight: 700; color: ${COLORS.teal}; margin-bottom: 4px;">Negotiation Priorities</div>
+        <ul class="bullet-list" style="font-size: 9px;">
           ${memoData.negotiation_priorities.slice(0, 4).map(p => `<li>${escapeHtml(p)}</li>`).join('')}
         </ul>
       </div>
@@ -86,10 +86,10 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
     <div class="grid-2">
       ${sectionEntries.slice(0, maxSections).map(s => `
         <div class="card-sm" style="border-left: 3px solid ${COLORS.navy};">
-          <div style="font-size: 10px; font-weight: 600; color: ${COLORS.navy}; margin-bottom: 4px;">${escapeHtml(s.data.title)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5; margin-bottom: 6px;">${escapeHtml(s.data.content.substring(0, 200))}${s.data.content.length > 200 ? '...' : ''}</div>
+          <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">${escapeHtml(s.data.title)}</div>
+          <div style="font-size: 8px; color: ${COLORS.gray600}; line-height: 1.5; margin-bottom: 4px;">${escapeHtml(s.data.content.substring(0, 180))}${s.data.content.length > 180 ? '...' : ''}</div>
           ${s.data.highlight ? `
-          <div class="callout" style="padding: 6px 10px; font-size: 9px;">
+          <div class="callout" style="padding: 5px 8px; font-size: 8px;">
             <strong>Key:</strong> ${escapeHtml(s.data.highlight)}
           </div>
           ` : ''}
@@ -103,7 +103,7 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
     <div class="report-page">
       ${pageHeader(8, meta.pageCount, 'Deal Valuation Report')}
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>
         <span class="ai-badge">AI-GENERATED</span>
       </div>

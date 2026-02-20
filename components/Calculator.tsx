@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { Circle, Star, Hexagon, Dna, Globe2, CheckCircle } from 'lucide-react';
 import {
   TherapeuticArea,
@@ -48,6 +49,18 @@ import {
   targetSpecificityOptions,
   diseaseSeverityOptions,
   treatmentGoalOptions,
+  metabolicModalityOptions,
+  metabolicIndicationOptions,
+  MechanismDifferentiation,
+  WeightLossEfficacy,
+  RouteOfAdministration,
+  ComorbidityBreadth,
+  MetabolicTreatmentApproach,
+  mechanismDifferentiationOptions,
+  weightLossEfficacyOptions,
+  routeOfAdministrationOptions,
+  comorbidityBreadthOptions,
+  metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
 import { canUseCalculator, incrementUsage, getUsage, FREE_LIMIT, syncUsageFromDatabase } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
@@ -309,6 +322,69 @@ const IMMUNOLOGY_TEMPLATES: DealTemplate[] = [
   },
 ];
 
+const METABOLIC_TEMPLATES: DealTemplate[] = [
+  {
+    id: 'met-oral-glp1-obesity',
+    name: 'Oral GLP-1 (Obesity)',
+    description: 'Holy grail of metabolic',
+    icon: 'highValue',
+    values: {
+      therapeuticArea: 'metabolic',
+      phase: 'phase2',
+      modality: 'oralPeptide' as Modality,
+      indication: 'obesity' as Indication,
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'met-dual-incretin',
+    name: 'Dual Incretin (Obesity)',
+    description: 'Tirzepatide-class',
+    icon: 'premium',
+    values: {
+      therapeuticArea: 'metabolic',
+      phase: 'phase2',
+      modality: 'dualIncretin' as Modality,
+      indication: 'obesity' as Indication,
+      territory: 'global',
+      competitivePosition: 'racing',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'met-mash-treatment',
+    name: 'NASH/MASH Therapy',
+    description: 'Liver disease pipeline',
+    icon: 'standard',
+    values: {
+      therapeuticArea: 'metabolic',
+      phase: 'phase2',
+      modality: 'smallMolecule' as Modality,
+      indication: 'nashMash' as Indication,
+      territory: 'global',
+      competitivePosition: 'bestInClass',
+      dataQuality: 'strongPhase2',
+    },
+  },
+  {
+    id: 'met-rare-gene-therapy',
+    name: 'Rare Metabolic Gene Therapy',
+    description: 'Orphan + curative',
+    icon: 'platform',
+    values: {
+      therapeuticArea: 'metabolic',
+      phase: 'phase1',
+      modality: 'geneTherapy' as Modality,
+      indication: 'rareMetabolic' as Indication,
+      territory: 'global',
+      competitivePosition: 'firstInClass',
+      dataQuality: 'promising',
+    },
+  },
+];
+
 const TEMPLATE_ICONS: Record<DealTemplate['icon'], React.ComponentType<{ className?: string }>> = {
   standard: Circle,
   premium: Star,
@@ -350,6 +426,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [targetSpecificity, setTargetSpecificity] = useState<TargetSpecificity>('pathwayTargeted');
   const [diseaseSeverity, setDiseaseSeverity] = useState<DiseaseSeverity>('moderateSevere');
   const [treatmentGoal, setTreatmentGoal] = useState<ImmunologyTreatmentGoal>('remissionInduction');
+  const [mechanismDifferentiation, setMechanismDifferentiation] = useState<MechanismDifferentiation>('incretinBased');
+  const [weightLossEfficacy, setWeightLossEfficacy] = useState<WeightLossEfficacy>('competitiveEfficacy');
+  const [routeOfAdministration, setRouteOfAdministration] = useState<RouteOfAdministration>('injectable');
+  const [comorbidityBreadth, setComorbidityBreadth] = useState<ComorbidityBreadth>('obesityPrimary');
+  const [metabolicTreatmentApproach, setMetabolicTreatmentApproach] = useState<MetabolicTreatmentApproach>('chronicWeightMgmt');
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -517,6 +598,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             regulatoryDesignations,
             ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
             ...(therapeuticArea === 'immunology' ? { immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal } : {}),
+            ...(therapeuticArea === 'metabolic' ? { mechanismDifferentiation, weightLossEfficacy, routeOfAdministration, comorbidityBreadth, metabolicTreatmentApproach } : {}),
           };
           const calculatedResult = calculateDealTerms(input);
           setResult(calculatedResult);
@@ -583,7 +665,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             })
             .catch(error => {
               console.error('Failed to save calculation to database:', error);
-              setSaveError('Unable to save calculation. Your results are shown but may not be synced.');
+              toast.warning('Unable to save calculation. Your results are shown but may not be synced.');
             });
 
       // Save to local history with ALL inputs for recalculation
@@ -651,6 +733,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setImmuneResetPotential('chronicTreatment');
       setTargetSpecificity('pathwayTargeted');
       setDiseaseSeverity('moderateSevere');
+    } else if (newArea === 'metabolic') {
+      setIndication('obesity' as Indication);
+      setModality('glp1Agonist' as Modality);
+      setMetabolicTreatmentApproach('chronicWeightMgmt');
+      setMechanismDifferentiation('incretinBased');
+      setWeightLossEfficacy('competitiveEfficacy');
+      setRouteOfAdministration('injectable');
+      setComorbidityBreadth('obesityPrimary');
     } else {
       setIndication('lung_nsclc' as Indication);
       setModality('smallMolecule');
@@ -686,6 +776,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           targetSpecificity: (newInputs.targetSpecificity as TargetSpecificity) || targetSpecificity,
           diseaseSeverity: (newInputs.diseaseSeverity as DiseaseSeverity) || diseaseSeverity,
           treatmentGoal: (newInputs.treatmentGoal as ImmunologyTreatmentGoal) || treatmentGoal,
+        } : {}),
+        ...(therapeuticArea === 'metabolic' ? {
+          mechanismDifferentiation: (newInputs.mechanismDifferentiation as MechanismDifferentiation) || mechanismDifferentiation,
+          weightLossEfficacy: (newInputs.weightLossEfficacy as WeightLossEfficacy) || weightLossEfficacy,
+          routeOfAdministration: (newInputs.routeOfAdministration as RouteOfAdministration) || routeOfAdministration,
+          comorbidityBreadth: (newInputs.comorbidityBreadth as ComorbidityBreadth) || comorbidityBreadth,
+          metabolicTreatmentApproach: (newInputs.metabolicTreatmentApproach as MetabolicTreatmentApproach) || metabolicTreatmentApproach,
         } : {}),
       };
 
@@ -796,7 +893,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
-                  {therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
+                  {therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
                   {BENCHMARK_VERSION.LABEL}
@@ -812,12 +909,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             <div className="mb-4">
               <h3 className="text-base font-semibold text-navy-800 dark:text-white">Start with a template</h3>
               <p className="text-sm text-neutral-500 dark:text-slate-400">
-                {therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : therapeuticArea === 'immunology' ? `Based on 48 immunology/autoimmune R&D partnerships (2019-2026)` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
+                {therapeuticArea === 'metabolic' ? `Based on 35+ metabolic/obesity R&D partnerships (2022-2026)` : therapeuticArea === 'neurology' ? `Based on ${DEAL_STATS.NEUROLOGY_DEALS} ${DEAL_STATS.NEUROLOGY_DEALS_DESCRIPTION}` : therapeuticArea === 'immunology' ? `Based on 48 immunology/autoimmune R&D partnerships (2019-2026)` : `Based on ${DEAL_STATS.TOTAL_DEALS} analyzed deals`}
               </p>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              {(therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : therapeuticArea === 'immunology' ? IMMUNOLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
+              {(therapeuticArea === 'metabolic' ? METABOLIC_TEMPLATES : therapeuticArea === 'neurology' ? NEUROLOGY_TEMPLATES : therapeuticArea === 'immunology' ? IMMUNOLOGY_TEMPLATES : DEAL_TEMPLATES).map((template) => {
                 const IconComponent = TEMPLATE_ICONS[template.icon];
                 return (
                   <button
@@ -860,7 +957,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           {/* Therapeutic Area Selector */}
           <div className="mb-6 lg:mb-8">
             <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {therapeuticAreaOptions.map((option) => (
                 <button
                   key={option.value}
@@ -924,7 +1021,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('modality') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {(therapeuticArea === 'neurology' ? neurologyModalityOptions : therapeuticArea === 'immunology' ? immunologyModalityOptions : modalityOptions).map((group) => (
+                      {(therapeuticArea === 'metabolic' ? metabolicModalityOptions : therapeuticArea === 'neurology' ? neurologyModalityOptions : therapeuticArea === 'immunology' ? immunologyModalityOptions : modalityOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -945,7 +1042,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       }}
                       className={`select-field transition-all duration-300 ${highlightedFields.has('indication') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                     >
-                      {(therapeuticArea === 'neurology' ? neurologyIndicationOptions : therapeuticArea === 'immunology' ? immunologyIndicationOptions : indicationOptions).map((group) => (
+                      {(therapeuticArea === 'metabolic' ? metabolicIndicationOptions : therapeuticArea === 'neurology' ? neurologyIndicationOptions : therapeuticArea === 'immunology' ? immunologyIndicationOptions : indicationOptions).map((group) => (
                         <optgroup key={group.group} label={group.group}>
                           {group.options.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -1010,6 +1107,26 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         className={`select-field transition-all duration-300 ${highlightedFields.has('treatmentApproach') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
                       >
                         {treatmentApproachOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : therapeuticArea === 'metabolic' ? (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                        Treatment Approach
+                        <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
+                      </label>
+                      <select
+                        value={metabolicTreatmentApproach}
+                        onChange={(e) => {
+                          const newValue = e.target.value as MetabolicTreatmentApproach;
+                          trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue);
+                          setMetabolicTreatmentApproach(newValue);
+                        }}
+                        className="select-field"
+                      >
+                        {metabolicTreatmentApproachOptions.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                       </select>
@@ -1170,6 +1287,87 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           className="select-field"
                         >
                           {diseaseSeverityOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {therapeuticArea === 'metabolic' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Mechanism Differentiation
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
+                        </label>
+                        <select
+                          value={mechanismDifferentiation}
+                          onChange={(e) => {
+                            const newValue = e.target.value as MechanismDifferentiation;
+                            trackParameterChange('mechanismDifferentiation', mechanismDifferentiation, newValue);
+                            setMechanismDifferentiation(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {mechanismDifferentiationOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Weight Loss Efficacy
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
+                        </label>
+                        <select
+                          value={weightLossEfficacy}
+                          onChange={(e) => {
+                            const newValue = e.target.value as WeightLossEfficacy;
+                            trackParameterChange('weightLossEfficacy', weightLossEfficacy, newValue);
+                            setWeightLossEfficacy(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {weightLossEfficacyOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Route of Administration
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
+                        </label>
+                        <select
+                          value={routeOfAdministration}
+                          onChange={(e) => {
+                            const newValue = e.target.value as RouteOfAdministration;
+                            trackParameterChange('routeOfAdministration', routeOfAdministration, newValue);
+                            setRouteOfAdministration(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {routeOfAdministrationOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
+                          Comorbidity Breadth
+                          <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
+                        </label>
+                        <select
+                          value={comorbidityBreadth}
+                          onChange={(e) => {
+                            const newValue = e.target.value as ComorbidityBreadth;
+                            trackParameterChange('comorbidityBreadth', comorbidityBreadth, newValue);
+                            setComorbidityBreadth(newValue);
+                          }}
+                          className="select-field"
+                        >
+                          {comorbidityBreadthOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                           ))}
                         </select>
@@ -1413,6 +1611,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               dataQuality,
               regulatoryDesignations,
               ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
+              ...(therapeuticArea === 'immunology' ? { immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal } : {}),
+              ...(therapeuticArea === 'metabolic' ? { mechanismDifferentiation, weightLossEfficacy, routeOfAdministration, comorbidityBreadth, metabolicTreatmentApproach } : {}),
             }}
             onApplyNewInputs={handleSensitivityApply}
           />
@@ -1427,7 +1627,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Switch Therapeutic Area?</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-              Switching to <strong>{pendingAreaSwitch === 'neurology' ? 'Neurology / CNS' : 'Oncology'}</strong> will clear your current results. Your calculation history is still saved.
+              Switching to <strong>{pendingAreaSwitch === 'metabolic' ? 'Metabolic / Obesity' : pendingAreaSwitch === 'neurology' ? 'Neurology / CNS' : pendingAreaSwitch === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'}</strong> will clear your current results. Your calculation history is still saved.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -1461,6 +1661,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             combinationPotential, competitivePosition, dataQuality,
             regulatoryDesignations,
             ...(therapeuticArea === 'neurology' ? { bbbPenetration, diseaseProgression, biomarkerValidation } : {}),
+            ...(therapeuticArea === 'immunology' ? { immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal } : {}),
+            ...(therapeuticArea === 'metabolic' ? { mechanismDifferentiation, weightLossEfficacy, routeOfAdministration, comorbidityBreadth, metabolicTreatmentApproach } : {}),
           },
           results: result,
         } : undefined}

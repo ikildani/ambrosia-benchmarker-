@@ -42,6 +42,7 @@ export default function DealFilters({
     oncology: 'Oncology',
     neurology: 'Neurology / CNS',
     immunology: 'Immunology / Autoimmune',
+    metabolic: 'Metabolic / Obesity',
     other: 'Other',
   };
 

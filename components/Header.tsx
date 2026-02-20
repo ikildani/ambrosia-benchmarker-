@@ -150,7 +150,7 @@ export default function Header({
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-6 lg:gap-8">
             {navItems.map((item, idx) => (
               item.href.startsWith('#') || item.href.includes('#') ? (
                 <a
@@ -192,6 +192,9 @@ export default function Header({
                 {/* User Avatar Button */}
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  aria-label="User menu"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="true"
                   className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200"
                 >
                   <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarGradient(avatarGradientId).from} ${getAvatarGradient(avatarGradientId).to} flex items-center justify-center text-white text-sm font-semibold shadow-sm`}>
@@ -212,7 +215,7 @@ export default function Header({
 
                 {/* Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                  <div role="menu" aria-label="User actions" className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
                     {/* User Info Header */}
                     <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-3">
@@ -315,6 +318,7 @@ export default function Header({
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-3 -mr-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors touch-feedback rounded-xl"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
@@ -330,7 +334,7 @@ export default function Header({
         {/* Mobile Navigation - Full-screen overlay */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 top-16 sm:top-20 bg-white dark:bg-slate-900 z-50 animate-mobile-menu overflow-y-auto safe-bottom">
-            <nav className="flex flex-col p-4 gap-1">
+            <nav aria-label="Mobile navigation" className="flex flex-col p-4 gap-1">
               {navItems.map((item, idx) => {
                 const iconMap: Record<string, JSX.Element> = {
                   Calculator: (

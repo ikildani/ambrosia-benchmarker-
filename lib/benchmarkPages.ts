@@ -25,12 +25,13 @@ export interface BenchmarkPageData {
 function makeInput(overrides: Partial<CalculationInput>): CalculationInput {
   const therapeuticArea: TherapeuticArea = overrides.therapeuticArea ?? 'oncology';
   const isNeuro = therapeuticArea === 'neurology';
+  const isMetabolic = therapeuticArea === 'metabolic';
 
   return {
     therapeuticArea,
     phase: overrides.phase ?? 'phase2',
-    modality: overrides.modality ?? 'smallMolecule',
-    indication: overrides.indication ?? (isNeuro ? 'alzheimers' : 'lung_nsclc'),
+    modality: overrides.modality ?? (isMetabolic ? 'glp1Agonist' : 'smallMolecule'),
+    indication: overrides.indication ?? (isMetabolic ? 'obesity' : isNeuro ? 'alzheimers' : 'lung_nsclc'),
     territory: overrides.territory ?? 'global',
     biomarker: overrides.biomarker ?? 'unselected',
     lineOfTherapy: overrides.lineOfTherapy ?? '2L',
@@ -49,6 +50,15 @@ function makeInput(overrides: Partial<CalculationInput>): CalculationInput {
           bbbPenetration: overrides.bbbPenetration ?? 'promisingPreclinical',
           diseaseProgression: overrides.diseaseProgression ?? 'moderateProgressive',
           biomarkerValidation: overrides.biomarkerValidation ?? 'exploratory',
+        }
+      : {}),
+    ...(isMetabolic
+      ? {
+          mechanismDifferentiation: overrides.mechanismDifferentiation ?? 'incretinBased',
+          weightLossEfficacy: overrides.weightLossEfficacy ?? 'competitiveEfficacy',
+          routeOfAdministration: overrides.routeOfAdministration ?? 'injectable',
+          comorbidityBreadth: overrides.comorbidityBreadth ?? 'obesityPrimary',
+          metabolicTreatmentApproach: overrides.metabolicTreatmentApproach ?? 'chronicWeightMgmt',
         }
       : {}),
   };
@@ -806,6 +816,57 @@ function buildNeurologyOverviewPage(): BenchmarkPageData {
   };
 }
 
+function buildMetabolicOverviewPage(): BenchmarkPageData {
+  const obesity = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'glp1Agonist' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  const mash = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'smallMolecule' as Modality,
+    indication: 'nashMash' as Indication,
+  }));
+  const oralGlp1 = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'oralPeptide' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  return {
+    slug: 'metabolic-obesity-deal-benchmarks-2026',
+    title: 'Metabolic & Obesity Licensing Deal Benchmarks 2026 | GLP-1 & Beyond',
+    metaDescription: `Comprehensive 2026 metabolic and obesity licensing deal benchmarks. GLP-1 agonists, dual incretins, oral peptides, and MASH deal terms analyzed from 35+ R&D partnerships.`,
+    h1: 'Metabolic & Obesity Deal Benchmarks 2026',
+    heroStats: buildHeroStats(obesity),
+    contextParagraphs: [
+      `The metabolic/obesity therapeutic area has become the most commercially valuable segment in biopharma. Semaglutide (Wegovy/Ozempic) became the fastest drug to $20B annual revenue in pharma history, while tirzepatide (Mounjaro/Zepbound) demonstrated 22.5% weight loss — competitive with bariatric surgery.`,
+      `Obesity licensing deals in 2025 have reached unprecedented levels. The AstraZeneca/CSPC deal at $18.5B headline value and Pfizer/Metsera at $9.8B demonstrate the massive premiums pharma companies are willing to pay for differentiated metabolic assets. Oral formulations, dual/triple incretins, and muscle-sparing approaches command the highest deal values.`,
+      `GLP-1 obesity deals at Phase 2 typically command ${formatCurrency(obesity.terms.upfront.median)} upfront (range ${formatCurrency(obesity.terms.upfront.low)} - ${formatCurrency(obesity.terms.upfront.high)}), while oral peptide assets attract ${formatCurrency(oralGlp1.terms.upfront.median)} upfront reflecting the oral delivery premium. NASH/MASH assets following resmetirom's approval see ${formatCurrency(mash.terms.upfront.median)} upfront.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'metabolic', modality: 'glp1Agonist', indication: 'obesity' },
+    faqs: [
+      {
+        question: 'How much are GLP-1 obesity licensing deals worth in 2026?',
+        answer: `Phase 2 GLP-1 agonist deals for obesity typically have total deal values of ${formatCurrency(obesity.terms.totalDealValue.low)} - ${formatCurrency(obesity.terms.totalDealValue.high)}, with upfronts of ${formatCurrency(obesity.terms.upfront.median)}. Oral formulations command 20-30% premiums over injectable equivalents.`,
+      },
+      {
+        question: 'What royalty rates do metabolic deals command?',
+        answer: `Base royalties for metabolic deals range from ${obesity.tieredRoyalties.base.low}% to ${obesity.tieredRoyalties.base.high}%, tiering up to ${obesity.tieredRoyalties.highTier.high}% at peak sales. The enormous commercial potential of obesity drugs drives aggressive tiered royalty structures.`,
+      },
+      {
+        question: 'How do oral obesity drug deals compare to injectables?',
+        answer: `Oral metabolic drugs command significant premiums. Oral peptide deals average ${formatCurrency(oralGlp1.terms.totalDealValue.median)} total deal value vs ${formatCurrency(obesity.terms.totalDealValue.median)} for injectable GLP-1s. The oral convenience advantage drives patient preference, primary care adoption, and payer formulary access.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'neurology-cns-deal-benchmarks', title: 'Neurology & CNS Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
 // ── Build full list ───────────────────────────────────────────────────────────
 
 const BENCHMARK_PAGES: BenchmarkPageData[] = [
@@ -824,6 +885,7 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
   buildPhase3Page(),
   buildOncologyOverviewPage(),
   buildNeurologyOverviewPage(),
+  buildMetabolicOverviewPage(),
 ];
 
 // ── Public API ────────────────────────────────────────────────────────────────

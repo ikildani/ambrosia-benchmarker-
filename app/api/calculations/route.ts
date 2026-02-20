@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 interface CalculationRequest {
   session_id?: string;
@@ -61,13 +62,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user tier if user_id is provided
+    // SECURITY: Derive user_id from auth session, not from request body
+    const authUser = await getAuthenticatedUser(request);
+    const verifiedUserId = authUser?.id || null;
+
+    // Get user tier from verified user
     let userTier = 'free';
-    if (body.user_id) {
+    if (verifiedUserId) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('tier')
-        .eq('id', body.user_id)
+        .eq('id', verifiedUserId)
         .single();
 
       if (profile?.tier) {
@@ -77,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     // Store the calculation
     const calculationData = {
-      user_id: body.user_id || null,
+      user_id: verifiedUserId,
       session_id: body.session_id || null,
       anonymous_id: body.anonymous_id || null,
       therapeutic_area: body.therapeutic_area || 'oncology',
@@ -134,7 +139,7 @@ export async function POST(request: NextRequest) {
     const validSessionId = calculationData.session_id;
 
     const eventData = {
-      user_id: body.user_id || null,
+      user_id: verifiedUserId,
       session_id: validSessionId,
       anonymous_id: body.anonymous_id || null,
       event_type: 'calculation_completed',
@@ -188,18 +193,31 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('user_id');
+    const requestedUserId = searchParams.get('user_id');
     const anonymousId = searchParams.get('anonymous_id');
     const sessionId = searchParams.get('session_id');
     const countOnly = searchParams.get('count') === 'true';
     const monthOnly = searchParams.get('month') === 'true'; // Get count for current month only
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
 
-    if (!userId && !anonymousId) {
+    if (!requestedUserId && !anonymousId) {
       return NextResponse.json(
         { error: 'user_id or anonymous_id is required' },
         { status: 400 }
       );
+    }
+
+    // SECURITY: Verify authenticated user owns the requested data
+    let userId: string | null = null;
+    if (requestedUserId) {
+      const authUser = await getAuthenticatedUser(request);
+      if (!authUser || authUser.id !== requestedUserId) {
+        return NextResponse.json(
+          { error: 'Unauthorized: user_id does not match session' },
+          { status: 403 }
+        );
+      }
+      userId = authUser.id;
     }
 
     // If count only is requested, return just the count
@@ -297,7 +315,6 @@ export async function DELETE(request: NextRequest) {
     const supabase = createServiceClient();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const userId = searchParams.get('user_id');
 
     if (!id) {
       return NextResponse.json(
@@ -306,19 +323,21 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    if (!userId) {
+    // SECURITY: Verify authenticated user owns the calculation
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        { error: 'user_id is required for deletion' },
-        { status: 400 }
+        { error: 'Authentication required for deletion' },
+        { status: 401 }
       );
     }
 
-    // Delete only if the calculation belongs to this user
+    // Delete only if the calculation belongs to the authenticated user
     const { error } = await supabase
       .from('calculations')
       .delete()
       .eq('id', id)
-      .eq('user_id', userId);
+      .eq('user_id', authUser.id);
 
     if (error) {
       console.error('Calculation delete error:', error);

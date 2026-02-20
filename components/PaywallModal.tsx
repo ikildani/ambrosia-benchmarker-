@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useTracking } from './TrackingProvider';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
   const { promoId, promoStatus, promoDiscount } = usePromoCode(initialPromo);
   const { user } = useAuth();
   const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -106,9 +109,11 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
       />
 
       <div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="paywall-modal-title"
+        tabIndex={-1}
         className="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
       >
         {/* Header */}

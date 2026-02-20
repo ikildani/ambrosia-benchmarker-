@@ -17,6 +17,7 @@ import { calculateRiskScore } from '@/lib/calculations';
 import { findComparableDeals } from '@/lib/comparableDeals';
 import Results from './Results';
 import { PartnerMatchForPDF } from './PartnerMatchesContainer';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface HistoryDetailModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface HistoryDetailModalProps {
   tier: 'free' | 'pro';
   onReuse?: (item: CalculationHistoryItem) => void;
   onUpgrade?: () => void;
+  userEmail?: string;
 }
 
 export default function HistoryDetailModal({
@@ -33,7 +35,8 @@ export default function HistoryDetailModal({
   item,
   tier,
   onReuse,
-  onUpgrade
+  onUpgrade,
+  userEmail
 }: HistoryDetailModalProps) {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -41,6 +44,7 @@ export default function HistoryDetailModal({
   const [fullInputs, setFullInputs] = useState<CalculationInput | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
   const isPro = tier === 'pro';
 
   // Simple close handler
@@ -111,18 +115,7 @@ export default function HistoryDetailModal({
     }
   }, [item, isOpen]);
 
-  // Close on ESC
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
-    };
-    if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-      // Focus the close button when modal opens
-      setTimeout(() => closeButtonRef.current?.focus(), 100);
-    }
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [isOpen, handleClose]);
+
 
   // Prevent body scroll when open
   useEffect(() => {
@@ -134,35 +127,6 @@ export default function HistoryDetailModal({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Focus trap
-  useEffect(() => {
-    if (!isOpen || !modalRef.current) return;
-
-    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
-
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement?.focus();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement?.focus();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleTab);
-    return () => window.removeEventListener('keydown', handleTab);
-  }, [isOpen]);
 
   const handleReuse = useCallback(() => {
     if (item && onReuse) {
@@ -170,28 +134,64 @@ export default function HistoryDetailModal({
     }
   }, [item, onReuse]);
 
-  const handleDownloadPDF = useCallback(() => {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const handleDownloadPDF = useCallback(async () => {
     if (result && fullInputs) {
-      const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
-      const riskScore = calculateRiskScore(fullInputs);
-      const comparableDeals = findComparableDeals({
-        therapeuticArea: fullInputs.therapeuticArea,
-        modality: fullInputs.modality,
-        indication: fullInputs.indication,
-        phase: fullInputs.phase,
-      }, 6);
-      const pdfData: PDFReportData = {
-        result,
-        inputs: fullInputs,
-        sensitivityData,
-        riskScore,
-        partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
-        comparableDeals,
-        historyId: item?.id,
-      };
-      generatePDFReport(pdfData);
+      setIsGeneratingPDF(true);
+      try {
+        const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
+        const riskScore = calculateRiskScore(fullInputs);
+        const comparableDeals = findComparableDeals({
+          therapeuticArea: fullInputs.therapeuticArea,
+          modality: fullInputs.modality,
+          indication: fullInputs.indication,
+          phase: fullInputs.phase,
+        }, 6);
+
+        // Fetch deal memo with auth
+        let memoData;
+        if (userEmail) {
+          try {
+            const response = await fetch('/api/deal-memo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userEmail,
+                inputs: fullInputs,
+                results: result,
+                labels: {
+                  phase: item?.labels?.phase || '',
+                  modality: item?.labels?.modality || '',
+                  indication: item?.labels?.indication || '',
+                },
+              }),
+            });
+            if (response.ok) {
+              const data = await response.json();
+              memoData = data.memo;
+            }
+          } catch {
+            // Proceed without memo
+          }
+        }
+
+        const pdfData: PDFReportData = {
+          result,
+          inputs: fullInputs,
+          sensitivityData,
+          riskScore,
+          partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
+          memoData,
+          comparableDeals,
+          historyId: item?.id,
+        };
+        generatePDFReport(pdfData);
+      } finally {
+        setIsGeneratingPDF(false);
+      }
     }
-  }, [result, item, partnerMatches, fullInputs]);
+  }, [result, item, partnerMatches, fullInputs, userEmail]);
 
   if (!isOpen || !item) return null;
 
@@ -217,6 +217,7 @@ export default function HistoryDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        tabIndex={-1}
       >
         {/* Header */}
         <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-6 overflow-hidden">
@@ -337,17 +338,27 @@ export default function HistoryDetailModal({
           {isPro && result && (
             <button
               onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
               className="flex-1 inline-flex items-center justify-center gap-2
                          px-4 py-3.5 sm:py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600
                          text-slate-700 dark:text-slate-200 font-semibold rounded-xl
                          hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500
                          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2
-                         active:scale-[0.98] touch-feedback"
+                         active:scale-[0.98] touch-feedback disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="truncate">Download PDF</span>
+              {isGeneratingPDF ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-slate-300 border-t-teal-500 rounded-full animate-spin flex-shrink-0" />
+                  <span className="truncate">Preparing Report...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="truncate">Download PDF</span>
+                </>
+              )}
             </button>
           )}
 

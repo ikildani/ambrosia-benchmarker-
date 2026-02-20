@@ -1,4 +1,5 @@
 // All CSS for the PDF report — print rules, page styling, typography
+// Designed for consulting-quality (Lazard/McKinsey) output
 
 export function getReportStyles(): string {
   return `
@@ -14,13 +15,14 @@ export function getReportStyles(): string {
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #1e293b;
       background: white;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      font-size: 13px;
-      line-height: 1.5;
+      font-size: 11px;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
     }
 
     .report-page {
@@ -30,7 +32,7 @@ export function getReportStyles(): string {
       overflow: hidden;
       page-break-after: always;
       page-break-inside: avoid;
-      padding: 40px 50px 80px 50px;
+      padding: 36px 44px 64px 44px;
       position: relative;
       background: white;
     }
@@ -44,29 +46,33 @@ export function getReportStyles(): string {
       padding: 0;
     }
 
-    /* Typography */
+    /* ========================================
+       TYPOGRAPHY — Clean hierarchy
+       ======================================== */
+
     .section-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #64748b;
+      font-size: 9px;
+      font-weight: 700;
+      color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 14px;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
     }
 
     .section-title-lg {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
       color: #1a1e42;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
     }
 
-    .text-sm { font-size: 11px; }
-    .text-xs { font-size: 10px; }
-    .text-xxs { font-size: 9px; }
-    .text-lg { font-size: 16px; }
-    .text-xl { font-size: 20px; }
-    .text-2xl { font-size: 24px; }
+    .text-sm { font-size: 10px; }
+    .text-xs { font-size: 9px; }
+    .text-xxs { font-size: 8px; }
+    .text-lg { font-size: 15px; }
+    .text-xl { font-size: 18px; }
+    .text-2xl { font-size: 22px; }
 
     .font-bold { font-weight: 700; }
     .font-semibold { font-weight: 600; }
@@ -80,146 +86,162 @@ export function getReportStyles(): string {
     .text-amber { color: #d97706; }
     .text-rose { color: #e11d48; }
 
-    /* Layout helpers */
+    /* ========================================
+       LAYOUT
+       ======================================== */
+
     .flex { display: flex; }
     .flex-col { flex-direction: column; }
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
     .gap-2 { gap: 8px; }
-    .gap-3 { gap: 12px; }
-    .gap-4 { gap: 16px; }
-    .gap-6 { gap: 24px; }
+    .gap-3 { gap: 10px; }
+    .gap-4 { gap: 14px; }
+    .gap-6 { gap: 20px; }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .grid-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .grid-4 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
-    /* Cards */
+    /* ========================================
+       CARDS — Refined, professional
+       ======================================== */
+
     .card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 14px;
     }
 
     .card-sm {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 12px;
+      border-radius: 5px;
+      padding: 10px 12px;
     }
 
     .card-highlight {
-      background: linear-gradient(135deg, #f0fdfa, #ecfeff);
-      border: 1px solid #99f6e4;
-      border-radius: 8px;
-      padding: 16px;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+      border: 1px solid #a7f3d0;
+      border-radius: 6px;
+      padding: 14px;
     }
 
     .card-amber {
-      background: #fffbeb;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
       border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 14px;
     }
 
     .card-navy {
-      background: #1a1e42;
+      background: linear-gradient(135deg, #1a1e42 0%, #1e2556 100%);
       border: none;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 14px;
       color: #ffffff;
     }
 
-    /* KPI cards */
+    /* ========================================
+       KPI CARDS — Dashboard metrics
+       ======================================== */
+
     .kpi-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 18px;
+      border-radius: 8px;
+      padding: 14px 12px;
       text-align: center;
     }
 
     .kpi-value {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #0d9488;
-      line-height: 1.2;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
     }
 
     .kpi-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: #64748b;
+      font-size: 8px;
+      font-weight: 700;
+      color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       margin-top: 4px;
     }
 
     .kpi-sub {
-      font-size: 10px;
+      font-size: 9px;
       color: #94a3b8;
       margin-top: 2px;
     }
 
-    /* Tables */
+    /* ========================================
+       TABLES — Clean, professional
+       ======================================== */
+
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
+      font-size: 10px;
     }
 
     .data-table th {
       background: #f8fafc;
-      border-bottom: 2px solid #e2e8f0;
-      padding: 8px 12px;
+      border-bottom: 2px solid #cbd5e1;
+      padding: 7px 10px;
       text-align: left;
-      font-weight: 600;
+      font-weight: 700;
       color: #475569;
-      font-size: 10px;
+      font-size: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
     }
 
     .data-table td {
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-bottom: 1px solid #f1f5f9;
       color: #334155;
     }
 
     .data-table tr:nth-child(even) td {
-      background: #f8fafc;
+      background: #fafbfc;
     }
 
     .data-table .value-cell {
-      font-weight: 600;
+      font-weight: 700;
       color: #0d9488;
       text-align: right;
     }
 
-    /* Badges */
+    /* ========================================
+       BADGES — Compact, informational
+       ======================================== */
+
     .badge {
       display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 9px;
-      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 8px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
     }
 
     .badge-teal {
@@ -229,22 +251,22 @@ export function getReportStyles(): string {
 
     .badge-amber {
       background: #fef3c7;
-      color: #d97706;
+      color: #b45309;
     }
 
     .badge-rose {
       background: #ffe4e6;
-      color: #e11d48;
+      color: #be123c;
     }
 
     .badge-blue {
       background: #dbeafe;
-      color: #2563eb;
+      color: #1d4ed8;
     }
 
     .badge-gray {
       background: #f1f5f9;
-      color: #64748b;
+      color: #475569;
     }
 
     .badge-navy {
@@ -253,14 +275,17 @@ export function getReportStyles(): string {
     }
 
     /* Impact level badges */
-    .impact-very-high { background: #fee2e2; color: #dc2626; }
-    .impact-high { background: #fef3c7; color: #d97706; }
-    .impact-medium { background: #dbeafe; color: #2563eb; }
-    .impact-low { background: #dcfce7; color: #16a34a; }
+    .impact-very-high { background: #fee2e2; color: #b91c1c; }
+    .impact-high { background: #fef3c7; color: #b45309; }
+    .impact-medium { background: #dbeafe; color: #1d4ed8; }
+    .impact-low { background: #dcfce7; color: #15803d; }
 
-    /* Score bars */
+    /* ========================================
+       SCORE BARS
+       ======================================== */
+
     .score-bar {
-      height: 6px;
+      height: 5px;
       background: #e2e8f0;
       border-radius: 3px;
       overflow: hidden;
@@ -272,56 +297,70 @@ export function getReportStyles(): string {
       background: linear-gradient(90deg, #0d9488, #06b6d4);
     }
 
-    /* Callout boxes */
+    /* ========================================
+       CALLOUT BOXES
+       ======================================== */
+
     .callout {
       background: #f0fdfa;
       border-left: 3px solid #0d9488;
-      padding: 12px 16px;
-      border-radius: 0 6px 6px 0;
-      font-size: 11px;
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      font-size: 10px;
       color: #134e4a;
+      line-height: 1.6;
     }
 
     .callout-amber {
       background: #fffbeb;
       border-left: 3px solid #f59e0b;
-      padding: 12px 16px;
-      border-radius: 0 6px 6px 0;
-      font-size: 11px;
-      color: #92400e;
+      padding: 10px 14px;
+      border-radius: 0 4px 4px 0;
+      font-size: 10px;
+      color: #78350f;
+      line-height: 1.6;
     }
 
-    /* Bullet lists */
+    /* ========================================
+       BULLET LISTS
+       ======================================== */
+
     .bullet-list {
-      padding-left: 16px;
-      font-size: 11px;
+      padding-left: 14px;
+      font-size: 10px;
       color: #334155;
     }
 
     .bullet-list li {
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       line-height: 1.5;
     }
 
-    /* Dividers */
+    /* ========================================
+       DIVIDERS
+       ======================================== */
+
     .divider {
       border: none;
       border-top: 1px solid #e2e8f0;
-      margin: 16px 0;
+      margin: 12px 0;
     }
 
     .divider-thick {
       border: none;
       border-top: 2px solid #e2e8f0;
-      margin: 20px 0;
+      margin: 16px 0;
     }
 
-    /* SVG chart containers */
+    /* ========================================
+       CHART CONTAINERS
+       ======================================== */
+
     .chart-container {
       width: 100%;
       display: flex;
       justify-content: center;
-      margin: 12px 0;
+      margin: 8px 0;
     }
 
     .chart-container svg {
@@ -329,7 +368,10 @@ export function getReportStyles(): string {
       height: auto;
     }
 
-    /* AI badge */
+    /* ========================================
+       AI BADGE
+       ======================================== */
+
     .ai-badge {
       display: inline-flex;
       align-items: center;
@@ -337,41 +379,46 @@ export function getReportStyles(): string {
       padding: 3px 10px;
       background: linear-gradient(135deg, #1a1e42, #312e81);
       color: #c4b5fd;
-      border-radius: 12px;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+      border-radius: 3px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
-    /* Disclaimer */
+    /* ========================================
+       DISCLAIMER
+       ======================================== */
+
     .disclaimer-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-left: 3px solid #94a3b8;
-      border-radius: 0 6px 6px 0;
-      padding: 16px 20px;
-      font-size: 9px;
+      border-radius: 0 4px 4px 0;
+      padding: 14px 18px;
+      font-size: 8px;
       color: #64748b;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
-    /* Print-specific */
+    /* ========================================
+       PRINT & SCREEN
+       ======================================== */
+
     @media print {
       body { background: white; }
       .report-page { box-shadow: none; }
       .no-print { display: none !important; }
     }
 
-    /* Screen preview */
     @media screen {
       body {
-        background: #e2e8f0;
+        background: #94a3b8;
         padding: 20px 0;
       }
       .report-page {
         margin: 20px auto;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
       }
     }
   `;

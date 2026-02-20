@@ -16,6 +16,7 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
     oncology: `The oncology licensing market continues to be the most active therapeutic area for pharma BD, driven by precision medicine advances, ADC platform wars, and the emergence of radiopharmaceuticals. ${phase} ${modality} assets in ${indication} are attracting premium valuations given the unmet need and growing biosimilar competition for legacy therapies.`,
     neurology: `Neurology deal-making has entered a renaissance period, with record-breaking acquisitions in CNS driven by breakthrough modalities that overcome the blood-brain barrier. ${phase} ${modality} assets represent a particularly compelling profile given the historic difficulty of CNS drug development and the massive unmet need across neurological disorders.`,
     immunology: `Immunology and autoimmune disease has become the fastest-growing therapeutic area for licensing deals, fueled by the next generation of targeted therapies that offer disease modification over symptom management. ${phase} ${modality} assets in ${indication} align with industry priorities around more selective, safer mechanisms.`,
+    metabolic: `Metabolic and obesity deal-making has exploded into one of pharma's most competitive arenas, with GLP-1 agonists, dual/triple incretins, and next-generation oral peptides commanding record-breaking valuations. ${phase} ${modality} assets in ${indication} are positioned in a market where differentiation beyond injectable semaglutide/tirzepatide — through oral delivery, muscle-sparing profiles, or MASH co-targeting — drives transformative deal premiums.`,
   };
 
   const context = taContext[inputs.therapeuticArea] || `${phase} ${modality} assets in ${indication} are positioned within a dynamic licensing landscape. Current market conditions favor well-differentiated assets with strong clinical data packages.`;
@@ -25,6 +26,7 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
     oncology: { upfront: '15-25%', dev: '20-30%', reg: '15-25%', comm: '25-40%' },
     neurology: { upfront: '20-35%', dev: '15-25%', reg: '15-20%', comm: '25-35%' },
     immunology: { upfront: '15-30%', dev: '20-30%', reg: '10-20%', comm: '25-40%' },
+    metabolic: { upfront: '20-35%', dev: '15-25%', reg: '10-20%', comm: '30-45%' },
   };
 
   const taComp = milestoneComps[inputs.therapeuticArea] || milestoneComps.oncology;
@@ -43,19 +45,19 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
     <div class="report-page">
       ${pageHeader(9, meta.pageCount, 'Deal Valuation Report')}
 
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: ${taColors.primary};"></div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: ${taColors.primary};"></div>
         <div class="section-title-lg" style="margin-bottom: 0;">${escapeHtml(taColors.label)} Intelligence</div>
       </div>
 
       <!-- Market Context -->
-      <div class="card" style="border-left: 3px solid ${taColors.primary}; margin-bottom: 16px;">
-        <div style="font-size: 10px; font-weight: 600; color: ${taColors.primary}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Market Context</div>
-        <div style="font-size: 11px; color: ${COLORS.gray700}; line-height: 1.7;">${context}</div>
+      <div class="card" style="border-left: 3px solid ${taColors.primary}; margin-bottom: 14px;">
+        <div style="font-size: 8px; font-weight: 700; color: ${taColors.primary}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;">Market Context</div>
+        <div style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">${context}</div>
       </div>
 
       <!-- Milestone Allocation Comparison -->
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 14px;">
         <div class="section-title">Milestone Allocation Benchmarks</div>
         <div class="card" style="padding: 0; overflow: hidden;">
           <table class="data-table">
@@ -70,22 +72,22 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
               <tr>
                 <td style="font-weight: 500;">Upfront</td>
                 <td style="text-align: center;">${taComp.upfront}</td>
-                <td style="text-align: center; font-weight: 600; color: ${COLORS.teal};">${userAlloc.upfront}</td>
+                <td style="text-align: center; font-weight: 700; color: ${COLORS.teal};">${userAlloc.upfront}</td>
               </tr>
               <tr>
                 <td style="font-weight: 500;">Development Milestones</td>
                 <td style="text-align: center;">${taComp.dev}</td>
-                <td style="text-align: center; font-weight: 600; color: ${COLORS.teal};">${userAlloc.dev}</td>
+                <td style="text-align: center; font-weight: 700; color: ${COLORS.teal};">${userAlloc.dev}</td>
               </tr>
               <tr>
                 <td style="font-weight: 500;">Regulatory Milestones</td>
                 <td style="text-align: center;">${taComp.reg}</td>
-                <td style="text-align: center; font-weight: 600; color: ${COLORS.teal};">${userAlloc.reg}</td>
+                <td style="text-align: center; font-weight: 700; color: ${COLORS.teal};">${userAlloc.reg}</td>
               </tr>
               <tr>
                 <td style="font-weight: 500;">Commercial Milestones</td>
                 <td style="text-align: center;">${taComp.comm}</td>
-                <td style="text-align: center; font-weight: 600; color: ${COLORS.teal};">${userAlloc.comm}</td>
+                <td style="text-align: center; font-weight: 700; color: ${COLORS.teal};">${userAlloc.comm}</td>
               </tr>
             </tbody>
           </table>
@@ -94,9 +96,9 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
 
       <!-- Key Considerations -->
       ${insights.length > 0 ? `
-      <div>
+      <div style="margin-bottom: 10px;">
         <div class="section-title">Key Considerations</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           ${insights.slice(0, 4).map(insight => {
             const impactCls: Record<string, string> = {
               'VERY HIGH': 'impact-very-high',
@@ -106,11 +108,11 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
             };
             return `
             <div class="card-sm">
-              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
-                <span style="font-size: 10px; font-weight: 600; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 3px;">
+                <span style="font-size: 9px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
                 <span class="badge ${impactCls[insight.impactLevel] || 'badge-gray'}">${insight.impactLevel}</span>
               </div>
-              <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
+              <div style="font-size: 8px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
             </div>
             `;
           }).join('')}
@@ -120,13 +122,18 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
 
       <!-- Special callouts -->
       ${inputs.therapeuticArea === 'neurology' ? `
-      <div class="callout" style="margin-top: 12px;">
+      <div class="callout">
         <strong>CNS Note:</strong> Blood-brain barrier penetration capabilities, disease modification potential, and biomarker validation status are critical value drivers in neurology licensing. Assets with demonstrated BBB engagement command significant premiums.
       </div>
       ` : ''}
       ${inputs.therapeuticArea === 'immunology' ? `
-      <div class="callout" style="margin-top: 12px;">
-        <strong>Autoimmune Note:</strong> The shift from chronic symptom management to immune reset/disease modification is redefining deal valuations. Assets offering curative-intent mechanisms (e.g., in vivo CAR-T, tolerizing therapies) attract transformative premiums.
+      <div class="callout">
+        <strong>Autoimmune Note:</strong> The shift from chronic symptom management to immune reset/disease modification is redefining deal valuations. Assets offering curative-intent mechanisms attract transformative premiums.
+      </div>
+      ` : ''}
+      ${inputs.therapeuticArea === 'metabolic' ? `
+      <div class="callout">
+        <strong>Metabolic/Obesity Note:</strong> The obesity market is projected to exceed $100B by 2030. Differentiation is key — oral formulations, muscle-sparing profiles, and multi-receptor agonism (GLP-1/GIP/glucagon) command the highest premiums. MASH/NASH co-targeting adds significant optionality value.
       </div>
       ` : ''}
 

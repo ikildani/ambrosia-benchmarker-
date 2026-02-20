@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalculationResult } from '@/lib/calculations';
 import { NegotiationPlaybook, PlaybookSection } from '@/lib/ai/playbook-generator';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface NegotiationPlaybookModalProps {
   isOpen: boolean;
@@ -116,6 +117,8 @@ export default function NegotiationPlaybookModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
 
   const generatePlaybook = useCallback(async () => {
     setLoading(true);
@@ -251,9 +254,11 @@ export default function NegotiationPlaybookModal({
         aria-hidden="true"
       />
       <div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="playbook-modal-title"
+        tabIndex={-1}
         className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8 overflow-hidden animate-fade-in print:shadow-none print:my-0"
       >
         {/* Header */}

@@ -9,7 +9,7 @@ export interface ComparableDeal {
   relevance: string;
   modalities?: string[];
   indications?: string[];
-  therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'both';
+  therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'both';
 }
 
 const COMPARABLE_DEALS: ComparableDeal[] = [
@@ -43,6 +43,17 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Harbour BioMed', licensee: 'AstraZeneca', value: '$4.575B', year: 2024, relevance: 'Bispecific platform (autoimmune)', modalities: ['bispecific'], therapeuticArea: 'immunology' },
   { licensor: 'Earendil Labs', licensee: 'Sanofi', value: '$2.56B', year: 2025, relevance: 'AI-designed bispecifics (IBD)', modalities: ['bispecific'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
   { licensor: 'RemeGen', licensee: 'Vor Bio', value: '$4B+', year: 2024, relevance: 'BAFF/APRIL (MG, SLE, RA)', modalities: ['dualAntagonist'], indications: ['myastheniaGravis', 'sle_lupus'], therapeuticArea: 'immunology' },
+  // Metabolic / Obesity
+  { licensor: 'Carmot Therapeutics', licensee: 'Roche', value: '$2.7B', year: 2023, relevance: 'GLP-1R/GCGR/FGF21 obesity pipeline acquisition', modalities: ['glp1Agonist', 'tripleIncretin'], indications: ['obesity', 'type2Diabetes'], therapeuticArea: 'metabolic' },
+  { licensor: 'Inversago Pharma', licensee: 'Novo Nordisk', value: '$1.075B', year: 2023, relevance: 'CB1 inverse agonist for obesity', modalities: ['smallMolecule'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'Scholar Rock', licensee: 'Eli Lilly', value: '$1.3B', year: 2024, relevance: 'Anti-activin muscle-sparing obesity apamistamab', modalities: ['antiActivin'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'Akero Therapeutics', licensee: 'Novo Nordisk', value: '$1.4B', year: 2024, relevance: 'FGF21 analog efruxifermin for MASH', modalities: ['peptide'], indications: ['nashMash'], therapeuticArea: 'metabolic' },
+  { licensor: 'Terns Pharmaceuticals', licensee: 'Roche', value: '$2.1B', year: 2024, relevance: 'GLP-1R agonist for obesity and MASH', modalities: ['glp1Agonist'], indications: ['obesity', 'nashMash'], therapeuticArea: 'metabolic' },
+  { licensor: 'Zealand Pharma', licensee: 'Roche', value: '$5.3B', year: 2025, relevance: 'Amylin analog petrelintide for obesity partnership', modalities: ['amylinAnalog'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'Metsera', licensee: 'Pfizer', value: '$9.8B', year: 2025, relevance: 'Oral GLP-1 obesity pipeline acquisition', modalities: ['oralPeptide'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'CSPC Pharmaceutical', licensee: 'AstraZeneca', value: '$18.5B', year: 2025, relevance: 'Largest metabolic licensing deal - oral GLP-1/GIP dual agonist', modalities: ['dualIncretin', 'oralPeptide'], indications: ['obesity', 'type2Diabetes'], therapeuticArea: 'metabolic' },
+  { licensor: 'Madrigal Pharmaceuticals', licensee: 'N/A (standalone)', value: '$7B+ market cap', year: 2024, relevance: 'First approved MASH drug (resmetirom/Rezdiffra)', modalities: ['smallMolecule'], indications: ['nashMash'], therapeuticArea: 'metabolic' },
+  { licensor: 'Gubra', licensee: 'AbbVie', value: '$2.2B', year: 2025, relevance: 'GLP-1/amylin dual agonist for obesity', modalities: ['dualIncretin', 'amylinAnalog'], indications: ['obesity'], therapeuticArea: 'metabolic' },
 ];
 
 // Extended interface for web UI component

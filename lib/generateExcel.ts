@@ -112,7 +112,7 @@ export async function generateExcelReport(
   addSectionHeader(ws1, r, 'ASSET PROFILE', 2);
   r++;
   const profileRows: [string, string][] = [
-    ['Therapeutic Area', therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'],
+    ['Therapeutic Area', therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : 'Oncology'],
     ['Development Phase', labels.phase],
     ['Modality', labels.modality],
     ['Indication', labels.indication],

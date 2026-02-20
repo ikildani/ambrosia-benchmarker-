@@ -1,7 +1,7 @@
 import benchmarks from '@/data/benchmarks.json';
 
 // Therapeutic area type
-export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology';
+export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic';
 
 // Phase types
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
@@ -17,7 +17,11 @@ export type Modality =
   | 'oligonucleotide'
   | 'carT_autoimmune' | 'inVivoCarT' | 'carTreg'
   | 'fcrnAntagonist' | 'complementInhibitor' | 'jakInhibitor'
-  | 's1pModulator' | 'oralIntegrin' | 'dualAntagonist' | 'tl1aInhibitor';
+  | 's1pModulator' | 'oralIntegrin' | 'dualAntagonist' | 'tl1aInhibitor'
+  // Metabolic-specific modalities
+  | 'glp1Agonist' | 'dualIncretin' | 'tripleIncretin'
+  | 'sglt2Inhibitor' | 'amylinAnalog' | 'oralPeptide'
+  | 'antiActivin' | 'microbiomeBased';
 
 // Indication types
 export type SolidTumorIndication =
@@ -47,7 +51,13 @@ export type ImmunologyIndication =
   | 'pnh' | 'cidp'
   | 'rareAutoimmune';
 
-export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication;
+export type MetabolicIndication =
+  | 'obesity' | 'type2Diabetes' | 'nashMash'
+  | 'metabolicSyndrome' | 'lipodystrophy'
+  | 'glycogenStorage' | 'pku'
+  | 'rareMetabolic';
+
+export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication;
 
 // Territory types (9 options)
 export type Territory =
@@ -72,6 +82,13 @@ export type ImmuneResetPotential = 'curativeIntent' | 'durableRemission' | 'chro
 export type TargetSpecificity = 'antigenSpecific' | 'pathwayTargeted' | 'broadImmunosuppression';
 export type DiseaseSeverity = 'mildModerate' | 'moderateSevere' | 'severe' | 'refractory';
 export type ImmunologyTreatmentGoal = 'remissionInduction' | 'maintenance' | 'flareControl';
+
+// Metabolic-specific types
+export type MechanismDifferentiation = 'incretinBased' | 'nonIncretin' | 'combinationMechanism';
+export type WeightLossEfficacy = 'superiorEfficacy' | 'competitiveEfficacy' | 'modestEfficacy';
+export type RouteOfAdministration = 'oral' | 'injectable' | 'implantable';
+export type ComorbidityBreadth = 'cardiometabolicBenefit' | 'obesityPrimary' | 'organProtective';
+export type MetabolicTreatmentApproach = 'chronicWeightMgmt' | 'glycemicControl' | 'organProtective' | 'metabolicReset';
 
 export interface RegulatoryDesignations {
   breakthrough: boolean;
@@ -123,6 +140,12 @@ export interface CalculationInput {
   targetSpecificity?: TargetSpecificity;
   diseaseSeverity?: DiseaseSeverity;
   treatmentGoal?: ImmunologyTreatmentGoal;
+  // Metabolic-specific optional fields
+  mechanismDifferentiation?: MechanismDifferentiation;
+  weightLossEfficacy?: WeightLossEfficacy;
+  routeOfAdministration?: RouteOfAdministration;
+  comorbidityBreadth?: ComorbidityBreadth;
+  metabolicTreatmentApproach?: MetabolicTreatmentApproach;
 }
 
 // Drill-down data for expanded metric views
@@ -171,7 +194,7 @@ export interface CalculationResult {
 }
 
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' {
+function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' {
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
@@ -195,9 +218,16 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'pnh', 'cidp',
     'rareAutoimmune'
   ];
+  const metabolicIndications: MetabolicIndication[] = [
+    'obesity', 'type2Diabetes', 'nashMash',
+    'metabolicSyndrome', 'lipodystrophy',
+    'glycogenStorage', 'pku',
+    'rareMetabolic'
+  ];
   if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
   if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
   if (immunologyIndications.includes(indication as ImmunologyIndication)) return 'immunology';
+  if (metabolicIndications.includes(indication as MetabolicIndication)) return 'metabolic';
   return 'hematologic';
 }
 
@@ -244,6 +274,27 @@ function getNegotiationInsight(input: CalculationInput): string {
   const insights = benchmarks.marketContext.negotiationInsights;
   const isNeurology = input.therapeuticArea === 'neurology';
   const isImmunology = input.therapeuticArea === 'immunology';
+  const isMetabolic = input.therapeuticArea === 'metabolic';
+
+  // For metabolic, check metabolic-specific insights first
+  if (isMetabolic) {
+    const metModalityInsights = (insights as Record<string, Record<string, string>>).metabolicModality;
+    if (metModalityInsights?.[input.modality]) {
+      return metModalityInsights[input.modality];
+    }
+    const metIndicationInsights = (insights as Record<string, Record<string, string>>).metabolicIndication;
+    if (metIndicationInsights?.[input.indication]) {
+      return metIndicationInsights[input.indication];
+    }
+    const mechInsights = (insights as Record<string, Record<string, string>>).mechanismDifferentiation;
+    if (input.mechanismDifferentiation && mechInsights?.[input.mechanismDifferentiation]) {
+      return mechInsights[input.mechanismDifferentiation];
+    }
+    const routeInsights = (insights as Record<string, Record<string, string>>).routeOfAdministration;
+    if (input.routeOfAdministration && routeInsights?.[input.routeOfAdministration]) {
+      return routeInsights[input.routeOfAdministration];
+    }
+  }
 
   // For immunology, check immunology-specific insights first
   if (isImmunology) {
@@ -291,7 +342,7 @@ function getNegotiationInsight(input: CalculationInput): string {
 
   // Line of therapy insights (oncology only)
   const lotInsights = insights.lineOfTherapy as Record<string, string>;
-  if (!isNeurology && !isImmunology && lotInsights[input.lineOfTherapy]) {
+  if (!isNeurology && !isImmunology && !isMetabolic && lotInsights[input.lineOfTherapy]) {
     return lotInsights[input.lineOfTherapy];
   }
 
@@ -324,14 +375,19 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const modifiers: { name: string; multiplier: number; context?: string }[] = [];
   const isNeurology = input.therapeuticArea === 'neurology';
   const isImmunology = input.therapeuticArea === 'immunology';
+  const isMetabolic = input.therapeuticArea === 'metabolic';
 
-  // Get phase baselines (immunology vs neurology vs oncology)
-  const phaseBaseline = isImmunology
+  // Get phase baselines (metabolic vs immunology vs neurology vs oncology)
+  const phaseBaseline = isMetabolic
+    ? ((benchmarks as any).metabolicPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    : isImmunology
     ? ((benchmarks as any).immunologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
     : isNeurology
     ? (benchmarks.neurologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
     : benchmarks.phaseBaselines[input.phase];
-  const phaseConfig = isImmunology
+  const phaseConfig = isMetabolic
+    ? ((benchmarks as any).metabolicPhaseConfig as typeof benchmarks.phaseConfig)
+    : isImmunology
     ? ((benchmarks as any).immunologyPhaseConfig as typeof benchmarks.phaseConfig)
     : isNeurology
     ? (benchmarks.neurologyPhaseConfig as typeof benchmarks.phaseConfig)
@@ -371,6 +427,15 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     lotMultiplier = tgData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: tgData?.label ?? tgKey, multiplier: lotMultiplier, context: tgData?.context });
+    }
+  } else if (isMetabolic) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mc = benchmarks.multiplierConfig as any;
+    const mtaKey = input.metabolicTreatmentApproach || 'chronicWeightMgmt';
+    const mtaData = mc.metabolicTreatmentApproach?.[mtaKey] as { multiplier: number; label: string; context?: string } | undefined;
+    lotMultiplier = mtaData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: mtaData?.label ?? mtaKey, multiplier: lotMultiplier, context: mtaData?.context });
     }
   } else if (isNeurology) {
     const taData = (benchmarks.multiplierConfig.treatmentApproach as Record<string, { multiplier: number; label: string; context?: string }>)[input.treatmentApproach];
@@ -428,9 +493,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   }
   regulatoryBonus = Math.min(regulatoryBonus, regConfig.maxBonus);
 
-  // Look up modality × indication interaction bonus (neurology and immunology)
+  // Look up modality × indication interaction bonus (neurology, immunology, metabolic)
   let interactionBonus = 0;
-  if (isNeurology || isImmunology) {
+  if (isNeurology || isImmunology || isMetabolic) {
     const interactionTerms = (benchmarks as any).interactionTerms || {};
     const key = `${input.modality}+${input.indication}`;
     if (interactionTerms[key]) {
@@ -503,13 +568,52 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     }
   }
 
+  // Get metabolic-specific multipliers
+  let mechDiffMultiplier = 1.0;
+  let weightLossMultiplier = 1.0;
+  let routeMultiplier = 1.0;
+  let comorbidityMultiplier = 1.0;
+  if (isMetabolic) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mc = benchmarks.multiplierConfig as any;
+
+    const mdKey = input.mechanismDifferentiation || 'incretinBased';
+    const mdData = mc.mechanismDifferentiation?.[mdKey] as { multiplier: number; label: string; context?: string } | undefined;
+    mechDiffMultiplier = mdData?.multiplier ?? 1.0;
+    if (mechDiffMultiplier !== 1.0) {
+      modifiers.push({ name: mdData?.label ?? mdKey, multiplier: mechDiffMultiplier, context: mdData?.context });
+    }
+
+    const wlKey = input.weightLossEfficacy || 'competitiveEfficacy';
+    const wlData = mc.weightLossEfficacy?.[wlKey] as { multiplier: number; label: string; context?: string } | undefined;
+    weightLossMultiplier = wlData?.multiplier ?? 1.0;
+    if (weightLossMultiplier !== 1.0) {
+      modifiers.push({ name: wlData?.label ?? wlKey, multiplier: weightLossMultiplier, context: wlData?.context });
+    }
+
+    const roaKey = input.routeOfAdministration || 'injectable';
+    const roaData = mc.routeOfAdministration?.[roaKey] as { multiplier: number; label: string; context?: string } | undefined;
+    routeMultiplier = roaData?.multiplier ?? 1.0;
+    if (routeMultiplier !== 1.0) {
+      modifiers.push({ name: roaData?.label ?? roaKey, multiplier: routeMultiplier, context: roaData?.context });
+    }
+
+    const cbKey = input.comorbidityBreadth || 'obesityPrimary';
+    const cbData = mc.comorbidityBreadth?.[cbKey] as { multiplier: number; label: string; context?: string } | undefined;
+    comorbidityMultiplier = cbData?.multiplier ?? 1.0;
+    if (comorbidityMultiplier !== 1.0) {
+      modifiers.push({ name: cbData?.label ?? cbKey, multiplier: comorbidityMultiplier, context: cbData?.context });
+    }
+  }
+
   // Apply diminishing multiplier stacking with therapeutic-area-specific exponents
   // Neurology: combo dampening reduced (CNS drugs are inherently combination-limited by BBB)
   // Neurology: indication exponent higher (indication choice matters more in neuro)
   // Immunology: combo therapies very relevant; indication and disease severity matter highly
-  const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : 0.75;
-  const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : 0.80;
-  const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : 0.85;
+  // Metabolic: route of admin and weight loss efficacy are the strongest differentiators
+  const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : isMetabolic ? 0.85 : 0.75;
+  const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : 0.80;
+  const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : 0.85;
 
   const effectiveMultiplier =
     Math.pow(modalityMultiplier, 1.0) *
@@ -526,6 +630,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     Math.pow(immuneResetMultiplier, 0.85) *
     Math.pow(targetSpecMultiplier, 0.7) *
     Math.pow(diseaseSevMultiplier, 0.75) *
+    Math.pow(mechDiffMultiplier, 0.80) *
+    Math.pow(weightLossMultiplier, 0.85) *
+    Math.pow(routeMultiplier, 0.75) *
+    Math.pow(comorbidityMultiplier, 0.70) *
     (1 + regulatoryBonus) *
     (1 + interactionBonus);
 
@@ -659,6 +767,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     } : {}),
     ...(isImmunology ? {
       milestoneExplanation: generateImmunologyMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isMetabolic ? {
+      milestoneExplanation: generateMetabolicMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {})
   };
 }
@@ -693,6 +804,19 @@ function generateImmunologyMilestoneExplanation(phase: Phase, upfrontPercent: nu
   return `Immunology/autoimmune deals at ${phase.replace('phase', 'Phase ')} typically allocate ${immunoUpfrontRanges[phase]} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the chronic-disease commercial model — autoimmune drugs generate recurring revenue (Humira $21B peak, Dupixent $13B+), ` +
     `so deal structures weight commercial milestones heavily, with upfronts higher than neurology but structured to reward market access and formulary wins.`;
+}
+
+function generateMetabolicMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const metUpfrontRanges: Record<Phase, string> = {
+    preclinical: '6-10%',
+    phase1: '10-15%',
+    phase2: '15-25%',
+    phase3: '20-30%',
+    approved: '28-42%',
+  };
+  return `Metabolic/obesity deals at ${phase.replace('phase', 'Phase ')} typically allocate ${metUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the commercial-weighted structure of metabolic deals — GLP-1 and incretin programs generate massive recurring revenue ($20B+ semaglutide peak), ` +
+    `so deal structures heavily weight commercial milestones tied to formulary access, indication expansion, and blockbuster sales tiers.`;
 }
 
 function generateDrillDownData(
@@ -824,6 +948,19 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
   const phaseLabel = benchmarks.labels.phases[input.phase];
   const isNeuro = input.therapeuticArea === 'neurology';
   const isImmuno = input.therapeuticArea === 'immunology';
+  const isMetab = input.therapeuticArea === 'metabolic';
+
+  if (isMetab) {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} metabolic asset with validated mechanism and strong efficacy data justifies premium upfront. The enormous commercial potential of obesity/metabolic drugs ($100B+ projected market) drives aggressive commercial milestone structures.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} metabolic asset with moderate risk. The GLP-1 era has established deal premiums, but differentiation via oral delivery, superior efficacy, or multi-organ benefit is critical for top-tier terms.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage metabolic asset with clinical uncertainty. Deals are structured with development milestones tied to weight loss endpoints and cardiometabolic outcome data.`;
+    } else {
+      return `High-risk metabolic profile. Expect modest upfront with milestone potential tied to efficacy differentiation, oral formulation success, and payer access milestones.`;
+    }
+  }
 
   if (isImmuno) {
     if (riskScore < 25) {
@@ -1005,6 +1142,7 @@ export const therapeuticAreaOptions = [
   { value: 'oncology', label: 'Oncology' },
   { value: 'neurology', label: 'Neurology / CNS' },
   { value: 'immunology', label: 'Immunology / Autoimmune' },
+  { value: 'metabolic', label: 'Metabolic / Obesity' },
 ];
 
 // Neurology-specific indication options
@@ -1177,4 +1315,81 @@ export const treatmentGoalOptions = [
   { value: 'remissionInduction', label: 'Remission induction' },
   { value: 'maintenance', label: 'Maintenance / prevention' },
   { value: 'flareControl', label: 'Acute flare control' },
+];
+
+// Metabolic-specific modality options
+export const metabolicModalityOptions = [
+  { group: 'Incretin-Based', options: [
+    { value: 'glp1Agonist', label: 'GLP-1 Receptor Agonist' },
+    { value: 'dualIncretin', label: 'Dual Incretin (GLP-1/GIP)' },
+    { value: 'tripleIncretin', label: 'Triple Agonist (GLP-1/GIP/Glucagon)' },
+    { value: 'amylinAnalog', label: 'Amylin Analog / Cagrilintide-type' },
+    { value: 'oralPeptide', label: 'Oral Peptide (Oral Semaglutide-type)' },
+  ]},
+  { group: 'Non-Incretin Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'antiActivin', label: 'Anti-Activin / Myostatin (Muscle-sparing)' },
+    { value: 'bispecific', label: 'Bispecific Antibody' },
+  ]},
+  { group: 'Small Molecules & SGLT2', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'sglt2Inhibitor', label: 'SGLT2 Inhibitor' },
+  ]},
+  { group: 'Advanced Modalities', options: [
+    { value: 'geneTherapy', label: 'Gene Therapy (Metabolic)' },
+    { value: 'rnai', label: 'RNA Therapeutics (siRNA/ASO)' },
+    { value: 'microbiomeBased', label: 'Microbiome-Based Therapy' },
+  ]},
+];
+
+// Metabolic-specific indication options
+export const metabolicIndicationOptions = [
+  { group: 'Obesity & Weight', options: [
+    { value: 'obesity', label: 'Obesity / Chronic Weight Management' },
+    { value: 'metabolicSyndrome', label: 'Metabolic Syndrome' },
+  ]},
+  { group: 'Diabetes & Glycemic', options: [
+    { value: 'type2Diabetes', label: 'Type 2 Diabetes' },
+  ]},
+  { group: 'Organ-Specific Metabolic', options: [
+    { value: 'nashMash', label: 'NASH / MASH (Fatty Liver)' },
+    { value: 'lipodystrophy', label: 'Lipodystrophy' },
+  ]},
+  { group: 'Rare Metabolic', options: [
+    { value: 'glycogenStorage', label: 'Glycogen Storage Disease' },
+    { value: 'pku', label: 'PKU (Phenylketonuria)' },
+    { value: 'rareMetabolic', label: 'Other Rare Metabolic' },
+  ]},
+];
+
+// Metabolic-specific parameter options
+export const mechanismDifferentiationOptions = [
+  { value: 'incretinBased', label: 'Incretin-based (GLP-1 class)' },
+  { value: 'nonIncretin', label: 'Non-incretin mechanism' },
+  { value: 'combinationMechanism', label: 'Combination / multi-pathway' },
+];
+
+export const weightLossEfficacyOptions = [
+  { value: 'superiorEfficacy', label: 'Superior (>20% weight loss)' },
+  { value: 'competitiveEfficacy', label: 'Competitive (15-20% weight loss)' },
+  { value: 'modestEfficacy', label: 'Modest (<15% weight loss)' },
+];
+
+export const routeOfAdministrationOptions = [
+  { value: 'oral', label: 'Oral administration' },
+  { value: 'injectable', label: 'Injectable (SC/weekly or less)' },
+  { value: 'implantable', label: 'Implantable / long-acting depot' },
+];
+
+export const comorbidityBreadthOptions = [
+  { value: 'cardiometabolicBenefit', label: 'Cardiometabolic benefit (CV + metabolic)' },
+  { value: 'obesityPrimary', label: 'Obesity-primary (weight only)' },
+  { value: 'organProtective', label: 'Organ-protective (liver, kidney, heart)' },
+];
+
+export const metabolicTreatmentApproachOptions = [
+  { value: 'chronicWeightMgmt', label: 'Chronic weight management' },
+  { value: 'glycemicControl', label: 'Glycemic control' },
+  { value: 'organProtective', label: 'Organ-protective' },
+  { value: 'metabolicReset', label: 'Metabolic reset / curative' },
 ];

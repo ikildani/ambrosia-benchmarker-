@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 // Stripe Customer Portal API
 // Allows customers to manage their subscriptions, update payment methods, and view invoices
+// SECURITY: userId is derived from auth session, never from request body
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,13 +19,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { email, userId } = body;
+    // SECURITY: Derive userId from auth session
+    const authUser = await getAuthenticatedUser(request);
+    const userId = authUser?.id || null;
+    const email = authUser?.email || null;
 
     if (!email && !userId) {
       return NextResponse.json(
-        { error: 'Email or user ID required' },
-        { status: 400 }
+        { error: 'Authentication required' },
+        { status: 401 }
       );
     }
 

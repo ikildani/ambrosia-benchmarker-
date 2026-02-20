@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 // Stripe Checkout Session API
 // Supports two purchase types:
 // 1. 'subscription' — $99/month Pro plan (default)
 // 2. 'report' — $149 one-time Deal Report
+// SECURITY: userId is derived from auth session, never from request body
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,8 +30,10 @@ export async function POST(request: NextRequest) {
       // No body provided
     }
 
-    const customerEmail = body.email as string | undefined;
-    const userId = body.userId as string | undefined;
+    // SECURITY: Derive userId from auth session, not from request body
+    const authUser = await getAuthenticatedUser(request);
+    const userId = authUser?.id || null;
+    const customerEmail = (body.email as string | undefined) || authUser?.email || undefined;
     const promoCode = body.promoCode as string | undefined;
     const purchaseType = (body.purchaseType as string) || 'subscription';
 
@@ -86,7 +90,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           product: 'deal-report',
           report_purchase_id: reportPurchase.id,
-          user_id: userId || '',
+          user_id: userId ?? '',
         },
         ...(customerEmail ? { customer_email: customerEmail } : {}),
       });
@@ -114,13 +118,13 @@ export async function POST(request: NextRequest) {
       subscription_data: {
         metadata: {
           product: 'deal-calculator-pro',
-          user_id: userId || '',
+          user_id: userId ?? '',
           promo_code: promoCode || '',
         },
       },
       metadata: {
         product: 'deal-calculator-pro',
-        user_id: userId || '',
+        user_id: userId ?? '',
         promo_code: promoCode || '',
       },
     };

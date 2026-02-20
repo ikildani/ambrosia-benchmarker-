@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { toast as sonnerToast } from 'sonner';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, DrillDownData, MilestoneBreakdown } from '@/lib/calculations';
 import { SensitivityAnalysis } from './sensitivity';
-import { generatePDFReport, PartnerForPDF } from '@/lib/report';
-import type { PDFReportData } from '@/lib/report';
-import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
-import { computeSensitivityAnalysis } from '@/lib/sensitivity';
-import { calculateRiskScore } from '@/lib/calculations';
-import { findComparableDeals } from '@/lib/comparableDeals';
+import type { PartnerForPDF } from '@/lib/report';
+import ReportGenerationModal from './ReportGenerationModal';
 import BenchmarkInfo from './BenchmarkInfo';
 import ChartSection from './charts/ChartSection';
 import ScenarioComparison from './ScenarioComparison';
@@ -427,6 +424,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [dealMemo, setDealMemo] = useState<DealMemo | null>(null);
   const [memoLoading, setMemoLoading] = useState(false);
   const [memoError, setMemoError] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportFormat, setReportFormat] = useState<'pdf' | 'excel'>('pdf');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const handleGenerateMemo = useCallback(async () => {
     if (memoLoading || dealMemo) return;
@@ -452,6 +452,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       setDealMemo(data.memo || data);
     } catch {
       setMemoError('Unable to generate memo. Please try again.');
+      sonnerToast.error('Failed to generate deal memo');
     } finally {
       setMemoLoading(false);
     }
@@ -482,11 +483,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       }).catch(() => {});
       setEmailSubmitted(true);
       sessionStorage.setItem('email_captured', 'true');
-      // If this was triggered by PDF gate, generate PDF now
+      // If this was triggered by PDF gate, open report modal
       if (showEmailGate) {
         setShowEmailGate(false);
-        const pdfData = await buildPDFData();
-        if (pdfData) generatePDFReport(pdfData);
+        setReportFormat('pdf');
+        setShowReportModal(true);
       }
     } catch {
       // Still mark as submitted for UX
@@ -496,58 +497,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     }
   };
 
-  const buildPDFData = useCallback(async (): Promise<PDFReportData | null> => {
-    if (!fullInputs) return null;
-    const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
-    const riskScore = calculateRiskScore(fullInputs);
-    const comparableDeals = findComparableDeals({
-      therapeuticArea: fullInputs.therapeuticArea,
-      modality: fullInputs.modality,
-      indication: fullInputs.indication,
-      phase: fullInputs.phase,
-    }, 6);
-
-    // Auto-fetch deal memo if not already generated
-    let memo = dealMemo;
-    if (!memo && fullInputs) {
-      try {
-        const response = await fetch('/api/deal-memo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reportId: reportId || undefined,
-            userId: userId || undefined,
-            email: userEmail || undefined,
-            inputs: fullInputs,
-            results: result,
-            labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
-          }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          memo = data.memo || data;
-          setDealMemo(memo);
-        }
-      } catch {
-        // Proceed without memo if fetch fails
-      }
-    }
-
-    return {
-      result,
-      inputs: fullInputs,
-      sensitivityData,
-      riskScore,
-      partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
-      memoData: memo || undefined,
-      comparableDeals,
-    };
-  }, [result, fullInputs, partnerMatches, dealMemo, reportId, userId, userEmail, labels]);
-
-  const handleFreePDFClick = async () => {
+  const handleFreePDFClick = () => {
     if (sessionStorage.getItem('email_captured') || emailSubmitted) {
-      const pdfData = await buildPDFData();
-      if (pdfData) generatePDFReport(pdfData);
+      trackExportAttempted('pdf');
+      setReportFormat('pdf');
+      setShowReportModal(true);
     } else {
       setShowEmailGate(true);
     }
@@ -559,23 +513,16 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     window.open(url, '_blank', 'width=600,height=500');
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
-    const pdfData = await buildPDFData();
-    if (pdfData) generatePDFReport(pdfData);
+    setReportFormat('pdf');
+    setShowReportModal(true);
   };
 
-  const handleDownloadExcel = async () => {
+  const handleDownloadExcel = () => {
     trackExportAttempted('excel');
-    const partnersForExcel: PartnerForExcel[] = partnerMatches.map(p => ({
-      company_name: p.company_name,
-      match_score: p.match_score,
-      match_reasons: p.match_reasons,
-      deals_last_12mo: p.deals_last_12mo,
-      hq_country: p.hq_country,
-    }));
-    const sensitivity = fullInputs ? computeSensitivityAnalysis(fullInputs, result) : undefined;
-    await generateExcelReport(result, inputs, partnersForExcel, fullInputs?.therapeuticArea, fullInputs?.treatmentApproach, sensitivity);
+    setReportFormat('excel');
+    setShowReportModal(true);
   };
 
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
@@ -611,7 +558,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   };
 
   return (
-    <div className="card-elevated overflow-hidden animate-slide-up">
+    <div aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden animate-slide-up">
       {/* Header */}
       <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -659,16 +606,16 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               <>
                 <button
                   onClick={handleDownloadPDF}
-                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow w-full sm:w-auto"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  <span>PDF</span>
+                  <span>Download Report</span>
                 </button>
                 <button
                   onClick={handleDownloadExcel}
-                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 text-sm font-medium rounded-xl transition-all duration-200 border border-teal-400/30 hover:border-teal-400/50 w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -679,12 +626,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             ) : (
               <button
                 onClick={handleFreePDFClick}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow w-full sm:w-auto"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span>PDF</span>
+                <span>Download Report</span>
               </button>
             )}
             <button
@@ -1379,6 +1326,48 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             results={result}
             labels={labels}
           />
+        )}
+
+        {/* Report Generation Modal */}
+        {fullInputs && (
+          <ReportGenerationModal
+            isOpen={showReportModal}
+            onClose={() => setShowReportModal(false)}
+            result={result}
+            fullInputs={fullInputs}
+            partnerMatches={partnerMatches}
+            existingMemo={dealMemo}
+            reportId={reportId}
+            userId={userId}
+            userEmail={userEmail}
+            labels={labels}
+            onMemoGenerated={(memo) => setDealMemo(memo)}
+            onDownloadComplete={() => setToast({ message: 'Report downloaded successfully', type: 'success' })}
+            format={reportFormat}
+          />
+        )}
+
+        {/* Success Toast */}
+        {toast && (
+          <div
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-700 rounded-xl shadow-2xl ${toast ? 'animate-toast-in' : 'animate-toast-out'}`}
+            role="status"
+            onAnimationEnd={() => {
+              setTimeout(() => setToast(null), 3000);
+            }}
+          >
+            <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
+              <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8.5L6.5 12L13 4" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-neutral-800 dark:text-white">{toast.message}</span>
+            <button onClick={() => setToast(null)} className="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-slate-300">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         )}
 
         {/* Upgrade CTA for Free Users */}

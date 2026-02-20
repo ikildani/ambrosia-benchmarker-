@@ -1,18 +1,33 @@
 {
   "metadata": {
     "lastUpdated": "2026-02",
-    "version": "4.0",
+    "version": "5.0",
     "nextUpdate": "2026-03",
     "updateFrequency": "monthly",
     "sources": [
       "Publicly announced deal terms (SEC filings, press releases)",
       "Industry benchmark reports",
       "2024-2026 mega-deal analysis",
-      "48 immunology/autoimmune R&D partnerships (2019-2026)"
+      "48 immunology/autoimmune R&D partnerships (2019-2026)",
+      "35+ metabolic/obesity R&D partnerships (2022-2026)"
     ],
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
-    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area — the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts.",
+    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area — the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts. Metabolic/Obesity added as fourth therapeutic area — the fastest-growing pharma segment ($100B+ obesity market projected by 2030) with GLP-1, dual/triple incretin, and oral peptide deals driving unprecedented valuations.",
     "changelog": [
+      {
+        "date": "2026-02-19",
+        "version": "5.0",
+        "summary": "Metabolic/Obesity Expansion",
+        "changes": [
+          "Added Metabolic/Obesity as fourth therapeutic area with 8 indications",
+          "Added 8 metabolic-specific modalities including GLP-1, dual incretin, triple agonist, SGLT2, amylin analog, oral peptide, anti-activin, and microbiome-based",
+          "Added 5 metabolic-specific multiplier parameters: mechanism differentiation, weight loss efficacy, route of administration, comorbidity breadth, treatment approach",
+          "Added metabolic phase baselines reflecting enormous market valuations (highest across all therapeutic areas)",
+          "Added metabolic phase config with commercial-milestone-heavy allocations",
+          "Added 10 metabolic modality x indication interaction terms",
+          "Added metabolic negotiation insights for modalities, indications, mechanisms, and routes of administration"
+        ]
+      },
       {
         "date": "2026-02-16",
         "version": "4.0",
@@ -185,6 +200,33 @@
       "royalty": { "base": 20, "max": 30 }
     }
   },
+  "metabolicPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 25, "median": 50, "high": 120 },
+      "totalValue": { "low": 350, "median": 750, "high": 1500 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase1": {
+      "upfront": { "low": 60, "median": 125, "high": 250 },
+      "totalValue": { "low": 600, "median": 1100, "high": 2200 },
+      "royalty": { "base": 8, "max": 15 }
+    },
+    "phase2": {
+      "upfront": { "low": 200, "median": 450, "high": 1000 },
+      "totalValue": { "low": 1200, "median": 2500, "high": 5500 },
+      "royalty": { "base": 12, "max": 22 }
+    },
+    "phase3": {
+      "upfront": { "low": 400, "median": 800, "high": 1800 },
+      "totalValue": { "low": 2000, "median": 4000, "high": 8500 },
+      "royalty": { "base": 16, "max": 26 }
+    },
+    "approved": {
+      "upfront": { "low": 700, "median": 1500, "high": 3500 },
+      "totalValue": { "low": 4000, "median": 7500, "high": 15000 },
+      "royalty": { "base": 20, "max": 32 }
+    }
+  },
   "phaseConfig": {
     "rangeWidths": {
       "preclinical": 0.60,
@@ -254,6 +296,29 @@
       "approved": { "dev": 0.05, "reg": 0.20, "comm": 0.75 }
     }
   },
+  "metabolicPhaseConfig": {
+    "rangeWidths": {
+      "preclinical": 0.55,
+      "phase1": 0.45,
+      "phase2": 0.35,
+      "phase3": 0.25,
+      "approved": 0.15
+    },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.06, "high": 0.10 },
+      "phase1": { "low": 0.10, "high": 0.15 },
+      "phase2": { "low": 0.15, "high": 0.25 },
+      "phase3": { "low": 0.20, "high": 0.30 },
+      "approved": { "low": 0.28, "high": 0.42 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.40, "reg": 0.25, "comm": 0.35 },
+      "phase1": { "dev": 0.30, "reg": 0.25, "comm": 0.45 },
+      "phase2": { "dev": 0.18, "reg": 0.22, "comm": 0.60 },
+      "phase3": { "dev": 0.08, "reg": 0.17, "comm": 0.75 },
+      "approved": { "dev": 0.05, "reg": 0.10, "comm": 0.85 }
+    }
+  },
   "modalities": {
     "smallMolecule": { "multiplier": 1.00, "label": "Small Molecule", "context": "Baseline" },
     "mab": { "multiplier": 1.03, "label": "Monoclonal Antibody (naked)", "context": "Mature, commoditizing" },
@@ -288,7 +353,15 @@
     "s1pModulator": { "multiplier": 1.15, "label": "S1P Receptor Modulator", "context": "Pfizer/Arena $6.7B; etrasimod approved UC; next-gen selectivity" },
     "oralIntegrin": { "multiplier": 1.35, "label": "Oral Integrin Inhibitor", "context": "Lilly/Morphic $3.2B; oral vedolizumab mechanism; high-conviction deal class" },
     "dualAntagonist": { "multiplier": 1.30, "label": "Dual BAFF/APRIL Antagonist", "context": "Vertex/Alpine $4.9B; Vor/RemeGen $4B+; IgAN and lupus nephritis applications" },
-    "tl1aInhibitor": { "multiplier": 1.45, "label": "Anti-TL1A", "context": "Hottest target 2023-2024; Merck/Prometheus $10.8B and Roche/Telavant $7.1B reset market" }
+    "tl1aInhibitor": { "multiplier": 1.45, "label": "Anti-TL1A", "context": "Hottest target 2023-2024; Merck/Prometheus $10.8B and Roche/Telavant $7.1B reset market" },
+    "glp1Agonist": { "multiplier": 1.50, "label": "GLP-1 Receptor Agonist", "context": "Hottest drug class in pharma; semaglutide/liraglutide validated; $20B+ peak sales" },
+    "dualIncretin": { "multiplier": 1.65, "label": "Dual Incretin (GLP-1/GIP)", "context": "Tirzepatide paradigm; Lilly Mounjaro/Zepbound; superior efficacy to mono-GLP-1" },
+    "tripleIncretin": { "multiplier": 1.70, "label": "Triple Agonist (GLP-1/GIP/Glucagon)", "context": "Next frontier; Lilly retatrutide 24% weight loss; highest efficacy potential" },
+    "sglt2Inhibitor": { "multiplier": 1.10, "label": "SGLT2 Inhibitor", "context": "Established class (empagliflozin, dapagliflozin); cardiorenal benefit; generic pressure" },
+    "amylinAnalog": { "multiplier": 1.35, "label": "Amylin Analog", "context": "Novo cagrilintide/sema combo (CagriSema); satiety mechanism complementary to GLP-1" },
+    "oralPeptide": { "multiplier": 1.55, "label": "Oral Peptide", "context": "Oral semaglutide breakthrough; oral convenience premium; Rybelsus $2B+" },
+    "antiActivin": { "multiplier": 1.40, "label": "Anti-Activin / Myostatin", "context": "Muscle-sparing weight loss; Scholar Rock/Lilly; differentiates from pure GLP-1" },
+    "microbiomeBased": { "multiplier": 1.15, "label": "Microbiome-Based Therapy", "context": "Emerging category; gut-brain axis; early-stage but high interest" }
   },
   "indications": {
     "solidTumor": {
@@ -362,6 +435,16 @@
       "pnh": { "multiplier": 1.28, "label": "PNH (Paroxysmal Nocturnal Hemoglobinuria)", "context": "Complement cornerstone; AZ/Alexion franchise; oral C5 emerging" },
       "cidp": { "multiplier": 1.20, "label": "CIDP", "context": "FcRn validated; IVIg replacement opportunity; argenx expanding" },
       "rareAutoimmune": { "multiplier": 1.25, "label": "Other Rare Autoimmune", "context": "Catch-all for rare autoimmune conditions; orphan premiums; pemphigus, myositis, stiff-person" }
+    },
+    "metabolic": {
+      "obesity": { "multiplier": 1.35, "label": "Obesity / Chronic Weight Management", "context": "$100B+ projected market by 2030; GLP-1 class dominates" },
+      "type2Diabetes": { "multiplier": 1.10, "label": "Type 2 Diabetes", "context": "Largest metabolic market but crowded; oral differentiation premium" },
+      "nashMash": { "multiplier": 1.30, "label": "NASH / MASH (Fatty Liver)", "context": "Madrigal resmetirom first approval; GLP-1 MASH data strong; $20B+ projected" },
+      "metabolicSyndrome": { "multiplier": 1.15, "label": "Metabolic Syndrome", "context": "Broad cardiometabolic indication; multi-organ benefit" },
+      "lipodystrophy": { "multiplier": 1.25, "label": "Lipodystrophy", "context": "Orphan indication; metreleptin precedent; high unmet need" },
+      "glycogenStorage": { "multiplier": 1.28, "label": "Glycogen Storage Disease", "context": "Rare metabolic; gene therapy and enzyme replacement; orphan premiums" },
+      "pku": { "multiplier": 1.22, "label": "PKU (Phenylketonuria)", "context": "BioMarin Palynziq precedent; gene therapy approaches emerging" },
+      "rareMetabolic": { "multiplier": 1.25, "label": "Other Rare Metabolic", "context": "Catch-all rare metabolic; orphan premiums" }
     }
   },
   "territories": {
@@ -454,6 +537,32 @@
       "remissionInduction": { "multiplier": 1.15, "label": "Remission induction", "context": "Achieving disease control; highest near-term value" },
       "maintenance": { "multiplier": 1.05, "label": "Maintenance / prevention", "context": "Preventing relapse; chronic recurring revenue model" },
       "flareControl": { "multiplier": 0.95, "label": "Acute flare control", "context": "Episodic use; smaller per-patient revenue" }
+    },
+    "mechanismDifferentiation": {
+      "incretinBased": { "multiplier": 1.10, "label": "Incretin-based (GLP-1 class)", "context": "Validated mechanism; massive market proof; but crowding" },
+      "nonIncretin": { "multiplier": 1.20, "label": "Non-incretin mechanism", "context": "Differentiated biology; muscle-sparing or central satiety; premium for novelty" },
+      "combinationMechanism": { "multiplier": 1.30, "label": "Combination / multi-pathway", "context": "Dual/triple mechanism; highest efficacy potential" }
+    },
+    "weightLossEfficacy": {
+      "superiorEfficacy": { "multiplier": 1.30, "label": "Superior efficacy (>20% weight loss)", "context": "Category-leading; competitive with bariatric surgery" },
+      "competitiveEfficacy": { "multiplier": 1.10, "label": "Competitive efficacy (15-20%)", "context": "In range with approved GLP-1 agents" },
+      "modestEfficacy": { "multiplier": 0.85, "label": "Modest efficacy (<15%)", "context": "Below GLP-1 standard; must differentiate on safety or convenience" }
+    },
+    "routeOfAdministration": {
+      "oral": { "multiplier": 1.30, "label": "Oral administration", "context": "Oral GLP-1/metabolic is the biggest competitive advantage" },
+      "injectable": { "multiplier": 1.00, "label": "Injectable (SC)", "context": "Standard for GLP-1 class; weekly injection established" },
+      "implantable": { "multiplier": 1.15, "label": "Implantable / long-acting depot", "context": "Monthly or longer dosing; adherence advantage" }
+    },
+    "comorbidityBreadth": {
+      "cardiometabolicBenefit": { "multiplier": 1.25, "label": "Cardiometabolic benefit", "context": "CV outcome data (SELECT trial); CKD, HFpEF, OSA; expands labels" },
+      "obesityPrimary": { "multiplier": 1.00, "label": "Obesity-primary", "context": "Weight loss indication only; large market but single-indication" },
+      "organProtective": { "multiplier": 1.15, "label": "Organ-protective", "context": "Liver (MASH), kidney (CKD), or heart protection; label expansion" }
+    },
+    "metabolicTreatmentApproach": {
+      "chronicWeightMgmt": { "multiplier": 1.10, "label": "Chronic weight management", "context": "Ongoing treatment; massive recurring revenue" },
+      "glycemicControl": { "multiplier": 1.00, "label": "Glycemic control", "context": "Established diabetes indication; HbA1c endpoints" },
+      "organProtective": { "multiplier": 1.15, "label": "Organ-protective", "context": "MASH resolution, CKD, CV outcomes; label expansion value" },
+      "metabolicReset": { "multiplier": 1.25, "label": "Metabolic reset / curative", "context": "Gene therapy or one-time intervention; highest premium" }
     }
   },
   "interactionTerms": {
@@ -480,7 +589,17 @@
     "complementInhibitor+pnh": { "bonus": 0.12, "context": "Complement + PNH is the cornerstone pairing; Soliris/Ultomiris franchise; oral next-gen" },
     "dualAntagonist+igan": { "bonus": 0.10, "context": "BAFF/APRIL + IgAN is the validated mechanism; Vertex/Alpine $4.9B acquisition" },
     "oralIntegrin+ulcerativeColitis": { "bonus": 0.08, "context": "Oral alpha4beta7 + UC is the oral vedolizumab thesis; Lilly/Morphic $3.2B" },
-    "inVivoCarT+sle_lupus": { "bonus": 0.15, "context": "In vivo CAR-T + SLE is the most transformative combination; scalable curative potential" }
+    "inVivoCarT+sle_lupus": { "bonus": 0.15, "context": "In vivo CAR-T + SLE is the most transformative combination; scalable curative potential" },
+    "dualIncretin+obesity": { "bonus": 0.10, "context": "Dual incretin + obesity is the premier combination; tirzepatide 22.5% weight loss precedent" },
+    "tripleIncretin+obesity": { "bonus": 0.12, "context": "Triple agonist + obesity is the highest efficacy potential; retatrutide 24%+ weight loss" },
+    "oralPeptide+obesity": { "bonus": 0.10, "context": "Oral GLP-1 + obesity is the holy grail; convenience advantage drives market access" },
+    "oralPeptide+type2Diabetes": { "bonus": 0.08, "context": "Oral peptide + T2D aligns with oral semaglutide success; primary care accessibility" },
+    "antiActivin+obesity": { "bonus": 0.08, "context": "Muscle-sparing anti-activin + obesity differentiates from GLP-1 muscle loss" },
+    "amylinAnalog+obesity": { "bonus": 0.08, "context": "Amylin + obesity complements GLP-1; CagriSema combination paradigm" },
+    "geneTherapy+rareMetabolic": { "bonus": 0.12, "context": "Gene therapy + rare metabolic is curative potential; orphan drug premiums" },
+    "geneTherapy+glycogenStorage": { "bonus": 0.10, "context": "Gene therapy for GSD has curative potential" },
+    "glp1Agonist+nashMash": { "bonus": 0.08, "context": "GLP-1 + MASH showing strong liver fat reduction; semaglutide MASH Phase 3 data" },
+    "smallMolecule+nashMash": { "bonus": 0.06, "context": "Oral THR-beta (resmetirom) + MASH first approved therapy; oral convenience" }
   },
   "neurologyDiseaseModifyingPhaseAdjustment": {
     "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",
@@ -580,6 +699,28 @@
       "targetSpecificity": {
         "antigenSpecific": "Antigen-specific approaches (CAR-Treg, tolerizing) avoid broad immunosuppression. This is the next frontier — emphasize safety advantage over broad immunosuppressants.",
         "broadImmunosuppression": "Broad immunosuppression faces commoditization pressure. Infection risk concerns limit use in milder disease. Focus on rapid onset and bridge-to-maintenance positioning."
+      },
+      "metabolicModality": {
+        "glp1Agonist": "GLP-1 agonists dominate metabolic. Semaglutide is the fastest-growing drug in history. Differentiation via oral delivery, superior efficacy, or muscle-sparing profiles is essential for premium terms.",
+        "dualIncretin": "Dual incretins represent the next wave after mono-GLP-1. Tirzepatide's superior efficacy data validates the approach. Emphasize comparative weight loss and CV outcome data.",
+        "tripleIncretin": "Triple agonists (GLP-1/GIP/glucagon) represent the frontier. Retatrutide's 24% weight loss is category-leading. Early-stage but commanding maximum interest.",
+        "oralPeptide": "Oral metabolic peptides are the holy grail. Oral semaglutide proved the concept ($2B+ revenue). Next-gen oral formulations with bioavailability improvements command massive premiums.",
+        "antiActivin": "Anti-activin/myostatin approaches differentiate by preserving lean mass during weight loss. Emphasize body composition data vs. GLP-1 muscle loss.",
+        "microbiomeBased": "Microbiome-based metabolic therapies are emerging but unvalidated. Expect milestone-heavy structures with proof-of-concept gates."
+      },
+      "metabolicIndication": {
+        "obesity": "Obesity is the single largest commercial opportunity in pharma history ($100B+ projected). Competition from Novo and Lilly is intense. Differentiation via oral delivery, superior efficacy, or muscle-sparing is critical.",
+        "nashMash": "NASH/MASH was validated by resmetirom approval. GLP-1 data in MASH is transformative. Multi-mechanism approaches are attracting platform deal interest.",
+        "type2Diabetes": "T2D is the largest established metabolic market but increasingly commoditized. Differentiation via oral delivery, fewer GI side effects, or CV/renal benefit is essential.",
+        "rareMetabolic": "Rare metabolic disorders carry orphan drug premiums. Gene therapy and enzyme replacement approaches for monogenic conditions command curative-potential premiums."
+      },
+      "mechanismDifferentiation": {
+        "nonIncretin": "Non-incretin mechanisms command premium for differentiation from the GLP-1 duopoly. Emphasize complementary biology, muscle-sparing, or central satiety pathways.",
+        "combinationMechanism": "Multi-pathway mechanisms are the frontier. Triple agonists, GLP-1 + amylin combos, and metabolic + anti-inflammatory approaches show the highest efficacy."
+      },
+      "routeOfAdministration": {
+        "oral": "Oral administration is the single biggest competitive differentiator in metabolic. Patient preference, primary care prescribing, and payer formulary access all favor oral. Premium of 20-30% over injectable equivalents.",
+        "implantable": "Long-acting implantable/depot formulations address adherence. Monthly or less frequent dosing eliminates injection burden. Emerging category."
       }
     }
   },

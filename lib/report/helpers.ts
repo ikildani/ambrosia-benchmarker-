@@ -1,11 +1,15 @@
 // Formatting utilities for report generation
 
+// Values from the calculation engine are in MILLIONS (e.g., 150 = $150M, 1500 = $1.5B)
+// This matches formatCurrency in lib/calculations.ts
 export function formatUsd(value: number | null | undefined): string {
-  if (value === null || value === undefined) return 'N/A';
-  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(0)}M`;
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
-  return `$${value.toLocaleString('en-US')}`;
+  if (value === null || value === undefined || isNaN(value as number)) return 'N/A';
+  const absValue = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+  if (absValue >= 1000) return `${sign}$${(absValue / 1000).toFixed(1)}B`;
+  if (absValue >= 1) return `${sign}$${Math.round(absValue)}M`;
+  if (absValue > 0) return `${sign}$${Math.round(absValue * 1000)}K`;
+  return '$0';
 }
 
 export function formatPercent(value: number, decimals: number = 1): string {
@@ -29,16 +33,18 @@ export function formatShortDate(date?: Date): string {
   });
 }
 
+// Parses deal value strings like "$1.2B" or "$500M" and returns value in MILLIONS
+// to match the calculation engine convention
 export function parseDealValue(valueStr: string): number | null {
   const cleaned = valueStr.replace(/[^0-9.BMK+]/gi, '');
   const match = cleaned.match(/([\d.]+)\s*(B|M|K)?/i);
   if (!match) return null;
   const num = parseFloat(match[1]);
   const suffix = (match[2] || '').toUpperCase();
-  if (suffix === 'B') return num * 1_000_000_000;
-  if (suffix === 'M') return num * 1_000_000;
-  if (suffix === 'K') return num * 1_000;
-  return num;
+  if (suffix === 'B') return num * 1000;     // $1.2B → 1200 (millions)
+  if (suffix === 'M') return num;             // $500M → 500 (millions)
+  if (suffix === 'K') return num / 1000;      // $500K → 0.5 (millions)
+  return num;                                 // assume millions
 }
 
 export function generateReportId(): string {
@@ -60,25 +66,25 @@ export function escapeHtml(str: string): string {
 // Page header HTML for consistent branding across pages
 export function pageHeader(pageNum: number, totalPages: number, reportTitle: string): string {
   return `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #0d9488, #06b6d4); border-radius: 4px;"></div>
-        <span style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">Ambrosia Ventures</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 18px;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <div style="width: 18px; height: 18px; background: linear-gradient(135deg, #0d9488, #06b6d4); border-radius: 3px;"></div>
+        <span style="font-size: 8px; font-weight: 700; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase;">Ambrosia Ventures</span>
       </div>
-      <div style="font-size: 9px; color: #94a3b8;">
+      <div style="font-size: 8px; color: #cbd5e1; letter-spacing: 0.02em;">
         ${escapeHtml(reportTitle)} &mdash; Page ${pageNum} of ${totalPages}
       </div>
     </div>
   `;
 }
 
-// Page footer HTML for consistent branding across pages
+// Page footer HTML — uses absolute positioning at bottom of report-page
 export function pageFooter(reportId: string): string {
   const now = formatDate();
   return `
-    <div style="position: absolute; bottom: 30px; left: 50px; right: 50px; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #e2e8f0;">
-      <span style="font-size: 8px; color: #94a3b8;">CONFIDENTIAL &mdash; ${now}</span>
-      <span style="font-size: 8px; color: #94a3b8;">Report ID: ${reportId}</span>
+    <div style="position: absolute; bottom: 24px; left: 44px; right: 44px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9;">
+      <span style="font-size: 7px; color: #cbd5e1; letter-spacing: 0.04em;">CONFIDENTIAL &mdash; ${now}</span>
+      <span style="font-size: 7px; color: #cbd5e1; letter-spacing: 0.04em;">${reportId}</span>
     </div>
   `;
 }
@@ -172,6 +178,8 @@ export function getTAColors(ta: string): { primary: string; light: string; label
       return { primary: COLORS.purple, light: COLORS.purpleLight, label: 'Neurology' };
     case 'immunology':
       return { primary: COLORS.blue, light: COLORS.blueLight, label: 'Immunology' };
+    case 'metabolic':
+      return { primary: COLORS.green, light: COLORS.greenLight, label: 'Metabolic / Obesity' };
     default:
       return { primary: COLORS.teal, light: COLORS.tealLight, label: ta };
   }

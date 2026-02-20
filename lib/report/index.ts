@@ -16,7 +16,8 @@ import type { PDFReportData, ReportMeta } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
 
-export function generatePDFReport(data: PDFReportData): void {
+/** Returns the full HTML document string for the report (10 pages with styles). */
+export function generateReportHTML(data: PDFReportData): string {
   const meta: ReportMeta = {
     reportId: generateReportId(),
     generatedAt: formatDate(),
@@ -24,7 +25,6 @@ export function generatePDFReport(data: PDFReportData): void {
     pageCount: 10,
   };
 
-  // Assemble all pages
   const pages = [
     renderCoverPage(data, meta),
     renderExecutiveDashboard(data, meta),
@@ -38,7 +38,7 @@ export function generatePDFReport(data: PDFReportData): void {
     renderMethodologyPage(data, meta),
   ];
 
-  const html = `
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -52,8 +52,12 @@ export function generatePDFReport(data: PDFReportData): void {
     </body>
     </html>
   `;
+}
 
-  // Open in new window and trigger print
+/** Legacy: opens a new window and triggers print dialog. */
+export function generatePDFReport(data: PDFReportData): void {
+  const html = generateReportHTML(data);
+
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Please allow pop-ups to download the PDF report.');
@@ -63,7 +67,6 @@ export function generatePDFReport(data: PDFReportData): void {
   printWindow.document.write(html);
   printWindow.document.close();
 
-  // Wait for content to render, then print
   printWindow.onload = () => {
     setTimeout(() => {
       printWindow.print();

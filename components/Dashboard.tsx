@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { clearHistory, formatDate, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
@@ -274,7 +275,6 @@ export default function Dashboard({
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
-    setSaveMessage('');
     try {
       const userData = localStorage.getItem('user_data');
       if (userData) {
@@ -289,10 +289,9 @@ export default function Dashboard({
         localStorage.setItem('user_data', JSON.stringify(parsed));
       }
       await new Promise(resolve => setTimeout(resolve, 300));
-      setSaveMessage('Settings saved successfully');
-      setTimeout(() => setSaveMessage(''), 3000);
+      toast.success('Settings saved successfully');
     } catch {
-      setSaveMessage('Failed to save settings');
+      toast.error('Failed to save settings');
     } finally {
       setIsSaving(false);
     }
@@ -576,7 +575,7 @@ export default function Dashboard({
 
         {/* Navigation Tabs - Mobile optimized with horizontal scroll */}
         <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0">
-          <div className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
+          <div role="tablist" aria-label="Dashboard sections" className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
             {[
               { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
               { id: 'history', label: 'History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -585,6 +584,10 @@ export default function Dashboard({
             ].map((tab) => (
               <button
                 key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`tabpanel-${tab.id}`}
+                id={`tab-${tab.id}`}
                 onClick={() => {
                   setActiveTab(tab.id as typeof activeTab);
                   if (tab.id === 'watchlist') {
@@ -616,7 +619,7 @@ export default function Dashboard({
 
         {/* Content */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
+          <div id="tabpanel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
             {/* Deal Insights - Full Width */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="flex items-center gap-2 mb-6">
@@ -797,7 +800,7 @@ export default function Dashboard({
         )}
 
         {activeTab === 'history' && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div id="tabpanel-history" role="tabpanel" aria-labelledby="tab-history" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
@@ -970,7 +973,7 @@ export default function Dashboard({
         )}
 
         {activeTab === 'settings' && (
-          <div className="max-w-3xl space-y-6">
+          <div id="tabpanel-settings" role="tabpanel" aria-labelledby="tab-settings" className="max-w-3xl space-y-6">
             {/* Profile Header Card */}
             <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
               <div className="absolute inset-0 opacity-10">
@@ -1359,6 +1362,7 @@ export default function Dashboard({
         tier={tier}
         onReuse={handleReuseInputs}
         onUpgrade={onUpgrade}
+        userEmail={userEmail}
       />
 
       {/* Floating Action Button - Mobile Only */}

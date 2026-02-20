@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { CalculationResult } from '@/lib/calculations';
 
 interface ShareModalProps {
@@ -19,6 +20,8 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [expiresIn, setExpiresIn] = useState<string>('30d');
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
 
   const handleShare = async () => {
     if (!user?.email || tier !== 'pro') return;
@@ -85,9 +88,11 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
         aria-hidden="true"
       />
       <div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-modal-title"
+        tabIndex={-1}
         className="relative bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in"
       >
         {/* Header */}

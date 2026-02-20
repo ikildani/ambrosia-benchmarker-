@@ -1,4 +1,4 @@
-// Page 5: Sensitivity Analysis (NEW)
+// Page 5: Sensitivity Analysis
 // Top value driver callout, tornado chart, parameter impact table, TA risk factors
 
 import { renderTornado } from '../svg-charts/tornado';
@@ -20,7 +20,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
   const topDriver = sensitivityData.topValueDriver;
   const params = sensitivityData.parameters;
 
-  const tornadoHtml = renderTornado(params, 580, 260);
+  const tornadoHtml = renderTornado(params, 560, 240);
 
   return `
     <div class="report-page">
@@ -29,28 +29,28 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title-lg">Sensitivity Analysis</div>
 
       <!-- Top Value Driver Callout -->
-      <div class="card-highlight" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="card-highlight" style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-size: 10px; font-weight: 600; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;">Top Value Driver</div>
-          <div style="font-size: 13px; font-weight: 600; color: ${COLORS.navy}; margin-bottom: 4px;">${escapeHtml(topDriver.parameterLabel)}</div>
-          <div style="font-size: 11px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(topDriver.insightText)}</div>
+          <div style="font-size: 8px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Top Value Driver</div>
+          <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">${escapeHtml(topDriver.parameterLabel)}</div>
+          <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(topDriver.insightText)}</div>
         </div>
-        <div style="text-align: right; flex-shrink: 0; margin-left: 20px;">
-          <div style="font-size: 22px; font-weight: 700; color: ${COLORS.teal};">+${formatUsd(topDriver.bestOption.delta)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400};">potential upside</div>
+        <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
+          <div style="font-size: 20px; font-weight: 700; color: ${COLORS.teal};">+${formatUsd(topDriver.bestOption.delta)}</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">potential upside</div>
         </div>
       </div>
 
       <!-- Tornado Chart -->
-      <div class="card" style="margin-bottom: 16px; padding: 12px;">
-        <div class="section-title" style="margin-bottom: 4px;">Parameter Impact (Tornado Chart)</div>
+      <div class="card" style="margin-bottom: 14px; padding: 10px;">
+        <div class="section-title" style="margin-bottom: 2px;">Parameter Impact (Tornado Chart)</div>
         <div class="chart-container">
           ${tornadoHtml}
         </div>
       </div>
 
       <!-- Parameter Impact Table -->
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 12px;">
         <div class="section-title">Parameter Details</div>
         <div class="card" style="padding: 0; overflow: hidden;">
           <table class="data-table">
@@ -64,13 +64,13 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
               </tr>
             </thead>
             <tbody>
-              ${params.slice(0, 8).map(p => {
+              ${params.slice(0, 7).map(p => {
                 const bestOpt = p.options.reduce((best, opt) => opt.delta > best.delta ? opt : best, p.options[0]);
                 return `
                 <tr>
                   <td style="font-weight: 500;">${escapeHtml(p.label)}</td>
-                  <td style="font-size: 10px;">${escapeHtml(p.currentLabel)}</td>
-                  <td style="font-size: 10px;">${bestOpt ? escapeHtml(bestOpt.label) : 'N/A'}</td>
+                  <td style="font-size: 9px;">${escapeHtml(p.currentLabel)}</td>
+                  <td style="font-size: 9px;">${bestOpt ? escapeHtml(bestOpt.label) : 'N/A'}</td>
                   <td class="value-cell">${bestOpt && bestOpt.delta > 0 ? '+' + formatUsd(bestOpt.delta) : 'N/A'}</td>
                   <td style="text-align: center;">${impactBadge(p.impactLevel)}</td>
                 </tr>
@@ -85,14 +85,14 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       ${sensitivityData.neurologyInsights.length > 0 ? `
       <div>
         <div class="section-title">Therapeutic Area Considerations</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
           ${sensitivityData.neurologyInsights.slice(0, 3).map(insight => `
             <div class="card-sm">
-              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
-                <span style="font-size: 10px; font-weight: 600; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 3px;">
+                <span style="font-size: 9px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
                 ${impactBadge(insight.impactLevel)}
               </div>
-              <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
+              <div style="font-size: 8px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
             </div>
           `).join('')}
         </div>

@@ -231,7 +231,7 @@ export default function CalculatorPage() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16 px-3 sm:px-4">
+      <main id="main-content" className="pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16 px-3 sm:px-4">
         {/* Page Header */}
         <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
           <div className="text-center">

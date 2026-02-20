@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "sonner";
 import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/lib/theme";
@@ -55,11 +56,18 @@ export default function RootLayout({
         <link rel="alternate" type="application/rss+xml" title="Ambrosia Ventures Blog" href="/feed.xml" />
       </head>
       <body className={inter.className}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:bg-teal-600 focus:text-white focus:rounded-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider>
           <GlobalJsonLd />
           <AuthProvider>
             <TrackingProvider>{children}</TrackingProvider>
           </AuthProvider>
+          <Toaster richColors position="top-right" />
           <Analytics />
         </ThemeProvider>
       </body>
