@@ -70,6 +70,7 @@ export default function PartnerMatchesContainer({
           indication_category: indicationCategory,
           indication_specific: indicationSpecific,
           territory_scope: mapTerritory(territory),
+          therapeutic_area: therapeuticArea,
           tier: tier, // Pass tier from frontend as fallback
         }),
       });
@@ -182,6 +183,7 @@ export default function PartnerMatchesContainer({
 // Map frontend values to backend enum values
 function mapModality(modality: string): string {
   const map: Record<string, string> = {
+    // Core modalities
     smallMolecule: 'small_molecule',
     antibody: 'antibody',
     adc: 'adc',
@@ -194,6 +196,30 @@ function mapModality(modality: string): string {
     oligonucleotide: 'oligonucleotide',
     radiopharm: 'radiopharm',
     other: 'other',
+    // Neurology-specific
+    aso: 'aso',
+    bbbPlatform: 'bbb_platform',
+    tauTargeting: 'tau_targeting',
+    ionChannel: 'ion_channel',
+    psychedelic: 'psychedelic',
+    stemCell: 'stem_cell',
+    // Immunology-specific
+    carT_autoimmune: 'car_t',
+    tl1aInhibitor: 'antibody',
+    jak_tyk2Inhibitor: 'small_molecule',
+    ilInhibitor: 'antibody',
+    complement: 'antibody',
+    sphingosine: 'small_molecule',
+    btk_degrader: 'small_molecule',
+    // Metabolic-specific
+    glp1Agonist: 'peptide',
+    dualIncretin: 'peptide',
+    tripleIncretin: 'peptide',
+    oralPeptide: 'peptide',
+    amylinAnalog: 'peptide',
+    sglt2Inhibitor: 'small_molecule',
+    antiActivin: 'antibody',
+    microbiomeBased: 'other',
   };
   return map[modality] || modality;
 }

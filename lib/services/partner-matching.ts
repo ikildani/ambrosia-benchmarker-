@@ -70,6 +70,8 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   'ion_channel': ['small_molecule', 'psychedelic', 'peptide'],
   'tau_targeting': ['antibody', 'small_molecule', 'aso'],
   'stem_cell': ['cell_therapy', 'gene_therapy'],
+  // Metabolic modalities map to core types but also cross-link
+  'sglt2_inhibitor': ['small_molecule', 'peptide'],
 };
 
 // Indication category adjacency (includes neurology and immunology sub-indication cross-links)
@@ -107,6 +109,35 @@ const INDICATION_ADJACENCY: Record<string, string[]> = {
   'nephrology': ['autoimmune', 'rare_disease', 'rheumatology', 'hematological'],
   'neuromuscular': ['autoimmune', 'cns', 'rare_disease', 'multiple_sclerosis'],
   'complement': ['autoimmune', 'hematological', 'nephrology', 'rare_disease'],
+  // Metabolic sub-indication adjacency
+  'obesity': ['metabolic', 'cardiovascular', 'type2_diabetes', 'nash_mash'],
+  'type2_diabetes': ['metabolic', 'obesity', 'cardiovascular', 'nash_mash'],
+  'nash_mash': ['metabolic', 'obesity', 'rare_disease'],
+  'metabolic_syndrome': ['metabolic', 'cardiovascular', 'obesity', 'type2_diabetes'],
+  'lipodystrophy': ['metabolic', 'rare_disease', 'obesity'],
+  'glycogen_storage': ['metabolic', 'rare_disease'],
+  'pku': ['metabolic', 'rare_disease'],
+  'rare_metabolic': ['metabolic', 'rare_disease', 'glycogen_storage', 'pku'],
+};
+
+// Map therapeutic areas to their associated indication categories
+// Used to boost TA-aligned companies and penalize misaligned ones
+const THERAPEUTIC_AREA_INDICATIONS: Record<string, string[]> = {
+  'oncology': ['solid_tumor', 'hematological'],
+  'neurology': ['cns', 'alzheimers', 'parkinsons', 'epilepsy', 'pain', 'multiple_sclerosis',
+    'rare_neurological', 'als', 'huntingtons', 'migraine', 'narcolepsy', 'tremor',
+    'tbi', 'addiction', 'schizophrenia', 'depression'],
+  'immunology': ['autoimmune', 'dermatology', 'rheumatology', 'ibd', 'nephrology',
+    'neuromuscular', 'complement'],
+  'metabolic': ['metabolic', 'obesity', 'type2_diabetes', 'nash_mash', 'metabolic_syndrome',
+    'lipodystrophy', 'glycogen_storage', 'pku', 'rare_metabolic', 'cardiovascular'],
+};
+
+const TA_LABELS: Record<string, string> = {
+  'oncology': 'Oncology',
+  'neurology': 'Neurology',
+  'immunology': 'Immunology',
+  'metabolic': 'Metabolic/Obesity',
 };
 
 // Phase ranking for comparison
@@ -125,6 +156,7 @@ export interface MatchInput {
   indication_category: string | null;
   indication_specific: string | null;
   territory_scope: string | null;
+  therapeutic_area: string | null;
 }
 
 export interface PartnerMatch {
@@ -570,6 +602,52 @@ function calculateMatchScore(
   }
   if (company.actively_acquiring && company.acquisition_appetite === 'aggressive') {
     breakdown.quality += WEIGHTS.actively_acquiring;
+  }
+
+  // 8. THERAPEUTIC AREA RELEVANCE
+  // Ensures companies are relevant to the user's therapeutic area, not just
+  // coincidentally sharing a modality (e.g., oncology peptide vs metabolic peptide)
+  if (input.therapeutic_area) {
+    const taIndications = THERAPEUTIC_AREA_INDICATIONS[input.therapeutic_area] || [];
+    const taLabel = TA_LABELS[input.therapeutic_area] || input.therapeutic_area;
+
+    // Check company's overlap with the user's therapeutic area
+    const companyTAOverlap = taIndications.filter(ind =>
+      companyIndications.includes(ind) || companyIndicationsSpecific.includes(ind)
+    );
+
+    if (companyTAOverlap.length >= 2) {
+      // Strong TA alignment — significant boost
+      breakdown.indication += 15;
+      reasons.push({
+        category: 'indication',
+        reason: `Strong ${taLabel} focus with multiple active programs`,
+        strength: 'strong',
+      });
+    } else if (companyTAOverlap.length === 1) {
+      breakdown.indication += 8;
+      reasons.push({
+        category: 'indication',
+        reason: `Active in ${taLabel}`,
+        strength: 'moderate',
+      });
+    } else {
+      // No TA overlap — check if company is primarily in a different TA
+      let primaryOtherTA = false;
+      for (const [otherTA, otherIndications] of Object.entries(THERAPEUTIC_AREA_INDICATIONS)) {
+        if (otherTA === input.therapeutic_area) continue;
+        const otherOverlap = otherIndications.filter(ind => companyIndications.includes(ind));
+        if (otherOverlap.length >= 2) {
+          primaryOtherTA = true;
+          break;
+        }
+      }
+
+      if (primaryOtherTA) {
+        // Company is clearly in a different TA — modality match is coincidental
+        breakdown.modality = Math.round(breakdown.modality * 0.4);
+      }
+    }
   }
 
   // Calculate total

@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       indication_category,
       indication_specific,
       territory_scope,
+      therapeutic_area,
     } = body;
 
     // Validate required fields
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
       indication_category: indication_category || null,
       indication_specific: indication_specific || null,
       territory_scope: territory_scope || null,
+      therapeutic_area: therapeutic_area || null,
     };
 
     // Build options - include enhanced breakdown for Pro tier
