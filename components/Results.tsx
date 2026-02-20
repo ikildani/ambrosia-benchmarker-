@@ -721,7 +721,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {fullInputs?.therapeuticArea === 'immunology' ? 'Why Immunology Deal Structures Differ' : 'Why Neurology Deal Structures Differ'}
+              {fullInputs?.therapeuticArea === 'immunology' ? 'Why Immunology Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'metabolic' ? 'Why Metabolic/Obesity Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'oncology' ? 'Why Oncology Deal Structures Differ'
+                : 'Why Neurology Deal Structures Differ'}
             </h4>
             <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">
               {result.milestoneExplanation}
@@ -765,6 +768,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               indicationCategory={getIndicationCategory(inputs.indication)}
               indicationSpecific={inputs.indication}
               territory={inputs.territory}
+              therapeuticArea={fullInputs?.therapeuticArea}
               tier={tier}
               onUpgrade={onUpgrade || (() => {})}
               onMatchesLoaded={handlePartnerMatchesLoaded}

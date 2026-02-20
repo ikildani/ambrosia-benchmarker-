@@ -139,6 +139,26 @@ interface UserAsset {
   territory: string | null;
 }
 
+// Map therapeutic area to keywords for patent cliff relevance sorting
+const TA_KEYWORDS: Record<string, string[]> = {
+  metabolic: ['metabolic', 'obesity', 'diabetes', 'glp-1', 'gip', 'sglt2', 'weight', 't2d'],
+  oncology: ['oncology', 'tumor', 'cancer', 'pd-1', 'pd-l1', 'adc', 'her2', 'egfr', 'cdk', 'parp', 'btk', 'bcl'],
+  neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer'],
+  immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus'],
+};
+
+function sortCliffsByRelevance(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
+  if (!therapeuticArea || !TA_KEYWORDS[therapeuticArea]) return cliffs;
+  const keywords = TA_KEYWORDS[therapeuticArea];
+  return [...cliffs].sort((a, b) => {
+    const aRelevant = keywords.some(kw => a.indication.toLowerCase().includes(kw));
+    const bRelevant = keywords.some(kw => b.indication.toLowerCase().includes(kw));
+    if (aRelevant && !bRelevant) return -1;
+    if (!aRelevant && bRelevant) return 1;
+    return 0;
+  });
+}
+
 interface PartnerMatchesProps {
   calculationId?: string;
   sessionId?: string;
@@ -154,6 +174,7 @@ interface PartnerMatchesProps {
   onUpgradeClick: () => void;
   // User's asset for outreach generation
   userAsset?: UserAsset;
+  therapeuticArea?: string;
 }
 
 export function PartnerMatches({
@@ -170,6 +191,7 @@ export function PartnerMatches({
   advisoryCta,
   onUpgradeClick,
   userAsset,
+  therapeuticArea,
 }: PartnerMatchesProps) {
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
   const [partnerDetails, setPartnerDetails] = useState<CompanyProfile | null>(null);
@@ -458,7 +480,7 @@ export function PartnerMatches({
                           </span>
                         </div>
                         <div className="space-y-2">
-                          {partnerDetails.company.patent_cliffs.slice(0, 3).map((cliff: PatentCliff, i: number) => (
+                          {sortCliffsByRelevance(partnerDetails.company.patent_cliffs, therapeuticArea).slice(0, 3).map((cliff: PatentCliff, i: number) => (
                             <div
                               key={i}
                               className="flex items-center justify-between gap-2 text-sm bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-500/20 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"

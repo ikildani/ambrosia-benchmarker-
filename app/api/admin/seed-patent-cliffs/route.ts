@@ -91,7 +91,7 @@ const patentCliffData: Record<string, {
   },
   'AstraZeneca': {
     patent_cliffs: [
-      { drug_name: 'Farxiga', indication: 'Diabetes/Cardio (SGLT2)', revenue_usd: 5900000000, expiry_year: 2025 },
+      { drug_name: 'Farxiga', indication: 'Metabolic (SGLT2 T2D/HF)', revenue_usd: 5900000000, expiry_year: 2025 },
       { drug_name: 'Lynparza', indication: 'Oncology (PARP)', revenue_usd: 2700000000, expiry_year: 2027 },
       { drug_name: 'Imfinzi', indication: 'Oncology (PD-L1)', revenue_usd: 4000000000, expiry_year: 2030 },
       { drug_name: 'Tagrisso', indication: 'Oncology (EGFR)', revenue_usd: 5800000000, expiry_year: 2032 },
@@ -100,10 +100,23 @@ const patentCliffData: Record<string, {
     revenue_at_risk_2026: 0,
     revenue_at_risk_2027: 2700000000,
   },
+  'Novo Nordisk': {
+    patent_cliffs: [
+      { drug_name: 'Ozempic', indication: 'Metabolic (GLP-1 Obesity/T2D)', revenue_usd: 18200000000, expiry_year: 2032 },
+      { drug_name: 'Wegovy', indication: 'Metabolic (GLP-1 Obesity)', revenue_usd: 6600000000, expiry_year: 2032 },
+      { drug_name: 'Rybelsus', indication: 'Metabolic (Oral GLP-1)', revenue_usd: 3500000000, expiry_year: 2031 },
+      { drug_name: 'Victoza', indication: 'Metabolic (GLP-1 T2D)', revenue_usd: 1800000000, expiry_year: 2025 },
+    ],
+    revenue_at_risk_2025: 1800000000,
+    revenue_at_risk_2026: 0,
+    revenue_at_risk_2027: 0,
+  },
   'Eli Lilly': {
     patent_cliffs: [
-      { drug_name: 'Trulicity', indication: 'Diabetes (GLP-1)', revenue_usd: 7400000000, expiry_year: 2027 },
-      { drug_name: 'Jardiance', indication: 'Diabetes (SGLT2)', revenue_usd: 2500000000, expiry_year: 2025 },
+      { drug_name: 'Mounjaro', indication: 'Metabolic (GIP/GLP-1 Obesity/T2D)', revenue_usd: 11300000000, expiry_year: 2036 },
+      { drug_name: 'Zepbound', indication: 'Metabolic (GIP/GLP-1 Obesity)', revenue_usd: 4500000000, expiry_year: 2036 },
+      { drug_name: 'Trulicity', indication: 'Metabolic (GLP-1 T2D)', revenue_usd: 7400000000, expiry_year: 2027 },
+      { drug_name: 'Jardiance', indication: 'Metabolic (SGLT2)', revenue_usd: 2500000000, expiry_year: 2025 },
       { drug_name: 'Taltz', indication: 'Autoimmune (IL-17)', revenue_usd: 2700000000, expiry_year: 2028 },
       { drug_name: 'Verzenio', indication: 'Oncology (CDK4/6)', revenue_usd: 3500000000, expiry_year: 2031 },
     ],

@@ -20,6 +20,7 @@ interface PartnerMatchesContainerProps {
   indicationCategory: string | null;
   indicationSpecific: string | null;
   territory: string;
+  therapeuticArea?: string;
 
   // User context
   tier: 'free' | 'pro' | 'report';
@@ -35,6 +36,7 @@ export default function PartnerMatchesContainer({
   indicationCategory,
   indicationSpecific,
   territory,
+  therapeuticArea,
   tier,
   onUpgrade,
   onMatchesLoaded,
@@ -172,6 +174,7 @@ export default function PartnerMatchesContainer({
       advisoryCta={advisoryCta}
       onUpgradeClick={onUpgrade}
       userAsset={userAsset}
+      therapeuticArea={therapeuticArea}
     />
   );
 }
