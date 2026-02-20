@@ -114,7 +114,7 @@ export default function Dashboard({
   }, [history, historySearch, historyAreaFilter, historySort]);
 
   useEffect(() => {
-    // Load user data from localStorage
+    // Load user data from localStorage first (instant)
     const userData = localStorage.getItem('user_data');
     if (userData) {
       try {
@@ -130,6 +130,53 @@ export default function Dashboard({
         // ignore
       }
     }
+
+    // Then hydrate from Supabase DB (authoritative source)
+    (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) return;
+
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('full_name, company_name, job_title, phone_number, linkedin_url, deal_role, avatar_gradient, created_at')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          // Only override if DB has non-null values (DB is authoritative)
+          if (profile.full_name) setEditName(profile.full_name);
+          if (profile.company_name) setEditCompany(profile.company_name);
+          if (profile.job_title) setEditTitle(profile.job_title);
+          if (profile.phone_number) setEditPhone(profile.phone_number);
+          if (profile.linkedin_url) setEditLinkedIn(profile.linkedin_url);
+          if (profile.deal_role) setEditRole(profile.deal_role);
+          if (profile.avatar_gradient) setSelectedAvatar(profile.avatar_gradient);
+          if (profile.created_at) setMemberSince(profile.created_at);
+
+          // Sync DB values back to localStorage
+          const existing = localStorage.getItem('user_data');
+          if (existing) {
+            try {
+              const parsed = JSON.parse(existing);
+              if (profile.full_name) parsed.name = profile.full_name;
+              if (profile.company_name) parsed.company = profile.company_name;
+              if (profile.job_title) parsed.title = profile.job_title;
+              if (profile.phone_number) parsed.phone = profile.phone_number;
+              if (profile.linkedin_url) parsed.linkedIn = profile.linkedin_url;
+              if (profile.deal_role) parsed.role = profile.deal_role;
+              if (profile.avatar_gradient) parsed.avatarGradient = profile.avatar_gradient;
+              localStorage.setItem('user_data', JSON.stringify(parsed));
+            } catch { /* ignore */ }
+          }
+        }
+      } catch {
+        // Non-blocking: localStorage data is still available
+      }
+    })();
   }, []);
 
   // Fetch watchlist activity count for notification dot
@@ -195,6 +242,7 @@ export default function Dashboard({
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
+      // 1. Update localStorage immediately for instant UI sync
       const userData = localStorage.getItem('user_data');
       if (userData) {
         const parsed = JSON.parse(userData);
@@ -206,8 +254,54 @@ export default function Dashboard({
         parsed.role = editRole;
         parsed.avatarGradient = selectedAvatar;
         localStorage.setItem('user_data', JSON.stringify(parsed));
+
+        // Also update profile cache for re-login
+        if (parsed.email) {
+          const emailKey = `profile_cache_${parsed.email.toLowerCase().trim()}`;
+          localStorage.setItem(emailKey, JSON.stringify({
+            name: editName,
+            company: editCompany,
+            title: editTitle,
+            phone: editPhone,
+            linkedIn: editLinkedIn,
+            role: editRole,
+          }));
+        }
       }
-      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // 2. Persist to Supabase database
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        if (supabase) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            const res = await fetch('/api/user/profile', {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                full_name: editName,
+                company_name: editCompany,
+                job_title: editTitle,
+                phone_number: editPhone,
+                linkedin_url: editLinkedIn,
+                deal_role: editRole,
+                avatar_gradient: selectedAvatar,
+              }),
+            });
+            if (!res.ok) {
+              console.warn('Profile API save failed:', res.status);
+            }
+          }
+        }
+      } catch (apiErr) {
+        // Non-blocking: localStorage save succeeded, DB sync failed silently
+        console.warn('Profile DB sync failed:', apiErr);
+      }
+
       toast.success('Settings saved successfully');
     } catch {
       toast.error('Failed to save settings');

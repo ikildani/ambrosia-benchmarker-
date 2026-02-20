@@ -73,16 +73,12 @@ export default function CompaniesPageClient() {
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Calculator</Link>
-              <Link href="/deals" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Deals</Link>
-              <Link href="/pulse" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Pulse</Link>
               <Link href="/companies" className="text-sm font-medium text-teal-600 dark:text-teal-400">Companies</Link>
             </nav>
             {/* Mobile nav */}
             <div className="flex md:hidden items-center gap-3">
-              <Link href="/calculator" className="text-xs font-medium text-slate-500 dark:text-slate-400">Calc</Link>
-              <Link href="/deals" className="text-xs font-medium text-slate-500 dark:text-slate-400">Deals</Link>
-              <Link href="/pulse" className="text-xs font-medium text-slate-500 dark:text-slate-400">Pulse</Link>
-              <Link href="/companies" className="text-xs font-medium text-teal-600 dark:text-teal-400">Co.</Link>
+              <Link href="/calculator" className="text-xs font-medium text-slate-500 dark:text-slate-400">Calculator</Link>
+              <Link href="/companies" className="text-xs font-medium text-teal-600 dark:text-teal-400">Companies</Link>
             </div>
             <div className="flex items-center gap-3">
               {isAuthenticated ? (

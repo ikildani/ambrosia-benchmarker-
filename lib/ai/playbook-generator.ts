@@ -93,11 +93,18 @@ TOTAL VALUE: ${formatCurrencyForPrompt(terms.totalDealValue.low)}-${formatCurren
 MILESTONES: Dev ${formatCurrencyForPrompt(terms.devMilestones.median)}, Reg ${formatCurrencyForPrompt(terms.regMilestones.median)}, Comm ${formatCurrencyForPrompt(terms.commMilestones.median)}
 ROYALTIES: Base ${tieredRoyalties.base.low}-${tieredRoyalties.base.high}%, Mid ${tieredRoyalties.midTier.low}-${tieredRoyalties.midTier.high}%, High ${tieredRoyalties.highTier.low}-${tieredRoyalties.highTier.high}%
 STRUCTURE: ${dealRecommendation.upfrontPercent}% upfront / ${dealRecommendation.milestonePercent}% milestones
-${modifiersList ? `MODIFIERS: ${modifiersList}` : ''}
+${modifiersList ? `MODIFIERS:\n${modifiersList}` : ''}
 
-Return JSON with 5 sections. Each section: title, content (2 sentences), bullets (3 items), highlight (1 key point). Be SPECIFIC to this ${labels.modality} at ${labels.phase} - reference the actual numbers.
+CRITICAL RULES:
+- Do NOT reference specific company names (e.g. Pfizer, Roche). You do not have partner data.
+- Do NOT cite patent cliff dates, revenue-at-risk figures, or pipeline gap data. You do not have this data.
+- Do NOT invent or hallucinate any statistics, dollar amounts, or dates beyond the numbers provided above.
+- Focus the partnerTactics section on strategic partner selection criteria and outreach positioning for this specific ${labels.modality} in ${labels.indication}.
+- Reference ONLY the actual deal numbers provided above.
 
-{"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Tactics","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
+Return JSON with 5 sections. Each section: title, content (2 sentences), bullets (3 items), highlight (1 key point). Be SPECIFIC to this ${labels.modality} at ${labels.phase}.
+
+{"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Selection Strategy","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
 }
 
 // Parse JSON from Claude's response with control character cleanup

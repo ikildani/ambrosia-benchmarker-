@@ -61,10 +61,6 @@ function LiveDemoSection() {
     <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-4">
-            <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Live Preview</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
             See Your Deal Terms Instantly
           </h2>

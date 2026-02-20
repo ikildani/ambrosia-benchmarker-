@@ -54,7 +54,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
                 <th style="text-align: right;">Low</th>
                 <th style="text-align: right; color: ${COLORS.teal};">Median</th>
                 <th style="text-align: right;">High</th>
-                <th style="width: 240px;">Range</th>
+                <th style="width: 260px;">Range</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +64,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.low)}</td>
                   <td class="value-cell">${formatUsd(t.median)}</td>
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.high)}</td>
-                  <td>${renderRangeBar({ low: t.low, median: t.median, high: t.high }, maxVal, 240, 20, false)}</td>
+                  <td style="padding: 2px 8px;">${renderRangeBar({ low: t.low, median: t.median, high: t.high }, maxVal, 250, 20, false)}</td>
                 </tr>
               `).join('')}
             </tbody>
