@@ -49,6 +49,23 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/** Fallback: open the report HTML in a new window and trigger browser print dialog. */
+function usePrintFallback(html: string): void {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Please allow pop-ups to download the PDF report.');
+    return;
+  }
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.onload = () => {
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+}
+
 function StepIcon({ status }: { status: 'pending' | 'active' | 'done' }) {
   if (status === 'done') {
     return (
@@ -256,7 +273,7 @@ export default function ReportGenerationModal({
         if (abortRef.current) return;
         markComplete('compiling');
 
-        // Step 4: Build PDF via server-side Chromium (with timeout + client fallback)
+        // Step 4: Build PDF via server-side Chromium (with print fallback)
         setCurrentStep('building');
         try {
           const reportPayload = {
@@ -265,9 +282,8 @@ export default function ReportGenerationModal({
           };
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-          let useClientFallback = false;
           try {
             const serverRes = await fetch('/api/report/generate', {
               method: 'POST',
@@ -275,43 +291,36 @@ export default function ReportGenerationModal({
               body: JSON.stringify(reportPayload),
               signal: controller.signal,
             });
+            clearTimeout(timeoutId);
 
             if (serverRes.ok) {
               const pdfArrayBuffer = await serverRes.arrayBuffer();
-              clearTimeout(timeoutId);
               pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+              const sizeMB = (pdfBlobRef.current.size / (1024 * 1024)).toFixed(1);
+              setFileSize(`${sizeMB} MB`);
             } else {
-              clearTimeout(timeoutId);
-              useClientFallback = true;
+              // Server can't generate (auth, error, etc.) — use browser print
+              usePrintFallback(html);
+              if (abortRef.current) return;
+              markComplete('building');
+              setCurrentStep('success');
+              p.onDownloadComplete();
+              await delay(1500);
+              if (!abortRef.current) p.onClose();
+              return;
             }
           } catch {
             clearTimeout(timeoutId);
-            useClientFallback = true;
+            // Server timeout or network error — use browser print
+            usePrintFallback(html);
+            if (abortRef.current) return;
+            markComplete('building');
+            setCurrentStep('success');
+            p.onDownloadComplete();
+            await delay(1500);
+            if (!abortRef.current) p.onClose();
+            return;
           }
-
-          if (useClientFallback) {
-            console.warn('Server PDF unavailable, using client-side generation');
-            const html2pdf = (await import('html2pdf.js')).default;
-            const pdfPromise = html2pdf()
-              .set({
-                margin: 0,
-                filename: `Ambrosia-Deal-Report-${p.labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
-                image: { type: 'jpeg', quality: 0.92 },
-                html2canvas: { scale: 1.5, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css', 'legacy'] },
-              })
-              .from(hiddenContainerRef.current!)
-              .outputPdf('blob');
-            const timeoutPromise = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error('Client PDF generation timed out after 45s')), 45000)
-            );
-            const blob: Blob = await Promise.race([pdfPromise, timeoutPromise]);
-            pdfBlobRef.current = blob;
-          }
-
-          const sizeMB = (pdfBlobRef.current!.size / (1024 * 1024)).toFixed(1);
-          setFileSize(`${sizeMB} MB`);
         } catch (err) {
           console.error('PDF generation failed:', err);
           setErrorMessage('Failed to build PDF. Please try again.');
