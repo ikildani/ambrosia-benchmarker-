@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
-import { clearHistory, type CalculationHistoryItem } from '@/lib/history';
+import { clearHistory, getHistoryItemWithDefaults, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
 import HistoryDetailModal from './HistoryDetailModal';
 import WatchlistPanel from './watchlist/WatchlistPanel';
@@ -183,6 +183,12 @@ export default function Dashboard({
     // Store inputs in sessionStorage for calculator to pick up
     sessionStorage.setItem('prefill_calculation', JSON.stringify(item.inputs));
     setShowHistoryModal(false);
+    onNavigateToCalculator();
+  };
+
+  const handleRecalculate = (item: CalculationHistoryItem) => {
+    const itemWithDefaults = getHistoryItemWithDefaults(item);
+    sessionStorage.setItem('prefill_calculation', JSON.stringify(itemWithDefaults.inputs));
     onNavigateToCalculator();
   };
 
@@ -525,6 +531,7 @@ export default function Dashboard({
             onSortChange={setHistorySort}
             onHistoryClick={handleHistoryClick}
             onDeleteHistory={handleDeleteHistory}
+            onRecalculate={handleRecalculate}
             onNavigateToCalculator={onNavigateToCalculator}
             formatCurrency={formatCurrency}
           />

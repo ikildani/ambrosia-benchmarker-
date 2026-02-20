@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
-import { CalculationResult, CalculationInput, formatCurrency, formatRange } from '@/lib/calculations';
+import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore } from '@/lib/calculations';
 import type { PartnerForPDF } from '@/lib/report';
 import ReportGenerationModal from './ReportGenerationModal';
 import ShareModal from './ShareModal';
@@ -25,6 +25,7 @@ export type { PartnerMatchForPDF };
 
 // Sub-components
 import ResultsHeader from './results/ResultsHeader';
+import InfoTooltip from './calculator/InfoTooltip';
 import MetricCard from './results/MetricCard';
 import DrillDownPanel from './results/DrillDownPanel';
 import DealMemoSection from './results/DealMemoSection';
@@ -57,6 +58,15 @@ const metricBadges: Record<string, { label: string; color: string }> = {
   regMilestones: { label: 'Upon Approval', color: 'teal' },
   commMilestones: { label: 'Sales-Based', color: 'cyan' },
   royalties: { label: 'On Net Sales', color: 'teal' }
+};
+
+const metricTooltips: Record<string, string> = {
+  upfront: 'The guaranteed payment at deal signing, regardless of future milestones. Typically 20-40% of total deal value for Phase 2+ assets.',
+  totalDealValue: 'Maximum potential value if all milestones are achieved and commercial targets met. Includes upfront, milestones, and estimated royalty value.',
+  devMilestones: 'Payments triggered by clinical development progress: IND filing, Phase 1/2/3 initiation, and data readouts. Usually the largest milestone bucket.',
+  regMilestones: 'Payments upon regulatory events: FDA/EMA submission, approval, and additional market authorizations. Typically 10-20% of total milestones.',
+  commMilestones: 'Sales-based milestone payments triggered when cumulative net sales reach defined thresholds ($500M, $1B, etc.). Paid once per threshold.',
+  royalties: 'Ongoing percentage of net sales paid to the licensor. Tiered rates increase at higher sales thresholds. Typically range from single-digit to low-twenties percent.',
 };
 
 // Helper to extract indication category from specific indication
@@ -320,6 +330,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     setShowReportModal(true);
   };
 
+  const handleDownloadExecutiveSummary = useCallback(() => {
+    if (!fullInputs || !result) return;
+
+    import('@/lib/report').then(({ generateExecutiveSummaryPDF }) => {
+      const pdfData = {
+        result,
+        inputs: fullInputs,
+        riskScore: calculateRiskScore(fullInputs),
+      };
+      generateExecutiveSummaryPDF(pdfData as any);
+    });
+  }, [fullInputs, result]);
+
   const handlePartnerMatchesLoaded = (matches: PartnerMatchForPDF[]) => {
     setPartnerMatches(matches as PartnerForPDF[]);
     // Also notify parent component if callback provided
@@ -366,6 +389,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         onFreePDFClick={handleFreePDFClick}
         onShare={() => setShowShareModal(true)}
         onLinkedInShare={handleLinkedInShare}
+        onDownloadExecutiveSummary={handleDownloadExecutiveSummary}
       />
 
       {/* Email Capture Bar */}
@@ -545,6 +569,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             canExpand={canExpandCard('upfront')}
             isPro={isPro}
             onProClick={() => handleProFeatureClick('comparable_deals')}
+            animationIndex={0}
+            tooltipContent={metricTooltips.upfront}
           />
 
           {/* Total Deal Value */}
@@ -568,6 +594,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             canExpand={canExpandCard('totalDealValue')}
             isPro={isPro}
             onProClick={() => handleProFeatureClick('comparable_deals')}
+            animationIndex={1}
+            tooltipContent={metricTooltips.totalDealValue}
           />
 
           {/* Development Milestones */}
@@ -591,6 +619,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             canExpand={canExpandCard('devMilestones')}
             isPro={isPro}
             onProClick={() => handleProFeatureClick('comparable_deals')}
+            animationIndex={2}
+            tooltipContent={metricTooltips.devMilestones}
           />
 
           {/* Regulatory Milestones */}
@@ -614,6 +644,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             canExpand={canExpandCard('regMilestones')}
             isPro={isPro}
             onProClick={() => handleProFeatureClick('comparable_deals')}
+            animationIndex={3}
+            tooltipContent={metricTooltips.regMilestones}
           />
 
           {/* Commercial Milestones */}
@@ -637,10 +669,15 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             canExpand={canExpandCard('commMilestones')}
             isPro={isPro}
             onProClick={() => handleProFeatureClick('comparable_deals')}
+            animationIndex={4}
+            tooltipContent={metricTooltips.commMilestones}
           />
 
           {/* Tiered Royalties */}
-          <div className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${expandedCard === 'royalties' ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}>
+          <div
+            className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${expandedCard === 'royalties' ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} motion-safe:animate-metric-cascade`}
+            style={{ animationDelay: '500ms' }}
+          >
             <div
               className={canExpandCard('royalties') ? 'cursor-pointer' : ''}
               onClick={() => {
@@ -658,7 +695,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">Tiered Royalties</p>
+                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">
+                    Tiered Royalties
+                    <InfoTooltip content={metricTooltips.royalties} />
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">

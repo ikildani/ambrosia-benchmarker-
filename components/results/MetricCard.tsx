@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { DrillDownData } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
+import InfoTooltip from '@/components/calculator/InfoTooltip';
 
 interface MetricCardProps {
   title: string;
@@ -18,6 +19,8 @@ interface MetricCardProps {
   canExpand: boolean;
   isPro: boolean;
   onProClick: () => void;
+  animationIndex?: number;
+  tooltipContent?: string;
 }
 
 const badgeColorClasses: Record<string, string> = {
@@ -53,7 +56,9 @@ function MetricCardInner({
   onToggle,
   canExpand,
   isPro,
-  onProClick
+  onProClick,
+  animationIndex,
+  tooltipContent
 }: MetricCardProps) {
   const handleHeaderClick = useCallback(() => {
     if (canExpand) {
@@ -72,7 +77,8 @@ function MetricCardInner({
 
   return (
     <div
-      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
+      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
+      style={typeof animationIndex === 'number' ? { animationDelay: `${animationIndex * 100}ms` } : undefined}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
@@ -90,7 +96,10 @@ function MetricCardInner({
                 {icon}
               </div>
             </div>
-            <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{title}</p>
+            <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">
+              {title}
+              {tooltipContent && <InfoTooltip content={tooltipContent} />}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>

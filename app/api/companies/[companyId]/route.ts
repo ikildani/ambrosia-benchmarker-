@@ -142,7 +142,7 @@ export async function GET(
     }
 
     // --- Computed: Competitive peers (companies with overlapping modalities) ---
-    let competitivePeers: { id: string; name: string; company_type: string; overlap_score: number; shared_modalities: string[] }[] = [];
+    let competitivePeers: { id: string; name: string; company_type: string; overlap_score: number; shared_modalities: string[]; deal_count?: number; modalities_count?: number }[] = [];
     if (company.modalities_active && company.modalities_active.length > 0) {
       const { data: peerCandidates } = await supabase
         .from('companies')
@@ -176,6 +176,28 @@ export async function GET(
           .filter(p => p.overlap_score > 0)
           .sort((a, b) => b.overlap_score - a.overlap_score)
           .slice(0, 8);
+      }
+    }
+
+    // --- Enrich top 3 peers with deal count and modality count for comparison view ---
+    if (competitivePeers.length > 0) {
+      const topPeerIds = competitivePeers.slice(0, 3).map((p) => p.id);
+      // Fetch deals for each top peer in the last 12 months to derive stats
+      const { data: peerDeals } = await supabase
+        .from('deals')
+        .select('licensee_id, licensor_id, modality')
+        .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(','))
+        .gte('announced_date', oneYearAgo);
+
+      if (peerDeals) {
+        for (const peer of competitivePeers.slice(0, 3)) {
+          const peerDealList = peerDeals.filter(
+            (d: any) => d.licensee_id === peer.id || d.licensor_id === peer.id
+          );
+          peer.deal_count = peerDealList.length;
+          const peerMods = new Set(peerDealList.map((d: any) => d.modality).filter(Boolean));
+          peer.modalities_count = peerMods.size;
+        }
       }
     }
 

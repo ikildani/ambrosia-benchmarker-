@@ -86,3 +86,5 @@ export function generatePDFReport(data: PDFReportData): void {
     }, 500);
   };
 }
+
+export { generateExecutiveSummaryHTML, generateExecutiveSummaryPDF } from './executiveSummary';

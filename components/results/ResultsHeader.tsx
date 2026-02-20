@@ -13,6 +13,7 @@ interface ResultsHeaderProps {
   onFreePDFClick: () => void;
   onShare: () => void;
   onLinkedInShare: () => void;
+  onDownloadExecutiveSummary: () => void;
 }
 
 function ResultsHeaderInner({
@@ -26,6 +27,7 @@ function ResultsHeaderInner({
   onFreePDFClick,
   onShare,
   onLinkedInShare,
+  onDownloadExecutiveSummary,
 }: ResultsHeaderProps) {
   return (
     <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-hidden">
@@ -89,6 +91,16 @@ function ResultsHeaderInner({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>Excel</span>
+              </button>
+              <button
+                onClick={onDownloadExecutiveSummary}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="hidden sm:inline">1-Page Summary</span>
+                <span className="sm:hidden">Summary</span>
               </button>
             </>
           ) : (

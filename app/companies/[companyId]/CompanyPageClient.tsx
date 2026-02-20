@@ -12,6 +12,8 @@ import PipelineByIndication from '@/components/competitive/PipelineByIndication'
 import CompanyBenchmarkComparison from '@/components/competitive/CompanyBenchmarkComparison';
 import PatentCliffTimeline from '@/components/competitive/PatentCliffTimeline';
 import CompetitivePeers from '@/components/competitive/CompetitivePeers';
+import DealTimeline from '@/components/competitive/DealTimeline';
+import PeerComparison from '@/components/competitive/PeerComparison';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -160,6 +162,15 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
               dealsByModality={data.deals_by_modality}
             />
 
+            {/* Deal timeline visualization */}
+            {data.recent_deals && data.recent_deals.length > 0 && (
+              <DealTimeline
+                deals={data.recent_deals}
+                companyName={data.company?.name || companyId}
+                isPro={isPro}
+              />
+            )}
+
             {/* Pipeline by indication matrix */}
             {data.pipeline_by_indication && Object.keys(data.pipeline_by_indication).length > 0 && (
               <PipelineByIndication data={data.pipeline_by_indication} isPro={isPro} />
@@ -173,6 +184,15 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
             {/* Competitive peers */}
             {data.competitive_peers && data.competitive_peers.length > 0 && (
               <CompetitivePeers peers={data.competitive_peers} isPro={isPro} />
+            )}
+
+            {/* Peer comparison chart */}
+            {data.competitive_peers && data.competitive_peers.length > 0 && (
+              <PeerComparison
+                company={data}
+                peers={data.competitive_peers.slice(0, 3)}
+                isPro={isPro}
+              />
             )}
           </div>
         ) : null}

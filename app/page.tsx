@@ -8,6 +8,8 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
 import ExitIntentCapture from '@/components/ExitIntentCapture';
+import UseCaseCards from '@/components/landing/UseCaseCards';
+import ComparisonTable from '@/components/landing/ComparisonTable';
 
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
@@ -502,6 +504,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Use Case Cards */}
+      <UseCaseCards />
+
+      {/* Comparison Table */}
+      <ComparisonTable />
 
       {/* Partner Discovery Preview Section */}
       <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">

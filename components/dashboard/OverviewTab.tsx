@@ -1,5 +1,7 @@
 import React from 'react';
 import { formatDate, type CalculationHistoryItem } from '@/lib/history';
+import ActivityHeatmap from './ActivityHeatmap';
+import InsightsSummary from './InsightsSummary';
 
 interface OverviewTabProps {
   history: CalculationHistoryItem[];
@@ -110,6 +112,9 @@ const OverviewTab = React.memo(function OverviewTab({
         )}
       </div>
 
+      {/* Activity Heatmap */}
+      <ActivityHeatmap history={history} />
+
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Stats Cards */}
       <div className="md:col-span-2 lg:col-span-2 grid sm:grid-cols-2 gap-3 sm:gap-4">
@@ -146,6 +151,11 @@ const OverviewTab = React.memo(function OverviewTab({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Smart Insights - Full Width */}
+      <div className="md:col-span-2 lg:col-span-3">
+        <InsightsSummary history={history} />
       </div>
 
       {/* Recent Activity */}

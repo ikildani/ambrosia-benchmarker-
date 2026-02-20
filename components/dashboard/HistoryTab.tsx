@@ -13,6 +13,7 @@ interface HistoryTabProps {
   onSortChange: (value: 'newest' | 'oldest' | 'highest_value' | 'highest_upfront') => void;
   onHistoryClick: (item: CalculationHistoryItem) => void;
   onDeleteHistory: (id: string) => void;
+  onRecalculate: (item: CalculationHistoryItem) => void;
   onNavigateToCalculator: () => void;
   formatCurrency: (value: number) => string;
 }
@@ -29,6 +30,7 @@ const HistoryTab = React.memo(function HistoryTab({
   onSortChange,
   onHistoryClick,
   onDeleteHistory,
+  onRecalculate,
   onNavigateToCalculator,
   formatCurrency,
 }: HistoryTabProps) {
@@ -157,6 +159,17 @@ const HistoryTab = React.memo(function HistoryTab({
                 </div>
               </div>
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRecalculate(item); }}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 dark:text-teal-400
+                             hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Recalculate
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); }}
                   className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
