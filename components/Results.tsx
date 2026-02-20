@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect, createRef } from 'react';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore } from '@/lib/calculations';
@@ -240,6 +240,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [compareItem, setCompareItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryPicker, setShowHistoryPicker] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
+  const comparisonRef = useRef<HTMLDivElement>(null);
 
   // Track previous result values for sensitivity analysis delta badges
   const isFirstRenderRef = useRef(true);
@@ -291,6 +292,15 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     const history = getHistory();
     setHasHistory(history.length > 0);
   }, []);
+
+  // Auto-scroll to comparison panel when a compare item is selected
+  useEffect(() => {
+    if (compareItem && comparisonRef.current) {
+      setTimeout(() => {
+        comparisonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [compareItem]);
 
   // Build compare label from history item
   const compareLabel = compareItem
@@ -1038,14 +1048,16 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Compare with Previous - History-based comparison */}
-        {compareItem && (
-          <ScenarioComparisonPanel
-            currentResult={result}
-            compareItem={compareItem}
-            compareLabel={compareLabel}
-            onClose={() => setCompareItem(null)}
-          />
-        )}
+        <div ref={comparisonRef}>
+          {compareItem && (
+            <ScenarioComparisonPanel
+              currentResult={result}
+              compareItem={compareItem}
+              compareLabel={compareLabel}
+              onClose={() => setCompareItem(null)}
+            />
+          )}
+        </div>
 
         {/* History Picker Modal */}
         {showHistoryPicker && (
