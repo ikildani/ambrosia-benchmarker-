@@ -88,14 +88,14 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       </div>
 
       <!-- Footer -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid ${COLORS.gray200};">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          ${logoIconColor(20)}
-          <span style="font-size: 10px; font-weight: 700; color: ${COLORS.gray500};">Ambrosia Ventures</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 10px; border-top: 1px solid ${COLORS.gray200};">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          ${logoIconColor(16)}
+          <span style="font-size: 9px; font-weight: 700; color: ${COLORS.gray500};">Ambrosia Ventures</span>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 9px; color: ${COLORS.gray400};">calculator.ambrosiaventures.co</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400};">${meta.reportId} &middot; \u00A9 ${new Date().getFullYear()} Ambrosia Ventures LLC</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">calculator.ambrosiaventures.co</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">${meta.reportId} &middot; \u00A9 ${new Date().getFullYear()} Ambrosia Ventures LLC</div>
         </div>
       </div>
 

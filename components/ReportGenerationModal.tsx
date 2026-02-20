@@ -96,6 +96,7 @@ export default function ReportGenerationModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [canSkipMemo, setCanSkipMemo] = useState(false);
   const [fileSize, setFileSize] = useState<string | null>(null);
+  const [hasPdf, setHasPdf] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -133,6 +134,7 @@ export default function ReportGenerationModal({
       setErrorMessage(null);
       setCanSkipMemo(false);
       setFileSize(null);
+      setHasPdf(false);
       setEmailSending(false);
       setEmailSent(false);
       pdfBlobRef.current = null;
@@ -320,6 +322,7 @@ export default function ReportGenerationModal({
               pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
               const sizeMB = (pdfBlobRef.current.size / (1024 * 1024)).toFixed(1);
               setFileSize(`${sizeMB} MB`);
+              setHasPdf(true);
             } else {
               // Server can't generate — open HTML report in new tab for print-to-PDF
               if (abortRef.current) return;
@@ -360,9 +363,7 @@ export default function ReportGenerationModal({
         if (abortRef.current) return;
         markComplete('building');
 
-        // PDF ready — open in new tab for viewing
-        const pdfUrl = URL.createObjectURL(pdfBlobRef.current!);
-        window.open(pdfUrl, '_blank');
+        // PDF ready — show success with download/view buttons
         setCurrentStep('success');
         p.onDownloadComplete();
       } catch (err) {
@@ -587,7 +588,7 @@ export default function ReportGenerationModal({
               })}
             </div>
 
-            {/* Success — report opened in new tab */}
+            {/* Success — PDF ready with download/view options */}
             {currentStep === 'success' && (
               <div className="mt-5 animate-step-fade-in">
                 <div className="flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg mb-4">
@@ -596,57 +597,64 @@ export default function ReportGenerationModal({
                       <path d="M3 8.5L6.5 12L13 4" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
-                    {format === 'pdf' ? 'Report opened in new tab' : 'Excel workbook saved to your downloads'}
-                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
+                      {format === 'pdf' ? 'Your report is ready' : 'Excel workbook saved to your downloads'}
+                    </p>
+                    {fileSize && <p className="text-xs text-teal-600/70 dark:text-teal-400/60 mt-0.5">{fileSize} PDF</p>}
+                  </div>
                 </div>
 
                 {format === 'pdf' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleViewReport}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all text-sm"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                      </svg>
-                      View Report
-                    </button>
-                    {pdfBlobRef.current && (
+                  <div className="space-y-2">
+                    {/* Primary: Download PDF */}
+                    {hasPdf && (
                       <button
                         onClick={handleSaveToDevice}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600 font-semibold rounded-xl transition-all text-sm"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all text-sm shadow-sm"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Save
+                        Download PDF
                       </button>
                     )}
-                    {userEmail && pdfBlobRef.current && (
+                    {/* Secondary actions row */}
+                    <div className="flex gap-2">
                       <button
-                        onClick={handleEmailReport}
-                        disabled={emailSending || emailSent}
-                        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-semibold ${
-                          emailSent
-                            ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-300'
-                            : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
-                        }`}
+                        onClick={handleViewReport}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600 font-semibold rounded-xl transition-all text-sm"
                       >
-                        {emailSent ? (
-                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 8.5L6.5 12L13 4" />
-                          </svg>
-                        ) : emailSending ? (
-                          <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                          </svg>
-                        )}
-                        {emailSent ? 'Sent' : 'Email'}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                        View in Browser
                       </button>
-                    )}
+                      {userEmail && hasPdf && (
+                        <button
+                          onClick={handleEmailReport}
+                          disabled={emailSending || emailSent}
+                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm font-semibold ${
+                            emailSent
+                              ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-300'
+                              : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
+                          }`}
+                        >
+                          {emailSent ? (
+                            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 8.5L6.5 12L13 4" />
+                            </svg>
+                          ) : emailSending ? (
+                            <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                          )}
+                          {emailSent ? 'Sent' : 'Email to Me'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

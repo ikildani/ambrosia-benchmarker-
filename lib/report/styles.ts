@@ -20,9 +20,10 @@ export function getReportStyles(): string {
       background: white;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      font-size: 12px;
-      line-height: 1.6;
-      letter-spacing: -0.01em;
+      font-size: 11px;
+      line-height: 1.55;
+      letter-spacing: -0.005em;
+      font-feature-settings: 'cv01', 'cv02', 'cv03', 'cv04';
     }
 
     .report-page {
@@ -30,7 +31,7 @@ export function getReportStyles(): string {
       min-height: 297mm;
       page-break-after: always;
       page-break-inside: avoid;
-      padding: 44px 52px 56px 52px;
+      padding: 40px 48px 52px 48px;
       position: relative;
       background: white;
     }
@@ -49,28 +50,29 @@ export function getReportStyles(): string {
        ======================================== */
 
     .section-title {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 12px;
+      letter-spacing: 0.14em;
+      margin-bottom: 10px;
     }
 
     .section-title-lg {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       color: #1a1e42;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
     }
 
-    .text-sm { font-size: 11px; }
-    .text-xs { font-size: 10px; }
-    .text-xxs { font-size: 9px; }
-    .text-lg { font-size: 16px; }
-    .text-xl { font-size: 20px; }
-    .text-2xl { font-size: 24px; }
+    .text-sm { font-size: 10px; }
+    .text-xs { font-size: 9px; }
+    .text-xxs { font-size: 8px; }
+    .text-lg { font-size: 15px; }
+    .text-xl { font-size: 19px; }
+    .text-2xl { font-size: 22px; }
 
     .font-bold { font-weight: 700; }
     .font-semibold { font-weight: 600; }
@@ -92,7 +94,7 @@ export function getReportStyles(): string {
     .flex-col { flex-direction: column; }
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 10px; }
+    .gap-2 { gap: 8px; }
     .gap-3 { gap: 12px; }
     .gap-4 { gap: 16px; }
     .gap-6 { gap: 24px; }
@@ -100,58 +102,58 @@ export function getReportStyles(): string {
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .grid-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .grid-4 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 14px;
+      gap: 10px;
     }
 
     /* ========================================
-       CARDS — Refined, professional
+       CARDS — Clean, minimal borders
        ======================================== */
 
     .card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 18px;
+      border-radius: 5px;
+      padding: 16px;
     }
 
     .card-sm {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 5px;
-      padding: 12px 16px;
+      border-radius: 4px;
+      padding: 10px 14px;
     }
 
     .card-highlight {
-      background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-      border: 1px solid #a7f3d0;
-      border-radius: 6px;
-      padding: 18px;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      border-radius: 5px;
+      padding: 16px;
     }
 
     .card-amber {
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      background: #fffbeb;
       border: 1px solid #fde68a;
-      border-radius: 6px;
-      padding: 18px;
+      border-radius: 5px;
+      padding: 16px;
     }
 
     .card-navy {
       background: linear-gradient(135deg, #1a1e42 0%, #1e2556 100%);
       border: none;
-      border-radius: 6px;
-      padding: 18px;
+      border-radius: 5px;
+      padding: 16px;
       color: #ffffff;
     }
 
@@ -162,58 +164,58 @@ export function getReportStyles(): string {
     .kpi-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 16px 14px;
+      border-radius: 6px;
+      padding: 14px 12px;
       text-align: center;
     }
 
     .kpi-value {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 26px;
+      font-weight: 800;
       color: #0d9488;
       line-height: 1.1;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
     .kpi-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       margin-top: 5px;
     }
 
     .kpi-sub {
-      font-size: 10px;
+      font-size: 9px;
       color: #94a3b8;
       margin-top: 3px;
     }
 
     /* ========================================
-       TABLES — Clean, professional
+       TABLES — Professional, tight
        ======================================== */
 
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
+      font-size: 10px;
     }
 
     .data-table th {
       background: #f8fafc;
-      border-bottom: 2px solid #cbd5e1;
-      padding: 9px 12px;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding: 8px 10px;
       text-align: left;
       font-weight: 700;
       color: #475569;
-      font-size: 9px;
+      font-size: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
     }
 
     .data-table td {
-      padding: 9px 12px;
+      padding: 7px 10px;
       border-bottom: 1px solid #f1f5f9;
       color: #334155;
     }
@@ -234,12 +236,12 @@ export function getReportStyles(): string {
 
     .badge {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 3px;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
     }
 
     .badge-teal {
@@ -283,15 +285,15 @@ export function getReportStyles(): string {
        ======================================== */
 
     .score-bar {
-      height: 5px;
+      height: 4px;
       background: #e2e8f0;
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: hidden;
     }
 
     .score-bar-fill {
       height: 100%;
-      border-radius: 3px;
+      border-radius: 2px;
       background: linear-gradient(90deg, #0d9488, #06b6d4);
     }
 
@@ -302,9 +304,9 @@ export function getReportStyles(): string {
     .callout {
       background: #f0fdfa;
       border-left: 3px solid #0d9488;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 0 4px 4px 0;
-      font-size: 11px;
+      font-size: 10px;
       color: #134e4a;
       line-height: 1.6;
     }
@@ -312,9 +314,9 @@ export function getReportStyles(): string {
     .callout-amber {
       background: #fffbeb;
       border-left: 3px solid #f59e0b;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 0 4px 4px 0;
-      font-size: 11px;
+      font-size: 10px;
       color: #78350f;
       line-height: 1.6;
     }
@@ -325,12 +327,12 @@ export function getReportStyles(): string {
 
     .bullet-list {
       padding-left: 16px;
-      font-size: 11px;
+      font-size: 10px;
       color: #334155;
     }
 
     .bullet-list li {
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       line-height: 1.5;
     }
 
@@ -341,13 +343,13 @@ export function getReportStyles(): string {
     .divider {
       border: none;
       border-top: 1px solid #e2e8f0;
-      margin: 14px 0;
+      margin: 12px 0;
     }
 
     .divider-thick {
       border: none;
       border-top: 2px solid #e2e8f0;
-      margin: 18px 0;
+      margin: 16px 0;
     }
 
     /* ========================================
@@ -358,7 +360,7 @@ export function getReportStyles(): string {
       width: 100%;
       display: flex;
       justify-content: center;
-      margin: 8px 0;
+      margin: 6px 0;
     }
 
     .chart-container svg {
@@ -378,9 +380,9 @@ export function getReportStyles(): string {
       background: linear-gradient(135deg, #1a1e42, #312e81);
       color: #c4b5fd;
       border-radius: 3px;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
@@ -393,8 +395,8 @@ export function getReportStyles(): string {
       border: 1px solid #e2e8f0;
       border-left: 3px solid #94a3b8;
       border-radius: 0 4px 4px 0;
-      padding: 16px 20px;
-      font-size: 9px;
+      padding: 14px 18px;
+      font-size: 8px;
       color: #64748b;
       line-height: 1.7;
     }
@@ -411,12 +413,12 @@ export function getReportStyles(): string {
 
     @media screen {
       body {
-        background: #94a3b8;
-        padding: 20px 0;
+        background: #64748b;
+        padding: 16px 0;
       }
       .report-page {
-        margin: 20px auto;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        margin: 16px auto;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.12);
       }
     }
   `;

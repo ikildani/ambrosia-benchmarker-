@@ -67,14 +67,15 @@ export function escapeHtml(str: string): string {
 // Page header HTML for consistent branding across pages
 export function pageHeader(pageNum: number, totalPages: number, reportTitle: string): string {
   return `
-    <div style="border-top: 2.5px solid #0d9488; padding-top: 10px; margin-bottom: 22px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #e2e8f0;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          ${logoIconColor(22)}
-          <span style="font-size: 9px; font-weight: 700; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase;">Ambrosia Ventures</span>
+    <div style="margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1.5px solid #0d9488;">
+        <div style="display: flex; align-items: center; gap: 7px;">
+          ${logoIconColor(18)}
+          <span style="font-size: 8px; font-weight: 700; color: #64748b; letter-spacing: 0.14em; text-transform: uppercase;">Ambrosia Ventures</span>
         </div>
-        <div style="font-size: 9px; color: #cbd5e1; letter-spacing: 0.02em;">
-          ${escapeHtml(reportTitle)} &mdash; Page ${pageNum} of ${totalPages}
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 8px; color: #94a3b8; letter-spacing: 0.02em;">${escapeHtml(reportTitle)}</span>
+          <span style="font-size: 8px; font-weight: 600; color: #0d9488;">${pageNum}/${totalPages}</span>
         </div>
       </div>
     </div>
@@ -85,9 +86,9 @@ export function pageHeader(pageNum: number, totalPages: number, reportTitle: str
 export function pageFooter(reportId: string): string {
   const now = formatDate();
   return `
-    <div style="position: absolute; bottom: 28px; left: 52px; right: 52px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9;">
-      <span style="font-size: 8px; color: #cbd5e1; letter-spacing: 0.04em;">CONFIDENTIAL &mdash; ${now}</span>
-      <span style="font-size: 8px; color: #cbd5e1; letter-spacing: 0.04em;">${reportId}</span>
+    <div style="position: absolute; bottom: 24px; left: 48px; right: 48px; display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #e2e8f0;">
+      <span style="font-size: 7px; color: #94a3b8; letter-spacing: 0.06em; text-transform: uppercase;">Confidential &middot; ${now}</span>
+      <span style="font-size: 7px; color: #94a3b8; font-weight: 600; letter-spacing: 0.04em;">${reportId}</span>
     </div>
   `;
 }

@@ -43,7 +43,7 @@ export function logoFullWhite(width: number = 200): string {
       <polygon points="92,33 96,40 89,39" fill="#9499d1" opacity="0.7"/>
     </g>
     <text x="120" y="60" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="2.5">Ventures</text>
+    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="1">Ventures</text>
   </svg>`;
 }
 
@@ -88,7 +88,7 @@ export function logoFullColor(width: number = 200): string {
       <polygon points="92,33 96,40 89,39" fill="#2a2f72" opacity="0.7"/>
     </g>
     <text x="120" y="60" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#151a3d" letter-spacing="0.5">Ambrosia</text>
-    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#656a9e" letter-spacing="2.5">Ventures</text>
+    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#656a9e" letter-spacing="1">Ventures</text>
   </svg>`;
 }
 
