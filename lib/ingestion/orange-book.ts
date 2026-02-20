@@ -5,8 +5,7 @@
 // Format: Tilde (~) delimited text files in a ZIP archive
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createReadStream } from 'fs';
-import { Readable } from 'stream';
+import { inflateRawSync } from 'zlib';
 
 // Top blockbuster drugs with estimated annual revenue (from public 10-K disclosures, 2024-2025)
 // Used to enrich patent cliff entries with revenue context
@@ -171,6 +170,7 @@ interface OrangeBookPatent {
   drug_product_flag: string;
   patent_use_code: string;
   delist_flag: string;
+  submission_date: string;
 }
 
 interface OrangeBookProduct {
@@ -235,12 +235,13 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
     const patents = parseTildeDelimited<OrangeBookPatent>(patentFile.content, [
       'appl_type', 'appl_no', 'product_no', 'patent_no', 'patent_expire_date',
       'drug_substance_flag', 'drug_product_flag', 'patent_use_code', 'delist_flag',
+      'submission_date',
     ]);
 
     const products = parseTildeDelimited<OrangeBookProduct>(productFile.content, [
       'ingredient', 'df_route', 'trade_name', 'applicant', 'strength',
       'appl_type', 'appl_no', 'product_no', 'te_code', 'approval_date',
-      'type', 'applicant_full_name',
+      'rld', 'rs', 'type', 'applicant_full_name',
     ]);
 
     console.log(`[orange-book] Parsed ${patents.length} patents, ${products.length} products`);
@@ -418,11 +419,10 @@ function parseZip(buffer: Buffer): Array<{ name: string; content: string }> {
       const content = buffer.toString('utf8', dataStart, dataStart + uncompressedSize);
       files.push({ name, content });
     } else if (compressionMethod === 8) {
-      // Deflated — use zlib
+      // Deflated — use zlib inflateRawSync
       try {
-        const zlib = require('zlib');
         const compressed = buffer.subarray(dataStart, dataStart + compressedSize);
-        const decompressed = zlib.inflateRawSync(compressed);
+        const decompressed = inflateRawSync(compressed);
         files.push({ name, content: decompressed.toString('utf8') });
       } catch (e) {
         console.warn(`[orange-book] Could not decompress ${name}: ${e}`);
@@ -464,9 +464,23 @@ function matchApplicant(applicant: string, fullName: string): string | null {
   return null;
 }
 
+const MONTH_MAP: Record<string, number> = {
+  'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+  'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+};
+
 function parseDate(dateStr: string): Date | null {
   if (!dateStr) return null;
-  // FDA dates can be MM/DD/YYYY or YYYY-MM-DD
+
+  // FDA Orange Book format: "Aug 24, 2026" or "Jan 1, 2030"
+  const textMatch = dateStr.match(/^(\w{3})\s+(\d{1,2}),?\s+(\d{4})$/);
+  if (textMatch) {
+    const month = MONTH_MAP[textMatch[1].toLowerCase()];
+    if (month === undefined) return null;
+    return new Date(parseInt(textMatch[3]), month, parseInt(textMatch[2]));
+  }
+
+  // Fallback: MM/DD/YYYY or YYYY-MM-DD
   const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
   if (parts.length !== 3) return null;
 
