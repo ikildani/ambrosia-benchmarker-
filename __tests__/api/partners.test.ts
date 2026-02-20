@@ -246,10 +246,10 @@ describe('/api/partners/match', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      // Method 3: trusts client tier for localStorage-based Pro users
-      expect(data.user_tier).toBe('pro');
-      expect(data.matches_shown).toBe(10);
-      expect(data.matches[0].profile_locked).toBe(false);
+      // Server derives tier from DB, not client — DB says 'free' so server returns 'free'
+      expect(data.user_tier).toBe('free');
+      expect(data.matches_shown).toBe(3);
+      expect(data.matches[0].profile_locked).toBe(true);
     });
   });
 
