@@ -42,7 +42,15 @@ import {
   comorbidityBreadthOptions,
   metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
-import { competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions, sectionHelp } from '@/lib/optionDescriptions';
+import {
+  competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions,
+  lineOfTherapyDescriptions, treatmentApproachDescriptions, bbbPenetrationDescriptions,
+  diseaseProgressionDescriptions, biomarkerValidationDescriptions, treatmentGoalDescriptions,
+  immuneResetDescriptions, targetSpecificityDescriptions, diseaseSeverityDescriptions,
+  metabolicTreatmentApproachDescriptions, mechanismDifferentiationDescriptions,
+  weightLossEfficacyDescriptions, routeOfAdministrationDescriptions, comorbidityBreadthDescriptions,
+  sectionHelp,
+} from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
 import InfoTooltip from './InfoTooltip';
@@ -60,6 +68,70 @@ dataQualityOptions.forEach(opt => {
 const combinationBadges: Record<string, ImpactBadge> = {};
 combinationPotentialOptions.forEach(opt => {
   combinationBadges[opt.value] = getMultiplierImpactBadge('combinationPotential', opt.value);
+});
+
+// Target Profile badges — oncology
+const lineOfTherapyBadges: Record<string, ImpactBadge> = {};
+lineOfTherapyOptions.forEach(opt => {
+  lineOfTherapyBadges[opt.value] = getMultiplierImpactBadge('lineOfTherapy', opt.value);
+});
+
+// Target Profile badges — neurology
+const treatmentApproachBadges: Record<string, ImpactBadge> = {};
+treatmentApproachOptions.forEach(opt => {
+  treatmentApproachBadges[opt.value] = getMultiplierImpactBadge('treatmentApproach', opt.value);
+});
+const bbbPenetrationBadges: Record<string, ImpactBadge> = {};
+bbbPenetrationOptions.forEach(opt => {
+  bbbPenetrationBadges[opt.value] = getMultiplierImpactBadge('bbbPenetration', opt.value);
+});
+const diseaseProgressionBadges: Record<string, ImpactBadge> = {};
+diseaseProgressionOptions.forEach(opt => {
+  diseaseProgressionBadges[opt.value] = getMultiplierImpactBadge('diseaseProgression', opt.value);
+});
+const biomarkerValidationBadges: Record<string, ImpactBadge> = {};
+biomarkerValidationOptions.forEach(opt => {
+  biomarkerValidationBadges[opt.value] = getMultiplierImpactBadge('biomarkerValidation', opt.value);
+});
+
+// Target Profile badges — immunology
+const treatmentGoalBadges: Record<string, ImpactBadge> = {};
+treatmentGoalOptions.forEach(opt => {
+  treatmentGoalBadges[opt.value] = getMultiplierImpactBadge('treatmentGoal', opt.value);
+});
+const immuneResetBadges: Record<string, ImpactBadge> = {};
+immuneResetOptions.forEach(opt => {
+  immuneResetBadges[opt.value] = getMultiplierImpactBadge('immuneResetPotential', opt.value);
+});
+const targetSpecificityBadges: Record<string, ImpactBadge> = {};
+targetSpecificityOptions.forEach(opt => {
+  targetSpecificityBadges[opt.value] = getMultiplierImpactBadge('targetSpecificity', opt.value);
+});
+const diseaseSeverityBadges: Record<string, ImpactBadge> = {};
+diseaseSeverityOptions.forEach(opt => {
+  diseaseSeverityBadges[opt.value] = getMultiplierImpactBadge('diseaseSeverity', opt.value);
+});
+
+// Target Profile badges — metabolic
+const metabolicTreatmentApproachBadges: Record<string, ImpactBadge> = {};
+metabolicTreatmentApproachOptions.forEach(opt => {
+  metabolicTreatmentApproachBadges[opt.value] = getMultiplierImpactBadge('metabolicTreatmentApproach', opt.value);
+});
+const mechanismDifferentiationBadges: Record<string, ImpactBadge> = {};
+mechanismDifferentiationOptions.forEach(opt => {
+  mechanismDifferentiationBadges[opt.value] = getMultiplierImpactBadge('mechanismDifferentiation', opt.value);
+});
+const weightLossEfficacyBadges: Record<string, ImpactBadge> = {};
+weightLossEfficacyOptions.forEach(opt => {
+  weightLossEfficacyBadges[opt.value] = getMultiplierImpactBadge('weightLossEfficacy', opt.value);
+});
+const routeOfAdministrationBadges: Record<string, ImpactBadge> = {};
+routeOfAdministrationOptions.forEach(opt => {
+  routeOfAdministrationBadges[opt.value] = getMultiplierImpactBadge('routeOfAdministration', opt.value);
+});
+const comorbidityBreadthBadges: Record<string, ImpactBadge> = {};
+comorbidityBreadthOptions.forEach(opt => {
+  comorbidityBreadthBadges[opt.value] = getMultiplierImpactBadge('comorbidityBreadth', opt.value);
 });
 
 interface AdvancedOptionsSectionProps {
@@ -387,227 +459,179 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
         </h3>
         <div className="space-y-4">
           {therapeuticArea === 'neurology' ? (
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Treatment Approach</label>
-              <select
-                value={treatmentApproach}
-                onChange={(e) => onTreatmentApproachChange(e.target.value as TreatmentApproach)}
-                className={`select-field transition-all duration-300 ${highlightedFields.has('treatmentApproach') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-              >
-                {treatmentApproachOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="treatment-approach-select"
+              label="Treatment Approach"
+              helpText={sectionHelp.treatmentApproach}
+              options={treatmentApproachOptions}
+              descriptions={treatmentApproachDescriptions}
+              impactBadges={treatmentApproachBadges}
+              value={treatmentApproach}
+              onChange={onTreatmentApproachChange}
+              highlighted={highlightedFields.has('treatmentApproach')}
+              columns={3}
+            />
           ) : therapeuticArea === 'metabolic' ? (
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                Treatment Approach
-                <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-              </label>
-              <select
-                value={metabolicTreatmentApproach}
-                onChange={(e) => onMetabolicTreatmentApproachChange(e.target.value as MetabolicTreatmentApproach)}
-                className="select-field"
-              >
-                {metabolicTreatmentApproachOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="metabolic-treatment-approach-select"
+              label="Treatment Approach"
+              helpText={sectionHelp.metabolicTreatmentApproach}
+              options={metabolicTreatmentApproachOptions}
+              descriptions={metabolicTreatmentApproachDescriptions}
+              impactBadges={metabolicTreatmentApproachBadges}
+              value={metabolicTreatmentApproach}
+              onChange={onMetabolicTreatmentApproachChange}
+              columns={3}
+            />
           ) : therapeuticArea === 'immunology' ? (
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                Treatment Goal
-                <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-              </label>
-              <select
-                value={treatmentGoal}
-                onChange={(e) => onTreatmentGoalChange(e.target.value as ImmunologyTreatmentGoal)}
-                className="select-field"
-              >
-                {treatmentGoalOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="treatment-goal-select"
+              label="Treatment Goal"
+              helpText={sectionHelp.treatmentGoal}
+              options={treatmentGoalOptions}
+              descriptions={treatmentGoalDescriptions}
+              impactBadges={treatmentGoalBadges}
+              value={treatmentGoal}
+              onChange={onTreatmentGoalChange}
+              columns={3}
+            />
           ) : (
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Line of Therapy</label>
-              <select
-                value={lineOfTherapy}
-                onChange={(e) => onLineOfTherapyChange(e.target.value as LineOfTherapy)}
-                className={`select-field transition-all duration-300 ${highlightedFields.has('lineOfTherapy') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-              >
-                {lineOfTherapyOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="line-of-therapy-select"
+              label="Line of Therapy"
+              helpText={sectionHelp.lineOfTherapy}
+              options={lineOfTherapyOptions}
+              descriptions={lineOfTherapyDescriptions}
+              impactBadges={lineOfTherapyBadges}
+              value={lineOfTherapy}
+              onChange={onLineOfTherapyChange}
+              highlighted={highlightedFields.has('lineOfTherapy')}
+              columns={3}
+            />
           )}
 
           {therapeuticArea === 'neurology' && (
             <>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  BBB Penetration
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                </label>
-                <select
-                  value={bbbPenetration}
-                  onChange={(e) => onBbbPenetrationChange(e.target.value as BBBPenetration)}
-                  className="select-field"
-                >
-                  {bbbPenetrationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Disease Progression
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                </label>
-                <select
-                  value={diseaseProgression}
-                  onChange={(e) => onDiseaseProgressionChange(e.target.value as DiseaseProgression)}
-                  className="select-field"
-                >
-                  {diseaseProgressionOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Biomarker Validation
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold tracking-wider align-middle">NEURO</span>
-                </label>
-                <select
-                  value={biomarkerValidation}
-                  onChange={(e) => onBiomarkerValidationChange(e.target.value as BiomarkerValidation)}
-                  className="select-field"
-                >
-                  {biomarkerValidationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
+              <OptionCardGroup
+                id="bbb-penetration-select"
+                label="BBB Penetration"
+                helpText={sectionHelp.bbbPenetration}
+                options={bbbPenetrationOptions}
+                descriptions={bbbPenetrationDescriptions}
+                impactBadges={bbbPenetrationBadges}
+                value={bbbPenetration}
+                onChange={onBbbPenetrationChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="disease-progression-select"
+                label="Disease Progression"
+                helpText={sectionHelp.diseaseProgression}
+                options={diseaseProgressionOptions}
+                descriptions={diseaseProgressionDescriptions}
+                impactBadges={diseaseProgressionBadges}
+                value={diseaseProgression}
+                onChange={onDiseaseProgressionChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="biomarker-validation-select"
+                label="Biomarker Validation"
+                helpText={sectionHelp.biomarkerValidation}
+                options={biomarkerValidationOptions}
+                descriptions={biomarkerValidationDescriptions}
+                impactBadges={biomarkerValidationBadges}
+                value={biomarkerValidation}
+                onChange={onBiomarkerValidationChange}
+                columns={3}
+              />
             </>
           )}
 
           {therapeuticArea === 'immunology' && (
             <>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Immune Reset Potential
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                </label>
-                <select
-                  value={immuneResetPotential}
-                  onChange={(e) => onImmuneResetPotentialChange(e.target.value as ImmuneResetPotential)}
-                  className="select-field"
-                >
-                  {immuneResetOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Target Specificity
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                </label>
-                <select
-                  value={targetSpecificity}
-                  onChange={(e) => onTargetSpecificityChange(e.target.value as TargetSpecificity)}
-                  className="select-field"
-                >
-                  {targetSpecificityOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Disease Severity
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-bold tracking-wider align-middle">IMMUNO</span>
-                </label>
-                <select
-                  value={diseaseSeverity}
-                  onChange={(e) => onDiseaseSeverityChange(e.target.value as DiseaseSeverity)}
-                  className="select-field"
-                >
-                  {diseaseSeverityOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
+              <OptionCardGroup
+                id="immune-reset-select"
+                label="Immune Reset Potential"
+                helpText={sectionHelp.immuneResetPotential}
+                options={immuneResetOptions}
+                descriptions={immuneResetDescriptions}
+                impactBadges={immuneResetBadges}
+                value={immuneResetPotential}
+                onChange={onImmuneResetPotentialChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="target-specificity-select"
+                label="Target Specificity"
+                helpText={sectionHelp.targetSpecificity}
+                options={targetSpecificityOptions}
+                descriptions={targetSpecificityDescriptions}
+                impactBadges={targetSpecificityBadges}
+                value={targetSpecificity}
+                onChange={onTargetSpecificityChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="disease-severity-select"
+                label="Disease Severity"
+                helpText={sectionHelp.diseaseSeverity}
+                options={diseaseSeverityOptions}
+                descriptions={diseaseSeverityDescriptions}
+                impactBadges={diseaseSeverityBadges}
+                value={diseaseSeverity}
+                onChange={onDiseaseSeverityChange}
+                columns={3}
+              />
             </>
           )}
 
           {therapeuticArea === 'metabolic' && (
             <>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Mechanism Differentiation
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                </label>
-                <select
-                  value={mechanismDifferentiation}
-                  onChange={(e) => onMechanismDifferentiationChange(e.target.value as MechanismDifferentiation)}
-                  className="select-field"
-                >
-                  {mechanismDifferentiationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Weight Loss Efficacy
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                </label>
-                <select
-                  value={weightLossEfficacy}
-                  onChange={(e) => onWeightLossEfficacyChange(e.target.value as WeightLossEfficacy)}
-                  className="select-field"
-                >
-                  {weightLossEfficacyOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Route of Administration
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                </label>
-                <select
-                  value={routeOfAdministration}
-                  onChange={(e) => onRouteOfAdministrationChange(e.target.value as RouteOfAdministration)}
-                  className="select-field"
-                >
-                  {routeOfAdministrationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
-                  Comorbidity Breadth
-                  <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold tracking-wider align-middle">METAB</span>
-                </label>
-                <select
-                  value={comorbidityBreadth}
-                  onChange={(e) => onComorbidityBreadthChange(e.target.value as ComorbidityBreadth)}
-                  className="select-field"
-                >
-                  {comorbidityBreadthOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
+              <OptionCardGroup
+                id="mechanism-differentiation-select"
+                label="Mechanism Differentiation"
+                helpText={sectionHelp.mechanismDifferentiation}
+                options={mechanismDifferentiationOptions}
+                descriptions={mechanismDifferentiationDescriptions}
+                impactBadges={mechanismDifferentiationBadges}
+                value={mechanismDifferentiation}
+                onChange={onMechanismDifferentiationChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="weight-loss-efficacy-select"
+                label="Weight Loss Efficacy"
+                helpText={sectionHelp.weightLossEfficacy}
+                options={weightLossEfficacyOptions}
+                descriptions={weightLossEfficacyDescriptions}
+                impactBadges={weightLossEfficacyBadges}
+                value={weightLossEfficacy}
+                onChange={onWeightLossEfficacyChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="route-of-administration-select"
+                label="Route of Administration"
+                helpText={sectionHelp.routeOfAdministration}
+                options={routeOfAdministrationOptions}
+                descriptions={routeOfAdministrationDescriptions}
+                impactBadges={routeOfAdministrationBadges}
+                value={routeOfAdministration}
+                onChange={onRouteOfAdministrationChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="comorbidity-breadth-select"
+                label="Comorbidity Breadth"
+                helpText={sectionHelp.comorbidityBreadth}
+                options={comorbidityBreadthOptions}
+                descriptions={comorbidityBreadthDescriptions}
+                impactBadges={comorbidityBreadthBadges}
+                value={comorbidityBreadth}
+                onChange={onComorbidityBreadthChange}
+                columns={3}
+              />
             </>
           )}
 
