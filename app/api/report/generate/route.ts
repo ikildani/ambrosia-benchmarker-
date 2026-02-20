@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Return PDF binary
-    return new NextResponse(pdfBuffer, {
+    return new Response(pdfBuffer.buffer as ArrayBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
