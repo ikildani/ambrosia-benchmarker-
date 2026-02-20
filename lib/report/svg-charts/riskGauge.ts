@@ -10,7 +10,7 @@ export function renderRiskGauge(score: number, size: number = 120): string {
   const r = size / 2 - 10;
   const strokeWidth = Math.max(8, size * 0.09);
   const vbW = size + pad * 2;
-  const vbH = size * 0.58 + pad * 2;
+  const vbH = size * 0.62 + pad * 2;
 
   // Arc from 180deg (left) to 0deg (right) — semicircle
   const startAngle = Math.PI;

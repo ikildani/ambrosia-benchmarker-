@@ -28,25 +28,27 @@ export function renderRangeBar(
   const highX = scale(range.high);
 
   const svgHeight = showLabels ? height + 2 : height;
+  // Unique IDs to avoid SVG gradient conflicts when multiple range bars on same page
+  const uid = `rb-${Math.round(range.low)}-${Math.round(range.median)}`;
 
   return `
     <svg width="${width}" height="${svgHeight}" viewBox="0 0 ${width} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="rbGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-g" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#99f6e4" />
           <stop offset="100%" stop-color="#5eead4" />
         </linearGradient>
-        <filter id="rbDiamondGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <filter id="${uid}-f" x="-30%" y="-30%" width="160%" height="160%">
           <feDropShadow dx="0" dy="0.5" stdDeviation="1.5" flood-color="${COLORS.teal}" flood-opacity="0.25" />
         </filter>
       </defs>
       <!-- Track -->
       <rect x="${padding}" y="${barY}" width="${trackW}" height="${barH}" rx="4" fill="${COLORS.gray100}" />
       <!-- Range fill -->
-      <rect x="${lowX}" y="${barY}" width="${highX - lowX}" height="${barH}" rx="4" fill="url(#rbGrad)" />
+      <rect x="${lowX}" y="${barY}" width="${highX - lowX}" height="${barH}" rx="4" fill="url(#${uid}-g)" />
       <!-- Median diamond -->
-      <polygon points="${medX},${barY - 2} ${medX + 5},${barY + barH / 2} ${medX},${barY + barH + 2} ${medX - 5},${barY + barH / 2}"
-        fill="${COLORS.teal}" filter="url(#rbDiamondGlow)" />
+      <polygon points="${medX},${barY - 2} ${medX + 4},${barY + barH / 2} ${medX},${barY + barH + 2} ${medX - 4},${barY + barH / 2}"
+        fill="${COLORS.teal}" filter="url(#${uid}-f)" />
       ${showLabels ? `
       <!-- Labels -->
       <text x="${lowX}" y="${barY + barH + 14}" font-size="9" fill="${COLORS.gray400}" text-anchor="start">${formatUsd(range.low)}</text>
