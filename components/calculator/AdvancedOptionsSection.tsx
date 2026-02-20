@@ -49,9 +49,9 @@ import {
   immuneResetDescriptions, targetSpecificityDescriptions, diseaseSeverityDescriptions,
   metabolicTreatmentApproachDescriptions, mechanismDifferentiationDescriptions,
   weightLossEfficacyDescriptions, routeOfAdministrationDescriptions, comorbidityBreadthDescriptions,
-  sectionHelp,
+  territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
-import { getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
 import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -132,6 +132,12 @@ routeOfAdministrationOptions.forEach(opt => {
 const comorbidityBreadthBadges: Record<string, ImpactBadge> = {};
 comorbidityBreadthOptions.forEach(opt => {
   comorbidityBreadthBadges[opt.value] = getMultiplierImpactBadge('comorbidityBreadth', opt.value);
+});
+
+// Deal Scope badges
+const territoryBadges: Record<string, ImpactBadge> = {};
+territoryOptions.forEach(opt => {
+  territoryBadges[opt.value] = getTerritoryImpactBadge(opt.value);
 });
 
 interface AdvancedOptionsSectionProps {
@@ -288,18 +294,18 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           Deal Scope
         </h3>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory<InfoTooltip content={sectionHelp.territory} /></label>
-            <select
-              value={territory}
-              onChange={(e) => onTerritoryChange(e.target.value as Territory)}
-              className={`select-field transition-all duration-300 ${highlightedFields.has('territory') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-            >
-              {territoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
+          <OptionCardGroup
+            id="territory-select"
+            label="Territory"
+            helpText={sectionHelp.territory}
+            options={territoryOptions}
+            descriptions={territoryDescriptions}
+            impactBadges={territoryBadges}
+            value={territory}
+            onChange={onTerritoryChange}
+            highlighted={highlightedFields.has('territory')}
+            columns={3}
+          />
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -308,8 +314,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                   key={option.value}
                   className={`flex items-center gap-3 px-4 py-3.5 sm:py-3 rounded-xl border-2 cursor-pointer transition-all duration-200 touch-feedback min-h-[52px] ${
                     regulatoryDesignations[option.value as keyof RegulatoryDesignations]
-                      ? 'border-teal-500 bg-teal-50 shadow-sm'
-                      : 'border-neutral-200 bg-white hover:border-teal-300 active:bg-teal-50/50'
+                      ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 shadow-sm'
+                      : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-teal-300 dark:hover:border-teal-600 active:bg-teal-50/50'
                   }`}
                 >
                   <input
@@ -321,7 +327,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                   <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
                     regulatoryDesignations[option.value as keyof RegulatoryDesignations]
                       ? 'bg-teal-500 border-teal-500'
-                      : 'border-neutral-300'
+                      : 'border-neutral-300 dark:border-slate-500'
                   }`}>
                     {regulatoryDesignations[option.value as keyof RegulatoryDesignations] && (
                       <svg className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,8 +337,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                   </div>
                   <span className={`text-sm sm:text-sm font-medium ${
                     regulatoryDesignations[option.value as keyof RegulatoryDesignations]
-                      ? 'text-teal-700'
-                      : 'text-neutral-700'
+                      ? 'text-teal-700 dark:text-teal-400'
+                      : 'text-neutral-700 dark:text-slate-300'
                   }`}>
                     {option.label}
                   </span>
@@ -390,18 +396,18 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             Deal Scope
           </h3>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory<InfoTooltip content={sectionHelp.territory} /></label>
-              <select
-                value={territory}
-                onChange={(e) => onTerritoryChange(e.target.value as Territory)}
-                className={`select-field transition-all duration-300 ${highlightedFields.has('territory') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-              >
-                {territoryOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
+            <OptionCardGroup
+              id="territory-select-right"
+              label="Territory"
+              helpText={sectionHelp.territory}
+              options={territoryOptions}
+              descriptions={territoryDescriptions}
+              impactBadges={territoryBadges}
+              value={territory}
+              onChange={onTerritoryChange}
+              highlighted={highlightedFields.has('territory')}
+              columns={3}
+            />
 
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>

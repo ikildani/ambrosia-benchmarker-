@@ -105,8 +105,8 @@ function WizardStepperInner({
         })}
       </nav>
 
-      {/* Step content with slide transition */}
-      <div className="overflow-hidden">
+      {/* Step content with slide transition — only clip overflow during animation to avoid hiding dropdowns/tooltips */}
+      <div className={transitioning ? 'overflow-hidden' : ''}>
         <div
           ref={contentRef}
           className={`motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-out ${transitionClass}`}

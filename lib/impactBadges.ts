@@ -51,6 +51,12 @@ export function getMultiplierImpactBadge(configKey: string, optionValue: string)
   return buildBadgeFromMultiplier(config[optionValue].multiplier);
 }
 
+export function getTerritoryImpactBadge(territory: string): ImpactBadge {
+  const data = (benchmarks as any).territories?.[territory];
+  if (!data) return { type: 'neutral', label: 'Neutral', rawMultiplier: 1.0 };
+  return buildBadgeFromMultiplier(data.multiplier);
+}
+
 export function getModalityImpactBadge(modality: string): ImpactBadge {
   const data = (benchmarks as any).modalities?.[modality];
   if (!data) return { type: 'neutral', label: 'Neutral', rawMultiplier: 1.0 };

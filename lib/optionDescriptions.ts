@@ -124,6 +124,19 @@ export const comorbidityBreadthDescriptions: Record<string, string> = {
   organProtective: 'Liver, kidney, or heart protection',
 };
 
+// --- Deal Scope descriptions ---
+export const territoryDescriptions: Record<string, string> = {
+  global: 'Maximum value, full worldwide rights',
+  us_only: '~55% of global pharma revenue',
+  ex_us: 'All markets excluding US',
+  us_eu: 'Core developed markets (~80%)',
+  us_japan: 'Major markets, Japan access value',
+  europe: 'IRA creating pricing pressure',
+  japan: 'Single-market Japan rights',
+  china: 'Geopolitical + regulatory risk',
+  row: 'Emerging markets, lowest value',
+};
+
 // Contextual help for section labels — explains WHY each parameter matters to deal value
 export const sectionHelp: Record<string, string> = {
   phase: 'Development phase is the single largest driver of deal value. Preclinical assets average $400M total value vs $4.5B for approved products.',
