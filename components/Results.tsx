@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore } from '@/lib/calculations';
@@ -10,6 +10,9 @@ import ShareModal from './ShareModal';
 import { useTracking } from './TrackingProvider';
 import { PRICING } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
+import benchmarks from '@/data/benchmarks.json';
+import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
+import type { CalculationHistoryItem } from '@/lib/history';
 
 // Dynamic imports for heavy below-fold components
 const SensitivityAnalysis = dynamic(() => import('./sensitivity').then(m => ({ default: m.SensitivityAnalysis })), { ssr: false });
@@ -18,6 +21,8 @@ const ScenarioComparison = dynamic(() => import('./ScenarioComparison'), { ssr: 
 const NegotiationPlaybookModal = dynamic(() => import('./NegotiationPlaybookModal'), { ssr: false });
 const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'), { ssr: false });
 const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false });
+const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: false });
+const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -232,6 +237,130 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportFormat, setReportFormat] = useState<'pdf' | 'excel'>('pdf');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [compareItem, setCompareItem] = useState<CalculationHistoryItem | null>(null);
+  const [showHistoryPicker, setShowHistoryPicker] = useState(false);
+  const [hasHistory, setHasHistory] = useState(false);
+
+  // Track previous result values for sensitivity analysis delta badges
+  const isFirstRenderRef = useRef(true);
+  const [previousTerms, setPreviousTerms] = useState<{
+    upfront: number;
+    totalDealValue: number;
+    devMilestones: number;
+    regMilestones: number;
+    commMilestones: number;
+  } | null>(null);
+
+  // Use a ref to always hold the "current" medians so we can capture them before they change
+  const currentMediansRef = useRef({
+    upfront: terms.upfront.median,
+    totalDealValue: terms.totalDealValue.median,
+    devMilestones: terms.devMilestones.median,
+    regMilestones: terms.regMilestones.median,
+    commMilestones: terms.commMilestones.median,
+  });
+
+  useEffect(() => {
+    const prev = currentMediansRef.current;
+    const curr = {
+      upfront: terms.upfront.median,
+      totalDealValue: terms.totalDealValue.median,
+      devMilestones: terms.devMilestones.median,
+      regMilestones: terms.regMilestones.median,
+      commMilestones: terms.commMilestones.median,
+    };
+
+    // Only show delta when values actually changed (not first render)
+    if (!isFirstRenderRef.current && (
+      prev.upfront !== curr.upfront ||
+      prev.totalDealValue !== curr.totalDealValue ||
+      prev.devMilestones !== curr.devMilestones ||
+      prev.regMilestones !== curr.regMilestones ||
+      prev.commMilestones !== curr.commMilestones
+    )) {
+      setPreviousTerms({ ...prev });
+    }
+
+    // Update ref to current values
+    currentMediansRef.current = curr;
+    isFirstRenderRef.current = false;
+  }, [terms]);
+
+  // Check if there's calculation history for the Compare button
+  useEffect(() => {
+    const history = getHistory();
+    setHasHistory(history.length > 0);
+  }, []);
+
+  // Build compare label from history item
+  const compareLabel = compareItem
+    ? `${compareItem.labels.phase} ${compareItem.labels.modality} -- ${historyFormatDate(compareItem.timestamp)}`
+    : '';
+
+  // Compute context lines comparing metrics against phase baselines
+  const contextLines = useMemo(() => {
+    if (!fullInputs) return {};
+
+    const ta = fullInputs.therapeuticArea;
+    const phase = fullInputs.phase;
+
+    // Pick the right baselines for the therapeutic area
+    const baselines = ta === 'metabolic'
+      ? (benchmarks as any).metabolicPhaseBaselines?.[phase]
+      : ta === 'immunology'
+      ? (benchmarks as any).immunologyPhaseBaselines?.[phase]
+      : ta === 'neurology'
+      ? benchmarks.neurologyPhaseBaselines[phase]
+      : benchmarks.phaseBaselines[phase];
+
+    if (!baselines) return {};
+
+    const taLabel = ta === 'oncology' ? 'oncology'
+      : ta === 'neurology' ? 'neurology'
+      : ta === 'immunology' ? 'immunology'
+      : 'metabolic';
+    const phaseLabel = benchmarks.labels.phases[phase];
+
+    function buildContextLine(actual: number, baseline: number, metricLabel: string): string {
+      if (baseline === 0) return '';
+      const pctDiff = Math.round(((actual - baseline) / baseline) * 100);
+      if (Math.abs(pctDiff) <= 5) {
+        return `In line with typical ${phaseLabel} ${taLabel} ${metricLabel}`;
+      }
+      const direction = pctDiff > 0 ? 'above' : 'below';
+      return `${Math.abs(pctDiff)}% ${direction} ${phaseLabel} ${taLabel} median`;
+    }
+
+    return {
+      totalDealValue: buildContextLine(terms.totalDealValue.median, baselines.totalValue.median, 'deal terms'),
+      upfront: buildContextLine(terms.upfront.median, baselines.upfront.median, 'upfront'),
+      devMilestones: '',
+      regMilestones: '',
+      commMilestones: '',
+    };
+  }, [fullInputs, terms]);
+
+  // Copy results to clipboard
+  const handleCopyResults = useCallback(() => {
+    const taLabel = fullInputs?.therapeuticArea
+      ? fullInputs.therapeuticArea.charAt(0).toUpperCase() + fullInputs.therapeuticArea.slice(1)
+      : '';
+    const text = [
+      `${taLabel} | ${labels.phase} | ${labels.modality} | ${labels.indication}`,
+      '',
+      `Total Deal Value: ${formatCurrency(terms.totalDealValue.median)} (range: ${formatCurrency(terms.totalDealValue.low)} - ${formatCurrency(terms.totalDealValue.high)})`,
+      `Upfront Payment: ${formatCurrency(terms.upfront.median)} (range: ${formatCurrency(terms.upfront.low)} - ${formatCurrency(terms.upfront.high)})`,
+      `Development Milestones: ${formatCurrency(terms.devMilestones.median)} (range: ${formatCurrency(terms.devMilestones.low)} - ${formatCurrency(terms.devMilestones.high)})`,
+      `Regulatory Milestones: ${formatCurrency(terms.regMilestones.median)} (range: ${formatCurrency(terms.regMilestones.low)} - ${formatCurrency(terms.regMilestones.high)})`,
+      `Commercial Milestones: ${formatCurrency(terms.commMilestones.median)} (range: ${formatCurrency(terms.commMilestones.low)} - ${formatCurrency(terms.commMilestones.high)})`,
+      `Royalties: ${tieredRoyalties.base.low}% - ${tieredRoyalties.highTier.high}%`,
+      '',
+      `Deal Structure: ${dealRecommendation.upfrontPercent}% Upfront / ${dealRecommendation.milestonePercent}% Milestones`,
+      `Generated by Ambrosia Benchmarker`,
+    ].join('\n');
+
+    navigator.clipboard.writeText(text);
+  }, [fullInputs, labels, terms, tieredRoyalties, dealRecommendation]);
 
   const handleGenerateMemo = useCallback(async () => {
     if (memoLoading || dealMemo) return;
@@ -390,6 +519,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         onShare={() => setShowShareModal(true)}
         onLinkedInShare={handleLinkedInShare}
         onDownloadExecutiveSummary={handleDownloadExecutiveSummary}
+        onCompare={() => setShowHistoryPicker(true)}
+        hasHistory={hasHistory}
+        onCopyResults={handleCopyResults}
       />
 
       {/* Email Capture Bar */}
@@ -571,6 +703,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={0}
             tooltipContent={metricTooltips.upfront}
+            contextLine={contextLines.upfront}
+            previousValue={previousTerms?.upfront}
+            currentValue={terms.upfront.median}
           />
 
           {/* Total Deal Value */}
@@ -596,6 +731,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={1}
             tooltipContent={metricTooltips.totalDealValue}
+            contextLine={contextLines.totalDealValue}
+            previousValue={previousTerms?.totalDealValue}
+            currentValue={terms.totalDealValue.median}
           />
 
           {/* Development Milestones */}
@@ -621,6 +759,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={2}
             tooltipContent={metricTooltips.devMilestones}
+            previousValue={previousTerms?.devMilestones}
+            currentValue={terms.devMilestones.median}
           />
 
           {/* Regulatory Milestones */}
@@ -646,6 +786,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={3}
             tooltipContent={metricTooltips.regMilestones}
+            previousValue={previousTerms?.regMilestones}
+            currentValue={terms.regMilestones.median}
           />
 
           {/* Commercial Milestones */}
@@ -671,6 +813,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={4}
             tooltipContent={metricTooltips.commMilestones}
+            previousValue={previousTerms?.commMilestones}
+            currentValue={terms.commMilestones.median}
           />
 
           {/* Tiered Royalties */}
@@ -890,6 +1034,27 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             currentResult={result}
             currentInputs={inputs}
             currentLabels={labels}
+          />
+        )}
+
+        {/* Compare with Previous - History-based comparison */}
+        {compareItem && (
+          <ScenarioComparisonPanel
+            currentResult={result}
+            compareItem={compareItem}
+            compareLabel={compareLabel}
+            onClose={() => setCompareItem(null)}
+          />
+        )}
+
+        {/* History Picker Modal */}
+        {showHistoryPicker && (
+          <HistoryPicker
+            onSelect={(item) => {
+              setCompareItem(item);
+              setShowHistoryPicker(false);
+            }}
+            onClose={() => setShowHistoryPicker(false)}
           />
         )}
 

@@ -121,9 +121,11 @@ function WizardStepperInner({
           <button
             type="button"
             onClick={() => handleStepChange(currentStep - 1)}
+            disabled={transitioning}
             className="flex-1 py-3 border-2 border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300
                        font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-800 transition-all duration-200
-                       motion-safe:active:scale-[0.98]"
+                       motion-safe:active:scale-[0.98]
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
           >
             Back
           </button>
@@ -132,10 +134,12 @@ function WizardStepperInner({
           <button
             type="button"
             onClick={() => handleStepChange(currentStep + 1)}
+            disabled={transitioning}
             className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
                        shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-200
                        hover:from-teal-600 hover:to-cyan-600 motion-safe:hover:-translate-y-0.5
                        motion-safe:active:scale-[0.98]
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg
                        flex items-center justify-center gap-2"
           >
             <span>Next</span>
@@ -147,7 +151,7 @@ function WizardStepperInner({
           <button
             type="button"
             onClick={onCalculate}
-            disabled={isCalculating}
+            disabled={isCalculating || transitioning}
             className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
                        shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-200
                        hover:from-teal-600 hover:to-cyan-600 motion-safe:hover:-translate-y-0.5

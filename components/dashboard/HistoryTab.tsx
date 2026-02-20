@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatDate, type CalculationHistoryItem } from '@/lib/history';
 
 interface HistoryTabProps {
@@ -34,6 +34,8 @@ const HistoryTab = React.memo(function HistoryTab({
   onNavigateToCalculator,
   formatCurrency,
 }: HistoryTabProps) {
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   return (
     <div id="tabpanel-history" role="tabpanel" aria-labelledby="tab-history" aria-live="polite" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
@@ -158,25 +160,45 @@ const HistoryTab = React.memo(function HistoryTab({
                   </svg>
                 </div>
               </div>
-              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                <button
-                  onClick={(e) => { e.stopPropagation(); onRecalculate(item); }}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 dark:text-teal-400
-                             hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Recalculate
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); }}
-                  className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
+              {pendingDeleteId === item.id ? (
+                <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 bg-red-50 dark:bg-red-900/20 -mx-6 -mb-6 px-6 pb-6 rounded-b-2xl">
+                  <span className="text-sm font-medium text-red-700 dark:text-red-300">Delete this analysis?</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPendingDeleteId(null); }}
+                      className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); setPendingDeleteId(null); }}
+                      className="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRecalculate(item); }}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 dark:text-teal-400
+                               hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Recalculate
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setPendingDeleteId(item.id); }}
+                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

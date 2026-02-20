@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { DrillDownData } from '@/lib/calculations';
+import { DrillDownData, formatCurrency } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
 import InfoTooltip from '@/components/calculator/InfoTooltip';
 
@@ -21,6 +21,9 @@ interface MetricCardProps {
   onProClick: () => void;
   animationIndex?: number;
   tooltipContent?: string;
+  contextLine?: string;
+  previousValue?: number;
+  currentValue?: number;
 }
 
 const badgeColorClasses: Record<string, string> = {
@@ -58,7 +61,10 @@ function MetricCardInner({
   isPro,
   onProClick,
   animationIndex,
-  tooltipContent
+  tooltipContent,
+  contextLine,
+  previousValue,
+  currentValue
 }: MetricCardProps) {
   const handleHeaderClick = useCallback(() => {
     if (canExpand) {
@@ -130,6 +136,19 @@ function MetricCardInner({
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-neutral-500 dark:text-slate-400">
             Expected: <span className={`font-bold ${expectedColor}`}>{expected}</span>
+            {previousValue !== undefined && currentValue !== undefined && previousValue !== currentValue && (
+              <span
+                className={`ml-2 inline-flex items-center text-xs font-semibold motion-safe:animate-fade-in ${
+                  currentValue > previousValue
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-500 dark:text-red-400'
+                }`}
+              >
+                {currentValue > previousValue ? '\u2191' : '\u2193'}{' '}
+                {currentValue > previousValue ? '+' : '-'}
+                {formatCurrency(Math.abs(currentValue - previousValue))}
+              </span>
+            )}
           </p>
         </div>
         <div className="progress-bar">
@@ -138,6 +157,9 @@ function MetricCardInner({
             style={{ width: `${progressWidth}%` }}
           />
         </div>
+        {contextLine && (
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{contextLine}</p>
+        )}
       </div>
 
       {/* Drill-down panel */}

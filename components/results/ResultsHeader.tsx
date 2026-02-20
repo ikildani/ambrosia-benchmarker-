@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import BenchmarkInfo from '../BenchmarkInfo';
 import WatchButton from '../WatchButton';
+import { DEAL_STATS } from '@/lib/config/constants';
+
+const DEAL_STATS_TOTAL = DEAL_STATS.TOTAL_DEALS;
 
 interface ResultsHeaderProps {
   labels: { phase: string; modality: string; indication: string };
@@ -14,6 +17,9 @@ interface ResultsHeaderProps {
   onShare: () => void;
   onLinkedInShare: () => void;
   onDownloadExecutiveSummary: () => void;
+  onCompare?: () => void;
+  hasHistory?: boolean;
+  onCopyResults?: () => void;
 }
 
 function ResultsHeaderInner({
@@ -28,7 +34,17 @@ function ResultsHeaderInner({
   onShare,
   onLinkedInShare,
   onDownloadExecutiveSummary,
+  onCompare,
+  hasHistory,
+  onCopyResults,
 }: ResultsHeaderProps) {
+  const [copyLabel, setCopyLabel] = useState('Copy');
+
+  const handleCopy = useCallback(() => {
+    onCopyResults?.();
+    setCopyLabel('Copied!');
+    setTimeout(() => setCopyLabel('Copy'), 2000);
+  }, [onCopyResults]);
   return (
     <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-hidden">
       <div className="absolute inset-0 opacity-10">
@@ -70,6 +86,9 @@ function ResultsHeaderInner({
             <span className="text-neutral-500 hidden sm:inline">&bull;</span>
             <BenchmarkInfo />
           </div>
+          <p className="mt-2 text-xs text-white/50">
+            Benchmarks based on {DEAL_STATS_TOTAL} publicly disclosed licensing deals from SEC filings and press releases &middot; Updated weekly
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {hasFullAccess ? (
@@ -112,6 +131,28 @@ function ResultsHeaderInner({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               <span>Download Report</span>
+            </button>
+          )}
+          {hasHistory && onCompare && (
+            <button
+              onClick={onCompare}
+              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" />
+              </svg>
+              <span>Compare</span>
+            </button>
+          )}
+          {onCopyResults && (
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30 w-full sm:w-auto"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              <span>{copyLabel}</span>
             </button>
           )}
           <button

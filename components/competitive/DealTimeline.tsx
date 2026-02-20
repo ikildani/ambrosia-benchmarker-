@@ -190,7 +190,31 @@ const DealTimeline = React.memo(function DealTimeline({
     setHoveredIndex(null);
   }, []);
 
-  if (sortedDeals.length === 0) return null;
+  if (sortedDeals.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            Deal Timeline
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {companyName}
+          </p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+            <svg className="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="font-medium text-slate-700 dark:text-slate-300 text-sm mb-1">No deal history available</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+            Deal timeline will appear when deal data is available for this company
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Build unique modalities for legend
   const legendModalities = Array.from(

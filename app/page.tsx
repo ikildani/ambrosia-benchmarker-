@@ -10,6 +10,7 @@ import AuthModal from '@/components/AuthModal';
 import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
+import HeroProductPreview from '@/components/landing/HeroProductPreview';
 
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
@@ -237,7 +238,8 @@ export default function Home() {
           }} />
         </div>
 
-        <div className={`relative max-w-5xl mx-auto text-center w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-12 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="text-center lg:text-left lg:flex-1">
           {/* Icon */}
           <div className="mb-8 sm:mb-10 lg:mb-12 animate-fade-in">
             <div className="relative inline-flex">
@@ -285,7 +287,7 @@ export default function Home() {
           </p>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Link
               href="/calculator"
               className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
@@ -324,7 +326,7 @@ export default function Home() {
           </div>
 
           {/* Feature Pills */}
-          <div className={`flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '600+ deals analyzed' },
               { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '4 therapeutic areas' },
@@ -345,6 +347,10 @@ export default function Home() {
               </div>
             ))}
           </div>
+          </div>
+
+          {/* Product Preview Mockup */}
+          <HeroProductPreview />
         </div>
 
         {/* Scroll indicator */}

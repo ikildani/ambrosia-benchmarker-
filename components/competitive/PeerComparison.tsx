@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 
 interface PeerComparisonProps {
   company: any;
@@ -203,7 +204,16 @@ const PeerComparison = React.memo(function PeerComparison({
                   : 'text-slate-700 dark:text-slate-300'
               }`}
             >
-              {col.name}
+              {col.isCurrent ? (
+                col.name
+              ) : (
+                <Link
+                  href={`/companies/${col.id}`}
+                  className="hover:text-teal-500 dark:hover:text-teal-400 hover:underline transition-colors cursor-pointer"
+                >
+                  {col.name}
+                </Link>
+              )}
             </div>
             {col.isCurrent && (
               <div className="text-[10px] uppercase tracking-wide font-medium text-teal-500 dark:text-teal-400 mt-0.5">
