@@ -1,5 +1,5 @@
 // All CSS for the PDF report — print rules, page styling, typography
-// Designed for consulting-quality (Lazard/McKinsey) output
+// Consulting-grade output: bold color blocking, navy headers, accent elements
 
 export function getReportStyles(): string {
   return `
@@ -23,7 +23,6 @@ export function getReportStyles(): string {
       font-size: 11px;
       line-height: 1.55;
       letter-spacing: -0.005em;
-      font-feature-settings: 'cv01', 'cv02', 'cv03', 'cv04';
     }
 
     .report-page {
@@ -40,31 +39,34 @@ export function getReportStyles(): string {
       page-break-after: auto;
     }
 
-    /* Cover page — no top padding, special layout */
     .cover-page {
       padding: 0;
     }
 
     /* ========================================
-       TYPOGRAPHY — Clean hierarchy
+       TYPOGRAPHY — Bold hierarchy
        ======================================== */
 
     .section-title {
       font-size: 9px;
       font-weight: 700;
-      color: #94a3b8;
+      color: #0d9488;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #ccfbf1;
     }
 
     .section-title-lg {
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       color: #1a1e42;
-      margin-bottom: 14px;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      padding-left: 12px;
+      border-left: 4px solid #0d9488;
     }
 
     .text-sm { font-size: 10px; }
@@ -118,59 +120,67 @@ export function getReportStyles(): string {
     }
 
     /* ========================================
-       CARDS — Clean, minimal borders
+       CARDS — Elevated with accents
        ======================================== */
 
     .card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 5px;
+      border-radius: 6px;
       padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .card-sm {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 4px;
+      border-radius: 5px;
       padding: 10px 14px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
 
     .card-highlight {
-      background: #f0fdfa;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
       border: 1px solid #99f6e4;
-      border-radius: 5px;
+      border-left: 4px solid #0d9488;
+      border-radius: 6px;
       padding: 16px;
+      box-shadow: 0 1px 4px rgba(13,148,136,0.08);
     }
 
     .card-amber {
-      background: #fffbeb;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
       border: 1px solid #fde68a;
-      border-radius: 5px;
+      border-left: 4px solid #f59e0b;
+      border-radius: 6px;
       padding: 16px;
     }
 
     .card-navy {
-      background: linear-gradient(135deg, #1a1e42 0%, #1e2556 100%);
+      background: linear-gradient(145deg, #1a1e42 0%, #252a5e 100%);
       border: none;
-      border-radius: 5px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 18px;
       color: #ffffff;
+      box-shadow: 0 2px 8px rgba(26,30,66,0.15);
     }
 
     /* ========================================
-       KPI CARDS — Dashboard metrics
+       KPI CARDS — Bold with top accent
        ======================================== */
 
     .kpi-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
+      border-top: 3px solid #0d9488;
       border-radius: 6px;
-      padding: 14px 12px;
+      padding: 16px 14px;
       text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
 
     .kpi-value {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
       color: #0d9488;
       line-height: 1.1;
@@ -180,10 +190,10 @@ export function getReportStyles(): string {
     .kpi-label {
       font-size: 8px;
       font-weight: 700;
-      color: #94a3b8;
+      color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      margin-top: 5px;
+      margin-top: 6px;
     }
 
     .kpi-sub {
@@ -193,7 +203,7 @@ export function getReportStyles(): string {
     }
 
     /* ========================================
-       TABLES — Professional, tight
+       TABLES — Navy headers, professional
        ======================================== */
 
     .data-table {
@@ -203,40 +213,52 @@ export function getReportStyles(): string {
     }
 
     .data-table th {
-      background: #f8fafc;
-      border-bottom: 1.5px solid #cbd5e1;
-      padding: 8px 10px;
+      background: #1a1e42;
+      color: #ffffff;
+      border-bottom: none;
+      padding: 9px 12px;
       text-align: left;
       font-weight: 700;
-      color: #475569;
       font-size: 8px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
 
+    .data-table th:first-child {
+      border-radius: 4px 0 0 0;
+    }
+
+    .data-table th:last-child {
+      border-radius: 0 4px 0 0;
+    }
+
     .data-table td {
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-bottom: 1px solid #f1f5f9;
       color: #334155;
     }
 
     .data-table tr:nth-child(even) td {
-      background: #fafbfc;
+      background: #f8fafc;
+    }
+
+    .data-table tr:hover td {
+      background: #f0fdfa;
     }
 
     .data-table .value-cell {
       font-weight: 700;
-      color: #1a1e42;
+      color: #0d9488;
       text-align: right;
     }
 
     /* ========================================
-       BADGES — Compact, informational
+       BADGES — Compact, bold
        ======================================== */
 
     .badge {
       display: inline-block;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 3px;
       font-size: 8px;
       font-weight: 700;
@@ -281,41 +303,42 @@ export function getReportStyles(): string {
     .impact-low { background: #dcfce7; color: #15803d; }
 
     /* ========================================
-       SCORE BARS
+       SCORE BARS — Taller, more visible
        ======================================== */
 
     .score-bar {
-      height: 4px;
+      height: 6px;
       background: #e2e8f0;
-      border-radius: 2px;
+      border-radius: 3px;
       overflow: hidden;
     }
 
     .score-bar-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 3px;
       background: linear-gradient(90deg, #0d9488, #06b6d4);
     }
 
     /* ========================================
-       CALLOUT BOXES
+       CALLOUT BOXES — Strong accents
        ======================================== */
 
     .callout {
-      background: #f0fdfa;
-      border-left: 3px solid #0d9488;
-      padding: 10px 14px;
-      border-radius: 0 4px 4px 0;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+      border-left: 4px solid #0d9488;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
       font-size: 10px;
       color: #134e4a;
       line-height: 1.6;
+      box-shadow: 0 1px 3px rgba(13,148,136,0.06);
     }
 
     .callout-amber {
-      background: #fffbeb;
-      border-left: 3px solid #f59e0b;
-      padding: 10px 14px;
-      border-radius: 0 4px 4px 0;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
       font-size: 10px;
       color: #78350f;
       line-height: 1.6;
@@ -348,7 +371,7 @@ export function getReportStyles(): string {
 
     .divider-thick {
       border: none;
-      border-top: 2px solid #e2e8f0;
+      border-top: 2.5px solid #1a1e42;
       margin: 16px 0;
     }
 
@@ -369,21 +392,22 @@ export function getReportStyles(): string {
     }
 
     /* ========================================
-       AI BADGE
+       AI BADGE — Premium look
        ======================================== */
 
     .ai-badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 10px;
+      padding: 4px 12px;
       background: linear-gradient(135deg, #1a1e42, #312e81);
       color: #c4b5fd;
-      border-radius: 3px;
+      border-radius: 4px;
       font-size: 7px;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
+      box-shadow: 0 1px 3px rgba(26,30,66,0.2);
     }
 
     /* ========================================
@@ -413,12 +437,12 @@ export function getReportStyles(): string {
 
     @media screen {
       body {
-        background: #64748b;
+        background: #475569;
         padding: 16px 0;
       }
       .report-page {
         margin: 16px auto;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
       }
     }
   `;
