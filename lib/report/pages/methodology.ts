@@ -1,6 +1,7 @@
 // Page 14: Methodology & Disclaimer
 // How the model works, data sources, factors considered, legal disclaimer
 
+import { logoIconColor } from '../logo';
 import { pageHeader, pageFooter, COLORS, formatDate, escapeHtml } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
@@ -89,7 +90,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       <!-- Footer -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid ${COLORS.gray200};">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <div style="width: 20px; height: 20px; background: linear-gradient(135deg, ${COLORS.teal}, ${COLORS.cyan}); border-radius: 4px;"></div>
+          ${logoIconColor(20)}
           <span style="font-size: 10px; font-weight: 700; color: ${COLORS.gray500};">Ambrosia Ventures</span>
         </div>
         <div style="text-align: right;">

@@ -2,6 +2,7 @@
 // Premium gradient header, headline metric, metadata grid, risk gauge
 
 import { renderRiskGauge } from '../svg-charts/riskGauge';
+import { logoFullWhite } from '../logo';
 import { formatUsd, formatDate, escapeHtml, phaseLabels, territoryLabels, modalityLabels, getLabel, COLORS, getTAColors } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
@@ -25,9 +26,8 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
         <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 60%; background: linear-gradient(135deg, transparent 0%, rgba(13,148,136,0.06) 100%);"></div>
 
         <!-- Logo + Brand -->
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 52px; position: relative;">
-          <div style="width: 36px; height: 36px; background: linear-gradient(135deg, ${COLORS.teal}, ${COLORS.cyan}); border-radius: 6px;"></div>
-          <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Ambrosia Ventures</span>
+        <div style="margin-bottom: 52px; position: relative;">
+          ${logoFullWhite(220)}
         </div>
 
         <!-- Title Block -->

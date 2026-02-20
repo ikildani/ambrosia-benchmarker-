@@ -1,4 +1,5 @@
 // Formatting utilities for report generation
+import { logoIconColor } from './logo';
 
 // Values from the calculation engine are in MILLIONS (e.g., 150 = $150M, 1500 = $1.5B)
 // This matches formatCurrency in lib/calculations.ts
@@ -69,7 +70,7 @@ export function pageHeader(pageNum: number, totalPages: number, reportTitle: str
     <div style="border-top: 2.5px solid #0d9488; padding-top: 10px; margin-bottom: 22px;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #e2e8f0;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <div style="width: 22px; height: 22px; background: linear-gradient(135deg, #0d9488, #06b6d4); border-radius: 4px;"></div>
+          ${logoIconColor(22)}
           <span style="font-size: 9px; font-weight: 700; color: #94a3b8; letter-spacing: 0.12em; text-transform: uppercase;">Ambrosia Ventures</span>
         </div>
         <div style="font-size: 9px; color: #cbd5e1; letter-spacing: 0.02em;">

@@ -57,7 +57,7 @@ export function generateReportHTML(data: PDFReportData): string {
       <title>${indication} — Deal Valuation Report | Ambrosia Ventures</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Inter:wght@400;500;600;700;800&family=Libre+Franklin:wght@200&display=swap" rel="stylesheet">
       <style>${getReportStyles()}</style>
     </head>
     <body>
