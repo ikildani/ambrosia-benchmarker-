@@ -31,18 +31,27 @@ export function renderRangeBar(
 
   return `
     <svg width="${width}" height="${svgHeight}" viewBox="0 0 ${width} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="rbGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#99f6e4" />
+          <stop offset="100%" stop-color="#5eead4" />
+        </linearGradient>
+        <filter id="rbDiamondGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0.5" stdDeviation="1.5" flood-color="${COLORS.teal}" flood-opacity="0.25" />
+        </filter>
+      </defs>
       <!-- Track -->
       <rect x="${padding}" y="${barY}" width="${trackW}" height="${barH}" rx="4" fill="${COLORS.gray100}" />
       <!-- Range fill -->
-      <rect x="${lowX}" y="${barY}" width="${highX - lowX}" height="${barH}" rx="4" fill="${COLORS.tealLight}" />
+      <rect x="${lowX}" y="${barY}" width="${highX - lowX}" height="${barH}" rx="4" fill="url(#rbGrad)" />
       <!-- Median diamond -->
       <polygon points="${medX},${barY - 2} ${medX + 5},${barY + barH / 2} ${medX},${barY + barH + 2} ${medX - 5},${barY + barH / 2}"
-        fill="${COLORS.teal}" />
+        fill="${COLORS.teal}" filter="url(#rbDiamondGlow)" />
       ${showLabels ? `
       <!-- Labels -->
-      <text x="${lowX}" y="${barY + barH + 14}" font-size="8" fill="${COLORS.gray400}" text-anchor="start">${formatUsd(range.low)}</text>
-      <text x="${medX}" y="${barY + barH + 14}" font-size="8" fill="${COLORS.teal}" font-weight="600" text-anchor="middle">${formatUsd(range.median)}</text>
-      <text x="${highX}" y="${barY + barH + 14}" font-size="8" fill="${COLORS.gray400}" text-anchor="end">${formatUsd(range.high)}</text>
+      <text x="${lowX}" y="${barY + barH + 14}" font-size="9" fill="${COLORS.gray400}" text-anchor="start">${formatUsd(range.low)}</text>
+      <text x="${medX}" y="${barY + barH + 14}" font-size="9" fill="${COLORS.navy}" font-weight="600" text-anchor="middle">${formatUsd(range.median)}</text>
+      <text x="${highX}" y="${barY + barH + 14}" font-size="9" fill="${COLORS.gray400}" text-anchor="end">${formatUsd(range.high)}</text>
       ` : ''}
     </svg>
   `;

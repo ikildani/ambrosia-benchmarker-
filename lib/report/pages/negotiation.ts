@@ -30,8 +30,6 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
     { key: 'openingPosition', icon: '01', color: COLORS.teal },
     { key: 'structureStrategy', icon: '02', color: COLORS.blue },
     { key: 'royaltyFloor', icon: '03', color: COLORS.purple },
-    { key: 'competitiveIntelligence', icon: '04', color: COLORS.amber },
-    { key: 'partnerTactics', icon: '05', color: COLORS.cyan },
   ];
 
   const sectionCards = sectionOrder.map(({ key, icon, color }) => {
@@ -40,24 +38,24 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
 
     const bulletsHtml = section.bullets.length > 0
       ? `<ul style="margin: 6px 0 0 0; padding-left: 14px; list-style: disc;">
-           ${section.bullets.map(b => `<li style="font-size: 8.5px; color: ${COLORS.gray600}; line-height: 1.6; margin-bottom: 2px;">${escapeHtml(b)}</li>`).join('')}
+           ${section.bullets.slice(0, 2).map(b => `<li style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.6; margin-bottom: 3px;">${escapeHtml(b)}</li>`).join('')}
          </ul>`
       : '';
 
     return `
-      <div style="margin-bottom: 14px; page-break-inside: avoid;">
-        <div style="display: flex; align-items: flex-start; gap: 10px;">
-          <div style="flex-shrink: 0; width: 26px; height: 26px; border-radius: 6px; background: ${color}; display: flex; align-items: center; justify-content: center;">
-            <span style="font-size: 9px; font-weight: 700; color: white;">${icon}</span>
+      <div style="margin-bottom: 16px; page-break-inside: avoid;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 6px; background: ${color}; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 10px; font-weight: 700; color: white;">${icon}</span>
           </div>
           <div style="flex: 1;">
-            <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">${escapeHtml(section.title)}</div>
-            <div style="font-size: 8.5px; color: ${COLORS.gray500}; line-height: 1.6;">${escapeHtml(section.content)}</div>
+            <div style="font-size: 11px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 4px;">${escapeHtml(section.title)}</div>
+            <div style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.6;">${escapeHtml(section.content.length > 180 ? section.content.substring(0, 180) + '...' : section.content)}</div>
             ${bulletsHtml}
             ${section.highlight ? `
               <div style="margin-top: 6px; padding: 5px 8px; background: ${color}10; border-left: 2px solid ${color}; border-radius: 0 3px 3px 0;">
-                <span style="font-size: 8px; font-weight: 700; color: ${color}; text-transform: uppercase; letter-spacing: 0.05em;">Key Insight:</span>
-                <span style="font-size: 8.5px; color: ${COLORS.gray600}; margin-left: 4px;">${escapeHtml(section.highlight)}</span>
+                <span style="font-size: 9px; font-weight: 700; color: ${color}; text-transform: uppercase; letter-spacing: 0.05em;">Key Insight:</span>
+                <span style="font-size: 10px; color: ${COLORS.gray600}; margin-left: 4px;">${escapeHtml(section.highlight)}</span>
               </div>
             ` : ''}
           </div>
@@ -70,7 +68,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
     ? `<div class="callout-amber" style="margin-top: 12px;">
          <strong>Key Caveats:</strong>
          <ul style="margin: 4px 0 0 0; padding-left: 14px; list-style: disc;">
-           ${keyCaveats.map(c => `<li style="font-size: 8.5px; line-height: 1.5;">${escapeHtml(c)}</li>`).join('')}
+           ${keyCaveats.slice(0, 3).map(c => `<li style="font-size: 10px; line-height: 1.5;">${escapeHtml(c)}</li>`).join('')}
          </ul>
        </div>`
     : '';
@@ -82,16 +80,15 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title">NEGOTIATION PLAYBOOK</div>
       <div class="section-title-lg">AI Negotiation Strategy</div>
 
-      <p style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 14px;">
-        AI-generated negotiation strategy tailored to this specific asset profile.
-        Recommendations are based on analysis of comparable deal structures and current market dynamics.
+      <p style="font-size: 11px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 18px;">
+        AI-generated strategy based on comparable deal structures and market dynamics.
       </p>
 
       ${sectionCards}
       ${caveatsHtml}
 
       <div style="margin-top: 12px; padding: 6px 10px; background: ${COLORS.gray50}; border-radius: 4px; border: 1px solid ${COLORS.gray200};">
-        <span style="font-size: 7.5px; color: ${COLORS.gray400};">
+        <span style="font-size: 9px; color: ${COLORS.gray400};">
           Generated by Ambrosia AI on ${escapeHtml(playbook.generatedAt || 'N/A')}. This playbook is for informational
           purposes only and should not substitute for professional legal or business counsel.
         </span>

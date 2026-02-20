@@ -22,14 +22,14 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
       <div class="section-title">PROJECTED TIMELINE</div>
       <div class="section-title-lg">Deal Timeline & Milestone Schedule</div>
 
-      <p style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 16px;">
+      <p style="font-size: 11px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 20px;">
         Estimated timeline from deal signing through commercial launch based on
         ${escapeHtml(phase)} entry point. Actual timelines vary based on regulatory feedback,
         trial design, and therapeutic area-specific factors.
       </p>
 
       <!-- Timeline Chart -->
-      <div class="chart-container" style="margin-bottom: 20px;">
+      <div class="chart-container" style="margin-bottom: 24px;">
         ${timelineHtml}
       </div>
 
@@ -38,19 +38,19 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
       <div class="grid-3" style="margin-top: 10px;">
         <div class="card">
           <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px;">Upfront Payment</div>
-          <div style="font-size: 22px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(result.terms.upfront.median)}</div>
+          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(result.terms.upfront.median)}</div>
           <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">Range: ${formatUsd(result.terms.upfront.low)} &ndash; ${formatUsd(result.terms.upfront.high)}</div>
           <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">Due at signing</div>
         </div>
         <div class="card">
           <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px;">Development Milestones</div>
-          <div style="font-size: 22px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(devMilestones.median)}</div>
+          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(devMilestones.median)}</div>
           <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">Range: ${formatUsd(devMilestones.low)} &ndash; ${formatUsd(devMilestones.high)}</div>
           <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">IND, Phase starts, data readouts</div>
         </div>
         <div class="card">
           <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px;">Regulatory Milestones</div>
-          <div style="font-size: 22px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(regMilestones.median)}</div>
+          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(regMilestones.median)}</div>
           <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">Range: ${formatUsd(regMilestones.low)} &ndash; ${formatUsd(regMilestones.high)}</div>
           <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">NDA/BLA filing, FDA approval</div>
         </div>
@@ -59,7 +59,7 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
       <div class="grid-2" style="margin-top: 12px;">
         <div class="card">
           <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px;">Commercial Milestones</div>
-          <div style="font-size: 22px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(commMilestones.median)}</div>
+          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(commMilestones.median)}</div>
           <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">Range: ${formatUsd(commMilestones.low)} &ndash; ${formatUsd(commMilestones.high)}</div>
           <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">Sales thresholds ($100M, $500M, $1B+)</div>
         </div>
@@ -71,7 +71,7 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
         </div>
       </div>
 
-      <div class="callout" style="margin-top: 16px;">
+      <div class="callout" style="margin-top: 20px;">
         <strong>Timeline Note:</strong> Durations are industry median estimates for ${escapeHtml(inputs.therapeuticArea)} assets.
         Regulatory expedited pathways (Breakthrough, Fast Track, Priority Review) can significantly compress the NDA/BLA phase.
       </div>

@@ -18,7 +18,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
     { key: 'commMilestones', label: 'Commercial Milestones', terms: result.terms.commMilestones, dd: drillDown.commMilestones },
   ];
 
-  const royaltyStepHtml = renderRoyaltyStep(royalties, 240, 140);
+  const royaltyStepHtml = renderRoyaltyStep(royalties, 260, 140);
 
   return `
     <div class="report-page">
@@ -27,12 +27,12 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       <div class="section-title-lg">Deal Terms Detail</div>
 
       <!-- Term Cards Grid -->
-      <div class="grid-2" style="margin-bottom: 14px;">
+      <div class="grid-2" style="margin-bottom: 20px;">
         ${termCards.map(tc => `
           <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
               <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${tc.label}</div>
-              <div style="font-size: 13px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(tc.terms.median)}</div>
+              <div style="font-size: 15px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(tc.terms.median)}</div>
             </div>
             <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 5px;">
               Range: ${formatUsd(tc.terms.low)} &ndash; ${formatUsd(tc.terms.high)}
@@ -73,7 +73,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
               </thead>
               <tbody>
                 ${allBreakdowns.map(tc =>
-                  (tc.dd.breakdown || []).slice(0, 3).map(b => `
+                  (tc.dd.breakdown || []).slice(0, 2).map(b => `
                     <tr>
                       <td style="font-size: 9px; color: ${COLORS.gray500};">${tc.label}</td>
                       <td>${escapeHtml(b.label)}</td>
@@ -90,7 +90,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       })()}
 
       <!-- Royalty Structure -->
-      <div style="display: grid; grid-template-columns: 1fr 260px; gap: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 300px; gap: 16px;">
         <div class="card">
           <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 8px;">Tiered Royalty Rates</div>
           <table class="data-table">

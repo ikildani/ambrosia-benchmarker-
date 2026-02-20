@@ -181,6 +181,84 @@ export async function sendCalculationReceipt(
   });
 }
 
+export async function sendReportEmail(
+  to: string,
+  indication: string,
+  pdfBuffer: Buffer,
+  fileName: string
+) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('Resend API key not configured, skipping email');
+    return { success: false, error: 'Email not configured' };
+  }
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 24px;">Your Deal Report</h1>
+          <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">${indication}</p>
+        </div>
+
+        <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
+          <p>Your consulting-grade deal analysis report is attached to this email as a PDF.</p>
+
+          <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+            <div style="font-size: 14px; font-weight: 600; color: #0d9488; margin-bottom: 4px;">Report Attached</div>
+            <div style="font-size: 12px; color: #64748b;">${fileName}</div>
+          </div>
+
+          <p style="font-size: 14px; color: #64748b;">
+            This report includes deal benchmarking, sensitivity analysis, comparable deals, partner matching, and AI-generated strategic insights.
+          </p>
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="https://calculator.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 10px; font-weight: 600;">
+              Run Another Analysis
+            </a>
+          </div>
+        </div>
+
+        <div style="text-align: center; padding: 24px; color: #64748b; font-size: 12px;">
+          <p style="margin: 0;">Ambrosia Ventures Deal Calculator</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'Ambrosia Ventures <onboarding@resend.dev>',
+      to: [to],
+      subject: `Your Ambrosia Deal Report: ${indication}`,
+      html,
+      replyTo: 'hello@ambrosiaventures.co',
+      attachments: [
+        {
+          filename: fileName,
+          content: pdfBuffer,
+        },
+      ],
+    });
+
+    if (error) {
+      console.error('Error sending report email:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, id: data?.id };
+  } catch (error) {
+    console.error('Report email send error:', error);
+    return { success: false, error: 'Failed to send report email' };
+  }
+}
+
 export async function sendUpgradeConfirmation(to: string, name: string) {
   const html = `
     <!DOCTYPE html>

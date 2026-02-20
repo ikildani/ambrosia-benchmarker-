@@ -20,6 +20,9 @@ export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
       timeout: 20000,
     });
 
+    // Ensure Google Fonts (Inter) are fully loaded before PDF render
+    await page.waitForFunction(() => document.fonts.ready, { timeout: 5000 }).catch(() => {});
+
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,

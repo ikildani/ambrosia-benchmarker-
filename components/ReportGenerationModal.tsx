@@ -9,7 +9,7 @@ import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
 import type { PDFReportData, PartnerForPDF } from '@/lib/report';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 
-type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'ready' | 'downloading' | 'success' | 'error';
+type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'preview' | 'downloading' | 'success' | 'error';
 
 interface StepDef {
   id: ModalStep;
@@ -94,11 +94,15 @@ export default function ReportGenerationModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [canSkipMemo, setCanSkipMemo] = useState(false);
   const [fileSize, setFileSize] = useState<string | null>(null);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const hiddenContainerRef = useRef<HTMLDivElement>(null);
   const pdfBlobRef = useRef<Blob | null>(null);
   const pdfDataRef = useRef<PDFReportData | null>(null);
+  const htmlStringRef = useRef<string | null>(null);
   const abortRef = useRef(false);
+  const startedRef = useRef(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
@@ -122,9 +126,13 @@ export default function ReportGenerationModal({
       setErrorMessage(null);
       setCanSkipMemo(false);
       setFileSize(null);
+      setEmailSending(false);
+      setEmailSent(false);
       pdfBlobRef.current = null;
       pdfDataRef.current = null;
+      htmlStringRef.current = null;
       abortRef.current = false;
+      startedRef.current = false;
       previousActiveElement.current = document.activeElement as HTMLElement;
       setTimeout(() => modalRef.current?.focus(), 100);
     } else {
@@ -134,7 +142,8 @@ export default function ReportGenerationModal({
 
   // Run the generation pipeline when modal opens
   useEffect(() => {
-    if (!isOpen || currentStep !== 'idle') return;
+    if (!isOpen || startedRef.current) return;
+    startedRef.current = true;
 
     const run = async () => {
       try {
@@ -223,8 +232,9 @@ export default function ReportGenerationModal({
         };
         pdfDataRef.current = pdfData;
 
-        // Render HTML into hidden container
+        // Render HTML into hidden container + save for preview
         const html = generateReportHTML(pdfData);
+        htmlStringRef.current = html;
         if (hiddenContainerRef.current) {
           hiddenContainerRef.current.innerHTML = html;
         }
@@ -277,7 +287,7 @@ export default function ReportGenerationModal({
         }
         if (abortRef.current) return;
         markComplete('building');
-        setCurrentStep('ready');
+        setCurrentStep('preview');
       } catch (err) {
         console.error('Report generation failed:', err);
         if (!abortRef.current) {
@@ -293,7 +303,8 @@ export default function ReportGenerationModal({
       clearTimeout(timer);
       abortRef.current = true;
     };
-  }, [isOpen, currentStep, format, fullInputs, result, partnerMatches, existingMemo, reportId, userId, userEmail, labels, markComplete, onMemoGenerated, onDownloadComplete, onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- startedRef prevents re-runs; currentStep intentionally excluded to avoid aborting the pipeline
+  }, [isOpen, format, fullInputs, result, partnerMatches, existingMemo, reportId, userId, userEmail, labels, markComplete, onMemoGenerated, onDownloadComplete, onClose]);
 
   const handleDownload = useCallback(() => {
     if (!pdfBlobRef.current) return;
@@ -314,6 +325,41 @@ export default function ReportGenerationModal({
       if (!abortRef.current) onClose();
     }, 1500);
   }, [labels.indication, onDownloadComplete, onClose]);
+
+  const handleEmailReport = useCallback(async () => {
+    if (!pdfBlobRef.current || !userEmail || emailSending) return;
+    setEmailSending(true);
+
+    try {
+      const arrayBuffer = await pdfBlobRef.current.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+
+      const fileName = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+
+      const res = await fetch('/api/report/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          pdfBase64: base64,
+          fileName,
+          indication: labels.indication,
+        }),
+      });
+
+      if (res.ok) {
+        setEmailSent(true);
+      } else {
+        console.error('Email send failed:', await res.text());
+      }
+    } catch (err) {
+      console.error('Email send error:', err);
+    } finally {
+      setEmailSending(false);
+    }
+  }, [userEmail, emailSending, labels.indication]);
 
   const handleSkipMemo = useCallback(() => {
     setCanSkipMemo(false);
@@ -337,7 +383,8 @@ export default function ReportGenerationModal({
 
   if (!isOpen) return null;
 
-  const isProcessing = !['ready', 'success', 'error', 'idle'].includes(currentStep);
+  const isProcessing = !['preview', 'success', 'error', 'idle'].includes(currentStep);
+  const isPreview = currentStep === 'preview';
 
   return (
     <>
@@ -360,11 +407,13 @@ export default function ReportGenerationModal({
           }}
         />
 
-        {/* Modal card */}
+        {/* Modal card — expands for preview */}
         <div
           ref={modalRef}
           tabIndex={-1}
-          className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-hidden outline-none"
+          className={`relative w-full bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-hidden outline-none transition-all duration-300 ${
+            isPreview ? 'max-w-4xl' : 'max-w-md'
+          }`}
           role="dialog"
           aria-modal="true"
           aria-label="Report generation"
@@ -386,7 +435,7 @@ export default function ReportGenerationModal({
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
-                    {currentStep === 'success' ? 'Report Downloaded' : currentStep === 'ready' ? 'Your Report is Ready' : 'Preparing Your Report'}
+                    {currentStep === 'success' ? 'Report Downloaded' : isPreview ? 'Report Preview' : 'Preparing Your Report'}
                   </h3>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <span className="text-xs px-2 py-0.5 bg-navy-100 dark:bg-navy-800 text-navy-600 dark:text-navy-300 rounded font-medium">{labels.phase}</span>
@@ -417,100 +466,166 @@ export default function ReportGenerationModal({
           {/* Divider */}
           <div className="h-px bg-neutral-200 dark:bg-slate-700" />
 
-          {/* Steps */}
-          <div className="px-6 py-5">
-            <div className="space-y-4">
-              {steps.map((step, i) => {
-                const status = getStepStatus(step.id);
-                return (
-                  <div
-                    key={step.id}
-                    className="flex items-start gap-3.5 animate-step-fade-in"
-                    style={{ animationDelay: `${i * 0.1}s` }}
-                  >
-                    <StepIcon status={status} />
-                    <div className="flex-1 min-w-0 pt-0.5">
-                      <p className={`text-sm font-semibold transition-colors duration-300 ${
-                        status === 'done' ? 'text-teal-600 dark:text-teal-400' :
-                        status === 'active' ? 'text-neutral-900 dark:text-white' :
-                        'text-neutral-400 dark:text-slate-500'
-                      }`}>
-                        {step.label}
-                      </p>
-                      <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                        status === 'active' ? 'text-neutral-500 dark:text-slate-400 animate-progress-pulse' :
-                        'text-neutral-400 dark:text-slate-600'
-                      }`}>
-                        {step.sublabel}
-                      </p>
-                      {/* Memo error with skip option */}
-                      {step.id === 'generating_memo' && canSkipMemo && status === 'active' && (
-                        <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                          <p className="text-xs text-amber-700 dark:text-amber-400">Memo generation encountered an issue.</p>
-                          <button
-                            onClick={handleSkipMemo}
-                            className="mt-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline"
-                          >
-                            Skip memo, continue anyway
-                          </button>
-                        </div>
-                      )}
+          {/* Preview state — two-column layout */}
+          {isPreview && htmlStringRef.current ? (
+            <div className="flex flex-col sm:flex-row">
+              {/* Left: Report preview */}
+              <div className="flex-1 sm:w-[65%] border-r border-neutral-200 dark:border-slate-700">
+                <div className="p-4">
+                  <div className="text-xs font-medium text-neutral-400 dark:text-slate-500 mb-2 uppercase tracking-wider">Preview</div>
+                  <div className="relative rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden bg-white" style={{ height: '55vh' }}>
+                    <div style={{ width: '210mm', transformOrigin: 'top left', transform: 'scale(0.48)', height: '115vh' }}>
+                      <iframe
+                        srcDoc={htmlStringRef.current}
+                        title="Report preview"
+                        className="w-full border-0"
+                        style={{ width: '210mm', height: '200vh', pointerEvents: 'none' }}
+                        sandbox=""
+                      />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Success state */}
-            {currentStep === 'success' && (
-              <div className="mt-5 flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg animate-step-fade-in">
-                <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0 animate-step-check">
-                  <svg className="w-3 h-3 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 8.5L6.5 12L13 4" />
-                  </svg>
                 </div>
-                <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
-                  {format === 'pdf' ? 'PDF report saved to your downloads' : 'Excel workbook saved to your downloads'}
-                </p>
               </div>
-            )}
 
-            {/* Error state */}
-            {currentStep === 'error' && errorMessage && (
-              <div className="mt-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-step-fade-in">
-                <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
-                <button
-                  onClick={() => {
-                    setCurrentStep('idle');
-                    setCompletedSteps(new Set());
-                    setErrorMessage(null);
-                  }}
-                  className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline"
-                >
-                  Try again
-                </button>
-              </div>
-            )}
-          </div>
+              {/* Right: Actions */}
+              <div className="sm:w-[35%] p-6 flex flex-col justify-between">
+                <div>
+                  <div className="text-sm font-bold text-neutral-900 dark:text-white mb-1">Your Report is Ready</div>
+                  {fileSize && (
+                    <p className="text-xs text-neutral-400 dark:text-slate-500 mb-6">
+                      PDF &middot; {fileSize} &middot; Consulting-grade
+                    </p>
+                  )}
 
-          {/* Footer with download button */}
-          {currentStep === 'ready' && format === 'pdf' && (
-            <>
-              <div className="h-px bg-neutral-200 dark:bg-slate-700" />
-              <div className="px-6 py-5">
-                <button
-                  onClick={handleDownload}
-                  className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all duration-200 animate-download-glow text-sm"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download PDF Report
-                </button>
-                {fileSize && (
-                  <p className="text-xs text-neutral-400 dark:text-slate-500 text-center mt-2.5">
-                    PDF &middot; {fileSize} &middot; 10 pages
+                  {/* Download button */}
+                  <button
+                    onClick={handleDownload}
+                    className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all duration-200 text-sm mb-3"
+                  >
+                    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download PDF
+                  </button>
+
+                  {/* Email button */}
+                  {userEmail && (
+                    <button
+                      onClick={handleEmailReport}
+                      disabled={emailSending || emailSent}
+                      className={`w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
+                        emailSent
+                          ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800'
+                          : 'bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-200 hover:bg-neutral-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      {emailSent ? (
+                        <>
+                          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 8.5L6.5 12L13 4" />
+                          </svg>
+                          Sent to {userEmail}
+                        </>
+                      ) : emailSending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                          </svg>
+                          Email Report
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-neutral-200 dark:border-slate-700">
+                  <p className="text-xs text-neutral-400 dark:text-slate-500">
+                    Selectable text &middot; Inter font &middot; A4 format
                   </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Steps (shown during processing and non-preview states) */}
+              <div className="px-6 py-5">
+                <div className="space-y-4">
+                  {steps.map((step, i) => {
+                    const status = getStepStatus(step.id);
+                    return (
+                      <div
+                        key={step.id}
+                        className="flex items-start gap-3.5 animate-step-fade-in"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        <StepIcon status={status} />
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <p className={`text-sm font-semibold transition-colors duration-300 ${
+                            status === 'done' ? 'text-teal-600 dark:text-teal-400' :
+                            status === 'active' ? 'text-neutral-900 dark:text-white' :
+                            'text-neutral-400 dark:text-slate-500'
+                          }`}>
+                            {step.label}
+                          </p>
+                          <p className={`text-xs mt-0.5 transition-colors duration-300 ${
+                            status === 'active' ? 'text-neutral-500 dark:text-slate-400 animate-progress-pulse' :
+                            'text-neutral-400 dark:text-slate-600'
+                          }`}>
+                            {step.sublabel}
+                          </p>
+                          {/* Memo error with skip option */}
+                          {step.id === 'generating_memo' && canSkipMemo && status === 'active' && (
+                            <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                              <p className="text-xs text-amber-700 dark:text-amber-400">Memo generation encountered an issue.</p>
+                              <button
+                                onClick={handleSkipMemo}
+                                className="mt-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline"
+                              >
+                                Skip memo, continue anyway
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Success state */}
+                {currentStep === 'success' && (
+                  <div className="mt-5 flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg animate-step-fade-in">
+                    <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0 animate-step-check">
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8.5L6.5 12L13 4" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">
+                      {format === 'pdf' ? 'PDF report saved to your downloads' : 'Excel workbook saved to your downloads'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Error state */}
+                {currentStep === 'error' && errorMessage && (
+                  <div className="mt-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-step-fade-in">
+                    <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
+                    <button
+                      onClick={() => {
+                        startedRef.current = false;
+                        setCurrentStep('idle');
+                        setCompletedSteps(new Set());
+                        setErrorMessage(null);
+                      }}
+                      className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline"
+                    >
+                      Try again
+                    </button>
+                  </div>
                 )}
               </div>
             </>

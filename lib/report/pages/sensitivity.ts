@@ -20,7 +20,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
   const topDriver = sensitivityData.topValueDriver;
   const params = sensitivityData.parameters;
 
-  const tornadoHtml = renderTornado(params, 560, 240);
+  const tornadoHtml = renderTornado(params, 560, 300);
 
   return `
     <div class="report-page">
@@ -29,20 +29,20 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title-lg">Sensitivity Analysis</div>
 
       <!-- Top Value Driver Callout -->
-      <div class="card-highlight" style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="card-highlight" style="margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-size: 8px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Top Value Driver</div>
-          <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 3px;">${escapeHtml(topDriver.parameterLabel)}</div>
-          <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(topDriver.insightText)}</div>
+          <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Top Value Driver</div>
+          <div style="font-size: 13px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 4px;">${escapeHtml(topDriver.parameterLabel)}</div>
+          <div style="font-size: 11px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(topDriver.insightText)}</div>
         </div>
-        <div style="text-align: right; flex-shrink: 0; margin-left: 16px;">
-          <div style="font-size: 20px; font-weight: 700; color: ${COLORS.teal};">+${formatUsd(topDriver.bestOption.delta)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400};">potential upside</div>
+        <div style="text-align: right; flex-shrink: 0; margin-left: 20px;">
+          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">+${formatUsd(topDriver.bestOption.delta)}</div>
+          <div style="font-size: 9px; color: ${COLORS.gray400};">potential upside</div>
         </div>
       </div>
 
       <!-- Tornado Chart -->
-      <div class="card" style="margin-bottom: 14px; padding: 10px;">
+      <div class="card" style="margin-bottom: 18px; padding: 14px;">
         <div class="section-title" style="margin-bottom: 2px;">Parameter Impact (Tornado Chart)</div>
         <div class="chart-container">
           ${tornadoHtml}
@@ -89,10 +89,10 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
           ${sensitivityData.neurologyInsights.slice(0, 3).map(insight => `
             <div class="card-sm">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 3px;">
-                <span style="font-size: 9px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
+                <span style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
                 ${impactBadge(insight.impactLevel)}
               </div>
-              <div style="font-size: 8px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
+              <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
             </div>
           `).join('')}
         </div>

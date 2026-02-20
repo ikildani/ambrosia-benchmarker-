@@ -14,7 +14,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
     ? (terms.upfront.median / terms.totalDealValue.median * 100).toFixed(0)
     : '0';
 
-  const gaugeHtml = renderRiskGauge(riskScore, 90);
+  const gaugeHtml = renderRiskGauge(riskScore, 110);
 
   // Donut segments
   const donutHtml = renderDonut([
@@ -22,7 +22,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
     { label: 'Dev Milestones', value: terms.devMilestones.median, color: COLORS.cyan },
     { label: 'Reg Milestones', value: terms.regMilestones.median, color: '#6366f1' },
     { label: 'Comm Milestones', value: terms.commMilestones.median, color: '#8b5cf6' },
-  ], 150);
+  ], 200);
 
   const topDriver = sensitivityData?.topValueDriver;
 
@@ -33,7 +33,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
       <div class="section-title-lg">Executive Dashboard</div>
 
       <!-- Top row: 3 large KPIs -->
-      <div class="grid-3" style="margin-bottom: 14px;">
+      <div class="grid-3" style="margin-bottom: 20px;">
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(terms.totalDealValue.median)}</div>
           <div class="kpi-label">Total Deal Value</div>
@@ -50,27 +50,27 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
       </div>
 
       <!-- Middle row: 4 smaller cards -->
-      <div class="grid-4" style="margin-bottom: 16px;">
+      <div class="grid-4" style="margin-bottom: 22px;">
         <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 16px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(terms.devMilestones.median)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Dev Milestones</div>
+          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.devMilestones.median)}</div>
+          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Dev Milestones</div>
         </div>
         <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 16px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(terms.regMilestones.median)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Reg Milestones</div>
+          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.regMilestones.median)}</div>
+          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Reg Milestones</div>
         </div>
         <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 16px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(terms.commMilestones.median)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Comm Milestones</div>
+          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.commMilestones.median)}</div>
+          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Comm Milestones</div>
         </div>
         <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 16px; font-weight: 700; color: ${COLORS.teal};">${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Base Royalty</div>
+          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%</div>
+          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Base Royalty</div>
         </div>
       </div>
 
       <!-- Bottom row: Donut + Recommendation -->
-      <div style="display: grid; grid-template-columns: 180px 1fr; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 220px 1fr; gap: 20px;">
         <!-- Donut chart -->
         <div style="display: flex; flex-direction: column; align-items: center;">
           <div class="section-title" style="margin-bottom: 6px;">Value Split</div>
@@ -81,8 +81,8 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <!-- Deal Recommendation -->
           <div class="card-highlight">
-            <div style="font-size: 8px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;">Recommended Structure</div>
-            <div style="font-size: 10px; color: ${COLORS.gray800}; line-height: 1.6;">
+            <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Recommended Structure</div>
+            <div style="font-size: 11px; color: ${COLORS.gray800}; line-height: 1.6;">
               ${result.dealRecommendation.rationale}
             </div>
             <div style="margin-top: 6px; display: flex; gap: 8px;">

@@ -26,11 +26,11 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
 
   const tocRows = TOC_ENTRIES.map(entry => `
     <div style="display: flex; align-items: baseline; margin-bottom: 10px;">
-      <div style="font-size: 11px; font-weight: 600; color: ${COLORS.navy}; white-space: nowrap;">${entry.title}</div>
-      <div style="flex: 1; border-bottom: 1.5px dotted ${COLORS.gray300}; margin: 0 8px; min-width: 20px; position: relative; top: -3px;"></div>
-      <div style="font-size: 11px; font-weight: 700; color: ${COLORS.teal}; white-space: nowrap;">${entry.page}</div>
+      <div style="font-size: 12px; font-weight: 600; color: ${COLORS.navy}; white-space: nowrap;">${entry.title}</div>
+      <div style="flex: 1; border-bottom: 1.5px dotted ${COLORS.gray300}; margin: 0 10px; min-width: 20px; position: relative; top: -3px;"></div>
+      <div style="font-size: 12px; font-weight: 700; color: ${COLORS.teal}; white-space: nowrap;">${entry.page}</div>
     </div>
-    <div style="font-size: 9px; color: ${COLORS.gray500}; margin-top: -6px; margin-bottom: 14px; padding-left: 2px;">${entry.description}</div>
+    <div style="font-size: 10px; color: ${COLORS.gray500}; margin-top: -5px; margin-bottom: 16px; padding-left: 2px;">${entry.description}</div>
   `).join('');
 
   return `
@@ -39,7 +39,7 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
 
       <div class="section-title-lg">Table of Contents</div>
 
-      <p style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 24px;">
+      <p style="font-size: 11px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 28px;">
         This report provides a comprehensive deal valuation analysis for
         <strong style="color: ${COLORS.navy};">${indication}</strong>,
         including quantitative benchmarks, sensitivity modeling, comparable transactions,
@@ -59,13 +59,13 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
       <div class="card" style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Report Details</div>
-          <div style="font-size: 10px; color: ${COLORS.gray700};">
+          <div style="font-size: 11px; color: ${COLORS.gray700};">
             ${meta.pageCount} pages &middot; Version ${meta.version} &middot; Generated ${meta.generatedAt}
           </div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Report ID</div>
-          <div style="font-size: 10px; font-weight: 600; color: ${COLORS.teal};">${meta.reportId}</div>
+          <div style="font-size: 11px; font-weight: 600; color: ${COLORS.teal};">${meta.reportId}</div>
         </div>
       </div>
 

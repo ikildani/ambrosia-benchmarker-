@@ -51,13 +51,13 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
       </div>
 
       <!-- Market Context -->
-      <div class="card" style="border-left: 3px solid ${taColors.primary}; margin-bottom: 14px;">
-        <div style="font-size: 8px; font-weight: 700; color: ${taColors.primary}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;">Market Context</div>
-        <div style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">${context}</div>
+      <div class="card" style="border-left: 3px solid ${taColors.primary}; margin-bottom: 18px;">
+        <div style="font-size: 9px; font-weight: 700; color: ${taColors.primary}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Market Context</div>
+        <div style="font-size: 11px; color: ${COLORS.gray700}; line-height: 1.7;">${context}</div>
       </div>
 
       <!-- Milestone Allocation Comparison -->
-      <div style="margin-bottom: 14px;">
+      <div style="margin-bottom: 18px;">
         <div class="section-title">Milestone Allocation Benchmarks</div>
         <div class="card" style="padding: 0; overflow: hidden;">
           <table class="data-table">
@@ -109,10 +109,10 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
             return `
             <div class="card-sm">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 3px;">
-                <span style="font-size: 9px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
+                <span style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
                 <span class="badge ${impactCls[insight.impactLevel] || 'badge-gray'}">${insight.impactLevel}</span>
               </div>
-              <div style="font-size: 8px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
+              <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
             </div>
             `;
           }).join('')}

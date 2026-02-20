@@ -83,10 +83,10 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
       <div class="section-title-lg">Risk Analysis & Probability-Weighted Value</div>
 
       <!-- Risk Gauge + Summary -->
-      <div style="display: flex; gap: 24px; margin-bottom: 20px;">
+      <div style="display: flex; gap: 28px; margin-bottom: 24px;">
         <div style="text-align: center; flex-shrink: 0;">
           <div class="chart-container" style="margin: 0;">${gaugeHtml}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 4px;">Overall Risk Score</div>
+          <div style="font-size: 10px; color: ${COLORS.gray400}; margin-top: 5px;">Overall Risk Score</div>
         </div>
         <div style="flex: 1;">
           <div class="callout" style="margin-bottom: 12px;">
@@ -98,15 +98,15 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
           <!-- Risk-adjusted KPIs -->
           <div class="grid-3">
             <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 18px;">${formatUsd(riskAdjustedLow)}</div>
+              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedLow)}</div>
               <div class="kpi-label">Risk-Adj Low</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 18px;">${formatUsd(riskAdjustedMedian)}</div>
+              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedMedian)}</div>
               <div class="kpi-label">Risk-Adj Median</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 18px;">${formatUsd(riskAdjustedHigh)}</div>
+              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedHigh)}</div>
               <div class="kpi-label">Risk-Adj High</div>
             </div>
           </div>
@@ -137,9 +137,9 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
                 <div class="score-bar" style="width: 100%;">
                   <div class="score-bar-fill" style="width: ${f.weight}%; background: ${f.weight > 60 ? COLORS.rose : f.weight > 40 ? COLORS.amber : COLORS.green};"></div>
                 </div>
-                <div style="font-size: 8px; color: ${COLORS.gray400}; margin-top: 2px;">${f.weight}/100</div>
+                <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 2px;">${f.weight}/100</div>
               </td>
-              <td style="font-size: 9px; color: ${COLORS.gray500}; line-height: 1.5;">${escapeHtml(f.description)}</td>
+              <td style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.5;">${escapeHtml(f.description)}</td>
             </tr>
           `).join('')}
         </tbody>

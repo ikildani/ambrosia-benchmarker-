@@ -22,7 +22,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
     `;
   }
 
-  const chartHtml = renderDealComparison(comparableDeals.slice(0, 6), userMedian, 560, 170);
+  const chartHtml = renderDealComparison(comparableDeals.slice(0, 6), userMedian, 560, 210);
 
   return `
     <div class="report-page">
@@ -31,12 +31,12 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title-lg">Comparable Transactions</div>
 
       <!-- Bar Chart -->
-      <div class="card" style="margin-bottom: 14px; padding: 10px;">
+      <div class="card" style="margin-bottom: 20px; padding: 14px;">
         <div class="section-title" style="margin-bottom: 2px;">Deal Value Comparison</div>
         <div class="chart-container">
           ${chartHtml}
         </div>
-        <div style="text-align: center; font-size: 8px; color: ${COLORS.gray400}; margin-top: 4px;">
+        <div style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; margin-top: 6px;">
           Dashed line indicates your estimated median deal value
         </div>
       </div>
@@ -47,7 +47,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
         ${comparableDeals.slice(0, 6).map(deal => `
           <div class="card-sm">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
-              <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; line-height: 1.3;">${escapeHtml(deal.parties)}</div>
+              <div style="font-size: 11px; font-weight: 700; color: ${COLORS.navy}; line-height: 1.3;">${escapeHtml(deal.parties)}</div>
               <span style="font-size: 12px; font-weight: 700; color: ${COLORS.teal}; white-space: nowrap; margin-left: 8px;">${escapeHtml(deal.totalValue)}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 5px;">

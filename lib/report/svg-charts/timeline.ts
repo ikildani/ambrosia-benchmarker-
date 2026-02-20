@@ -12,18 +12,31 @@ interface TimelineMilestone {
 }
 
 export function renderDealTimeline(phase: string, milestones: TimelineMilestone[]): string {
-  const width = 480;
-  const height = milestones.length * 36 + 60;
-  const leftMargin = 120;
+  const width = 500;
+  const height = milestones.length * 40 + 60;
+  const leftMargin = 130;
   const rightMargin = 20;
   const topMargin = 30;
-  const barHeight = 18;
-  const rowHeight = 36;
+  const barHeight = 20;
+  const rowHeight = 40;
   const chartWidth = width - leftMargin - rightMargin;
 
   // Find max month for scale
   const maxMonth = Math.max(...milestones.map(m => m.startMonth + m.durationMonths));
   const scale = chartWidth / maxMonth;
+
+  // Build gradient defs for each unique color
+  const uniqueColors = [...new Set(milestones.map(m => m.color))];
+  const gradientDefs = uniqueColors.map((c, i) => {
+    // Lighten the color by mixing toward white
+    return `
+      <linearGradient id="tlGrad${i}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="${c}" />
+        <stop offset="100%" stop-color="${c}" stop-opacity="0.7" />
+      </linearGradient>
+    `;
+  }).join('');
+  const colorToGrad = (c: string) => `url(#tlGrad${uniqueColors.indexOf(c)})`;
 
   // Year gridlines
   const yearLines: string[] = [];
@@ -31,7 +44,7 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
     const x = leftMargin + year * 12 * scale;
     yearLines.push(`
       <line x1="${x}" y1="${topMargin - 5}" x2="${x}" y2="${topMargin + milestones.length * rowHeight}" stroke="${COLORS.gray200}" stroke-dasharray="3,3" />
-      <text x="${x}" y="${topMargin - 10}" text-anchor="middle" font-size="8" fill="${COLORS.gray400}" font-weight="600">Year ${year}</text>
+      <text x="${x}" y="${topMargin - 10}" text-anchor="middle" font-size="9" fill="${COLORS.gray400}" font-weight="600">Year ${year}</text>
     `);
   }
 
@@ -43,14 +56,20 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
     const textY = y + barHeight / 2 + 3.5;
 
     return `
-      <text x="${leftMargin - 8}" y="${textY}" text-anchor="end" font-size="8" fill="${COLORS.gray600}" font-weight="600">${m.label}</text>
-      <rect x="${x}" y="${y}" width="${w}" height="${barHeight}" rx="3" fill="${m.color}" opacity="0.85" />
-      ${m.value ? `<text x="${x + w + 5}" y="${textY}" font-size="7.5" fill="${COLORS.gray500}" font-weight="600">${m.value}</text>` : ''}
+      <text x="${leftMargin - 8}" y="${textY}" text-anchor="end" font-size="10" fill="${COLORS.gray600}" font-weight="600">${m.label}</text>
+      <rect x="${x}" y="${y}" width="${w}" height="${barHeight}" rx="3" fill="${colorToGrad(m.color)}" filter="url(#tlShadow)" />
+      ${m.value ? `<text x="${x + w + 5}" y="${textY}" font-size="9" fill="${COLORS.gray500}" font-weight="600">${m.value}</text>` : ''}
     `;
   }).join('');
 
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        ${gradientDefs}
+        <filter id="tlShadow" x="-2%" y="-4%" width="104%" height="112%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" />
+        </filter>
+      </defs>
       <!-- Axis line -->
       <line x1="${leftMargin}" y1="${topMargin - 5}" x2="${leftMargin}" y2="${topMargin + milestones.length * rowHeight}" stroke="${COLORS.gray300}" />
       <!-- Year gridlines -->
@@ -58,7 +77,7 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
       <!-- Milestone bars -->
       ${bars}
       <!-- Start label -->
-      <text x="${leftMargin}" y="${topMargin - 10}" text-anchor="middle" font-size="8" fill="${COLORS.gray400}" font-weight="600">Signing</text>
+      <text x="${leftMargin}" y="${topMargin - 10}" text-anchor="middle" font-size="9" fill="${COLORS.gray400}" font-weight="600">Signing</text>
     </svg>
   `;
 }

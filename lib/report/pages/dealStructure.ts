@@ -12,7 +12,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
 
   // Waterfall chart
   const baseValue = terms.totalDealValue.median / result.modifiers.reduce((acc, m) => acc * m.multiplier, 1);
-  const waterfallHtml = renderWaterfall(result.modifiers, baseValue, 560, 220);
+  const waterfallHtml = renderWaterfall(result.modifiers, baseValue, 560, 280);
 
   // Range bars for each term
   const maxVal = terms.totalDealValue.high * 1.1;
@@ -31,13 +31,13 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
       <div class="section-title-lg">Deal Structure & Valuation</div>
 
       <!-- Modifier Waterfall -->
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 22px;">
         <div class="section-title">Value Impact Waterfall</div>
         <div class="card" style="padding: 12px 10px;">
           <div class="chart-container">
             ${waterfallHtml}
           </div>
-          <div style="text-align: center; font-size: 8px; color: ${COLORS.gray400}; margin-top: 4px;">
+          <div style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; margin-top: 6px;">
             Shows how each factor modifies the base valuation to reach the final estimated deal value
           </div>
         </div>
@@ -64,7 +64,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.low)}</td>
                   <td class="value-cell">${formatUsd(t.median)}</td>
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.high)}</td>
-                  <td>${renderRangeBar({ low: t.low, median: t.median, high: t.high }, maxVal, 220, 28, true)}</td>
+                  <td>${renderRangeBar({ low: t.low, median: t.median, high: t.high }, maxVal, 260, 28, true)}</td>
                 </tr>
               `).join('')}
             </tbody>

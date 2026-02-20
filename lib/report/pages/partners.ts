@@ -28,12 +28,12 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
       ${pageHeader(8, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Partner Landscape</div>
-      <p style="font-size: 10px; color: ${COLORS.gray500}; margin-bottom: 14px; line-height: 1.5;">
+      <p style="font-size: 11px; color: ${COLORS.gray500}; margin-bottom: 18px; line-height: 1.5;">
         Top ${topPartners.length} potential partners ranked by algorithmic match score based on therapeutic focus, deal activity, and strategic fit.
       </p>
 
       <!-- Partner Cards -->
-      <div class="grid-2" style="margin-bottom: 14px;">
+      <div class="grid-2" style="margin-bottom: 20px;">
         ${topPartners.map(p => {
           const scoreColor = p.match_score >= 80 ? COLORS.teal : p.match_score >= 60 ? COLORS.cyan : COLORS.amber;
           return `
@@ -44,7 +44,7 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
                 ${p.hq_country ? `<div style="font-size: 8px; color: ${COLORS.gray400};">${escapeHtml(p.hq_country)}</div>` : ''}
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 16px; font-weight: 700; color: ${scoreColor};">${p.match_score}%</div>
+                <div style="font-size: 18px; font-weight: 700; color: ${scoreColor};">${p.match_score}%</div>
                 <div style="font-size: 7px; color: ${COLORS.gray400}; font-weight: 700; letter-spacing: 0.1em;">MATCH</div>
               </div>
             </div>

@@ -66,33 +66,42 @@ export function renderRoyaltyStep(
     const y = scaleY(val);
     yTicks.push(`
       <line x1="${marginLeft}" y1="${y}" x2="${marginLeft + chartW}" y2="${y}" stroke="${COLORS.gray100}" stroke-width="1" />
-      <text x="${marginLeft - 6}" y="${y + 3}" text-anchor="end" font-size="8" fill="${COLORS.gray400}">${val.toFixed(0)}%</text>
+      <text x="${marginLeft - 6}" y="${y + 3}" text-anchor="end" font-size="9" fill="${COLORS.gray400}">${val.toFixed(0)}%</text>
     `);
   }
 
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="rsAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${COLORS.teal}" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="${COLORS.teal}" stop-opacity="0.03" />
+        </linearGradient>
+        <filter id="rsLineShadow" x="-2%" y="-8%" width="104%" height="116%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.1" />
+        </filter>
+      </defs>
       <!-- Grid -->
       ${yTicks.join('')}
       <!-- Shaded area -->
-      <polygon points="${areaPath.join(' ')}" fill="${COLORS.teal}" opacity="0.12" />
+      <polygon points="${areaPath.join(' ')}" fill="url(#rsAreaGrad)" />
       <!-- High line -->
-      <polyline points="${highPoints.join(' ')}" fill="none" stroke="${COLORS.teal}" stroke-width="2" />
+      <polyline points="${highPoints.join(' ')}" fill="none" stroke="${COLORS.teal}" stroke-width="2" filter="url(#rsLineShadow)" />
       <!-- Low line -->
       <polyline points="${lowPoints.join(' ')}" fill="none" stroke="${COLORS.navy}" stroke-width="2" stroke-dasharray="4,3" />
       <!-- Tier labels -->
       ${tiers.map((tier) => {
         const x = scaleX((tier.xStart + tier.xEnd) / 2);
         return `
-          <text x="${x}" y="${height - 18}" text-anchor="middle" font-size="9" font-weight="500" fill="${COLORS.gray700}">${tier.label} Tier</text>
-          <text x="${x}" y="${height - 6}" text-anchor="middle" font-size="8" fill="${COLORS.gray400}">${tier.low}%-${tier.high}%</text>
+          <text x="${x}" y="${height - 18}" text-anchor="middle" font-size="10" font-weight="500" fill="${COLORS.gray700}">${tier.label} Tier</text>
+          <text x="${x}" y="${height - 6}" text-anchor="middle" font-size="9" fill="${COLORS.gray400}">${tier.low}%-${tier.high}%</text>
         `;
       }).join('')}
       <!-- Legend -->
       <line x1="${marginLeft}" y1="${height - 2}" x2="${marginLeft + 16}" y2="${height - 2}" stroke="${COLORS.teal}" stroke-width="2" />
-      <text x="${marginLeft + 20}" y="${height}" font-size="7" fill="${COLORS.gray500}">High</text>
+      <text x="${marginLeft + 20}" y="${height}" font-size="8" fill="${COLORS.gray500}">High</text>
       <line x1="${marginLeft + 50}" y1="${height - 2}" x2="${marginLeft + 66}" y2="${height - 2}" stroke="${COLORS.navy}" stroke-width="2" stroke-dasharray="4,3" />
-      <text x="${marginLeft + 70}" y="${height}" font-size="7" fill="${COLORS.gray500}">Low</text>
+      <text x="${marginLeft + 70}" y="${height}" font-size="8" fill="${COLORS.gray500}">Low</text>
     </svg>
   `;
 }
