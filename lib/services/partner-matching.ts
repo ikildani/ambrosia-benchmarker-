@@ -517,8 +517,9 @@ function calculateMatchScore(
   // 5. STRATEGIC NEED (patent cliffs, pipeline gaps, strategic priority match)
   const patentCliffs = parsePatentCliffs(company.patent_cliffs);
 
-  // Patent cliff urgency: upcoming cliffs in related indication = buying pressure
-  const relevantCliffs = patentCliffs.filter((cliff: PatentCliff) => {
+  // Patent cliff urgency: upcoming cliffs in related TA/indication = buying pressure
+  const taCliffs = filterCliffsByTA(patentCliffs, input.therapeutic_area);
+  const relevantCliffs = taCliffs.filter((cliff: PatentCliff) => {
     const cliffIndication = cliff.indication?.toLowerCase() || '';
     return (
       (input.indication_category && cliffIndication.includes(input.indication_category.toLowerCase())) ||
@@ -563,8 +564,8 @@ function calculateMatchScore(
     });
   }
 
-  // Pipeline gap from patent cliffs in target indication
-  const pipelineGaps = patentCliffs
+  // Pipeline gap from patent cliffs in target indication (filtered to same TA)
+  const pipelineGaps = taCliffs
     .filter((c: PatentCliff) => c.expiry_year <= 2028 && c.indication)
     .map((c: PatentCliff) => c.indication!.toLowerCase());
 
@@ -1280,6 +1281,23 @@ function parsePatentCliffs(cliffs: any): PatentCliff[] {
       revenue_usd: c.revenue_usd || 0,
       expiry_year: c.expiry_year,
     }));
+}
+
+// Map therapeutic area to keywords found in patent cliff indication strings
+const TA_CLIFF_KEYWORDS: Record<string, string[]> = {
+  oncology: ['oncology', 'tumor', 'cancer', 'pd-1', 'pd-l1', 'adc', 'her2', 'egfr', 'cdk', 'parp', 'btk', 'bcl', 'alk', 'lymphoma', 'leukemia', 'myeloma', 'melanoma', 'nsclc', 'sclc', 'breast', 'prostate', 'lung', 'colorectal', 'bladder', 'renal', 'ovarian', 'hematology'],
+  neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer', 'parkinson', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'bipolar', 'adhd', 'pain', 'neuropath'],
+  immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus', 'psoriasis', 'crohn', 'colitis', 'rheumatoid', 'atopic', 'dermatitis', 'ibd'],
+  metabolic: ['metabolic', 'obesity', 'diabetes', 'glp-1', 'gip', 'sglt2', 'weight', 't2d', 'nash', 'mash', 'nafld', 'cardiovascular', 'lipid', 'cholesterol', 'hypertension'],
+};
+
+function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea: string | null): PatentCliff[] {
+  if (!therapeuticArea || !TA_CLIFF_KEYWORDS[therapeuticArea]) return cliffs;
+  const keywords = TA_CLIFF_KEYWORDS[therapeuticArea];
+  return cliffs.filter((cliff) => {
+    const indication = cliff.indication?.toLowerCase() || '';
+    return keywords.some((kw) => indication.includes(kw));
+  });
 }
 
 function formatCurrency(value: number): string {

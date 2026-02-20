@@ -137,6 +137,7 @@ describe('/api/partners/match', () => {
         indication_category: null,
         indication_specific: null,
         territory_scope: null,
+        therapeutic_area: 'oncology',
       },
       generated_at: new Date().toISOString(),
     });

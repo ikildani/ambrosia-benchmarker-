@@ -147,16 +147,15 @@ const TA_KEYWORDS: Record<string, string[]> = {
   immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus'],
 };
 
-function sortCliffsByRelevance(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
+function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
   if (!therapeuticArea || !TA_KEYWORDS[therapeuticArea]) return cliffs;
   const keywords = TA_KEYWORDS[therapeuticArea];
-  return [...cliffs].sort((a, b) => {
-    const aRelevant = keywords.some(kw => a.indication.toLowerCase().includes(kw));
-    const bRelevant = keywords.some(kw => b.indication.toLowerCase().includes(kw));
-    if (aRelevant && !bRelevant) return -1;
-    if (!aRelevant && bRelevant) return 1;
-    return 0;
+  const filtered = cliffs.filter((cliff) => {
+    const indication = (cliff.indication || '').toLowerCase();
+    return keywords.some(kw => indication.includes(kw));
   });
+  // If no cliffs match the TA (e.g. sparse data), fall back to all cliffs
+  return filtered.length > 0 ? filtered : cliffs;
 }
 
 interface PartnerMatchesProps {
@@ -480,7 +479,7 @@ export function PartnerMatches({
                           </span>
                         </div>
                         <div className="space-y-2">
-                          {sortCliffsByRelevance(partnerDetails.company.patent_cliffs, therapeuticArea).slice(0, 3).map((cliff: PatentCliff, i: number) => (
+                          {filterCliffsByTA(partnerDetails.company.patent_cliffs, therapeuticArea).slice(0, 3).map((cliff: PatentCliff, i: number) => (
                             <div
                               key={i}
                               className="flex items-center justify-between gap-2 text-sm bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-500/20 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
