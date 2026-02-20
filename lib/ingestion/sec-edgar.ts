@@ -25,6 +25,7 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1776985': 'Roche',
   '1110803': 'Sanofi',
   '1585364': 'GSK',
+  '1776903': 'Novo Nordisk',
 
   // Large Biotech
   '1682852': 'Moderna',
@@ -42,9 +43,31 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1326190': 'Exact Sciences',
   '1418091': 'Ultragenyx',
   '1651308': 'Argenx',
+  '913241': 'Biogen',
+
+  // Rare Disease / Specialty
+  '1629377': 'Sarepta Therapeutics',
+  '1576263': 'Insmed',
+  '1527599': 'Apellis Pharmaceuticals',
+
+  // Ophthalmology
+  '1167379': 'Alcon',
+
+  // CV/Metabolic
+  '1624512': 'BridgeBio Pharma',
+  '1801417': 'Madrigal Pharmaceuticals',
+  '1859690': 'Structure Therapeutics',
+
+  // Respiratory/Immunology
+  '818686': 'Teva',
+  '1679363': 'Iovance Biotherapeutics',
+
+  // Dermatology/Autoimmune
+  '1750153': 'Roivant Sciences',
+  '1787858': 'Arcutis Biotherapeutics',
+  '1555280': 'Galapagos',
 
   // Mid-cap Pharma/Biotech
-  '913241': 'Biogen',
   '1545654': 'Blueprint Medicines',
   '1438423': 'Agios',
   '1493152': 'Rocket Pharmaceuticals',
@@ -59,6 +82,43 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1592836': 'ImmunoGen',
   '1411685': 'Arcus Biosciences',
   '1653087': 'CRISPR Therapeutics',
+  '1652130': 'Intellia Therapeutics',
+  '1650664': 'Editas Medicine',
+  '1745916': 'Beam Therapeutics',
+  '1610950': 'Relay Therapeutics',
+  '1588978': 'Nuvalent',
+  '1713539': 'Recursion Pharmaceuticals',
+
+  // Neuroscience
+  '1566044': 'Intra-Cellular Therapies',
+  '939767': 'Exelixis',
+
+  // Gene/Cell Therapy
+  '1637459': 'Allogene Therapeutics',
+  '1585521': 'Autolus Therapeutics',
+  '1702780': 'Caribou Biosciences',
+  '1070698': 'Precision BioSciences',
+  '1472468': 'Fate Therapeutics',
+  '1636651': 'Poseida Therapeutics',
+
+  // Radiopharmaceuticals
+  '1521036': 'Lantheus',
+
+  // Oligonucleotide
+  '1178670': 'Alnylam',
+  '936395': 'Ionis Pharmaceuticals',
+  '1580608': 'Arrowhead Pharmaceuticals',
+
+  // Chinese Biotech (US-listed)
+  '1651625': 'BeiGene',
+  '1704292': 'Zai Lab',
+  '1564824': 'Hutchmed',
+
+  // Regional
+  '1478242': 'Zealand Pharma',
+  '1649904': 'Rhythm Pharmaceuticals',
+  '1634293': 'Travere Therapeutics',
+  '1393584': 'Bicycle Therapeutics',
 };
 
 // Search terms for licensing deals

@@ -114,10 +114,17 @@ export async function GET(request: NextRequest) {
       .not('licensee_name', 'is', null);
 
     // Fetch all companies once (shared between licensee and licensor linking)
+    // Include name_variations for fuzzy matching (SEC filings use legal names like "Pfizer Inc.")
     const { data: allCompanies } = await supabase
       .from('companies')
-      .select('id, name');
-    const nameToId = new Map((allCompanies || []).map(c => [c.name.toLowerCase(), c.id]));
+      .select('id, name, name_variations');
+    const nameToId = new Map<string, string>();
+    for (const c of allCompanies || []) {
+      nameToId.set(c.name.toLowerCase(), c.id);
+      for (const v of c.name_variations || []) {
+        nameToId.set(v.toLowerCase(), c.id);
+      }
+    }
 
     // PERFORMANCE: Batch updates by company_id to avoid N+1 per-deal updates
     if (unlinkedLicensees && unlinkedLicensees.length > 0) {
@@ -160,6 +167,31 @@ export async function GET(request: NextRequest) {
 
     console.log(`Linked ${linkedLicensees} licensee IDs + ${linkedLicensors} licensor IDs`);
 
+    // Step 6: Recalculate deal stats for all affected companies
+    console.log('Step 6: Recalculating company deal stats...');
+    const affectedCompanyIds = new Set<string>();
+
+    // Collect all company IDs that were just linked
+    if (unlinkedLicensees) {
+      for (const deal of unlinkedLicensees) {
+        const companyId = nameToId.get(deal.licensee_name.toLowerCase());
+        if (companyId) affectedCompanyIds.add(companyId);
+      }
+    }
+    if (unlinkedLicensors) {
+      for (const deal of unlinkedLicensors) {
+        const companyId = nameToId.get(deal.licensor_name.toLowerCase());
+        if (companyId) affectedCompanyIds.add(companyId);
+      }
+    }
+
+    let statsUpdated = 0;
+    for (const companyId of affectedCompanyIds) {
+      const { error: rpcError } = await supabase.rpc('update_company_deal_stats', { p_company_id: companyId });
+      if (!rpcError) statsUpdated++;
+    }
+    console.log(`Recalculated deal stats for ${statsUpdated}/${affectedCompanyIds.size} companies`);
+
     const countsSummary = Object.entries(counts)
       .filter(([, v]) => v && v > 0)
       .map(([k, v]) => `${k}: ${v}`)
@@ -176,6 +208,7 @@ export async function GET(request: NextRequest) {
       },
       backfillErrors,
       linked: { licensees: linkedLicensees, licensors: linkedLicensors },
+      statsRecalculated: statsUpdated,
       counts,
     });
   } catch (error) {

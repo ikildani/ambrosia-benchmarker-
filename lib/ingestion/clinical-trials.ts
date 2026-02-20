@@ -3,18 +3,35 @@
 
 const CT_API_V2 = 'https://clinicaltrials.gov/api/v2/studies';
 
-// Top 100+ pharma/biotech companies to track
+// Top 150+ pharma/biotech companies to track
 export const COMPANIES_TO_TRACK = [
   // Large Pharma
   'Pfizer', 'Merck', 'Novartis', 'Roche', 'AstraZeneca',
   'Bristol-Myers Squibb', 'Johnson & Johnson', 'AbbVie',
   'Gilead Sciences', 'Amgen', 'Regeneron', 'Eli Lilly', 'Sanofi',
   'GSK', 'Takeda', 'Boehringer Ingelheim', 'Bayer',
+  'Novo Nordisk', 'Merck KGaA',
 
   // Large Biotech
   'Biogen', 'Vertex', 'Moderna', 'BioNTech', 'Alexion',
   'BioMarin', 'Incyte', 'Seagen', 'Jazz Pharmaceuticals',
-  'Neurocrine', 'Alkermes', 'Exact Sciences',
+  'Neurocrine', 'Alkermes', 'Exact Sciences', 'Argenx',
+
+  // Rare Disease
+  'Ultragenyx', 'Sarepta', 'Sobi', 'Ipsen', 'Insmed',
+
+  // Ophthalmology
+  'Alcon', 'Bausch + Lomb', 'Apellis',
+
+  // CV/Metabolic
+  'BridgeBio', 'Madrigal Pharmaceuticals', 'Structure Therapeutics',
+
+  // Respiratory/Immunology
+  'Teva', 'Chiesi', 'Iovance Biotherapeutics',
+
+  // Dermatology
+  'Roivant Sciences', 'Arcutis Biotherapeutics', 'Sun Pharma',
+  'LEO Pharma', 'Galapagos',
 
   // Mid-cap Biotech
   'Blueprint Medicines', 'Agios', 'Rocket Pharmaceuticals',
@@ -24,6 +41,8 @@ export const COMPANIES_TO_TRACK = [
   'Editas Medicine', 'Beam Therapeutics', 'Prime Medicine',
   'Allogene', 'Autolus', 'Fate Therapeutics', 'Poseida',
   'Caribou Biosciences', 'Precision BioSciences', '2seventy bio',
+  'Intra-Cellular Therapies', 'Exelixis', 'Zealand Pharma',
+  'Rhythm Pharmaceuticals', 'Travere Therapeutics',
 
   // ADC/Bispecific specialists
   'Daiichi Sankyo', 'Astellas', 'Zymeworks', 'Mersana',
@@ -43,13 +62,19 @@ export const COMPANIES_TO_TRACK = [
   'Bicycle Therapeutics', 'Cullinan', 'Erasca', 'Nuvalent',
   'Relay Therapeutics', 'Recursion', 'Exscientia', 'Schrodinger',
 
-  // Japanese Pharma
-  'Eisai', 'Shionogi',
-  'Chugai', 'Ono Pharmaceutical', 'Sumitomo Pharma',
+  // Regional — Japan
+  'Eisai', 'Shionogi', 'Chugai', 'Ono Pharmaceutical',
+  'Sumitomo Pharma', 'Otsuka', 'Mitsubishi Tanabe',
 
-  // Chinese Biotech
+  // Regional — China/Korea
   'BeiGene', 'Zai Lab', 'Hutchmed', 'Innovent',
-  'Hengrui', 'CSPC Pharmaceutical',
+  'Hengrui', 'CSPC Pharmaceutical', 'Celltrion', 'Samsung Biologics',
+
+  // Regional — Europe/Other
+  'Recordati', 'Menarini', 'Servier',
+
+  // Regional — India
+  'Lupin', 'Dr. Reddy\'s', 'Cipla',
 ];
 
 export interface CTStudy {
