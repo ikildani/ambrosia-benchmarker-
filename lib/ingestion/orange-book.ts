@@ -5,7 +5,7 @@
 // Format: Tilde (~) delimited text files in a ZIP archive
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { inflateRawSync } from 'zlib';
+import { unzipSync } from 'fflate';
 
 // Top blockbuster drugs with estimated annual revenue (from public 10-K disclosures, 2024-2025)
 // Used to enrich patent cliff entries with revenue context
@@ -216,29 +216,35 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
       throw new Error(`FDA download failed: ${zipResponse.status}`);
     }
 
-    const zipBuffer = Buffer.from(await zipResponse.arrayBuffer());
-    console.log(`[orange-book] Downloaded ${(zipBuffer.length / 1024 / 1024).toFixed(1)}MB`);
+    const zipArrayBuffer = await zipResponse.arrayBuffer();
+    const zipData = new Uint8Array(zipArrayBuffer);
+    console.log(`[orange-book] Downloaded ${(zipData.length / 1024 / 1024).toFixed(1)}MB`);
 
-    // Step 2: Extract patent.txt and products.txt from ZIP
-    // Use a simple ZIP parser since the files are small
-    const files = parseZip(zipBuffer);
-    const patentFile = files.find(f => f.name.toLowerCase().includes('patent'));
-    const productFile = files.find(f => f.name.toLowerCase().includes('product'));
+    // Step 2: Extract patent.txt and products.txt from ZIP using fflate
+    const unzipped = unzipSync(zipData);
+    const fileNames = Object.keys(unzipped);
+    console.log(`[orange-book] ZIP contains: ${fileNames.join(', ')}`);
 
-    if (!patentFile || !productFile) {
-      throw new Error('Could not find patent.txt or products.txt in ZIP');
+    const patentFileName = fileNames.find(f => f.toLowerCase().includes('patent'));
+    const productFileName = fileNames.find(f => f.toLowerCase().includes('product'));
+
+    if (!patentFileName || !productFileName) {
+      throw new Error(`Could not find patent.txt or products.txt in ZIP. Files: ${fileNames.join(', ')}`);
     }
 
-    console.log(`[orange-book] Parsing ${patentFile.name} and ${productFile.name}...`);
+    const patentContent = new TextDecoder().decode(unzipped[patentFileName]);
+    const productContent = new TextDecoder().decode(unzipped[productFileName]);
+
+    console.log(`[orange-book] Parsing ${patentFileName} (${patentContent.length} chars) and ${productFileName} (${productContent.length} chars)...`);
 
     // Step 3: Parse tilde-delimited files
-    const patents = parseTildeDelimited<OrangeBookPatent>(patentFile.content, [
+    const patents = parseTildeDelimited<OrangeBookPatent>(patentContent, [
       'appl_type', 'appl_no', 'product_no', 'patent_no', 'patent_expire_date',
       'drug_substance_flag', 'drug_product_flag', 'patent_use_code', 'delist_flag',
       'submission_date',
     ]);
 
-    const products = parseTildeDelimited<OrangeBookProduct>(productFile.content, [
+    const products = parseTildeDelimited<OrangeBookProduct>(productContent, [
       'ingredient', 'df_route', 'trade_name', 'applicant', 'strength',
       'appl_type', 'appl_no', 'product_no', 'te_code', 'approval_date',
       'rld', 'rs', 'type', 'applicant_full_name',
@@ -386,53 +392,6 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
     errors.push(String(error));
     return { matched: 0, unmatched: 0, companies_updated: 0, errors };
   }
-}
-
-// Simple ZIP parser for small archives
-function parseZip(buffer: Buffer): Array<{ name: string; content: string }> {
-  const files: Array<{ name: string; content: string }> = [];
-
-  // Find local file headers (PK\x03\x04)
-  let offset = 0;
-  while (offset < buffer.length - 30) {
-    // Local file header signature
-    if (buffer.readUInt32LE(offset) !== 0x04034b50) {
-      // Try central directory or end
-      if (buffer.readUInt32LE(offset) === 0x02014b50 || buffer.readUInt32LE(offset) === 0x06054b50) {
-        break;
-      }
-      offset++;
-      continue;
-    }
-
-    const compressionMethod = buffer.readUInt16LE(offset + 8);
-    const compressedSize = buffer.readUInt32LE(offset + 18);
-    const uncompressedSize = buffer.readUInt32LE(offset + 22);
-    const nameLength = buffer.readUInt16LE(offset + 26);
-    const extraLength = buffer.readUInt16LE(offset + 28);
-
-    const name = buffer.toString('utf8', offset + 30, offset + 30 + nameLength);
-    const dataStart = offset + 30 + nameLength + extraLength;
-
-    if (compressionMethod === 0) {
-      // Stored (no compression)
-      const content = buffer.toString('utf8', dataStart, dataStart + uncompressedSize);
-      files.push({ name, content });
-    } else if (compressionMethod === 8) {
-      // Deflated — use zlib inflateRawSync
-      try {
-        const compressed = buffer.subarray(dataStart, dataStart + compressedSize);
-        const decompressed = inflateRawSync(compressed);
-        files.push({ name, content: decompressed.toString('utf8') });
-      } catch (e) {
-        console.warn(`[orange-book] Could not decompress ${name}: ${e}`);
-      }
-    }
-
-    offset = dataStart + compressedSize;
-  }
-
-  return files;
 }
 
 function parseTildeDelimited<T>(content: string, fields: string[]): T[] {
