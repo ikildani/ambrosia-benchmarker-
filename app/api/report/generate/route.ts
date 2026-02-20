@@ -7,7 +7,7 @@ import type { PDFReportData } from '@/lib/report/types';
 
 // Server-side PDF generation endpoint
 // Requires: Pro tier OR active report purchase
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {

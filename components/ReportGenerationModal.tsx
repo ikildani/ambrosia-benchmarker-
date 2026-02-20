@@ -242,7 +242,7 @@ export default function ReportGenerationModal({
         if (abortRef.current) return;
         markComplete('compiling');
 
-        // Step 4: Build PDF via server-side Chromium (with 12s timeout + client fallback)
+        // Step 4: Build PDF via server-side Chromium (with timeout + client fallback)
         setCurrentStep('building');
         try {
           const reportPayload = {
@@ -250,9 +250,9 @@ export default function ReportGenerationModal({
             reportPurchaseId: reportId,
           };
 
-          // Race server-side generation against a 12s timeout
+          // Server-side generation with full-lifecycle timeout (covers headers + body)
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 12000);
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
 
           let useClientFallback = false;
           try {
@@ -262,12 +262,14 @@ export default function ReportGenerationModal({
               body: JSON.stringify(reportPayload),
               signal: controller.signal,
             });
-            clearTimeout(timeoutId);
 
             if (serverRes.ok) {
+              // Note: don't clear timeout until body is fully read
               const pdfArrayBuffer = await serverRes.arrayBuffer();
+              clearTimeout(timeoutId);
               pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
             } else {
+              clearTimeout(timeoutId);
               useClientFallback = true;
             }
           } catch {
@@ -278,17 +280,22 @@ export default function ReportGenerationModal({
           if (useClientFallback) {
             console.warn('Server PDF unavailable, using client-side generation');
             const html2pdf = (await import('html2pdf.js')).default;
-            const blob: Blob = await html2pdf()
+            // Race client-side PDF against a 45s timeout to prevent infinite hang
+            const pdfPromise = html2pdf()
               .set({
                 margin: 0,
                 filename: `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
+                image: { type: 'jpeg', quality: 0.92 },
+                html2canvas: { scale: 1.5, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['css', 'legacy'] },
               })
               .from(hiddenContainerRef.current!)
               .outputPdf('blob');
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Client PDF generation timed out after 45s')), 45000)
+            );
+            const blob: Blob = await Promise.race([pdfPromise, timeoutPromise]);
             pdfBlobRef.current = blob;
           }
 
