@@ -155,7 +155,7 @@ export default function ReportGenerationModal({
     const run = async () => {
       const p = propsRef.current;
       try {
-        // Step 1: Analyzing
+        // Step 1: Analyzing — synchronous computation + fire off memo fetch in parallel
         setCurrentStep('analyzing');
         const sensitivityData = computeSensitivityAnalysis(p.fullInputs, p.result);
         const riskScore = calculateRiskScore(p.fullInputs);
@@ -165,7 +165,31 @@ export default function ReportGenerationModal({
           indication: p.fullInputs.indication,
           phase: p.fullInputs.phase,
         }, 6);
-        await delay(800);
+
+        // Start memo fetch NOW (in parallel with UI transitions) — don't wait for step 2
+        let memoPromise: Promise<DealMemo | null> | null = null;
+        if (p.format === 'pdf' && !p.existingMemo) {
+          memoPromise = fetch('/api/deal-memo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reportId: p.reportId || undefined,
+              userId: p.userId || undefined,
+              email: p.userEmail || undefined,
+              inputs: p.fullInputs,
+              results: p.result,
+              labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
+            }),
+          }).then(async (response) => {
+            if (response.ok) {
+              const data = await response.json();
+              return (data.memo || data) as DealMemo;
+            }
+            return null;
+          }).catch(() => null);
+        }
+
+        await delay(300);
         if (abortRef.current) return;
         markComplete('analyzing');
 
@@ -195,31 +219,15 @@ export default function ReportGenerationModal({
           return;
         }
 
-        // Step 2: Generate AI memo (PDF only)
+        // Step 2: Await the memo that was already fetching in parallel
         setCurrentStep('generating_memo');
         let memo = p.existingMemo;
-        if (!memo) {
-          try {
-            const response = await fetch('/api/deal-memo', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                reportId: p.reportId || undefined,
-                userId: p.userId || undefined,
-                email: p.userEmail || undefined,
-                inputs: p.fullInputs,
-                results: p.result,
-                labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
-              }),
-            });
-            if (response.ok) {
-              const data = await response.json();
-              memo = data.memo || data;
-              p.onMemoGenerated(memo as DealMemo);
-            } else {
-              setCanSkipMemo(true);
-            }
-          } catch {
+        if (!memo && memoPromise) {
+          const fetchedMemo = await memoPromise;
+          if (fetchedMemo) {
+            memo = fetchedMemo;
+            p.onMemoGenerated(memo);
+          } else {
             setCanSkipMemo(true);
           }
         }
@@ -244,7 +252,7 @@ export default function ReportGenerationModal({
         if (hiddenContainerRef.current) {
           hiddenContainerRef.current.innerHTML = html;
         }
-        await delay(600);
+        await delay(200);
         if (abortRef.current) return;
         markComplete('compiling');
 
