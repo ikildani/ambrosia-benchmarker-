@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
+import { isAdminEmail, isProEmail } from '@/lib/config/authorized-emails';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateReportHTML } from '@/lib/report';
 import { renderPDFBuffer } from '@/lib/report/server-renderer';
 import type { PDFReportData } from '@/lib/report/types';
 
 // Server-side PDF generation endpoint
-// Requires: Pro tier OR active report purchase
+// Requires: Pro tier, admin/pro email, or active report purchase
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
@@ -29,11 +30,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify access: must be Pro tier or have a valid report purchase
+    // Verify access: admin email, pro email, pro tier in DB, or valid report purchase
     const supabase = createServiceClient();
     let hasAccess = false;
 
-    if (userId) {
+    // Admin and pro emails always have access
+    if (isAdminEmail(userEmail) || isProEmail(userEmail)) {
+      hasAccess = true;
+    }
+
+    if (!hasAccess && userId) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('tier')

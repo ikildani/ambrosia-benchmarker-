@@ -49,21 +49,26 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/** Fallback: open the report HTML in a new window and trigger browser print dialog. */
-function usePrintFallback(html: string): void {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Please allow pop-ups to download the PDF report.');
+/** Fallback: trigger browser print dialog via a hidden iframe (no popup blocker issues). */
+function triggerPrintFallback(html: string): void {
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!doc) {
+    document.body.removeChild(iframe);
     return;
   }
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.onload = () => {
+  doc.open();
+  doc.write(html);
+  doc.close();
+  // Wait for content + fonts to render, then trigger print
+  setTimeout(() => {
+    try { iframe.contentWindow?.print(); } catch { /* cross-origin fallback */ }
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
-  };
+      try { document.body.removeChild(iframe); } catch { /* already removed */ }
+    }, 2000);
+  }, 1500);
 }
 
 function StepIcon({ status }: { status: 'pending' | 'active' | 'done' }) {
@@ -299,26 +304,18 @@ export default function ReportGenerationModal({
               const sizeMB = (pdfBlobRef.current.size / (1024 * 1024)).toFixed(1);
               setFileSize(`${sizeMB} MB`);
             } else {
-              // Server can't generate (auth, error, etc.) — use browser print
-              usePrintFallback(html);
+              // Server can't generate — show preview with print-to-PDF option
               if (abortRef.current) return;
               markComplete('building');
-              setCurrentStep('success');
-              p.onDownloadComplete();
-              await delay(1500);
-              if (!abortRef.current) p.onClose();
+              setCurrentStep('preview');
               return;
             }
           } catch {
             clearTimeout(timeoutId);
-            // Server timeout or network error — use browser print
-            usePrintFallback(html);
+            // Server timeout or network error — show preview with print-to-PDF option
             if (abortRef.current) return;
             markComplete('building');
-            setCurrentStep('success');
-            p.onDownloadComplete();
-            await delay(1500);
-            if (!abortRef.current) p.onClose();
+            setCurrentStep('preview');
             return;
           }
         } catch (err) {
@@ -348,23 +345,28 @@ export default function ReportGenerationModal({
   }, [isOpen]);
 
   const handleDownload = useCallback(() => {
-    if (!pdfBlobRef.current) return;
-    setCurrentStep('downloading');
-
-    const url = URL.createObjectURL(pdfBlobRef.current);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    setCurrentStep('success');
-    onDownloadComplete();
-    setTimeout(() => {
-      if (!abortRef.current) onClose();
-    }, 1500);
+    if (pdfBlobRef.current) {
+      // Server-generated PDF — direct download
+      setCurrentStep('downloading');
+      const url = URL.createObjectURL(pdfBlobRef.current);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setCurrentStep('success');
+      onDownloadComplete();
+      setTimeout(() => {
+        if (!abortRef.current) onClose();
+      }, 1500);
+    } else if (htmlStringRef.current) {
+      // No server PDF — trigger browser print dialog (Save as PDF)
+      triggerPrintFallback(htmlStringRef.current);
+      setCurrentStep('success');
+      onDownloadComplete();
+    }
   }, [labels.indication, onDownloadComplete, onClose]);
 
   const handleEmailReport = useCallback(async () => {
@@ -532,11 +534,11 @@ export default function ReportGenerationModal({
               <div className="sm:w-[35%] p-6 flex flex-col justify-between">
                 <div>
                   <div className="text-sm font-bold text-neutral-900 dark:text-white mb-1">Your Report is Ready</div>
-                  {fileSize && (
-                    <p className="text-xs text-neutral-400 dark:text-slate-500 mb-6">
-                      PDF &middot; {fileSize} &middot; Consulting-grade
-                    </p>
-                  )}
+                  <p className="text-xs text-neutral-400 dark:text-slate-500 mb-6">
+                    {fileSize
+                      ? `PDF \u00B7 ${fileSize} \u00B7 Consulting-grade`
+                      : 'Use Save as PDF in the print dialog'}
+                  </p>
 
                   {/* Download button */}
                   <button
@@ -546,7 +548,7 @@ export default function ReportGenerationModal({
                     <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Download PDF
+                    {pdfBlobRef.current ? 'Download PDF' : 'Save as PDF'}
                   </button>
 
                   {/* Email button */}
