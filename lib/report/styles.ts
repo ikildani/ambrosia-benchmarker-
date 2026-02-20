@@ -28,8 +28,6 @@ export function getReportStyles(): string {
     .report-page {
       width: 210mm;
       min-height: 297mm;
-      max-height: 297mm;
-      overflow: hidden;
       page-break-after: always;
       page-break-inside: avoid;
       padding: 44px 52px 56px 52px;

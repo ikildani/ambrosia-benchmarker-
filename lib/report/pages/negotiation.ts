@@ -17,7 +17,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
 
         <div class="callout" style="margin-top: 24px;">
           <strong>Not Available:</strong> The AI Negotiation Playbook was not generated for this analysis.
-          Upgrade to Pro to access AI-powered negotiation strategies tailored to your deal parameters.
+          Visit calculator.ambrosiaventures.co to generate an AI-powered negotiation strategy tailored to your deal parameters.
         </div>
 
         ${pageFooter(meta.reportId)}

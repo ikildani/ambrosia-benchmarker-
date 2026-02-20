@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { isProEmail } from '@/lib/config/authorized-emails';
+import { isAdminEmail, isProEmail } from '@/lib/config/authorized-emails';
 import { getPlaybookGenerator, PlaybookInput, NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 
 export interface PlaybookRequest {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
     const bodyText = await request.text();
     const body = JSON.parse(bodyText) as PlaybookRequest & { email?: string };
 
-    if (userTier === 'free' && body.email && isProEmail(body.email)) {
+    if (userTier === 'free' && body.email && (isProEmail(body.email) || isAdminEmail(body.email))) {
       userTier = 'pro';
     }
 

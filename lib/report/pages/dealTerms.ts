@@ -90,7 +90,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       })()}
 
       <!-- Royalty Structure -->
-      <div style="display: grid; grid-template-columns: 1fr 300px; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div class="card">
           <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 8px;">Tiered Royalty Rates</div>
           <table class="data-table">

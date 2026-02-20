@@ -7,8 +7,8 @@
  * "Ambrosia" in white Cormorant Garamond, "Ventures" in light purple Libre Franklin.
  */
 export function logoFullWhite(width: number = 200): string {
-  const height = Math.round(width * (100 / 520));
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100" width="${width}" height="${height}">
+  const height = Math.round(width * (96 / 580));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 96" width="${width}" height="${height}">
     <defs>
       <linearGradient id="lw-gc" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#72e8f7"/>
@@ -42,8 +42,8 @@ export function logoFullWhite(width: number = 200): string {
       <path d="M76 24 C90 12, 102 24, 92 38" fill="none" stroke="url(#lw-gg)" stroke-width="2.4" stroke-linecap="round"/>
       <polygon points="92,33 96,40 89,39" fill="#9499d1" opacity="0.7"/>
     </g>
-    <text x="120" y="62" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-    <text x="248" y="62" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="2.5">Ventures</text>
+    <text x="120" y="60" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
+    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="2.5">Ventures</text>
   </svg>`;
 }
 
@@ -52,8 +52,8 @@ export function logoFullWhite(width: number = 200): string {
  * "Ambrosia" in dark navy Cormorant Garamond, "Ventures" in muted purple Libre Franklin.
  */
 export function logoFullColor(width: number = 200): string {
-  const height = Math.round(width * (100 / 520));
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100" width="${width}" height="${height}">
+  const height = Math.round(width * (96 / 580));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 96" width="${width}" height="${height}">
     <defs>
       <linearGradient id="lc-gc" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#5fd4e3"/>
@@ -87,8 +87,8 @@ export function logoFullColor(width: number = 200): string {
       <path d="M76 24 C90 12, 102 24, 92 38" fill="none" stroke="url(#lc-gg)" stroke-width="2.4" stroke-linecap="round"/>
       <polygon points="92,33 96,40 89,39" fill="#2a2f72" opacity="0.7"/>
     </g>
-    <text x="120" y="62" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#151a3d" letter-spacing="0.5">Ambrosia</text>
-    <text x="248" y="62" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#656a9e" letter-spacing="2.5">Ventures</text>
+    <text x="120" y="60" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#151a3d" letter-spacing="0.5">Ambrosia</text>
+    <text x="340" y="60" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#656a9e" letter-spacing="2.5">Ventures</text>
   </svg>`;
 }
 

@@ -8,6 +8,7 @@ import { generateReportHTML } from '@/lib/report';
 import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
 import type { PDFReportData, PartnerForPDF } from '@/lib/report';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
+import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 
 type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'success' | 'error';
 
@@ -167,8 +168,9 @@ export default function ReportGenerationModal({
           phase: p.fullInputs.phase,
         }, 6);
 
-        // Start memo fetch NOW (in parallel with UI transitions) — don't wait for step 2
+        // Start memo + playbook fetches NOW (in parallel) — don't wait for step 2
         let memoPromise: Promise<DealMemo | null> | null = null;
+        let playbookPromise: Promise<NegotiationPlaybook | null> | null = null;
         if (p.format === 'pdf' && !p.existingMemo) {
           memoPromise = fetch('/api/deal-memo', {
             method: 'POST',
@@ -185,6 +187,35 @@ export default function ReportGenerationModal({
             if (response.ok) {
               const data = await response.json();
               return (data.memo || data) as DealMemo;
+            }
+            return null;
+          }).catch(() => null);
+        }
+        if (p.format === 'pdf') {
+          playbookPromise = fetch('/api/playbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: p.userEmail || undefined,
+              inputs: {
+                modality: p.fullInputs.modality,
+                phase: p.fullInputs.phase,
+                indication: p.fullInputs.indication,
+                territory: p.fullInputs.territory,
+              },
+              results: {
+                terms: p.result.terms,
+                tieredRoyalties: p.result.tieredRoyalties,
+                dealRecommendation: p.result.dealRecommendation,
+                negotiationInsight: p.result.negotiationInsight,
+                modifiers: p.result.modifiers,
+              },
+              labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
+            }),
+          }).then(async (response) => {
+            if (response.ok) {
+              const data = await response.json();
+              return (data.playbook || null) as NegotiationPlaybook | null;
             }
             return null;
           }).catch(() => null);
@@ -220,9 +251,10 @@ export default function ReportGenerationModal({
           return;
         }
 
-        // Step 2: Await the memo that was already fetching in parallel
+        // Step 2: Await the memo + playbook that were already fetching in parallel
         setCurrentStep('generating_memo');
         let memo = p.existingMemo;
+        let playbook: NegotiationPlaybook | null = null;
         if (!memo && memoPromise) {
           const fetchedMemo = await memoPromise;
           if (fetchedMemo) {
@@ -232,18 +264,24 @@ export default function ReportGenerationModal({
             setCanSkipMemo(true);
           }
         }
+        if (playbookPromise) {
+          playbook = await playbookPromise;
+        }
         if (abortRef.current) return;
         markComplete('generating_memo');
 
         // Step 3: Compile visualizations
         setCurrentStep('compiling');
+        // Read fresh partner data (may have loaded while memo was fetching)
+        const freshPartners = propsRef.current.partnerMatches;
         const pdfData: PDFReportData = {
           result: p.result,
           inputs: p.fullInputs,
           sensitivityData,
           riskScore,
-          partnerMatches: p.partnerMatches.length > 0 ? p.partnerMatches : undefined,
+          partnerMatches: freshPartners.length > 0 ? freshPartners : undefined,
           memoData: memo || undefined,
+          playbookData: playbook || undefined,
           comparableDeals,
         };
         pdfDataRef.current = pdfData;
