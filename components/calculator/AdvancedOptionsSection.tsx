@@ -42,9 +42,10 @@ import {
   comorbidityBreadthOptions,
   metabolicTreatmentApproachOptions,
 } from '@/lib/calculations';
-import { competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions } from '@/lib/optionDescriptions';
+import { competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions, sectionHelp } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
+import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
 
 // Static badges — multiplier values don't change at runtime
@@ -169,6 +170,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           <OptionCardGroup
             id="competitive-position-select"
             label="Competitive Position"
+            helpText={sectionHelp.competitivePosition}
             options={competitivePositionOptions}
             descriptions={competitivePositionDescriptions}
             impactBadges={competitiveBadges}
@@ -180,6 +182,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           <OptionCardGroup
             id="data-quality-select"
             label="Data Quality"
+            helpText={sectionHelp.dataQuality}
             options={dataQualityOptions}
             descriptions={dataQualityDescriptions}
             impactBadges={dataQualityBadges}
@@ -191,6 +194,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           <OptionCardGroup
             id="combination-potential-select"
             label="Combination Potential"
+            helpText={sectionHelp.combinationPotential}
             options={combinationPotentialOptions}
             descriptions={combinationPotentialDescriptions}
             impactBadges={combinationBadges}
@@ -213,7 +217,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
         </h3>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory</label>
+            <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory<InfoTooltip content={sectionHelp.territory} /></label>
             <select
               value={territory}
               onChange={(e) => onTerritoryChange(e.target.value as Territory)}
@@ -282,6 +286,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             <OptionCardGroup
               id="competitive-position-select"
               label="Competitive Position"
+              helpText={sectionHelp.competitivePosition}
               options={competitivePositionOptions}
               descriptions={competitivePositionDescriptions}
               impactBadges={competitiveBadges}
@@ -294,6 +299,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             <OptionCardGroup
               id="data-quality-select"
               label="Data Quality"
+              helpText={sectionHelp.dataQuality}
               options={dataQualityOptions}
               descriptions={dataQualityDescriptions}
               impactBadges={dataQualityBadges}
@@ -313,7 +319,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           </h3>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory</label>
+              <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Territory<InfoTooltip content={sectionHelp.territory} /></label>
               <select
                 value={territory}
                 onChange={(e) => onTerritoryChange(e.target.value as Territory)}
@@ -608,6 +614,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
           <OptionCardGroup
             id="combination-potential-select"
             label="Combination Potential"
+            helpText={sectionHelp.combinationPotential}
             options={combinationPotentialOptions}
             descriptions={combinationPotentialDescriptions}
             impactBadges={combinationBadges}

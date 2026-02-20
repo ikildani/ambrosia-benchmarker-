@@ -4,6 +4,7 @@ import React, { useState, useRef, useMemo, useCallback, useEffect, useLayoutEffe
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { ImpactBadge } from '@/lib/impactBadges';
+import InfoTooltip from './InfoTooltip';
 
 export interface GroupedOption {
   group: string;
@@ -13,6 +14,7 @@ export interface GroupedOption {
 interface SearchableComboboxProps<T extends string> {
   id: string;
   label: string;
+  helpText?: string;
   groups: GroupedOption[];
   value: T;
   onChange: (value: T) => void;
@@ -23,6 +25,7 @@ interface SearchableComboboxProps<T extends string> {
 function SearchableComboboxInner<T extends string>({
   id,
   label,
+  helpText,
   groups,
   value,
   onChange,
@@ -217,7 +220,7 @@ function SearchableComboboxInner<T extends string>({
     return (
       <>
         <div className="space-y-2">
-          <label id={`${id}-label`} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">{label}</label>
+          <label id={`${id}-label`} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">{label}{helpText && <InfoTooltip content={helpText} />}</label>
           <button
             ref={triggerRef}
             type="button"
@@ -301,7 +304,7 @@ function SearchableComboboxInner<T extends string>({
   // Desktop combobox
   return (
     <div className="space-y-2 relative">
-      <label id={`${id}-label`} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">{label}</label>
+      <label id={`${id}-label`} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">{label}{helpText && <InfoTooltip content={helpText} />}</label>
       <button
         ref={triggerRef}
         type="button"

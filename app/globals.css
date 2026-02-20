@@ -600,13 +600,26 @@ select::selection {
   animation: bottomSheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Wizard step fade-in */
-@keyframes wizardFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Wizard step slide-in */
+@keyframes wizardSlideIn {
+  from { opacity: 0.3; transform: translateX(0); }
+  to { opacity: 1; transform: translateX(0); }
 }
+.animate-wizard-slide-in {
+  animation: wizardSlideIn 0.2s ease-out forwards;
+}
+/* Keep old class for backwards compat */
 .animate-wizard-step {
-  animation: wizardFadeIn 0.25s ease-out forwards;
+  animation: wizardSlideIn 0.2s ease-out forwards;
+}
+
+/* Tooltip pop-in */
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.animate-tooltip-in {
+  animation: tooltipIn 0.15s ease-out forwards;
 }
 
 /* Skeleton loading for mobile */
@@ -918,7 +931,8 @@ select::selection {
   .animate-tab-indicator,
   .animate-slide-down,
   .animate-bottom-sheet,
-  .animate-wizard-step {
+  .animate-wizard-step,
+  .animate-wizard-slide-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

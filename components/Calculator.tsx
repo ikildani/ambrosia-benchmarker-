@@ -46,7 +46,8 @@ import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 
-import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper } from './calculator/index';
+import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
+import { getValidationWarnings } from '@/lib/validationWarnings';
 import type { DealTemplate } from './calculator/index';
 import type { WizardStep } from './calculator/index';
 
@@ -151,6 +152,11 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     comorbidityBreadth, metabolicTreatmentApproach,
   ]);
 
+  // Smart validation: detect contradictory inputs
+  const validationWarnings = useMemo(() => {
+    return getValidationWarnings({ phase, dataQuality, competitivePosition, combinationPotential, biomarker, modality, territory });
+  }, [phase, dataQuality, competitivePosition, combinationPotential, biomarker, modality, territory]);
+
   // Check for report purchase from URL params (after Stripe redirect)
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -212,6 +218,70 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       mounted = false;
     };
   }, []);
+
+  // Restore wizard progress from sessionStorage (if no prefill or URL params)
+  useEffect(() => {
+    if (hadPrefillRef.current) return;
+    const saved = sessionStorage.getItem('wizard_progress');
+    if (!saved) return;
+    try {
+      const s = JSON.parse(saved);
+      if (s.therapeuticArea) setTherapeuticArea(s.therapeuticArea);
+      if (s.phase) setPhase(s.phase);
+      if (s.modality) setModality(s.modality);
+      if (s.indication) setIndication(s.indication);
+      if (s.territory) setTerritory(s.territory);
+      if (s.biomarker) setBiomarker(s.biomarker);
+      if (s.lineOfTherapy) setLineOfTherapy(s.lineOfTherapy);
+      if (s.treatmentApproach) setTreatmentApproach(s.treatmentApproach);
+      if (s.combinationPotential) setCombinationPotential(s.combinationPotential);
+      if (s.competitivePosition) setCompetitivePosition(s.competitivePosition);
+      if (s.dataQuality) setDataQuality(s.dataQuality);
+      if (s.regulatoryDesignations) setRegulatoryDesignations(s.regulatoryDesignations);
+      if (s.bbbPenetration) setBbbPenetration(s.bbbPenetration);
+      if (s.diseaseProgression) setDiseaseProgression(s.diseaseProgression);
+      if (s.biomarkerValidation) setBiomarkerValidation(s.biomarkerValidation);
+      if (s.immuneResetPotential) setImmuneResetPotential(s.immuneResetPotential);
+      if (s.targetSpecificity) setTargetSpecificity(s.targetSpecificity);
+      if (s.diseaseSeverity) setDiseaseSeverity(s.diseaseSeverity);
+      if (s.treatmentGoal) setTreatmentGoal(s.treatmentGoal);
+      if (s.mechanismDifferentiation) setMechanismDifferentiation(s.mechanismDifferentiation);
+      if (s.weightLossEfficacy) setWeightLossEfficacy(s.weightLossEfficacy);
+      if (s.routeOfAdministration) setRouteOfAdministration(s.routeOfAdministration);
+      if (s.comorbidityBreadth) setComorbidityBreadth(s.comorbidityBreadth);
+      if (s.metabolicTreatmentApproach) setMetabolicTreatmentApproach(s.metabolicTreatmentApproach);
+      if (typeof s.wizardStep === 'number') setWizardStep(s.wizardStep);
+      if (typeof s.quickMode === 'boolean') setQuickMode(s.quickMode);
+      if (s.showTemplates === false) setShowTemplates(false);
+    } catch {
+      // Ignore invalid saved state
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist wizard progress to sessionStorage on every input change
+  useEffect(() => {
+    const state = {
+      therapeuticArea, phase, modality, indication, territory, biomarker,
+      lineOfTherapy, treatmentApproach, combinationPotential,
+      competitivePosition, dataQuality, regulatoryDesignations,
+      bbbPenetration, diseaseProgression, biomarkerValidation,
+      immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal,
+      mechanismDifferentiation, weightLossEfficacy, routeOfAdministration,
+      comorbidityBreadth, metabolicTreatmentApproach,
+      wizardStep, quickMode, showTemplates,
+    };
+    sessionStorage.setItem('wizard_progress', JSON.stringify(state));
+  }, [
+    therapeuticArea, phase, modality, indication, territory, biomarker,
+    lineOfTherapy, treatmentApproach, combinationPotential,
+    competitivePosition, dataQuality, regulatoryDesignations,
+    bbbPenetration, diseaseProgression, biomarkerValidation,
+    immuneResetPotential, targetSpecificity, diseaseSeverity, treatmentGoal,
+    mechanismDifferentiation, weightLossEfficacy, routeOfAdministration,
+    comorbidityBreadth, metabolicTreatmentApproach,
+    wizardStep, quickMode, showTemplates,
+  ]);
 
   // Read URL params (from LiveDemo CTA) and auto-calculate on first visit
   useEffect(() => {
@@ -388,6 +458,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         labels: calculatedResult.labels,
         hasPDF: false,
       });
+
+          // Clear wizard progress now that calculation is done
+          sessionStorage.removeItem('wizard_progress');
 
           // Increment usage after successful calculation (only for free tier)
           if (tier === 'free') {
@@ -675,9 +748,24 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   onMetabolicTreatmentApproachChange: (newValue: MetabolicTreatmentApproach) => { trackParameterChange('metabolicTreatmentApproach', metabolicTreatmentApproach, newValue); setMetabolicTreatmentApproach(newValue); },
                 } as const;
 
+                // Determine which fields are visible on this step for filtering warnings
+                const stepFields: Record<string, string[]> = {
+                  asset: ['phase', 'modality', 'biomarker'],
+                  target: ['combinationPotential'],
+                  competitive: ['competitivePosition', 'dataQuality', 'combinationPotential'],
+                  deal: ['territory'],
+                  'competitive-deal': ['competitivePosition', 'dataQuality', 'combinationPotential', 'territory'],
+                };
+                const currentStepFields = stepFields[stepId || ''] || [];
+                const stepWarnings = validationWarnings.filter(w =>
+                  w.fields.some(f => currentStepFields.includes(f))
+                );
+
+                let stepContent: React.ReactNode = null;
+
                 switch (stepId) {
                   case 'asset':
-                    return (
+                    stepContent = (
                       <AssetDetailsSection
                         therapeuticArea={therapeuticArea}
                         phase={phase}
@@ -694,23 +782,32 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         onShowAdvanced={() => { setQuickMode(false); setWizardStep(0); }}
                       />
                     );
+                    break;
                   case 'target':
-                    return <AdvancedOptionsSection column="left" {...advancedProps} />;
+                    stepContent = <AdvancedOptionsSection column="left" {...advancedProps} />;
+                    break;
                   case 'competitive':
-                    return <AdvancedOptionsSection column="competitive" {...advancedProps} />;
+                    stepContent = <AdvancedOptionsSection column="competitive" {...advancedProps} />;
+                    break;
                   case 'deal':
-                    return <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
+                    stepContent = <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
+                    break;
                   case 'competitive-deal':
-                    // Quick mode: competitive + deal scope combined
-                    return (
+                    stepContent = (
                       <div className="space-y-8">
                         <AdvancedOptionsSection column="competitive" {...advancedProps} />
                         <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
                       </div>
                     );
-                  default:
-                    return null;
+                    break;
                 }
+
+                return (
+                  <div className="space-y-4">
+                    {stepContent}
+                    <ValidationWarnings warnings={stepWarnings} />
+                  </div>
+                );
               })()}
             </WizardStepper>
 

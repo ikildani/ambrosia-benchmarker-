@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 export interface WizardStep {
   id: string;
@@ -24,16 +24,24 @@ function WizardStepperInner({
   children,
 }: WizardStepperProps) {
   const [transitioning, setTransitioning] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleStepChange = useCallback((newStep: number) => {
     if (newStep === currentStep || transitioning) return;
+    setSlideDirection(newStep > currentStep ? 'left' : 'right');
     setTransitioning(true);
-    // Brief fade-out, then switch, then fade-in
     setTimeout(() => {
       onStepChange(newStep);
       setTransitioning(false);
-    }, 150);
+    }, 180);
   }, [currentStep, transitioning, onStepChange]);
+
+  const transitionClass = transitioning
+    ? slideDirection === 'left'
+      ? 'opacity-0 -translate-x-4'
+      : 'opacity-0 translate-x-4'
+    : 'opacity-100 translate-x-0 animate-wizard-slide-in';
 
   return (
     <div>
@@ -51,8 +59,8 @@ function WizardStepperInner({
                 onClick={() => isClickable && handleStepChange(i)}
                 disabled={!isClickable && !isCurrent}
                 aria-current={isCurrent ? 'step' : undefined}
-                className={`flex flex-col items-center gap-1.5 flex-shrink-0 ${
-                  isClickable ? 'cursor-pointer' : isCurrent ? 'cursor-default' : 'cursor-default opacity-50'
+                className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all duration-200 ${
+                  isClickable ? 'cursor-pointer hover:scale-105' : isCurrent ? 'cursor-default' : 'cursor-default opacity-50'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
@@ -70,14 +78,14 @@ function WizardStepperInner({
                     i + 1
                   )}
                 </div>
-                <span className={`hidden sm:block text-xs font-medium ${
+                <span className={`hidden sm:block text-xs font-medium transition-colors duration-200 ${
                   isCurrent ? 'text-teal-600 dark:text-teal-400' :
                   isCompleted ? 'text-teal-600 dark:text-teal-400' :
                   'text-neutral-400 dark:text-slate-500'
                 }`}>
                   {step.label}
                 </span>
-                <span className={`sm:hidden text-[10px] font-medium ${
+                <span className={`sm:hidden text-[10px] font-medium transition-colors duration-200 ${
                   isCurrent ? 'text-teal-600 dark:text-teal-400' :
                   isCompleted ? 'text-teal-600 dark:text-teal-400' :
                   'text-neutral-400 dark:text-slate-500'
@@ -97,9 +105,14 @@ function WizardStepperInner({
         })}
       </nav>
 
-      {/* Step content with transition */}
-      <div className={`transition-opacity duration-150 ${transitioning ? 'opacity-0' : 'opacity-100 animate-wizard-step'}`}>
-        {children}
+      {/* Step content with slide transition */}
+      <div className="overflow-hidden">
+        <div
+          ref={contentRef}
+          className={`motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-out ${transitionClass}`}
+        >
+          {children}
+        </div>
       </div>
 
       {/* Navigation buttons */}
@@ -109,7 +122,8 @@ function WizardStepperInner({
             type="button"
             onClick={() => handleStepChange(currentStep - 1)}
             className="flex-1 py-3 border-2 border-neutral-200 dark:border-slate-700 text-neutral-700 dark:text-slate-300
-                       font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-800 transition-colors"
+                       font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-800 transition-all duration-200
+                       motion-safe:active:scale-[0.98]"
           >
             Back
           </button>
@@ -119,8 +133,9 @@ function WizardStepperInner({
             type="button"
             onClick={() => handleStepChange(currentStep + 1)}
             className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
-                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all
-                       hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
+                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-200
+                       hover:from-teal-600 hover:to-cyan-600 motion-safe:hover:-translate-y-0.5
+                       motion-safe:active:scale-[0.98]
                        flex items-center justify-center gap-2"
           >
             <span>Next</span>
@@ -134,11 +149,11 @@ function WizardStepperInner({
             onClick={onCalculate}
             disabled={isCalculating}
             className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
-                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all
-                       hover:from-teal-600 hover:to-cyan-600 hover:-translate-y-0.5
+                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-200
+                       hover:from-teal-600 hover:to-cyan-600 motion-safe:hover:-translate-y-0.5
                        disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
                        flex items-center justify-center gap-2.5 touch-feedback btn-press
-                       active:scale-[0.97] active:shadow-md"
+                       motion-safe:active:scale-[0.97] active:shadow-md"
           >
             {isCalculating ? (
               <>

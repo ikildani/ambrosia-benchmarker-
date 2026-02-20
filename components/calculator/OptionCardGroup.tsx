@@ -1,8 +1,10 @@
 import React, { useCallback, useRef } from 'react';
 import type { ImpactBadge } from '@/lib/impactBadges';
+import InfoTooltip from './InfoTooltip';
 
 interface OptionCardGroupProps<T extends string> {
   label: string;
+  helpText?: string;
   options: { value: string; label: string }[];
   descriptions?: Record<string, string>;
   impactBadges?: Record<string, ImpactBadge>;
@@ -15,6 +17,7 @@ interface OptionCardGroupProps<T extends string> {
 
 function OptionCardGroupInner<T extends string>({
   label,
+  helpText,
   options,
   descriptions,
   impactBadges,
@@ -63,6 +66,7 @@ function OptionCardGroupInner<T extends string>({
     <div className="space-y-2">
       <label id={id} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
         {label}
+        {helpText && <InfoTooltip content={helpText} />}
       </label>
       <div
         ref={groupRef}
@@ -83,10 +87,11 @@ function OptionCardGroupInner<T extends string>({
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => onChange(option.value as T)}
-              className={`px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-200 touch-feedback ${
+              className={`px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-200 touch-feedback
+                motion-safe:active:scale-[0.96] motion-safe:hover:scale-[1.02] ${
                 isSelected
-                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm'
-                  : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600'
+                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10 motion-safe:scale-[1.01]'
+                  : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-sm'
               } ${highlighted ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
             >
               <div className={`text-sm font-medium ${isSelected ? 'text-teal-700 dark:text-teal-400' : 'text-neutral-800 dark:text-slate-200'}`}>

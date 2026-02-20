@@ -9,4 +9,5 @@ export { default as SearchableCombobox } from './SearchableCombobox';
 export { default as LiveDealPreview } from './LiveDealPreview';
 export { default as WizardStepper } from './WizardStepper';
 export type { WizardStep } from './WizardStepper';
+export { default as ValidationWarnings } from './ValidationWarnings';
 export type { DealTemplate } from './types';

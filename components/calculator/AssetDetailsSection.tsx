@@ -18,10 +18,11 @@ import {
   metabolicIndicationOptions,
   biomarkerOptions,
 } from '@/lib/calculations';
-import { phaseDescriptions } from '@/lib/optionDescriptions';
+import { phaseDescriptions, sectionHelp } from '@/lib/optionDescriptions';
 import { getPhaseImpactBadge, getModalityImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
+import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AssetDetailsSectionProps {
@@ -89,6 +90,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
         <OptionCardGroup
           id="phase-select"
           label="Development Phase"
+          helpText={sectionHelp.phase}
           options={phaseOptions}
           descriptions={phaseDescriptions}
           impactBadges={phaseImpactBadges}
@@ -101,6 +103,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
         <SearchableCombobox
           id="modality-select"
           label="Modality"
+          helpText={sectionHelp.modality}
           groups={modalityOptionsList}
           value={modality}
           onChange={onModalityChange}
@@ -111,6 +114,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
         <SearchableCombobox
           id="indication-select"
           label="Primary Indication"
+          helpText={sectionHelp.indication}
           groups={indicationOptionsList}
           value={indication}
           onChange={onIndicationChange}
@@ -131,7 +135,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
 
         {!quickMode && (
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status</label>
+          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status<InfoTooltip content={sectionHelp.biomarker} /></label>
           <select
             value={biomarker}
             onChange={(e) => onBiomarkerChange(e.target.value as BiomarkerStatus)}
