@@ -106,6 +106,11 @@ export default function ReportGenerationModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
+  // Stable refs for props used inside the pipeline effect — prevents
+  // dependency changes from triggering cleanup (which sets abortRef=true).
+  const propsRef = useRef({ result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose });
+  propsRef.current = { result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose };
+
   const steps = format === 'pdf' ? PDF_STEPS : EXCEL_STEPS;
 
   const getStepStatus = (stepId: ModalStep): 'pending' | 'active' | 'done' => {
@@ -140,75 +145,77 @@ export default function ReportGenerationModal({
     }
   }, [isOpen]);
 
-  // Run the generation pipeline when modal opens
+  // Run the generation pipeline when modal opens.
+  // IMPORTANT: Only depends on `isOpen` — all other props are read via propsRef
+  // to prevent dependency changes from triggering cleanup (which aborts the pipeline).
   useEffect(() => {
     if (!isOpen || startedRef.current) return;
     startedRef.current = true;
 
     const run = async () => {
+      const p = propsRef.current;
       try {
         // Step 1: Analyzing
         setCurrentStep('analyzing');
-        const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
-        const riskScore = calculateRiskScore(fullInputs);
+        const sensitivityData = computeSensitivityAnalysis(p.fullInputs, p.result);
+        const riskScore = calculateRiskScore(p.fullInputs);
         const comparableDeals = findComparableDeals({
-          therapeuticArea: fullInputs.therapeuticArea,
-          modality: fullInputs.modality,
-          indication: fullInputs.indication,
-          phase: fullInputs.phase,
+          therapeuticArea: p.fullInputs.therapeuticArea,
+          modality: p.fullInputs.modality,
+          indication: p.fullInputs.indication,
+          phase: p.fullInputs.phase,
         }, 6);
         await delay(800);
         if (abortRef.current) return;
         markComplete('analyzing');
 
-        if (format === 'excel') {
-          // Excel: skip memo/compiling, go straight to building
+        if (p.format === 'excel') {
           setCurrentStep('building');
-          const partnersForExcel: PartnerForExcel[] = partnerMatches.map(p => ({
-            company_name: p.company_name,
-            match_score: p.match_score,
-            match_reasons: p.match_reasons,
-            deals_last_12mo: p.deals_last_12mo,
-            hq_country: p.hq_country,
+          const partnersForExcel: PartnerForExcel[] = p.partnerMatches.map(pm => ({
+            company_name: pm.company_name,
+            match_score: pm.match_score,
+            match_reasons: pm.match_reasons,
+            deals_last_12mo: pm.deals_last_12mo,
+            hq_country: pm.hq_country,
           }));
           await generateExcelReport(
-            result,
-            { modality: fullInputs.modality, phase: fullInputs.phase, indication: fullInputs.indication, territory: fullInputs.territory },
+            p.result,
+            { modality: p.fullInputs.modality, phase: p.fullInputs.phase, indication: p.fullInputs.indication, territory: p.fullInputs.territory },
             partnersForExcel,
-            fullInputs.therapeuticArea,
-            fullInputs.treatmentApproach,
+            p.fullInputs.therapeuticArea,
+            p.fullInputs.treatmentApproach,
             sensitivityData
           );
           if (abortRef.current) return;
           markComplete('building');
           setCurrentStep('success');
-          onDownloadComplete();
+          p.onDownloadComplete();
           await delay(1500);
-          if (!abortRef.current) onClose();
+          if (!abortRef.current) p.onClose();
           return;
         }
 
         // Step 2: Generate AI memo (PDF only)
         setCurrentStep('generating_memo');
-        let memo = existingMemo;
+        let memo = p.existingMemo;
         if (!memo) {
           try {
             const response = await fetch('/api/deal-memo', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                reportId: reportId || undefined,
-                userId: userId || undefined,
-                email: userEmail || undefined,
-                inputs: fullInputs,
-                results: result,
-                labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
+                reportId: p.reportId || undefined,
+                userId: p.userId || undefined,
+                email: p.userEmail || undefined,
+                inputs: p.fullInputs,
+                results: p.result,
+                labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
               }),
             });
             if (response.ok) {
               const data = await response.json();
               memo = data.memo || data;
-              onMemoGenerated(memo as DealMemo);
+              p.onMemoGenerated(memo as DealMemo);
             } else {
               setCanSkipMemo(true);
             }
@@ -222,17 +229,16 @@ export default function ReportGenerationModal({
         // Step 3: Compile visualizations
         setCurrentStep('compiling');
         const pdfData: PDFReportData = {
-          result,
-          inputs: fullInputs,
+          result: p.result,
+          inputs: p.fullInputs,
           sensitivityData,
           riskScore,
-          partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
+          partnerMatches: p.partnerMatches.length > 0 ? p.partnerMatches : undefined,
           memoData: memo || undefined,
           comparableDeals,
         };
         pdfDataRef.current = pdfData;
 
-        // Render HTML into hidden container + save for preview
         const html = generateReportHTML(pdfData);
         htmlStringRef.current = html;
         if (hiddenContainerRef.current) {
@@ -247,10 +253,9 @@ export default function ReportGenerationModal({
         try {
           const reportPayload = {
             reportData: pdfData,
-            reportPurchaseId: reportId,
+            reportPurchaseId: p.reportId,
           };
 
-          // Server-side generation with full-lifecycle timeout (covers headers + body)
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -264,7 +269,6 @@ export default function ReportGenerationModal({
             });
 
             if (serverRes.ok) {
-              // Note: don't clear timeout until body is fully read
               const pdfArrayBuffer = await serverRes.arrayBuffer();
               clearTimeout(timeoutId);
               pdfBlobRef.current = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
@@ -280,11 +284,10 @@ export default function ReportGenerationModal({
           if (useClientFallback) {
             console.warn('Server PDF unavailable, using client-side generation');
             const html2pdf = (await import('html2pdf.js')).default;
-            // Race client-side PDF against a 45s timeout to prevent infinite hang
             const pdfPromise = html2pdf()
               .set({
                 margin: 0,
-                filename: `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
+                filename: `Ambrosia-Deal-Report-${p.labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 0.92 },
                 html2canvas: { scale: 1.5, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -319,14 +322,13 @@ export default function ReportGenerationModal({
       }
     };
 
-    // Kick off on next tick to avoid React strict mode double-fire
     const timer = setTimeout(run, 50);
     return () => {
       clearTimeout(timer);
       abortRef.current = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- startedRef prevents re-runs; currentStep intentionally excluded to avoid aborting the pipeline
-  }, [isOpen, format, fullInputs, result, partnerMatches, existingMemo, reportId, userId, userEmail, labels, markComplete, onMemoGenerated, onDownloadComplete, onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- props accessed via propsRef to prevent cleanup abort
+  }, [isOpen]);
 
   const handleDownload = useCallback(() => {
     if (!pdfBlobRef.current) return;
