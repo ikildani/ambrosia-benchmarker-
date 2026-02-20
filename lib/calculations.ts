@@ -1113,7 +1113,7 @@ export const combinationPotentialOptions = [
   { value: 'standalone', label: 'Standalone only' },
 ];
 
-export const competitivePositionOptions = [
+export const competitivePositionOptions: { value: CompetitivePosition; label: string }[] = [
   { value: 'firstInClass', label: 'First-in-class, no competition' },
   { value: 'firstToPivotal', label: 'First to pivotal trial' },
   { value: 'bestInClass', label: 'Best-in-class potential' },

@@ -21,7 +21,7 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
     `;
   }
 
-  const topPartners = partners.slice(0, 6);
+  const topPartners = partners.slice(0, 8);
 
   return `
     <div class="report-page">

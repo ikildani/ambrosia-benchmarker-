@@ -3,16 +3,16 @@ import CompaniesPageClient from './CompaniesPageClient';
 
 export const metadata: Metadata = {
   title: 'Company Profiles — Biotech & Pharma Deal Intelligence | Ambrosia Ventures',
-  description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 50+ biotech and pharma companies across oncology, neurology, immunology, and metabolic/obesity.',
+  description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 120+ biotech and pharma companies across oncology, neurology, immunology, rare disease, and more.',
   openGraph: {
     title: 'Company Profiles — Biotech & Pharma Deal Intelligence',
-    description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 50+ biotech and pharma companies.',
+    description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 120+ biotech and pharma companies.',
     url: 'https://calculator.ambrosiaventures.co/companies',
   },
   twitter: {
     card: 'summary',
     title: 'Company Profiles — Biotech & Pharma Deal Intelligence',
-    description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 50+ biotech and pharma companies.',
+    description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 120+ biotech and pharma companies.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/companies',
