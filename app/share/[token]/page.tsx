@@ -7,14 +7,49 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+  const ogImageUrl = `${baseUrl}/api/og/share/${params.token}`;
+
+  // Fetch shared data for dynamic title/description
+  let title = 'Shared Deal Analysis | Ambrosia Ventures';
+  let description = 'View this shared biotech licensing deal analysis from Ambrosia Ventures Calculator.';
+
+  try {
+    const response = await fetch(`${baseUrl}/api/share/${params.token}`, {
+      cache: 'no-store',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.labels) {
+        title = `${data.labels.modality} ${data.labels.indication} Deal Analysis | Ambrosia Ventures`;
+        description = `${data.labels.phase} ${data.labels.modality} deal analysis for ${data.labels.indication}. View benchmarked deal terms, milestones, and royalties.`;
+      }
+    }
+  } catch {
+    // Fall back to generic metadata
+  }
+
   return {
-    title: 'Shared Deal Analysis | Ambrosia Ventures',
-    description: 'View this shared biotech licensing deal analysis from Ambrosia Ventures Calculator.',
+    title,
+    description,
     openGraph: {
-      title: 'Shared Deal Analysis | Ambrosia Ventures',
-      description: 'View this shared biotech licensing deal analysis.',
+      title,
+      description,
       type: 'website',
-      images: ['/api/og?title=Shared%20Analysis&type=landing'],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: 'Ambrosia Ventures Deal Analysis',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImageUrl],
     },
     robots: {
       index: false, // Don't index shared pages

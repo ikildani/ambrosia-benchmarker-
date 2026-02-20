@@ -25,6 +25,15 @@ const GRAY_500 = '64748B';
 const AMBER = 'F59E0B';
 const ROSE = 'F43F5E';
 const GREEN = '22C55E';
+const BLUE = '3B82F6';
+
+// Chart component colors (for Deal Value Composition bars)
+const CHART_COLORS: Record<string, string> = {
+  upfront: TEAL,
+  dev: BLUE,
+  reg: AMBER,
+  comm: GREEN,
+};
 
 // Conditional formatting colors for positive/negative values
 const POS_FILL = 'DCFCE7';
@@ -102,6 +111,14 @@ function addSectionHeader(ws: ExcelJS.Worksheet, row: number, text: string, cols
     ws.getCell(row, c).fill = navyFill();
   }
   ws.getRow(row).height = 28;
+}
+
+/** Build a visual horizontal bar string using Unicode block characters.
+ *  Returns a string of repeated '█' proportional to `value / maxValue`, capped at `maxBlocks`. */
+function buildBarString(value: number, maxValue: number, maxBlocks: number = 25): string {
+  if (maxValue <= 0 || value <= 0) return '';
+  const blocks = Math.max(1, Math.round((value / maxValue) * maxBlocks));
+  return '\u2588'.repeat(blocks);
 }
 
 function addTableHeaders(ws: ExcelJS.Worksheet, row: number, headers: string[]): void {
@@ -297,6 +314,100 @@ export async function generateExcelReport(
     rr++;
   });
 
+  // ── Deal Value Composition (visual bar chart) ──
+  rr += 2;
+  addSectionHeader(ws2, rr, 'DEAL VALUE COMPOSITION (Median)', 5);
+  rr++;
+  addTableHeaders(ws2, rr, ['Component', 'Value', 'Visual', '', '% of Total']);
+  rr++;
+
+  const compositionComponents = [
+    { label: 'Upfront Payment', value: terms.upfront.median, colorKey: 'upfront' },
+    { label: 'Dev Milestones', value: terms.devMilestones.median, colorKey: 'dev' },
+    { label: 'Reg Milestones', value: terms.regMilestones.median, colorKey: 'reg' },
+    { label: 'Comm Milestones', value: terms.commMilestones.median, colorKey: 'comm' },
+  ];
+  const totalMedian = terms.totalDealValue.median;
+  const maxComponentValue = Math.max(...compositionComponents.map(c => c.value));
+
+  compositionComponents.forEach((comp, i) => {
+    const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
+    const barColor = CHART_COLORS[comp.colorKey] || TEAL;
+    const pctOfTotal = totalMedian > 0 ? comp.value / totalMedian : 0;
+    const barString = buildBarString(comp.value, maxComponentValue, 25);
+
+    // Column A: Component name
+    ws2.getCell(rr, 1).value = comp.label;
+    ws2.getCell(rr, 1).font = { bold: true, size: 10 };
+    ws2.getCell(rr, 1).fill = fill;
+    ws2.getCell(rr, 1).border = thinBorder();
+
+    // Column B: Value ($XM)
+    const valCell = ws2.getCell(rr, 2);
+    valCell.value = comp.value;
+    valCell.numFmt = CURRENCY_FMT;
+    valCell.font = { size: 10, bold: true, color: { argb: barColor } };
+    valCell.fill = fill;
+    valCell.alignment = { horizontal: 'right' };
+    valCell.border = thinBorder();
+
+    // Columns C-D: Visual bar (merged) with colored font
+    ws2.mergeCells(rr, 3, rr, 4);
+    const barCell = ws2.getCell(rr, 3);
+    barCell.value = barString;
+    barCell.font = { size: 11, color: { argb: barColor } };
+    barCell.fill = fill;
+    barCell.alignment = { vertical: 'middle' };
+    barCell.border = thinBorder();
+    // Apply border to the merged end cell too
+    ws2.getCell(rr, 4).border = thinBorder();
+
+    // Column E: % of Total
+    const pctCell = ws2.getCell(rr, 5);
+    pctCell.value = pctOfTotal;
+    pctCell.numFmt = '0.0%';
+    pctCell.font = { size: 10, bold: true, color: { argb: barColor } };
+    pctCell.fill = fill;
+    pctCell.alignment = { horizontal: 'center' };
+    pctCell.border = thinBorder();
+
+    rr++;
+  });
+
+  // Total row for composition
+  const totalFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: NAVY } };
+  ws2.getCell(rr, 1).value = 'Total Deal Value';
+  ws2.getCell(rr, 1).font = { bold: true, size: 10, color: { argb: WHITE } };
+  ws2.getCell(rr, 1).fill = totalFill;
+  ws2.getCell(rr, 1).border = thinBorder();
+
+  const totalValCell = ws2.getCell(rr, 2);
+  totalValCell.value = totalMedian;
+  totalValCell.numFmt = CURRENCY_FMT;
+  totalValCell.font = { bold: true, size: 10, color: { argb: WHITE } };
+  totalValCell.fill = totalFill;
+  totalValCell.alignment = { horizontal: 'right' };
+  totalValCell.border = thinBorder();
+
+  ws2.mergeCells(rr, 3, rr, 4);
+  ws2.getCell(rr, 3).value = '\u2588'.repeat(25); // full bar for total
+  ws2.getCell(rr, 3).font = { size: 11, color: { argb: WHITE } };
+  ws2.getCell(rr, 3).fill = totalFill;
+  ws2.getCell(rr, 3).alignment = { vertical: 'middle' };
+  ws2.getCell(rr, 3).border = thinBorder();
+  ws2.getCell(rr, 4).border = thinBorder();
+
+  const totalPctCell = ws2.getCell(rr, 5);
+  totalPctCell.value = 1;
+  totalPctCell.numFmt = '0.0%';
+  totalPctCell.font = { bold: true, size: 10, color: { argb: WHITE } };
+  totalPctCell.fill = totalFill;
+  totalPctCell.alignment = { horizontal: 'center' };
+  totalPctCell.border = thinBorder();
+
+  ws2.getRow(rr).height = 22;
+  rr++;
+
   // Print area for Deal Terms (landscape)
   setPrintArea(ws2, rr - 1, 5);
 
@@ -306,9 +417,9 @@ export async function generateExcelReport(
       properties: { tabColor: { argb: AMBER } },
       pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
     });
-    ws3.columns = [{ width: 24 }, { width: 20 }, { width: 20 }, { width: 18 }, { width: 16 }];
+    ws3.columns = [{ width: 24 }, { width: 20 }, { width: 20 }, { width: 18 }, { width: 22 }, { width: 16 }];
 
-    addSectionHeader(ws3, 1, 'SENSITIVITY ANALYSIS', 5);
+    addSectionHeader(ws3, 1, 'SENSITIVITY ANALYSIS', 6);
 
     // Top value driver
     const td = sensitivityData.topValueDriver;
@@ -317,13 +428,22 @@ export async function generateExcelReport(
     ws3.getCell(3, 2).value = td.parameterLabel;
     ws3.getCell(3, 2).font = { bold: true, size: 10, color: { argb: TEAL } };
     ws3.getCell(4, 1).value = td.insightText;
-    ws3.mergeCells(4, 1, 4, 5);
+    ws3.mergeCells(4, 1, 4, 6);
     ws3.getCell(4, 1).font = { size: 10, italic: true };
     ws3.getCell(4, 1).alignment = { wrapText: true };
     ws3.getRow(4).height = 35;
 
     // Parameter table
-    addTableHeaders(ws3, 6, ['Parameter', 'Current', 'Best Alternative', 'Potential Gain', 'Impact']);
+    addTableHeaders(ws3, 6, ['Parameter', 'Current', 'Best Alternative', 'Potential Gain', 'Gain/Loss Visual', 'Impact']);
+
+    // Calculate max absolute delta across all parameters for scaling the visual bars
+    const maxAbsDelta = Math.max(
+      ...sensitivityData.parameters.slice(0, 10).map(p => {
+        const bestOpt = p.options.reduce((best, opt) => opt.delta > best.delta ? opt : best, p.options[0]);
+        return Math.abs(bestOpt?.delta || 0);
+      }),
+      1 // prevent division by zero
+    );
 
     let sensitivityLastRow = 6;
     sensitivityData.parameters.slice(0, 10).forEach((p, i) => {
@@ -364,20 +484,51 @@ export async function generateExcelReport(
         gainCell.alignment = { horizontal: 'right' };
       }
 
+      // Column 5: Gain/Loss Visual sparkline bar
+      const sparkCell = ws3.getCell(row, 5);
+      if (bestOpt && bestOpt.delta !== 0) {
+        const absVal = Math.abs(bestOpt.delta);
+        const isPositive = bestOpt.delta > 0;
+        const arrow = isPositive ? '\u25B2' : '\u25BC'; // ▲ or ▼
+        const barStr = buildBarString(absVal, maxAbsDelta, 15);
+        sparkCell.value = `${arrow} ${barStr}`;
+        sparkCell.font = {
+          size: 10,
+          bold: true,
+          color: { argb: isPositive ? POS_FONT : NEG_FONT },
+        };
+        sparkCell.fill = isPositive ? positiveFill() : negativeFill();
+      } else {
+        sparkCell.value = '\u2500'; // — (horizontal dash for no change)
+        sparkCell.font = { size: 10, color: { argb: GRAY_500 } };
+        sparkCell.fill = fill;
+      }
+      sparkCell.alignment = { vertical: 'middle' };
+      sparkCell.border = thinBorder();
+
+      // Column 6: Impact level
       const impactColors: Record<string, string> = { 'VERY HIGH': ROSE, 'HIGH': AMBER, 'MEDIUM': CYAN, 'LOW': GREEN };
-      ws3.getCell(row, 5).value = p.impactLevel;
-      ws3.getCell(row, 5).font = { size: 9, bold: true, color: { argb: impactColors[p.impactLevel] || GRAY_500 } };
-      ws3.getCell(row, 5).fill = fill;
-      ws3.getCell(row, 5).alignment = { horizontal: 'center' };
-      ws3.getCell(row, 5).border = thinBorder();
+      ws3.getCell(row, 6).value = p.impactLevel;
+      ws3.getCell(row, 6).font = { size: 9, bold: true, color: { argb: impactColors[p.impactLevel] || GRAY_500 } };
+      ws3.getCell(row, 6).fill = fill;
+      ws3.getCell(row, 6).alignment = { horizontal: 'center' };
+      ws3.getCell(row, 6).border = thinBorder();
     });
 
     // Add detail rows showing all options with conditional delta coloring
     sensitivityLastRow += 2;
-    addSectionHeader(ws3, sensitivityLastRow, 'PARAMETER OPTIONS DETAIL', 5);
+    addSectionHeader(ws3, sensitivityLastRow, 'PARAMETER OPTIONS DETAIL', 6);
     sensitivityLastRow++;
-    addTableHeaders(ws3, sensitivityLastRow, ['Parameter', 'Option', 'Total Value ($M)', 'Delta ($M)', 'Delta (%)']);
+    addTableHeaders(ws3, sensitivityLastRow, ['Parameter', 'Option', 'Total Value ($M)', 'Delta ($M)', 'Delta Visual', 'Delta (%)']);
     sensitivityLastRow++;
+
+    // Calculate max absolute delta across all detail options for scaling
+    const maxAbsDetailDelta = Math.max(
+      ...sensitivityData.parameters.slice(0, 10).flatMap(p =>
+        p.options.map(opt => Math.abs(opt.delta))
+      ),
+      1
+    );
 
     sensitivityData.parameters.slice(0, 10).forEach((p) => {
       p.options.forEach((opt) => {
@@ -416,8 +567,26 @@ export async function generateExcelReport(
           deltaCell.font = { size: 9, color: { argb: GRAY_500 } };
         }
 
-        // Delta percent with conditional formatting
-        const pctCell = ws3.getCell(row, 5);
+        // Delta Visual sparkline bar (column 5)
+        const detailSparkCell = ws3.getCell(row, 5);
+        if (opt.delta !== 0) {
+          const absVal = Math.abs(opt.delta);
+          const isPos = opt.delta > 0;
+          const arrow = isPos ? '\u25B2' : '\u25BC';
+          const detailBar = buildBarString(absVal, maxAbsDetailDelta, 12);
+          detailSparkCell.value = `${arrow} ${detailBar}`;
+          detailSparkCell.font = { size: 9, bold: true, color: { argb: isPos ? POS_FONT : NEG_FONT } };
+          detailSparkCell.fill = isPos ? positiveFill() : negativeFill();
+        } else {
+          detailSparkCell.value = '\u25CF current'; // ● current
+          detailSparkCell.font = { size: 9, color: { argb: GRAY_500 } };
+          detailSparkCell.fill = fill;
+        }
+        detailSparkCell.alignment = { vertical: 'middle' };
+        detailSparkCell.border = thinBorder();
+
+        // Delta percent with conditional formatting (column 6)
+        const pctCell = ws3.getCell(row, 6);
         pctCell.value = opt.deltaPercent / 100; // convert to decimal for Excel %
         pctCell.numFmt = '+0.0%;-0.0%';
         pctCell.font = { size: 9, bold: true };
@@ -435,7 +604,7 @@ export async function generateExcelReport(
     });
 
     // Print area for Sensitivity
-    setPrintArea(ws3, sensitivityLastRow - 1, 5);
+    setPrintArea(ws3, sensitivityLastRow - 1, 6);
   }
 
   // ── Sheet 4: Comparable Deals ──
