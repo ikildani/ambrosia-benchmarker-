@@ -110,9 +110,9 @@ const OverviewTab = React.memo(function OverviewTab({
         )}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Stats Cards */}
-      <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className="md:col-span-2 lg:col-span-2 grid sm:grid-cols-2 gap-3 sm:gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm sm:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>

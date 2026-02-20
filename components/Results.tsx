@@ -1,20 +1,27 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange } from '@/lib/calculations';
-import { SensitivityAnalysis } from './sensitivity';
 import type { PartnerForPDF } from '@/lib/report';
 import ReportGenerationModal from './ReportGenerationModal';
-import ChartSection from './charts/ChartSection';
-import ScenarioComparison from './ScenarioComparison';
 import ShareModal from './ShareModal';
-import NegotiationPlaybookModal from './NegotiationPlaybookModal';
 import { useTracking } from './TrackingProvider';
-import PartnerMatchesContainer, { PartnerMatchForPDF } from './PartnerMatchesContainer';
 import { PRICING } from '@/lib/config/constants';
-import ComparableDeals from './ComparableDeals';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
+
+// Dynamic imports for heavy below-fold components
+const SensitivityAnalysis = dynamic(() => import('./sensitivity').then(m => ({ default: m.SensitivityAnalysis })), { ssr: false });
+const ChartSection = dynamic(() => import('./charts/ChartSection'), { ssr: false });
+const ScenarioComparison = dynamic(() => import('./ScenarioComparison'), { ssr: false });
+const NegotiationPlaybookModal = dynamic(() => import('./NegotiationPlaybookModal'), { ssr: false });
+const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'), { ssr: false });
+const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false });
+
+// Static type import (types are erased at runtime, safe alongside dynamic component import)
+import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
+export type { PartnerMatchForPDF };
 
 // Sub-components
 import ResultsHeader from './results/ResultsHeader';
@@ -176,7 +183,7 @@ export function ResultsSkeleton() {
       <div className="h-12 bg-neutral-100 rounded-xl" />
 
       {/* Metric cards grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="bg-white border border-neutral-100 rounded-xl p-5 space-y-3">
             <div className="h-3 bg-neutral-100 rounded w-2/3" />
@@ -516,7 +523,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Terms Grid */}
-        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {/* Upfront Payment */}
           <MetricCard
             title="Upfront Payment"

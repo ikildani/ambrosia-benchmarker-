@@ -1,19 +1,58 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
+
+type TabId = 'overview' | 'history' | 'watchlist' | 'settings';
 
 interface DashboardNavProps {
-  activeTab: 'overview' | 'history' | 'watchlist' | 'settings';
-  onTabChange: (tab: 'overview' | 'history' | 'watchlist' | 'settings') => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
   watchlistNewCount: number;
 }
+
+const TAB_IDS: TabId[] = ['overview', 'history', 'watchlist', 'settings'];
 
 const DashboardNav = React.memo(function DashboardNav({
   activeTab,
   onTabChange,
   watchlistNewCount,
 }: DashboardNavProps) {
+  const tablistRef = useRef<HTMLDivElement>(null);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = TAB_IDS.indexOf(activeTab);
+    let nextIndex: number | null = null;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        nextIndex = (currentIndex + 1) % TAB_IDS.length;
+        break;
+      case 'ArrowLeft':
+        nextIndex = (currentIndex - 1 + TAB_IDS.length) % TAB_IDS.length;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = TAB_IDS.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    const nextTabId = TAB_IDS[nextIndex];
+    onTabChange(nextTabId);
+
+    // Move focus to the newly active tab button
+    const tablistEl = tablistRef.current;
+    if (tablistEl) {
+      const nextButton = tablistEl.querySelector<HTMLButtonElement>(`#tab-${nextTabId}`);
+      nextButton?.focus();
+    }
+  }, [activeTab, onTabChange]);
+
   return (
     <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0">
-      <div role="tablist" aria-label="Dashboard sections" className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
+      <div ref={tablistRef} role="tablist" aria-label="Dashboard sections" onKeyDown={handleKeyDown} className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
         {[
           { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
           { id: 'history', label: 'History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -26,6 +65,7 @@ const DashboardNav = React.memo(function DashboardNav({
             aria-selected={activeTab === tab.id}
             aria-controls={`tabpanel-${tab.id}`}
             id={`tab-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => onTabChange(tab.id as typeof activeTab)}
             className={`flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-[80px] sm:min-w-0 scroll-snap-center touch-feedback ${
               activeTab === tab.id

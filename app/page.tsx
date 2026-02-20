@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
-import Pricing from '@/components/Pricing';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
-import FAQSection from '@/components/FAQSection';
 import ExitIntentCapture from '@/components/ExitIntentCapture';
+
+// Below-fold components loaded dynamically
+const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
+const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: false });
 import { useAuth } from '@/contexts/AuthContext';
 import {
   calculateDealTerms,

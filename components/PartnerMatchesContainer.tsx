@@ -111,9 +111,9 @@ export default function PartnerMatchesContainer({
 
   if (loading) {
     return (
-      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-8">
+      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-8" aria-live="polite">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
           <span className="text-sm text-neutral-600 dark:text-slate-300">Finding potential partners...</span>
         </div>
       </div>

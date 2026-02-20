@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
 // Avatar gradient options - premium color combinations (synced with Dashboard.tsx)
@@ -86,6 +86,17 @@ export default function Header({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Focus first menu item when dropdown opens
+  useEffect(() => {
+    if (userMenuOpen && menuRef.current) {
+      const firstItem = menuRef.current.querySelector<HTMLElement>('[role="menu"] a[href], [role="menu"] button:not([disabled])');
+      // Delay to allow the menu to render
+      requestAnimationFrame(() => {
+        firstItem?.focus();
+      });
+    }
+  }, [userMenuOpen]);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -99,6 +110,59 @@ export default function Header({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Keyboard navigation for dropdown menu
+  const handleDropdownKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const menuContainer = menuRef.current;
+    if (!menuContainer || !userMenuOpen) return;
+
+    const focusableSelectors = 'a[href], button:not([disabled])';
+    const focusableItems = Array.from(
+      menuContainer.querySelectorAll<HTMLElement>(focusableSelectors)
+    ).filter(el => {
+      // Exclude the toggle button itself (first button is the avatar trigger)
+      return el.closest('[role="menu"]') !== null;
+    });
+
+    if (focusableItems.length === 0) return;
+
+    const currentIndex = focusableItems.indexOf(document.activeElement as HTMLElement);
+
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault();
+        const nextIndex = currentIndex < focusableItems.length - 1 ? currentIndex + 1 : 0;
+        focusableItems[nextIndex]?.focus();
+        break;
+      }
+      case 'ArrowUp': {
+        e.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : focusableItems.length - 1;
+        focusableItems[prevIndex]?.focus();
+        break;
+      }
+      case 'Escape': {
+        e.preventDefault();
+        setUserMenuOpen(false);
+        // Return focus to the trigger button
+        const triggerButton = menuContainer.querySelector<HTMLButtonElement>('[aria-haspopup="true"]');
+        triggerButton?.focus();
+        break;
+      }
+      case 'Enter':
+      case ' ': {
+        // Let the default behavior handle activation of links/buttons
+        // Only preventDefault for Space to avoid page scroll
+        if (e.key === ' ') {
+          e.preventDefault();
+          (document.activeElement as HTMLElement)?.click();
+        }
+        break;
+      }
+      default:
+        return;
+    }
+  }, [userMenuOpen]);
 
   // Navigation items with proper routing
   const navItems = [
@@ -188,7 +252,7 @@ export default function Header({
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative" ref={menuRef} onKeyDown={handleDropdownKeyDown}>
                 {/* User Avatar Button */}
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -237,6 +301,7 @@ export default function Header({
                     <div className="py-2">
                       <Link
                         href="/dashboard"
+                        role="menuitem"
                         onClick={() => setUserMenuOpen(false)}
                         className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
                           isDashboardPage ? 'bg-slate-50 dark:bg-slate-700' : ''
@@ -255,6 +320,7 @@ export default function Header({
 
                       <Link
                         href="/calculator"
+                        role="menuitem"
                         onClick={() => setUserMenuOpen(false)}
                         className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
                           isCalculatorPage ? 'bg-slate-50 dark:bg-slate-700' : ''
@@ -275,6 +341,7 @@ export default function Header({
                     {/* Sign Out */}
                     <div className="border-t border-slate-200 dark:border-slate-700 p-2">
                       <button
+                        role="menuitem"
                         onClick={() => {
                           setUserMenuOpen(false);
                           onSignOut?.();

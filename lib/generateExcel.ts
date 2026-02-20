@@ -26,6 +26,16 @@ const AMBER = 'F59E0B';
 const ROSE = 'F43F5E';
 const GREEN = '22C55E';
 
+// Conditional formatting colors for positive/negative values
+const POS_FILL = 'DCFCE7';
+const POS_FONT = '166534';
+const NEG_FILL = 'FFE4E6';
+const NEG_FONT = '9F1239';
+
+// Number format strings
+const CURRENCY_FMT = '$#,##0.0"M"';
+const PERCENT_FMT = '0.0%';
+
 function navyFill(): ExcelJS.Fill {
   return { type: 'pattern', pattern: 'solid', fgColor: { argb: NAVY } };
 }
@@ -37,6 +47,35 @@ function grayFill(): ExcelJS.Fill {
 }
 function lightGrayFill(): ExcelJS.Fill {
   return { type: 'pattern', pattern: 'solid', fgColor: { argb: GRAY_100 } };
+}
+function positiveFill(): ExcelJS.Fill {
+  return { type: 'pattern', pattern: 'solid', fgColor: { argb: POS_FILL } };
+}
+function negativeFill(): ExcelJS.Fill {
+  return { type: 'pattern', pattern: 'solid', fgColor: { argb: NEG_FILL } };
+}
+
+/** Apply conditional green/red styling to a cell based on a numeric value */
+function applyConditionalStyle(cell: ExcelJS.Cell, value: number, baseFontSize: number = 10): void {
+  if (value > 0) {
+    cell.fill = positiveFill();
+    cell.font = { ...cell.font, size: baseFontSize, bold: true, color: { argb: POS_FONT } };
+  } else if (value < 0) {
+    cell.fill = negativeFill();
+    cell.font = { ...cell.font, size: baseFontSize, bold: true, color: { argb: NEG_FONT } };
+  }
+}
+
+/** Set print area on a worksheet given row/col bounds */
+function setPrintArea(ws: ExcelJS.Worksheet, lastRow: number, lastCol: number): void {
+  const colLetter = String.fromCharCode(64 + Math.min(lastCol, 26));
+  ws.pageSetup = {
+    ...ws.pageSetup,
+    printArea: `A1:${colLetter}${lastRow}`,
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+  };
 }
 
 function headerFont(size: number = 12): Partial<ExcelJS.Font> {
@@ -96,7 +135,10 @@ export async function generateExcelReport(
   wb.created = new Date();
 
   // ── Sheet 1: Executive Summary ──
-  const ws1 = wb.addWorksheet('Executive Summary', { properties: { tabColor: { argb: TEAL } } });
+  const ws1 = wb.addWorksheet('Executive Summary', {
+    properties: { tabColor: { argb: TEAL } },
+    pageSetup: { orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
   ws1.columns = [{ width: 28 }, { width: 45 }];
 
   addSectionHeader(ws1, 1, 'DEAL VALUATION REPORT', 2);
@@ -137,13 +179,17 @@ export async function generateExcelReport(
   r++;
   ws1.getCell(r, 1).value = 'Upfront Allocation';
   ws1.getCell(r, 1).font = { bold: true, size: 10 };
-  ws1.getCell(r, 2).value = `${dealRecommendation.upfrontPercent}%`;
-  ws1.getCell(r, 2).font = { bold: true, size: 12, color: { argb: TEAL } };
+  const upfrontCell = ws1.getCell(r, 2);
+  upfrontCell.value = dealRecommendation.upfrontPercent / 100;
+  upfrontCell.numFmt = '0%';
+  upfrontCell.font = { bold: true, size: 12, color: { argb: TEAL } };
   r++;
   ws1.getCell(r, 1).value = 'Milestone Allocation';
   ws1.getCell(r, 1).font = { bold: true, size: 10 };
-  ws1.getCell(r, 2).value = `${dealRecommendation.milestonePercent}%`;
-  ws1.getCell(r, 2).font = { bold: true, size: 12, color: { argb: TEAL } };
+  const milestoneCell = ws1.getCell(r, 2);
+  milestoneCell.value = dealRecommendation.milestonePercent / 100;
+  milestoneCell.numFmt = '0%';
+  milestoneCell.font = { bold: true, size: 12, color: { argb: TEAL } };
   r++;
   ws1.getCell(r, 1).value = 'Rationale';
   ws1.getCell(r, 1).font = { bold: true, size: 10 };
@@ -162,9 +208,15 @@ export async function generateExcelReport(
   ws1.getCell(r, 1).alignment = { wrapText: true };
   ws1.getRow(r).height = 50;
 
+  // Print area for Executive Summary
+  setPrintArea(ws1, r, 2);
+
   // ── Sheet 2: Deal Terms ──
-  const ws2 = wb.addWorksheet('Deal Terms', { properties: { tabColor: { argb: CYAN } } });
-  ws2.columns = [{ width: 26 }, { width: 16 }, { width: 16 }, { width: 16 }, { width: 35 }];
+  const ws2 = wb.addWorksheet('Deal Terms', {
+    properties: { tabColor: { argb: CYAN } },
+    pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
+  ws2.columns = [{ width: 26 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 38 }];
 
   addSectionHeader(ws2, 1, 'ESTIMATED DEAL TERMS', 5);
   addTableHeaders(ws2, 3, ['Metric', 'Low', 'Median', 'High', 'Notes']);
@@ -188,15 +240,17 @@ export async function generateExcelReport(
     ws2.getCell(rr, 1).border = thinBorder();
 
     [t.vals.low, t.vals.median, t.vals.high].forEach((v, ci) => {
-      ws2.getCell(rr, ci + 2).value = formatCurrency(v);
-      ws2.getCell(rr, ci + 2).font = {
+      const cell = ws2.getCell(rr, ci + 2);
+      cell.value = v; // raw numeric value (in $M)
+      cell.numFmt = CURRENCY_FMT;
+      cell.font = {
         bold: ci === 1 || isTotal,
         size: 10,
         color: { argb: ci === 1 ? TEAL : NAVY },
       };
-      ws2.getCell(rr, ci + 2).fill = fill;
-      ws2.getCell(rr, ci + 2).alignment = { horizontal: 'right' };
-      ws2.getCell(rr, ci + 2).border = thinBorder();
+      cell.fill = fill;
+      cell.alignment = { horizontal: 'right' };
+      cell.border = thinBorder();
     });
 
     ws2.getCell(rr, 5).value = t.note;
@@ -222,16 +276,20 @@ export async function generateExcelReport(
     ws2.getCell(rr, 1).font = { bold: true, size: 10 };
     ws2.getCell(rr, 1).fill = fill;
     ws2.getCell(rr, 1).border = thinBorder();
-    ws2.getCell(rr, 2).value = `${ro.low}%`;
-    ws2.getCell(rr, 2).font = { size: 10 };
-    ws2.getCell(rr, 2).fill = fill;
-    ws2.getCell(rr, 2).alignment = { horizontal: 'center' };
-    ws2.getCell(rr, 2).border = thinBorder();
-    ws2.getCell(rr, 3).value = `${ro.high}%`;
-    ws2.getCell(rr, 3).font = { size: 10, bold: true, color: { argb: TEAL } };
-    ws2.getCell(rr, 3).fill = fill;
-    ws2.getCell(rr, 3).alignment = { horizontal: 'center' };
-    ws2.getCell(rr, 3).border = thinBorder();
+    const lowCell = ws2.getCell(rr, 2);
+    lowCell.value = ro.low / 100; // convert percentage to decimal for Excel
+    lowCell.numFmt = PERCENT_FMT;
+    lowCell.font = { size: 10 };
+    lowCell.fill = fill;
+    lowCell.alignment = { horizontal: 'center' };
+    lowCell.border = thinBorder();
+    const highCell = ws2.getCell(rr, 3);
+    highCell.value = ro.high / 100; // convert percentage to decimal for Excel
+    highCell.numFmt = PERCENT_FMT;
+    highCell.font = { size: 10, bold: true, color: { argb: TEAL } };
+    highCell.fill = fill;
+    highCell.alignment = { horizontal: 'center' };
+    highCell.border = thinBorder();
     ws2.getCell(rr, 4).value = ro.threshold;
     ws2.getCell(rr, 4).font = { size: 9, color: { argb: GRAY_500 } };
     ws2.getCell(rr, 4).fill = fill;
@@ -239,10 +297,16 @@ export async function generateExcelReport(
     rr++;
   });
 
+  // Print area for Deal Terms (landscape)
+  setPrintArea(ws2, rr - 1, 5);
+
   // ── Sheet 3: Sensitivity Analysis ──
   if (sensitivityData && sensitivityData.parameters.length > 0) {
-    const ws3 = wb.addWorksheet('Sensitivity', { properties: { tabColor: { argb: AMBER } } });
-    ws3.columns = [{ width: 22 }, { width: 18 }, { width: 18 }, { width: 16 }, { width: 14 }];
+    const ws3 = wb.addWorksheet('Sensitivity', {
+      properties: { tabColor: { argb: AMBER } },
+      pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+    ws3.columns = [{ width: 24 }, { width: 20 }, { width: 20 }, { width: 18 }, { width: 16 }];
 
     addSectionHeader(ws3, 1, 'SENSITIVITY ANALYSIS', 5);
 
@@ -261,8 +325,10 @@ export async function generateExcelReport(
     // Parameter table
     addTableHeaders(ws3, 6, ['Parameter', 'Current', 'Best Alternative', 'Potential Gain', 'Impact']);
 
+    let sensitivityLastRow = 6;
     sensitivityData.parameters.slice(0, 10).forEach((p, i) => {
       const row = 7 + i;
+      sensitivityLastRow = row;
       const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
       const bestOpt = p.options.reduce((best, opt) => opt.delta > best.delta ? opt : best, p.options[0]);
 
@@ -281,12 +347,22 @@ export async function generateExcelReport(
       ws3.getCell(row, 3).fill = fill;
       ws3.getCell(row, 3).border = thinBorder();
 
-      const gain = bestOpt && bestOpt.delta > 0 ? `+${formatCurrency(bestOpt.delta)}` : 'N/A';
-      ws3.getCell(row, 4).value = gain;
-      ws3.getCell(row, 4).font = { size: 10, bold: true, color: { argb: gain !== 'N/A' ? TEAL : GRAY_500 } };
-      ws3.getCell(row, 4).fill = fill;
-      ws3.getCell(row, 4).alignment = { horizontal: 'right' };
-      ws3.getCell(row, 4).border = thinBorder();
+      // Potential Gain cell with conditional formatting (green/red)
+      const gainCell = ws3.getCell(row, 4);
+      if (bestOpt && bestOpt.delta !== 0) {
+        gainCell.value = bestOpt.delta; // raw numeric value in $M
+        gainCell.numFmt = '+$#,##0.0"M";-$#,##0.0"M"';
+        gainCell.font = { size: 10, bold: true };
+        gainCell.border = thinBorder();
+        gainCell.alignment = { horizontal: 'right' };
+        applyConditionalStyle(gainCell, bestOpt.delta, 10);
+      } else {
+        gainCell.value = 'N/A';
+        gainCell.font = { size: 10, bold: true, color: { argb: GRAY_500 } };
+        gainCell.fill = fill;
+        gainCell.border = thinBorder();
+        gainCell.alignment = { horizontal: 'right' };
+      }
 
       const impactColors: Record<string, string> = { 'VERY HIGH': ROSE, 'HIGH': AMBER, 'MEDIUM': CYAN, 'LOW': GREEN };
       ws3.getCell(row, 5).value = p.impactLevel;
@@ -295,6 +371,71 @@ export async function generateExcelReport(
       ws3.getCell(row, 5).alignment = { horizontal: 'center' };
       ws3.getCell(row, 5).border = thinBorder();
     });
+
+    // Add detail rows showing all options with conditional delta coloring
+    sensitivityLastRow += 2;
+    addSectionHeader(ws3, sensitivityLastRow, 'PARAMETER OPTIONS DETAIL', 5);
+    sensitivityLastRow++;
+    addTableHeaders(ws3, sensitivityLastRow, ['Parameter', 'Option', 'Total Value ($M)', 'Delta ($M)', 'Delta (%)']);
+    sensitivityLastRow++;
+
+    sensitivityData.parameters.slice(0, 10).forEach((p) => {
+      p.options.forEach((opt) => {
+        const row = sensitivityLastRow;
+        const fill = (sensitivityLastRow % 2 === 0) ? grayFill() : lightGrayFill();
+
+        ws3.getCell(row, 1).value = p.label;
+        ws3.getCell(row, 1).font = { size: 9 };
+        ws3.getCell(row, 1).fill = fill;
+        ws3.getCell(row, 1).border = thinBorder();
+
+        ws3.getCell(row, 2).value = opt.label;
+        ws3.getCell(row, 2).font = { size: 9 };
+        ws3.getCell(row, 2).fill = fill;
+        ws3.getCell(row, 2).border = thinBorder();
+
+        const tvCell = ws3.getCell(row, 3);
+        tvCell.value = opt.resultingTotalValue;
+        tvCell.numFmt = CURRENCY_FMT;
+        tvCell.font = { size: 9 };
+        tvCell.fill = fill;
+        tvCell.alignment = { horizontal: 'right' };
+        tvCell.border = thinBorder();
+
+        // Delta value with conditional formatting
+        const deltaCell = ws3.getCell(row, 4);
+        deltaCell.value = opt.delta;
+        deltaCell.numFmt = '+$#,##0.0"M";-$#,##0.0"M"';
+        deltaCell.font = { size: 9, bold: true };
+        deltaCell.alignment = { horizontal: 'right' };
+        deltaCell.border = thinBorder();
+        if (opt.delta !== 0) {
+          applyConditionalStyle(deltaCell, opt.delta, 9);
+        } else {
+          deltaCell.fill = fill;
+          deltaCell.font = { size: 9, color: { argb: GRAY_500 } };
+        }
+
+        // Delta percent with conditional formatting
+        const pctCell = ws3.getCell(row, 5);
+        pctCell.value = opt.deltaPercent / 100; // convert to decimal for Excel %
+        pctCell.numFmt = '+0.0%;-0.0%';
+        pctCell.font = { size: 9, bold: true };
+        pctCell.alignment = { horizontal: 'right' };
+        pctCell.border = thinBorder();
+        if (opt.deltaPercent !== 0) {
+          applyConditionalStyle(pctCell, opt.deltaPercent, 9);
+        } else {
+          pctCell.fill = fill;
+          pctCell.font = { size: 9, color: { argb: GRAY_500 } };
+        }
+
+        sensitivityLastRow++;
+      });
+    });
+
+    // Print area for Sensitivity
+    setPrintArea(ws3, sensitivityLastRow - 1, 5);
   }
 
   // ── Sheet 4: Comparable Deals ──
@@ -304,8 +445,11 @@ export async function generateExcelReport(
     labels.indication
   );
   if (comparableDeals.length > 0) {
-    const ws4 = wb.addWorksheet('Comparable Deals', { properties: { tabColor: { argb: NAVY } } });
-    ws4.columns = [{ width: 22 }, { width: 22 }, { width: 16 }, { width: 10 }, { width: 50 }];
+    const ws4 = wb.addWorksheet('Comparable Deals', {
+      properties: { tabColor: { argb: NAVY } },
+      pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+    ws4.columns = [{ width: 24 }, { width: 24 }, { width: 18 }, { width: 12 }, { width: 50 }];
 
     addSectionHeader(ws4, 1, 'COMPARABLE TRANSACTIONS', 5);
     addTableHeaders(ws4, 3, ['Licensor', 'Licensee', 'Deal Value', 'Year', 'Relevance']);
@@ -336,12 +480,18 @@ export async function generateExcelReport(
       ws4.getCell(row, 5).fill = fill;
       ws4.getCell(row, 5).border = thinBorder();
     });
+
+    // Print area for Comparable Deals
+    setPrintArea(ws4, 3 + comparableDeals.length, 5);
   }
 
   // ── Sheet 5: Partners ──
   if (partners && partners.length > 0) {
-    const ws5 = wb.addWorksheet('Partners', { properties: { tabColor: { argb: TEAL } } });
-    ws5.columns = [{ width: 28 }, { width: 14 }, { width: 18 }, { width: 14 }, { width: 40 }];
+    const ws5 = wb.addWorksheet('Partners', {
+      properties: { tabColor: { argb: TEAL } },
+      pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+    ws5.columns = [{ width: 28 }, { width: 16 }, { width: 18 }, { width: 16 }, { width: 44 }];
 
     addSectionHeader(ws5, 1, 'POTENTIAL PARTNERS', 5);
     addTableHeaders(ws5, 3, ['Company', 'Match Score', 'Deals (12mo)', 'HQ Country', 'Key Match Reasons']);
@@ -355,11 +505,13 @@ export async function generateExcelReport(
       ws5.getCell(row, 1).font = { size: 10, bold: true };
       ws5.getCell(row, 1).fill = fill;
       ws5.getCell(row, 1).border = thinBorder();
-      ws5.getCell(row, 2).value = `${p.match_score}%`;
-      ws5.getCell(row, 2).font = { size: 11, bold: true, color: { argb: scoreColor } };
-      ws5.getCell(row, 2).fill = fill;
-      ws5.getCell(row, 2).alignment = { horizontal: 'center' };
-      ws5.getCell(row, 2).border = thinBorder();
+      const scoreCell = ws5.getCell(row, 2);
+      scoreCell.value = p.match_score / 100; // decimal for Excel %
+      scoreCell.numFmt = '0%';
+      scoreCell.font = { size: 11, bold: true, color: { argb: scoreColor } };
+      scoreCell.fill = fill;
+      scoreCell.alignment = { horizontal: 'center' };
+      scoreCell.border = thinBorder();
       ws5.getCell(row, 3).value = p.deals_last_12mo;
       ws5.getCell(row, 3).font = { size: 10 };
       ws5.getCell(row, 3).fill = fill;
@@ -375,11 +527,16 @@ export async function generateExcelReport(
       ws5.getCell(row, 5).fill = fill;
       ws5.getCell(row, 5).border = thinBorder();
     });
+
+    // Print area for Partners
+    setPrintArea(ws5, 3 + partners.length, 5);
   }
 
   // ── Sheet 6: Methodology ──
-  const ws6 = wb.addWorksheet('Methodology');
-  ws6.columns = [{ width: 80 }];
+  const ws6 = wb.addWorksheet('Methodology', {
+    pageSetup: { orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
+  ws6.columns = [{ width: 85 }];
 
   addSectionHeader(ws6, 1, 'METHODOLOGY & DISCLAIMER', 1);
 
@@ -419,6 +576,9 @@ export async function generateExcelReport(
       color: { argb: line === 'IMPORTANT DISCLAIMER' ? ROSE : NAVY },
     };
   });
+
+  // Print area for Methodology
+  setPrintArea(ws6, 1 + methLines.length, 1);
 
   // Generate and download
   const timestamp = new Date().toISOString().slice(0, 10);

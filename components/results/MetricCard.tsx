@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DrillDownData } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
 
@@ -55,19 +55,33 @@ function MetricCardInner({
   isPro,
   onProClick
 }: MetricCardProps) {
+  const handleHeaderClick = useCallback(() => {
+    if (canExpand) {
+      onToggle();
+    } else if (!isPro) {
+      onProClick();
+    }
+  }, [canExpand, isPro, onToggle, onProClick]);
+
+  const handleHeaderKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleHeaderClick();
+    }
+  }, [handleHeaderClick]);
+
   return (
     <div
       className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
-        onClick={() => {
-          if (canExpand) {
-            onToggle();
-          } else if (!isPro) {
-            onProClick();
-          }
-        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={canExpand ? isExpanded : undefined}
+        aria-label={`${title}: ${value}. ${canExpand ? (isExpanded ? 'Collapse details' : 'Expand details') : ''}`}
+        onClick={handleHeaderClick}
+        onKeyDown={handleHeaderKeyDown}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

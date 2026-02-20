@@ -14,8 +14,11 @@ const TOC_ENTRIES: { title: string; page: number; description: string }[] = [
   { title: 'Comparable Deals', page: 7, description: 'Recent transactions and market benchmarks' },
   { title: 'Partner Matches', page: 8, description: 'Top-ranked potential licensing partners' },
   { title: 'AI Deal Memo', page: 9, description: 'AI-generated strategic narrative and playbook' },
-  { title: 'Therapeutic Intelligence', page: 10, description: 'Indication-specific market context and trends' },
-  { title: 'Methodology', page: 11, description: 'Model design, data sources, and disclaimer' },
+  { title: 'Risk Analysis', page: 10, description: 'Risk factor breakdown and probability-weighted valuation' },
+  { title: 'Deal Timeline', page: 11, description: 'Gantt-style milestone schedule from signing to launch' },
+  { title: 'Negotiation Strategy', page: 12, description: 'AI-powered negotiation playbook and tactics' },
+  { title: 'Therapeutic Intelligence', page: 13, description: 'Indication-specific market context and trends' },
+  { title: 'Methodology', page: 14, description: 'Model design, data sources, and disclaimer' },
 ];
 
 export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): string {

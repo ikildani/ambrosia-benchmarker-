@@ -35,11 +35,15 @@ import { canUseCalculator, incrementUsage, getUsage, FREE_LIMIT, syncUsageFromDa
 import { addToHistory } from '@/lib/history';
 import { PRICING, DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/contexts/AuthContext';
-import Results, { ResultsSkeleton } from './Results';
+import ResultsSkeleton from './skeletons/ResultsSkeleton';
 import { WatchlistProvider } from '@/contexts/WatchlistContext';
 import PaywallModal from './PaywallModal';
 import OnboardingModal, { type OnboardingStep } from './OnboardingModal';
+
+// Dynamic import: Results is only rendered after calculation completes
+const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 
 import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection } from './calculator/index';
@@ -575,7 +579,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             hasResult={!!result}
           />
 
-          <div className={`grid ${quickMode ? 'max-w-xl mx-auto' : 'lg:grid-cols-2'} gap-6 lg:gap-8`}>
+          <div className={`grid ${quickMode ? 'max-w-xl mx-auto' : 'md:grid-cols-2'} gap-6 lg:gap-8`}>
             {/* Left Column */}
             <div className="space-y-6 lg:space-y-8">
               {/* Asset Details Section */}
@@ -871,16 +875,19 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       </div>
 
       {/* Loading Skeleton */}
-      {isCalculating && !result && (
-        <div className="mt-8">
-          <ResultsSkeleton />
-        </div>
-      )}
+      <div aria-live="polite" aria-atomic="true">
+        {isCalculating && !result && (
+          <div className="mt-8">
+            <ResultsSkeleton />
+            <span className="sr-only">Analyzing market data, please wait...</span>
+          </div>
+        )}
+      </div>
 
       {/* Results */}
       {result && (
         <WatchlistProvider tier={tier}>
-        <div className="mt-8 animate-fade-in results-container">
+        <div className="mt-8 animate-fade-in results-container" aria-live="polite">
           <Results
             result={result}
             tier={(tier === 'pro' ? 'pro' : (reportPurchaseId && reportVerified) ? 'report' : 'free') as EffectiveTier}

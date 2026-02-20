@@ -33,7 +33,7 @@ const HistoryTab = React.memo(function HistoryTab({
   formatCurrency,
 }: HistoryTabProps) {
   return (
-    <div id="tabpanel-history" role="tabpanel" aria-labelledby="tab-history" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div id="tabpanel-history" role="tabpanel" aria-labelledby="tab-history" aria-live="polite" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
