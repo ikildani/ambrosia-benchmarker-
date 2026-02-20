@@ -24,22 +24,22 @@ function getRiskFactors(data: PDFReportData): RiskFactor[] {
     description: `${inputs.phase === 'preclinical' ? 'Preclinical assets' : inputs.phase === 'approved' ? 'Approved products' : `${inputs.phase} candidates`} carry ${phaseRisk[inputs.phase] > 50 ? 'higher' : 'lower'} clinical risk.`,
   });
 
-  // Competitive position
-  const compRisk: Record<string, number> = { firstInClass: 20, bestInClass: 30, fastFollower: 50, crowdedField: 75 };
+  // Competitive position (matches CompetitivePosition type)
+  const compRisk: Record<string, number> = { firstInClass: 20, firstToPivotal: 25, bestInClass: 30, racing: 50, behind: 60, crowded: 75 };
   factors.push({
     name: 'Competitive Position',
     impact: compRisk[inputs.competitivePosition] > 50 ? 'negative' : 'positive',
     weight: compRisk[inputs.competitivePosition] || 50,
-    description: inputs.competitivePosition === 'firstInClass' ? 'First-in-class novelty reduces competitive risk.' : inputs.competitivePosition === 'crowdedField' ? 'Crowded competitive landscape increases execution risk.' : 'Competitive dynamics introduce moderate uncertainty.',
+    description: inputs.competitivePosition === 'firstInClass' ? 'First-in-class novelty reduces competitive risk.' : inputs.competitivePosition === 'crowded' ? 'Crowded competitive landscape increases execution risk.' : 'Competitive dynamics introduce moderate uncertainty.',
   });
 
-  // Data quality
-  const dataRisk: Record<string, number> = { strong: 15, moderate: 40, limited: 65 };
+  // Data quality (matches DataQuality type)
+  const dataRisk: Record<string, number> = { pivotalReady: 10, strongPhase2: 20, promising: 40, mixed: 55, limited: 70 };
   factors.push({
     name: 'Data Quality',
     impact: dataRisk[inputs.dataQuality] > 50 ? 'negative' : 'positive',
     weight: dataRisk[inputs.dataQuality] || 40,
-    description: `${inputs.dataQuality === 'strong' ? 'Strong supporting data' : inputs.dataQuality === 'limited' ? 'Limited data package' : 'Moderate data'} ${inputs.dataQuality === 'strong' ? 'reduces' : 'increases'} valuation uncertainty.`,
+    description: `${inputs.dataQuality === 'pivotalReady' || inputs.dataQuality === 'strongPhase2' ? 'Strong supporting data' : inputs.dataQuality === 'limited' || inputs.dataQuality === 'mixed' ? 'Limited or mixed data package' : 'Promising data'} ${dataRisk[inputs.dataQuality] <= 30 ? 'reduces' : 'increases'} valuation uncertainty.`,
   });
 
   // Modality risk
@@ -77,7 +77,7 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.pageCount - 2, meta.pageCount, 'Risk Analysis')}
+      ${pageHeader(10, meta.pageCount, 'Risk Analysis')}
 
       <div class="section-title">RISK ASSESSMENT</div>
       <div class="section-title-lg">Risk Analysis & Probability-Weighted Value</div>
