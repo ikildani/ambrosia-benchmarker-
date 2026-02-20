@@ -89,25 +89,23 @@ function OptionCardGroupInner<T extends string>({
                   : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600'
               } ${highlighted ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
             >
-              <div className="flex items-start justify-between gap-1">
-                <div className={`text-sm font-medium ${isSelected ? 'text-teal-700 dark:text-teal-400' : 'text-neutral-800 dark:text-slate-200'}`}>
-                  {option.label}
-                </div>
-                {badge && (
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide whitespace-nowrap flex-shrink-0 ${
-                    badge.type === 'premium' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                    badge.type === 'discount' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                    badge.type === 'base' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                    'bg-neutral-100 text-neutral-500 dark:bg-slate-700 dark:text-slate-400'
-                  }`}>
-                    {badge.label}
-                  </span>
-                )}
+              <div className={`text-sm font-medium ${isSelected ? 'text-teal-700 dark:text-teal-400' : 'text-neutral-800 dark:text-slate-200'}`}>
+                {option.label}
               </div>
               {description && (
                 <div className={`text-xs mt-0.5 leading-tight ${isSelected ? 'text-teal-600/70 dark:text-teal-400/60' : 'text-neutral-400 dark:text-slate-500'}`}>
                   {description}
                 </div>
+              )}
+              {badge && (
+                <span className={`inline-flex items-center px-1.5 py-0.5 mt-1.5 rounded text-[10px] font-bold tracking-wide ${
+                  badge.type === 'premium' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                  badge.type === 'discount' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                  badge.type === 'base' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                  'bg-neutral-100 text-neutral-500 dark:bg-slate-700 dark:text-slate-400'
+                }`}>
+                  {badge.label}
+                </span>
               )}
             </button>
           );
