@@ -859,11 +859,196 @@ function buildMetabolicOverviewPage(): BenchmarkPageData {
       },
     ],
     relatedPages: [
-      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
-      { slug: 'neurology-cns-deal-benchmarks', title: 'Neurology & CNS Deals' },
-      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'glp1-obesity-deal-benchmarks-2026', title: 'GLP-1 Obesity Deal Benchmarks' },
+      { slug: 'dual-incretin-deal-benchmarks-2026', title: 'Dual & Triple Incretin Deals' },
+      { slug: 'nash-mash-deal-benchmarks-2026', title: 'NASH/MASH Deal Benchmarks' },
+      { slug: 'oral-peptide-obesity-deal-benchmarks-2026', title: 'Oral Peptide Deal Benchmarks' },
     ],
     category: 'overview',
+  };
+}
+
+function buildGLP1ObesityPage(): BenchmarkPageData {
+  const injectable = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'glp1Agonist' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  const oral = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'oralPeptide' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  return {
+    slug: 'glp1-obesity-deal-benchmarks-2026',
+    title: 'GLP-1 Agonist Obesity Licensing Deal Benchmarks 2026 | Semaglutide & Beyond',
+    metaDescription: `GLP-1 agonist obesity deals average ${formatCurrency(injectable.terms.totalDealValue.median)} total value at Phase 2. Compare injectable vs oral GLP-1 deal terms, upfronts, milestones, and royalties.`,
+    h1: 'GLP-1 Agonist Obesity Deal Benchmarks 2026',
+    heroStats: buildHeroStats(injectable),
+    contextParagraphs: [
+      `GLP-1 receptor agonists have become the defining drug class of the decade. Semaglutide (Wegovy/Ozempic) generated $20B+ in annual revenue by 2025, making it the fastest drug to that milestone in pharma history. Tirzepatide (Mounjaro/Zepbound) achieved 22.5% weight loss in clinical trials, approaching bariatric surgery efficacy without the surgical risk.`,
+      `Phase 2 GLP-1 agonist licensing deals for obesity carry median upfront payments of ${formatCurrency(injectable.terms.upfront.median)} (range ${formatCurrency(injectable.terms.upfront.low)} - ${formatCurrency(injectable.terms.upfront.high)}), with total deal values reaching ${formatCurrency(injectable.terms.totalDealValue.median)}. The CSPC/AstraZeneca deal at $18.5B headline value and Carmot/Roche acquisition at $2.7B set the high-water marks for the category.`,
+      `Oral GLP-1 formulations command significant premiums: ${formatCurrency(oral.terms.upfront.median)} upfront vs ${formatCurrency(injectable.terms.upfront.median)} for injectables. The oral convenience advantage drives patient preference, primary care adoption, and payer formulary access — making oral GLP-1 assets the most sought-after in biopharma.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'metabolic', modality: 'glp1Agonist', indication: 'obesity' },
+    faqs: [
+      {
+        question: 'How much are GLP-1 obesity deals worth in 2026?',
+        answer: `Phase 2 injectable GLP-1 deals average ${formatCurrency(injectable.terms.totalDealValue.median)} total deal value with ${formatCurrency(injectable.terms.upfront.median)} upfront. Oral GLP-1 assets command 20-30% premiums, averaging ${formatCurrency(oral.terms.totalDealValue.median)} total value.`,
+      },
+      {
+        question: 'What royalty rates do GLP-1 obesity deals command?',
+        answer: `GLP-1 obesity royalties range from ${injectable.tieredRoyalties.base.low}%-${injectable.tieredRoyalties.base.high}% base tier, escalating to ${injectable.tieredRoyalties.highTier.high}% at peak sales. The $100B+ projected obesity market drives aggressive tiered royalty structures.`,
+      },
+      {
+        question: 'How do oral GLP-1 deals compare to injectable GLP-1 deals?',
+        answer: `Oral GLP-1 deals command 20-30% premiums over injectable equivalents. Oral formulations average ${formatCurrency(oral.terms.upfront.median)} upfront vs ${formatCurrency(injectable.terms.upfront.median)} for injectables, reflecting the oral convenience advantage for patient adherence and primary care adoption.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'metabolic-obesity-deal-benchmarks-2026', title: 'Metabolic & Obesity Overview' },
+      { slug: 'dual-incretin-deal-benchmarks-2026', title: 'Dual Incretin Deal Benchmarks' },
+      { slug: 'nash-mash-deal-benchmarks-2026', title: 'NASH/MASH Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildDualIncretinPage(): BenchmarkPageData {
+  const dual = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'dualIncretin' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  const triple = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'tripleIncretin' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  return {
+    slug: 'dual-incretin-deal-benchmarks-2026',
+    title: 'Dual & Triple Incretin Deal Benchmarks 2026 | GLP-1/GIP/Glucagon',
+    metaDescription: `Dual incretin (GLP-1/GIP) deals average ${formatCurrency(dual.terms.totalDealValue.median)} total value. Compare dual vs triple agonist deal terms and benchmarks.`,
+    h1: 'Dual & Triple Incretin Deal Benchmarks 2026',
+    heroStats: buildHeroStats(dual),
+    contextParagraphs: [
+      `Dual and triple incretin agonists represent the next frontier in obesity therapeutics. Tirzepatide (GLP-1/GIP dual agonist) demonstrated category-leading 22.5% weight loss, while retatrutide (GLP-1/GIP/glucagon triple agonist) achieved 24.2% weight loss in Phase 2 — the highest in any obesity trial. These multi-receptor approaches consistently outperform single-receptor GLP-1 agonists.`,
+      `Phase 2 dual incretin licensing deals command median upfront payments of ${formatCurrency(dual.terms.upfront.median)}, with total deal values of ${formatCurrency(dual.terms.totalDealValue.median)}. Triple agonists push even higher at ${formatCurrency(triple.terms.totalDealValue.median)} total value, reflecting the frontier premium and superior clinical data potential.`,
+      `The Carmot/Roche acquisition at $2.7B for CT-388 (a GLP-1/GIP/FGF21 triple agonist at Phase 1) demonstrated the massive premium pharma will pay for next-generation multi-receptor approaches. Development milestones average ${formatCurrency(dual.terms.devMilestones.median)}, with commercial milestones reaching ${formatCurrency(dual.terms.commMilestones.median)}.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'metabolic', modality: 'dualIncretin', indication: 'obesity' },
+    faqs: [
+      {
+        question: 'What are dual incretin deals worth in 2026?',
+        answer: `Phase 2 dual incretin deals average ${formatCurrency(dual.terms.totalDealValue.median)} total value with ${formatCurrency(dual.terms.upfront.median)} upfront. Triple incretins command an additional premium at ${formatCurrency(triple.terms.totalDealValue.median)} total value.`,
+      },
+      {
+        question: 'How do dual incretins compare to single GLP-1 agonists?',
+        answer: `Dual incretins (GLP-1/GIP) command 10-15% premiums over single GLP-1 agonists, driven by tirzepatide's superior clinical results. The multi-receptor mechanism provides better weight loss efficacy and broader metabolic benefits.`,
+      },
+      {
+        question: 'What milestone structures do incretin deals use?',
+        answer: `Dual incretin deals allocate heavily toward commercial milestones (${formatCurrency(dual.terms.commMilestones.median)}) given the massive market opportunity. Development milestones (${formatCurrency(dual.terms.devMilestones.median)}) reflect the clinical de-risking required to demonstrate superiority over existing GLP-1s.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'glp1-obesity-deal-benchmarks-2026', title: 'GLP-1 Obesity Deal Benchmarks' },
+      { slug: 'metabolic-obesity-deal-benchmarks-2026', title: 'Metabolic & Obesity Overview' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildNashMashPage(): BenchmarkPageData {
+  const mash = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'smallMolecule' as Modality,
+    indication: 'nashMash' as Indication,
+  }));
+  const mashBiologic = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'glp1Agonist' as Modality,
+    indication: 'nashMash' as Indication,
+  }));
+  return {
+    slug: 'nash-mash-deal-benchmarks-2026',
+    title: 'NASH/MASH Licensing Deal Benchmarks 2026 | Liver Disease Deal Terms',
+    metaDescription: `NASH/MASH licensing deals average ${formatCurrency(mash.terms.totalDealValue.median)} total value. Benchmark deal terms for steatohepatitis therapies following resmetirom approval.`,
+    h1: 'NASH/MASH Deal Benchmarks 2026',
+    heroStats: buildHeroStats(mash),
+    contextParagraphs: [
+      `The NASH/MASH therapeutic landscape was transformed by resmetirom's (Rezdiffra) FDA approval in March 2024 — the first approved therapy for metabolic dysfunction-associated steatohepatitis. This validated the category and unlocked a wave of licensing deals. Madrigal Pharmaceuticals' market cap exceeded $7B on approval, setting the commercial benchmark for the class.`,
+      `Phase 2 MASH small molecule deals command median upfront payments of ${formatCurrency(mash.terms.upfront.median)}, with total deal values of ${formatCurrency(mash.terms.totalDealValue.median)}. GLP-1-based MASH approaches (leveraging semaglutide's MASH data) push even higher at ${formatCurrency(mashBiologic.terms.totalDealValue.median)} total value, reflecting the dual obesity/MASH opportunity.`,
+      `Key deal drivers include fibrosis improvement data (F2-F3 reversal), combination strategies with GLP-1 agonists, and the massive undiagnosed patient population (estimated 6-8M in the US alone). Efruxifermin (FGF21 agonist) was acquired by Novo Nordisk for $1.4B, while survodutide (GLP-1/glucagon dual agonist) is being developed by Boehringer Ingelheim in a $1.6B partnership with Zealand.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'metabolic', modality: 'smallMolecule', indication: 'nashMash' },
+    faqs: [
+      {
+        question: 'What are MASH deals worth after resmetirom approval?',
+        answer: `Phase 2 MASH deals average ${formatCurrency(mash.terms.totalDealValue.median)} total value. The resmetirom approval validated the category, increasing deal premiums 20-30% compared to pre-approval benchmarks.`,
+      },
+      {
+        question: 'How do MASH deal terms compare to obesity deals?',
+        answer: `MASH deals command slightly lower valuations than pure obesity plays due to smaller addressable populations, but assets with dual obesity/MASH potential (like GLP-1-based approaches at ${formatCurrency(mashBiologic.terms.totalDealValue.median)} total value) attract premium terms.`,
+      },
+      {
+        question: 'What endpoints matter most for MASH deal valuations?',
+        answer: `Fibrosis improvement (F2-F3 reversal without worsening MASH) is the gold-standard endpoint. Resolution of MASH without worsening fibrosis is also valued. Combination data with GLP-1 agonists can significantly increase deal premiums.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'metabolic-obesity-deal-benchmarks-2026', title: 'Metabolic & Obesity Overview' },
+      { slug: 'glp1-obesity-deal-benchmarks-2026', title: 'GLP-1 Obesity Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deal Benchmarks' },
+    ],
+    category: 'indication',
+  };
+}
+
+function buildOralPeptidePage(): BenchmarkPageData {
+  const oral = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'oralPeptide' as Modality,
+    indication: 'obesity' as Indication,
+  }));
+  const oralT2D = calculateDealTerms(makeInput({
+    therapeuticArea: 'metabolic',
+    modality: 'oralPeptide' as Modality,
+    indication: 'type2Diabetes' as Indication,
+  }));
+  return {
+    slug: 'oral-peptide-obesity-deal-benchmarks-2026',
+    title: 'Oral Peptide Obesity Deal Benchmarks 2026 | Oral GLP-1 Deal Terms',
+    metaDescription: `Oral peptide obesity deals average ${formatCurrency(oral.terms.totalDealValue.median)} total value — 20-30% premium over injectables. Benchmark oral GLP-1 deal terms.`,
+    h1: 'Oral Peptide & Oral GLP-1 Deal Benchmarks 2026',
+    heroStats: buildHeroStats(oral),
+    contextParagraphs: [
+      `Oral peptide delivery is the "holy grail" of the obesity market. Oral semaglutide (Rybelsus) proved the concept with $2B+ annual revenue, but next-generation oral peptides aim for weight loss efficacy approaching injectable levels. The Pfizer/Metsera deal at $9.8B headline value for an oral obesity peptide demonstrated the massive premium pharma companies place on oral convenience.`,
+      `Phase 2 oral peptide obesity deals command median upfronts of ${formatCurrency(oral.terms.upfront.median)} — a 20-30% premium over injectable GLP-1 equivalents. Total deal values reach ${formatCurrency(oral.terms.totalDealValue.median)}. The oral premium reflects the transformative impact on patient adherence, primary care prescribing, and payer formulary positioning.`,
+      `Oral peptide deals for type 2 diabetes average ${formatCurrency(oralT2D.terms.totalDealValue.median)} total value, while obesity-focused oral deals command higher premiums. Royalty rates range from ${oral.tieredRoyalties.base.low}%-${oral.tieredRoyalties.base.high}% base, escalating to ${oral.tieredRoyalties.highTier.high}% at peak sales thresholds reflecting the enormous commercial opportunity.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'metabolic', modality: 'oralPeptide', indication: 'obesity' },
+    faqs: [
+      {
+        question: 'Why do oral obesity drugs command premium deal terms?',
+        answer: `Oral formulations command 20-30% premiums over injectable equivalents. Median upfronts reach ${formatCurrency(oral.terms.upfront.median)} vs lower for injectables. The premium reflects improved patient compliance, primary care adoption, and competitive positioning against injectable-only competitors.`,
+      },
+      {
+        question: 'What is the market opportunity for oral GLP-1 drugs?',
+        answer: `The oral obesity market is projected to capture 30-40% of the $100B+ total obesity market by 2030. Oral convenience dramatically expands the addressable patient population from specialist-managed injectable users to primary care patients.`,
+      },
+      {
+        question: 'What are key risks for oral peptide deals?',
+        answer: `Key risks include bioavailability challenges (oral peptides typically have <2% bioavailability), food-effect interactions requiring fasting, GI tolerability concerns, and manufacturing complexity. Formulation innovations that solve these challenges command the highest premiums.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'glp1-obesity-deal-benchmarks-2026', title: 'GLP-1 Obesity Deal Benchmarks' },
+      { slug: 'metabolic-obesity-deal-benchmarks-2026', title: 'Metabolic & Obesity Overview' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deal Benchmarks' },
+    ],
+    category: 'modality',
   };
 }
 
@@ -886,6 +1071,10 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
   buildOncologyOverviewPage(),
   buildNeurologyOverviewPage(),
   buildMetabolicOverviewPage(),
+  buildGLP1ObesityPage(),
+  buildDualIncretinPage(),
+  buildNashMashPage(),
+  buildOralPeptidePage(),
 ];
 
 // ── Public API ────────────────────────────────────────────────────────────────

@@ -53,7 +53,7 @@ export default function PressPage() {
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
               The Deal Calculator enables biotech executives, business development professionals, and investors
               to estimate upfront payments, milestone structures, and royalty rates based on real market data
-              across therapeutic areas including oncology, neurology, immunology, and rare diseases.
+              across therapeutic areas including oncology, neurology, immunology, and metabolic/obesity.
             </p>
           </div>
         </section>
