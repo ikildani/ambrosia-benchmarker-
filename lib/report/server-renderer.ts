@@ -5,10 +5,9 @@ import chromium from '@sparticuz/chromium';
  * Render an HTML string to a PDF buffer using headless Chromium.
  * Designed for Vercel serverless functions with @sparticuz/chromium.
  */
-export async function renderPDFBuffer(html: string): Promise<Buffer> {
+export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
   const browser = await puppeteer.launch({
     args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath(),
     headless: true,
   });
@@ -27,7 +26,7 @@ export async function renderPDFBuffer(html: string): Promise<Buffer> {
       margin: { top: '0', bottom: '0', left: '0', right: '0' },
     });
 
-    return Buffer.from(pdf);
+    return new Uint8Array(pdf);
   } finally {
     await browser.close();
   }
