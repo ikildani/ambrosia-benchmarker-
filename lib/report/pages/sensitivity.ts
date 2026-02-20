@@ -29,21 +29,21 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title-lg">Sensitivity Analysis</div>
 
       <!-- Top Value Driver Callout -->
-      <div class="card-highlight" style="margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 18px; background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 24px; color: white;">
         <div>
-          <div style="font-size: 9px; font-weight: 700; color: ${COLORS.navy}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Top Value Driver</div>
-          <div style="font-size: 13px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 4px;">${escapeHtml(topDriver.parameterLabel)}</div>
-          <div style="font-size: 11px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(topDriver.insightText)}</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Top Value Driver</div>
+          <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 5px;">${escapeHtml(topDriver.parameterLabel)}</div>
+          <div style="font-size: 10px; color: rgba(255,255,255,0.55); line-height: 1.6;">${escapeHtml(topDriver.insightText)}</div>
         </div>
-        <div style="text-align: right; flex-shrink: 0; margin-left: 20px;">
-          <div style="font-size: 24px; font-weight: 700; color: ${COLORS.teal};">+${formatUsd(topDriver.bestOption.delta)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400};">potential upside</div>
+        <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center;">
+          <div style="font-size: 28px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em;">+${formatUsd(topDriver.bestOption.delta)}</div>
+          <div style="font-size: 8px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em;">potential upside</div>
         </div>
       </div>
 
       <!-- Tornado Chart -->
-      <div class="card" style="margin-bottom: 18px; padding: 14px;">
-        <div class="section-title" style="margin-bottom: 2px;">Parameter Impact (Tornado Chart)</div>
+      <div class="card" style="margin-bottom: 18px; padding: 14px; border-top: 3px solid ${COLORS.navy};">
+        <div class="section-title" style="margin-bottom: 4px;">Parameter Impact (Tornado Chart)</div>
         <div class="chart-container">
           ${tornadoHtml}
         </div>

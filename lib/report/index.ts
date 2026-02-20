@@ -1,6 +1,7 @@
 // Report Orchestrator — assembles all pages into a print-ready HTML document
 
 import { getReportStyles } from './styles';
+import { getEmbeddedFontStyles } from './fonts';
 import { generateReportId, formatDate } from './helpers';
 import { renderCoverPage } from './pages/cover';
 import { renderTableOfContents } from './pages/tableOfContents';
@@ -55,10 +56,7 @@ export function generateReportHTML(data: PDFReportData): string {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${indication} — Deal Valuation Report | Ambrosia Ventures</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Inter:wght@400;500;600;700;800&family=Libre+Franklin:wght@200&display=swap" rel="stylesheet">
-      <style>${getReportStyles()}</style>
+      <style>${getEmbeddedFontStyles()}${getReportStyles()}</style>
     </head>
     <body>
       ${pages.join('\n')}

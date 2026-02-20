@@ -51,9 +51,9 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
       </div>
 
       <!-- Market Context -->
-      <div class="card" style="border-left: 3px solid ${taColors.primary}; margin-bottom: 18px;">
-        <div style="font-size: 9px; font-weight: 700; color: ${taColors.primary}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Market Context</div>
-        <div style="font-size: 11px; color: ${COLORS.gray700}; line-height: 1.7;">${context}</div>
+      <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 22px; color: white; margin-bottom: 18px; border-left: 4px solid ${taColors.primary};">
+        <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 8px;">Market Context</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.7;">${context}</div>
       </div>
 
       <!-- Milestone Allocation Comparison -->

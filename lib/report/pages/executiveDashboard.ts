@@ -32,41 +32,39 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
       <div class="section-title-lg">Executive Dashboard</div>
 
-      <!-- Top row: 3 large KPIs -->
-      <div class="grid-3" style="margin-bottom: 20px;">
-        <div class="kpi-card">
-          <div class="kpi-value">${formatUsd(terms.totalDealValue.median)}</div>
-          <div class="kpi-label">Total Deal Value</div>
-          <div class="kpi-sub">${formatUsd(terms.totalDealValue.low)} &ndash; ${formatUsd(terms.totalDealValue.high)}</div>
+      <!-- Hero KPI Row -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 14px; margin-bottom: 18px;">
+        <!-- Total Deal Value — large hero card -->
+        <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 22px; color: white;">
+          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
+          <div style="font-size: 32px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em; line-height: 1;">${formatUsd(terms.totalDealValue.median)}</div>
+          <div style="font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 5px;">${formatUsd(terms.totalDealValue.low)} &ndash; ${formatUsd(terms.totalDealValue.high)}</div>
         </div>
+        <!-- Upfront Payment -->
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(terms.upfront.median)}</div>
           <div class="kpi-label">Upfront Payment</div>
           <div class="kpi-sub">${upfrontPct}% of total deal value</div>
         </div>
-        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <!-- Risk Gauge -->
+        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 16px;">
           ${gaugeHtml}
         </div>
       </div>
 
-      <!-- Middle row: 4 smaller cards -->
-      <div class="grid-4" style="margin-bottom: 22px;">
-        <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.devMilestones.median)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Dev Milestones</div>
-        </div>
-        <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.regMilestones.median)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Reg Milestones</div>
-        </div>
-        <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${formatUsd(terms.commMilestones.median)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Comm Milestones</div>
-        </div>
-        <div class="card-sm" style="text-align: center;">
-          <div style="font-size: 18px; font-weight: 700; color: ${COLORS.navy};">${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px;">Base Royalty</div>
-        </div>
+      <!-- Milestone Breakdown Row -->
+      <div class="grid-4" style="margin-bottom: 18px;">
+        ${[
+          { label: 'Dev Milestones', value: formatUsd(terms.devMilestones.median), color: COLORS.teal },
+          { label: 'Reg Milestones', value: formatUsd(terms.regMilestones.median), color: COLORS.cyan },
+          { label: 'Comm Milestones', value: formatUsd(terms.commMilestones.median), color: '#6366f1' },
+          { label: 'Base Royalty', value: `${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%`, color: '#8b5cf6' },
+        ].map(item => `
+          <div class="card-sm" style="text-align: center; border-top: 3px solid ${item.color};">
+            <div style="font-size: 20px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${item.value}</div>
+            <div style="font-size: 8px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-top: 4px;">${item.label}</div>
+          </div>
+        `).join('')}
       </div>
 
       <!-- Bottom row: Donut + Recommendation -->

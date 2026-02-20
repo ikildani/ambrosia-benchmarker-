@@ -34,17 +34,18 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
 
       <!-- Partner Cards -->
       <div class="grid-2" style="margin-bottom: 20px;">
-        ${topPartners.map(p => {
+        ${topPartners.map((p, i) => {
           const scoreColor = p.match_score >= 80 ? COLORS.teal : p.match_score >= 60 ? COLORS.cyan : COLORS.amber;
+          const isTop = i < 2;
           return `
-          <div class="card">
+          <div class="card" style="border-top: 3px solid ${isTop ? scoreColor : COLORS.gray200};">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
               <div>
                 <div style="font-size: 11px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(p.company_name)}</div>
                 ${p.hq_country ? `<div style="font-size: 8px; color: ${COLORS.gray400};">${escapeHtml(p.hq_country)}</div>` : ''}
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 18px; font-weight: 700; color: ${scoreColor};">${p.match_score}%</div>
+                <div style="font-size: 20px; font-weight: 800; color: ${scoreColor}; letter-spacing: -0.02em;">${p.match_score}%</div>
                 <div style="font-size: 7px; color: ${COLORS.gray400}; font-weight: 700; letter-spacing: 0.1em;">MATCH</div>
               </div>
             </div>

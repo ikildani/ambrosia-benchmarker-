@@ -28,11 +28,13 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
 
       <!-- Term Cards Grid -->
       <div class="grid-2" style="margin-bottom: 20px;">
-        ${termCards.map(tc => `
-          <div class="card">
+        ${termCards.map((tc, i) => {
+          const colors = [COLORS.teal, COLORS.cyan, '#6366f1', '#8b5cf6'];
+          return `
+          <div class="card" style="border-top: 3px solid ${colors[i]};">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
               <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${tc.label}</div>
-              <div style="font-size: 15px; font-weight: 700; color: ${COLORS.teal};">${formatUsd(tc.terms.median)}</div>
+              <div style="font-size: 17px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${formatUsd(tc.terms.median)}</div>
             </div>
             <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 5px;">
               Range: ${formatUsd(tc.terms.low)} &ndash; ${formatUsd(tc.terms.high)}
@@ -50,8 +52,8 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
               }).join('')}
             </div>
             ` : ''}
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
 
       <!-- Milestone Breakdown Table -->

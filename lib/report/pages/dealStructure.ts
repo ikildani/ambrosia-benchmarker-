@@ -33,11 +33,11 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
       <!-- Modifier Waterfall -->
       <div style="margin-bottom: 22px;">
         <div class="section-title">Value Impact Waterfall</div>
-        <div class="card" style="padding: 12px 10px;">
+        <div class="card" style="padding: 16px 12px; border-top: 3px solid ${COLORS.navy};">
           <div class="chart-container">
             ${waterfallHtml}
           </div>
-          <div style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; margin-top: 6px;">
+          <div style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; margin-top: 6px; letter-spacing: 0.02em;">
             Shows how each factor modifies the base valuation to reach the final estimated deal value
           </div>
         </div>

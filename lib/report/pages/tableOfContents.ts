@@ -24,14 +24,22 @@ const TOC_ENTRIES: { title: string; page: number; description: string }[] = [
 export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): string {
   const indication = data.result.labels.indication || data.inputs.indication;
 
-  const tocRows = TOC_ENTRIES.map(entry => `
-    <div style="display: flex; align-items: baseline; margin-bottom: 10px;">
-      <div style="font-size: 12px; font-weight: 600; color: ${COLORS.navy}; white-space: nowrap;">${entry.title}</div>
-      <div style="flex: 1; border-bottom: 1.5px dotted ${COLORS.gray300}; margin: 0 10px; min-width: 20px; position: relative; top: -3px;"></div>
-      <div style="font-size: 12px; font-weight: 700; color: ${COLORS.teal}; white-space: nowrap;">${entry.page}</div>
-    </div>
-    <div style="font-size: 10px; color: ${COLORS.gray500}; margin-top: -5px; margin-bottom: 16px; padding-left: 2px;">${entry.description}</div>
-  `).join('');
+  const tocRows = TOC_ENTRIES.map((entry, i) => {
+    // Visual grouping: highlight key sections
+    const isHighlight = [3, 6, 9, 10].includes(entry.page); // Executive, Sensitivity, Risk, Timeline
+    return `
+    <div style="display: flex; align-items: center; margin-bottom: 3px; padding: 7px 12px; border-radius: 4px; ${isHighlight ? `background: ${COLORS.gray50};` : ''}">
+      <div style="width: 28px; height: 28px; border-radius: 4px; background: ${i === 0 ? COLORS.navy : COLORS.gray100}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">
+        <span style="font-size: 10px; font-weight: 800; color: ${i === 0 ? '#fff' : COLORS.teal};">${entry.page}</span>
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="font-size: 11px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 1px;">${entry.title}</div>
+        <div style="font-size: 9px; color: ${COLORS.gray400}; line-height: 1.4;">${entry.description}</div>
+      </div>
+      <div style="flex: 1; border-bottom: 1px dotted ${COLORS.gray200}; margin: 0 12px; min-width: 20px;"></div>
+      <div style="font-size: 11px; font-weight: 800; color: ${COLORS.teal}; flex-shrink: 0;">p. ${entry.page}</div>
+    </div>`;
+  }).join('');
 
   return `
     <div class="report-page">

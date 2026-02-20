@@ -79,35 +79,31 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
     <div class="report-page">
       ${pageHeader(10, meta.pageCount, 'Risk Analysis')}
 
-      <div class="section-title">RISK ASSESSMENT</div>
       <div class="section-title-lg">Risk Analysis & Probability-Weighted Value</div>
 
-      <!-- Risk Gauge + Summary -->
-      <div style="display: flex; gap: 28px; margin-bottom: 24px;">
+      <!-- Risk Hero: Gauge + Summary on navy -->
+      <div style="display: grid; grid-template-columns: auto 1fr; gap: 24px; background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 22px 28px; color: white; margin-bottom: 18px;">
         <div style="text-align: center; flex-shrink: 0;">
           <div class="chart-container" style="margin: 0;">${gaugeHtml}</div>
-          <div style="font-size: 10px; color: ${COLORS.gray400}; margin-top: 5px;">Overall Risk Score</div>
+          <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">Overall Risk Score</div>
         </div>
-        <div style="flex: 1;">
-          <div class="callout" style="margin-bottom: 12px;">
-            <strong>Risk Assessment Summary:</strong> This deal carries a risk score of ${riskScore}/100, implying
-            an estimated ${successProb}% probability of achieving projected deal economics.
-            Risk-adjusted total deal value ranges from ${formatUsd(riskAdjustedLow)} to ${formatUsd(riskAdjustedHigh)}.
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 14px;">
+            This deal carries a risk score of <strong style="color: #fff;">${riskScore}/100</strong>, implying
+            an estimated <strong style="color: ${COLORS.tealMid};">${successProb}%</strong> probability of achieving projected deal economics.
           </div>
-
-          <!-- Risk-adjusted KPIs -->
-          <div class="grid-3">
-            <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedLow)}</div>
-              <div class="kpi-label">Risk-Adj Low</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; padding: 10px 12px; text-align: center;">
+              <div style="font-size: 18px; font-weight: 800; color: ${COLORS.tealMid};">${formatUsd(riskAdjustedLow)}</div>
+              <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 3px;">Risk-Adj Low</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedMedian)}</div>
-              <div class="kpi-label">Risk-Adj Median</div>
+            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; padding: 10px 12px; text-align: center;">
+              <div style="font-size: 18px; font-weight: 800; color: #fff;">${formatUsd(riskAdjustedMedian)}</div>
+              <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 3px;">Risk-Adj Median</div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-value" style="font-size: 20px;">${formatUsd(riskAdjustedHigh)}</div>
-              <div class="kpi-label">Risk-Adj High</div>
+            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 5px; padding: 10px 12px; text-align: center;">
+              <div style="font-size: 18px; font-weight: 800; color: ${COLORS.tealMid};">${formatUsd(riskAdjustedHigh)}</div>
+              <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 3px;">Risk-Adj High</div>
             </div>
           </div>
         </div>
