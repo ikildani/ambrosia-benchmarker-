@@ -203,7 +203,7 @@ export async function fetchCompanyTrials(
       pageCount++;
 
       // Rate limiting
-      await sleep(300);
+      await sleep(200);
 
     } catch (error) {
       console.error(`Error fetching trials for ${companyName}:`, error);
@@ -479,12 +479,42 @@ function escapeLikePattern(str: string): string {
 }
 
 export async function runWeeklyIngestion(
-  supabase: any
-): Promise<{ companies: number; trials: number; errors: string[] }> {
-  console.log('Starting ClinicalTrials.gov weekly ingestion...');
+  supabase: any,
+  options: { batchSize?: number } = {}
+): Promise<{ companies: number; trials: number; errors: string[]; batch_info: { processed: number; total: number } }> {
+  const { batchSize = 30 } = options;
 
-  // Deduplicate company list at runtime (safety net)
+  console.log(`Starting ClinicalTrials.gov ingestion (batch of ${batchSize})...`);
+
+  // Deduplicate company list at runtime
   const uniqueCompanies = [...new Set(COMPANIES_TO_TRACK)];
+
+  // Query all companies from DB to find which were least recently enriched
+  const { data: allDbCompanies } = await supabase
+    .from('companies')
+    .select('id, name, name_variations, last_enriched_at');
+
+  // Build lookup: lowercase name/variation -> { id, last_enriched_at }
+  const companyLookup = new Map<string, { id: string; last_enriched_at: string | null }>();
+  for (const c of allDbCompanies || []) {
+    companyLookup.set(c.name.toLowerCase(), { id: c.id, last_enriched_at: c.last_enriched_at });
+    for (const v of c.name_variations || []) {
+      companyLookup.set(v.toLowerCase(), { id: c.id, last_enriched_at: c.last_enriched_at });
+    }
+  }
+
+  // Sort COMPANIES_TO_TRACK by least recently enriched (nulls first = never enriched)
+  const sortedCompanies = uniqueCompanies.sort((a, b) => {
+    const infoA = companyLookup.get(a.toLowerCase());
+    const infoB = companyLookup.get(b.toLowerCase());
+    const dateA = infoA?.last_enriched_at ? new Date(infoA.last_enriched_at).getTime() : 0;
+    const dateB = infoB?.last_enriched_at ? new Date(infoB.last_enriched_at).getTime() : 0;
+    return dateA - dateB; // 0 (never enriched) sorts first
+  });
+
+  // Take only the batch
+  const batch = sortedCompanies.slice(0, batchSize);
+  console.log(`Processing batch of ${batch.length}/${uniqueCompanies.length} companies (stalest first)`);
 
   // Log ingestion start
   const { data: logEntry } = await supabase
@@ -492,7 +522,7 @@ export async function runWeeklyIngestion(
     .insert({
       source: 'clinicaltrials',
       run_type: 'scheduled',
-      parameters: { companies: uniqueCompanies.length },
+      parameters: { companies: batch.length, total: uniqueCompanies.length, batchSize },
     })
     .select('id')
     .single();
@@ -501,111 +531,130 @@ export async function runWeeklyIngestion(
   const errors: string[] = [];
   let companiesProcessed = 0;
   let trialsInserted = 0;
-  let trialsUpdated = 0;
 
   try {
-    for (const companyName of uniqueCompanies) {
+    for (const companyName of batch) {
       try {
         console.log(`Processing ${companyName}...`);
 
         const trials = await fetchCompanyTrials(companyName);
 
         if (trials.length === 0) {
+          companiesProcessed++;
+          // Still mark as enriched so we don't re-process empty companies every run
+          const existing = companyLookup.get(companyName.toLowerCase());
+          if (existing) {
+            await supabase
+              .from('companies')
+              .update({ last_enriched_at: new Date().toISOString() })
+              .eq('id', existing.id);
+          }
+          await sleep(200);
           continue;
         }
 
         // Find or create company
-        let { data: company } = await supabase
-          .from('companies')
-          .select('id')
-          .ilike('name', `%${escapeLikePattern(companyName)}%`)
-          .limit(1)
-          .single();
+        let companyId = companyLookup.get(companyName.toLowerCase())?.id;
 
-        if (!company) {
-          const { data: newCompany } = await supabase
+        if (!companyId) {
+          // Try ilike search as fallback
+          const { data: found } = await supabase
             .from('companies')
-            .insert({
-              name: companyName,
-              name_variations: [companyName],
-              data_sources: ['clinicaltrials'],
-            })
             .select('id')
+            .ilike('name', `%${escapeLikePattern(companyName)}%`)
+            .limit(1)
             .single();
-          company = newCompany;
+
+          if (found) {
+            companyId = found.id;
+          } else {
+            const { data: newCompany } = await supabase
+              .from('companies')
+              .insert({
+                name: companyName,
+                name_variations: [companyName],
+                data_sources: ['clinicaltrials'],
+              })
+              .select('id')
+              .single();
+            companyId = newCompany?.id;
+          }
         }
 
-        if (!company) {
-          errors.push(`Failed to create company: ${companyName}`);
+        if (!companyId) {
+          errors.push(`Failed to find/create company: ${companyName}`);
           continue;
         }
 
-        // Aggregate modalities and indications
+        // Aggregate modalities and indications while building batch records
         const modalities = new Set<string>();
         const indications = new Set<string>();
         const indicationsSpecific = new Set<string>();
+        const trialRecords: any[] = [];
 
         for (const trial of trials) {
           const modality = inferModalityFromIntervention(trial.interventions);
           const indication = inferIndicationFromConditions(trial.conditions);
 
-          // Upsert trial
-          const { error: upsertError, data: upserted } = await supabase
-            .from('company_trials')
-            .upsert({
-              company_id: company.id,
-              company_name: companyName,
-              nct_id: trial.nctId,
-              trial_title: trial.title,
-              trial_acronym: trial.acronym,
-              brief_summary: trial.briefSummary?.substring(0, 2000),
-              intervention_name: trial.interventions[0]?.name || null,
-              intervention_type: trial.interventions[0]?.type || null,
-              modality: modality,
-              indication_category: indication.category,
-              indication_specific: indication.specific,
-              conditions: trial.conditions,
-              phase: trial.phase,
-              status: trial.status,
-              is_collaboration: trial.collaborators.length > 0,
-              collaborator_names: trial.collaborators,
-              lead_sponsor_type: trial.sponsorType,
-              locations_countries: trial.locations,
-              enrollment_count: trial.enrollmentCount,
-              start_date: trial.startDate,
-              primary_completion_date: trial.primaryCompletionDate,
-              completion_date: trial.completionDate,
-              last_update_posted: trial.lastUpdatePosted,
-              results_available: trial.hasResults,
-              updated_at: new Date().toISOString(),
-            }, {
-              onConflict: 'company_id,nct_id',
-            })
-            .select('id');
-
-          if (upsertError) {
-            errors.push(`Trial upsert error ${trial.nctId}: ${upsertError.message}`);
-          } else {
-            trialsInserted++;
-          }
+          trialRecords.push({
+            company_id: companyId,
+            company_name: companyName,
+            nct_id: trial.nctId,
+            trial_title: trial.title,
+            trial_acronym: trial.acronym,
+            brief_summary: trial.briefSummary?.substring(0, 2000),
+            intervention_name: trial.interventions[0]?.name || null,
+            intervention_type: trial.interventions[0]?.type || null,
+            modality: modality,
+            indication_category: indication.category,
+            indication_specific: indication.specific,
+            conditions: trial.conditions,
+            phase: trial.phase,
+            status: trial.status,
+            is_collaboration: trial.collaborators.length > 0,
+            collaborator_names: trial.collaborators,
+            lead_sponsor_type: trial.sponsorType,
+            locations_countries: trial.locations,
+            enrollment_count: trial.enrollmentCount,
+            start_date: trial.startDate,
+            primary_completion_date: trial.primaryCompletionDate,
+            completion_date: trial.completionDate,
+            last_update_posted: trial.lastUpdatePosted,
+            results_available: trial.hasResults,
+            updated_at: new Date().toISOString(),
+          });
 
           if (modality && modality !== 'other') modalities.add(modality);
           if (indication.category) indications.add(indication.category);
           if (indication.specific) indicationsSpecific.add(indication.specific);
         }
 
+        // Batch upsert trials (chunks of 50 to avoid payload limits)
+        for (let i = 0; i < trialRecords.length; i += 50) {
+          const chunk = trialRecords.slice(i, i + 50);
+          const { error: batchError } = await supabase
+            .from('company_trials')
+            .upsert(chunk, { onConflict: 'company_id,nct_id' });
+
+          if (batchError) {
+            errors.push(`Batch upsert error for ${companyName} (chunk ${i}): ${batchError.message}`);
+          } else {
+            trialsInserted += chunk.length;
+          }
+        }
+
         // Count active trials
         const { count: activeTrialsCount } = await supabase
           .from('company_trials')
           .select('*', { count: 'exact', head: true })
-          .eq('company_id', company.id)
+          .eq('company_id', companyId)
           .in('status', ['recruiting', 'active_not_recruiting', 'not_yet_recruiting']);
 
         // Update company profile (merge with existing data)
         const { data: existingCompany } = await supabase
           .from('companies')
           .select('modalities_active, indications_active, indications_specific, data_sources')
-          .eq('id', company.id)
+          .eq('id', companyId)
           .single();
 
         const mergedModalities = Array.from(new Set([
@@ -639,12 +688,12 @@ export async function runWeeklyIngestion(
             last_enriched_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
-          .eq('id', company.id);
+          .eq('id', companyId);
 
         companiesProcessed++;
 
-        // Rate limiting between companies
-        await sleep(1500);
+        // Rate limiting between companies (reduced from 1500ms)
+        await sleep(500);
 
       } catch (error) {
         const errorMsg = `Error processing ${companyName}: ${error}`;
@@ -659,10 +708,10 @@ export async function runWeeklyIngestion(
         .from('data_ingestion_log')
         .update({
           completed_at: new Date().toISOString(),
-          records_fetched: uniqueCompanies.length,
+          records_fetched: batch.length,
           records_processed: companiesProcessed,
           records_inserted: trialsInserted,
-          records_updated: trialsUpdated,
+          records_updated: 0,
           records_failed: errors.length,
           errors: errors.slice(0, 50),
           status: errors.length > 0 ? 'partial' : 'completed',
@@ -670,9 +719,14 @@ export async function runWeeklyIngestion(
         .eq('id', logId);
     }
 
-    console.log(`ClinicalTrials.gov ingestion complete: ${companiesProcessed} companies, ${trialsInserted} trials`);
+    console.log(`ClinicalTrials.gov ingestion complete: ${companiesProcessed}/${batch.length} companies, ${trialsInserted} trials`);
 
-    return { companies: companiesProcessed, trials: trialsInserted, errors };
+    return {
+      companies: companiesProcessed,
+      trials: trialsInserted,
+      errors,
+      batch_info: { processed: batch.length, total: uniqueCompanies.length },
+    };
 
   } catch (error) {
     if (logId) {
