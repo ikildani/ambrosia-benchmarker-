@@ -26,7 +26,7 @@ function DrillDownPanelInner({
           </h5>
           <div className="bg-neutral-50 dark:bg-slate-700/50 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[320px]">
+            <table className="w-full text-sm min-w-0 sm:min-w-[320px]">
               <thead>
                 <tr className="bg-neutral-100 dark:bg-slate-700">
                   <th className="text-left py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">Component</th>

@@ -37,7 +37,7 @@ export default function ScenarioCompareTable({
 
     return (
       <tr key={metric.key} className="border-t border-neutral-100 dark:border-neutral-700">
-        <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
+        <td className="px-3 sm:px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
           {metric.label}
         </td>
         {scenarios.map((scenario, idx) => {
@@ -48,7 +48,7 @@ export default function ScenarioCompareTable({
           const diff = showDiff ? calculateDifference(baseValue, numericValue) : null;
 
           return (
-            <td key={scenario.id} className="px-4 py-3 text-sm text-right">
+            <td key={scenario.id} className="px-3 sm:px-4 py-3 text-sm text-right">
               <div
                 className={
                   metric.category === 'financial'
@@ -91,20 +91,20 @@ export default function ScenarioCompareTable({
   return (
     <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[600px]">
+        <table className="w-full min-w-[400px] sm:min-w-[600px]">
           <thead className="bg-neutral-50 dark:bg-neutral-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase w-32">
+              <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase w-24 sm:w-32">
                 Metric
               </th>
               {scenarios.map((s, idx) => (
-                <th key={s.id} className="px-4 py-3 text-right min-w-[150px]">
+                <th key={s.id} className="px-3 sm:px-4 py-3 text-right min-w-[110px] sm:min-w-[150px]">
                   <div className="flex items-center justify-end gap-2">
                     <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 truncate max-w-[120px]">
                       {s.name}
                     </span>
                     {idx === baselineIndex && (
-                      <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-[10px] rounded font-medium">
+                      <span className="px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs rounded font-medium">
                         BASE
                       </span>
                     )}
@@ -133,7 +133,7 @@ export default function ScenarioCompareTable({
                   {idx !== baselineIndex && (
                     <button
                       onClick={() => setBaselineIndex(idx)}
-                      className="text-[10px] text-neutral-400 hover:text-teal-600 dark:hover:text-teal-400 mt-0.5 transition-colors"
+                      className="text-xs text-neutral-400 hover:text-teal-600 dark:hover:text-teal-400 mt-0.5 transition-colors"
                     >
                       Set as baseline
                     </button>
@@ -141,7 +141,7 @@ export default function ScenarioCompareTable({
                 </th>
               ))}
               {canAddMore && (
-                <th className="px-4 py-3 text-center min-w-[100px]">
+                <th className="px-3 sm:px-4 py-3 text-center min-w-[80px] sm:min-w-[100px]">
                   <button
                     onClick={onAddScenario}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
