@@ -104,7 +104,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             </svg>
             <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Simple Pricing</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">
             Choose Your Plan
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -116,7 +116,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 max-w-5xl xl:max-w-6xl mx-auto">
           {/* Free Tier */}
           <div
-            className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
+            className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 xl:p-8 transition-all duration-300 ${
               currentTier === 'free'
                 ? 'ring-2 ring-teal-500 shadow-glow-lg'
                 : 'border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:-translate-y-1'
@@ -185,7 +185,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
 
           {/* Deal Report Tier */}
-          <div className="relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 border-2 border-purple-300 dark:border-purple-500 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 xl:p-8 border-2 border-purple-300 dark:border-purple-500 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
               <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft whitespace-nowrap">
                 Per Calculation
@@ -238,7 +238,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
           {/* Pro Tier */}
           <div
-            className={`relative bg-gradient-to-br from-navy-900 to-navy-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
+            className={`relative bg-gradient-to-br from-navy-900 to-navy-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 xl:p-8 transition-all duration-300 ${
               currentTier === 'pro'
                 ? 'ring-2 ring-teal-500 shadow-glow-lg'
                 : 'shadow-soft-xl hover:shadow-soft-xl hover:-translate-y-1'

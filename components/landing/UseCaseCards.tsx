@@ -71,7 +71,7 @@ export default function UseCaseCards() {
   }, []);
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 px-4 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-800/50 dark:to-slate-900 transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-800/50 dark:to-slate-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 sm:mb-12 lg:mb-16">
           <div className="inline-flex items-center gap-2 bg-cyan-50 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30 rounded-full px-4 py-1.5 mb-6">
@@ -80,7 +80,7 @@ export default function UseCaseCards() {
             </svg>
             <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">Built For You</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
             Every Role, One Platform
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -88,13 +88,13 @@ export default function UseCaseCards() {
           </p>
         </div>
 
-        <div ref={sectionRef} className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+        <div ref={sectionRef} className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
           {useCases.map((useCase, idx) => (
             <div
               key={useCase.title}
               className={`group relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl
                          rounded-2xl border border-white/20 dark:border-slate-700/50
-                         p-6 sm:p-8 shadow-soft hover:shadow-soft-lg
+                         p-6 sm:p-8 xl:p-10 shadow-soft hover:shadow-soft-lg
                          motion-safe:transition-all motion-safe:duration-700
                          hover:-translate-y-2 hover:border-teal-200 dark:hover:border-teal-500/50
                          ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}

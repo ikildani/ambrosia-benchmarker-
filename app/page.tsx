@@ -62,7 +62,7 @@ function LiveDemoSection() {
     <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3">
             See Your Deal Terms Instantly
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -376,7 +376,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Simple Process</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
               How It Works
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -458,7 +458,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Why Use This Tool</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
               Built for Life Sciences Professionals
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -524,7 +524,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">AI Partner Matching</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3">
               Find Your Ideal Licensing Partner
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -580,7 +580,7 @@ export default function Home() {
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
             Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings and press releases. Updated weekly with new transactions.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 xl:gap-8">
             {[
               { icon: '📄', label: 'SEC EDGAR 8-K Filings', desc: 'Primary deal data extracted from regulatory filings' },
               { icon: '🔬', label: 'ClinicalTrials.gov', desc: 'Pipeline and trial data for partner intelligence' },
@@ -608,7 +608,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 bg-navy-50 dark:bg-navy-500/20 border border-navy-200 dark:border-navy-500/30 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-6">
             <span className="text-xs sm:text-sm font-medium text-navy-700 dark:text-navy-300">About Us</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-4 sm:mb-6">
             Ambrosia Ventures
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-neutral-600 dark:text-slate-400 mb-6 sm:mb-8 lg:mb-10 leading-relaxed px-2">
@@ -643,7 +643,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-navy-900 text-neutral-400 py-10 sm:py-12 lg:py-16 xl:py-20 px-4 xl:px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl xl:max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 pb-8 sm:pb-12 border-b border-navy-800">
             <div className="flex items-center">
               <AmbrosiaLogo variant="reversed" height={32} />

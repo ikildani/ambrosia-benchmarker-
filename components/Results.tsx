@@ -537,7 +537,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
       {/* Email Capture Bar */}
       {!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && (
-        <div className="px-4 sm:px-6 lg:px-8 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-b border-teal-100 dark:border-teal-800">
+        <div className="px-4 sm:px-6 lg:px-8 xl:px-10 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-b border-teal-100 dark:border-teal-800">
           <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 max-w-xl mx-auto">
             <div className="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-400 flex-shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -603,7 +603,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
       <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft flex-shrink-0">
               <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -622,7 +622,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Applied Modifiers - Horizontal scroll on mobile */}
         {modifiers.length > 0 && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
             <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
               <svg className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -984,7 +984,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Negotiation Insight - Pro Feature */}
         <div className="relative mb-4 sm:mb-6">
-          <div className={`p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!hasFullAccess ? 'blur-sm' : ''}`}>
+          <div className={`p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 ${!hasFullAccess ? 'blur-sm' : ''}`}>
             <div className="flex items-start gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-soft flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

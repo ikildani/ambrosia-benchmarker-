@@ -214,7 +214,7 @@ export default function Header({
           </Link>
 
           {/* Desktop Navigation */}
-          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-6 lg:gap-8">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10">
             {navItems.map((item, idx) => (
               item.href.startsWith('#') || item.href.includes('#') ? (
                 <a

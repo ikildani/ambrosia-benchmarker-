@@ -11,7 +11,7 @@ function DrillDownPanelInner({
   isRoyalty = false
 }: DrillDownPanelProps) {
   return (
-    <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-slate-600 animate-fade-in">
+    <div className="mt-4 pt-4 xl:mt-5 xl:pt-5 border-t border-neutral-200 dark:border-slate-600 animate-fade-in">
       {/* Why This Range */}
       <div className="mb-4">
         <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Why This Range?</h5>

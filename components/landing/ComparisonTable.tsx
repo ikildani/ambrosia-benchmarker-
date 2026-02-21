@@ -26,8 +26,8 @@ export default function ComparisonTable() {
   }, []);
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 px-4 bg-white dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <div className="max-w-4xl xl:max-w-5xl mx-auto">
         <div className="text-center mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-6">
             <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export default function ComparisonTable() {
             </svg>
             <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Side by Side</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
             Manual Analysis vs Ambrosia
           </h2>
           <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 max-w-xl mx-auto">

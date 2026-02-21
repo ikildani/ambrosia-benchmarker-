@@ -66,7 +66,7 @@ export default function FAQSection() {
 
       <div className="max-w-4xl xl:max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-slate-900 dark:text-white mb-4">
             Frequently Asked Questions
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -80,7 +80,7 @@ export default function FAQSection() {
               key={index}
               className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft transition-all duration-200"
             >
-              <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
+              <summary className="flex items-center justify-between p-5 xl:p-6 cursor-pointer list-none">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">
                   {faq.question}
                 </h3>
@@ -93,7 +93,7 @@ export default function FAQSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <div className="px-5 pb-5">
+              <div className="px-5 pb-5 xl:px-6 xl:pb-6">
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                   {faq.answer}
                 </p>

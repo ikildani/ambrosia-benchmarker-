@@ -640,7 +640,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   };
 
   return (
-    <div id="calculator" className="w-full max-w-6xl mx-auto scroll-mt-24 pb-20 md:pb-0">
+    <div id="calculator" className="w-full max-w-6xl xl:max-w-7xl mx-auto scroll-mt-24 pb-20 md:pb-0">
       <div className="card-elevated overflow-hidden">
         {/* Header */}
         <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-6 lg:py-8 xl:py-10 overflow-hidden">
@@ -659,7 +659,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 </svg>
               </div>
               <div className="min-w-0">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
+                <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white truncate">
                   {therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : therapeuticArea === 'neurology' ? 'Neurology / CNS' : therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
