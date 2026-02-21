@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendReportEmail } from '@/lib/email/client';
+import { captureApiError } from '@/lib/sentry-api';
+import { hashEmail, reportEmailSchema } from '@/lib/api-validation';
 
 export const maxDuration = 15;
 
@@ -10,20 +12,18 @@ export async function POST(request: NextRequest) {
     const authUser = await getAuthenticatedUser(request);
     const userId = authUser?.id || null;
 
-    const body = await request.json();
-    const { email, pdfBase64, fileName, indication } = body as {
-      email: string;
-      pdfBase64: string;
-      fileName: string;
-      indication: string;
-    };
+    const rawBody = await request.json();
 
-    if (!email || !pdfBase64 || !fileName) {
+    // Validate input with Zod schema (also sanitizes fileName)
+    const parseResult = reportEmailSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.issues[0]?.message || 'Invalid input';
       return NextResponse.json(
-        { error: 'Email, PDF data, and filename are required' },
+        { error: firstError },
         { status: 400 }
       );
     }
+    const { email, pdfBase64, fileName, indication } = parseResult.data;
 
     // Verify access: must be Pro tier or authenticated user
     const supabase = createServiceClient();
@@ -61,12 +61,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Track event
+    // Track event (hash email to avoid storing PII in event_data)
+    const emailHash = await hashEmail(email);
     supabase.from('events').insert({
       user_id: userId,
       event_type: 'report_emailed',
       event_data: {
-        recipient: email,
+        recipient_hash: emailHash,
         file_name: fileName,
         indication,
         pdf_size_bytes: pdfBuffer.length,
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Report email error:', error);
+    captureApiError(error, 'report-email');
     return NextResponse.json(
       { error: 'Failed to send report email' },
       { status: 500 }

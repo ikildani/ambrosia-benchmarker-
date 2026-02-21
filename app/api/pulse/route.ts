@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { captureApiError } from '@/lib/sentry-api';
 
 export async function GET(request: NextRequest) {
   const identifier = getIdentifier(request);
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
       is_pro: true,
     });
   } catch (error) {
-    console.error('Pulse API error:', error);
+    captureApiError(error, 'pulse');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

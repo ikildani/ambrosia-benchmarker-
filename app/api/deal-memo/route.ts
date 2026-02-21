@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getDealMemoGenerator, DealMemo, DealMemoInput } from '@/lib/ai/deal-memo-generator';
 import { isProEmail } from '@/lib/config/authorized-emails';
+import { captureApiError } from '@/lib/sentry-api';
 
 export interface DealMemoRequest {
   reportId?: string;
@@ -74,10 +75,8 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
       }
     }
 
-    // Check 3: Email whitelist directly (if email passed but no DB profile)
-    if (!authorized && body.email && isProEmail(body.email)) {
-      authorized = true;
-    }
+    // SECURITY: Removed body.email whitelist fallback — only trust email from
+    // database profile (Check 2 above) to prevent tier escalation via request body.
 
     if (!authorized) {
       return NextResponse.json(
@@ -104,7 +103,7 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
 
     return NextResponse.json({ success: true, memo });
   } catch (error) {
-    console.error('Deal memo generation error:', error);
+    captureApiError(error, 'deal-memo');
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     if (error instanceof SyntaxError) {

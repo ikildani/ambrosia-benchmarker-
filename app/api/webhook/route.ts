@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
+import { captureApiError, maskEmail } from '@/lib/sentry-api';
 
 // Stripe Webhook Handler
 // To enable webhooks:
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
 
         // 2. Fallback: lookup by email (with warning)
         if (!upgraded && customerEmail) {
-          console.warn('Using email fallback for subscription upgrade:', customerEmail);
+          console.warn('Using email fallback for subscription upgrade:', customerEmail ? maskEmail(customerEmail) : 'none');
           const { error: emailError } = await supabase
             .from('user_profiles')
             .update(updatePayload)
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
 
           if (!emailError) {
             upgraded = true;
-            console.log('User upgraded to pro via email fallback:', customerEmail);
+            console.log('User upgraded to pro via email fallback:', customerEmail ? maskEmail(customerEmail) : 'none');
           } else {
             console.error('Failed to upgrade user by email:', emailError);
           }
@@ -291,7 +292,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    captureApiError(error, 'webhook');
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }

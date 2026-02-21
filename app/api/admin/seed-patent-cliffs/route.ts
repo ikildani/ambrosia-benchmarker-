@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 // Patent cliff data for major pharma companies
 const patentCliffData: Record<string, {
@@ -240,15 +241,20 @@ const patentCliffData: Record<string, {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
-    const body = await request.json();
-    const { user_email } = body;
 
-    // Verify admin access
-    if (!isAdminEmail(user_email)) {
-      return NextResponse.json(
-        { error: 'Unauthorized - admin access required' },
-        { status: 403 }
-      );
+    // Verify admin access: Bearer token or authenticated session
+    const authHeader = request.headers.get('authorization');
+    const adminKey = process.env.ADMIN_API_KEY;
+    const isTokenAuth = adminKey && authHeader === `Bearer ${adminKey}`;
+
+    if (!isTokenAuth) {
+      const user = await getAuthenticatedUser(request);
+      if (!user?.email || !isAdminEmail(user.email)) {
+        return NextResponse.json(
+          { error: 'Unauthorized - admin access required' },
+          { status: 403 }
+        );
+      }
     }
 
     const results: { updated: string[]; created: string[]; failed: string[] } = {

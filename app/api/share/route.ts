@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       expiresAt,
     });
   } catch (error) {
-    console.error('Share API error:', error);
+    captureApiError(error, 'share-post');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { generateWeeklySnapshot } from '@/lib/digest/weekly-snapshot';
 import { buildWeeklyDigestHtml } from '@/lib/digest/email-templates';
 import { sendEmail } from '@/lib/email/client';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -175,7 +176,7 @@ export async function GET(request: NextRequest) {
       eligible_users: eligibleUsers.length,
     });
   } catch (error) {
-    console.error('Weekly digest error:', error);
+    captureApiError(error, 'cron-weekly-digest');
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

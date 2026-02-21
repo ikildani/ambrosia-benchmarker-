@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -185,7 +186,7 @@ export async function GET(request: NextRequest) {
       filters: filterOptions,
     });
   } catch (error) {
-    console.error('Deals API error:', error);
+    captureApiError(error, 'deals');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

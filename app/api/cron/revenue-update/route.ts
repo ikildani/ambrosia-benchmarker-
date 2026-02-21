@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runXBRLRevenueUpdate } from '@/lib/ingestion/sec-xbrl';
 import { runProductRevenueExtraction } from '@/lib/ingestion/sec-revenue-extraction';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[revenue-cron] Error:', error);
+    captureApiError(error, 'cron-revenue-update');
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendWelcomeEmail, sendCalculationReceipt, sendUpgradeConfirmation } from '@/lib/email/client';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('Email API error:', error);
+    captureApiError(error, 'email-send');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

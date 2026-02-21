@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'text/html',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       },
     });
   }
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(stats, {
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
     },
   });
 }

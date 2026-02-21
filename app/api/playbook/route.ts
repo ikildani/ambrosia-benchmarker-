@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { isAdminEmail, isProEmail } from '@/lib/config/authorized-emails';
+import { isProEmail } from '@/lib/config/authorized-emails';
 import { getPlaybookGenerator, PlaybookInput, NegotiationPlaybook } from '@/lib/ai/playbook-generator';
+import { captureApiError } from '@/lib/sentry-api';
 
 export interface PlaybookRequest {
   inputs: {
@@ -42,20 +43,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
       if (user) {
         const { data: profile } = await supabase
           .from('user_profiles')
-          .select('tier')
+          .select('tier, email')
           .eq('id', user.id)
           .single();
         userTier = (profile?.tier as 'free' | 'pro') || 'free';
+        // Check PRO_EMAILS list using verified email from database
+        if (userTier === 'free' && profile?.email && isProEmail(profile.email)) {
+          userTier = 'pro';
+        }
       }
     }
 
-    // Fallback: check email from request body
     const bodyText = await request.text();
-    const body = JSON.parse(bodyText) as PlaybookRequest & { email?: string };
-
-    if (userTier === 'free' && body.email && (isProEmail(body.email) || isAdminEmail(body.email))) {
-      userTier = 'pro';
-    }
+    const body = JSON.parse(bodyText) as PlaybookRequest;
 
     if (userTier !== 'pro') {
       return NextResponse.json(
@@ -101,8 +101,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
       playbook,
     });
   } catch (error) {
-    console.error('Playbook generation error:', error);
-
+    captureApiError(error, 'playbook');
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Handle specific error types

@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { captureApiError } from '@/lib/sentry-api';
 
 // Tier-based match limits
 const MATCH_LIMITS = {
@@ -70,13 +71,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Method 2: Check PRO_EMAILS list by email (for localStorage auth users)
-    if (userTier === 'free' && isProEmail(user_email)) {
-      userTier = 'pro';
+    // Method 2: Check PRO_EMAILS list using verified email from database profile
+    if (userTier === 'free' && user_id) {
+      const { data: emailProfile } = await supabase
+        .from('user_profiles')
+        .select('email')
+        .eq('id', user_id)
+        .single();
+      if (emailProfile?.email && isProEmail(emailProfile.email)) {
+        userTier = 'pro';
+      }
     }
 
-    // SECURITY: Removed client tier trust — never use client-provided tier for authorization.
-    // Tier is verified from database (Method 1) or PRO_EMAILS whitelist (Method 2) only.
+    // SECURITY: Never trust client-provided tier or email for authorization.
+    // Tier is verified from database only.
 
     // Build match input
     const matchInput: MatchInput = {
@@ -250,7 +258,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('Partner matching error:', error);
+    captureApiError(error, 'partners-match');
     return NextResponse.json(
       { error: 'Failed to find partner matches' },
       { status: 500 }

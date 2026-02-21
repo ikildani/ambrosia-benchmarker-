@@ -3,6 +3,18 @@
     "app/api/report/generate/route.ts": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "app/api/deal-memo/route.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "app/api/playbook/route.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "app/api/partners/outreach/route.ts": {
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "crons": [

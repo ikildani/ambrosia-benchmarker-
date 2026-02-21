@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runCompanyEnrichment } from '@/lib/ingestion/company-enrichment';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       error_details: result.errors.length > 0 ? result.errors.slice(0, 20) : undefined,
     });
   } catch (error) {
-    console.error('Company enrichment cron error:', error);
+    captureApiError(error, 'cron-company-enrichment');
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

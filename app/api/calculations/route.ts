@@ -2,38 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
-
-interface CalculationRequest {
-  session_id?: string;
-  anonymous_id?: string;
-  user_id?: string;
-
-  // Input parameters
-  therapeutic_area?: string;
-  modality: string;
-  development_phase: string;
-  indication_category?: string;
-  indication_specific?: string;
-  territory_scope?: string;
-  territories_included?: string[];
-  exclusivity_type?: string;
-  deal_type?: string;
-  includes_manufacturing?: boolean;
-  includes_codev?: boolean;
-  includes_copromote?: boolean;
-
-  // Output values
-  outputs: {
-    upfront_low?: number;
-    upfront_mid?: number;
-    upfront_high?: number;
-    milestones_total?: number;
-    royalty_low?: number;
-    royalty_high?: number;
-    total_deal_value_low?: number;
-    total_deal_value_high?: number;
-  };
-}
+import { captureApiError } from '@/lib/sentry-api';
+import { calculationRequestSchema } from '@/lib/api-validation';
 
 export async function POST(request: NextRequest) {
   // Rate limiting
@@ -52,15 +22,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    const body: CalculationRequest = await request.json();
+    const rawBody = await request.json();
 
-    // Validate required fields
-    if (!body.modality || !body.development_phase) {
+    // Validate input with Zod schema
+    const parseResult = calculationRequestSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.issues[0]?.message || 'Invalid input';
       return NextResponse.json(
-        { error: 'modality and development_phase are required' },
+        { error: firstError },
         { status: 400 }
       );
     }
+    const body = parseResult.data;
 
     // SECURITY: Derive user_id from auth session, not from request body
     const authUser = await getAuthenticatedUser(request);
@@ -180,7 +153,7 @@ export async function POST(request: NextRequest) {
       calculation_id: calculation!.id,
     });
   } catch (error) {
-    console.error('Calculation API error:', error);
+    captureApiError(error, 'calculations-post');
     return NextResponse.json(
       { error: 'Failed to save calculation' },
       { status: 500 }
@@ -301,7 +274,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ calculations: data });
   } catch (error) {
-    console.error('Calculation API error:', error);
+    captureApiError(error, 'calculations-get');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -349,7 +322,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Calculation API error:', error);
+    captureApiError(error, 'calculations-delete');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -104,8 +104,8 @@ export async function middleware(request: NextRequest) {
             }
           );
         }
-      } catch {
-        // Rate limiting failure should not block the request
+      } catch (e) {
+        console.warn('[rate-limit] Redis failed:', e);
       }
     }
   }

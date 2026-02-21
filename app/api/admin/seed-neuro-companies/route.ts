@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 // Company profiles for partner matching across all therapeutic areas
 const allCompanies = [
@@ -5249,8 +5250,8 @@ export async function POST(request: NextRequest) {
 
     let isAuthed = isTokenAuth;
     if (!isAuthed) {
-      const body = await request.json().catch(() => ({}));
-      isAuthed = isAdminEmail(body?.user_email);
+      const user = await getAuthenticatedUser(request);
+      isAuthed = !!user?.email && isAdminEmail(user.email);
     }
 
     if (!isAuthed) {

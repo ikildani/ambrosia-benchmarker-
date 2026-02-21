@@ -6,6 +6,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts'],
+  },
   images: {
     remotePatterns: [
       {
@@ -54,8 +57,8 @@ const nextConfig = {
         ],
       },
       {
-        // API routes need less restrictive CSP for JSON responses
-        source: '/api/:path*',
+        // Mutation/auth API routes: no caching
+        source: '/api/((?!embed).*)',
         headers: [
           {
             key: 'X-Content-Type-Options',

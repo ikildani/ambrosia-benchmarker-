@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function GET(
       expiresAt: shared.expires_at,
     });
   } catch (error) {
-    console.error('Get share error:', error);
+    captureApiError(error, 'share-get');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
