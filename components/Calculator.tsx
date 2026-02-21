@@ -328,8 +328,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   }, []);
 
   const handleCalculate = () => {
-    // Gate 2nd+ calculation behind account creation for anonymous users
-    if (!isAuthenticated && getUsage().count >= 1) {
+    // Gate 4th+ calculation behind account creation for anonymous users
+    if (!isAuthenticated && getUsage().count >= 3) {
       openAuthModal('signup');
       return;
     }

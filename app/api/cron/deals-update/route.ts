@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runDailyIngestion } from '@/lib/ingestion/sec-edgar';
+import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
+import { runOpenFDAIngestion } from '@/lib/ingestion/openfda';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -58,6 +60,28 @@ export async function GET(request: NextRequest) {
     console.log('Starting weekly deals update...');
     console.log('Step 1: SEC EDGAR ingestion...');
     const edgarResult = await runDailyIngestion(supabase, anthropicApiKey, 7);
+
+    // Step 1b: Run press release ingestion (5 RSS sources)
+    console.log('Step 1b: Press release ingestion...');
+    let pressResult = { deals_inserted: 0, errors: [] as string[] };
+    try {
+      pressResult = await runPressReleaseIngestion(supabase, anthropicApiKey, {
+        maxArticlesPerSource: 5, // Conservative for cron — full runs via admin endpoint
+      });
+      console.log(`Press releases: ${pressResult.deals_inserted} deals inserted`);
+    } catch (error) {
+      console.error('Press release ingestion error (non-fatal):', error);
+    }
+
+    // Step 1c: Run OpenFDA approvals ingestion (last 14 days)
+    console.log('Step 1c: OpenFDA approvals ingestion...');
+    let fdaResult = { inserted: 0, errors: [] as string[] };
+    try {
+      fdaResult = await runOpenFDAIngestion(supabase, { daysBack: 14 });
+      console.log(`OpenFDA: ${fdaResult.inserted} approvals inserted`);
+    } catch (error) {
+      console.error('OpenFDA ingestion error (non-fatal):', error);
+    }
 
     // Step 2: Backfill therapeutic_area on all deals with expanded mapping
     console.log('Step 2: Backfilling therapeutic_area (expanded mapping)...');
@@ -205,6 +229,14 @@ export async function GET(request: NextRequest) {
         processed: edgarResult.processed,
         deals: edgarResult.deals,
         errors: edgarResult.errors.length,
+      },
+      pressReleases: {
+        deals_inserted: pressResult.deals_inserted,
+        errors: pressResult.errors.length,
+      },
+      fdaApprovals: {
+        inserted: fdaResult.inserted,
+        errors: fdaResult.errors.length,
       },
       backfillErrors,
       linked: { licensees: linkedLicensees, licensors: linkedLicensors },

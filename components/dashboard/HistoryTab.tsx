@@ -62,12 +62,12 @@ const HistoryTab = React.memo(function HistoryTab({
             </div>
 
             {/* Area Filter Chips */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar flex-nowrap">
               {([['all', 'All Areas'], ['oncology', 'Oncology'], ['neurology', 'Neurology'], ['immunology', 'Immunology']] as const).map(([value, label]) => (
                 <button
                   key={value}
                   onClick={() => onAreaFilterChange(value)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
                     historyAreaFilter === value
                       ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'

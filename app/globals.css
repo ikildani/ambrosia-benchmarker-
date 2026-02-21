@@ -689,7 +689,12 @@ select::selection {
 /* Horizontal scroll indicator gradient */
 .scroll-fade-right::after {
   content: '';
-  @apply absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none;
+  @apply absolute right-0 top-0 bottom-0 w-8 pointer-events-none;
+  background: linear-gradient(to left, var(--scroll-fade-bg, white), transparent);
+}
+
+:is(.dark) .scroll-fade-right::after {
+  --scroll-fade-bg: rgb(30 41 59);
 }
 
 .scroll-fade-left::before {

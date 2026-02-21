@@ -103,7 +103,7 @@ function OptionCardGroupInner<T extends string>({
                 </div>
               )}
               {badge && (
-                <span className={`inline-flex items-center px-1.5 py-0.5 mt-1.5 rounded text-[10px] font-bold tracking-wide ${
+                <span className={`inline-flex items-center px-1.5 py-0.5 mt-1.5 rounded text-xs font-bold tracking-wide ${
                   badge.type === 'premium' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
                   badge.type === 'discount' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
                   badge.type === 'base' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :

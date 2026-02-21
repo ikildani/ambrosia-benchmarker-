@@ -67,7 +67,7 @@ const DashboardNav = React.memo(function DashboardNav({
             id={`tab-${tab.id}`}
             tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => onTabChange(tab.id as typeof activeTab)}
-            className={`flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-[80px] sm:min-w-0 scroll-snap-center touch-feedback ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-0 scroll-snap-center touch-feedback ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md sm:shadow-sm'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:bg-white/50 dark:active:bg-slate-700/50'
@@ -78,7 +78,7 @@ const DashboardNav = React.memo(function DashboardNav({
             }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
             </svg>
-            <span>{tab.label}</span>
+            <span className="text-xs sm:text-sm">{tab.label}</span>
             {tab.id === 'watchlist' && watchlistNewCount > 0 && activeTab !== 'watchlist' && (
               <span className="ml-1 w-5 h-5 flex items-center justify-center bg-teal-500 text-white text-[10px] font-bold rounded-full animate-pulse">
                 {watchlistNewCount > 9 ? '9+' : watchlistNewCount}

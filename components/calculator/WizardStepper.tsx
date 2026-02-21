@@ -85,7 +85,7 @@ function WizardStepperInner({
                 }`}>
                   {step.label}
                 </span>
-                <span className={`sm:hidden text-[10px] font-medium transition-colors duration-200 ${
+                <span className={`sm:hidden text-xs font-medium transition-colors duration-200 ${
                   isCurrent ? 'text-teal-600 dark:text-teal-400' :
                   isCompleted ? 'text-teal-600 dark:text-teal-400' :
                   'text-neutral-400 dark:text-slate-500'

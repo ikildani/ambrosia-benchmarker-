@@ -103,7 +103,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Analysis Activity</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
           <span>Less</span>
           <div className="w-2.5 h-2.5 rounded-sm bg-slate-100 dark:bg-slate-700" />
           <div className="w-2.5 h-2.5 rounded-sm bg-teal-200 dark:bg-teal-800" />
@@ -113,11 +113,11 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
         </div>
       </div>
 
-      <div className="overflow-x-auto relative">
+      <div className="overflow-x-auto relative scroll-fade-right">
         {/* Month labels */}
         <div className="flex ml-8 mb-1">
           {monthLabels.map((m, i) => (
-            <div key={`${m.label}-${i}`} className="text-[10px] text-slate-400 dark:text-slate-500" style={{ position: 'absolute', left: `${32 + m.col * 14}px` }}>
+            <div key={`${m.label}-${i}`} className="text-xs text-slate-400 dark:text-slate-500" style={{ position: 'absolute', left: `${32 + m.col * 14}px` }}>
               {m.label}
             </div>
           ))}
@@ -127,7 +127,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
           {/* Day-of-week labels */}
           <div className="flex flex-col gap-[2px] mr-1 -ml-8">
             {['', 'Mon', '', 'Wed', '', 'Fri', ''].map((label, i) => (
-              <div key={i} className="h-[11px] text-[10px] text-slate-400 dark:text-slate-500 leading-[11px]">{label}</div>
+              <div key={i} className="h-[11px] text-xs text-slate-400 dark:text-slate-500 leading-[11px]">{label}</div>
             ))}
           </div>
 

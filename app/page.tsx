@@ -11,6 +11,7 @@ import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 import HeroProductPreview from '@/components/landing/HeroProductPreview';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
@@ -566,7 +567,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Social Proof / Stats Section */}
+      {/* Authority Section */}
       <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -574,23 +575,21 @@ export default function Home() {
             backgroundSize: '32px 32px'
           }} />
         </div>
-        <div className="max-w-6xl mx-auto relative">
-          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-4">Trusted by Life Sciences Professionals</h2>
-            <p className="text-neutral-400 text-sm sm:text-base">Powering deal analysis for biotech and pharma</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        <div className="max-w-4xl mx-auto relative text-center">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Built for Life Sciences Deal-Making</h2>
+          <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+            Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings and press releases. Updated weekly with new transactions.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             {[
-              { value: '600+', label: 'Deals Analyzed' },
-              { value: '$2B+', label: 'Deal Value Estimated' },
-              { value: '50+', label: 'Companies Served' },
-              { value: '99%', label: 'User Satisfaction' },
-            ].map((stat, idx) => (
-              <div key={idx} className="text-center group">
-                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {stat.value}
-                </div>
-                <div className="text-neutral-400 text-xs sm:text-sm font-medium">{stat.label}</div>
+              { icon: '📄', label: 'SEC EDGAR 8-K Filings', desc: 'Primary deal data extracted from regulatory filings' },
+              { icon: '🔬', label: 'ClinicalTrials.gov', desc: 'Pipeline and trial data for partner intelligence' },
+              { icon: '📊', label: 'Weekly Updates', desc: 'New deals ingested every Monday at 4AM UTC' },
+            ].map((source, idx) => (
+              <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 text-left">
+                <div className="text-2xl mb-2">{source.icon}</div>
+                <div className="text-white font-semibold text-sm mb-1">{source.label}</div>
+                <div className="text-neutral-400 text-xs">{source.desc}</div>
               </div>
             ))}
           </div>

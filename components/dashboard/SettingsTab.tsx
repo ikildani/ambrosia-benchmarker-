@@ -125,7 +125,7 @@ const SettingsTab = React.memo(function SettingsTab({
               <button
                 key={gradient.id}
                 onClick={() => onSelectAvatar(gradient.id)}
-                className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient.from} ${gradient.to} flex items-center justify-center transition-all ${
+                className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient.from} ${gradient.to} flex items-center justify-center transition-all ${
                   selectedAvatar === gradient.id
                     ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110'
                     : 'hover:scale-105 opacity-70 hover:opacity-100'
