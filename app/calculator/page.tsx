@@ -105,7 +105,7 @@ export default function CalculatorPage() {
               </Link>
               <div className="hidden sm:block w-px h-5 sm:h-6 bg-slate-200" />
               <Link href="/" className="flex items-center">
-                <AmbrosiaLogo variant="color" height={40} />
+                <AmbrosiaLogo variant="auto" height={40} />
               </Link>
             </div>
 

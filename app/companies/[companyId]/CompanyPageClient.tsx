@@ -67,7 +67,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
             <Link href="/" className="flex items-center">
-              <AmbrosiaLogo variant="color" height={32} />
+              <AmbrosiaLogo variant="auto" height={32} />
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Calculator</Link>

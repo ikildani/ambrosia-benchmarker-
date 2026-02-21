@@ -389,7 +389,7 @@ export default function Dashboard({
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <button onClick={onNavigateHome} className="flex items-center touch-feedback">
-              <AmbrosiaLogo variant="color" height={40} />
+              <AmbrosiaLogo variant="auto" height={40} />
             </button>
 
             {/* Desktop Navigation */}

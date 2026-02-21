@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             <Link href="/" className="flex items-center touch-feedback">
-              <AmbrosiaLogo variant="color" height={40} />
+              <AmbrosiaLogo variant="auto" height={40} />
             </Link>
             <Link
               href="/"
