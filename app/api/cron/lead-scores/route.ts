@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 
-// Vercel Cron: Run every 6 hours
-// Add to vercel.json: { "crons": [{ "path": "/api/cron/lead-scores", "schedule": "0 */6 * * *" }] }
+export const maxDuration = 120;
+export const dynamic = 'force-dynamic';
 
 const SCORING_WEIGHTS = {
   // Activity frequency

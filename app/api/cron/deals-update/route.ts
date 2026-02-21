@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     let pressResult = { deals_inserted: 0, errors: [] as string[] };
     try {
       pressResult = await runPressReleaseIngestion(supabase, anthropicApiKey, {
-        maxArticlesPerSource: 5, // Conservative for cron — full runs via admin endpoint
+        maxArticlesPerSource: 15, // Increased from 5 for better daily coverage
       });
       console.log(`Press releases: ${pressResult.deals_inserted} deals inserted`);
     } catch (error) {

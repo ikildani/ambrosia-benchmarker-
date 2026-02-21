@@ -28,7 +28,7 @@
     },
     {
       "path": "/api/cron/trials-update",
-      "schedule": "0 5 * * 1,4"
+      "schedule": "0 5 * * *"
     },
     {
       "path": "/api/cron/weekly-digest",
