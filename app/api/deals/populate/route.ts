@@ -4808,29 +4808,22 @@ export async function POST(request: NextRequest) {
     const supabase = createServiceClient();
     const batchSize = 100;
 
-    // Step 1: Delete all existing deals to re-seed
-    console.log('Clearing existing deals...');
-    const { error: deleteError } = await supabase.from('deals').delete().neq('id', '');
-    if (deleteError) {
-      console.error('Error clearing deals:', deleteError);
-    }
-
-    // Step 2: Insert curated real deals in batches
-    console.log(`Inserting ${CURATED_DEALS.length} curated real deals...`);
+    // Step 1: Upsert curated real deals in batches (preserves existing SEC EDGAR deals)
+    console.log(`Upserting ${CURATED_DEALS.length} curated real deals...`);
 
     for (let i = 0; i < CURATED_DEALS.length; i += batchSize) {
       const batch = CURATED_DEALS.slice(i, i + batchSize);
-      const { error } = await supabase.from('deals').insert(batch);
+      const { error } = await supabase.from('deals').upsert(batch, { onConflict: 'licensor_name,licensee_name,asset_name,announced_date' });
 
       if (error) {
-        console.error(`Error inserting curated deals batch ${Math.floor(i / batchSize) + 1}:`, error);
+        console.error(`Error upserting curated deals batch ${Math.floor(i / batchSize) + 1}:`, error);
       } else {
-        console.log(`Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
+        console.log(`Upserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} deals`);
       }
     }
 
-    // Step 3: Link deals to companies by name matching
-    console.log('Step 3: Linking deals to companies...');
+    // Step 2: Link deals to companies by name matching
+    console.log('Step 2: Linking deals to companies...');
     let linkedLicensees = 0;
     let linkedLicensors = 0;
 

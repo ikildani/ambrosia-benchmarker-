@@ -96,6 +96,8 @@ export interface CTStudy {
   enrollmentCount: number | null;
   locations: string[];
   hasResults: boolean;
+  primaryOutcomes: Array<{ measure: string; description: string | null; timeFrame: string | null }>;
+  secondaryOutcomes: Array<{ measure: string; description: string | null; timeFrame: string | null }>;
 }
 
 interface Intervention {
@@ -140,6 +142,7 @@ export async function fetchCompanyTrials(
           'LocationCountry',
           'ResultsFirstPostDate',
           'LastUpdatePostDate',
+          'OutcomeMeasuresModule',
         ].join(','),
       });
 
@@ -171,6 +174,7 @@ export async function fetchCompanyTrials(
           const interventions = protocol?.armsInterventionsModule;
           const contacts = protocol?.contactsLocationsModule;
           const results = study?.resultsSection;
+          const outcomes = protocol?.outcomesModule;
 
           studies.push({
             nctId: identification?.nctId || '',
@@ -195,6 +199,16 @@ export async function fetchCompanyTrials(
             enrollmentCount: design?.enrollmentInfo?.count || null,
             locations: Array.from(new Set(contacts?.locations?.map((l: any) => l.country) || [])),
             hasResults: !!results || !!status?.resultsFirstPostDateStruct,
+            primaryOutcomes: (outcomes?.primaryOutcomes || []).map((o: any) => ({
+              measure: o.measure || '',
+              description: o.description || null,
+              timeFrame: o.timeFrame || null,
+            })),
+            secondaryOutcomes: (outcomes?.secondaryOutcomes || []).map((o: any) => ({
+              measure: o.measure || '',
+              description: o.description || null,
+              timeFrame: o.timeFrame || null,
+            })),
           });
         }
       }
@@ -631,6 +645,9 @@ export async function runWeeklyIngestion(
             completion_date: trial.completionDate,
             last_update_posted: trial.lastUpdatePosted,
             results_available: trial.hasResults,
+            primary_outcomes: trial.primaryOutcomes.map(o => o.measure).filter(Boolean),
+            secondary_outcomes: trial.secondaryOutcomes.map(o => o.measure).filter(Boolean),
+            primary_outcome_measures: trial.primaryOutcomes,
             updated_at: new Date().toISOString(),
           });
 

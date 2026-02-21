@@ -265,14 +265,17 @@ export async function runProductRevenueExtraction(
           .upsert(
             {
               company_id: company.id,
+              company_name: company.name,
               drug_name: product.drug_name,
+              drug_name_normalized: product.drug_name.toUpperCase().trim(),
               revenue_usd: product.revenue_usd,
               fiscal_year: product.fiscal_year,
-              confidence: product.confidence,
+              fiscal_period: 'FY',
+              confidence_score: product.confidence,
               source: 'claude_extraction',
               updated_at: new Date().toISOString(),
             },
-            { onConflict: 'company_id,drug_name,fiscal_year' }
+            { onConflict: 'company_id,drug_name_normalized,fiscal_year,fiscal_period' }
           );
 
         if (upsertError) {

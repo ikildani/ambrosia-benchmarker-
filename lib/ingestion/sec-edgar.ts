@@ -40,7 +40,7 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1397723': 'Jazz Pharmaceuticals',
   '1142750': 'Neurocrine',
   '1018963': 'Alkermes',
-  '1326190': 'Exact Sciences',
+  '1491924': 'Exact Sciences',
   '1418091': 'Ultragenyx',
   '1651308': 'Argenx',
   '913241': 'Biogen',
@@ -119,6 +119,40 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1649904': 'Rhythm Pharmaceuticals',
   '1634293': 'Travere Therapeutics',
   '1393584': 'Bicycle Therapeutics',
+
+  // Immunology/Autoimmune
+  '1671927': 'Immunocore',
+  '1559053': 'Prothena',
+  '1528115': 'Annexon Biosciences',
+  '744218': 'Celldex Therapeutics',
+  '1730430': 'Kiniksa Pharmaceuticals',
+  '1851194': 'Ventyx Biosciences',
+  '1808865': 'iTeos Therapeutics',
+  '1340243': 'MorphoSys',
+
+  // Metabolic/Endocrine
+  '1607678': 'Viking Therapeutics',
+  '1326190': 'Altimmune',
+  '1744659': 'Akero Therapeutics',
+  '1785173': '89bio',
+  '1831363': 'Terns Pharmaceuticals',
+  '1270073': 'Intercept Pharmaceuticals',
+  '1727196': 'Scholar Rock',
+
+  // Mid-cap Oncology
+  '1651311': 'Merus',
+  '1771910': 'ADC Therapeutics',
+  '1382101': 'Sutro Biopharma',
+  '1761918': 'Erasca',
+  '1789972': 'Cullinan Oncology',
+  '1894562': 'Prime Medicine',
+
+  // Neuroscience additions
+  '1582313': 'Xenon Pharmaceuticals',
+  '1714899': 'Denali Therapeutics',
+  '1070494': 'Acadia Pharmaceuticals',
+  '1597553': 'Sage Therapeutics',
+  '1805387': 'Cerevel Therapeutics',
 };
 
 // Search terms for licensing deals
@@ -297,6 +331,8 @@ small_molecule, antibody, adc, bispecific, car_t, cell_therapy, gene_therapy, mr
 
 INDICATION CATEGORIES (use exactly):
 solid_tumor, hematological, autoimmune, cns, cardiovascular, infectious, metabolic, rare_disease, respiratory, dermatology, ophthalmology, other
+
+For indication_category, classify carefully beyond oncology: use 'autoimmune' for immunology/inflammatory conditions (rheumatoid arthritis, lupus, IBD, Crohn's, psoriasis, atopic dermatitis, multiple sclerosis), 'metabolic' for metabolic conditions (diabetes, obesity, NASH/MASH, fatty liver, lipid disorders, thyroid), 'cardiovascular' for heart/vascular conditions, 'infectious' for infectious diseases. Do not default to 'other' when a more specific category applies.
 
 PHASE VALUES (use exactly):
 discovery, preclinical, phase_1, phase_2, phase_3, approved, unknown
