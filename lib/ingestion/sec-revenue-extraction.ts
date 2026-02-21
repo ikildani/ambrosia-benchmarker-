@@ -4,7 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
+const SEC_SUBMISSIONS_API = 'https://data.sec.gov/submissions';
 const USER_AGENT = 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co';
 
 export interface ProductRevenue {
@@ -113,25 +113,10 @@ async function fetchFilingText(url: string): Promise<string> {
  * Search SEC EFTS for a company's most recent 10-K filing containing revenue data.
  */
 async function findLatest10K(cik: string): Promise<{ url: string; filedDate: string } | null> {
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const today = new Date();
-
-  const params = new URLSearchParams({
-    q: '"net revenue"',
-    forms: '10-K',
-    dateRange: 'custom',
-    startdt: formatDate(oneYearAgo),
-    enddt: formatDate(today),
-  });
-
-  // Filter by CIK if available
-  if (cik) {
-    params.set('q', `"net revenue" AND cik:${cik}`);
-  }
+  const paddedCik = cik.padStart(10, '0');
 
   try {
-    const response = await fetch(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
+    const response = await fetch(`${SEC_SUBMISSIONS_API}/CIK${paddedCik}.json`, {
       headers: {
         'User-Agent': USER_AGENT,
         'Accept': 'application/json',
@@ -139,23 +124,30 @@ async function findLatest10K(cik: string): Promise<{ url: string; filedDate: str
     });
 
     if (!response.ok) {
-      console.error(`SEC EFTS search failed: ${response.status}`);
+      console.error(`SEC submissions API failed for CIK ${cik}: ${response.status}`);
       return null;
     }
 
     const data = await response.json();
+    const recent = data.filings?.recent;
+    if (!recent?.form?.length) return null;
 
-    if (!data.hits?.hits?.length) return null;
+    // Find most recent 10-K filing
+    const forms: string[] = recent.form;
+    const idx = forms.findIndex((f: string) => f === '10-K');
+    if (idx === -1) return null;
 
-    const hit = data.hits.hits[0];
-    const accessionFormatted = hit._source.accession_number.replace(/-/g, '');
+    const accession = recent.accessionNumber[idx];
+    const primaryDoc = recent.primaryDocument[idx];
+    const filedDate = recent.filingDate[idx];
+    const accessionFormatted = accession.replace(/-/g, '');
 
     return {
-      url: `https://www.sec.gov/Archives/edgar/data/${hit._source.cik}/${accessionFormatted}/${hit._source.file_name}`,
-      filedDate: hit._source.file_date,
+      url: `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionFormatted}/${primaryDoc}`,
+      filedDate,
     };
   } catch (error) {
-    console.error(`SEC EFTS search error for CIK ${cik}:`, error);
+    console.error(`SEC submissions lookup error for CIK ${cik}:`, error);
     return null;
   }
 }
@@ -346,10 +338,6 @@ export async function runProductRevenueExtraction(
   );
 
   return result;
-}
-
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
 }
 
 function sleep(ms: number): Promise<void> {
