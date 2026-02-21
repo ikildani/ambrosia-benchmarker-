@@ -21,33 +21,66 @@ import type { PDFReportData, ReportMeta } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
 
-/** Returns the full HTML document string for the report (14 pages with styles). */
+/** Returns the full HTML document string for the report with styles.
+ *  Pages without data (AI memo, playbook) are excluded — no placeholders. */
 export function generateReportHTML(data: PDFReportData): string {
   const indication = data.result.labels.indication || data.inputs.indication;
+
+  // Build pages dynamically — exclude sections with no data
+  const pages: string[] = [];
+
+  // Always-included pages
+  const corePagesPreAI = [
+    renderCoverPage,
+    // TOC placeholder — will be re-rendered with correct count below
+    renderExecutiveDashboard,
+    renderDealStructurePage,
+    renderDealTermsPage,
+    renderSensitivityPage,
+    renderComparablesPage,
+    renderPartnersPage,
+  ];
+
+  // Conditionally included AI pages
+  const hasAIMemo = !!(data.memoData || data.playbookData);
+  const hasPlaybook = !!data.playbookData;
+
+  // Always-included post-AI pages
+  const corePagesPostAI = [
+    renderRiskAnalysisPage,
+    renderDealTimelinePage,
+    renderTherapeuticIntelPage,
+    renderMethodologyPage,
+  ];
+
+  const totalPages = corePagesPreAI.length + (hasAIMemo ? 1 : 0) + (hasPlaybook ? 1 : 0) + corePagesPostAI.length + 1; // +1 for TOC
 
   const meta: ReportMeta = {
     reportId: generateReportId(),
     generatedAt: formatDate(),
     version: '2.0',
-    pageCount: 14,
+    pageCount: totalPages,
   };
 
-  const pages = [
-    renderCoverPage(data, meta),
-    renderTableOfContents(data, meta),
-    renderExecutiveDashboard(data, meta),
-    renderDealStructurePage(data, meta),
-    renderDealTermsPage(data, meta),
-    renderSensitivityPage(data, meta),
-    renderComparablesPage(data, meta),
-    renderPartnersPage(data, meta),
-    renderAIMemoPage(data, meta),
-    renderRiskAnalysisPage(data, meta),
-    renderDealTimelinePage(data, meta),
-    renderNegotiationPage(data, meta),
-    renderTherapeuticIntelPage(data, meta),
-    renderMethodologyPage(data, meta),
-  ];
+  // Page 1: Cover
+  pages.push(renderCoverPage(data, meta));
+  // Page 2: TOC
+  pages.push(renderTableOfContents(data, meta));
+  // Pages 3-8: Core analysis
+  pages.push(renderExecutiveDashboard(data, meta));
+  pages.push(renderDealStructurePage(data, meta));
+  pages.push(renderDealTermsPage(data, meta));
+  pages.push(renderSensitivityPage(data, meta));
+  pages.push(renderComparablesPage(data, meta));
+  pages.push(renderPartnersPage(data, meta));
+  // AI pages — only if data exists
+  if (hasAIMemo) pages.push(renderAIMemoPage(data, meta));
+  if (hasPlaybook) pages.push(renderNegotiationPage(data, meta));
+  // Remaining pages
+  pages.push(renderRiskAnalysisPage(data, meta));
+  pages.push(renderDealTimelinePage(data, meta));
+  pages.push(renderTherapeuticIntelPage(data, meta));
+  pages.push(renderMethodologyPage(data, meta));
 
   return `
     <!DOCTYPE html>

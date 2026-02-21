@@ -19,6 +19,9 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Point Biopharma', licensee: 'Eli Lilly', value: '$4.9B', year: 2023, relevance: 'Radiopharmaceutical platform', modalities: ['radiopharm'], therapeuticArea: 'oncology' },
   { licensor: 'Daiichi Sankyo', licensee: 'Merck', value: '$22B', year: 2023, relevance: 'ADC co-development (3 assets)', modalities: ['adc'], therapeuticArea: 'oncology' },
   { licensor: 'Mirati Therapeutics', licensee: 'BMS', value: '$4.8B', year: 2024, relevance: 'Small molecule (KRAS)', modalities: ['smallMolecule'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
+  { licensor: 'GSK', licensee: 'N/A (standalone)', value: '$2B+ revenue', year: 2024, relevance: 'Dostarlimab PD-1 in endometrial/MSI-H', modalities: ['mab'], indications: ['endometrial'], therapeuticArea: 'oncology' },
+  { licensor: 'Genmab/Seagen', licensee: 'Pfizer', value: '$1.6B milestone', year: 2024, relevance: 'Tisotumab vedotin ADC for cervical', modalities: ['adc'], indications: ['cervical'], therapeuticArea: 'oncology' },
+  { licensor: 'Blueprint Medicines', licensee: 'Roche', value: '$1.7B', year: 2023, relevance: 'RET inhibitor (pralsetinib) - thyroid and lung', modalities: ['smallMolecule'], indications: ['thyroid', 'lung_nsclc'], therapeuticArea: 'oncology' },
   // Neurology
   { licensor: 'Karuna Therapeutics', licensee: 'BMS', value: '$14B', year: 2024, relevance: 'Schizophrenia (KarXT/Cobenfy)', modalities: ['smallMolecule'], indications: ['schizophrenia'], therapeuticArea: 'neurology' },
   { licensor: 'Cerevel Therapeutics', licensee: 'AbbVie', value: '$8.7B', year: 2024, relevance: 'CNS pipeline acquisition', indications: ['schizophrenia', 'parkinsons'], therapeuticArea: 'neurology' },
@@ -27,6 +30,10 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Gilgamesh', licensee: 'AbbVie', value: '$1.2B', year: 2024, relevance: 'Neuroplastogen (Phase 2)', modalities: ['psychedelic'], indications: ['depression'], therapeuticArea: 'neurology' },
   { licensor: 'PTC Therapeutics', licensee: 'Novartis', value: '$1B upfront', year: 2024, relevance: "Huntington's gene therapy", modalities: ['geneTherapy'], indications: ['huntingtons'], therapeuticArea: 'neurology' },
   { licensor: 'Ionis/Biogen', licensee: 'N/A', value: '$1.8B+ revenue', year: 2024, relevance: 'ASO in rare neuro (tofersen/SOD1 ALS)', modalities: ['aso'], indications: ['als'], therapeuticArea: 'neurology' },
+  { licensor: 'Acadia Pharmaceuticals', licensee: 'N/A (standalone)', value: '$3B+ market cap', year: 2023, relevance: 'Trofinetide (Daybue) first approved Rett therapy', modalities: ['peptide'], indications: ['rett'], therapeuticArea: 'neurology' },
+  { licensor: 'Sarepta Therapeutics', licensee: 'Roche', value: '$1.5B upfront', year: 2024, relevance: 'Gene therapy for DMD (delandistrogene)', modalities: ['geneTherapy'], indications: ['dmd'], therapeuticArea: 'neurology' },
+  { licensor: 'Compass Pathways', licensee: 'N/A (standalone)', value: '$1B+ market cap', year: 2024, relevance: 'Psilocybin therapy PTSD/depression', modalities: ['psychedelic'], indications: ['ptsd', 'depression'], therapeuticArea: 'neurology' },
+  { licensor: 'Intra-Cellular', licensee: 'N/A (standalone)', value: '$5.8B acquisition', year: 2025, relevance: 'CAPLYTA for bipolar/schizophrenia', modalities: ['smallMolecule'], indications: ['bipolar', 'schizophrenia'], therapeuticArea: 'neurology' },
   // Immunology / Autoimmune
   { licensor: 'Prometheus Biosciences', licensee: 'Merck', value: '$10.8B', year: 2023, relevance: 'Anti-TL1A (IBD)', modalities: ['tl1aInhibitor'], indications: ['crohns', 'ulcerativeColitis'], therapeuticArea: 'immunology' },
   { licensor: 'Telavant', licensee: 'Roche', value: '$7.1B', year: 2024, relevance: 'Anti-TL1A (IBD)', modalities: ['tl1aInhibitor'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
@@ -43,6 +50,11 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Harbour BioMed', licensee: 'AstraZeneca', value: '$4.575B', year: 2024, relevance: 'Bispecific platform (autoimmune)', modalities: ['bispecific'], therapeuticArea: 'immunology' },
   { licensor: 'Earendil Labs', licensee: 'Sanofi', value: '$2.56B', year: 2025, relevance: 'AI-designed bispecifics (IBD)', modalities: ['bispecific'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'immunology' },
   { licensor: 'RemeGen', licensee: 'Vor Bio', value: '$4B+', year: 2024, relevance: 'BAFF/APRIL (MG, SLE, RA)', modalities: ['dualAntagonist'], indications: ['myastheniaGravis', 'sle_lupus'], therapeuticArea: 'immunology' },
+  { licensor: 'Sanofi', licensee: 'N/A (standalone)', value: '$13B+ Dupixent revenue', year: 2024, relevance: 'IL-4/13 mAb for asthma, EoE, AD', modalities: ['mab'], indications: ['asthma', 'eosinophilicEsophagitis', 'atopicderm'], therapeuticArea: 'immunology' },
+  { licensor: 'Horizon Therapeutics', licensee: 'Amgen', value: '$27.8B', year: 2023, relevance: 'Tepezza (thyroid eye disease) + rare portfolio', modalities: ['mab'], indications: ['thyroidEye', 'gout'], therapeuticArea: 'immunology' },
+  { licensor: 'Incyte', licensee: 'N/A (standalone)', value: '$1.2B Jakafi', year: 2024, relevance: 'JAK inhibitor ruxolitinib (GVHD approval)', modalities: ['jakInhibitor'], indications: ['gvhd'], therapeuticArea: 'immunology' },
+  { licensor: 'Eledon Pharmaceuticals', licensee: 'AstraZeneca', value: '$1.3B', year: 2024, relevance: 'Tegoprubart anti-CD40L for transplant rejection', modalities: ['mab'], indications: ['organTransplant'], therapeuticArea: 'immunology' },
+  { licensor: 'Ipsen', licensee: 'Genfit', value: '$480M', year: 2024, relevance: 'Elafibranor PPAR agonist for PBC', modalities: ['smallMolecule'], indications: ['pbc'], therapeuticArea: 'immunology' },
   // Metabolic / Obesity
   { licensor: 'Carmot Therapeutics', licensee: 'Roche', value: '$2.7B', year: 2023, relevance: 'GLP-1R/GCGR/FGF21 obesity pipeline acquisition', modalities: ['glp1Agonist', 'tripleIncretin'], indications: ['obesity', 'type2Diabetes'], therapeuticArea: 'metabolic' },
   { licensor: 'Inversago Pharma', licensee: 'Novo Nordisk', value: '$1.075B', year: 2023, relevance: 'CB1 inverse agonist for obesity', modalities: ['smallMolecule'], indications: ['obesity'], therapeuticArea: 'metabolic' },
@@ -54,6 +66,12 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'CSPC Pharmaceutical', licensee: 'AstraZeneca', value: '$18.5B', year: 2025, relevance: 'Largest metabolic licensing deal - oral GLP-1/GIP dual agonist', modalities: ['dualIncretin', 'oralPeptide'], indications: ['obesity', 'type2Diabetes'], therapeuticArea: 'metabolic' },
   { licensor: 'Madrigal Pharmaceuticals', licensee: 'N/A (standalone)', value: '$7B+ market cap', year: 2024, relevance: 'First approved MASH drug (resmetirom/Rezdiffra)', modalities: ['smallMolecule'], indications: ['nashMash'], therapeuticArea: 'metabolic' },
   { licensor: 'Gubra', licensee: 'AbbVie', value: '$2.2B', year: 2025, relevance: 'GLP-1/amylin dual agonist for obesity', modalities: ['dualIncretin', 'amylinAnalog'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'Provention Bio', licensee: 'Sanofi', value: '$2.9B', year: 2023, relevance: 'Teplizumab (Tzield) for T1D delay', modalities: ['mab'], indications: ['type1Diabetes'], therapeuticArea: 'metabolic' },
+  { licensor: 'Bayer', licensee: 'N/A (standalone)', value: '$3.5B+ finerenone', year: 2024, relevance: 'Finerenone MRA for CKD in T2D', modalities: ['smallMolecule'], indications: ['ckdMetabolic', 'type2Diabetes'], therapeuticArea: 'metabolic' },
+  { licensor: 'AstraZeneca', licensee: 'N/A (standalone)', value: '$4.5B Farxiga', year: 2024, relevance: 'SGLT2 inhibitor for HFpEF and CKD', modalities: ['sglt2Inhibitor'], indications: ['hfpef', 'ckdMetabolic'], therapeuticArea: 'metabolic' },
+  { licensor: 'Novartis', licensee: 'N/A (standalone)', value: '$2B+ inclisiran', year: 2024, relevance: 'siRNA PCSK9 for familial hypercholesterolemia', modalities: ['rnai'], indications: ['familialHypercholesterolemia'], therapeuticArea: 'metabolic' },
+  { licensor: 'Ultragenyx', licensee: 'N/A (standalone)', value: '$800M+ Crysvita', year: 2024, relevance: 'FGF23 antibody for rare metabolic (XLH)', indications: ['rareMetabolic'], therapeuticArea: 'metabolic' },
+  { licensor: '4D Molecular Therapeutics', licensee: 'Bayer', value: '$1.5B', year: 2024, relevance: 'AAV gene therapy for Fabry disease', modalities: ['geneTherapy'], indications: ['fabry'], therapeuticArea: 'metabolic' },
 ];
 
 // Extended interface for web UI component

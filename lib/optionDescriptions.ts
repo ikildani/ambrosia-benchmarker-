@@ -124,6 +124,12 @@ export const comorbidityBreadthDescriptions: Record<string, string> = {
   organProtective: 'Liver, kidney, or heart protection',
 };
 
+// --- Biomarker Status descriptions ---
+export const biomarkerDescriptions: Record<string, string> = {
+  selected: 'Enriched population, higher response rates',
+  unselected: 'Broader population, larger addressable market',
+};
+
 // --- Deal Scope descriptions ---
 export const territoryDescriptions: Record<string, string> = {
   global: 'Maximum value, full worldwide rights',

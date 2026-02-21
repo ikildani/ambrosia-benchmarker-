@@ -157,7 +157,8 @@ function WizardStepperInner({
                        hover:from-teal-600 hover:to-cyan-600 motion-safe:hover:-translate-y-0.5
                        disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
                        flex items-center justify-center gap-2.5 touch-feedback btn-press
-                       motion-safe:active:scale-[0.97] active:shadow-md"
+                       motion-safe:active:scale-[0.97] active:shadow-md
+                       animate-cta-glow"
           >
             {isCalculating ? (
               <>

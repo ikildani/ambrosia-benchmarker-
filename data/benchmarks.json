@@ -383,7 +383,12 @@
       "headNeck": { "multiplier": 1.02, "label": "Head & Neck", "context": "IO standard, moderate interest" },
       "cholangiocarcinoma": { "multiplier": 1.18, "label": "Cholangiocarcinoma", "context": "FGFR/IDH targets, high need" },
       "mesothelioma": { "multiplier": 1.15, "label": "Mesothelioma", "context": "Small but high unmet need" },
-      "sarcoma": { "multiplier": 1.12, "label": "Sarcoma", "context": "Heterogeneous, orphan potential" }
+      "sarcoma": { "multiplier": 1.12, "label": "Sarcoma", "context": "Heterogeneous, orphan potential" },
+      "endometrial": { "multiplier": 1.12, "label": "Endometrial (Uterine)", "context": "Dostarlimab IO approval driving interest; MSS subset high unmet need" },
+      "cervical": { "multiplier": 1.08, "label": "Cervical", "context": "IO approvals + tisotumab vedotin ADC activity; moderate deal interest" },
+      "thyroid": { "multiplier": 1.18, "label": "Thyroid (Anaplastic/Medullary)", "context": "High unmet need in anaplastic; RET targeting in medullary; orphan potential" },
+      "esophageal": { "multiplier": 1.05, "label": "Esophageal", "context": "IO standard in 1L; overlap with gastric/GEJ; moderate interest" },
+      "smallBowel": { "multiplier": 1.20, "label": "Small Bowel / Appendiceal", "context": "Rare GI tumors; very few therapeutic options; orphan premiums" }
     },
     "hematologic": {
       "aml": { "multiplier": 1.18, "label": "AML", "context": "High unmet need, targeted agents active" },
@@ -395,7 +400,10 @@
       "mantleCell": { "multiplier": 1.10, "label": "Mantle Cell Lymphoma", "context": "BTK standard, need for refractory" },
       "mds": { "multiplier": 1.15, "label": "MDS", "context": "HMA backbone, high unmet need" },
       "mpn": { "multiplier": 1.10, "label": "MPN", "context": "JAK inhibitor standard" },
-      "tCellLymphoma": { "multiplier": 1.20, "label": "T-cell Lymphomas", "context": "High unmet need, few options" }
+      "tCellLymphoma": { "multiplier": 1.20, "label": "T-cell Lymphomas", "context": "High unmet need, few options" },
+      "cml": { "multiplier": 0.95, "label": "CML", "context": "Well-served by TKIs; generic imatinib; limited deal activity" },
+      "waldenstrom": { "multiplier": 1.15, "label": "Waldenstrom's Macroglobulinemia", "context": "BTK inhibitor success; limited competition; orphan-adjacent" },
+      "hodgkins": { "multiplier": 1.05, "label": "Hodgkin Lymphoma", "context": "BV + IO standard; cure-oriented but well-served" }
     },
     "neurology": {
       "alzheimers": { "multiplier": 1.30, "label": "Alzheimer's Disease", "context": "Anti-amyloid approvals reset market; BBB delivery premium; $15B+ projected TAM" },
@@ -412,7 +420,15 @@
       "tremor": { "multiplier": 1.10, "label": "Movement Disorders (Tremor / Dystonia)", "context": "Emerging BD activity; essential tremor and dystonia underserved; Neurocrine active" },
       "tbi": { "multiplier": 1.18, "label": "Traumatic Brain Injury / Stroke Recovery", "context": "High unmet need; no approved disease-modifying treatments; neuroprotection premium" },
       "addiction": { "multiplier": 1.05, "label": "Addiction / Substance Use Disorders", "context": "Growing interest; psychedelic overlap; opioid use disorder expanding" },
-      "rareNeuro": { "multiplier": 1.25, "label": "Other Rare Neurological", "context": "Catch-all for rare genetic CNS; orphan premiums; SMA, Rett, ataxia, lysosomal storage" }
+      "rareNeuro": { "multiplier": 1.25, "label": "Other Rare Neurological", "context": "Catch-all for rare genetic CNS; orphan premiums; SMA, Rett, ataxia, lysosomal storage" },
+      "bipolar": { "multiplier": 1.10, "label": "Bipolar Disorder", "context": "Large underserved population; CAPLYTA expansion; lithium-sparing approaches" },
+      "ptsd": { "multiplier": 1.12, "label": "PTSD / Trauma Disorders", "context": "Psychedelic-assisted therapy advancing; high unmet need; growing pharma interest" },
+      "ocd": { "multiplier": 1.05, "label": "OCD / Anxiety Disorders", "context": "SRI partial response; psilocybin and glutamate modulation emerging" },
+      "autism": { "multiplier": 1.22, "label": "Autism Spectrum Disorder", "context": "Massive underserved population; vasopressin/oxytocin and serotonin targets; rare genetic forms" },
+      "rett": { "multiplier": 1.30, "label": "Rett Syndrome", "context": "Trofinetide (Acadia) approved; gene therapy approaches advancing; orphan premiums" },
+      "friedreichs": { "multiplier": 1.28, "label": "Friedreich's Ataxia", "context": "Orphan; frataxin gene therapy advancing; Biogen active" },
+      "dmd": { "multiplier": 1.32, "label": "Duchenne Muscular Dystrophy", "context": "Gene therapy paradigm; Sarepta delandistrogene precedent; highest pediatric neuro unmet need" },
+      "chronicPain": { "multiplier": 0.95, "label": "Chronic Pain (Non-Neuropathic)", "context": "Opioid alternative market; Nav1.7/Nav1.8 targets; large but regulatory-complex" }
     },
     "immunology": {
       "ulcerativeColitis": { "multiplier": 1.20, "label": "Ulcerative Colitis", "context": "Largest IBD market; S1P, JAK, TL1A, integrin all competing" },
@@ -434,7 +450,17 @@
       "hidradenitis": { "multiplier": 1.15, "label": "Hidradenitis Suppurativa", "context": "Humira/Cosentyx established; unmet need in moderate-severe" },
       "pnh": { "multiplier": 1.28, "label": "PNH (Paroxysmal Nocturnal Hemoglobinuria)", "context": "Complement cornerstone; AZ/Alexion franchise; oral C5 emerging" },
       "cidp": { "multiplier": 1.20, "label": "CIDP", "context": "FcRn validated; IVIg replacement opportunity; argenx expanding" },
-      "rareAutoimmune": { "multiplier": 1.25, "label": "Other Rare Autoimmune", "context": "Catch-all for rare autoimmune conditions; orphan premiums; pemphigus, myositis, stiff-person" }
+      "rareAutoimmune": { "multiplier": 1.25, "label": "Other Rare Autoimmune", "context": "Catch-all for rare autoimmune conditions; orphan premiums; myositis, stiff-person" },
+      "celiac": { "multiplier": 1.15, "label": "Celiac Disease", "context": "No approved therapy; massive underserved population; multiple Phase 2 programs" },
+      "vitiligo": { "multiplier": 1.08, "label": "Vitiligo", "context": "JAK inhibitor ruxolitinib cream approved; expanding pipeline; moderate deal size" },
+      "pemphigus": { "multiplier": 1.25, "label": "Pemphigus / Bullous Diseases", "context": "Rituximab standard but unmet need; CAR-T + novel targets; orphan premiums" },
+      "itp": { "multiplier": 1.15, "label": "Immune Thrombocytopenia (ITP)", "context": "FcRn validated; complement expanding; multiple biologics pipeline" },
+      "asthma": { "multiplier": 1.12, "label": "Severe Asthma", "context": "Tezepelumab, dupilumab expanding; biologics in severe; $10B+ market" },
+      "eosinophilicEsophagitis": { "multiplier": 1.18, "label": "Eosinophilic Esophagitis (EoE)", "context": "Dupixent first approval; high unmet need; biologics pipeline active" },
+      "gvhd": { "multiplier": 1.25, "label": "Graft-vs-Host Disease (GVHD)", "context": "Orphan; JAK inhibitors approved; CAR-T and Treg approaches" },
+      "organTransplant": { "multiplier": 1.22, "label": "Solid Organ Transplant Rejection", "context": "Calcineurin-free regimens needed; Tegoprubart deal activity; massive unmet need" },
+      "thyroidEye": { "multiplier": 1.22, "label": "Thyroid Eye Disease", "context": "Tepezza $2B peak; IGF-1R targeting validated; expansion indications" },
+      "pbc": { "multiplier": 1.20, "label": "Primary Biliary Cholangitis (PBC)", "context": "Elafibranor approved; PPAR agonists; orphan potential" }
     },
     "metabolic": {
       "obesity": { "multiplier": 1.35, "label": "Obesity / Chronic Weight Management", "context": "$100B+ projected market by 2030; GLP-1 class dominates" },
@@ -444,7 +470,15 @@
       "lipodystrophy": { "multiplier": 1.25, "label": "Lipodystrophy", "context": "Orphan indication; metreleptin precedent; high unmet need" },
       "glycogenStorage": { "multiplier": 1.28, "label": "Glycogen Storage Disease", "context": "Rare metabolic; gene therapy and enzyme replacement; orphan premiums" },
       "pku": { "multiplier": 1.22, "label": "PKU (Phenylketonuria)", "context": "BioMarin Palynziq precedent; gene therapy approaches emerging" },
-      "rareMetabolic": { "multiplier": 1.25, "label": "Other Rare Metabolic", "context": "Catch-all rare metabolic; orphan premiums" }
+      "rareMetabolic": { "multiplier": 1.25, "label": "Other Rare Metabolic", "context": "Catch-all rare metabolic; orphan premiums" },
+      "type1Diabetes": { "multiplier": 1.28, "label": "Type 1 Diabetes", "context": "Teplizumab approved for delay; cell therapy replacing islets; high unmet need" },
+      "ckdMetabolic": { "multiplier": 1.22, "label": "CKD (Metabolic/Diabetic)", "context": "Finerenone, SGLT2 expanding; GLP-1 CKD data; massive market overlap with diabetes" },
+      "hfpef": { "multiplier": 1.20, "label": "HFpEF (Heart Failure)", "context": "SGLT2 and GLP-1 showing benefit; Entresto precedent; cardiometabolic overlap deals" },
+      "familialHypercholesterolemia": { "multiplier": 1.18, "label": "Familial Hypercholesterolemia", "context": "PCSK9 established; inclisiran siRNA; ANGPTL3 targets; orphan severe forms" },
+      "gout": { "multiplier": 1.05, "label": "Gout / Hyperuricemia", "context": "Large market but generic ULT dominates; biologics for refractory (pegloticase)" },
+      "wilsonDisease": { "multiplier": 1.30, "label": "Wilson Disease", "context": "Orphan; gene therapy approaches; very high unmet need" },
+      "fabry": { "multiplier": 1.28, "label": "Fabry Disease", "context": "ERT established but gene therapy premium; $2B+ market; Sanofi, Chiesi active" },
+      "gaucher": { "multiplier": 1.25, "label": "Gaucher Disease", "context": "ERT/SRT established; gene therapy potential; Sanofi Cerdelga precedent" }
     }
   },
   "territories": {
@@ -599,7 +633,27 @@
     "geneTherapy+rareMetabolic": { "bonus": 0.12, "context": "Gene therapy + rare metabolic is curative potential; orphan drug premiums" },
     "geneTherapy+glycogenStorage": { "bonus": 0.10, "context": "Gene therapy for GSD has curative potential" },
     "glp1Agonist+nashMash": { "bonus": 0.08, "context": "GLP-1 + MASH showing strong liver fat reduction; semaglutide MASH Phase 3 data" },
-    "smallMolecule+nashMash": { "bonus": 0.06, "context": "Oral THR-beta (resmetirom) + MASH first approved therapy; oral convenience" }
+    "smallMolecule+nashMash": { "bonus": 0.06, "context": "Oral THR-beta (resmetirom) + MASH first approved therapy; oral convenience" },
+    "geneTherapy+dmd": { "bonus": 0.12, "context": "Gene therapy is the lead modality for DMD; Sarepta delandistrogene precedent; curative potential" },
+    "geneTherapy+rett": { "bonus": 0.10, "context": "MECP2 gene replacement for Rett; AveXis/Novartis SMA model validates CNS gene therapy" },
+    "geneTherapy+friedreichs": { "bonus": 0.10, "context": "Frataxin gene therapy for FA; Lexeo/AAV approach; orphan curative potential" },
+    "aso+dmd": { "bonus": 0.08, "context": "Exon-skipping ASOs validated in DMD (eteplirsen); multiple targets available" },
+    "psychedelic+ptsd": { "bonus": 0.08, "context": "MDMA-assisted therapy paradigm for PTSD; high-profile clinical programs advancing" },
+    "psychedelic+ocd": { "bonus": 0.06, "context": "Psilocybin showing promise in OCD; glutamate modulation + neuroplasticity" },
+    "carT_autoimmune+pemphigus": { "bonus": 0.10, "context": "CAR-T depleting pathogenic B cells in pemphigus; dramatic skin clearance responses" },
+    "carT_autoimmune+gvhd": { "bonus": 0.08, "context": "CAR-T and Treg approaches in GVHD; alloreactivity targeting" },
+    "fcrnAntagonist+itp": { "bonus": 0.08, "context": "FcRn validated for IgG-mediated diseases; ITP expansion beyond Vyvgart core" },
+    "complementInhibitor+gvhd": { "bonus": 0.06, "context": "Complement in transplant immunology; complement activation in GVHD pathogenesis" },
+    "mab+asthma": { "bonus": 0.06, "context": "Biologic mAbs transforming severe asthma; TSLP, IL-33, IL-4/13 targets" },
+    "mab+eosinophilicEsophagitis": { "bonus": 0.08, "context": "Dupixent first biologic for EoE; anti-IL-13 and TSLP pipeline expanding" },
+    "geneTherapy+fabry": { "bonus": 0.10, "context": "Gene therapy replacing lifelong ERT in Fabry; 4D Molecular, Freeline precedents" },
+    "geneTherapy+gaucher": { "bonus": 0.08, "context": "Gene therapy for GSD type 1; replacing chronic ERT with one-time treatment" },
+    "geneTherapy+wilsonDisease": { "bonus": 0.10, "context": "ATP7B gene replacement for Wilson disease; curative potential for orphan copper disorder" },
+    "geneTherapy+type1Diabetes": { "bonus": 0.10, "context": "Islet cell encapsulation and gene editing for T1D; immune evasion approaches" },
+    "sglt2Inhibitor+hfpef": { "bonus": 0.08, "context": "SGLT2 validated in HFpEF (EMPEROR-Preserved, DELIVER); cardio-renal-metabolic nexus" },
+    "sglt2Inhibitor+ckdMetabolic": { "bonus": 0.08, "context": "SGLT2 validated in CKD (DAPA-CKD, EMPA-KIDNEY); renal protection beyond glycemic control" },
+    "glp1Agonist+hfpef": { "bonus": 0.06, "context": "GLP-1 showing HFpEF benefit via weight loss and metabolic improvement; SELECT trial" },
+    "rnai+familialHypercholesterolemia": { "bonus": 0.08, "context": "siRNA inclisiran validated for FH; Novartis franchise; PCSK9 silencing paradigm" }
   },
   "neurologyDiseaseModifyingPhaseAdjustment": {
     "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",
@@ -667,7 +721,15 @@
         "epilepsy": "Epilepsy gene therapy and ion channel approaches attract orphan premiums for rare epilepsy syndromes. Broad epilepsy is competitive — differentiate on mechanism.",
         "tbi": "TBI/stroke recovery has zero approved disease-modifying treatments. Massive unmet need but regulatory path uncertain. Neuroprotection/regeneration data is key.",
         "depression": "MDD is a large but competitive market. Differentiation (novel MOA, rapid onset, reduced side effects) is critical for premium terms.",
-        "rareNeuro": "Rare neurological diseases carry orphan drug premiums. Gene therapy and ASO approaches for monogenic CNS disorders can command curative-potential premiums."
+        "rareNeuro": "Rare neurological diseases carry orphan drug premiums. Gene therapy and ASO approaches for monogenic CNS disorders can command curative-potential premiums.",
+        "bipolar": "Bipolar disorder has a large underserved population. CAPLYTA expansion and lithium-sparing approaches are driving renewed pharma interest. Novel MOAs command premium.",
+        "ptsd": "PTSD is gaining traction with psychedelic-assisted therapy approaches. High unmet need and growing societal awareness. Regulatory pathway still evolving.",
+        "ocd": "OCD has limited approved options beyond SSRIs. Psilocybin and glutamate modulation are emerging. Differentiated mechanisms command premium for treatment-resistant patients.",
+        "autism": "Autism spectrum disorder has zero approved disease-modifying treatments. Massive underserved population creates enormous TAM potential. Genetic subtype targeting (Fragile X, Rett) carries orphan premiums.",
+        "rett": "Rett syndrome was validated by Acadia's trofinetide approval. Gene therapy approaches (MECP2 replacement) command curative-potential premiums. Orphan designation ensures market exclusivity.",
+        "friedreichs": "Friedreich's ataxia is a genetically validated orphan indication. Frataxin gene therapy approaches advancing. Biogen and Lexeo are active. Premium terms for disease modification.",
+        "dmd": "Duchenne muscular dystrophy commands the highest premiums in pediatric neuromuscular. Gene therapy (Sarepta's Elevidys) established the paradigm. Micro-dystrophin and exon-skipping approaches both active.",
+        "chronicPain": "Non-neuropathic chronic pain is a large market but regulatory-complex post-opioid crisis. Nav1.7/Nav1.8 and non-opioid approaches are the focus. Expect rigorous safety requirements."
       },
       "treatmentApproach": {
         "diseaseModifying": "Disease-modifying status significantly increases value in neurodegeneration. Emphasize biomarker evidence of disease modification in negotiations.",
@@ -690,7 +752,17 @@
         "myastheniaGravis": "MG was transformed by FcRn antagonists (Vyvgart). Complement and CAR-T approaches expanding. High unmet need in refractory patients.",
         "igan": "IgA Nephropathy validated by Vertex/Alpine $4.9B acquisition. BAFF/APRIL mechanism established. Complement and endothelin approaches expanding.",
         "pnh": "PNH is the cornerstone complement indication. AZ/Alexion franchise ($6B+ revenue). Oral C5 and next-gen complement targets are the frontier.",
-        "rareAutoimmune": "Rare autoimmune conditions carry orphan drug premiums. Pemphigus, myositis, stiff-person syndrome — all attracting CAR-T and novel biologic approaches."
+        "rareAutoimmune": "Rare autoimmune conditions carry orphan drug premiums. Myositis, stiff-person syndrome — all attracting CAR-T and novel biologic approaches.",
+        "celiac": "Celiac disease has zero approved therapies — patients rely entirely on dietary gluten avoidance. Massive underserved population (~1% prevalence). Multiple Phase 2 programs active.",
+        "vitiligo": "Vitiligo was validated by ruxolitinib cream approval. JAK inhibitors dominate but novel approaches (melanocyte stimulation, immune modulation) can differentiate. Moderate deal sizes.",
+        "pemphigus": "Pemphigus/bullous diseases have high unmet need despite rituximab. CAR-T showing dramatic B-cell depletion and skin clearance. Orphan premiums for severe autoimmune blistering.",
+        "itp": "ITP is expanding beyond TPO agonists. FcRn antagonists validated the IgG-reduction approach. Complement and novel biologics pipeline growing. Multi-indication expansion potential.",
+        "asthma": "Severe asthma biologics are a $10B+ market. TSLP (tezepelumab), IL-33, and anti-alarmin approaches expanding. Differentiation from anti-IL5 and anti-IL4/13 is key for premium terms.",
+        "eosinophilicEsophagitis": "EoE was transformed by dupilumab approval. High unmet need with limited approved options. Anti-IL-13, TSLP, and small molecule approaches in pipeline. Premium for oral delivery.",
+        "gvhd": "GVHD carries orphan premiums with high mortality in severe cases. JAK inhibitors (ruxolitinib, belumosudil) approved. CAR-Treg and tolerizing approaches are the next frontier.",
+        "organTransplant": "Solid organ transplant rejection has massive unmet need for calcineurin-free regimens. Kidney injury and chronic rejection drive long-term costs. Tegoprubart and costimulation blockade gaining traction.",
+        "thyroidEye": "Thyroid eye disease was validated by Tepezza ($2B+ peak sales). IGF-1R targeting established. Expansion to moderate disease and novel targets (FcRn, complement) attracting deal interest.",
+        "pbc": "Primary biliary cholangitis expanded with elafibranor approval. PPAR agonists validated. Orphan-adjacent with growing pipeline interest. Combination approaches for inadequate responders."
       },
       "immuneResetPotential": {
         "curativeIntent": "Curative intent (drug-free remission) is the holy grail in autoimmune. CAR-T and tolerizing approaches command 40%+ premiums. Emphasize DORIS remission data.",
@@ -712,7 +784,15 @@
         "obesity": "Obesity is the single largest commercial opportunity in pharma history ($100B+ projected). Competition from Novo and Lilly is intense. Differentiation via oral delivery, superior efficacy, or muscle-sparing is critical.",
         "nashMash": "NASH/MASH was validated by resmetirom approval. GLP-1 data in MASH is transformative. Multi-mechanism approaches are attracting platform deal interest.",
         "type2Diabetes": "T2D is the largest established metabolic market but increasingly commoditized. Differentiation via oral delivery, fewer GI side effects, or CV/renal benefit is essential.",
-        "rareMetabolic": "Rare metabolic disorders carry orphan drug premiums. Gene therapy and enzyme replacement approaches for monogenic conditions command curative-potential premiums."
+        "rareMetabolic": "Rare metabolic disorders carry orphan drug premiums. Gene therapy and enzyme replacement approaches for monogenic conditions command curative-potential premiums.",
+        "type1Diabetes": "Type 1 diabetes is being transformed. Teplizumab delays onset (first disease-modifying approval). Cell therapy (islet replacement, immune evasion capsules) commands curative premiums. Massive long-term market.",
+        "ckdMetabolic": "CKD in the metabolic context is validated by SGLT2 data (DAPA-CKD, EMPA-KIDNEY) and finerenone. GLP-1 agonists showing CKD benefit. Cardio-renal-metabolic nexus deals command multi-indication premiums.",
+        "hfpef": "HFpEF is the largest unmet need in cardiology. SGLT2 (empagliflozin, dapagliflozin) validated. GLP-1 and metabolic approaches showing benefit. Premium for cardiometabolic dual-indication data.",
+        "familialHypercholesterolemia": "Familial hypercholesterolemia is an orphan indication with validated targets. PCSK9 (mAb and siRNA), ANGPTL3, and Lp(a) approaches all attracting deals. Premium for severe/homozygous FH.",
+        "gout": "Gout is a large market but dominated by generics (allopurinol, febuxostat). Premium terms require differentiation — biologics for refractory (pegloticase), IL-1 inhibition, or novel urate-lowering mechanisms.",
+        "wilsonDisease": "Wilson disease is a high-unmet-need orphan condition. Current chelation therapy is poorly tolerated. Gene therapy (ATP7B replacement) commands curative premiums. Very few competitors.",
+        "fabry": "Fabry disease has established ERT ($2B+ market) but gene therapy commands significant premium for one-time curative potential. 4D Molecular, Freeline, and others advancing. Replacement of chronic ERT is the thesis.",
+        "gaucher": "Gaucher disease pioneered enzyme replacement therapy. Gene therapy and substrate reduction approaches offer next-gen potential. Sanofi franchise ($1B+) established. Premium for durability over ERT."
       },
       "mechanismDifferentiation": {
         "nonIncretin": "Non-incretin mechanisms command premium for differentiation from the GLP-1 duopoly. Emphasize complementary biology, muscle-sparing, or central satiety pathways.",

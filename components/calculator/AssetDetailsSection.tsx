@@ -18,11 +18,10 @@ import {
   metabolicIndicationOptions,
   biomarkerOptions,
 } from '@/lib/calculations';
-import { phaseDescriptions, sectionHelp } from '@/lib/optionDescriptions';
-import { getPhaseImpactBadge, getModalityImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
+import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
-import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AssetDetailsSectionProps {
@@ -80,6 +79,14 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     return badges;
   }, [therapeuticArea]);
 
+  const biomarkerImpactBadges = useMemo(() => {
+    const badges: Record<string, ImpactBadge> = {};
+    biomarkerOptions.forEach(opt => {
+      badges[opt.value] = getMultiplierImpactBadge('biomarker', opt.value);
+    });
+    return badges;
+  }, []);
+
   return (
     <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
       <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
@@ -134,18 +141,18 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
         )}
 
         {!quickMode && (
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Biomarker Status<InfoTooltip content={sectionHelp.biomarker} /></label>
-          <select
-            value={biomarker}
-            onChange={(e) => onBiomarkerChange(e.target.value as BiomarkerStatus)}
-            className={`select-field transition-all duration-300 ${highlightedFields.has('biomarker') ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-          >
-            {biomarkerOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
+        <OptionCardGroup
+          id="biomarker-select"
+          label="Biomarker Status"
+          helpText={sectionHelp.biomarker}
+          options={biomarkerOptions}
+          descriptions={biomarkerDescriptions}
+          impactBadges={biomarkerImpactBadges}
+          value={biomarker}
+          onChange={onBiomarkerChange}
+          highlighted={highlightedFields.has('biomarker')}
+          columns={3}
+        />
         )}
       </div>
     </div>

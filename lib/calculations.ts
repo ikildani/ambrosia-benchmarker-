@@ -28,17 +28,22 @@ export type SolidTumorIndication =
   | 'lung_nsclc' | 'lung_sclc' | 'breast_her2' | 'breast_tnbc' | 'breast_hr'
   | 'colorectal' | 'pancreatic' | 'melanoma' | 'prostate' | 'ovarian'
   | 'gastric' | 'liver' | 'renal' | 'gbm' | 'bladder' | 'headNeck'
-  | 'cholangiocarcinoma' | 'mesothelioma' | 'sarcoma';
+  | 'cholangiocarcinoma' | 'mesothelioma' | 'sarcoma'
+  | 'endometrial' | 'cervical' | 'thyroid' | 'esophageal' | 'smallBowel';
 
 export type HematologicIndication =
   | 'aml' | 'all' | 'cll' | 'myeloma' | 'dlbcl' | 'follicular'
-  | 'mantleCell' | 'mds' | 'mpn' | 'tCellLymphoma';
+  | 'mantleCell' | 'mds' | 'mpn' | 'tCellLymphoma'
+  | 'cml' | 'waldenstrom' | 'hodgkins';
 
 export type NeurologyIndication =
   | 'alzheimers' | 'parkinsons' | 'schizophrenia' | 'depression'
   | 'als' | 'huntingtons' | 'migraine' | 'narcolepsy'
   | 'pain' | 'ms' | 'epilepsy' | 'tremor' | 'tbi' | 'addiction'
-  | 'rareNeuro';
+  | 'rareNeuro'
+  | 'bipolar' | 'ptsd' | 'ocd'
+  | 'autism' | 'rett' | 'friedreichs' | 'dmd'
+  | 'chronicPain';
 
 export type ImmunologyIndication =
   | 'rheumatoidArthritis' | 'sle_lupus' | 'lupusNephritis'
@@ -49,13 +54,20 @@ export type ImmunologyIndication =
   | 'systemicSclerosis' | 'sjogrens'
   | 'alopecia' | 'hidradenitis'
   | 'pnh' | 'cidp'
-  | 'rareAutoimmune';
+  | 'rareAutoimmune'
+  | 'celiac' | 'vitiligo' | 'pemphigus' | 'itp'
+  | 'asthma' | 'eosinophilicEsophagitis'
+  | 'gvhd' | 'organTransplant'
+  | 'thyroidEye' | 'pbc';
 
 export type MetabolicIndication =
   | 'obesity' | 'type2Diabetes' | 'nashMash'
   | 'metabolicSyndrome' | 'lipodystrophy'
   | 'glycogenStorage' | 'pku'
-  | 'rareMetabolic';
+  | 'rareMetabolic'
+  | 'type1Diabetes' | 'ckdMetabolic'
+  | 'hfpef' | 'familialHypercholesterolemia'
+  | 'gout' | 'wilsonDisease' | 'fabry' | 'gaucher';
 
 export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication;
 
@@ -199,13 +211,17 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
     'gastric', 'liver', 'renal', 'gbm', 'bladder', 'headNeck',
-    'cholangiocarcinoma', 'mesothelioma', 'sarcoma'
+    'cholangiocarcinoma', 'mesothelioma', 'sarcoma',
+    'endometrial', 'cervical', 'thyroid', 'esophageal', 'smallBowel'
   ];
   const neurologyIndications: NeurologyIndication[] = [
     'alzheimers', 'parkinsons', 'schizophrenia', 'depression',
     'als', 'huntingtons', 'migraine', 'narcolepsy',
     'pain', 'ms', 'epilepsy', 'tremor', 'tbi', 'addiction',
-    'rareNeuro'
+    'rareNeuro',
+    'bipolar', 'ptsd', 'ocd',
+    'autism', 'rett', 'friedreichs', 'dmd',
+    'chronicPain'
   ];
   const immunologyIndications: ImmunologyIndication[] = [
     'rheumatoidArthritis', 'sle_lupus', 'lupusNephritis',
@@ -216,13 +232,20 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'systemicSclerosis', 'sjogrens',
     'alopecia', 'hidradenitis',
     'pnh', 'cidp',
-    'rareAutoimmune'
+    'rareAutoimmune',
+    'celiac', 'vitiligo', 'pemphigus', 'itp',
+    'asthma', 'eosinophilicEsophagitis',
+    'gvhd', 'organTransplant',
+    'thyroidEye', 'pbc'
   ];
   const metabolicIndications: MetabolicIndication[] = [
     'obesity', 'type2Diabetes', 'nashMash',
     'metabolicSyndrome', 'lipodystrophy',
     'glycogenStorage', 'pku',
-    'rareMetabolic'
+    'rareMetabolic',
+    'type1Diabetes', 'ckdMetabolic',
+    'hfpef', 'familialHypercholesterolemia',
+    'gout', 'wilsonDisease', 'fabry', 'gaucher'
   ];
   if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
   if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
@@ -1069,6 +1092,11 @@ export const indicationOptions = [
     { value: 'cholangiocarcinoma', label: 'Cholangiocarcinoma' },
     { value: 'mesothelioma', label: 'Mesothelioma' },
     { value: 'sarcoma', label: 'Sarcoma' },
+    { value: 'endometrial', label: 'Endometrial (Uterine)' },
+    { value: 'cervical', label: 'Cervical' },
+    { value: 'thyroid', label: 'Thyroid (Anaplastic/Medullary)' },
+    { value: 'esophageal', label: 'Esophageal' },
+    { value: 'smallBowel', label: 'Small Bowel / Appendiceal' },
   ]},
   { group: 'Hematologic Malignancies', options: [
     { value: 'aml', label: 'AML' },
@@ -1081,6 +1109,9 @@ export const indicationOptions = [
     { value: 'mds', label: 'MDS' },
     { value: 'mpn', label: 'MPN' },
     { value: 'tCellLymphoma', label: 'T-cell Lymphomas' },
+    { value: 'cml', label: 'CML' },
+    { value: 'waldenstrom', label: "Waldenstrom's Macroglobulinemia" },
+    { value: 'hodgkins', label: 'Hodgkin Lymphoma' },
   ]},
 ];
 
@@ -1157,6 +1188,9 @@ export const neurologyIndicationOptions = [
     { value: 'schizophrenia', label: 'Schizophrenia / Psychosis' },
     { value: 'depression', label: 'Depression / MDD' },
     { value: 'addiction', label: 'Addiction / Substance Use Disorders' },
+    { value: 'bipolar', label: 'Bipolar Disorder' },
+    { value: 'ptsd', label: 'PTSD / Trauma Disorders' },
+    { value: 'ocd', label: 'OCD / Anxiety Disorders' },
   ]},
   { group: 'Movement & Seizure', options: [
     { value: 'epilepsy', label: 'Epilepsy' },
@@ -1168,7 +1202,14 @@ export const neurologyIndicationOptions = [
     { value: 'migraine', label: 'Migraine / Headache' },
     { value: 'narcolepsy', label: 'Narcolepsy / Sleep Disorders' },
     { value: 'tbi', label: 'Traumatic Brain Injury / Stroke Recovery' },
+    { value: 'chronicPain', label: 'Chronic Pain (Non-Neuropathic)' },
     { value: 'rareNeuro', label: 'Other Rare Neurological' },
+  ]},
+  { group: 'Neurodevelopmental & Rare', options: [
+    { value: 'autism', label: 'Autism Spectrum Disorder' },
+    { value: 'rett', label: 'Rett Syndrome' },
+    { value: 'friedreichs', label: "Friedreich's Ataxia" },
+    { value: 'dmd', label: 'Duchenne Muscular Dystrophy' },
   ]},
 ];
 
@@ -1263,6 +1304,7 @@ export const immunologyIndicationOptions = [
     { value: 'ulcerativeColitis', label: 'Ulcerative Colitis' },
     { value: 'crohns', label: "Crohn's Disease" },
     { value: 'ibd_broad', label: 'IBD (Broad UC + CD)' },
+    { value: 'celiac', label: 'Celiac Disease' },
   ]},
   { group: 'Rheumatologic', options: [
     { value: 'rheumatoidArthritis', label: 'Rheumatoid Arthritis' },
@@ -1278,15 +1320,28 @@ export const immunologyIndicationOptions = [
     { value: 'psoriaticArthritis', label: 'Psoriatic Arthritis' },
     { value: 'alopecia', label: 'Alopecia Areata' },
     { value: 'hidradenitis', label: 'Hidradenitis Suppurativa' },
+    { value: 'vitiligo', label: 'Vitiligo' },
   ]},
-  { group: 'Neuromuscular & Hematologic', options: [
+  { group: 'Neuromuscular & Rare', options: [
     { value: 'myastheniaGravis', label: 'Myasthenia Gravis' },
     { value: 'cidp', label: 'CIDP' },
     { value: 'multipleSclerosisMod', label: 'Multiple Sclerosis' },
     { value: 'pnh', label: 'PNH' },
+    { value: 'pemphigus', label: 'Pemphigus / Bullous Diseases' },
+    { value: 'itp', label: 'Immune Thrombocytopenia (ITP)' },
   ]},
-  { group: 'Renal & Other', options: [
+  { group: 'Respiratory & Allergic', options: [
+    { value: 'asthma', label: 'Severe Asthma' },
+    { value: 'eosinophilicEsophagitis', label: 'Eosinophilic Esophagitis (EoE)' },
+  ]},
+  { group: 'Transplant', options: [
+    { value: 'gvhd', label: 'Graft-vs-Host Disease (GVHD)' },
+    { value: 'organTransplant', label: 'Solid Organ Transplant Rejection' },
+  ]},
+  { group: 'Renal & Rare', options: [
     { value: 'igan', label: 'IgA Nephropathy' },
+    { value: 'thyroidEye', label: 'Thyroid Eye Disease' },
+    { value: 'pbc', label: 'Primary Biliary Cholangitis (PBC)' },
     { value: 'rareAutoimmune', label: 'Other Rare Autoimmune' },
   ]},
 ];
@@ -1350,14 +1405,26 @@ export const metabolicIndicationOptions = [
   ]},
   { group: 'Diabetes & Glycemic', options: [
     { value: 'type2Diabetes', label: 'Type 2 Diabetes' },
+    { value: 'type1Diabetes', label: 'Type 1 Diabetes' },
   ]},
   { group: 'Organ-Specific Metabolic', options: [
     { value: 'nashMash', label: 'NASH / MASH (Fatty Liver)' },
     { value: 'lipodystrophy', label: 'Lipodystrophy' },
+    { value: 'ckdMetabolic', label: 'CKD (Metabolic/Diabetic)' },
+  ]},
+  { group: 'Cardiovascular-Metabolic', options: [
+    { value: 'hfpef', label: 'HFpEF (Heart Failure)' },
+    { value: 'familialHypercholesterolemia', label: 'Familial Hypercholesterolemia' },
+  ]},
+  { group: 'Other Metabolic', options: [
+    { value: 'gout', label: 'Gout / Hyperuricemia' },
   ]},
   { group: 'Rare Metabolic', options: [
     { value: 'glycogenStorage', label: 'Glycogen Storage Disease' },
     { value: 'pku', label: 'PKU (Phenylketonuria)' },
+    { value: 'wilsonDisease', label: 'Wilson Disease' },
+    { value: 'fabry', label: 'Fabry Disease' },
+    { value: 'gaucher', label: 'Gaucher Disease' },
     { value: 'rareMetabolic', label: 'Other Rare Metabolic' },
   ]},
 ];

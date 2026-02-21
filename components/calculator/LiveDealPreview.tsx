@@ -24,7 +24,7 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
             <div className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-slate-500 mb-1">
               Estimated Deal Value
             </div>
-            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums number-animate" key={totalRange}>
+            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums animate-number-flash" key={totalRange}>
               {totalRange}
             </div>
             <div className="text-xs text-neutral-500 dark:text-slate-400 mt-1 tabular-nums">

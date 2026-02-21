@@ -139,23 +139,16 @@ interface UserAsset {
   territory: string | null;
 }
 
-// Map therapeutic area to keywords for patent cliff relevance sorting
-const TA_KEYWORDS: Record<string, string[]> = {
-  metabolic: ['metabolic', 'obesity', 'diabetes', 'glp-1', 'gip', 'sglt2', 'weight', 't2d'],
-  oncology: ['oncology', 'tumor', 'cancer', 'pd-1', 'pd-l1', 'adc', 'her2', 'egfr', 'cdk', 'parp', 'btk', 'bcl'],
-  neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer'],
-  immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus'],
-};
+// Reuse the server-side TA keyword list for consistent filtering
+import { TA_CLIFF_KEYWORDS } from '@/lib/services/partner-matching';
 
 function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
-  if (!therapeuticArea || !TA_KEYWORDS[therapeuticArea]) return cliffs;
-  const keywords = TA_KEYWORDS[therapeuticArea];
-  const filtered = cliffs.filter((cliff) => {
+  if (!therapeuticArea || !TA_CLIFF_KEYWORDS[therapeuticArea]) return [];
+  const keywords = TA_CLIFF_KEYWORDS[therapeuticArea];
+  return cliffs.filter((cliff) => {
     const indication = (cliff.indication || '').toLowerCase();
     return keywords.some(kw => indication.includes(kw));
   });
-  // If no cliffs match the TA (e.g. sparse data), fall back to all cliffs
-  return filtered.length > 0 ? filtered : cliffs;
 }
 
 interface PartnerMatchesProps {

@@ -321,7 +321,7 @@ export async function findPartnerMatches(
         const companyDeals = companyDealsMap.get(company.id) || [];
         match.detailed_breakdown = buildDetailedBreakdown(company, input, breakdown, companyDeals);
         match.watch_outs = calculateWatchOuts(company, input, companyDeals);
-        match.strategic_context = buildStrategicContext(company);
+        match.strategic_context = buildStrategicContext(company, input.therapeutic_area);
         match.relevant_deals = companyDeals.slice(0, 5).map((deal) => ({
           id: deal.id,
           asset_name: deal.asset_name || 'Undisclosed',
@@ -518,15 +518,12 @@ function calculateMatchScore(
   const patentCliffs = parsePatentCliffs(company.patent_cliffs);
 
   // Patent cliff urgency: upcoming cliffs in related TA/indication = buying pressure
+  // taCliffs are already filtered to the user's therapeutic area
   const taCliffs = filterCliffsByTA(patentCliffs, input.therapeutic_area);
-  const relevantCliffs = taCliffs.filter((cliff: PatentCliff) => {
-    const cliffIndication = cliff.indication?.toLowerCase() || '';
-    return (
-      (input.indication_category && cliffIndication.includes(input.indication_category.toLowerCase())) ||
-      (input.indication_specific && cliffIndication.includes(input.indication_specific.toLowerCase())) ||
-      (cliff.expiry_year <= 2028 && cliff.revenue_usd >= 1_000_000_000)
-    );
-  });
+  // Among TA-filtered cliffs, prioritize those expiring soon
+  const relevantCliffs = taCliffs.filter((cliff: PatentCliff) =>
+    cliff.expiry_year <= 2029
+  );
 
   if (relevantCliffs.length > 0) {
     breakdown.strategic += WEIGHTS.strategic_patent_cliff;
@@ -1001,39 +998,31 @@ export function buildDetailedBreakdown(
     });
   }
 
-  // STRATEGIC FACTOR (from patent cliffs)
-  const patentCliffs = parsePatentCliffs(company.patent_cliffs);
-  const relevantCliff = patentCliffs.find(
-    (cliff) =>
-      cliff.indication?.toLowerCase().includes(input.indication_category?.toLowerCase() || '') ||
-      cliff.indication?.toLowerCase().includes(input.indication_specific?.toLowerCase() || '')
-  );
+  // STRATEGIC FACTOR (from patent cliffs — filtered to user's therapeutic area)
+  const allCliffs = parsePatentCliffs(company.patent_cliffs);
+  const taFilteredCliffs = filterCliffsByTA(allCliffs, input.therapeutic_area);
+  // Find the most relevant cliff: prefer those expiring soon with high revenue
+  const relevantCliff = taFilteredCliffs
+    .filter((c) => c.expiry_year <= 2029)
+    .sort((a, b) => b.revenue_usd - a.revenue_usd)[0] || null;
 
-  if (relevantCliff || (company.revenue_at_risk_2027 && company.revenue_at_risk_2027 > 1000000000)) {
+  if (relevantCliff) {
     const strategicEvidence: EvidenceLine[] = [];
 
-    if (relevantCliff) {
-      strategicEvidence.push({
-        text: `${relevantCliff.drug_name} patent cliff ${relevantCliff.expiry_year} (${formatCurrency(relevantCliff.revenue_usd)} at risk)`,
-        type: 'patent_cliff',
-        highlight: true,
-      });
-      strategicEvidence.push({
-        text: `Pipeline gap in ${relevantCliff.indication || input.indication_category}`,
-        type: 'strategic',
-      });
-    } else if (company.revenue_at_risk_2027 > 1000000000) {
-      strategicEvidence.push({
-        text: `${formatCurrency(company.revenue_at_risk_2027)} revenue at risk by 2027`,
-        type: 'patent_cliff',
-        highlight: true,
-      });
-    }
+    strategicEvidence.push({
+      text: `${relevantCliff.drug_name} patent cliff ${relevantCliff.expiry_year} (${formatCurrency(relevantCliff.revenue_usd)} at risk)`,
+      type: 'patent_cliff',
+      highlight: true,
+    });
+    strategicEvidence.push({
+      text: `Pipeline gap in ${relevantCliff.indication || input.therapeutic_area || 'target area'}`,
+      type: 'strategic',
+    });
 
     factors.push({
       category: 'strategic',
       title: 'Strategic Need',
-      points: 10, // Bonus points for strategic alignment
+      points: 10,
       maxPoints: 15,
       evidenceLines: strategicEvidence,
     });
@@ -1197,10 +1186,13 @@ export function calculateWatchOuts(
 }
 
 /**
- * Build strategic context from company data
+ * Build strategic context from company data.
+ * Filters patent cliffs to the user's therapeutic area so only relevant drugs are shown.
  */
-export function buildStrategicContext(company: any): StrategicContext {
-  const patentCliffs = parsePatentCliffs(company.patent_cliffs);
+export function buildStrategicContext(company: any, therapeuticArea?: string | null): StrategicContext {
+  const allCliffs = parsePatentCliffs(company.patent_cliffs);
+  // Filter cliffs to the user's therapeutic area — never show irrelevant drugs
+  const patentCliffs = filterCliffsByTA(allCliffs, therapeuticArea || null);
 
   const revenueAtRisk: { year: number; amount: number }[] = [];
   if (company.revenue_at_risk_2025 > 0) {
@@ -1213,7 +1205,7 @@ export function buildStrategicContext(company: any): StrategicContext {
     revenueAtRisk.push({ year: 2027, amount: company.revenue_at_risk_2027 });
   }
 
-  // Identify pipeline gaps based on patent cliffs
+  // Identify pipeline gaps based on TA-filtered patent cliffs
   const pipelineGaps: string[] = [];
   for (const cliff of patentCliffs) {
     if (cliff.indication && cliff.expiry_year <= 2028) {
@@ -1284,14 +1276,19 @@ function parsePatentCliffs(cliffs: any): PatentCliff[] {
 }
 
 // Map therapeutic area to keywords found in patent cliff indication strings
-const TA_CLIFF_KEYWORDS: Record<string, string[]> = {
-  oncology: ['oncology', 'tumor', 'cancer', 'pd-1', 'pd-l1', 'adc', 'her2', 'egfr', 'cdk', 'parp', 'btk', 'bcl', 'alk', 'lymphoma', 'leukemia', 'myeloma', 'melanoma', 'nsclc', 'sclc', 'breast', 'prostate', 'lung', 'colorectal', 'bladder', 'renal', 'ovarian', 'hematology'],
-  neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer', 'parkinson', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'bipolar', 'adhd', 'pain', 'neuropath'],
-  immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus', 'psoriasis', 'crohn', 'colitis', 'rheumatoid', 'atopic', 'dermatitis', 'ibd'],
+// Exported so client components can reuse the same keyword list
+export const TA_CLIFF_KEYWORDS: Record<string, string[]> = {
+  oncology: ['oncology', 'tumor', 'cancer', 'pd-1', 'pd-l1', 'adc', 'her2', 'egfr', 'cdk', 'parp', 'btk', 'bcl', 'alk', 'lymphoma', 'leukemia', 'myeloma', 'melanoma', 'nsclc', 'sclc', 'breast', 'prostate', 'lung', 'colorectal', 'bladder', 'renal', 'ovarian', 'glioblastoma', 'carcinoma', 'sarcoma'],
+  neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer', 'parkinson', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'bipolar', 'adhd', 'pain', 'neuropath', 'als', 'huntington', 'dementia'],
+  immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus', 'psoriasis', 'crohn', 'colitis', 'rheumatoid', 'atopic', 'dermatitis', 'ibd', 'inflammatory'],
   metabolic: ['metabolic', 'obesity', 'diabetes', 'glp-1', 'gip', 'sglt2', 'weight', 't2d', 'nash', 'mash', 'nafld', 'cardiovascular', 'lipid', 'cholesterol', 'hypertension'],
 };
 
-function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea: string | null): PatentCliff[] {
+// NOTE: 'hematology' is NOT in the oncology list because hematology drugs
+// (e.g. anticoagulants like Eliquis) are not relevant to solid tumor oncology assets.
+// Oncology-relevant hematologic malignancies are covered by 'lymphoma', 'leukemia', 'myeloma'.
+
+export function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea: string | null): PatentCliff[] {
   if (!therapeuticArea || !TA_CLIFF_KEYWORDS[therapeuticArea]) return cliffs;
   const keywords = TA_CLIFF_KEYWORDS[therapeuticArea];
   return cliffs.filter((cliff) => {
