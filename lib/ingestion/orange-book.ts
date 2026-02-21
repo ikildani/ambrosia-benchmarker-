@@ -195,6 +195,28 @@ interface PatentCliffEntry {
   expiry_year: number;
 }
 
+// Check drug_revenues table for live-updated revenue before falling back to hardcoded values
+async function loadLiveRevenues(supabase: SupabaseClient): Promise<Map<string, number>> {
+  const revenueMap = new Map<string, number>();
+  try {
+    const { data } = await supabase
+      .from('drug_revenues')
+      .select('drug_name_normalized, revenue_usd, fiscal_year')
+      .eq('fiscal_period', 'FY')
+      .order('fiscal_year', { ascending: false });
+
+    // Keep only the most recent FY entry per drug
+    for (const row of data || []) {
+      if (!revenueMap.has(row.drug_name_normalized)) {
+        revenueMap.set(row.drug_name_normalized, Number(row.revenue_usd));
+      }
+    }
+  } catch {
+    // Fallback to hardcoded if table doesn't exist yet or query fails
+  }
+  return revenueMap;
+}
+
 export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise<{
   matched: number;
   unmatched: number;
@@ -202,6 +224,7 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
   errors: string[];
 }> {
   const errors: string[] = [];
+  const liveRevenues = await loadLiveRevenues(supabase);
 
   try {
     // Step 1: Download Orange Book ZIP from FDA
@@ -295,9 +318,10 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
 
       const tradeName = product.trade_name.toUpperCase().trim();
 
-      // Get revenue and indication from blockbuster list
+      // Get revenue: check live DB first, then hardcoded fallback
       const blockbuster = BLOCKBUSTER_REVENUE[tradeName];
-      const revenue = blockbuster?.revenue_usd || 0;
+      const liveRevenue = liveRevenues.get(tradeName);
+      const revenue = liveRevenue ?? blockbuster?.revenue_usd ?? 0;
       const indication = blockbuster?.indication || categorizeIndication(product.ingredient, product.df_route);
 
       // Skip non-blockbuster drugs (revenue = 0 and not in blockbuster list)
@@ -323,11 +347,13 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
     // Get all companies for name matching
     const { data: allCompanies } = await supabase
       .from('companies')
-      .select('id, name, name_variations, patent_cliffs');
+      .select('id, name, name_variations, patent_cliffs, data_sources');
 
     const companyNameToId = new Map<string, string>();
+    const companyDataSources = new Map<string, string[]>();
     for (const c of allCompanies || []) {
       companyNameToId.set(c.name.toLowerCase(), c.id);
+      companyDataSources.set(c.id, c.data_sources || []);
       for (const v of c.name_variations || []) {
         companyNameToId.set(v.toLowerCase(), c.id);
       }
@@ -372,7 +398,7 @@ export async function ingestOrangeBookPatents(supabase: SupabaseClient): Promise
           revenue_at_risk_2025: riskByYear['2025'] || 0,
           revenue_at_risk_2026: riskByYear['2026'] || 0,
           revenue_at_risk_2027: riskByYear['2027'] || 0,
-          data_sources: ['fda_orange_book'],
+          data_sources: Array.from(new Set([...(companyDataSources.get(companyId) || []), 'fda_orange_book'])),
           last_enriched_at: new Date().toISOString(),
         })
         .eq('id', companyId);

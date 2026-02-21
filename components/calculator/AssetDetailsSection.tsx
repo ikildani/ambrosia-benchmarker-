@@ -88,6 +88,16 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     return badges;
   }, []);
 
+  const modalityBadges = useMemo(() => {
+    const badges: Record<string, ImpactBadge> = {};
+    modalityOptionsList.forEach(group => {
+      group.options.forEach(opt => {
+        badges[opt.value] = getModalityImpactBadge(opt.value);
+      });
+    });
+    return badges;
+  }, [modalityOptionsList]);
+
   const indicationBadges = useMemo(() => {
     const badges: Record<string, ImpactBadge> = {};
     indicationOptionsList.forEach(group => {
@@ -127,6 +137,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           onChange={onModalityChange}
           highlighted={highlightedFields.has('modality')}
           impactBadge={getModalityImpactBadge(modality)}
+          optionBadges={modalityBadges}
         />
 
         <SearchableCombobox

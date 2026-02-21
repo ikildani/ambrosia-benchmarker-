@@ -5291,19 +5291,28 @@ export async function POST(request: NextRequest) {
     }
 
     for (const company of allCompanies) {
-      const companyData = {
+      // Identity/profile fields — safe to update for existing companies
+      const profileData = {
         name: company.name,
         name_variations: company.name_variations,
         ticker: company.ticker,
         company_type: company.company_type,
         hq_country: company.hq_country,
+        indications_specific: company.indications_specific,
+        territory_focus: company.territory_focus,
+        strategic_priorities: company.strategic_priorities,
+        patent_cliffs: company.patent_cliffs,
+        data_sources: ['sec_filings', 'dealforma', 'company_ir', 'evaluate_pharma'],
+        last_enriched_at: new Date().toISOString(),
+      };
+
+      // Computed fields — only set on INSERT, not on UPDATE (auto-enrichment pipelines handle these)
+      const computedData = {
         modalities_active: company.modalities_active,
         modalities_primary: company.modalities_primary,
         indications_active: company.indications_active,
-        indications_specific: company.indications_specific,
         phase_preference_min: company.phase_preference_min,
         phase_preference_max: company.phase_preference_max,
-        territory_focus: company.territory_focus,
         deals_last_12mo: company.deals_last_12mo,
         deals_last_24mo: company.deals_last_24mo,
         active_trials_count: company.active_trials_count,
@@ -5311,19 +5320,19 @@ export async function POST(request: NextRequest) {
         median_upfront_usd: company.median_upfront_usd,
         actively_acquiring: company.actively_acquiring,
         acquisition_appetite: company.acquisition_appetite,
-        strategic_priorities: company.strategic_priorities,
         data_quality_score: company.data_quality_score,
-        patent_cliffs: company.patent_cliffs,
-        data_sources: ['sec_filings', 'dealforma', 'company_ir', 'evaluate_pharma'],
-        last_enriched_at: new Date().toISOString(),
       };
+
+      // Full data for inserts only
+      const companyData = { ...profileData, ...computedData };
 
       const existingId = companyMap.get(company.name.toLowerCase());
 
       if (existingId) {
+        // Only update profile/identity fields — preserve auto-computed values
         const { error: updateError } = await supabase
           .from('companies')
-          .update(companyData)
+          .update(profileData)
           .eq('id', existingId);
 
         if (updateError) {

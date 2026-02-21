@@ -1,4 +1,7 @@
-import benchmarks from '@/data/benchmarks.json';
+import { getBenchmarksSync } from '@/lib/benchmarks';
+
+// Live-calibrated benchmarks (merges static JSON with DB-driven calibrations)
+const benchmarks = getBenchmarksSync();
 
 // Therapeutic area type
 export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic';
