@@ -295,14 +295,23 @@ export async function runBenchmarkCalibration(
     allResults.push(result);
 
     if (!dryRun) {
-      const { error: upsertError } = await supabase
+      // Delete existing active calibration for this key, then insert
+      // (upsert doesn't work with nullable columns — PostgreSQL treats NULL != NULL)
+      await supabase
         .from('benchmark_calibrations')
-        .upsert(result, {
-          onConflict: 'calibration_type,therapeutic_area,phase,modality',
-        });
+        .delete()
+        .eq('calibration_type', 'phase_baseline')
+        .eq('therapeutic_area', therapeuticArea)
+        .eq('phase', phase)
+        .is('modality', null)
+        .eq('is_active', true);
 
-      if (upsertError) {
-        errors.push(`Upsert error for phase baseline ${key}: ${upsertError.message}`);
+      const { error: insertError } = await supabase
+        .from('benchmark_calibrations')
+        .insert(result);
+
+      if (insertError) {
+        errors.push(`Insert error for phase baseline ${key}: ${insertError.message}`);
       } else {
         phaseBaselinesUpdated++;
       }
@@ -394,14 +403,22 @@ export async function runBenchmarkCalibration(
     allResults.push(result);
 
     if (!dryRun) {
-      const { error: upsertError } = await supabase
+      // Delete existing active calibration for this key, then insert
+      await supabase
         .from('benchmark_calibrations')
-        .upsert(result, {
-          onConflict: 'calibration_type,therapeutic_area,phase,modality',
-        });
+        .delete()
+        .eq('calibration_type', 'modality_multiplier')
+        .eq('therapeutic_area', therapeuticArea)
+        .is('phase', null)
+        .eq('modality', modality)
+        .eq('is_active', true);
 
-      if (upsertError) {
-        errors.push(`Upsert error for modality multiplier ${key}: ${upsertError.message}`);
+      const { error: insertError } = await supabase
+        .from('benchmark_calibrations')
+        .insert(result);
+
+      if (insertError) {
+        errors.push(`Insert error for modality multiplier ${key}: ${insertError.message}`);
       } else {
         modalityMultipliersUpdated++;
       }
