@@ -1,4 +1,5 @@
 import React from 'react';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 function ResultsDisclaimerInner() {
   return (
@@ -28,6 +29,10 @@ function ResultsDisclaimerInner() {
             <a href="/terms" className="text-teal-600 hover:text-teal-700 ml-1 underline">Terms</a>
             {' '}&bull;{' '}
             <a href="/privacy" className="text-teal-600 hover:text-teal-700 underline">Privacy</a>
+          </p>
+          <p className="text-xs text-slate-500 leading-relaxed mt-2">
+            <strong className="text-slate-600">Data Sources:</strong> Deal benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly
+            disclosed transactions. Data refreshed daily from SEC EDGAR 8-K filings, ClinicalTrials.gov, and FDA Orange Book.
           </p>
         </div>
       </div>

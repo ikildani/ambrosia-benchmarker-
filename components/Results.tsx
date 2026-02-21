@@ -23,6 +23,7 @@ const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'
 const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false });
 const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: false });
 const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
+const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -908,6 +909,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           onUpgrade={onUpgrade}
         />
 
+        {/* Market Urgency - Patent Cliff Signal */}
+        {partnerMatches.length > 0 && (
+          <MarketUrgency
+            partnerMatches={partnerMatches}
+            therapeuticArea={fullInputs?.therapeuticArea}
+            isPro={hasFullAccess}
+            onUpgrade={onUpgrade}
+            onBuyReport={onBuyReport}
+          />
+        )}
+
         {/* Therapeutic Area Milestone Explanation */}
         {result.milestoneExplanation && (
           <div className="mt-6 p-4 sm:p-5 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800/50 rounded-xl">
@@ -1164,6 +1176,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Methodology Section */}
         <MethodologySection />
+
+        {/* Data Freshness Indicator */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Benchmarks last updated{' '}
+            {(() => {
+              const [y, m] = (benchmarks.metadata.lastUpdated as string).split('-');
+              const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              return `${monthNames[parseInt(m, 10) - 1]} ${y}`;
+            })()}
+            {' '}&middot;{' '}Deal data refreshed daily via SEC EDGAR
+          </p>
+        </div>
 
         {/* World-Class Disclaimer */}
         <ResultsDisclaimer />

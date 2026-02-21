@@ -58,7 +58,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
                 {deal.relevanceReasons.map((reason, i) => (
                   <span
                     key={i}
-                    className="text-[10px] px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-medium"
+                    className="text-xs px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-medium"
                   >
                     {reason}
                   </span>

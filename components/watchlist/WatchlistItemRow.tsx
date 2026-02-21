@@ -27,7 +27,7 @@ export default function WatchlistItemRow({ item, onRemove }: WatchlistItemRowPro
   return (
     <div className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
       <div className="flex items-center gap-3 min-w-0">
-        <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${config.bg} ${config.color} uppercase tracking-wide shrink-0`}>
+        <span className={`px-2 py-0.5 text-xs font-bold rounded ${config.bg} ${config.color} uppercase tracking-wide shrink-0`}>
           {config.label}
         </span>
         <span className="text-sm font-medium text-slate-900 dark:text-white truncate">

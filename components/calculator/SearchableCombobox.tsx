@@ -20,6 +20,7 @@ interface SearchableComboboxProps<T extends string> {
   onChange: (value: T) => void;
   highlighted?: boolean;
   impactBadge?: ImpactBadge;
+  optionBadges?: Record<string, ImpactBadge>;
 }
 
 function SearchableComboboxInner<T extends string>({
@@ -31,6 +32,7 @@ function SearchableComboboxInner<T extends string>({
   onChange,
   highlighted,
   impactBadge,
+  optionBadges,
 }: SearchableComboboxProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,12 +194,23 @@ function SearchableComboboxInner<T extends string>({
                   : 'hover:bg-neutral-50 dark:hover:bg-slate-800'
               } ${isSelected ? 'text-teal-700 dark:text-teal-400 font-medium' : 'text-neutral-700 dark:text-slate-300'}`}
             >
-              <span>{option.label}</span>
-              {isSelected && (
-                <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
+              <span className="truncate">{option.label}</span>
+              <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                {optionBadges?.[option.value] && optionBadges[option.value].type !== 'neutral' && (
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide whitespace-nowrap ${
+                    optionBadges[option.value].type === 'premium' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                    optionBadges[option.value].type === 'discount' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  }`}>
+                    {optionBadges[option.value].label}
+                  </span>
+                )}
+                {isSelected && (
+                  <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
             </div>
           );
         })}

@@ -19,7 +19,8 @@ import {
   biomarkerOptions,
 } from '@/lib/calculations';
 import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
-import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, getIndicationImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { STEP_ACCENTS } from '@/lib/areaAccents';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -87,10 +88,20 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     return badges;
   }, []);
 
+  const indicationBadges = useMemo(() => {
+    const badges: Record<string, ImpactBadge> = {};
+    indicationOptionsList.forEach(group => {
+      group.options.forEach(opt => {
+        badges[opt.value] = getIndicationImpactBadge(opt.value);
+      });
+    });
+    return badges;
+  }, [indicationOptionsList]);
+
   return (
     <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
       <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-teal-500 text-white text-xs flex items-center justify-center">1</span>
+        <span className={`w-6 h-6 rounded-full ${STEP_ACCENTS[therapeuticArea].bg} text-white text-xs flex items-center justify-center transition-colors duration-300`}>1</span>
         Asset Details
       </h3>
       <div className="space-y-4">
@@ -126,6 +137,8 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           value={indication}
           onChange={onIndicationChange}
           highlighted={highlightedFields.has('indication')}
+          impactBadge={indicationBadges[indication]}
+          optionBadges={indicationBadges}
         />
 
         {quickMode && (

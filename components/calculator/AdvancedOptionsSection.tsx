@@ -52,6 +52,7 @@ import {
   territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { STEP_ACCENTS } from '@/lib/areaAccents';
 import OptionCardGroup from './OptionCardGroup';
 import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -237,11 +238,13 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onMetabolicTreatmentApproachChange,
   column,
 }: AdvancedOptionsSectionProps) {
+  const accent = STEP_ACCENTS[therapeuticArea];
+
   if (column === 'competitive') {
     return (
       <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
         <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-teal-500/50 text-white text-xs flex items-center justify-center">3</span>
+          <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
           Competitive Landscape
         </h3>
         <div className="space-y-4">
@@ -290,7 +293,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
     return (
       <div>
         <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-teal-500/30 text-teal-700 text-xs flex items-center justify-center">4</span>
+          <span className={`w-6 h-6 rounded-full ${accent.bg30} ${accent.text30} text-xs flex items-center justify-center transition-colors duration-300`}>4</span>
           Deal Scope
         </h3>
         <div className="space-y-4">
@@ -357,7 +360,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
         {/* Competitive Landscape Section */}
         <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
           <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-teal-500/50 text-white text-xs flex items-center justify-center">3</span>
+            <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
             Competitive Landscape
           </h3>
           <div className="space-y-4">
@@ -392,7 +395,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
         {/* Deal Scope Section */}
         <div>
           <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-teal-500/30 text-teal-700 text-xs flex items-center justify-center">4</span>
+            <span className={`w-6 h-6 rounded-full ${accent.bg30} ${accent.text30} text-xs flex items-center justify-center transition-colors duration-300`}>4</span>
             Deal Scope
           </h3>
           <div className="space-y-4">
@@ -460,7 +463,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
       {/* Target Profile Section */}
       <div>
         <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-teal-500/70 text-white text-xs flex items-center justify-center">2</span>
+          <span className={`w-6 h-6 rounded-full ${accent.bg70} text-white text-xs flex items-center justify-center transition-colors duration-300`}>2</span>
           Target Profile
         </h3>
         <div className="space-y-4">

@@ -1,8 +1,29 @@
 import React, { useCallback, useRef } from 'react';
 import type { TherapeuticArea } from '@/lib/calculations';
-import { therapeuticAreaOptions } from '@/lib/calculations';
+import {
+  therapeuticAreaOptions,
+  indicationOptions,
+  neurologyIndicationOptions,
+  immunologyIndicationOptions,
+  metabolicIndicationOptions,
+} from '@/lib/calculations';
 import { Microscope, Brain, ShieldCheck, HeartPulse, Check } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+// Compute indication counts per area
+function countIndications(groups: { options: { value: string }[] }[]): { total: number; groups: number } {
+  return {
+    total: groups.reduce((sum, g) => sum + g.options.length, 0),
+    groups: groups.length,
+  };
+}
+
+const INDICATION_COUNTS: Record<TherapeuticArea, { total: number; groups: number }> = {
+  oncology: countIndications(indicationOptions),
+  neurology: countIndications(neurologyIndicationOptions),
+  immunology: countIndications(immunologyIndicationOptions),
+  metabolic: countIndications(metabolicIndicationOptions),
+};
 
 interface AreaMeta {
   icon: LucideIcon;
@@ -109,16 +130,18 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
       <label id="therapeutic-area-label" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
       <div ref={groupRef} role="radiogroup" aria-labelledby="therapeutic-area-label" onKeyDown={handleKeyDown} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {therapeuticAreaOptions.map((option) => {
-          const isSelected = therapeuticArea === option.value;
-          const meta = AREA_META[option.value as TherapeuticArea];
+          const area = option.value as TherapeuticArea;
+          const isSelected = therapeuticArea === area;
+          const meta = AREA_META[area];
           const Icon = meta.icon;
+          const counts = INDICATION_COUNTS[area];
           return (
             <button
               key={option.value}
               role="radio"
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
-              onClick={() => selectArea(option.value as TherapeuticArea)}
+              onClick={() => selectArea(area)}
               className={`relative px-4 py-4 rounded-xl border-2 text-left transition-all duration-200 motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] ${
                 isSelected
                   ? `${meta.accentClass} ${meta.accentBgClass} shadow-md`
@@ -134,6 +157,9 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
                 <div className="min-w-0">
                   <div className="text-sm font-semibold leading-tight">{option.label}</div>
                   <div className={`text-xs mt-1 leading-tight ${isSelected ? 'opacity-75' : 'text-neutral-400 dark:text-slate-500'}`}>{meta.description}</div>
+                  <div className={`text-[10px] mt-1.5 font-medium ${isSelected ? 'opacity-60' : 'text-neutral-300 dark:text-slate-600'}`}>
+                    {counts.total} indications
+                  </div>
                 </div>
               </div>
               {isSelected && (

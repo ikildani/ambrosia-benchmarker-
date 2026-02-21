@@ -94,7 +94,7 @@ function PeerCard({
           {peer.name}
         </Link>
         {peer.company_type && (
-          <span className="ml-2 inline-block px-2 py-0.5 text-[10px] font-semibold rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+          <span className="ml-2 inline-block px-2 py-0.5 text-xs font-semibold rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
             {typeLabels[peer.company_type] || peer.company_type}
           </span>
         )}
@@ -103,7 +103,7 @@ function PeerCard({
       {/* Overlap score bar */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] uppercase tracking-wide font-medium text-slate-400 dark:text-slate-500">
+          <span className="text-xs uppercase tracking-wide font-medium text-slate-400 dark:text-slate-500">
             Overlap
           </span>
           <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
@@ -124,7 +124,7 @@ function PeerCard({
           {peer.shared_modalities.map((m) => (
             <span
               key={m}
-              className="px-2 py-0.5 text-[10px] font-medium rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300"
+              className="px-2 py-0.5 text-xs font-medium rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300"
             >
               {formatModality(m)}
             </span>

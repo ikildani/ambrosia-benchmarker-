@@ -10,6 +10,12 @@ export interface PartnerForPDF {
   match_reasons: { reason: string; strength: string }[];
   deals_last_12mo: number;
   hq_country: string | null;
+  strategic_context?: {
+    patent_cliffs: { drug_name: string; indication: string | null; revenue_usd: number; expiry_year: number }[];
+    revenue_at_risk: { year: number; amount: number }[];
+    pipeline_gaps: string[];
+    strategic_priorities: string[];
+  } | null;
 }
 
 export interface PDFReportData {

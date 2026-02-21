@@ -11,6 +11,12 @@ export interface PartnerMatchForPDF {
   match_reasons: { reason: string; strength: string }[];
   deals_last_12mo: number;
   hq_country: string | null;
+  strategic_context?: {
+    patent_cliffs: { drug_name: string; indication: string | null; revenue_usd: number; expiry_year: number }[];
+    revenue_at_risk: { year: number; amount: number }[];
+    pipeline_gaps: string[];
+    strategic_priorities: string[];
+  } | null;
 }
 
 interface PartnerMatchesContainerProps {
@@ -88,7 +94,7 @@ export default function PartnerMatchesContainer({
       setAdvisoryCta(data.advisory_cta || null);
       setCalculationId(data.calculation_id);
 
-      // Notify parent of loaded matches for PDF export
+      // Notify parent of loaded matches for PDF export and Market Urgency
       if (onMatchesLoaded && fetchedMatches.length > 0) {
         onMatchesLoaded(fetchedMatches.map((m: any) => ({
           company_name: m.company_name,
@@ -96,6 +102,7 @@ export default function PartnerMatchesContainer({
           match_reasons: m.match_reasons || [],
           deals_last_12mo: m.deals_last_12mo || 0,
           hq_country: m.hq_country,
+          strategic_context: m.strategic_context || null,
         })));
       }
     } catch (err) {

@@ -123,7 +123,7 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
                     strokeLinejoin="round"
                   />
                 </svg>
-                <p className="text-[10px] text-slate-400 text-center mt-0.5">Deal trend</p>
+                <p className="text-xs text-slate-400 text-center mt-0.5">Deal trend</p>
               </div>
             )}
           </div>

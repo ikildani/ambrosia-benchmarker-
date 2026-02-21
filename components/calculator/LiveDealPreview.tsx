@@ -38,7 +38,7 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-neutral-200 dark:border-slate-700 safe-bottom">
         <div className="px-4 py-3 flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-slate-500">
               Est. Deal Value
             </div>
             <div className="text-base font-bold text-navy-800 dark:text-white tabular-nums">
@@ -46,7 +46,7 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-neutral-400 dark:text-slate-500">Upfront</div>
+            <div className="text-xs text-neutral-400 dark:text-slate-500">Upfront</div>
             <div className="text-sm font-semibold text-teal-600 dark:text-teal-400 tabular-nums">{upfrontMedian}</div>
           </div>
         </div>

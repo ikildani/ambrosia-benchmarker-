@@ -62,3 +62,26 @@ export function getModalityImpactBadge(modality: string): ImpactBadge {
   if (!data) return { type: 'neutral', label: 'Neutral', rawMultiplier: 1.0 };
   return buildBadgeFromMultiplier(data.multiplier);
 }
+
+const indicationCategoriesMap: Record<string, string[]> = {
+  solidTumor: Object.keys((benchmarks as any).indications?.solidTumor || {}),
+  hematologic: Object.keys((benchmarks as any).indications?.hematologic || {}),
+  neurology: Object.keys((benchmarks as any).indications?.neurology || {}),
+  immunology: Object.keys((benchmarks as any).indications?.immunology || {}),
+  metabolic: Object.keys((benchmarks as any).indications?.metabolic || {}),
+};
+
+function findIndicationCategory(indicationValue: string): string | null {
+  for (const [cat, values] of Object.entries(indicationCategoriesMap)) {
+    if (values.includes(indicationValue)) return cat;
+  }
+  return null;
+}
+
+export function getIndicationImpactBadge(indicationValue: string): ImpactBadge {
+  const category = findIndicationCategory(indicationValue);
+  if (!category) return { type: 'neutral', label: 'Neutral', rawMultiplier: 1.0 };
+  const data = (benchmarks as any).indications?.[category]?.[indicationValue];
+  if (!data) return { type: 'neutral', label: 'Neutral', rawMultiplier: 1.0 };
+  return buildBadgeFromMultiplier(data.multiplier);
+}
