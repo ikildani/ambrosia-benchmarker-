@@ -142,7 +142,8 @@ export async function fetchCompanyTrials(
           'LocationCountry',
           'ResultsFirstPostDate',
           'LastUpdatePostDate',
-          'OutcomeMeasuresModule',
+          'PrimaryOutcomeMeasure',
+          'SecondaryOutcomeMeasure',
         ].join(','),
       });
 
