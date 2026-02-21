@@ -188,10 +188,10 @@ export async function fetchCompanyTrials(
               description: i.description || null,
             })),
             collaborators: (sponsor?.collaborators || []).map((c: any) => c.name),
-            startDate: status?.startDateStruct?.date || null,
-            primaryCompletionDate: status?.primaryCompletionDateStruct?.date || null,
-            completionDate: status?.completionDateStruct?.date || null,
-            lastUpdatePosted: status?.lastUpdatePostDateStruct?.date || null,
+            startDate: normalizeDate(status?.startDateStruct?.date),
+            primaryCompletionDate: normalizeDate(status?.primaryCompletionDateStruct?.date),
+            completionDate: normalizeDate(status?.completionDateStruct?.date),
+            lastUpdatePosted: normalizeDate(status?.lastUpdatePostDateStruct?.date),
             enrollmentCount: design?.enrollmentInfo?.count || null,
             locations: Array.from(new Set(contacts?.locations?.map((l: any) => l.country) || [])),
             hasResults: !!results || !!status?.resultsFirstPostDateStruct,
@@ -472,6 +472,16 @@ function mapStatus(ctStatus: string | undefined): string {
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ClinicalTrials.gov returns dates as "YYYY-MM-DD", "YYYY-MM", or "YYYY"
+// Normalize to full "YYYY-MM-DD" for Postgres date columns
+function normalizeDate(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr; // Already full date
+  if (/^\d{4}-\d{2}$/.test(dateStr)) return `${dateStr}-01`; // Year-month → add day
+  if (/^\d{4}$/.test(dateStr)) return `${dateStr}-01-01`; // Year only → add month+day
+  return null; // Unrecognized format
 }
 
 function escapeLikePattern(str: string): string {
