@@ -692,7 +692,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         tabIndex={-1}
-        className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up"
+        className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-slide-up"
       >
         {/* Header */}
         <div className="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 px-8 py-8">

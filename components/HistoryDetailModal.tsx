@@ -268,7 +268,7 @@ export default function HistoryDetailModal({
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-220px)] p-4 sm:p-6">
+        <div className="overflow-y-auto overscroll-contain max-h-[calc(90vh-220px)] p-4 sm:p-6">
           {/* Quick Summary Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
             <div className="p-2.5 sm:p-3 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-slate-700 dark:to-slate-700 rounded-xl border border-teal-200/50 dark:border-slate-600 overflow-hidden">

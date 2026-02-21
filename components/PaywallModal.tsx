@@ -114,7 +114,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
         aria-modal="true"
         aria-labelledby="paywall-modal-title"
         tabIndex={-1}
-        className="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
+        className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up"
       >
         {/* Header */}
         <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-6 py-6 overflow-hidden">

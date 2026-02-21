@@ -492,7 +492,7 @@ export default function ReportGenerationModal({
         <div
           ref={modalRef}
           tabIndex={-1}
-          className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-hidden outline-none transition-all duration-300"
+          className="relative w-full max-w-md max-h-[90vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl animate-slide-up overflow-y-auto overscroll-contain outline-none transition-all duration-300"
           role="dialog"
           aria-modal="true"
           aria-label="Report generation"

@@ -422,7 +422,7 @@ export default function OnboardingModal({
         aria-labelledby="onboarding-title"
         aria-describedby="onboarding-description"
         tabIndex={-1}
-        className={`relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up outline-none ${
+        className={`relative w-full sm:max-w-md max-h-[90vh] bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up outline-none ${
           isSpotlightStep ? 'lg:mr-8' : ''
         }`}
       >
