@@ -408,7 +408,7 @@ export async function runOpenFDAIngestion(
             territories_included: ['United States'],
             deal_type: 'other',
             announced_date: approvalDate,
-            source_type: 'openfda_suppl',
+            source_type: 'openfda',
             source_url: `https://api.fda.gov/drug/drugsfda.json?search=application_number:${result.application_number}`,
             source_filing_id: sourceId,
             terms_disclosed: false,
