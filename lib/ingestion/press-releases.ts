@@ -351,8 +351,8 @@ export async function runPressReleaseIngestion(
             const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
             const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
 
-            // Parse pub date
-            let announcedDate: string | null = null;
+            // Parse pub date (fallback to today if RSS item has no date)
+            let announcedDate: string = new Date().toISOString().split('T')[0];
             try {
               const d = new Date(item.pubDate);
               if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
