@@ -15,6 +15,7 @@ interface EnrichmentResult {
 type AcquisitionAppetite = 'aggressive' | 'moderate' | 'selective' | 'inactive';
 
 const PAGE_SIZE = 50;
+const MAX_DURATION_MS = 240_000; // 4 minutes (leave 1 min buffer for cleanup + logging)
 
 /**
  * Runs the full company enrichment pipeline:
@@ -24,6 +25,9 @@ const PAGE_SIZE = 50;
  * 4. Derives actively_acquiring flag
  * 5. Recalculates data quality scores
  * 6. Logs results to data_ingestion_log
+ *
+ * Processes as many companies as possible within the time budget.
+ * If it runs out of time, it logs partial results and returns.
  */
 export async function runCompanyEnrichment(
   supabase: SupabaseClient,
@@ -31,6 +35,7 @@ export async function runCompanyEnrichment(
 ): Promise<EnrichmentResult> {
   const startTime = Date.now();
   const errors: string[] = [];
+  let timedOut = false;
   let companiesProcessed = 0;
   let statsUpdated = 0;
   let appetiteUpdated = 0;
@@ -69,6 +74,13 @@ export async function runCompanyEnrichment(
 
     // Process each company individually, wrapped in try/catch
     for (const company of companies) {
+      // Time budget check: bail out if we're running low
+      if (Date.now() - startTime > MAX_DURATION_MS) {
+        timedOut = true;
+        console.log(`Time budget exceeded after ${companiesProcessed} companies, stopping.`);
+        break;
+      }
+
       try {
         // Step 2a: Call RPC to refresh deal stats
         const { error: rpcError } = await supabase.rpc('update_company_deal_stats', {
@@ -182,8 +194,11 @@ export async function runCompanyEnrichment(
       }
     }
 
-    // If we got fewer results than a full page, we're done
-    if (companies.length < PAGE_SIZE) {
+    // If time budget exceeded, stop pagination
+    if (timedOut) {
+      hasMore = false;
+    } else if (companies.length < PAGE_SIZE) {
+      // If we got fewer results than a full page, we're done
       hasMore = false;
     } else {
       page++;
@@ -200,7 +215,7 @@ export async function runCompanyEnrichment(
   // Step 3: Log to data_ingestion_log
   const { error: logError } = await supabase.from('data_ingestion_log').insert({
     source: 'company_enrichment',
-    status: errors.length === 0 ? 'success' : 'partial',
+    status: timedOut ? 'partial' : errors.length === 0 ? 'success' : 'partial',
     records_processed: companiesProcessed,
     records_inserted: appetiteUpdated,
     errors: errors.length > 0 ? errors.slice(0, 50) : null,
@@ -210,6 +225,7 @@ export async function runCompanyEnrichment(
       appetite_updated: appetiteUpdated,
       full_refresh: options?.fullRefresh || false,
       specific_ids: options?.companyIds?.length || 0,
+      timed_out: timedOut,
     },
   });
 
