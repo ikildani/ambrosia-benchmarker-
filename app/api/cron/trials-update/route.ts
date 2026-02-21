@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
       trials: result.trials,
       batch_info: result.batch_info,
       errors: result.errors.length,
+      error_details: result.errors.slice(0, 10),
     });
   } catch (error) {
     console.error('Clinical trials update error:', error);
