@@ -496,35 +496,35 @@ export async function runWeeklyIngestion(
 
   console.log(`Starting ClinicalTrials.gov ingestion (batch of ${batchSize})...`);
 
-  // Deduplicate company list at runtime
-  const uniqueCompanies = [...new Set(COMPANIES_TO_TRACK)];
-
-  // Query all companies from DB to find which were least recently enriched
+  // Dynamic: pull all companies from DB, ordered by least recently enriched
+  // This replaces the hardcoded COMPANIES_TO_TRACK list so new seeded companies
+  // are automatically picked up for trial tracking
   const { data: allDbCompanies } = await supabase
     .from('companies')
-    .select('id, name, name_variations, last_enriched_at');
+    .select('id, name, name_variations, last_enriched_at')
+    .eq('actively_acquiring', true)
+    .order('last_enriched_at', { ascending: true, nullsFirst: true });
+
+  if (!allDbCompanies || allDbCompanies.length === 0) {
+    return { companies: 0, trials: 0, errors: ['No companies found in DB'], batch_info: { processed: 0, total: 0 } };
+  }
 
   // Build lookup: lowercase name/variation -> { id, last_enriched_at }
   const companyLookup = new Map<string, { id: string; last_enriched_at: string | null }>();
-  for (const c of allDbCompanies || []) {
+  for (const c of allDbCompanies) {
     companyLookup.set(c.name.toLowerCase(), { id: c.id, last_enriched_at: c.last_enriched_at });
     for (const v of c.name_variations || []) {
       companyLookup.set(v.toLowerCase(), { id: c.id, last_enriched_at: c.last_enriched_at });
     }
   }
 
-  // Sort COMPANIES_TO_TRACK by least recently enriched (nulls first = never enriched)
-  const sortedCompanies = uniqueCompanies.sort((a, b) => {
-    const infoA = companyLookup.get(a.toLowerCase());
-    const infoB = companyLookup.get(b.toLowerCase());
-    const dateA = infoA?.last_enriched_at ? new Date(infoA.last_enriched_at).getTime() : 0;
-    const dateB = infoB?.last_enriched_at ? new Date(infoB.last_enriched_at).getTime() : 0;
-    return dateA - dateB; // 0 (never enriched) sorts first
-  });
+  // Use company names as CT.gov search terms (already sorted by stalest first from query)
+  const allCompanyNames = allDbCompanies.map((c: any) => c.name);
+  const totalCompanies = allCompanyNames.length;
 
   // Take only the batch
-  const batch = sortedCompanies.slice(0, batchSize);
-  console.log(`Processing batch of ${batch.length}/${uniqueCompanies.length} companies (stalest first)`);
+  const batch = allCompanyNames.slice(0, batchSize);
+  console.log(`Processing batch of ${batch.length}/${totalCompanies} companies (stalest first)`);
 
   // Log ingestion start
   const { data: logEntry } = await supabase
@@ -532,7 +532,7 @@ export async function runWeeklyIngestion(
     .insert({
       source: 'clinicaltrials',
       run_type: 'scheduled',
-      parameters: { companies: batch.length, total: uniqueCompanies.length, batchSize },
+      parameters: { companies: batch.length, total: totalCompanies, batchSize },
     })
     .select('id')
     .single();
@@ -735,7 +735,7 @@ export async function runWeeklyIngestion(
       companies: companiesProcessed,
       trials: trialsInserted,
       errors,
-      batch_info: { processed: batch.length, total: uniqueCompanies.length },
+      batch_info: { processed: batch.length, total: totalCompanies },
     };
 
   } catch (error) {
