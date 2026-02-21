@@ -16,6 +16,53 @@ interface FeedSource {
 }
 
 const FEED_SOURCES: FeedSource[] = [
+  // === Tier 1: Dedicated Deals Feeds (highest signal, every item is a deal) ===
+  {
+    name: 'BioSpace_Deals',
+    url: 'https://www.biospace.com/deals.rss',
+    type: 'rss',
+    dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'rights', 'option', 'milestone', 'royalt', 'upfront', 'billion', 'million'],
+  },
+  {
+    name: 'BioPharma_Dive_Deals',
+    url: 'https://www.biopharmadive.com/feeds/topic/deals/',
+    type: 'rss',
+    dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'rights', 'option', 'milestone', 'royalt', 'upfront', 'billion', 'million'],
+  },
+
+  // === Tier 2: Deal-Type Wire Feeds (high volume, filtered by deal category) ===
+  {
+    name: 'GlobeNewswire_Licensing',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/feedTitle/GlobeNewswire%20-%20Licensing%20Agreements',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'collaboration', 'fda', 'pipeline', 'biologic'],
+  },
+  {
+    name: 'GlobeNewswire_MA',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/27-Mergers%20And%20Acquisitions/feedTitle/GlobeNewswire%20-%20Mergers%20And%20Acquisitions',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'pipeline', 'biologic', 'pharmaceutical'],
+  },
+  {
+    name: 'GlobeNewswire_Partnerships',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/29-Partnerships/feedTitle/GlobeNewswire%20-%20Partnerships',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'collaboration', 'fda', 'pipeline', 'biologic'],
+  },
+  {
+    name: 'PR_Newswire_Biotech',
+    url: 'https://www.prnewswire.com/rss/health-latest-news/biotechnology-list.rss',
+    type: 'rss',
+    dealKeywords: ['license agreement', 'collaboration agreement', 'exclusive license', 'acquisition', 'deal', 'partnership', 'co-develop', 'option agreement', 'milestone', 'royalt'],
+  },
+  {
+    name: 'PR_Newswire_Pharma',
+    url: 'https://www.prnewswire.com/rss/health-latest-news/pharmaceuticals-list.rss',
+    type: 'rss',
+    dealKeywords: ['license agreement', 'collaboration agreement', 'exclusive license', 'acquisition', 'deal', 'partnership', 'co-develop', 'option agreement', 'milestone', 'royalt'],
+  },
+
+  // === Tier 3: Industry News Feeds (need keyword filtering for deals) ===
   {
     name: 'FierceBiotech',
     url: 'https://www.fiercebiotech.com/rss/xml',
@@ -29,16 +76,10 @@ const FEED_SOURCES: FeedSource[] = [
     dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'rights', 'option', 'milestone', 'royalt', 'upfront', 'co-develop', 'co-promote'],
   },
   {
-    name: 'GlobeNewswire_Partnerships',
-    url: 'https://www.globenewswire.com/RssFeed/subjectcode/18-Partnerships%20Agreements/feedTitle/GlobeNewswire%20-%20Partnerships%20Agreements',
+    name: 'Endpoints_News',
+    url: 'https://endpoints.news/feed/',
     type: 'rss',
-    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'collaboration', 'fda', 'pipeline'],
-  },
-  {
-    name: 'PR_Newswire_Health',
-    url: 'https://www.prnewswire.com/rss/health-latest-news/health-latest-news-list.rss',
-    type: 'rss',
-    dealKeywords: ['license agreement', 'collaboration agreement', 'exclusive license', 'acquisition', 'deal', 'partnership', 'co-develop', 'option agreement', 'milestone', 'royalt'],
+    dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'upfront', 'milestone', 'billion', 'million'],
   },
   {
     name: 'BioWorld_Deals',
