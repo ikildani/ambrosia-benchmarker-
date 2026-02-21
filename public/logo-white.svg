@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100" width="520" height="100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 555 100" width="555" height="100">
 
 
   <defs>
@@ -43,5 +43,5 @@
 
   </g>
   <text x="120" y="62" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-  <text x="248" y="62" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="2.5">Ventures</text>
+  <text x="283" y="62" font-family="'Libre Franklin', 'Helvetica Neue', Helvetica, sans-serif" font-size="28" font-weight="200" fill="#9499d1" letter-spacing="2.5">Ventures</text>
 </svg>

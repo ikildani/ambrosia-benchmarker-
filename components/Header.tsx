@@ -210,7 +210,7 @@ export default function Header({
             href="/"
             className="flex items-center group"
           >
-            <AmbrosiaLogo variant="color" height={40} />
+            <AmbrosiaLogo variant="auto" height={40} />
           </Link>
 
           {/* Desktop Navigation */}
