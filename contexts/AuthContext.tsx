@@ -186,10 +186,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('is_authenticated', 'true');
             localStorage.setItem('user_data', JSON.stringify(newUser));
 
-            // Auto-upgrade pro users by email
+            // Check tier: email allowlist first, then database
             if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
               setTierState('pro');
               localStorage.setItem('user_tier', 'pro');
+            } else {
+              // Query actual tier from database (Stripe webhook sets this)
+              supabase.from('user_profiles')
+                .select('tier')
+                .eq('id', supabaseUser.id)
+                .single()
+                .then(({ data: profile, error: tierError }) => {
+                  if (!tierError && profile?.tier === 'pro') {
+                    setTierState('pro');
+                    localStorage.setItem('user_tier', 'pro');
+                  }
+                });
             }
 
             // Sync usage count from database
@@ -227,23 +239,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('is_authenticated', 'true');
             localStorage.setItem('user_data', JSON.stringify(newUser));
 
-            // Auto-upgrade pro users by email
+            // Check tier: email allowlist first, then database
             if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
               setTierState('pro');
               localStorage.setItem('user_tier', 'pro');
+            } else {
+              // Query actual tier from database (Stripe webhook sets this)
+              supabase.from('user_profiles')
+                .select('tier')
+                .eq('id', supabaseUser.id)
+                .single()
+                .then(({ data: profile, error: tierError }) => {
+                  if (!tierError && profile?.tier === 'pro') {
+                    setTierState('pro');
+                    localStorage.setItem('user_tier', 'pro');
+                  }
+                });
             }
 
             // Sync usage count from database (so it persists across devices)
             syncUsageFromDatabase(supabaseUser.id).catch(console.error);
 
             // Create user profile if it doesn't exist (for OAuth users)
+            // Using ignoreDuplicates to avoid overwriting existing profiles (especially tier)
             supabase.from('user_profiles').upsert({
               id: supabaseUser.id,
               email: supabaseUser.email,
               company_name: supabaseUser.user_metadata?.company || null,
               tier: 'free',
               email_verified: true,
-            }, { onConflict: 'id' }).then(({ error }) => {
+            }, { onConflict: 'id', ignoreDuplicates: true }).then(({ error }) => {
               if (error) console.error('[Auth] Profile upsert error:', error);
             });
           }
