@@ -236,7 +236,7 @@ async function extractDealFromArticle(
 ): Promise<ExtractedDeal | null> {
   const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
-  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from press releases and news articles.
+  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from press releases and news articles. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
 Your task is to identify and extract structured deal data. Be precise and conservative:
 - Only extract information that is explicitly stated
@@ -250,7 +250,11 @@ INDICATION CATEGORIES: solid_tumor, hematological, autoimmune, cns, cardiovascul
 PHASE VALUES: discovery, preclinical, phase_1, phase_2, phase_3, approved, unknown
 TERRITORY VALUES: global, us, ex_us, us_eu, us_eu_japan, china, japan, asia_pacific, europe, regional, other
 DEAL TYPE VALUES: license, option, collaboration, acquisition, co_development, co_promotion, other
-EXCLUSIVITY VALUES: exclusive, co_exclusive, non_exclusive, unknown`;
+EXCLUSIVITY VALUES: exclusive, co_exclusive, non_exclusive, unknown
+REGULATORY DESIGNATIONS: breakthrough, fast_track, orphan, priority_review, rmat, prime, accelerated
+
+MILESTONE EXTRACTION: Extract individual milestones when disclosed. Classify as development (IND, Phase starts), regulatory (filing, approval), commercial (revenue-based), or sales (net sales thresholds).
+DEAL STRUCTURE: Look for opt-in/opt-out provisions, profit-sharing vs royalty, cost-sharing ratios, research funding, rights retained by licensor, sublicense rights, contract duration, companion diagnostic rights.`;
 
   const userPrompt = `Extract the biopharma licensing/collaboration deal from this article. Return ONLY valid JSON.
 
@@ -285,6 +289,19 @@ If it IS a deal, return:
   "includes_co_development": boolean,
   "includes_co_promotion": boolean,
   "option_exercise_fee": number or null,
+  "milestone_details": [{"description": "milestone name", "amount_usd": number, "type": "development|regulatory|commercial|sales"}] or null,
+  "sales_milestones": [{"threshold_usd": number, "payment_usd": number}] or null,
+  "research_funding_usd": number or null,
+  "profit_share_pct": decimal or null,
+  "cost_share_ratio": decimal or null,
+  "opt_in_rights": "opt-in/opt-out provision description, or null",
+  "opt_in_stage": "phase for opt-in, or null",
+  "regulatory_designations": ["array of designations"],
+  "term_years": number or null,
+  "sublicense_rights": boolean or null,
+  "rights_retained": "what licensor retains, or null",
+  "indications_licensed": number or null,
+  "includes_diagnostics": boolean,
   "confidence_score": 0-100,
   "extraction_notes": "any caveats"
 }
@@ -298,7 +315,7 @@ ${content}`;
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+      max_tokens: 4000,
       messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
     });
@@ -429,6 +446,20 @@ export async function runPressReleaseIngestion(
               includes_co_development: deal.includes_co_development,
               includes_co_promotion: deal.includes_co_promotion,
               option_exercise_fee: deal.option_exercise_fee,
+              // Rich term fields
+              milestone_details: deal.milestone_details || [],
+              sales_milestones: deal.sales_milestones || [],
+              research_funding_usd: deal.research_funding_usd,
+              profit_share_pct: deal.profit_share_pct,
+              cost_share_ratio: deal.cost_share_ratio,
+              opt_in_rights: deal.opt_in_rights,
+              opt_in_stage: deal.opt_in_stage,
+              regulatory_designations: deal.regulatory_designations || [],
+              term_years: deal.term_years,
+              sublicense_rights: deal.sublicense_rights,
+              rights_retained: deal.rights_retained,
+              indications_licensed: deal.indications_licensed,
+              includes_diagnostics: deal.includes_diagnostics || false,
               announced_date: announcedDate,
               source_type: 'press_release',
               source_url: item.link,

@@ -180,6 +180,17 @@ export interface SECFiling {
   fileNumber: string;
 }
 
+export interface MilestoneDetail {
+  description: string;
+  amount_usd: number;
+  type: 'development' | 'regulatory' | 'commercial' | 'sales';
+}
+
+export interface SalesMilestone {
+  threshold_usd: number;
+  payment_usd: number;
+}
+
 export interface ExtractedDeal {
   licensor: string;
   licensee: string;
@@ -208,6 +219,20 @@ export interface ExtractedDeal {
   includes_co_development: boolean;
   includes_co_promotion: boolean;
   option_exercise_fee: number | null;
+  // Rich term fields
+  milestone_details: MilestoneDetail[] | null;
+  sales_milestones: SalesMilestone[] | null;
+  research_funding_usd: number | null;
+  profit_share_pct: number | null;
+  cost_share_ratio: number | null;
+  opt_in_rights: string | null;
+  opt_in_stage: string | null;
+  regulatory_designations: string[];
+  term_years: number | null;
+  sublicense_rights: boolean | null;
+  rights_retained: string | null;
+  indications_licensed: number | null;
+  includes_diagnostics: boolean;
   confidence_score: number;
   extraction_notes: string | null;
   therapeutic_area: string | null;
@@ -317,7 +342,7 @@ export async function extractDealFromFiling(
 ): Promise<ExtractedDeal | null> {
   const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
-  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from SEC 8-K filings.
+  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from SEC 8-K filings. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
 Your task is to identify and extract structured deal data. Be precise and conservative:
 - Only extract information that is explicitly stated
@@ -344,7 +369,26 @@ DEAL TYPE VALUES (use exactly):
 license, option, collaboration, acquisition, co_development, co_promotion, other
 
 EXCLUSIVITY VALUES (use exactly):
-exclusive, co_exclusive, non_exclusive, unknown`;
+exclusive, co_exclusive, non_exclusive, unknown
+
+REGULATORY DESIGNATION VALUES (use exactly, array):
+breakthrough, fast_track, orphan, priority_review, rmat, prime, accelerated
+
+MILESTONE EXTRACTION GUIDELINES:
+- Extract INDIVIDUAL milestones when disclosed (e.g., "$10M upon IND filing", "$50M upon Phase 3 initiation")
+- Classify each as development (IND, Phase starts, enrollment), regulatory (filing, approval), commercial/sales (revenue thresholds)
+- Sales milestones are triggered by net sales thresholds (e.g., "$100M upon reaching $1B net sales")
+- Separate sales milestones into the sales_milestones array with threshold and payment
+
+DEAL STRUCTURE DETAILS:
+- Look for opt-in/opt-out provisions (common in option deals — e.g., "option to co-develop after Phase 2 data")
+- Look for profit-sharing vs royalty structures (co-development deals often split profits instead of paying royalties)
+- Look for cost-sharing ratios (e.g., "50/50 cost share through Phase 2, 70/30 thereafter")
+- Look for research funding commitments separate from upfront payments
+- Note rights retained by licensor (e.g., "licensor retains rights in Greater China", "co-promote rights in US")
+- Note contract duration/term if mentioned
+- Count number of indications licensed (single vs multi-indication deals)
+- Note companion diagnostic rights if mentioned`;
 
   const userPrompt = `Extract the licensing/collaboration deal from this SEC 8-K filing. Return ONLY valid JSON.
 
@@ -380,6 +424,19 @@ If it IS a deal, return this structure:
   "includes_co_development": boolean,
   "includes_co_promotion": boolean,
   "option_exercise_fee": number or null,
+  "milestone_details": [{"description": "milestone name", "amount_usd": number, "type": "development|regulatory|commercial|sales"}] or null,
+  "sales_milestones": [{"threshold_usd": number, "payment_usd": number}] or null,
+  "research_funding_usd": number or null,
+  "profit_share_pct": decimal or null (e.g., 0.50 for 50%),
+  "cost_share_ratio": decimal or null (e.g., 0.50 for 50/50),
+  "opt_in_rights": "description of opt-in/opt-out provisions, or null",
+  "opt_in_stage": "phase at which opt-in can occur, or null",
+  "regulatory_designations": ["array of designations like breakthrough, fast_track, orphan, priority_review, rmat, prime, accelerated"],
+  "term_years": number or null,
+  "sublicense_rights": boolean or null,
+  "rights_retained": "what licensor retains (e.g., 'co-promote US, Japan rights'), or null",
+  "indications_licensed": number or null (count of indications covered),
+  "includes_diagnostics": boolean,
   "confidence_score": 0-100 (how confident you are in this extraction),
   "extraction_notes": "any important caveats or notes about the extraction"
 }
@@ -390,7 +447,7 @@ ${filingText}`;
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+      max_tokens: 4000,
       messages: [
         { role: 'user', content: userPrompt }
       ],
@@ -556,6 +613,20 @@ export async function runDailyIngestion(
             includes_co_development: deal.includes_co_development,
             includes_co_promotion: deal.includes_co_promotion,
             option_exercise_fee: deal.option_exercise_fee,
+            // Rich term fields
+            milestone_details: deal.milestone_details || [],
+            sales_milestones: deal.sales_milestones || [],
+            research_funding_usd: deal.research_funding_usd,
+            profit_share_pct: deal.profit_share_pct,
+            cost_share_ratio: deal.cost_share_ratio,
+            opt_in_rights: deal.opt_in_rights,
+            opt_in_stage: deal.opt_in_stage,
+            regulatory_designations: deal.regulatory_designations || [],
+            term_years: deal.term_years,
+            sublicense_rights: deal.sublicense_rights,
+            rights_retained: deal.rights_retained,
+            indications_licensed: deal.indications_licensed,
+            includes_diagnostics: deal.includes_diagnostics || false,
             announced_date: filing.filingDate,
             source_type: 'sec_8k',
             source_url: filing.documentUrl,
