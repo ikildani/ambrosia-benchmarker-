@@ -10,14 +10,14 @@ export default function AmbrosiaLogo({ variant = "auto", height = 40 }: Ambrosia
     return (
       <>
         <img
-          src="/logo-color.svg"
+          src="/logo-color.png"
           alt="Ambrosia Ventures"
           height={height}
           style={{ height, width: "auto" }}
           className="block dark:hidden"
         />
         <img
-          src="/logo-white.svg"
+          src="/logo-white.png"
           alt="Ambrosia Ventures"
           height={height}
           style={{ height, width: "auto" }}
@@ -27,7 +27,7 @@ export default function AmbrosiaLogo({ variant = "auto", height = 40 }: Ambrosia
     );
   }
 
-  const src = variant === "color" ? "/logo-color.svg" : "/logo-white.svg";
+  const src = variant === "color" ? "/logo-color.png" : "/logo-white.png";
 
   return (
     <img
