@@ -383,7 +383,7 @@ export async function runPressReleaseIngestion(
           // Extract deal using Claude
           const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
 
-          if (deal && deal.confidence_score >= 50) {
+          if (deal && deal.confidence_score >= 50 && deal.licensor && deal.licensee) {
             dealsExtracted++;
 
             // Find or create companies
