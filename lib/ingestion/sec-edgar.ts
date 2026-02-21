@@ -481,7 +481,7 @@ export async function runDailyIngestion(
         const content = await fetchFilingContent(filing.documentUrl);
         const deal = await extractDealFromFiling(content, anthropicApiKey);
 
-        if (deal && deal.confidence_score >= 50) {
+        if (deal && deal.confidence_score >= 75) {
           // Find or create companies
           const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
           const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);

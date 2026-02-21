@@ -339,7 +339,7 @@
     "oncolyticVirus": { "multiplier": 1.10, "label": "Oncolytic Virus", "context": "Niche interest" },
     "bbbPlatform": { "multiplier": 1.50, "label": "BBB Delivery Platform", "context": "2-3x premium for multi-program optionality; AZ/JCR $825M, ABL/GSK $2.7B" },
     "aso": { "multiplier": 1.15, "label": "Antisense Oligonucleotide (ASO)", "context": "Established in neuro (Biogen/Ionis); genetic precision, proven path" },
-    "psychedelic": { "multiplier": 1.20, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B for MDD" },
+    "psychedelic": { "multiplier": 1.10, "label": "Psychedelic / Neuroplastogen", "context": "Emerging category; AbbVie/Gilgamesh up to $1.2B; regulatory path still unclear" },
     "ionChannel": { "multiplier": 1.10, "label": "Ion Channel Modulator", "context": "Nav1.8, CaV, HCN targets; emerging in pain and epilepsy; Praxis, Xenon active" },
     "tauTargeting": { "multiplier": 1.25, "label": "Tau-targeting Therapy", "context": "Hot emerging category; tau degraders, immunotherapy, PET imaging; post-amyloid wave" },
     "stemCell": { "multiplier": 1.15, "label": "Neural Stem Cell / Progenitor", "context": "BlueRock/Bayer precedent; iPSC-derived neurons; PD and stroke applications" },
@@ -356,12 +356,12 @@
     "tl1aInhibitor": { "multiplier": 1.45, "label": "Anti-TL1A", "context": "Hottest target 2023-2024; Merck/Prometheus $10.8B and Roche/Telavant $7.1B reset market" },
     "glp1Agonist": { "multiplier": 1.50, "label": "GLP-1 Receptor Agonist", "context": "Hottest drug class in pharma; semaglutide/liraglutide validated; $20B+ peak sales" },
     "dualIncretin": { "multiplier": 1.65, "label": "Dual Incretin (GLP-1/GIP)", "context": "Tirzepatide paradigm; Lilly Mounjaro/Zepbound; superior efficacy to mono-GLP-1" },
-    "tripleIncretin": { "multiplier": 1.70, "label": "Triple Agonist (GLP-1/GIP/Glucagon)", "context": "Next frontier; Lilly retatrutide 24% weight loss; highest efficacy potential" },
+    "tripleIncretin": { "multiplier": 1.55, "label": "Triple Agonist (GLP-1/GIP/Glucagon)", "context": "Next frontier; Lilly retatrutide 24% weight loss Phase 2; awaiting Phase 3 validation" },
     "sglt2Inhibitor": { "multiplier": 1.10, "label": "SGLT2 Inhibitor", "context": "Established class (empagliflozin, dapagliflozin); cardiorenal benefit; generic pressure" },
     "amylinAnalog": { "multiplier": 1.35, "label": "Amylin Analog", "context": "Novo cagrilintide/sema combo (CagriSema); satiety mechanism complementary to GLP-1" },
     "oralPeptide": { "multiplier": 1.55, "label": "Oral Peptide", "context": "Oral semaglutide breakthrough; oral convenience premium; Rybelsus $2B+" },
     "antiActivin": { "multiplier": 1.40, "label": "Anti-Activin / Myostatin", "context": "Muscle-sparing weight loss; Scholar Rock/Lilly; differentiates from pure GLP-1" },
-    "microbiomeBased": { "multiplier": 1.15, "label": "Microbiome-Based Therapy", "context": "Emerging category; gut-brain axis; early-stage but high interest" }
+    "microbiomeBased": { "multiplier": 0.90, "label": "Microbiome-Based Therapy", "context": "Early-stage; no FDA approvals; no major licensing precedents; high clinical risk" }
   },
   "indications": {
     "solidTumor": {
@@ -706,7 +706,7 @@
       "neurologyModality": {
         "bbbPlatform": "BBB delivery platforms command 2-3x premiums due to multi-program optionality. Leverage AZ/JCR ($825M) and ABL/GSK ($2.7B) as comparables.",
         "aso": "ASOs have a proven regulatory path in neuro (Spinraza precedent). Emphasize genetic target validation and manufacturing scalability.",
-        "psychedelic": "Psychedelic/neuroplastogen deals are nascent but high-value. AbbVie/Gilgamesh ($1.2B) sets the benchmark for differentiated Phase 2 assets.",
+        "psychedelic": "Psychedelic/neuroplastogen deals are emerging. AbbVie/Gilgamesh ($1.2B) is the only major benchmark. Regulatory path remains unclear; expect milestone-heavy structures.",
         "geneTherapy": "CNS gene therapy commands higher premiums than oncology gene therapy due to curative potential for monogenic disorders. Expect scrutiny on BBB penetration and durability.",
         "ionChannel": "Ion channel modulators are gaining traction in epilepsy and pain. Nav1.8 (Vertex precedent) and genetic epilepsy channels command differentiated terms. Emphasize selectivity data.",
         "tauTargeting": "Tau-targeting therapies are the next wave after amyloid validation. Tau PET-guided patient selection and disease modification data are key negotiation leverage points.",
@@ -775,10 +775,10 @@
       "metabolicModality": {
         "glp1Agonist": "GLP-1 agonists dominate metabolic. Semaglutide is the fastest-growing drug in history. Differentiation via oral delivery, superior efficacy, or muscle-sparing profiles is essential for premium terms.",
         "dualIncretin": "Dual incretins represent the next wave after mono-GLP-1. Tirzepatide's superior efficacy data validates the approach. Emphasize comparative weight loss and CV outcome data.",
-        "tripleIncretin": "Triple agonists (GLP-1/GIP/glucagon) represent the frontier. Retatrutide's 24% weight loss is category-leading. Early-stage but commanding maximum interest.",
+        "tripleIncretin": "Triple agonists (GLP-1/GIP/glucagon) are early-stage with compelling Phase 2 data (retatrutide 24% weight loss). Phase 3 validation pending. Expect moderate premiums over dual incretins until pivotal data confirms.",
         "oralPeptide": "Oral metabolic peptides are the holy grail. Oral semaglutide proved the concept ($2B+ revenue). Next-gen oral formulations with bioavailability improvements command massive premiums.",
         "antiActivin": "Anti-activin/myostatin approaches differentiate by preserving lean mass during weight loss. Emphasize body composition data vs. GLP-1 muscle loss.",
-        "microbiomeBased": "Microbiome-based metabolic therapies are emerging but unvalidated. Expect milestone-heavy structures with proof-of-concept gates."
+        "microbiomeBased": "Microbiome-based metabolic therapies have no FDA approvals or major licensing precedents. Expect highly milestone-gated structures with low upfront payments. Clinical risk is the dominant factor."
       },
       "metabolicIndication": {
         "obesity": "Obesity is the single largest commercial opportunity in pharma history ($100B+ projected). Competition from Novo and Lilly is intense. Differentiation via oral delivery, superior efficacy, or muscle-sparing is critical.",
