@@ -203,7 +203,7 @@ export default function Header({
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex justify-between items-center h-16 sm:h-20 lg:h-24">
           {/* Logo */}
           <Link
@@ -220,19 +220,20 @@ export default function Header({
                 <a
                   key={idx}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors ${
+                  className={`relative text-sm font-medium transition-colors group ${
                     item.isActive
                       ? 'text-teal-600 dark:text-teal-400'
                       : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
                   }`}
                 >
                   {item.label}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-teal-500 transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </a>
               ) : (
                 <Link
                   key={idx}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  className={`relative text-sm font-medium transition-colors flex items-center gap-1.5 group ${
                     item.isActive
                       ? 'text-teal-600 dark:text-teal-400'
                       : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
@@ -244,6 +245,7 @@ export default function Header({
                       {item.badge}
                     </span>
                   )}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-teal-500 transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </Link>
               )
             ))}

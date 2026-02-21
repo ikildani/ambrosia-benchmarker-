@@ -94,7 +94,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
   };
 
   return (
-    <section id="pricing" className="py-16 sm:py-20 lg:py-24 px-4 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
+    <section id="pricing" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12 lg:mb-16">
@@ -113,13 +113,13 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         </div>
 
         {/* Pricing Cards - Three columns */}
-        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 max-w-5xl xl:max-w-6xl mx-auto">
           {/* Free Tier */}
           <div
             className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
               currentTier === 'free'
                 ? 'ring-2 ring-teal-500 shadow-glow-lg'
-                : 'border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg'
+                : 'border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:-translate-y-1'
             }`}
           >
             {currentTier === 'free' && (
@@ -185,7 +185,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
 
           {/* Deal Report Tier */}
-          <div className="relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 border-2 border-purple-300 dark:border-purple-500 shadow-soft transition-all duration-300">
+          <div className="relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 border-2 border-purple-300 dark:border-purple-500 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
               <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft whitespace-nowrap">
                 Per Calculation

@@ -643,7 +643,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     <div id="calculator" className="w-full max-w-6xl mx-auto scroll-mt-24 pb-20 md:pb-0">
       <div className="card-elevated overflow-hidden">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-6 lg:py-8 xl:py-10 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
@@ -682,7 +682,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         )}
 
         {/* Form */}
-        <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
+        <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
           {/* Therapeutic Area Selector */}
           <TherapeuticAreaSelector
             therapeuticArea={therapeuticArea}
@@ -692,7 +692,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           />
 
           {/* Wizard + Live Preview layout */}
-          <div className="grid md:grid-cols-[1fr_280px] gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-[1fr_280px] xl:grid-cols-[1fr_320px] gap-6 lg:gap-8 xl:gap-10">
             <WizardStepper
               steps={activeSteps}
               currentStep={wizardStep}

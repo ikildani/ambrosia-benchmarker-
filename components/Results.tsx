@@ -601,7 +601,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
+      <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
         <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
           <div className="flex items-start gap-3 sm:gap-4">
@@ -690,7 +690,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Terms Grid */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
           {/* Upfront Payment */}
           <MetricCard
             title="Upfront Payment"

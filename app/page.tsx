@@ -59,8 +59,8 @@ function LiveDemoSection() {
   const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all cursor-pointer appearance-none";
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
-      <div className="max-w-5xl mx-auto">
+    <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+      <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-800 dark:text-white mb-3">
             See Your Deal Terms Instantly
@@ -71,7 +71,7 @@ function LiveDemoSection() {
         </div>
 
         {/* 3 Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl xl:max-w-4xl mx-auto mb-8">
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Phase</label>
             <select value={demoPhase} onChange={(e) => setDemoPhase(e.target.value as Phase)} className={selectClass}>
@@ -101,7 +101,7 @@ function LiveDemoSection() {
         </div>
 
         {/* Result Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl xl:max-w-4xl mx-auto mb-8">
           {[
             {
               label: 'Upfront Payment',
@@ -222,7 +222,7 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 pb-16 sm:pb-20 lg:pb-24 px-4 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 xl:pt-48 pb-16 sm:pb-20 lg:pb-24 xl:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,199,199,0.12),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,199,199,0.15),rgba(0,0,0,0))]" />
@@ -367,7 +367,7 @@ export default function Home() {
       <LiveDemoSection />
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 px-4 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
+      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-6">
@@ -384,7 +384,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
             {[
               {
                 step: '1',
@@ -449,7 +449,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-20 lg:py-24 px-4 bg-neutral-50 dark:bg-slate-800/50 transition-colors duration-300">
+      <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-neutral-50 dark:bg-slate-800/50 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-6">
@@ -466,7 +466,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
             {[
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
@@ -515,8 +515,8 @@ export default function Home() {
       <ComparisonTable />
 
       {/* Partner Discovery Preview Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+        <div className="max-w-5xl xl:max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 bg-cyan-50 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30 rounded-full px-4 py-1.5 mb-4">
               <svg className="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -532,7 +532,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl xl:max-w-4xl mx-auto mb-8">
             {[
               { name: 'Major Pharma Co.', score: 92, focus: 'Oncology, ADC expertise', deals: '12 deals in 12mo' },
               { name: 'Global BioPharma', score: 87, focus: 'Late-stage licensing', deals: '8 deals in 12mo' },
@@ -568,14 +568,14 @@ export default function Home() {
       </section>
 
       {/* Authority Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
+      <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
             backgroundSize: '32px 32px'
           }} />
         </div>
-        <div className="max-w-4xl mx-auto relative text-center">
+        <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Built for Life Sciences Deal-Making</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
             Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings and press releases. Updated weekly with new transactions.
@@ -603,8 +603,8 @@ export default function Home() {
       <FAQSection />
 
       {/* About Section */}
-      <section id="about" className="py-16 sm:py-20 lg:py-24 px-4 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
-        <div className="max-w-4xl mx-auto text-center">
+      <section id="about" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
+        <div className="max-w-4xl xl:max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-navy-50 dark:bg-navy-500/20 border border-navy-200 dark:border-navy-500/30 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-6">
             <span className="text-xs sm:text-sm font-medium text-navy-700 dark:text-navy-300">About Us</span>
           </div>
@@ -642,7 +642,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-navy-900 text-neutral-400 py-10 sm:py-12 lg:py-16 px-4">
+      <footer className="bg-navy-900 text-neutral-400 py-10 sm:py-12 lg:py-16 xl:py-20 px-4 xl:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 pb-8 sm:pb-12 border-b border-navy-800">
             <div className="flex items-center">

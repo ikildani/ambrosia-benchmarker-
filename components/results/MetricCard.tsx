@@ -83,7 +83,7 @@ function MetricCardInner({
 
   return (
     <div
-      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
+      className={`group metric-card border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
       style={typeof animationIndex === 'number' ? { animationDelay: `${animationIndex * 100}ms` } : undefined}
     >
       <div

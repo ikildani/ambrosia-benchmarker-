@@ -57,14 +57,14 @@ export default function FAQSection() {
   };
 
   return (
-    <section id="faq" className="py-16 sm:py-20 lg:py-24 px-4 bg-slate-50 dark:bg-slate-800/50">
+    <section id="faq" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-slate-50 dark:bg-slate-800/50">
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl xl:max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
             Frequently Asked Questions
@@ -78,7 +78,7 @@ export default function FAQSection() {
           {faqs.map((faq, index) => (
             <details
               key={index}
-              className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+              className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft transition-all duration-200"
             >
               <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">
