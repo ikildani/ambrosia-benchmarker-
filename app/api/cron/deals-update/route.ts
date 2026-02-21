@@ -216,6 +216,32 @@ export async function GET(request: NextRequest) {
     }
     console.log(`Recalculated deal stats for ${statsUpdated}/${affectedCompanyIds.size} companies`);
 
+    // Step 7: Auto-promote companies with real deal activity
+    // Companies discovered by pipelines start with actively_acquiring=false.
+    // Promote them when they have enough signal to be useful in partner matching.
+    console.log('Step 7: Auto-promoting companies with deal activity...');
+    let promoted = 0;
+
+    const { data: promotionCandidates } = await supabase
+      .from('companies')
+      .select('id, name, deals_last_12mo, deals_last_24mo, active_trials_count, data_quality_score')
+      .eq('actively_acquiring', false)
+      .gte('data_quality_score', 40)
+      .or('deals_last_12mo.gt.0,deals_last_24mo.gte.2,active_trials_count.gte.3');
+
+    if (promotionCandidates && promotionCandidates.length > 0) {
+      const promoteIds = promotionCandidates.map((c: any) => c.id);
+      const { error: promoteError } = await supabase
+        .from('companies')
+        .update({ actively_acquiring: true })
+        .in('id', promoteIds);
+
+      if (!promoteError) {
+        promoted = promoteIds.length;
+        console.log(`Auto-promoted ${promoted} companies: ${promotionCandidates.map((c: any) => c.name).join(', ')}`);
+      }
+    }
+
     const countsSummary = Object.entries(counts)
       .filter(([, v]) => v && v > 0)
       .map(([k, v]) => `${k}: ${v}`)
@@ -241,6 +267,7 @@ export async function GET(request: NextRequest) {
       backfillErrors,
       linked: { licensees: linkedLicensees, licensors: linkedLicensors },
       statsRecalculated: statsUpdated,
+      autoPromoted: promoted,
       counts,
     });
   } catch (error) {
