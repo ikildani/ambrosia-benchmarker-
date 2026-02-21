@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/AuthModal';
 
@@ -65,34 +65,18 @@ export default function CompaniesPageClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            <Link href="/" className="flex items-center">
-              <AmbrosiaLogo variant="auto" height={32} />
-            </Link>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Calculator</Link>
-              <Link href="/companies" className="text-sm font-medium text-teal-600 dark:text-teal-400">Companies</Link>
-            </nav>
-            {/* Mobile nav */}
-            <div className="flex md:hidden items-center gap-3">
-              <Link href="/calculator" className="text-xs font-medium text-slate-500 dark:text-slate-400">Calculator</Link>
-              <Link href="/companies" className="text-xs font-medium text-teal-600 dark:text-teal-400">Companies</Link>
-            </div>
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <Link href="/dashboard" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Dashboard</Link>
-              ) : (
-                <button onClick={() => openAuthModal('signup')} className="px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Get Started</button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        isAuthenticated={isAuthenticated}
+        userName={user?.name}
+        userEmail={user?.email}
+        tier={tier}
+        onSignInClick={() => openAuthModal('signin')}
+        onSignUpClick={() => openAuthModal('signup')}
+        onSignOut={signOut}
+      />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white">
+      <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white pt-16 sm:pt-20 lg:pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3 py-1 bg-teal-500/20 text-teal-300 text-xs font-semibold rounded-full">

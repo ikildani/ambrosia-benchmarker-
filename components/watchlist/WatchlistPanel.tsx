@@ -5,6 +5,7 @@ import { useWatchlist } from '@/lib/hooks/useWatchlist';
 import WatchlistItemRow from './WatchlistItemRow';
 import WatchlistActivityFeed from './WatchlistActivityFeed';
 import AddToWatchlistModal from './AddToWatchlistModal';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface WatchlistPanelProps {
   tier: 'free' | 'pro';
@@ -100,15 +101,15 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
               </h3>
             </div>
             {items.length === 0 ? (
-              <div className="px-5 py-8 text-center text-slate-400">
-                <p className="text-sm">No items in your watchlist yet.</p>
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="mt-3 text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium"
-                >
-                  Add your first item
-                </button>
-              </div>
+              <EmptyState
+                icon="bell"
+                title="Your watchlist is empty"
+                description="Track modalities, indications, and companies to get notified when matching deals appear."
+                action={{
+                  label: 'Add First Item',
+                  onClick: () => setShowAddModal(true),
+                }}
+              />
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
                 {items.map((item) => (

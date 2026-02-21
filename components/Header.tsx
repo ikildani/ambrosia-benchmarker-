@@ -23,6 +23,7 @@ interface HeaderProps {
   isAuthenticated?: boolean;
   userName?: string;
   userEmail?: string;
+  tier?: 'free' | 'pro';
   onSignInClick?: () => void;
   onSignUpClick?: () => void;
   onSignOut?: () => void;
@@ -33,6 +34,7 @@ export default function Header({
   isAuthenticated = false,
   userName,
   userEmail,
+  tier = 'free',
   onSignInClick,
   onSignUpClick,
   onSignOut,
@@ -68,10 +70,17 @@ export default function Header({
   const isCompaniesPage = pathname?.startsWith('/companies');
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -165,24 +174,28 @@ export default function Header({
   }, [userMenuOpen]);
 
   // Navigation items with proper routing
+  const isPro = tier === 'pro';
   const navItems = [
+    ...(isAuthenticated ? [{
+      label: 'Dashboard',
+      href: '/dashboard',
+      isActive: isDashboardPage,
+    }] : []),
     {
       label: 'Calculator',
       href: '/calculator',
       isActive: isCalculatorPage,
     },
-    {
+    ...(isPro ? [{
       label: 'Pulse',
       href: '/pulse',
       isActive: isPulsePage,
-      badge: 'PRO',
     },
     {
       label: 'Companies',
       href: '/companies',
       isActive: isCompaniesPage,
-      badge: 'PRO',
-    },
+    }] : []),
     {
       label: 'Pricing',
       href: isLandingPage ? '#pricing' : '/#pricing',
@@ -240,11 +253,6 @@ export default function Header({
                   }`}
                 >
                   {item.label}
-                  {item.badge && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-gradient-to-r from-teal-500 to-cyan-500 text-white leading-none">
-                      {item.badge}
-                    </span>
-                  )}
                   <span className={`absolute -bottom-1 left-0 h-0.5 bg-teal-500 transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </Link>
               )
@@ -281,7 +289,7 @@ export default function Header({
 
                 {/* Dropdown Menu */}
                 {userMenuOpen && (
-                  <div role="menu" aria-label="User actions" className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+                  <div role="menu" aria-label="User actions" className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] max-h-[calc(100vh-5rem)] overflow-y-auto bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 animate-fade-in">
                     {/* User Info Header */}
                     <div className="px-5 py-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-3">
@@ -338,6 +346,48 @@ export default function Header({
                           <p className="text-xs text-slate-500 dark:text-slate-400">Run new analysis</p>
                         </div>
                       </Link>
+
+                      {isPro && (
+                        <>
+                          <Link
+                            href="/pulse"
+                            role="menuitem"
+                            onClick={() => setUserMenuOpen(false)}
+                            className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                              isPulsePage ? 'bg-slate-50 dark:bg-slate-700' : ''
+                            }`}
+                          >
+                            <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Pulse</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Weekly deal intelligence</p>
+                            </div>
+                          </Link>
+
+                          <Link
+                            href="/companies"
+                            role="menuitem"
+                            onClick={() => setUserMenuOpen(false)}
+                            className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                              isCompaniesPage ? 'bg-slate-50 dark:bg-slate-700' : ''
+                            }`}
+                          >
+                            <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Companies</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Company profiles & deals</p>
+                            </div>
+                          </Link>
+                        </>
+                      )}
                     </div>
 
                     {/* Sign Out */}
@@ -406,6 +456,11 @@ export default function Header({
             <nav aria-label="Mobile navigation" className="flex flex-col p-4 gap-1">
               {navItems.map((item, idx) => {
                 const iconMap: Record<string, JSX.Element> = {
+                  Dashboard: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  ),
                   Calculator: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -474,25 +529,6 @@ export default function Header({
 
               {isAuthenticated ? (
                 <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
-                      isDashboardPage
-                        ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
-                    }`}
-                  >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      isDashboardPage ? 'bg-teal-100' : 'bg-slate-100'
-                    }`}>
-                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                      </svg>
-                    </div>
-                    <span className="text-base">Dashboard</span>
-                  </Link>
-
                   {/* User Info Card */}
                   <div className="my-4 px-4 py-3 bg-slate-50 rounded-2xl">
                     <div className="flex items-center gap-3">

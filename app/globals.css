@@ -616,6 +616,22 @@ select::selection {
   animation: bottomSheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Tab content fade-slide */
+@keyframes tabFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-tab-content {
+  animation: tabFadeSlide 0.2s ease-out forwards;
+}
+
 /* Wizard step slide-in */
 @keyframes wizardSlideIn {
   from { opacity: 0.3; transform: translateX(0); }
@@ -984,6 +1000,7 @@ select::selection {
   .animate-float,
   .animate-breathe,
   .animate-tab-indicator,
+  .animate-tab-content,
   .animate-slide-down,
   .animate-bottom-sheet,
   .animate-wizard-step,

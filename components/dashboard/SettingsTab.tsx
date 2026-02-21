@@ -74,7 +74,7 @@ const SettingsTab = React.memo(function SettingsTab({
   onUpgrade,
 }: SettingsTabProps) {
   return (
-    <div id="tabpanel-settings" role="tabpanel" aria-labelledby="tab-settings" className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       {/* Profile Header Card */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">

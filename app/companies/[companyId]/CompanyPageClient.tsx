@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import Header from '@/components/Header';
 import CompanyProfileCard from '@/components/competitive/CompanyProfileCard';
 import CompanySummary from '@/components/competitive/CompanySummary';
 import CompanyDealHistory from '@/components/competitive/CompanyDealHistory';
@@ -25,6 +25,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
     user,
     tier,
     signIn,
+    signOut,
     openAuthModal,
     closeAuthModal,
     showAuthModal,
@@ -62,36 +63,17 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            <Link href="/" className="flex items-center">
-              <AmbrosiaLogo variant="auto" height={32} />
-            </Link>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Calculator</Link>
-              <Link href="/companies" className="text-sm font-medium text-teal-600 dark:text-teal-400">Companies</Link>
-              <Link href="/pulse" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Pulse</Link>
-            </nav>
-            {/* Mobile nav */}
-            <div className="flex md:hidden items-center gap-3">
-              <Link href="/calculator" className="text-xs font-medium text-slate-500 dark:text-slate-400">Calc</Link>
-              <Link href="/companies" className="text-xs font-medium text-teal-600 dark:text-teal-400">Co.</Link>
-              <Link href="/pulse" className="text-xs font-medium text-slate-500 dark:text-slate-400">Pulse</Link>
-            </div>
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <Link href="/dashboard" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition-colors">Dashboard</Link>
-              ) : (
-                <button onClick={() => openAuthModal('signup')} className="px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Get Started</button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        isAuthenticated={isAuthenticated}
+        userName={user?.name}
+        userEmail={user?.email}
+        tier={tier}
+        onSignInClick={() => openAuthModal('signin')}
+        onSignUpClick={() => openAuthModal('signup')}
+        onSignOut={signOut}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 sm:pt-28 lg:pt-32">
         {/* Back link */}
         <Link href="/companies" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mb-6 transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

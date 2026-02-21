@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { formatDate, type CalculationHistoryItem } from '@/lib/history';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface HistoryTabProps {
   history: CalculationHistoryItem[];
@@ -37,7 +38,7 @@ const HistoryTab = React.memo(function HistoryTab({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
-    <div id="tabpanel-history" role="tabpanel" aria-labelledby="tab-history" aria-live="polite" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div aria-live="polite" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
@@ -203,35 +204,26 @@ const HistoryTab = React.memo(function HistoryTab({
           ))}
         </div>
         ) : (
-          <div className="p-8 text-center">
-            <p className="text-slate-500 dark:text-slate-400 mb-3">No calculations match your filters</p>
-            <button
-              onClick={() => { onSearchChange(''); onAreaFilterChange('all'); }}
-              className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
-            >
-              Clear filters
-            </button>
-          </div>
+          <EmptyState
+            icon="search"
+            title="No matching calculations"
+            description="Try adjusting your search or filter criteria."
+            secondaryAction={{
+              label: 'Clear filters',
+              onClick: () => { onSearchChange(''); onAreaFilterChange('all'); },
+            }}
+          />
         )
       ) : (
-        <div className="p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-2">No calculations yet</h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-4">Your calculation history will appear here</p>
-          <button
-            onClick={onNavigateToCalculator}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Calculation
-          </button>
-        </div>
+        <EmptyState
+          icon="calculator"
+          title="No calculations yet"
+          description="Run your first deal analysis to see your calculation history here."
+          action={{
+            label: 'New Calculation',
+            onClick: () => onNavigateToCalculator(),
+          }}
+        />
       )}
     </div>
   );

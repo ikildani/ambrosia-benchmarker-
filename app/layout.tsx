@@ -7,6 +7,7 @@ import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/lib/theme";
 import { GlobalJsonLd } from "./json-ld";
+import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -68,6 +69,12 @@ export default function RootLayout({
             <TrackingProvider>{children}</TrackingProvider>
           </AuthProvider>
           <Toaster richColors position="top-right" />
+          <ProgressBar
+            height="2px"
+            color="#0d9488"
+            options={{ showSpinner: false }}
+            shallowRouting
+          />
           <Analytics />
         </ThemeProvider>
       </body>

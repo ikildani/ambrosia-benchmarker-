@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, startTransition } from 'react';
 import { toast } from 'sonner';
-import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { clearHistory, getHistoryItemWithDefaults, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
 import HistoryDetailModal from './HistoryDetailModal';
@@ -30,7 +29,6 @@ interface DashboardProps {
   userName: string;
   userEmail: string;
   tier: 'free' | 'pro';
-  onNavigateHome: () => void;
   onNavigateToCalculator: () => void;
   onUpgrade: () => void;
   onSignOut: () => void;
@@ -40,7 +38,6 @@ export default function Dashboard({
   userName,
   userEmail,
   tier,
-  onNavigateHome,
   onNavigateToCalculator,
   onUpgrade,
   onSignOut,
@@ -65,7 +62,6 @@ export default function Dashboard({
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
@@ -343,7 +339,9 @@ export default function Dashboard({
   };
 
   const handleTabChange = (tab: 'overview' | 'history' | 'watchlist' | 'settings') => {
-    setActiveTab(tab);
+    startTransition(() => {
+      setActiveTab(tab);
+    });
     if (tab === 'watchlist') {
       setWatchlistNewCount(0);
       localStorage.setItem('last_viewed_watchlist', new Date().toISOString());
@@ -382,176 +380,7 @@ export default function Dashboard({
   const topModality = getTopModality();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
-      {/* Header with Full Navigation */}
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-40 safe-top">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <button onClick={onNavigateHome} className="flex items-center touch-feedback">
-              <AmbrosiaLogo variant="auto" height={40} />
-            </button>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              <button
-                onClick={onNavigateHome}
-                className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-              >
-                Home
-              </button>
-              <button
-                onClick={onNavigateToCalculator}
-                className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-              >
-                Calculator
-              </button>
-              <button
-                onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-              >
-                Pricing
-              </button>
-              <button
-                onClick={() => { onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-              >
-                About
-              </button>
-            </nav>
-
-            {/* User Menu */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              {tier === 'free' ? (
-                <span className="hidden sm:inline-flex px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-full">
-                  Free Plan
-                </span>
-              ) : (
-                <span className="hidden sm:inline-flex px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold rounded-full shadow-sm">
-                  Pro Plan
-                </span>
-              )}
-
-              {/* User Avatar/Dropdown */}
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-teal-500/20`}>
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white leading-tight">{userName}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
-                </div>
-              </div>
-
-              {/* Mobile Menu Button - Larger touch target */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-3 -mr-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white touch-feedback rounded-xl"
-                aria-label="Toggle menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </header>
-
-      {/* Mobile Navigation - Full-screen overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-white dark:bg-slate-900 z-[9999] overflow-y-auto">
-          <nav className="flex flex-col p-4 gap-1">
-            {/* Navigation Links */}
-            <button
-              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); }}
-              className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback"
-            >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </div>
-              <span className="text-base">Home</span>
-            </button>
-            <button
-              onClick={() => { setMobileMenuOpen(false); onNavigateToCalculator(); }}
-              className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback"
-            >
-              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-base">Calculator</span>
-            </button>
-            <button
-              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-              className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback"
-            >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-base">Pricing</span>
-            </button>
-            <button
-              onClick={() => { setMobileMenuOpen(false); onNavigateHome(); setTimeout(() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-              className="flex items-center gap-4 px-4 py-4 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 rounded-2xl font-medium transition-colors touch-feedback"
-            >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-base">About</span>
-            </button>
-
-            {/* Divider */}
-            <div className="my-4 border-t border-slate-200 dark:border-slate-700" />
-
-            {/* User Section */}
-            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{userEmail}</p>
-                </div>
-                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                  tier === 'pro'
-                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                    : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
-                }`}>
-                  {tier === 'pro' ? 'Pro' : 'Free'}
-                </span>
-              </div>
-            </div>
-
-            {/* Sign Out Button */}
-            <button
-              onClick={() => { setMobileMenuOpen(false); onSignOut(); }}
-              className="flex items-center gap-4 px-4 py-4 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/20 active:bg-red-100 dark:active:bg-red-500/30 rounded-2xl font-medium transition-colors touch-feedback"
-            >
-              <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-              <span className="text-base">Sign Out</span>
-            </button>
-          </nav>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300 pt-16 sm:pt-20 lg:pt-24">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Banner - Mobile optimized */}
         <div className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 text-white relative overflow-hidden">
@@ -597,77 +426,99 @@ export default function Dashboard({
           watchlistNewCount={watchlistNewCount}
         />
 
-        {/* Content */}
-        {activeTab === 'overview' && (
-          <OverviewTab
-            history={history}
-            recentCalculations={recentCalculations}
-            topPhase={topPhase}
-            topModality={topModality}
-            tier={tier}
-            onNavigateToCalculator={onNavigateToCalculator}
-            onUpgrade={onUpgrade}
-            onHistoryClick={handleHistoryClick}
-            formatCurrency={formatCurrency}
-          />
-        )}
+        {/* Content - all tabs stay mounted, visibility toggled via CSS for instant switching */}
+        <div>
+          <div
+            style={{ display: activeTab === 'overview' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-overview"
+            aria-labelledby="tab-overview"
+          >
+            <OverviewTab
+              history={history}
+              recentCalculations={recentCalculations}
+              topPhase={topPhase}
+              topModality={topModality}
+              tier={tier}
+              onNavigateToCalculator={onNavigateToCalculator}
+              onUpgrade={onUpgrade}
+              onHistoryClick={handleHistoryClick}
+              formatCurrency={formatCurrency}
+            />
+          </div>
 
-        {activeTab === 'history' && (
-          <HistoryTab
-            history={history}
-            filteredHistory={filteredHistory}
-            historyLoading={historyLoading}
-            historySearch={historySearch}
-            historyAreaFilter={historyAreaFilter}
-            historySort={historySort}
-            onSearchChange={setHistorySearch}
-            onAreaFilterChange={setHistoryAreaFilter}
-            onSortChange={setHistorySort}
-            onHistoryClick={handleHistoryClick}
-            onDeleteHistory={handleDeleteHistory}
-            onRecalculate={handleRecalculate}
-            onNavigateToCalculator={onNavigateToCalculator}
-            formatCurrency={formatCurrency}
-          />
-        )}
+          <div
+            style={{ display: activeTab === 'history' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-history"
+            aria-labelledby="tab-history"
+          >
+            <HistoryTab
+              history={history}
+              filteredHistory={filteredHistory}
+              historyLoading={historyLoading}
+              historySearch={historySearch}
+              historyAreaFilter={historyAreaFilter}
+              historySort={historySort}
+              onSearchChange={setHistorySearch}
+              onAreaFilterChange={setHistoryAreaFilter}
+              onSortChange={setHistorySort}
+              onHistoryClick={handleHistoryClick}
+              onDeleteHistory={handleDeleteHistory}
+              onRecalculate={handleRecalculate}
+              onNavigateToCalculator={onNavigateToCalculator}
+              formatCurrency={formatCurrency}
+            />
+          </div>
 
-        {activeTab === 'watchlist' && (
-          <WatchlistPanel tier={tier} onUpgrade={onUpgrade} />
-        )}
+          <div
+            style={{ display: activeTab === 'watchlist' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-watchlist"
+            aria-labelledby="tab-watchlist"
+          >
+            <WatchlistPanel tier={tier} onUpgrade={onUpgrade} />
+          </div>
 
-        {activeTab === 'settings' && (
-          <SettingsTab
-            editName={editName}
-            userEmail={userEmail}
-            editCompany={editCompany}
-            editTitle={editTitle}
-            editPhone={editPhone}
-            editLinkedIn={editLinkedIn}
-            editRole={editRole}
-            memberSince={memberSince}
-            selectedAvatar={selectedAvatar}
-            isSaving={isSaving}
-            saveMessage={saveMessage}
-            showDeleteConfirm={showDeleteConfirm}
-            tier={tier}
-            history={history}
-            avatarGradients={AVATAR_GRADIENTS}
-            getAvatarGradient={getAvatarGradient}
-            onEditName={setEditName}
-            onEditCompany={setEditCompany}
-            onEditTitle={setEditTitle}
-            onEditPhone={setEditPhone}
-            onEditLinkedIn={setEditLinkedIn}
-            onEditRole={setEditRole}
-            onSelectAvatar={setSelectedAvatar}
-            onSaveSettings={handleSaveSettings}
-            onExportData={handleExportData}
-            onSignOut={onSignOut}
-            onShowDeleteConfirm={setShowDeleteConfirm}
-            onDeleteAccount={handleDeleteAccount}
-            onUpgrade={onUpgrade}
-          />
-        )}
+          <div
+            style={{ display: activeTab === 'settings' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-settings"
+            aria-labelledby="tab-settings"
+          >
+            <SettingsTab
+              editName={editName}
+              userEmail={userEmail}
+              editCompany={editCompany}
+              editTitle={editTitle}
+              editPhone={editPhone}
+              editLinkedIn={editLinkedIn}
+              editRole={editRole}
+              memberSince={memberSince}
+              selectedAvatar={selectedAvatar}
+              isSaving={isSaving}
+              saveMessage={saveMessage}
+              showDeleteConfirm={showDeleteConfirm}
+              tier={tier}
+              history={history}
+              avatarGradients={AVATAR_GRADIENTS}
+              getAvatarGradient={getAvatarGradient}
+              onEditName={setEditName}
+              onEditCompany={setEditCompany}
+              onEditTitle={setEditTitle}
+              onEditPhone={setEditPhone}
+              onEditLinkedIn={setEditLinkedIn}
+              onEditRole={setEditRole}
+              onSelectAvatar={setSelectedAvatar}
+              onSaveSettings={handleSaveSettings}
+              onExportData={handleExportData}
+              onSignOut={onSignOut}
+              onShowDeleteConfirm={setShowDeleteConfirm}
+              onDeleteAccount={handleDeleteAccount}
+              onUpgrade={onUpgrade}
+            />
+          </div>
+        </div>
       </div>
 
       {/* History Detail Modal */}

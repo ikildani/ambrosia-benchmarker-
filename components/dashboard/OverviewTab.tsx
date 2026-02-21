@@ -27,7 +27,7 @@ const OverviewTab = React.memo(function OverviewTab({
   formatCurrency,
 }: OverviewTabProps) {
   return (
-    <div id="tabpanel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
+    <div className="space-y-6">
       {/* Deal Insights - Full Width */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-6">

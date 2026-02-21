@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import Header from '@/components/Header';
@@ -196,8 +197,9 @@ export default function Home() {
     signIn(email, name);
   };
 
+  const router = useRouter();
   const handleDashboardClick = () => {
-    window.location.href = '/dashboard';
+    router.push('/dashboard');
   };
 
   return (
@@ -207,6 +209,7 @@ export default function Home() {
         isAuthenticated={isAuthenticated}
         userName={user?.name}
         userEmail={user?.email}
+        tier={tier}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

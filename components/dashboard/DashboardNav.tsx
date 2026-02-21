@@ -51,7 +51,7 @@ const DashboardNav = React.memo(function DashboardNav({
   }, [activeTab, onTabChange]);
 
   return (
-    <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0">
+    <div className="mb-6 sm:mb-8 -mx-3 sm:mx-0 px-3 sm:px-0 sticky top-16 sm:top-20 lg:top-24 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm py-2 -mt-2">
       <div ref={tablistRef} role="tablist" aria-label="Dashboard sections" onKeyDown={handleKeyDown} className="flex gap-1.5 sm:gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 sm:p-1 rounded-2xl sm:rounded-xl w-full sm:w-fit overflow-x-auto hide-scrollbar scroll-snap-x">
         {[
           { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Dashboard from '@/components/Dashboard';
+import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardPage() {
@@ -40,11 +41,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Navigation handlers that use Next.js routing
-  const handleNavigateHome = () => {
-    router.push('/');
-  };
-
   const handleNavigateToCalculator = () => {
     router.push('/calculator');
   };
@@ -59,14 +55,22 @@ export default function DashboardPage() {
   };
 
   return (
-    <Dashboard
-      userName={user.name}
-      userEmail={user.email}
-      tier={tier}
-      onNavigateHome={handleNavigateHome}
-      onNavigateToCalculator={handleNavigateToCalculator}
-      onUpgrade={handleUpgrade}
-      onSignOut={handleSignOut}
-    />
+    <>
+      <Header
+        isAuthenticated={isAuthenticated}
+        userName={user.name}
+        userEmail={user.email}
+        tier={tier}
+        onSignOut={handleSignOut}
+      />
+      <Dashboard
+        userName={user.name}
+        userEmail={user.email}
+        tier={tier}
+        onNavigateToCalculator={handleNavigateToCalculator}
+        onUpgrade={handleUpgrade}
+        onSignOut={handleSignOut}
+      />
+    </>
   );
 }

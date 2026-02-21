@@ -1,9 +1,8 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import Header from '@/components/Header';
 import MarketPulse from '@/components/pulse/MarketPulse';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,54 +38,18 @@ function PulsePageInner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Compact Header */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            <Link href="/" className="flex items-center">
-              <AmbrosiaLogo variant="auto" height={32} />
-            </Link>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/calculator" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Calculator</Link>
-              <Link href="/pulse" className="text-sm font-medium text-teal-600 dark:text-teal-400">Pulse</Link>
-              <Link href="/#pricing" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Pricing</Link>
-            </nav>
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <Link href="/dashboard" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={signOut}
-                    className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={() => openAuthModal('signin')}
-                    className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => openAuthModal('signup')}
-                    className="px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 transition-all"
-                  >
-                    Get Started
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        isAuthenticated={isAuthenticated}
+        userName={user?.name}
+        userEmail={user?.email}
+        tier={tier}
+        onSignInClick={() => openAuthModal('signin')}
+        onSignUpClick={() => openAuthModal('signup')}
+        onSignOut={signOut}
+      />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white">
+      <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white pt-16 sm:pt-20 lg:pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3 py-1 bg-teal-500/20 text-teal-300 text-xs font-semibold rounded-full">
