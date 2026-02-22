@@ -843,20 +843,20 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 }
               }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center transition-colors group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30">
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center transition-colors group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30">
                     <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">
+                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200 truncate">
                     Tiered Royalties
                     <InfoTooltip content={metricTooltips.royalties} />
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
                     {metricBadges.royalties.label}
                   </span>
                   {canExpandCard('royalties') ? (

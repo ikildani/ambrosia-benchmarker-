@@ -212,7 +212,7 @@ export default function HistoryDetailModal({
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative w-full sm:max-w-4xl sm:mx-4 max-h-[90vh] bg-white
+        className="relative w-full sm:max-w-6xl sm:mx-4 max-h-[90vh] bg-white dark:bg-slate-900
                    rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-modal-slide-up"
         role="dialog"
         aria-modal="true"

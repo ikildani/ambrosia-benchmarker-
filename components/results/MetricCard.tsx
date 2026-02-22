@@ -96,20 +96,20 @@ function MetricCardInner({
         onClick={handleHeaderClick}
         onKeyDown={handleHeaderKeyDown}
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className={`w-10 h-10 xl:w-12 xl:h-12 rounded-xl ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`w-10 h-10 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
               <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
                 {icon}
               </div>
             </div>
-            <p className="text-sm xl:text-base font-semibold text-neutral-700 dark:text-slate-200">
+            <p className="text-sm xl:text-base font-semibold text-neutral-700 dark:text-slate-200 truncate">
               {title}
               {tooltipContent && <InfoTooltip content={tooltipContent} />}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
               {badge}
             </span>
             {canExpand && (
