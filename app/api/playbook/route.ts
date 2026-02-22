@@ -19,6 +19,7 @@ export interface PlaybookRequest {
   };
   userId?: string;
   email?: string;
+  reportId?: string;
 }
 
 export interface PlaybookResponse {
@@ -57,7 +58,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
       }
     }
 
-    // Auth method 2: userId/email in body (matches deal-memo pattern)
+    // Auth method 2: Report purchase (matches deal-memo pattern)
+    if (!authorized && body.reportId) {
+      const { data: report } = await supabase
+        .from('report_purchases')
+        .select('id, status')
+        .eq('id', body.reportId)
+        .eq('status', 'completed')
+        .single();
+      if (report) authorized = true;
+    }
+
+    // Auth method 3: userId/email in body (matches deal-memo pattern)
     if (!authorized && (body.userId || body.email)) {
       const query = supabase.from('user_profiles').select('tier, email');
       if (body.userId) {

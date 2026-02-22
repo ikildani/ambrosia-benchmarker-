@@ -1103,6 +1103,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             labels={labels}
             userId={userId}
             userEmail={userEmail}
+            reportId={reportId}
           />
         )}
 

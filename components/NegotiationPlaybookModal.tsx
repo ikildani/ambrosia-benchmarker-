@@ -18,6 +18,7 @@ interface NegotiationPlaybookModalProps {
   labels: { phase: string; modality: string; indication: string };
   userId?: string;
   userEmail?: string;
+  reportId?: string;
 }
 
 // Section icon component
@@ -116,6 +117,7 @@ export default function NegotiationPlaybookModal({
   labels,
   userId,
   userEmail,
+  reportId,
 }: NegotiationPlaybookModalProps) {
   const [playbook, setPlaybook] = useState<NegotiationPlaybook | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,6 +141,7 @@ export default function NegotiationPlaybookModal({
         body: JSON.stringify({
           userId: userId || undefined,
           email: userEmail || undefined,
+          reportId: reportId || undefined,
           inputs,
           results: {
             terms: results.terms,
@@ -170,7 +173,7 @@ export default function NegotiationPlaybookModal({
       clearTimeout(timeoutId);
       setLoading(false);
     }
-  }, [inputs, results, labels, userId, userEmail]);
+  }, [inputs, results, labels, userId, userEmail, reportId]);
 
   // Generate playbook when modal opens
   useEffect(() => {
