@@ -85,6 +85,23 @@ export async function POST(request: NextRequest) {
               console.log('Report purchase completed:', reportPurchaseId);
             }
 
+            // Upgrade user to 'report' tier (unless already 'pro')
+            if (reportUserId) {
+              const { data: existingProfile } = await supabase
+                .from('user_profiles')
+                .select('tier')
+                .eq('id', reportUserId)
+                .single();
+
+              if (existingProfile && existingProfile.tier !== 'pro') {
+                await supabase
+                  .from('user_profiles')
+                  .update({ tier: 'report', updated_at: new Date().toISOString() })
+                  .eq('id', reportUserId);
+                console.log('User upgraded to report tier:', reportUserId);
+              }
+            }
+
             // Track purchase event
             await supabase.from('events').insert({
               user_id: reportUserId || null,
@@ -95,7 +112,7 @@ export async function POST(request: NextRequest) {
                 amount_total: session.amount_total,
                 currency: session.currency,
               },
-              user_tier: 'free',
+              user_tier: 'report',
             });
           }
           break;
