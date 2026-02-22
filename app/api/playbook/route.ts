@@ -83,8 +83,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
     }
 
     if (!authorized) {
+      // Temporary debug info to diagnose auth failures
+      const debugInfo = {
+        hasBearer: !!authHeader,
+        hasUserId: !!body.userId,
+        hasEmail: !!body.email,
+        hasReportId: !!body.reportId,
+      };
+      console.error('[playbook] Auth failed:', JSON.stringify(debugInfo));
       return NextResponse.json(
-        { success: false, error: 'Negotiation playbook is a Pro feature. Upgrade to access AI-powered negotiation strategies.' },
+        { success: false, error: 'Negotiation playbook is a Pro feature. Upgrade to access AI-powered negotiation strategies.', debug: debugInfo },
         { status: 403 }
       );
     }

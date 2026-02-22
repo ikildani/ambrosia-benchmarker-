@@ -159,7 +159,8 @@ export default function NegotiationPlaybookModal({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to generate playbook');
+        const debugStr = data.debug ? ` [debug: ${JSON.stringify(data.debug)}]` : '';
+        throw new Error((data.error || 'Failed to generate playbook') + debugStr);
       }
 
       setPlaybook(data.playbook);
