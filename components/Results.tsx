@@ -1101,6 +1101,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             inputs={inputs}
             results={result}
             labels={labels}
+            userId={userId}
+            userEmail={userEmail}
           />
         )}
 

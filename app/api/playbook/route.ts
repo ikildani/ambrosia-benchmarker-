@@ -17,6 +17,8 @@ export interface PlaybookRequest {
     modality: string;
     indication: string;
   };
+  userId?: string;
+  email?: string;
 }
 
 export interface PlaybookResponse {
@@ -29,8 +31,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
   try {
     // SECURITY: Require Pro tier — this is an expensive AI endpoint
     const supabase = createServiceClient();
-    let userTier: 'free' | 'pro' = 'free';
+    let authorized = false;
 
+    const bodyText = await request.text();
+    const body = JSON.parse(bodyText) as PlaybookRequest;
+
+    // Auth method 1: Bearer token
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7);
@@ -46,18 +52,25 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
           .select('tier, email')
           .eq('id', user.id)
           .single();
-        userTier = (profile?.tier as 'free' | 'pro') || 'free';
-        // Check PRO_EMAILS list using verified email from database
-        if (userTier === 'free' && profile?.email && isProEmail(profile.email)) {
-          userTier = 'pro';
-        }
+        if (profile?.tier === 'pro') authorized = true;
+        if (!authorized && profile?.email && isProEmail(profile.email)) authorized = true;
       }
     }
 
-    const bodyText = await request.text();
-    const body = JSON.parse(bodyText) as PlaybookRequest;
+    // Auth method 2: userId/email in body (matches deal-memo pattern)
+    if (!authorized && (body.userId || body.email)) {
+      const query = supabase.from('user_profiles').select('tier, email');
+      if (body.userId) {
+        query.eq('id', body.userId);
+      } else if (body.email) {
+        query.eq('email', body.email);
+      }
+      const { data: profile } = await query.single();
+      if (profile?.tier === 'pro') authorized = true;
+      if (!authorized && profile?.email && isProEmail(profile.email)) authorized = true;
+    }
 
-    if (userTier !== 'pro') {
+    if (!authorized) {
       return NextResponse.json(
         { success: false, error: 'Negotiation playbook is a Pro feature. Upgrade to access AI-powered negotiation strategies.' },
         { status: 403 }

@@ -198,6 +198,7 @@ export default function ReportGenerationModal({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              userId: p.userId || undefined,
               email: p.userEmail || undefined,
               inputs: {
                 modality: p.fullInputs.modality,
