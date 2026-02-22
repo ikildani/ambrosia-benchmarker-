@@ -6,7 +6,7 @@ import WatchButton from '@/components/WatchButton';
 
 interface DealCardProps {
   deal: Deal;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
 }
 
 const formatCurrency = (value: number | null) => {

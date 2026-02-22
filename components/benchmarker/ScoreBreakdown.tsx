@@ -120,7 +120,7 @@ export function ScoreBreakdown({
   };
 
   return (
-    <div className="border-t border-gray-100 px-4 py-5 bg-gradient-to-b from-gray-50/50 to-white animate-fade-in">
+    <div className="border-t border-gray-100 px-3 sm:px-4 py-4 sm:py-5 bg-gradient-to-b from-gray-50/50 to-white animate-fade-in">
       {/* Score Progress Bar */}
       <ScoreProgressBar score={matchScore} />
 
@@ -194,7 +194,7 @@ export function ScoreBreakdown({
             </div>
             {/* Revenue at Risk Summary */}
             {strategicContext.revenue_at_risk && strategicContext.revenue_at_risk.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-500/30 flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
+              <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-500/30 flex flex-wrap items-center gap-1.5 sm:gap-3 text-xs">
                 <span className="text-amber-700 dark:text-amber-300 font-medium">Revenue at Risk:</span>
                 {strategicContext.revenue_at_risk.map((risk, i) => (
                   <span key={i} className="text-gray-700 dark:text-slate-300">
@@ -254,7 +254,7 @@ export function ScoreBreakdown({
       )}
 
       {/* Action Buttons */}
-      <div className="mt-5 flex gap-3">
+      <div className="mt-5 flex gap-2 sm:gap-3">
         <button
           onClick={() => setShowEmailModal(true)}
           className="flex-1 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all flex items-center justify-center gap-2 shadow-sm"

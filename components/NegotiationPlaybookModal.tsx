@@ -13,6 +13,7 @@ interface NegotiationPlaybookModalProps {
     phase: string;
     indication: string;
     territory: string;
+    therapeuticArea?: string;
   };
   results: CalculationResult;
   labels: { phase: string; modality: string; indication: string };
@@ -159,8 +160,7 @@ export default function NegotiationPlaybookModal({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        const debugStr = data.debug ? ` [debug: ${JSON.stringify(data.debug)}]` : '';
-        throw new Error((data.error || 'Failed to generate playbook') + debugStr);
+        throw new Error(data.error || 'Failed to generate playbook');
       }
 
       setPlaybook(data.playbook);
@@ -257,7 +257,7 @@ export default function NegotiationPlaybookModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
       <div
         className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm"
         onClick={onClose}
@@ -269,7 +269,7 @@ export default function NegotiationPlaybookModal({
         aria-modal="true"
         aria-labelledby="playbook-modal-title"
         tabIndex={-1}
-        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8 overflow-hidden animate-fade-in print:shadow-none print:my-0"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-4 sm:my-8 overflow-hidden animate-fade-in print:shadow-none print:my-0"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-navy-800 to-navy-900 p-4 sm:p-6 print:bg-navy-800">

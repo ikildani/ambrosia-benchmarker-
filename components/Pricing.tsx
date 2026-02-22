@@ -5,8 +5,8 @@ import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 
 interface PricingProps {
-  currentTier: 'free' | 'pro';
-  onSelectTier: (tier: 'free' | 'pro') => void;
+  currentTier: 'free' | 'pro' | 'report';
+  onSelectTier: (tier: 'free' | 'pro' | 'report') => void;
   userEmail?: string;
   userId?: string;
   initialPromoCode?: string;

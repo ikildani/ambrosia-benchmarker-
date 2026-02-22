@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       user_id?: string;
       user_email?: string;
       session_id?: string;
-      tier?: 'free' | 'pro'; // Client-side tier for localStorage auth
+      tier?: 'free' | 'pro' | 'report'; // Client-side tier for localStorage auth
     };
 
     const {
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check user tier - must be Pro
-    let userTier: 'free' | 'pro' = 'free';
+    // Check user tier - must be Pro or Report
+    let userTier: 'free' | 'pro' | 'report' = 'free';
     let authenticatedUserId: string | null = null;
 
     // Method 1: Check Supabase user_profiles by user_id
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
       if (profile) {
         authenticatedUserId = profile.id;
-        userTier = (profile.tier as 'free' | 'pro') || 'free';
+        userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
       }
     }
 
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     // SECURITY: Never trust client-provided tier or email for authorization.
     // Tier is verified from database only.
 
-    // Only Pro users can generate outreach emails
-    if (userTier !== 'pro') {
+    // Only Pro/Report users can generate outreach emails
+    if (userTier !== 'pro' && userTier !== 'report') {
       return NextResponse.json(
         {
           error: 'Outreach email generation is a Pro feature',

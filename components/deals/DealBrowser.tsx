@@ -112,8 +112,9 @@ export default function DealBrowser() {
       if (filters.termsDisclosed) params.set('terms_disclosed', 'true');
       if (filters.search) params.set('search', filters.search);
 
-      // Send user identifiers in headers instead of query params for security
+      // Send user identifiers in headers for tier lookup
       const headers: Record<string, string> = {};
+      if (user?.id) headers['X-User-Id'] = user.id;
       if (user?.email) headers['X-User-Email'] = user.email;
 
       const response = await fetch(`/api/deals?${params.toString()}`, { headers });
@@ -183,8 +184,8 @@ export default function DealBrowser() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Excel Export - Pro Only */}
-          {tier === 'pro' && (
+          {/* Excel Export - Pro/Report */}
+          {(tier === 'pro' || tier === 'report') && (
             <button
               onClick={() => {
                 const dealsForExport: DealForExcel[] = deals.map(deal => ({

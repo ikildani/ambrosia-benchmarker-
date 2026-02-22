@@ -8,7 +8,7 @@ import AddToWatchlistModal from './AddToWatchlistModal';
 import EmptyState from '@/components/ui/EmptyState';
 
 interface WatchlistPanelProps {
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   onUpgrade: () => void;
 }
 

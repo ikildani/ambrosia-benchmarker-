@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         .eq('id', userId)
         .single();
 
-      if (profile?.tier === 'pro') {
+      if (profile?.tier === 'pro' || profile?.tier === 'report') {
         hasAccess = true;
       }
     }

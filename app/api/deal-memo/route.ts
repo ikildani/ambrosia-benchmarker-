@@ -66,7 +66,7 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
         query.eq('email', body.email);
       }
       const { data: profile } = await query.single();
-      if (profile?.tier === 'pro') {
+      if (profile?.tier === 'pro' || profile?.tier === 'report') {
         authorized = true;
       }
       // Check email whitelist (team members, beta testers)
@@ -79,15 +79,8 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
     // database profile (Check 2 above) to prevent tier escalation via request body.
 
     if (!authorized) {
-      // Temporary debug info to diagnose auth failures
-      const debugInfo = {
-        hasReportId: !!body.reportId,
-        hasUserId: !!body.userId,
-        hasEmail: !!body.email,
-      };
-      console.error('[deal-memo] Auth failed:', JSON.stringify(debugInfo));
       return NextResponse.json(
-        { success: false, error: 'Report purchase or Pro subscription required', debug: debugInfo },
+        { success: false, error: 'Report purchase or Pro subscription required' },
         { status: 403 }
       );
     }

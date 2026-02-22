@@ -1023,7 +1023,8 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
   }
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) return '$0M';
   if (value >= 1000) {
     return `$${(value / 1000).toFixed(1)}B`;
   }

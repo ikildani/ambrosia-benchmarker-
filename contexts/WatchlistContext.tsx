@@ -31,7 +31,7 @@ export function useWatchlistContext() {
 
 interface WatchlistProviderProps {
   children: ReactNode;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
 }
 
 export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {

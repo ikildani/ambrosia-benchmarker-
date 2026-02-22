@@ -7,7 +7,7 @@ interface DealTableProps {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (field: string) => void;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
 }
 
 const formatCurrency = (value: number | null) => {

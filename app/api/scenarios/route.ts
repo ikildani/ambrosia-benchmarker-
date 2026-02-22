@@ -33,21 +33,21 @@ export async function GET(request: NextRequest) {
     }
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
       .eq('email', email)
       .single();
 
-    userTier = (profile?.tier as 'free' | 'pro') || 'free';
+    userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
     if (userTier === 'free' && isProEmail(email)) {
       userTier = 'pro';
     }
 
-    if (userTier !== 'pro') {
+    if (userTier !== 'pro' && userTier !== 'report') {
       return NextResponse.json(
         { error: 'Pro subscription required', scenarios: [] },
         { status: 403 }
@@ -108,21 +108,21 @@ export async function POST(request: NextRequest) {
     }
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('id, tier')
       .eq('email', email)
       .single();
 
-    userTier = (profile?.tier as 'free' | 'pro') || 'free';
+    userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
     // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
     if (userTier === 'free' && isProEmail(email)) {
       userTier = 'pro';
     }
 
-    if (userTier !== 'pro') {
+    if (userTier !== 'pro' && userTier !== 'report') {
       return NextResponse.json(
         { error: 'Pro subscription required to save scenarios' },
         { status: 403 }
@@ -177,6 +177,17 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Delete a scenario
 export async function DELETE(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = await checkRateLimit(identifier, 'scenarios-delete', RATE_LIMIT_CONFIGS.default);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
@@ -187,6 +198,20 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: 'ID and email required' },
         { status: 400 }
+      );
+    }
+
+    // SECURITY: Verify the scenario belongs to this email before deleting
+    const { data: scenario } = await supabase
+      .from('saved_scenarios')
+      .select('id, email')
+      .eq('id', id)
+      .single();
+
+    if (!scenario || scenario.email !== email) {
+      return NextResponse.json(
+        { error: 'Scenario not found' },
+        { status: 404 }
       );
     }
 

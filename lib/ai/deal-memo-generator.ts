@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
-import { ComparableDeal, getRelevantDeals } from '@/lib/comparableDeals';
+import { ComparableDeal } from '@/lib/comparableDeals';
+import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
 
 // Output types
 export interface DealMemo {
@@ -132,8 +133,8 @@ export class DealMemoGenerator {
   }
 
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {
-    // Get comparable deals for this asset
-    const comparableDeals = getRelevantDeals(
+    // Get comparable deals for this asset (merges DB + curated deals)
+    const comparableDeals = await getRelevantDealsWithDB(
       input.inputs.therapeuticArea,
       input.inputs.modality,
       input.inputs.indication,

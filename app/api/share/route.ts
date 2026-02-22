@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify Pro tier
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
 
     if (email) {
       const { data: profile } = await supabase
@@ -29,11 +29,11 @@ export async function POST(request: NextRequest) {
         .eq('email', email)
         .single();
 
-      userTier = (profile?.tier as 'free' | 'pro') || 'free';
+      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
     }
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
-    if (userTier !== 'pro') {
+    if (userTier !== 'pro' && userTier !== 'report') {
       return NextResponse.json(
         { error: 'Pro subscription required to share calculations' },
         { status: 403 }

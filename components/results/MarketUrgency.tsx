@@ -190,7 +190,7 @@ export default function MarketUrgency({
                   {formatCurrencyShort(analysis.totalRevenueAtRisk)}
                 </p>
               </div>
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2 sm:gap-4 text-sm">
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-neutral-400 dark:text-slate-500" />
                   <span className="text-neutral-600 dark:text-slate-300">
@@ -211,7 +211,7 @@ export default function MarketUrgency({
                     key={`${cliff.drug_name}-${i}`}
                     className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 rounded-lg text-xs"
                   >
-                    <span className="font-medium text-teal-800 dark:text-teal-300">
+                    <span className="font-medium text-teal-800 dark:text-teal-300 truncate max-w-[120px] sm:max-w-none">
                       {cliff.drug_name}
                     </span>
                     <span className="text-teal-600 dark:text-teal-400">

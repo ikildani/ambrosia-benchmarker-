@@ -1,8 +1,18 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { CalculationInput } from '@/lib/calculations';
-import { findComparableDeals } from '@/lib/comparableDeals';
 import { PRICING } from '@/lib/config/constants';
+
+interface ComparableDealForUI {
+  id: string;
+  parties: string;
+  totalValue: string;
+  upfront?: string;
+  year: number;
+  phase?: string;
+  relevanceReasons: string[];
+}
 
 interface ComparableDealsProps {
   inputs: CalculationInput;
@@ -11,8 +21,25 @@ interface ComparableDealsProps {
 }
 
 export default function ComparableDeals({ inputs, tier, onBuyReport }: ComparableDealsProps) {
-  const deals = findComparableDeals(inputs);
-  if (deals.length === 0) return null;
+  const [deals, setDeals] = useState<ComparableDealForUI[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({
+      therapeuticArea: inputs.therapeuticArea || '',
+      modality: inputs.modality || '',
+      indication: inputs.indication || '',
+      phase: inputs.phase || '',
+    });
+    fetch(`/api/deals/comparable?${params}`)
+      .then(res => res.json())
+      .then(data => setDeals(data.deals || []))
+      .catch(() => setDeals([]))
+      .finally(() => setLoading(false));
+  }, [inputs.therapeuticArea, inputs.modality, inputs.indication, inputs.phase]);
+
+  if (!loading && deals.length === 0) return null;
 
   const hasFullAccess = tier === 'pro' || tier === 'report';
   const FREE_DEAL_LIMIT = 3;
@@ -28,22 +55,40 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
         Recent deals with similar characteristics to your asset profile
       </p>
       <div className="space-y-3">
-        {visibleDeals.map((deal, idx) => (
+        {loading && (
+          <div className="space-y-3 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-40 mb-2" />
+                    <div className="h-3 bg-slate-100 dark:bg-slate-600 rounded w-24" />
+                  </div>
+                  <div className="h-4 bg-teal-100 dark:bg-teal-900/30 rounded w-16" />
+                </div>
+                <div className="flex gap-1.5 mt-2">
+                  <div className="h-5 bg-teal-50 dark:bg-teal-900/20 rounded w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!loading && visibleDeals.map((deal, idx) => (
           <div
             key={deal.id || idx}
             className="relative p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg"
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-semibold text-slate-900 dark:text-white text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">
                   {deal.parties}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {deal.year} &middot; {deal.phase}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-teal-600 dark:text-teal-400 text-sm">
+              <div className="text-right flex-shrink-0">
+                <p className="font-semibold text-teal-600 dark:text-teal-400 text-sm whitespace-nowrap">
                   {deal.totalValue}
                 </p>
                 {deal.upfront && (

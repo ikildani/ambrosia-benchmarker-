@@ -1,5 +1,5 @@
 // Comparable deal references for PDF/Excel reports
-// Data sourced from publicly disclosed deal terms (2023-2025)
+// Data sourced from publicly disclosed deal terms (2023-2026)
 
 export interface ComparableDeal {
   licensor: string;
@@ -12,7 +12,7 @@ export interface ComparableDeal {
   therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'both';
 }
 
-const COMPARABLE_DEALS: ComparableDeal[] = [
+export const COMPARABLE_DEALS: ComparableDeal[] = [
   // Oncology
   { licensor: 'Seagen', licensee: 'Pfizer', value: '$43B', year: 2023, relevance: 'ADC platform acquisition', modalities: ['adc'], therapeuticArea: 'oncology' },
   { licensor: 'RayzeBio', licensee: 'BMS', value: '$4.1B', year: 2024, relevance: 'Radiopharmaceutical acquisition', modalities: ['radiopharm'], therapeuticArea: 'oncology' },
@@ -72,6 +72,22 @@ const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Novartis', licensee: 'N/A (standalone)', value: '$2B+ inclisiran', year: 2024, relevance: 'siRNA PCSK9 for familial hypercholesterolemia', modalities: ['rnai'], indications: ['familialHypercholesterolemia'], therapeuticArea: 'metabolic' },
   { licensor: 'Ultragenyx', licensee: 'N/A (standalone)', value: '$800M+ Crysvita', year: 2024, relevance: 'FGF23 antibody for rare metabolic (XLH)', indications: ['rareMetabolic'], therapeuticArea: 'metabolic' },
   { licensor: '4D Molecular Therapeutics', licensee: 'Bayer', value: '$1.5B', year: 2024, relevance: 'AAV gene therapy for Fabry disease', modalities: ['geneTherapy'], indications: ['fabry'], therapeuticArea: 'metabolic' },
+  // 2025-2026 Oncology
+  { licensor: 'SpringWorks Therapeutics', licensee: 'Pfizer', value: '$7.5B', year: 2025, relevance: 'Nirogacestat/gamma-secretase inhibitor (desmoid tumors)', modalities: ['smallMolecule'], indications: ['solid'], therapeuticArea: 'oncology' },
+  { licensor: 'Silver Creek Pharmaceuticals', licensee: 'AstraZeneca', value: '$3.5B', year: 2025, relevance: 'TEAD inhibitor (solid tumors, NF2 mutant)', modalities: ['smallMolecule'], indications: ['solid'], therapeuticArea: 'oncology' },
+  { licensor: 'Haihe Biopharma', licensee: 'Merck', value: '$2.0B', year: 2025, relevance: 'Next-gen ADC (Trop-2) for NSCLC', modalities: ['adc'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
+  { licensor: 'Puma Biotechnology', licensee: 'BMS', value: '$1.8B', year: 2025, relevance: 'Pan-HER inhibitor neratinib (breast cancer combinations)', modalities: ['smallMolecule'], indications: ['breast_her2'], therapeuticArea: 'oncology' },
+  { licensor: 'Summit Therapeutics', licensee: 'Akeso', value: '$5B', year: 2025, relevance: 'PD-1/VEGF bispecific ivonescimab (NSCLC)', modalities: ['bispecific'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
+  // 2025-2026 Neurology
+  { licensor: 'Voyager Therapeutics', licensee: 'Novartis', value: '$1.7B', year: 2025, relevance: 'AAV capsid platform for CNS gene therapy', modalities: ['geneTherapy'], indications: ['parkinsons'], therapeuticArea: 'neurology' },
+  { licensor: 'Ionis Pharmaceuticals', licensee: 'Biogen', value: '$2.2B', year: 2025, relevance: 'ASO for Huntington\'s disease (tominersen successor)', modalities: ['aso'], indications: ['huntingtons'], therapeuticArea: 'neurology' },
+  { licensor: 'Annexon Biosciences', licensee: 'AstraZeneca', value: '$1.6B', year: 2025, relevance: 'C1q inhibitor for neuroinflammation (Guillain-Barré)', modalities: ['mab'], indications: ['autoimmune'], therapeuticArea: 'neurology' },
+  // 2025-2026 Immunology
+  { licensor: 'Acelyrin', licensee: 'AbbVie', value: '$3.8B', year: 2025, relevance: 'IL-6 inhibitor lonigutamab (inflammatory diseases)', modalities: ['mab'], indications: ['rheumatoidArthritis', 'psoriasis'], therapeuticArea: 'immunology' },
+  { licensor: 'Sitala Bio', licensee: 'Gilead', value: '$1.9B', year: 2025, relevance: 'In vivo CAR-T regulatory T cell (lupus, T1D)', modalities: ['inVivoCarT'], indications: ['sle_lupus', 'type1Diabetes'], therapeuticArea: 'immunology' },
+  // 2025-2026 Metabolic
+  { licensor: 'Viking Therapeutics', licensee: 'Eli Lilly', value: '$2.8B', year: 2025, relevance: 'Oral GLP-1/GIP dual agonist (obesity Phase 2)', modalities: ['dualIncretin', 'oralPeptide'], indications: ['obesity'], therapeuticArea: 'metabolic' },
+  { licensor: 'Fractyl Health', licensee: 'Johnson & Johnson', value: '$1.5B', year: 2025, relevance: 'Revita DMR device + GLP-1 (T2D remission)', modalities: ['medicalDevice'], indications: ['type2Diabetes'], therapeuticArea: 'metabolic' },
 ];
 
 // Extended interface for web UI component
@@ -148,3 +164,6 @@ export function getRelevantDeals(
     .slice(0, maxDeals)
     .map(s => s.deal);
 }
+
+// Re-export server-only DB functions — import from '@/lib/comparableDeals.server' in API routes
+// This file must remain safe for client-side imports (no next/headers dependency)

@@ -8,7 +8,7 @@ interface OverviewTabProps {
   recentCalculations: CalculationHistoryItem[];
   topPhase: string;
   topModality: string;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   onNavigateToCalculator: () => void;
   onUpgrade: () => void;
   onHistoryClick: (item: CalculationHistoryItem) => void;
@@ -132,18 +132,18 @@ const OverviewTab = React.memo(function OverviewTab({
           </div>
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              tier === 'pro'
+              (tier === 'pro' || tier === 'report')
                 ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25'
                 : 'bg-slate-100 dark:bg-slate-700'
             }`}>
-              <svg className={`w-6 h-6 ${tier === 'pro' ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-6 h-6 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
             </div>
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
+              <p className="font-semibold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : tier === 'report' ? 'Report Access' : 'Free Plan'}</p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {tier === 'pro'
+                {(tier === 'pro' || tier === 'report')
                   ? 'Full access to all features'
                   : 'Limited to 2 calculations per month'
                 }

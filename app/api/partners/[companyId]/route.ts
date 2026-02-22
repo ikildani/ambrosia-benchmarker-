@@ -17,25 +17,25 @@ export async function GET(
     const anonymousId = request.headers.get('x-anonymous-id');
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
 
     if (userId) {
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('tier')
+        .select('tier, email')
         .eq('id', userId)
         .single();
 
-      userTier = (profile?.tier as 'free' | 'pro') || 'free';
-    }
+      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
-    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
-    if (userTier === 'free' && isProEmail(userEmail)) {
-      userTier = 'pro';
+      // Check PRO_EMAILS using verified database email (not client-provided)
+      if (userTier === 'free' && profile?.email && isProEmail(profile.email)) {
+        userTier = 'pro';
+      }
     }
 
     // Free users can't access detailed profiles
-    if (userTier !== 'pro') {
+    if (userTier !== 'pro' && userTier !== 'report') {
       return NextResponse.json(
         {
           error: 'Pro subscription required',

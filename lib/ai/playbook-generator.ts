@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CalculationResult, DealTerms, TieredRoyalties, DealRecommendation } from '@/lib/calculations';
+import { ComparableDeal } from '@/lib/comparableDeals';
+import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
 
 // Input types
 export interface PlaybookInput {
@@ -8,6 +10,7 @@ export interface PlaybookInput {
     phase: string;
     indication: string;
     territory: string;
+    therapeuticArea?: string;
   };
   results: {
     terms: DealTerms;
@@ -71,7 +74,7 @@ function formatCurrencyForPrompt(value: number): string {
 }
 
 // Build the playbook generation prompt
-function buildPlaybookPrompt(input: PlaybookInput): string {
+function buildPlaybookPrompt(input: PlaybookInput, comparableDeals: ComparableDeal[]): string {
   const { inputs, results, labels } = input;
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers } = results;
 
@@ -85,6 +88,10 @@ function buildPlaybookPrompt(input: PlaybookInput): string {
     })
     .join('\n');
 
+  const comparablesList = comparableDeals
+    .map((d) => `- ${d.licensor} → ${d.licensee}: ${d.value} (${d.year}) — ${d.relevance}`)
+    .join('\n');
+
   return `Expert pharma BD advisor. Generate negotiation playbook for out-licensing this asset.
 
 ASSET: ${labels.phase} ${labels.modality} in ${labels.indication}, ${territoryLabel} rights
@@ -95,14 +102,17 @@ ROYALTIES: Base ${tieredRoyalties.base.low}-${tieredRoyalties.base.high}%, Mid $
 STRUCTURE: ${dealRecommendation.upfrontPercent}% upfront / ${dealRecommendation.milestonePercent}% milestones
 ${modifiersList ? `MODIFIERS:\n${modifiersList}` : ''}
 
+COMPARABLE TRANSACTIONS:
+${comparablesList || 'No direct comparables identified'}
+
 CRITICAL RULES:
-- Do NOT reference specific company names (e.g. Pfizer, Roche). You do not have partner data.
-- Do NOT cite patent cliff dates, revenue-at-risk figures, or pipeline gap data. You do not have this data.
+- Reference comparable transactions listed above when relevant to support negotiation positions.
+- Do NOT cite patent cliff dates, revenue-at-risk figures, or pipeline gap data beyond what is provided.
 - Do NOT invent or hallucinate any statistics, dollar amounts, or dates beyond the numbers provided above.
 - Focus the partnerTactics section on strategic partner selection criteria and outreach positioning for this specific ${labels.modality} in ${labels.indication}.
-- Reference ONLY the actual deal numbers provided above.
+- Reference the actual deal numbers and comparable transactions provided above.
 
-Return JSON with 5 sections. Each section: title, content (2 sentences), bullets (3 items), highlight (1 key point). Be SPECIFIC to this ${labels.modality} at ${labels.phase}.
+Return JSON with 5 sections. Each section: title, content (2-3 sentences), bullets (3 items), highlight (1 key point). Be SPECIFIC to this ${labels.modality} at ${labels.phase}. Reference real company names and deal values from the comparables.
 
 {"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Selection Strategy","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
 }
@@ -139,11 +149,19 @@ export class PlaybookGenerator {
   }
 
   async generatePlaybook(input: PlaybookInput): Promise<NegotiationPlaybook> {
-    const prompt = buildPlaybookPrompt(input);
+    // Fetch comparable deals for market context
+    const comparableDeals = await getRelevantDealsWithDB(
+      input.inputs.therapeuticArea || 'oncology',
+      input.inputs.modality,
+      input.inputs.indication,
+      8
+    );
+
+    const prompt = buildPlaybookPrompt(input, comparableDeals);
 
     const message = await this.client.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1500,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }],
     });
 

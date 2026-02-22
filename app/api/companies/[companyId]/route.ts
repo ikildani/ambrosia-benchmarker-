@@ -31,7 +31,7 @@ export async function GET(
       if (profile?.tier) userTier = profile.tier;
     }
 
-    const isPro = userTier === 'pro';
+    const isPro = userTier === 'pro' || userTier === 'report';
 
     // Fetch company profile
     const { data: company, error: companyError } = await supabase
@@ -44,7 +44,8 @@ export async function GET(
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    const companyName = company.name;
+    // Sanitize company name for PostgREST filter safety (commas/dots could break .or() syntax)
+    const companyName = (company.name || '').replace(/[,.()"'\\]/g, '');
     const threeYearsAgo = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -58,7 +59,7 @@ export async function GET(
       supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area')
-        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.${companyName},licensor_name.ilike.${companyName}`)
+        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.%${companyName}%,licensor_name.ilike.%${companyName}%`)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -75,7 +76,7 @@ export async function GET(
       supabase
         .from('deals')
         .select('announced_date, modality, upfront_usd, indication_category')
-        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.${companyName},licensor_name.ilike.${companyName}`)
+        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.ilike.%${companyName}%,licensor_name.ilike.%${companyName}%`)
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);

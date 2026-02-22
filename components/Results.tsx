@@ -24,6 +24,7 @@ const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false 
 const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: false });
 const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
 const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false });
+const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligence'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -573,7 +574,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       {showEmailGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowEmailGate(false)} />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full p-6">
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-xs sm:max-w-sm w-full p-4 sm:p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Download Your PDF Report</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Enter your email to receive the PDF and get weekly deal insights.</p>
             <form onSubmit={handleEmailSubmit} className="space-y-3">
@@ -594,7 +595,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 {emailSubmitting ? 'Processing...' : 'Get PDF Report'}
               </button>
             </form>
-            <button onClick={() => setShowEmailGate(false)} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <button onClick={() => setShowEmailGate(false)} className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -638,7 +639,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               )}
             </div>
             {/* Mobile: horizontal scroll, Desktop: wrap */}
-            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0 pt-12 -mt-12">
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
               {modifiers.map((mod, idx) => (
                 <div key={idx} className="group relative flex-shrink-0">
                   <span
@@ -668,7 +669,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   </span>
                   {/* Tooltip with context */}
                   {mod.context && (
-                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal">
+                    <div className="invisible group-hover:visible sm:group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
                       {mod.context}
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800" />
                     </div>
@@ -955,6 +956,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
         )}
 
+        {/* Pipeline Intelligence — Clinical Trials */}
+        {fullInputs && (
+          <PipelineIntelligence
+            therapeuticArea={fullInputs.therapeuticArea}
+            modality={fullInputs.modality}
+            tier={tier}
+            onUpgrade={onUpgrade}
+            onBuyReport={onBuyReport}
+          />
+        )}
+
         {/* AI Deal Memo */}
         <DealMemoSection
           hasFullAccess={hasFullAccess}
@@ -1050,8 +1062,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           )}
         </div>
 
-        {/* Scenario Comparison (Pro only) */}
-        {isPro && (
+        {/* Scenario Comparison (Pro/Report) */}
+        {hasFullAccess && (
           <ScenarioComparison
             currentResult={result}
             currentInputs={inputs}
@@ -1098,7 +1110,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <NegotiationPlaybookModal
             isOpen={showPlaybookModal}
             onClose={() => setShowPlaybookModal(false)}
-            inputs={inputs}
+            inputs={{ ...inputs, therapeuticArea: fullInputs?.therapeuticArea }}
             results={result}
             labels={labels}
             userId={userId}
@@ -1129,7 +1141,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* Success Toast */}
         {toast && (
           <div
-            className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-700 rounded-xl shadow-2xl ${toast ? 'animate-toast-in' : 'animate-toast-out'}`}
+            className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 left-4 sm:left-auto z-50 flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-700 rounded-xl shadow-2xl max-w-sm ${toast ? 'animate-toast-in' : 'animate-toast-out'}`}
             role="status"
             onAnimationEnd={() => {
               setTimeout(() => setToast(null), 3000);

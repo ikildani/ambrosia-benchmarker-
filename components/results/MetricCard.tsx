@@ -84,7 +84,7 @@ function MetricCardInner({
 
   return (
     <div
-      className={`group metric-card xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
+      className={`group metric-card p-4 sm:p-5 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
       style={typeof animationIndex === 'number' ? { animationDelay: `${animationIndex * 100}ms` } : undefined}
     >
       <div
@@ -98,7 +98,7 @@ function MetricCardInner({
       >
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-10 h-10 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
+            <div className={`w-9 h-9 sm:w-10 sm:h-10 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
               <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
                 {icon}
               </div>

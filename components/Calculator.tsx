@@ -62,7 +62,7 @@ const QUICK_STEPS: WizardStep[] = [
 ];
 
 interface CalculatorProps {
-  tier?: 'free' | 'pro';
+  tier?: 'free' | 'pro' | 'report';
   onUpgrade?: () => void;
 }
 
@@ -515,7 +515,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         <div className="mt-8 animate-fade-in results-container" aria-live="polite">
           <Results
             result={calc.result}
-            tier={(tier === 'pro' ? 'pro' : (reportPurchaseId && reportVerified) ? 'report' : 'free') as EffectiveTier}
+            tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
             onUpgrade={onUpgrade}
             onBuyReport={() => {
               setPaywallReason('report_upsell');

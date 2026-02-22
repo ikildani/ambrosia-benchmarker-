@@ -28,7 +28,7 @@ function getAvatarGradient(id: string | null) {
 interface DashboardProps {
   userName: string;
   userEmail: string;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   onNavigateToCalculator: () => void;
   onUpgrade: () => void;
   onSignOut: () => void;
@@ -396,8 +396,8 @@ export default function Dashboard({
             <div className="text-center sm:text-left">
               <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
                 <span className="text-teal-400 text-sm font-medium">{getGreeting()}</span>
-                {tier === 'pro' && (
-                  <span className="px-2 py-0.5 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold rounded-full">Pro Member</span>
+                {(tier === 'pro' || tier === 'report') && (
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold rounded-full">{tier === 'report' ? 'Report' : 'Pro'} Member</span>
                 )}
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>

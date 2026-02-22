@@ -23,7 +23,7 @@ interface HistoryDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: CalculationHistoryItem | null;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   onReuse?: (item: CalculationHistoryItem) => void;
   onUpgrade?: () => void;
   userEmail?: string;
@@ -45,7 +45,7 @@ export default function HistoryDetailModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useFocusTrap(modalRef, isOpen, onClose);
-  const isPro = tier === 'pro';
+  const isPro = tier === 'pro' || tier === 'report';
 
   // Simple close handler
   const handleClose = useCallback(() => {

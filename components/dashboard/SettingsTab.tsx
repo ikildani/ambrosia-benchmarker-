@@ -23,7 +23,7 @@ interface SettingsTabProps {
   isSaving: boolean;
   saveMessage: string;
   showDeleteConfirm: boolean;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   history: CalculationHistoryItem[];
   avatarGradients: AvatarGradient[];
   getAvatarGradient: (id: string | null) => AvatarGradient;
@@ -95,11 +95,11 @@ const SettingsTab = React.memo(function SettingsTab({
             {editCompany && <p className="text-teal-400 mt-1">{editCompany}</p>}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                tier === 'pro'
+                (tier === 'pro' || tier === 'report')
                   ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
                   : 'bg-slate-700 text-slate-300'
               }`}>
-                {tier === 'pro' ? 'Pro Member' : 'Free Plan'}
+                {tier === 'pro' ? 'Pro Member' : tier === 'report' ? 'Report' : 'Free Plan'}
               </span>
               {memberSince && (
                 <span className="text-slate-500 text-xs">
@@ -291,21 +291,21 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
         </div>
-        <div className={`p-5 rounded-xl mb-4 ${tier === 'pro' ? 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/20 dark:to-cyan-500/20 border border-teal-200 dark:border-teal-500/30' : 'bg-slate-50 dark:bg-slate-700'}`}>
+        <div className={`p-5 rounded-xl mb-4 ${(tier === 'pro' || tier === 'report') ? 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/20 dark:to-cyan-500/20 border border-teal-200 dark:border-teal-500/30' : 'bg-slate-50 dark:bg-slate-700'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                tier === 'pro'
+                (tier === 'pro' || tier === 'report')
                   ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25'
                   : 'bg-slate-200 dark:bg-slate-600'
               }`}>
-                <svg className={`w-7 h-7 ${tier === 'pro' ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-7 h-7 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
               <div>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? `${PRICING.PRO_MONTHLY} • Billed monthly` : 'Free forever'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : tier === 'report' ? 'Report Access' : 'Free Plan'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? `${PRICING.PRO_MONTHLY} • Billed monthly` : tier === 'report' ? 'One-time report purchase' : 'Free forever'}</p>
               </div>
             </div>
             {tier === 'free' && (
@@ -319,7 +319,7 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          {(tier === 'pro'
+          {((tier === 'pro' || tier === 'report')
             ? ['Unlimited calculations', 'PDF report generation', 'Full history access', 'Priority support', 'Advanced analytics', 'API access coming soon']
             : ['2 calculations per month', 'Basic deal estimates', 'Calculation history']
           ).map((feature, idx) => (

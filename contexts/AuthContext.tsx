@@ -81,7 +81,7 @@ interface AuthContextType {
   // Auth state
   isAuthenticated: boolean;
   user: User | null;
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
 
   // Auth actions
   signIn: (email: string, name: string, userData?: Partial<User>) => void;
@@ -89,7 +89,7 @@ interface AuthContextType {
   updateUser: (data: Partial<User>) => void;
 
   // Tier actions
-  setTier: (tier: 'free' | 'pro') => void;
+  setTier: (tier: 'free' | 'pro' | 'report') => void;
 
   // Modal state
   showAuthModal: boolean;
@@ -106,7 +106,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [tier, setTierState] = useState<'free' | 'pro'>('free');
+  const [tier, setTierState] = useState<'free' | 'pro' | 'report'>('free');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
@@ -127,8 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // SECURITY: localStorage tier is for UI display only, not authorization
     // All Pro features must be verified server-side against the database
     const savedTier = localStorage.getItem('user_tier');
-    if (savedTier === 'pro') {
-      setTierState('pro'); // UI hint only - server will verify
+    if (savedTier === 'pro' || savedTier === 'report') {
+      setTierState(savedTier as 'pro' | 'report'); // UI hint only - server will verify
     }
 
     // Load auth state from localStorage first
@@ -197,9 +197,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .eq('id', supabaseUser.id)
                 .single()
                 .then(({ data: profile, error: tierError }) => {
-                  if (!tierError && profile?.tier === 'pro') {
-                    setTierState('pro');
-                    localStorage.setItem('user_tier', 'pro');
+                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                    setTierState(profile.tier as 'pro' | 'report');
+                    localStorage.setItem('user_tier', profile.tier);
                   }
                 });
             }
@@ -250,9 +250,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .eq('id', supabaseUser.id)
                 .single()
                 .then(({ data: profile, error: tierError }) => {
-                  if (!tierError && profile?.tier === 'pro') {
-                    setTierState('pro');
-                    localStorage.setItem('user_tier', 'pro');
+                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                    setTierState(profile.tier as 'pro' | 'report');
+                    localStorage.setItem('user_tier', profile.tier);
                   }
                 });
             }
@@ -398,10 +398,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const setTier = useCallback((newTier: 'free' | 'pro') => {
+  const setTier = useCallback((newTier: 'free' | 'pro' | 'report') => {
     setTierState(newTier);
-    if (newTier === 'pro') {
-      localStorage.setItem('user_tier', 'pro');
+    if (newTier === 'pro' || newTier === 'report') {
+      localStorage.setItem('user_tier', newTier);
     } else {
       localStorage.removeItem('user_tier');
     }

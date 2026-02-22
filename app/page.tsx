@@ -189,7 +189,7 @@ export default function Home() {
     }
   }, []);
 
-  const handleTierChange = (newTier: 'free' | 'pro') => {
+  const handleTierChange = (newTier: 'free' | 'pro' | 'report') => {
     setTier(newTier);
   };
 

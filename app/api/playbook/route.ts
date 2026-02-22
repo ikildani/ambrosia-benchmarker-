@@ -10,6 +10,7 @@ export interface PlaybookRequest {
     phase: string;
     indication: string;
     territory: string;
+    therapeuticArea?: string;
   };
   results: PlaybookInput['results'];
   labels: {
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
           .select('tier, email')
           .eq('id', user.id)
           .single();
-        if (profile?.tier === 'pro') authorized = true;
+        if (profile?.tier === 'pro' || profile?.tier === 'report') authorized = true;
         if (!authorized && profile?.email && isProEmail(profile.email)) authorized = true;
       }
     }
@@ -78,21 +79,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
         query.eq('email', body.email);
       }
       const { data: profile } = await query.single();
-      if (profile?.tier === 'pro') authorized = true;
+      if (profile?.tier === 'pro' || profile?.tier === 'report') authorized = true;
       if (!authorized && profile?.email && isProEmail(profile.email)) authorized = true;
     }
 
     if (!authorized) {
-      // Temporary debug info to diagnose auth failures
-      const debugInfo = {
-        hasBearer: !!authHeader,
-        hasUserId: !!body.userId,
-        hasEmail: !!body.email,
-        hasReportId: !!body.reportId,
-      };
-      console.error('[playbook] Auth failed:', JSON.stringify(debugInfo));
       return NextResponse.json(
-        { success: false, error: 'Negotiation playbook is a Pro feature. Upgrade to access AI-powered negotiation strategies.', debug: debugInfo },
+        { success: false, error: 'Negotiation playbook requires a Report or Pro subscription.' },
         { status: 403 }
       );
     }

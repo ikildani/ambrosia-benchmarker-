@@ -31,7 +31,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
 }
 
 interface UseCalculationOptions {
-  tier: 'free' | 'pro';
+  tier: 'free' | 'pro' | 'report';
   isAuthenticated: boolean;
   userId?: string;
   sessionId: string;

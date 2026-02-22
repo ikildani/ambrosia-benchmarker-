@@ -80,9 +80,34 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // SECURITY: Verify session exists and belongs to the anonymous_id or user_id making the request
+    const { data: existingSession } = await supabase
+      .from('sessions')
+      .select('id, anonymous_id, user_id')
+      .eq('id', body.session_id)
+      .single();
+
+    if (!existingSession) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only allow updating a session if the caller provides matching anonymous_id or user_id
+    // user_id update is only allowed if session has no user_id yet (linking anonymous to user)
     const updateData: Record<string, unknown> = {};
 
-    if (body.user_id !== undefined) updateData.user_id = body.user_id;
+    if (body.user_id !== undefined) {
+      // Only allow linking if session has no user or is already linked to this user
+      if (existingSession.user_id && existingSession.user_id !== body.user_id) {
+        return NextResponse.json(
+          { error: 'Session already linked to another user' },
+          { status: 403 }
+        );
+      }
+      updateData.user_id = body.user_id;
+    }
     if (body.ended_at !== undefined) updateData.ended_at = body.ended_at;
     if (body.duration_seconds !== undefined) updateData.duration_seconds = body.duration_seconds;
     if (body.calculation_count !== undefined) updateData.calculation_count = body.calculation_count;

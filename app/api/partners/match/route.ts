@@ -6,8 +6,9 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 
 // Tier-based match limits
-const MATCH_LIMITS = {
+const MATCH_LIMITS: Record<string, number> = {
   free: 3,
+  report: 10,
   pro: 10,
 };
 
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine user tier from verified sources
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
     let authenticatedUserId: string | null = null;
 
     // Method 1: Check Supabase user_profiles by user_id
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 
       if (profile) {
         authenticatedUserId = profile.id;
-        userTier = (profile.tier as 'free' | 'pro') || 'free';
+        userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
       }
     }
 
@@ -96,23 +97,24 @@ export async function POST(request: NextRequest) {
       therapeutic_area: therapeutic_area || null,
     };
 
-    // Build options - include enhanced breakdown for Pro tier
+    // Build options - include enhanced breakdown for Pro/Report tier
+    const hasPaidAccess = userTier === 'pro' || userTier === 'report';
     const matchOptions: FindPartnerMatchesOptions = {
       limit: 50,
-      includeEnhancedBreakdown: userTier === 'pro',
+      includeEnhancedBreakdown: hasPaidAccess,
     };
 
     // Find matches
     const result = await findPartnerMatches(supabase, matchInput, matchOptions);
 
     // Determine how many to show based on tier
-    const matchLimit = MATCH_LIMITS[userTier];
+    const matchLimit = MATCH_LIMITS[userTier] || MATCH_LIMITS.free;
     const matchesToShow = result.matches.slice(0, matchLimit);
     const hiddenMatches = result.total_matches - matchLimit;
 
     // Prepare response based on tier
     const responseMatches = matchesToShow.map((match, index) => {
-      if (userTier === 'free') {
+      if (!hasPaidAccess) {
         // Free tier: names, match score, and top 2 reasons (profile data hidden)
         return {
           rank: index + 1,
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
           avg_upfront_usd: null,
         };
       } else {
-        // Pro tier: full profile data with enhanced breakdown
+        // Pro/Report tier: full profile data with enhanced breakdown
         return {
           rank: index + 1,
           company_id: match.company_id,
@@ -226,7 +228,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Add upgrade CTA for free users
-    if (userTier === 'free' && hiddenMatches > 0) {
+    if (!hasPaidAccess && hiddenMatches > 0) {
       response.upgrade_cta = {
         type: 'partner_profiles',
         message: `Upgrade to Pro to see ${hiddenMatches} more potential partners with full profiles`,
@@ -240,8 +242,8 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Add advisory CTA for pro users
-    if (userTier === 'pro') {
+    // Add advisory CTA for paid users
+    if (hasPaidAccess) {
       response.advisory_cta = {
         message: 'Need deeper partner analysis? Our advisory team provides full market mapping, warm introductions, and deal support.',
         cta_text: 'Book a Call',

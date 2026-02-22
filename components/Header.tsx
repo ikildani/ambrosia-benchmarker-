@@ -23,7 +23,7 @@ interface HeaderProps {
   isAuthenticated?: boolean;
   userName?: string;
   userEmail?: string;
-  tier?: 'free' | 'pro';
+  tier?: 'free' | 'pro' | 'report';
   onSignInClick?: () => void;
   onSignUpClick?: () => void;
   onSignOut?: () => void;
@@ -174,7 +174,7 @@ export default function Header({
   }, [userMenuOpen]);
 
   // Navigation items with proper routing
-  const isPro = tier === 'pro';
+  const isPro = tier === 'pro' || tier === 'report';
   const navItems = [
     ...(isAuthenticated ? [{
       label: 'Dashboard',

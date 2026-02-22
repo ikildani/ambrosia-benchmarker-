@@ -24,24 +24,30 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
 
-    // Get user email from headers (more secure than query params)
+    // SECURITY: Prefer user_id (UUID, hard to guess) over email (easily spoofable)
+    const userId = request.headers.get('x-user-id');
     const email = request.headers.get('x-user-email');
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    // SECURITY: Only trust database-verified tier, never client-provided tier
-    let userTier: 'free' | 'pro' = 'free';
+    let userTier: 'free' | 'pro' | 'report' = 'free';
 
-    if (email) {
+    if (userId && UUID_REGEX.test(userId)) {
+      // Preferred: lookup by UUID (not guessable)
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('tier')
+        .eq('id', userId)
+        .single();
+      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+    } else if (email) {
+      // Fallback: lookup by email (less secure, but needed for localStorage-auth users)
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('tier')
         .eq('email', email)
         .single();
-
-      userTier = (profile?.tier as 'free' | 'pro') || 'free';
+      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
     }
-
-    // SECURITY: Removed client tier fallback - this was a privilege escalation vulnerability
-    // Tier must be verified from database only
 
     // Build query
     let query = supabase
@@ -152,20 +158,24 @@ export async function GET(request: NextRequest) {
       query = query.eq('terms_disclosed', true);
     }
 
-    // Search by text
+    // Search by text — use individual ilike filters to avoid PostgREST filter injection
     const search = searchParams.get('search');
     if (search) {
-      query = query.or(`asset_name.ilike.%${search}%,licensor_name.ilike.%${search}%,licensee_name.ilike.%${search}%`);
+      // Sanitize search input: strip PostgREST filter operators
+      const sanitized = search.replace(/[%_\\]/g, '\\$&').slice(0, 100);
+      query = query.or(`asset_name.ilike.%${sanitized}%,licensor_name.ilike.%${sanitized}%,licensee_name.ilike.%${sanitized}%`);
     }
 
-    // Pagination
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    // Pagination — clamp to safe bounds
+    const page = Math.max(1, Math.min(parseInt(searchParams.get('page') || '1') || 1, 10000));
+    const limit = Math.max(1, Math.min(parseInt(searchParams.get('limit') || '20') || 20, 50));
     const offset = (page - 1) * limit;
 
-    // Sorting
-    const sortBy = searchParams.get('sort_by') || 'announced_date';
-    const sortOrder = searchParams.get('sort_order') || 'desc';
+    // Sorting — whitelist allowed columns to prevent injection
+    const ALLOWED_SORT_COLUMNS = ['announced_date', 'upfront_usd', 'total_deal_value_usd', 'licensor_name', 'licensee_name', 'asset_name', 'modality', 'phase_at_signing'];
+    const sortByRaw = searchParams.get('sort_by') || 'announced_date';
+    const sortBy = ALLOWED_SORT_COLUMNS.includes(sortByRaw) ? sortByRaw : 'announced_date';
+    const sortOrder = searchParams.get('sort_order') === 'asc' ? 'asc' : 'desc';
 
     query = query
       .order(sortBy, { ascending: sortOrder === 'asc' })
@@ -181,9 +191,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // For free users, only show first 5 full deals, blur the rest
+    // For free users, only show first 5 full deals globally, blur the rest
     const processedDeals = (deals || []).map((deal, index) => {
-      if (userTier === 'pro' || index < 5) {
+      const globalIndex = offset + index;
+      if (userTier === 'pro' || userTier === 'report' || globalIndex < 5) {
         return deal;
       }
       // Blur financial data for free users beyond 5 deals

@@ -91,7 +91,7 @@ function DealMemoSectionInner({
                 </div>
 
                 {/* Risk Factors + Negotiation Priorities side by side */}
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Risks</h4>
                     <ul className="space-y-1.5">

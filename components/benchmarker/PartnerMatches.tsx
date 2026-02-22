@@ -313,12 +313,12 @@ export function PartnerMatches({
           >
             {/* Main Row */}
             <div
-              className="p-4 flex items-center justify-between"
+              className="p-3 sm:p-4 flex items-center justify-between"
               onClick={() => handlePartnerClick(match)}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
                 {/* Rank Badge */}
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm ${
+                <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-semibold text-sm ${
                   match.rank === 1
                     ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white'
                     : match.rank === 2
@@ -356,7 +356,7 @@ export function PartnerMatches({
               </div>
 
               {/* Score & Expand */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <div className="text-right">
                   <div className="flex items-center gap-1">
                     <div className={`text-sm font-semibold ${
@@ -631,7 +631,7 @@ export function PartnerMatches({
       {/* Free Tier: Upgrade CTA */}
       {userTier === 'free' && upgradeCta && (
         <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-purple-500/10 rounded-xl border border-blue-100 dark:border-blue-500/30">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -653,7 +653,7 @@ export function PartnerMatches({
             </div>
             <button
               onClick={handleUpgradeCtaClick}
-              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="flex-shrink-0 w-full sm:w-auto px-5 sm:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               Upgrade to Pro
               <ArrowRight className="w-4 h-4" />
@@ -665,7 +665,7 @@ export function PartnerMatches({
       {/* Pro Tier: Advisory CTA */}
       {userTier === 'pro' && advisoryCta && (
         <div className="mt-6 p-5 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-500/10 dark:via-orange-500/10 dark:to-yellow-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Globe className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -682,7 +682,7 @@ export function PartnerMatches({
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleAdvisoryCtaClick}
-              className="flex-shrink-0 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-500 dark:to-orange-500 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 dark:hover:from-amber-400 dark:hover:to-orange-400 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="flex-shrink-0 w-full sm:w-auto px-5 sm:px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-500 dark:to-orange-500 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-600 dark:hover:from-amber-400 dark:hover:to-orange-400 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               {advisoryCta.cta_text}
               <ExternalLink className="w-4 h-4" />
