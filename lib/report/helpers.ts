@@ -140,6 +140,23 @@ export const modalityLabels: Record<string, string> = {
   inVivoCarT: 'In Vivo CAR-T',
 };
 
+export const competitivePositionLabels: Record<string, string> = {
+  firstInClass: 'First-in-Class',
+  firstToPivotal: 'First to Pivotal',
+  bestInClass: 'Best-in-Class',
+  racing: 'Racing',
+  behind: 'Behind',
+  crowded: 'Crowded',
+};
+
+export const dataQualityLabels: Record<string, string> = {
+  pivotalReady: 'Pivotal-Ready',
+  strongPhase2: 'Strong Phase 2',
+  promising: 'Promising',
+  mixed: 'Mixed',
+  limited: 'Limited',
+};
+
 export function getLabel(value: string, map: Record<string, string>): string {
   return map[value] || value;
 }

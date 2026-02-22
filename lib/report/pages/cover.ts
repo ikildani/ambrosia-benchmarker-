@@ -3,7 +3,7 @@
 
 import { renderRiskGauge } from '../svg-charts/riskGauge';
 import { logoFullWhite } from '../logo';
-import { formatUsd, formatDate, escapeHtml, phaseLabels, territoryLabels, modalityLabels, getLabel, COLORS, getTAColors } from '../helpers';
+import { formatUsd, formatDate, escapeHtml, phaseLabels, territoryLabels, modalityLabels, competitivePositionLabels, dataQualityLabels, getLabel, COLORS, getTAColors } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
@@ -94,11 +94,11 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
           </div>
           <div style="border-left: 3px solid ${COLORS.navy}; padding: 10px 14px; background: #f8fafc; border-radius: 0 4px 4px 0;">
             <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 2px;">Competitive Position</div>
-            <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(inputs.competitivePosition.replace(/([A-Z])/g, ' $1').trim())}</div>
+            <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(getLabel(inputs.competitivePosition, competitivePositionLabels))}</div>
           </div>
           <div style="border-left: 3px solid ${COLORS.navy}; padding: 10px 14px; background: #f8fafc; border-radius: 0 4px 4px 0;">
             <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 2px;">Data Quality</div>
-            <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(inputs.dataQuality.replace(/([A-Z])/g, ' $1').trim())}</div>
+            <div style="font-size: 12px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(getLabel(inputs.dataQuality, dataQualityLabels))}</div>
           </div>
           <div style="border-left: 3px solid ${riskScore >= 70 ? COLORS.rose : riskScore >= 40 ? COLORS.amber : COLORS.green}; padding: 10px 14px; background: #f8fafc; border-radius: 0 4px 4px 0;">
             <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 2px;">Risk Score</div>
