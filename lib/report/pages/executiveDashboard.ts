@@ -33,7 +33,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
       <div class="section-title-lg">Executive Dashboard</div>
 
       <!-- Hero KPI Row -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 14px; margin-bottom: 18px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px;">
         <!-- Total Deal Value — large hero card -->
         <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 22px; color: white;">
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
@@ -47,7 +47,8 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
           <div class="kpi-sub">${upfrontPct}% of total deal value</div>
         </div>
         <!-- Risk Gauge -->
-        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 16px;">
+        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div class="kpi-label" style="margin-top: 0; margin-bottom: 8px;">Risk Factor Score</div>
           ${gaugeHtml}
         </div>
       </div>
@@ -69,10 +70,28 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
       <!-- Bottom row: Donut + Recommendation -->
       <div style="display: grid; grid-template-columns: 220px 1fr; gap: 20px;">
-        <!-- Donut chart -->
-        <div style="display: flex; flex-direction: column; align-items: center;">
+        <!-- Left: Donut + Royalty Rates -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
           <div class="section-title" style="margin-bottom: 6px;">Value Split</div>
           ${donutHtml}
+          <!-- Royalty Rates Compact -->
+          <div class="card-sm" style="width: 100%; border-top: 3px solid #8b5cf6;">
+            <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Tiered Royalty Rates</div>
+            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 9px;">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: ${COLORS.gray500};">Base (&lt;$500M)</span>
+                <span style="font-weight: 700; color: ${COLORS.navy};">${result.tieredRoyalties.base.low}%–${result.tieredRoyalties.base.high}%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: ${COLORS.gray500};">Mid ($500M–$1B)</span>
+                <span style="font-weight: 700; color: ${COLORS.navy};">${result.tieredRoyalties.midTier.low}%–${result.tieredRoyalties.midTier.high}%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: ${COLORS.gray500};">High (&gt;$1B)</span>
+                <span style="font-weight: 700; color: ${COLORS.navy};">${result.tieredRoyalties.highTier.low}%–${result.tieredRoyalties.highTier.high}%</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Right column: Recommendation + Top Driver -->

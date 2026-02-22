@@ -58,15 +58,24 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
               </tr>
             </thead>
             <tbody>
-              ${termRanges.map(t => `
-                <tr>
-                  <td style="font-weight: 600;">${t.label}</td>
+              ${termRanges.map((t, i) => {
+                const isTotal = i === 0;
+                const rowBg = isTotal ? `background: linear-gradient(90deg, #f0fdfa, #ecfeff);` : '';
+                const labelStyle = isTotal
+                  ? `font-weight: 800; color: ${COLORS.navy}; font-size: 11px;`
+                  : `font-weight: 600;`;
+                const medianStyle = isTotal
+                  ? `font-weight: 800; color: ${COLORS.teal}; text-align: right; font-size: 12px;`
+                  : '';
+                return `
+                <tr style="${rowBg}">
+                  <td style="${labelStyle}">${t.label}</td>
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.low)}</td>
-                  <td class="value-cell">${formatUsd(t.median)}</td>
+                  <td ${isTotal ? `style="${medianStyle}"` : 'class="value-cell"'}>${formatUsd(t.median)}</td>
                   <td style="text-align: right; color: ${COLORS.gray500};">${formatUsd(t.high)}</td>
                   <td style="padding: 2px 8px;">${renderRangeBar({ low: t.low, median: t.median, high: t.high }, maxVal, 250, 20, false)}</td>
-                </tr>
-              `).join('')}
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>

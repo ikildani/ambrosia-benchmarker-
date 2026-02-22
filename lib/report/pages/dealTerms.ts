@@ -30,14 +30,18 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
       <div class="grid-2" style="margin-bottom: 20px;">
         ${termCards.map((tc, i) => {
           const colors = [COLORS.teal, COLORS.cyan, '#6366f1', '#8b5cf6'];
+          const maxTermVal = Math.max(...termCards.map(t => t.terms.high)) * 1.1;
+          const barWidth = maxTermVal > 0 ? Math.min((tc.terms.median / maxTermVal) * 100, 100) : 0;
           return `
           <div class="card" style="border-top: 3px solid ${colors[i]};">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
-              <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${tc.label}</div>
-              <div style="font-size: 17px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${formatUsd(tc.terms.median)}</div>
+            <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px;">${tc.label}</div>
+            <div style="font-size: 22px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px;">${formatUsd(tc.terms.median)}</div>
+            <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 8px;">
+              ${formatUsd(tc.terms.low)} &ndash; ${formatUsd(tc.terms.high)}
             </div>
-            <div style="font-size: 9px; color: ${COLORS.gray400}; margin-bottom: 5px;">
-              Range: ${formatUsd(tc.terms.low)} &ndash; ${formatUsd(tc.terms.high)}
+            <!-- Range bar -->
+            <div style="height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-bottom: 8px;">
+              <div style="height: 100%; width: ${barWidth}%; background: linear-gradient(90deg, ${colors[i]}, ${colors[i]}99); border-radius: 2px;"></div>
             </div>
             <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5; margin-bottom: 6px;">
               ${escapeHtml(tc.dd.rangeExplanation)}
@@ -105,17 +109,17 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
             </thead>
             <tbody>
               <tr>
-                <td>Base</td>
+                <td>Base <span style="font-size: 8px; color: ${COLORS.gray400};">(&lt;$500M)</span></td>
                 <td style="text-align: right;">${royalties.base.low}%</td>
                 <td class="value-cell">${royalties.base.high}%</td>
               </tr>
               <tr>
-                <td>Mid Tier</td>
+                <td>Mid Tier <span style="font-size: 8px; color: ${COLORS.gray400};">($500M–$1B)</span></td>
                 <td style="text-align: right;">${royalties.midTier.low}%</td>
                 <td class="value-cell">${royalties.midTier.high}%</td>
               </tr>
               <tr>
-                <td>High Tier</td>
+                <td>High Tier <span style="font-size: 8px; color: ${COLORS.gray400};">(&gt;$1B)</span></td>
                 <td style="text-align: right;">${royalties.highTier.low}%</td>
                 <td class="value-cell">${royalties.highTier.high}%</td>
               </tr>

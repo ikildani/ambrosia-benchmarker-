@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { DrillDownData, formatCurrency } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
 import InfoTooltip from '@/components/calculator/InfoTooltip';
+import AnimatedValue from './AnimatedValue';
 
 interface MetricCardProps {
   title: string;
@@ -135,7 +136,13 @@ function MetricCardInner({
         </p>
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-neutral-500 dark:text-slate-400">
-            Expected: <span className={`font-bold ${expectedColor}`}>{expected}</span>
+            Expected: <span className={`font-bold ${expectedColor}`}>
+              {currentValue !== undefined ? (
+                <AnimatedValue value={currentValue} duration={900 + (animationIndex || 0) * 100} />
+              ) : (
+                expected
+              )}
+            </span>
             {previousValue !== undefined && currentValue !== undefined && previousValue !== currentValue && (
               <span
                 className={`ml-2 inline-flex items-center text-xs font-semibold motion-safe:animate-fade-in ${
@@ -153,8 +160,11 @@ function MetricCardInner({
         </div>
         <div className="progress-bar">
           <div
-            className={`h-full ${progressColor} rounded-full transition-all duration-500`}
-            style={{ width: `${progressWidth}%` }}
+            className={`h-full ${progressColor} rounded-full transition-all duration-1000 ease-out`}
+            style={{
+              width: `${progressWidth}%`,
+              transitionDelay: `${(animationIndex || 0) * 100}ms`,
+            }}
           />
         </div>
         {contextLine && (

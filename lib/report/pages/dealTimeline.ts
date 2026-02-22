@@ -35,33 +35,33 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
 
       <!-- Milestone Payments Grid -->
       <div class="section-title" style="margin-top: 16px;">MILESTONE PAYMENT SCHEDULE</div>
-      <div class="grid-3" style="margin-top: 10px;">
+      <div class="grid-4" style="margin-top: 10px;">
         ${[
           { label: 'Upfront Payment', data: result.terms.upfront, desc: 'Due at signing', color: COLORS.teal },
-          { label: 'Development Milestones', data: devMilestones, desc: 'IND, Phase starts, data readouts', color: COLORS.cyan },
-          { label: 'Regulatory Milestones', data: regMilestones, desc: 'NDA/BLA filing, FDA approval', color: '#6366f1' },
+          { label: 'Dev Milestones', data: devMilestones, desc: 'IND, Phase starts, readouts', color: COLORS.cyan },
+          { label: 'Reg Milestones', data: regMilestones, desc: 'NDA/BLA filing, approval', color: '#6366f1' },
+          { label: 'Comm Milestones', data: commMilestones, desc: 'Sales thresholds ($500M+)', color: '#8b5cf6' },
         ].map(item => `
           <div class="card" style="border-top: 3px solid ${item.color};">
             <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 6px;">${item.label}</div>
-            <div style="font-size: 24px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${formatUsd(item.data.median)}</div>
+            <div style="font-size: 20px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${formatUsd(item.data.median)}</div>
             <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">${formatUsd(item.data.low)} &ndash; ${formatUsd(item.data.high)}</div>
             <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">${item.desc}</div>
           </div>
         `).join('')}
       </div>
 
-      <div class="grid-2" style="margin-top: 12px;">
-        <div class="card" style="border-top: 3px solid #8b5cf6;">
-          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 6px;">Commercial Milestones</div>
-          <div style="font-size: 24px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.02em;">${formatUsd(commMilestones.median)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 3px;">${formatUsd(commMilestones.low)} &ndash; ${formatUsd(commMilestones.high)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 6px;">Sales thresholds ($100M, $500M, $1B+)</div>
-        </div>
-        <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 18px; color: white;">
+      <!-- Total Deal Value Hero -->
+      <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 18px 22px; color: white; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
-          <div style="font-size: 26px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em;">${formatUsd(result.terms.totalDealValue.median)}</div>
+          <div style="font-size: 28px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em;">${formatUsd(result.terms.totalDealValue.median)}</div>
           <div style="font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 3px;">${formatUsd(result.terms.totalDealValue.low)} &ndash; ${formatUsd(result.terms.totalDealValue.high)}</div>
-          <div style="font-size: 8px; color: ${COLORS.tealMid}; font-weight: 600; margin-top: 6px;">+ Royalties on net sales</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 8px; color: ${COLORS.tealMid}; font-weight: 600;">+ Tiered Royalties</div>
+          <div style="font-size: 14px; font-weight: 800; color: white; margin-top: 2px;">${result.tieredRoyalties.base.low}% &ndash; ${result.tieredRoyalties.highTier.high}%</div>
+          <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-top: 2px;">on net sales</div>
         </div>
       </div>
 

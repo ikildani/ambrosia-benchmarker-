@@ -43,7 +43,7 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
         </p>
 
         <!-- Key Metrics Row -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; position: relative;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; position: relative;">
           <!-- Total Deal Value -->
           <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 18px 20px;">
             <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
@@ -57,8 +57,11 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
             <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px;">${formatUsd(result.terms.upfront.low)} &ndash; ${formatUsd(result.terms.upfront.high)}</div>
           </div>
           <!-- Risk Gauge -->
-          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px 16px; display: flex; align-items: center; justify-content: center;">
-            ${gaugeHtml}
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 18px 20px;">
+            <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">Risk Factor Score</div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+              ${gaugeHtml}
+            </div>
           </div>
         </div>
       </div>
