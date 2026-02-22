@@ -314,7 +314,7 @@ export default function NegotiationPlaybookModal({
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 max-h-[60vh] overflow-y-auto print:max-h-none print:overflow-visible">
+        <div className="p-4 sm:p-6 print:overflow-visible">
           {loading && <PlaybookSkeleton />}
 
           {error && (
