@@ -117,24 +117,7 @@ Return JSON with 5 sections. Each section: title, content (2-3 sentences), bulle
 {"sections":{"openingPosition":{"title":"Opening Position","content":"...","bullets":["...","...","..."],"highlight":"..."},"structureStrategy":{"title":"Deal Structure","content":"...","bullets":["...","...","..."],"highlight":"..."},"royaltyFloor":{"title":"Royalty Negotiation","content":"...","bullets":["...","...","..."],"highlight":"..."},"competitiveIntelligence":{"title":"Competitive Dynamics","content":"...","bullets":["...","...","..."],"highlight":"..."},"partnerTactics":{"title":"Partner Selection Strategy","content":"...","bullets":["...","...","..."],"highlight":"..."}},"keyCaveats":["For informational purposes only.","Consult advisors before commitments."]}`;
 }
 
-// Parse JSON from Claude's response with control character cleanup
-function parseJsonResponse<T>(text: string): T {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('No JSON found in response');
-  }
-
-  // Clean up control characters that can appear in AI-generated JSON
-  let cleanedJson = jsonMatch[0]
-    .replace(/[\x00-\x1F\x7F]/g, (char) => {
-      if (char === '\n' || char === '\r') return ' ';
-      if (char === '\t') return ' ';
-      return '';
-    })
-    .replace(/\s+/g, ' ');
-
-  return JSON.parse(cleanedJson) as T;
-}
+import { parseJsonResponse } from './parse-json';
 
 // Playbook Generator class
 export class PlaybookGenerator {
@@ -145,11 +128,10 @@ export class PlaybookGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic({ apiKey, timeout: 30_000 });
   }
 
   async generatePlaybook(input: PlaybookInput): Promise<NegotiationPlaybook> {
-    // Fetch comparable deals for market context
     const comparableDeals = await getRelevantDealsWithDB(
       input.inputs.therapeuticArea || 'oncology',
       input.inputs.modality,
@@ -158,34 +140,52 @@ export class PlaybookGenerator {
     );
 
     const prompt = buildPlaybookPrompt(input, comparableDeals);
+    let lastError: Error | null = null;
 
-    const message = await this.client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const message = await this.client.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: prompt }],
+        });
 
-    const textContent = message.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+        const textContent = message.content.find((c) => c.type === 'text');
+        if (!textContent || textContent.type !== 'text') {
+          throw new Error('No text content in AI response');
+        }
+
+        const parsed = parseJsonResponse<{
+          sections: NegotiationPlaybook['sections'];
+          keyCaveats: string[];
+        }>(textContent.text);
+
+        // Validate required fields
+        if (!parsed.sections?.openingPosition || !Array.isArray(parsed.keyCaveats)) {
+          throw new Error('AI response missing required playbook sections');
+        }
+
+        return {
+          generatedAt: new Date().toISOString(),
+          assetProfile: {
+            phase: input.labels.phase,
+            modality: input.labels.modality,
+            indication: input.labels.indication,
+            territory: territoryLabels[input.inputs.territory] || input.inputs.territory,
+          },
+          sections: parsed.sections,
+          keyCaveats: parsed.keyCaveats,
+        };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        const msg = lastError.message.toLowerCase();
+        const isRetryable = msg.includes('timeout') || msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
+        if (!isRetryable || attempt > 0) break;
+        await new Promise(r => setTimeout(r, 2_000));
+      }
     }
 
-    const parsed = parseJsonResponse<{
-      sections: NegotiationPlaybook['sections'];
-      keyCaveats: string[];
-    }>(textContent.text);
-
-    return {
-      generatedAt: new Date().toISOString(),
-      assetProfile: {
-        phase: input.labels.phase,
-        modality: input.labels.modality,
-        indication: input.labels.indication,
-        territory: territoryLabels[input.inputs.territory] || input.inputs.territory,
-      },
-      sections: parsed.sections,
-      keyCaveats: parsed.keyCaveats,
-    };
+    throw lastError ?? new Error('Playbook generation failed');
   }
 }
 

@@ -13,6 +13,57 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 
+// Company profile shape (matches Supabase `companies` table columns used in scoring)
+interface CompanyProfile {
+  id: string;
+  name: string;
+  company_type: string | null;
+  ticker: string | null;
+  hq_country: string | null;
+  modalities_active: string[];
+  modalities_primary: string[];
+  indications_active: string[];
+  indications_specific: string[];
+  deals_last_12mo: number;
+  deals_last_24mo: number;
+  last_deal_date: string | null;
+  last_deal_modality: string | null;
+  last_deal_indication: string | null;
+  active_trials_count: number;
+  avg_upfront_usd: number | null;
+  median_upfront_usd: number | null;
+  phase_preference_min: string | null;
+  phase_preference_max: string | null;
+  acquisition_appetite: string | null;
+  actively_acquiring: boolean;
+  strategic_priorities: string[];
+  territory_focus: string[];
+  data_quality_score: number;
+  patent_cliffs: unknown;
+  revenue_at_risk_2025: number;
+  revenue_at_risk_2026: number;
+  revenue_at_risk_2027: number;
+}
+
+// Deal shape for enrichment queries
+interface CompanyDeal {
+  id: string;
+  asset_name: string | null;
+  licensor_id: string;
+  licensee_id: string;
+  licensor_name: string | null;
+  licensee_name: string | null;
+  modality: string | null;
+  indication_category: string | null;
+  indication_specific: string | null;
+  phase_at_signing: string | null;
+  total_deal_value_usd: number | null;
+  upfront_usd: number | null;
+  announced_date: string;
+  deal_type: string | null;
+  territory: string | null;
+}
+
 // Scoring weights - tuned for deal relevance with strategic need parity
 const WEIGHTS = {
   // Modality alignment (max 40 points)
@@ -258,7 +309,7 @@ export async function findPartnerMatches(
 
   // Pre-fetch deals for all companies if enhanced breakdown is needed
   // This is more efficient than fetching per-company
-  let companyDealsMap: Map<string, any[]> = new Map();
+  let companyDealsMap: Map<string, CompanyDeal[]> = new Map();
   if (includeEnhancedBreakdown) {
     const companyIds = companies.map((c) => c.id);
     const { data: allDeals } = await supabase
@@ -271,7 +322,7 @@ export async function findPartnerMatches(
       .order('announced_date', { ascending: false });
 
     if (allDeals) {
-      for (const deal of allDeals) {
+      for (const deal of allDeals as CompanyDeal[]) {
         const licensorDeals = companyDealsMap.get(deal.licensor_id) || [];
         licensorDeals.push(deal);
         companyDealsMap.set(deal.licensor_id, licensorDeals);
@@ -283,7 +334,7 @@ export async function findPartnerMatches(
     }
   }
 
-  for (const company of companies) {
+  for (const company of companies as CompanyProfile[]) {
     const { score, breakdown, reasons } = calculateMatchScore(company, input);
 
     // Only include meaningful matches (score >= 15)
@@ -358,7 +409,7 @@ export async function findPartnerMatches(
 }
 
 function calculateMatchScore(
-  company: any,
+  company: CompanyProfile,
   input: MatchInput
 ): { score: number; breakdown: ScoreBreakdown; reasons: MatchReason[] } {
   const breakdown: ScoreBreakdown = {
@@ -439,8 +490,8 @@ function calculateMatchScore(
 
   // 3. PHASE PREFERENCE MATCHING (with sweet-spot bonus)
   const inputPhaseRank = PHASE_RANK[input.development_phase] ?? 2;
-  const minPhaseRank = PHASE_RANK[company.phase_preference_min] ?? 0;
-  const maxPhaseRank = PHASE_RANK[company.phase_preference_max] ?? 5;
+  const minPhaseRank = (company.phase_preference_min ? PHASE_RANK[company.phase_preference_min] : undefined) ?? 0;
+  const maxPhaseRank = (company.phase_preference_max ? PHASE_RANK[company.phase_preference_max] : undefined) ?? 5;
 
   if (inputPhaseRank >= minPhaseRank && inputPhaseRank <= maxPhaseRank) {
     // Check if asset is in the sweet spot (center of company's preferred range)
@@ -752,10 +803,10 @@ export const formatters = {
  * Build detailed score breakdown with evidence lines for each category
  */
 export function buildDetailedBreakdown(
-  company: any,
+  company: CompanyProfile,
   input: MatchInput,
   breakdown: ScoreBreakdown,
-  companyDeals: any[]
+  companyDeals: CompanyDeal[]
 ): DetailedScoreBreakdown {
   const factors: ScoreFactor[] = [];
 
@@ -1044,9 +1095,9 @@ export function buildDetailedBreakdown(
  * Calculate watch-out factors for a partner match
  */
 export function calculateWatchOuts(
-  company: any,
+  company: CompanyProfile,
   input: MatchInput,
-  companyDeals: any[]
+  companyDeals: CompanyDeal[]
 ): WatchOutFactor[] {
   const watchOuts: WatchOutFactor[] = [];
 
@@ -1106,14 +1157,14 @@ export function calculateWatchOuts(
 
   // 4. Phase Mismatch Risk
   const inputPhaseRank = PHASE_RANK[input.development_phase] ?? 2;
-  const minPhaseRank = PHASE_RANK[company.phase_preference_min] ?? 0;
-  const maxPhaseRank = PHASE_RANK[company.phase_preference_max] ?? 5;
+  const minPhaseRank = (company.phase_preference_min ? PHASE_RANK[company.phase_preference_min] : undefined) ?? 0;
+  const maxPhaseRank = (company.phase_preference_max ? PHASE_RANK[company.phase_preference_max] : undefined) ?? 5;
 
   if (inputPhaseRank < minPhaseRank - 1) {
     watchOuts.push({
       title: 'Early Stage Hesitation',
       impact: -5,
-      description: `Historically focuses on ${formatPhase(company.phase_preference_min)}+ assets. May require more data package.`,
+      description: `Historically focuses on ${formatPhase(company.phase_preference_min || 'phase_1')}+ assets. May require more data package.`,
       severity: 'medium',
       category: 'strategic',
     });
@@ -1189,7 +1240,7 @@ export function calculateWatchOuts(
  * Build strategic context from company data.
  * Filters patent cliffs to the user's therapeutic area so only relevant drugs are shown.
  */
-export function buildStrategicContext(company: any, therapeuticArea?: string | null): StrategicContext {
+export function buildStrategicContext(company: CompanyProfile, therapeuticArea?: string | null): StrategicContext {
   const allCliffs = parsePatentCliffs(company.patent_cliffs);
   // Filter cliffs to the user's therapeutic area — never show irrelevant drugs
   const patentCliffs = filterCliffsByTA(allCliffs, therapeuticArea || null);
@@ -1261,7 +1312,7 @@ export async function fetchCompanyDeals(
 // HELPER FUNCTIONS
 // ============================================================================
 
-function parsePatentCliffs(cliffs: any): PatentCliff[] {
+function parsePatentCliffs(cliffs: unknown): PatentCliff[] {
   if (!cliffs || !Array.isArray(cliffs)) {
     return [];
   }
@@ -1322,7 +1373,7 @@ function formatTerritory(territory: string): string {
   return labels[territory] || territory;
 }
 
-function generateDealRelevance(deal: any): string {
+function generateDealRelevance(deal: Pick<CompanyDeal, 'modality' | 'phase_at_signing' | 'deal_type'>): string {
   const parts: string[] = [];
   if (deal.modality) parts.push(formatModality(deal.modality));
   if (deal.phase_at_signing) parts.push(formatPhase(deal.phase_at_signing));

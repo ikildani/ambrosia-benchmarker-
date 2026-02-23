@@ -1,6 +1,9 @@
 // ClinicalTrials.gov Pipeline Intelligence Ingestion
 // Tracks active trials for pharma/biotech companies
 
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 const CT_API_V2 = 'https://clinicaltrials.gov/api/v2/studies';
 
 // Top 150+ pharma/biotech companies to track
@@ -151,10 +154,12 @@ export async function fetchCompanyTrials(
         params.set('pageToken', pageToken);
       }
 
-      const response = await fetch(`${CT_API_V2}?${params}`, {
+      const response = await fetchWithTimeout(`${CT_API_V2}?${params}`, {
         headers: {
           'Accept': 'application/json',
         },
+        timeoutMs: 20_000,
+        retries: 1,
       });
 
       if (!response.ok) {
@@ -187,25 +192,25 @@ export async function fetchCompanyTrials(
             phase: mapPhase(design?.phases?.[0]),
             status: mapStatus(status?.overallStatus),
             conditions: conditions?.conditions || [],
-            interventions: (interventions?.interventions || []).map((i: any) => ({
+            interventions: (interventions?.interventions || []).map((i: { name?: string; type?: string; description?: string }) => ({
               name: i.name || '',
               type: i.type || '',
               description: i.description || null,
             })),
-            collaborators: (sponsor?.collaborators || []).map((c: any) => c.name),
+            collaborators: (sponsor?.collaborators || []).map((c: { name?: string }) => c.name),
             startDate: normalizeDate(status?.startDateStruct?.date),
             primaryCompletionDate: normalizeDate(status?.primaryCompletionDateStruct?.date),
             completionDate: normalizeDate(status?.completionDateStruct?.date),
             lastUpdatePosted: normalizeDate(status?.lastUpdatePostDateStruct?.date),
             enrollmentCount: design?.enrollmentInfo?.count || null,
-            locations: Array.from(new Set(contacts?.locations?.map((l: any) => l.country) || [])),
+            locations: Array.from(new Set(contacts?.locations?.map((l: { country?: string }) => l.country) || [])),
             hasResults: !!results || !!status?.resultsFirstPostDateStruct,
-            primaryOutcomes: (outcomes?.primaryOutcomes || []).map((o: any) => ({
+            primaryOutcomes: (outcomes?.primaryOutcomes || []).map((o: { measure?: string; description?: string; timeFrame?: string }) => ({
               measure: o.measure || '',
               description: o.description || null,
               timeFrame: o.timeFrame || null,
             })),
-            secondaryOutcomes: (outcomes?.secondaryOutcomes || []).map((o: any) => ({
+            secondaryOutcomes: (outcomes?.secondaryOutcomes || []).map((o: { measure?: string; description?: string; timeFrame?: string }) => ({
               measure: o.measure || '',
               description: o.description || null,
               timeFrame: o.timeFrame || null,
@@ -582,7 +587,7 @@ function escapeLikePattern(str: string): string {
 }
 
 export async function runWeeklyIngestion(
-  supabase: any,
+  supabase: SupabaseClient,
   options: { batchSize?: number } = {}
 ): Promise<{ companies: number; trials: number; errors: string[]; batch_info: { processed: number; total: number } }> {
   const { batchSize = 30 } = options;
@@ -612,7 +617,7 @@ export async function runWeeklyIngestion(
   }
 
   // Use company names as CT.gov search terms (already sorted by stalest first from query)
-  const allCompanyNames = allDbCompanies.map((c: any) => c.name);
+  const allCompanyNames = allDbCompanies.map((c: { name: string }) => c.name);
   const totalCompanies = allCompanyNames.length;
 
   // Take only the batch

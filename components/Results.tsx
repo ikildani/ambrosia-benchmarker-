@@ -10,7 +10,7 @@ import ShareModal from './ShareModal';
 import { useTracking } from './TrackingProvider';
 import { PRICING } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
-import benchmarks from '@/data/benchmarks.json';
+import { staticBenchmarks as benchmarks } from '@/lib/benchmarks';
 import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
 import type { CalculationHistoryItem } from '@/lib/history';
 
@@ -318,9 +318,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
     // Pick the right baselines for the therapeutic area
     const baselines = ta === 'metabolic'
-      ? (benchmarks as any).metabolicPhaseBaselines?.[phase]
+      ? benchmarks.metabolicPhaseBaselines[phase]
       : ta === 'immunology'
-      ? (benchmarks as any).immunologyPhaseBaselines?.[phase]
+      ? benchmarks.immunologyPhaseBaselines[phase]
       : ta === 'neurology'
       ? benchmarks.neurologyPhaseBaselines[phase]
       : benchmarks.phaseBaselines[phase];

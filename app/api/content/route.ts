@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { CreateBlogPostRequest, generateSlug } from '@/types/content';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { clampInt } from '@/lib/api-validation';
 
 // Helper to verify admin authentication
 async function verifyAdmin(request: Request): Promise<{ authorized: boolean; error?: NextResponse }> {
@@ -9,7 +11,7 @@ async function verifyAdmin(request: Request): Promise<{ authorized: boolean; err
   if (!authHeader?.startsWith('Bearer ')) {
     return {
       authorized: false,
-      error: NextResponse.json({ error: 'Authorization required' }, { status: 401 }),
+      error: apiError('Authorization required', 401),
     };
   }
 
@@ -20,14 +22,14 @@ async function verifyAdmin(request: Request): Promise<{ authorized: boolean; err
   if (authError || !user) {
     return {
       authorized: false,
-      error: NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 }),
+      error: apiError('Invalid or expired token', 401),
     };
   }
 
   if (!isAdminEmail(user.email)) {
     return {
       authorized: false,
-      error: NextResponse.json({ error: 'Admin access required' }, { status: 403 }),
+      error: apiError('Admin access required', 403),
     };
   }
 
@@ -40,8 +42,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const category = searchParams.get('category');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = clampInt(searchParams.get('limit'), 1, 100, 50);
+    const offset = clampInt(searchParams.get('offset'), 0, 100000, 0);
 
     const supabase = createServiceClient();
 
@@ -63,24 +65,13 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('Error fetching posts:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch posts' },
-        { status: 500 }
-      );
+      return apiError('Failed to fetch posts', 500);
     }
 
-    return NextResponse.json({
-      posts: data || [],
-      total: count || 0,
-      limit,
-      offset,
-    });
+    return apiSuccess({ posts: data || [], total: count || 0, limit, offset });
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 
@@ -96,10 +87,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as CreateBlogPostRequest;
 
     if (!body.title || !body.content) {
-      return NextResponse.json(
-        { error: 'title and content are required' },
-        { status: 400 }
-      );
+      return apiError('title and content are required', 400);
     }
 
     const slug = body.slug || generateSlug(body.title);
@@ -113,10 +101,7 @@ export async function POST(request: Request) {
       .single();
 
     if (existing) {
-      return NextResponse.json(
-        { error: 'A post with this slug already exists' },
-        { status: 409 }
-      );
+      return apiError('A post with this slug already exists', 409);
     }
 
     const { data, error } = await supabase
@@ -139,18 +124,12 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('Error creating post:', error);
-      return NextResponse.json(
-        { error: 'Failed to create post' },
-        { status: 500 }
-      );
+      return apiError('Failed to create post', 500);
     }
 
-    return NextResponse.json({ post: data }, { status: 201 });
+    return apiSuccess({ post: data }, 201);
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

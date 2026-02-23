@@ -1,17 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
 export async function GET(request: NextRequest) {
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult), 'RATE_LIMITED');
   }
 
   try {
@@ -45,7 +43,7 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('Pulse history error:', error);
-        return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });
+        return apiError('Failed to fetch history', 500);
       }
 
       // For free users, null out financial details in snapshots
@@ -61,7 +59,7 @@ export async function GET(request: NextRequest) {
             phase_breakdown: nullifyFinancials(s.phase_breakdown),
           }));
 
-      return NextResponse.json({ snapshots: gatedSnapshots });
+      return apiSuccess({ snapshots: gatedSnapshots });
     }
 
     // Build snapshot query — support ?week= deep link
@@ -88,7 +86,7 @@ export async function GET(request: NextRequest) {
 
     if (snapshotResult.error) {
       console.error('Pulse snapshot error:', snapshotResult.error);
-      return NextResponse.json({ error: 'No snapshot available' }, { status: 404 });
+      return apiError('No snapshot available', 404);
     }
 
     const snapshot = snapshotResult.data;
@@ -96,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     // Gate data for free users
     if (!isPro) {
-      return NextResponse.json({
+      return apiSuccess({
         snapshot: {
           ...snapshot,
           avg_upfront_usd: null,
@@ -113,7 +111,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       snapshot,
       deals,
       total_deals: deals.length,
@@ -121,7 +119,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'pulse');
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return apiError('Internal server error', 500);
   }
 }
 

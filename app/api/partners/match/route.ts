@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
 // Tier-based match limits
 const MATCH_LIMITS: Record<string, number> = {
@@ -18,13 +19,7 @@ export async function POST(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'partnerMatch', RATE_LIMIT_CONFIGS.partnerMatch);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please try again later.' },
-      {
-        status: 429,
-        headers: getRateLimitHeaders(rateLimitResult),
-      }
-    );
+    return apiErrorWithHeaders('Too many requests. Please try again later.', 429, getRateLimitHeaders(rateLimitResult), 'RATE_LIMITED');
   }
 
   try {
@@ -48,10 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!modality || !development_phase) {
-      return NextResponse.json(
-        { error: 'modality and development_phase are required' },
-        { status: 400 }
-      );
+      return apiError('modality and development_phase are required', 400);
     }
 
     // Determine user tier from verified sources
@@ -218,7 +210,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Build response
-    const response: any = {
+    const response: Record<string, unknown> = {
       success: true,
       total_matches: result.total_matches,
       matches_shown: matchLimit,
@@ -257,14 +249,11 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    return NextResponse.json(response);
+    return apiSuccess(response);
 
   } catch (error) {
     captureApiError(error, 'partners-match');
-    return NextResponse.json(
-      { error: 'Failed to find partner matches' },
-      { status: 500 }
-    );
+    return apiError('Failed to find partner matches', 500);
   }
 }
 // Trigger rebuild 1770005077

@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
-import { calculationRequestSchema } from '@/lib/api-validation';
+import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
 export async function POST(request: NextRequest) {
   // Rate limiting
@@ -11,13 +12,7 @@ export async function POST(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please try again later.' },
-      {
-        status: 429,
-        headers: getRateLimitHeaders(rateLimitResult),
-      }
-    );
+    return apiErrorWithHeaders('Too many requests. Please try again later.', 429, getRateLimitHeaders(rateLimitResult), 'RATE_LIMITED');
   }
 
   try {
@@ -28,10 +23,7 @@ export async function POST(request: NextRequest) {
     const parseResult = calculationRequestSchema.safeParse(rawBody);
     if (!parseResult.success) {
       const firstError = parseResult.error.issues[0]?.message || 'Invalid input';
-      return NextResponse.json(
-        { error: firstError },
-        { status: 400 }
-      );
+      return apiError(firstError, 400);
     }
     const body = parseResult.data;
 
@@ -102,10 +94,7 @@ export async function POST(request: NextRequest) {
 
     if (calcError) {
       console.error('Calculation save error:', calcError);
-      return NextResponse.json(
-        { error: 'Failed to save calculation' },
-        { status: 500 }
-      );
+      return apiError('Failed to save calculation', 500);
     }
 
     // Fire event and update session count (non-blocking — don't let these fail the response)
@@ -148,16 +137,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      calculation_id: calculation!.id,
-    });
+    return apiSuccess({ calculation_id: calculation!.id });
   } catch (error) {
     captureApiError(error, 'calculations-post');
-    return NextResponse.json(
-      { error: 'Failed to save calculation' },
-      { status: 500 }
-    );
+    return apiError('Failed to save calculation', 500);
   }
 }
 
@@ -171,13 +154,10 @@ export async function GET(request: NextRequest) {
     const sessionId = searchParams.get('session_id');
     const countOnly = searchParams.get('count') === 'true';
     const monthOnly = searchParams.get('month') === 'true'; // Get count for current month only
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
+    const limit = clampInt(searchParams.get('limit'), 1, 100, 50);
 
     if (!requestedUserId && !anonymousId) {
-      return NextResponse.json(
-        { error: 'user_id or anonymous_id is required' },
-        { status: 400 }
-      );
+      return apiError('user_id or anonymous_id is required', 400);
     }
 
     // SECURITY: Verify authenticated user owns the requested data
@@ -185,10 +165,7 @@ export async function GET(request: NextRequest) {
     if (requestedUserId) {
       const authUser = await getAuthenticatedUser(request);
       if (!authUser || authUser.id !== requestedUserId) {
-        return NextResponse.json(
-          { error: 'Unauthorized: user_id does not match session' },
-          { status: 403 }
-        );
+        return apiError('Unauthorized: user_id does not match session', 403);
       }
       userId = authUser.id;
     }
@@ -211,14 +188,11 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error('Calculation count error:', error);
-        return NextResponse.json(
-          { error: 'Failed to count calculations' },
-          { status: 500 }
-        );
+        return apiError('Failed to count calculations', 500);
       }
 
       const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      return NextResponse.json({
+      return apiSuccess({
         count: count || 0,
         month: monthOnly ? currentMonth : undefined
       });
@@ -228,10 +202,7 @@ export async function GET(request: NextRequest) {
     // This prevents enumeration attacks on anonymous calculation data
     if (anonymousId && !userId) {
       if (!sessionId) {
-        return NextResponse.json(
-          { error: 'session_id required for anonymous access' },
-          { status: 400 }
-        );
+        return apiError('session_id required for anonymous access', 400);
       }
 
       // Verify the session_id matches calculations with this anonymous_id
@@ -243,10 +214,7 @@ export async function GET(request: NextRequest) {
         .limit(1);
 
       if (!sessionCheck || sessionCheck.length === 0) {
-        return NextResponse.json(
-          { error: 'Invalid session' },
-          { status: 403 }
-        );
+        return apiError('Invalid session', 403);
       }
     }
 
@@ -266,19 +234,13 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Calculation fetch error:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch calculations' },
-        { status: 500 }
-      );
+      return apiError('Failed to fetch calculations', 500);
     }
 
-    return NextResponse.json({ calculations: data });
+    return apiSuccess({ calculations: data });
   } catch (error) {
     captureApiError(error, 'calculations-get');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 
@@ -290,19 +252,13 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'id is required' },
-        { status: 400 }
-      );
+      return apiError('id is required', 400);
     }
 
     // SECURITY: Verify authenticated user owns the calculation
     const authUser = await getAuthenticatedUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: 'Authentication required for deletion' },
-        { status: 401 }
-      );
+      return apiError('Authentication required for deletion', 401);
     }
 
     // Delete only if the calculation belongs to the authenticated user
@@ -314,18 +270,12 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Calculation delete error:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete calculation' },
-        { status: 500 }
-      );
+      return apiError('Failed to delete calculation', 500);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     captureApiError(error, 'calculations-delete');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

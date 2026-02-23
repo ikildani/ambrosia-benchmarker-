@@ -23,7 +23,12 @@ module.exports = async () => {
         ...nextJestConfig,
         displayName: 'unit',
         testEnvironment: 'jest-environment-jsdom',
-        testMatch: ['<rootDir>/__tests__/calculations.test.ts'],
+        testMatch: [
+          '<rootDir>/__tests__/calculations.test.ts',
+          '<rootDir>/__tests__/sensitivity.test.ts',
+          '<rootDir>/__tests__/calculations-edge.test.ts',
+          '<rootDir>/__tests__/report.test.ts',
+        ],
         setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       },
       {

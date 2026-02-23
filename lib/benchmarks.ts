@@ -4,8 +4,123 @@
 import staticBenchmarksData from '@/data/benchmarks.json';
 import { createClient } from '@supabase/supabase-js';
 
+// ── Shared sub-types used across the Benchmarks interface ──────────────────
+
+/** Shape of a single phase-baseline entry (upfront/totalValue/royalty). */
+export interface PhaseBaselineEntry {
+  upfront: { low: number; median: number; high: number };
+  totalValue: { low: number; median: number; high: number };
+  royalty: { base: number; max: number };
+}
+
+/** Phase baselines keyed by phase string. */
+export type PhaseBaselines = Record<string, PhaseBaselineEntry>;
+
+/** Shape of a single multiplier option (e.g. biomarker.selected). */
+export interface MultiplierOption {
+  multiplier: number;
+  label: string;
+  context?: string;
+}
+
+/** A multiplier config category is a map of option-key → MultiplierOption. */
+export type MultiplierCategory = Record<string, MultiplierOption>;
+
+/** Phase configuration block (range widths, upfront ratios, milestone allocations). */
+export interface PhaseConfig {
+  rangeWidths: Record<string, number>;
+  upfrontRatios: Record<string, { low: number; high: number }>;
+  milestoneAllocations: Record<string, { dev: number; reg: number; comm: number }>;
+}
+
+/** Shape of an interaction term entry. */
+export interface InteractionTerm {
+  bonus: number;
+  context: string;
+}
+
+/** Neurology disease-modifying phase adjustment block. */
+export interface NeurologyDMPhaseAdjustment {
+  _description: string;
+  milestoneRebalance: Record<string, { dev: number; reg: number; comm: number }>;
+}
+
+/** Full Benchmarks interface covering all keys in benchmarks.json. */
+export interface Benchmarks {
+  metadata: { version: string; lastUpdated: string; [key: string]: unknown };
+
+  // Phase baselines per therapeutic area
+  phaseBaselines: PhaseBaselines;
+  neurologyPhaseBaselines: PhaseBaselines;
+  immunologyPhaseBaselines: PhaseBaselines;
+  metabolicPhaseBaselines: PhaseBaselines;
+
+  // Phase config per therapeutic area
+  phaseConfig: PhaseConfig;
+  neurologyPhaseConfig: PhaseConfig;
+  immunologyPhaseConfig: PhaseConfig;
+  metabolicPhaseConfig: PhaseConfig;
+
+  // Modalities & territories
+  modalities: Record<string, MultiplierOption>;
+  territories: Record<string, MultiplierOption>;
+
+  // Indications by category
+  indications: {
+    solidTumor: Record<string, MultiplierOption>;
+    hematologic: Record<string, MultiplierOption>;
+    neurology: Record<string, MultiplierOption>;
+    immunology: Record<string, MultiplierOption>;
+    metabolic: Record<string, MultiplierOption>;
+  };
+
+  // Multiplier config — all 19 categories
+  multiplierConfig: {
+    biomarker: MultiplierCategory;
+    lineOfTherapy: MultiplierCategory;
+    combinationPotential: MultiplierCategory;
+    competitivePosition: MultiplierCategory;
+    dataQuality: MultiplierCategory;
+    treatmentApproach: MultiplierCategory;
+    bbbPenetration: MultiplierCategory;
+    diseaseProgression: MultiplierCategory;
+    biomarkerValidation: MultiplierCategory;
+    regulatoryDesignations: {
+      breakthrough: { bonus: number; label: string };
+      fastTrack: { bonus: number; label: string };
+      orphan: { bonus: number; label: string };
+      prime: { bonus: number; label: string };
+      maxBonus: number;
+    };
+    immuneResetPotential: MultiplierCategory;
+    targetSpecificity: MultiplierCategory;
+    diseaseSeverity: MultiplierCategory;
+    treatmentGoal: MultiplierCategory;
+    mechanismDifferentiation: MultiplierCategory;
+    weightLossEfficacy: MultiplierCategory;
+    routeOfAdministration: MultiplierCategory;
+    comorbidityBreadth: MultiplierCategory;
+    metabolicTreatmentApproach: MultiplierCategory;
+  };
+
+  // Interaction terms and special adjustments
+  interactionTerms: Record<string, InteractionTerm>;
+  neurologyDiseaseModifyingPhaseAdjustment: NeurologyDMPhaseAdjustment;
+
+  // Market context & labels (used by frontend)
+  marketContext: {
+    tooltips: Record<string, string>;
+    negotiationInsights: Record<string, Record<string, string>>;
+  };
+  labels: {
+    phases: Record<string, string>;
+    metrics: Record<string, string>;
+    rangeLabels: Record<string, string>;
+  };
+}
+
 // Re-export static benchmarks for code that needs raw uncalibrated data
-export const staticBenchmarks = staticBenchmarksData;
+export const staticBenchmarks = staticBenchmarksData as unknown as Benchmarks;
 
 // In-memory cache
 let calibrationCache: CalibrationRow[] | null = null;
@@ -29,8 +144,9 @@ interface CalibrationRow {
   sample_size: number;
 }
 
-// Map therapeutic_area to the correct baselines key in benchmarks.json
-const TA_BASELINES_KEY: Record<string, string> = {
+// Map therapeutic_area to the correct baselines key in Benchmarks
+type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines';
+const TA_BASELINES_KEY: Record<string, PhaseBaselinesKey> = {
   'oncology': 'phaseBaselines',
   'neurology': 'neurologyPhaseBaselines',
   'immunology': 'immunologyPhaseBaselines',
@@ -101,7 +217,7 @@ function deepClone<T>(obj: T): T {
  *
  * Only calibrations with sample_size >= 5 are applied.
  */
-export function getBenchmarksSync(): typeof staticBenchmarksData {
+export function getBenchmarksSync(): Benchmarks {
   const now = Date.now();
 
   // If cache is null or expired, trigger async refresh (fire-and-forget)
@@ -113,12 +229,12 @@ export function getBenchmarksSync(): typeof staticBenchmarksData {
 
     // If cache is completely null (never loaded), return static defaults
     if (calibrationCache === null) {
-      return deepClone(staticBenchmarksData);
+      return deepClone(staticBenchmarksData as unknown as Benchmarks);
     }
   }
 
   // Deep clone static benchmarks to avoid mutation
-  const merged = deepClone(staticBenchmarksData) as Record<string, unknown>;
+  const merged = deepClone(staticBenchmarksData as unknown as Benchmarks);
 
   for (const cal of calibrationCache) {
     // Only apply calibrations with sufficient sample size
@@ -129,12 +245,7 @@ export function getBenchmarksSync(): typeof staticBenchmarksData {
       const baselinesKey = TA_BASELINES_KEY[cal.therapeutic_area];
       if (!baselinesKey) continue;
 
-      const baselines = merged[baselinesKey] as Record<string, {
-        upfront: { low: number; median: number; high: number };
-        totalValue: { low: number; median: number; high: number };
-        royalty: { base: number; max: number };
-      }> | undefined;
-
+      const baselines = merged[baselinesKey];
       if (!baselines || !baselines[cal.phase]) continue;
 
       const phaseData = baselines[cal.phase];
@@ -155,17 +266,10 @@ export function getBenchmarksSync(): typeof staticBenchmarksData {
     }
 
     if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null) {
-      const modalities = merged['modalities'] as Record<string, {
-        multiplier: number;
-        label: string;
-        context: string;
-      }> | undefined;
-
-      if (!modalities || !modalities[cal.modality]) continue;
-
-      modalities[cal.modality].multiplier = cal.multiplier;
+      if (!merged.modalities[cal.modality]) continue;
+      merged.modalities[cal.modality].multiplier = cal.multiplier;
     }
   }
 
-  return merged as typeof staticBenchmarksData;
+  return merged;
 }

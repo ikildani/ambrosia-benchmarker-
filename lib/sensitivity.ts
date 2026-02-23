@@ -205,7 +205,9 @@ function computeParameterSensitivity(
   const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology, isMetabolic);
   if (options.length === 0) return null;
 
-  const currentValue = String(baseInputs[parameterKey]);
+  const rawValue = baseInputs[parameterKey];
+  if (rawValue === undefined || rawValue === null) return null;
+  const currentValue = String(rawValue);
   const baseTotalValue = baseResult.terms.totalDealValue.median;
   const baseUpfront = baseResult.terms.upfront.median;
 
@@ -280,9 +282,18 @@ function generateInsightText(param: ParameterSensitivity, bestOption: ParameterO
 
 // Find the top value driver (single biggest improvement opportunity)
 function findTopValueDriver(parameters: ParameterSensitivity[]): TopValueDriver {
+  if (parameters.length === 0) {
+    return {
+      parameterKey: 'phase' as keyof CalculationInput,
+      parameterLabel: 'Development Phase',
+      bestOption: { value: '', label: '', resultingUpfront: 0, resultingTotalValue: 0, delta: 0, deltaPercent: 0 },
+      insightText: 'No parameters available for sensitivity analysis.',
+    };
+  }
+
   let bestImprovement = {
     param: parameters[0],
-    option: parameters[0]?.options[0] || {
+    option: parameters[0].options[0] || {
       value: '',
       label: '',
       resultingUpfront: 0,

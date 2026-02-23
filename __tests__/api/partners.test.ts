@@ -231,6 +231,11 @@ describe('/api/partners/match', () => {
         data: { id: '123', tier: 'free' },
         error: null,
       });
+      // Mock Method 2: email lookup (also returns non-Pro email)
+      mockSupabase.single.mockResolvedValueOnce({
+        data: { email: 'user@example.com' },
+        error: null,
+      });
 
       // Client sends tier=pro (from localStorage after Stripe payment)
       const request = new NextRequest('http://localhost/api/partners/match', {

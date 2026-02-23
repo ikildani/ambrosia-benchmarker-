@@ -102,23 +102,7 @@ Respond with ONLY a JSON object (no markdown, no backticks, just the raw JSON):
 }`;
 }
 
-// Parse JSON from Claude's response
-function parseJsonResponse<T>(text: string): T {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('No JSON found in response');
-  }
-
-  let cleanedJson = jsonMatch[0]
-    .replace(/[\x00-\x1F\x7F]/g, (char) => {
-      if (char === '\n' || char === '\r') return ' ';
-      if (char === '\t') return ' ';
-      return '';
-    })
-    .replace(/\s+/g, ' ');
-
-  return JSON.parse(cleanedJson) as T;
-}
+import { parseJsonResponse } from './parse-json';
 
 // Deal Memo Generator class
 export class DealMemoGenerator {
@@ -129,11 +113,10 @@ export class DealMemoGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic({ apiKey, timeout: 30_000 });
   }
 
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {
-    // Get comparable deals for this asset (merges DB + curated deals)
     const comparableDeals = await getRelevantDealsWithDB(
       input.inputs.therapeuticArea,
       input.inputs.modality,
@@ -142,24 +125,39 @@ export class DealMemoGenerator {
     );
 
     const prompt = buildMemoPrompt(input, comparableDeals);
+    let lastError: Error | null = null;
 
-    const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2500,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const message = await this.client.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2500,
+          messages: [{ role: 'user', content: prompt }],
+        });
 
-    const textContent = message.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+        const textContent = message.content.find((c) => c.type === 'text');
+        if (!textContent || textContent.type !== 'text') {
+          throw new Error('No text content in AI response');
+        }
+
+        const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(textContent.text);
+
+        // Validate required fields
+        if (!parsed.executive_summary || !parsed.valuation_rationale || !Array.isArray(parsed.risk_factors)) {
+          throw new Error('AI response missing required fields (executive_summary, valuation_rationale, or risk_factors)');
+        }
+
+        return { ...parsed, generatedAt: new Date().toISOString() };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        const msg = lastError.message.toLowerCase();
+        const isRetryable = msg.includes('timeout') || msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
+        if (!isRetryable || attempt > 0) break;
+        await new Promise(r => setTimeout(r, 2_000));
+      }
     }
 
-    const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(textContent.text);
-
-    return {
-      ...parsed,
-      generatedAt: new Date().toISOString(),
-    };
+    throw lastError ?? new Error('Deal memo generation failed');
   }
 }
 

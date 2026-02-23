@@ -2,6 +2,8 @@
 // Extracts licensing deals from 8-K filings using Claude AI
 
 import Anthropic from '@anthropic-ai/sdk';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 const SEC_COMPANY_SEARCH = 'https://data.sec.gov/submissions';
@@ -258,11 +260,13 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
         size: '100',
       });
 
-      const response = await fetch(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
+      const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
         headers: {
           'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
           'Accept': 'application/json',
         },
+        timeoutMs: 20_000,
+        retries: 1,
       });
 
       if (!response.ok) {
@@ -305,11 +309,13 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
 }
 
 export async function fetchFilingContent(url: string): Promise<string> {
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: {
       'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
       'Accept': 'text/html,application/xhtml+xml',
     },
+    timeoutMs: 20_000,
+    retries: 1,
   });
 
   if (!response.ok) {
@@ -340,7 +346,7 @@ export async function extractDealFromFiling(
   filingText: string,
   anthropicApiKey: string
 ): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
   const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from SEC 8-K filings. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
@@ -476,7 +482,7 @@ ${filingText}`;
 }
 
 export async function findOrCreateCompany(
-  supabase: any,
+  supabase: SupabaseClient,
   companyName: string,
   isLicensee: boolean = false
 ): Promise<string | null> {
@@ -529,7 +535,7 @@ export async function findOrCreateCompany(
 }
 
 export async function runDailyIngestion(
-  supabase: any,
+  supabase: SupabaseClient,
   anthropicApiKey: string,
   daysBack: number = 1
 ): Promise<{ processed: number; deals: number; errors: string[] }> {

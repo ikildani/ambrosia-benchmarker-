@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,13 +12,7 @@ export async function GET(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'deals', RATE_LIMIT_CONFIGS.deals);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please try again later.' },
-      {
-        status: 429,
-        headers: getRateLimitHeaders(rateLimitResult),
-      }
-    );
+    return apiErrorWithHeaders('Too many requests. Please try again later.', 429, getRateLimitHeaders(rateLimitResult), 'RATE_LIMITED');
   }
 
   try {
@@ -185,10 +180,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Deals query error:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch deals' },
-        { status: 500 }
-      );
+      return apiError('Failed to fetch deals', 500);
     }
 
     // For free users, only show first 5 full deals globally, blur the rest
@@ -222,7 +214,7 @@ export async function GET(request: NextRequest) {
     // Get filter options for the UI
     const filterOptions = await getFilterOptions(supabase);
 
-    return NextResponse.json({
+    return apiSuccess({
       deals: processedDeals,
       total: count || 0,
       page,
@@ -233,10 +225,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'deals');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 

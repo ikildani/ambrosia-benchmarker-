@@ -44,6 +44,17 @@ export const reportEmailSchema = z.object({
 });
 
 /**
+ * Parse + clamp an integer query parameter.
+ * Prevents DoS via ?limit=999999999 and ensures sane defaults.
+ */
+export function clampInt(value: string | null | undefined, min: number, max: number, fallback: number): number {
+  if (value == null) return fallback;
+  const parsed = parseInt(value, 10);
+  if (Number.isNaN(parsed)) return fallback;
+  return Math.max(min, Math.min(max, parsed));
+}
+
+/**
  * Hash an email for safe storage in analytics/events.
  * Uses Web Crypto API (available in Node 18+ and Edge Runtime).
  */

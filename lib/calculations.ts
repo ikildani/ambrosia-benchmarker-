@@ -397,6 +397,12 @@ function getNegotiationInsight(input: CalculationInput): string {
   return "Consider recent comparable deals in your negotiation strategy.";
 }
 
+/** Clamp a multiplier to a safe range. Returns fallback if NaN, Infinity, or non-positive. */
+function safeMultiplier(value: number, fallback: number = 1.0): number {
+  if (!Number.isFinite(value) || value <= 0) return fallback;
+  return value;
+}
+
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const modifiers: { name: string; multiplier: number; context?: string }[] = [];
   const isNeurology = input.therapeuticArea === 'neurology';
@@ -405,39 +411,39 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   // Get phase baselines (metabolic vs immunology vs neurology vs oncology)
   const phaseBaseline = isMetabolic
-    ? ((benchmarks as any).metabolicPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    ? benchmarks.metabolicPhaseBaselines[input.phase]
     : isImmunology
-    ? ((benchmarks as any).immunologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    ? benchmarks.immunologyPhaseBaselines[input.phase]
     : isNeurology
-    ? (benchmarks.neurologyPhaseBaselines as typeof benchmarks.phaseBaselines)[input.phase]
+    ? benchmarks.neurologyPhaseBaselines[input.phase]
     : benchmarks.phaseBaselines[input.phase];
   const phaseConfig = isMetabolic
-    ? ((benchmarks as any).metabolicPhaseConfig as typeof benchmarks.phaseConfig)
+    ? benchmarks.metabolicPhaseConfig
     : isImmunology
-    ? ((benchmarks as any).immunologyPhaseConfig as typeof benchmarks.phaseConfig)
+    ? benchmarks.immunologyPhaseConfig
     : isNeurology
-    ? (benchmarks.neurologyPhaseConfig as typeof benchmarks.phaseConfig)
+    ? benchmarks.neurologyPhaseConfig
     : benchmarks.phaseConfig;
 
   // Get multipliers from benchmarks
-  const modalityData = benchmarks.modalities[input.modality] as { multiplier: number; label: string; context?: string } | undefined;
+  const modalityData = benchmarks.modalities[input.modality];
   const modalityMultiplier = modalityData?.multiplier ?? 1.0;
   modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData?.context });
 
   // Get indication multiplier
   const category = getIndicationCategory(input.indication);
-  const indicationsCategory = benchmarks.indications[category] as Record<string, { multiplier: number; label: string; context?: string }>;
+  const indicationsCategory = benchmarks.indications[category];
   const indicationData = indicationsCategory[input.indication];
   const indicationMultiplier = indicationData?.multiplier ?? 1.0;
   modifiers.push({ name: indicationData?.label ?? input.indication, multiplier: indicationMultiplier, context: indicationData?.context });
 
   // Get territory multiplier
-  const territoryData = benchmarks.territories[input.territory] as { multiplier: number; label: string; context?: string } | undefined;
+  const territoryData = benchmarks.territories[input.territory];
   const territoryMultiplier = territoryData?.multiplier ?? 1.0;
   modifiers.push({ name: territoryData?.label ?? input.territory, multiplier: territoryMultiplier, context: territoryData?.context });
 
   // Get biomarker multiplier
-  const biomarkerData = benchmarks.multiplierConfig.biomarker[input.biomarker] as { multiplier: number; label: string; context?: string } | undefined;
+  const biomarkerData = benchmarks.multiplierConfig.biomarker[input.biomarker];
   const biomarkerMultiplier = biomarkerData?.multiplier ?? 1.0;
   if (biomarkerMultiplier !== 1.0) {
     modifiers.push({ name: biomarkerData?.label ?? input.biomarker, multiplier: biomarkerMultiplier, context: biomarkerData?.context });
@@ -446,31 +452,29 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Get line of therapy / treatment approach / treatment goal multiplier (depends on therapeutic area)
   let lotMultiplier = 1.0;
   if (isImmunology) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mc = benchmarks.multiplierConfig as any;
+    const mc = benchmarks.multiplierConfig;
     const tgKey = input.treatmentGoal || 'remissionInduction';
-    const tgData = mc.treatmentGoal?.[tgKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const tgData = mc.treatmentGoal?.[tgKey];
     lotMultiplier = tgData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: tgData?.label ?? tgKey, multiplier: lotMultiplier, context: tgData?.context });
     }
   } else if (isMetabolic) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mc = benchmarks.multiplierConfig as any;
+    const mc = benchmarks.multiplierConfig;
     const mtaKey = input.metabolicTreatmentApproach || 'chronicWeightMgmt';
-    const mtaData = mc.metabolicTreatmentApproach?.[mtaKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const mtaData = mc.metabolicTreatmentApproach?.[mtaKey];
     lotMultiplier = mtaData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: mtaData?.label ?? mtaKey, multiplier: lotMultiplier, context: mtaData?.context });
     }
   } else if (isNeurology) {
-    const taData = (benchmarks.multiplierConfig.treatmentApproach as Record<string, { multiplier: number; label: string; context?: string }>)[input.treatmentApproach];
+    const taData = benchmarks.multiplierConfig.treatmentApproach[input.treatmentApproach];
     lotMultiplier = taData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: taData?.label ?? input.treatmentApproach, multiplier: lotMultiplier, context: taData?.context });
     }
   } else {
-    const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy] as { multiplier: number; label: string; context?: string } | undefined;
+    const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy];
     lotMultiplier = lotData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: lotData?.label ?? input.lineOfTherapy, multiplier: lotMultiplier, context: lotData?.context });
@@ -478,21 +482,21 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   }
 
   // Get combination potential multiplier
-  const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential] as { multiplier: number; label: string; context?: string } | undefined;
+  const comboData = benchmarks.multiplierConfig.combinationPotential[input.combinationPotential];
   const comboMultiplier = comboData?.multiplier ?? 1.0;
   if (comboMultiplier !== 1.0) {
     modifiers.push({ name: comboData?.label ?? input.combinationPotential, multiplier: comboMultiplier, context: comboData?.context });
   }
 
   // Get competitive position multiplier
-  const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition] as { multiplier: number; label: string; context?: string } | undefined;
+  const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
   const competitiveMultiplier = compData?.multiplier ?? 1.0;
   if (competitiveMultiplier !== 1.0) {
     modifiers.push({ name: compData?.label ?? input.competitivePosition, multiplier: competitiveMultiplier, context: compData?.context });
   }
 
   // Get data quality multiplier
-  const dataData = benchmarks.multiplierConfig.dataQuality[input.dataQuality] as { multiplier: number; label: string; context?: string } | undefined;
+  const dataData = benchmarks.multiplierConfig.dataQuality[input.dataQuality];
   const dataQualityMultiplier = dataData?.multiplier ?? 1.0;
   if (dataQualityMultiplier !== 1.0) {
     modifiers.push({ name: dataData?.label ?? input.dataQuality, multiplier: dataQualityMultiplier, context: dataData?.context });
@@ -522,7 +526,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Look up modality × indication interaction bonus (all therapeutic areas)
   let interactionBonus = 0;
   {
-    const interactionTerms = (benchmarks as any).interactionTerms || {};
+    const interactionTerms = benchmarks.interactionTerms || {};
     const key = `${input.modality}+${input.indication}`;
     if (interactionTerms[key]) {
       interactionBonus = interactionTerms[key].bonus;
@@ -539,25 +543,24 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   let diseaseProgMultiplier = 1.0;
   let biomarkerValMultiplier = 1.0;
   if (isNeurology) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mc = benchmarks.multiplierConfig as any;
+    const mc = benchmarks.multiplierConfig;
 
     const bbbKey = input.bbbPenetration || 'unproven';
-    const bbbData = mc.bbbPenetration?.[bbbKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const bbbData = mc.bbbPenetration?.[bbbKey];
     bbbMultiplier = bbbData?.multiplier ?? 1.0;
     if (bbbMultiplier !== 1.0) {
       modifiers.push({ name: bbbData?.label ?? bbbKey, multiplier: bbbMultiplier, context: bbbData?.context });
     }
 
     const dpKey = input.diseaseProgression || 'moderateProgressive';
-    const dpData = mc.diseaseProgression?.[dpKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const dpData = mc.diseaseProgression?.[dpKey];
     diseaseProgMultiplier = dpData?.multiplier ?? 1.0;
     if (diseaseProgMultiplier !== 1.0) {
       modifiers.push({ name: dpData?.label ?? dpKey, multiplier: diseaseProgMultiplier, context: dpData?.context });
     }
 
     const bvKey = input.biomarkerValidation || 'noBiomarker';
-    const bvData = mc.biomarkerValidation?.[bvKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const bvData = mc.biomarkerValidation?.[bvKey];
     biomarkerValMultiplier = bvData?.multiplier ?? 1.0;
     if (biomarkerValMultiplier !== 1.0) {
       modifiers.push({ name: bvData?.label ?? bvKey, multiplier: biomarkerValMultiplier, context: bvData?.context });
@@ -569,25 +572,24 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   let targetSpecMultiplier = 1.0;
   let diseaseSevMultiplier = 1.0;
   if (isImmunology) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mc = benchmarks.multiplierConfig as any;
+    const mc = benchmarks.multiplierConfig;
 
     const irKey = input.immuneResetPotential || 'chronicTreatment';
-    const irData = mc.immuneResetPotential?.[irKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const irData = mc.immuneResetPotential?.[irKey];
     immuneResetMultiplier = irData?.multiplier ?? 1.0;
     if (immuneResetMultiplier !== 1.0) {
       modifiers.push({ name: irData?.label ?? irKey, multiplier: immuneResetMultiplier, context: irData?.context });
     }
 
     const tsKey = input.targetSpecificity || 'pathwayTargeted';
-    const tsData = mc.targetSpecificity?.[tsKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const tsData = mc.targetSpecificity?.[tsKey];
     targetSpecMultiplier = tsData?.multiplier ?? 1.0;
     if (targetSpecMultiplier !== 1.0) {
       modifiers.push({ name: tsData?.label ?? tsKey, multiplier: targetSpecMultiplier, context: tsData?.context });
     }
 
     const dsKey = input.diseaseSeverity || 'moderateSevere';
-    const dsData = mc.diseaseSeverity?.[dsKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const dsData = mc.diseaseSeverity?.[dsKey];
     diseaseSevMultiplier = dsData?.multiplier ?? 1.0;
     if (diseaseSevMultiplier !== 1.0) {
       modifiers.push({ name: dsData?.label ?? dsKey, multiplier: diseaseSevMultiplier, context: dsData?.context });
@@ -600,32 +602,31 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   let routeMultiplier = 1.0;
   let comorbidityMultiplier = 1.0;
   if (isMetabolic) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mc = benchmarks.multiplierConfig as any;
+    const mc = benchmarks.multiplierConfig;
 
     const mdKey = input.mechanismDifferentiation || 'incretinBased';
-    const mdData = mc.mechanismDifferentiation?.[mdKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const mdData = mc.mechanismDifferentiation?.[mdKey];
     mechDiffMultiplier = mdData?.multiplier ?? 1.0;
     if (mechDiffMultiplier !== 1.0) {
       modifiers.push({ name: mdData?.label ?? mdKey, multiplier: mechDiffMultiplier, context: mdData?.context });
     }
 
     const wlKey = input.weightLossEfficacy || 'competitiveEfficacy';
-    const wlData = mc.weightLossEfficacy?.[wlKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const wlData = mc.weightLossEfficacy?.[wlKey];
     weightLossMultiplier = wlData?.multiplier ?? 1.0;
     if (weightLossMultiplier !== 1.0) {
       modifiers.push({ name: wlData?.label ?? wlKey, multiplier: weightLossMultiplier, context: wlData?.context });
     }
 
     const roaKey = input.routeOfAdministration || 'injectable';
-    const roaData = mc.routeOfAdministration?.[roaKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const roaData = mc.routeOfAdministration?.[roaKey];
     routeMultiplier = roaData?.multiplier ?? 1.0;
     if (routeMultiplier !== 1.0) {
       modifiers.push({ name: roaData?.label ?? roaKey, multiplier: routeMultiplier, context: roaData?.context });
     }
 
     const cbKey = input.comorbidityBreadth || 'obesityPrimary';
-    const cbData = mc.comorbidityBreadth?.[cbKey] as { multiplier: number; label: string; context?: string } | undefined;
+    const cbData = mc.comorbidityBreadth?.[cbKey];
     comorbidityMultiplier = cbData?.multiplier ?? 1.0;
     if (comorbidityMultiplier !== 1.0) {
       modifiers.push({ name: cbData?.label ?? cbKey, multiplier: comorbidityMultiplier, context: cbData?.context });
@@ -642,32 +643,40 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : 0.85;
 
   const effectiveMultiplier =
-    Math.pow(modalityMultiplier, 1.0) *
-    Math.pow(indicationMultiplier, indicationExp) *
-    Math.pow(biomarkerMultiplier, 0.9) *
-    Math.pow(lotMultiplier, lotExp) *
-    Math.pow(comboMultiplier, comboExp) *
-    Math.pow(territoryMultiplier, 1.0) *
-    Math.pow(competitiveMultiplier, 0.7) *
-    Math.pow(dataQualityMultiplier, 0.5) *
-    Math.pow(bbbMultiplier, 0.8) *
-    Math.pow(diseaseProgMultiplier, 0.7) *
-    Math.pow(biomarkerValMultiplier, 0.75) *
-    Math.pow(immuneResetMultiplier, 0.85) *
-    Math.pow(targetSpecMultiplier, 0.7) *
-    Math.pow(diseaseSevMultiplier, 0.75) *
-    Math.pow(mechDiffMultiplier, 0.80) *
-    Math.pow(weightLossMultiplier, 0.85) *
-    Math.pow(routeMultiplier, 0.75) *
-    Math.pow(comorbidityMultiplier, 0.70) *
-    (1 + regulatoryBonus) *
-    (1 + interactionBonus);
+    safeMultiplier(Math.pow(modalityMultiplier, 1.0)) *
+    safeMultiplier(Math.pow(indicationMultiplier, indicationExp)) *
+    safeMultiplier(Math.pow(biomarkerMultiplier, 0.9)) *
+    safeMultiplier(Math.pow(lotMultiplier, lotExp)) *
+    safeMultiplier(Math.pow(comboMultiplier, comboExp)) *
+    safeMultiplier(Math.pow(territoryMultiplier, 1.0)) *
+    safeMultiplier(Math.pow(competitiveMultiplier, 0.7)) *
+    safeMultiplier(Math.pow(dataQualityMultiplier, 0.5)) *
+    safeMultiplier(Math.pow(bbbMultiplier, 0.8)) *
+    safeMultiplier(Math.pow(diseaseProgMultiplier, 0.7)) *
+    safeMultiplier(Math.pow(biomarkerValMultiplier, 0.75)) *
+    safeMultiplier(Math.pow(immuneResetMultiplier, 0.85)) *
+    safeMultiplier(Math.pow(targetSpecMultiplier, 0.7)) *
+    safeMultiplier(Math.pow(diseaseSevMultiplier, 0.75)) *
+    safeMultiplier(Math.pow(mechDiffMultiplier, 0.80)) *
+    safeMultiplier(Math.pow(weightLossMultiplier, 0.85)) *
+    safeMultiplier(Math.pow(routeMultiplier, 0.75)) *
+    safeMultiplier(Math.pow(comorbidityMultiplier, 0.70)) *
+    safeMultiplier(1 + regulatoryBonus) *
+    safeMultiplier(1 + interactionBonus);
 
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
   const rangeWidth = phaseConfig.rangeWidths[input.phase];
 
   const adjustedMedian = Math.round(baseTotalValue.median * effectiveMultiplier);
+
+  if (!Number.isFinite(adjustedMedian) || adjustedMedian < 0) {
+    throw new Error(
+      `Invalid calculation: adjustedMedian=${adjustedMedian}, effectiveMultiplier=${effectiveMultiplier}. ` +
+      `Input: phase=${input.phase}, modality=${input.modality}, indication=${input.indication}`
+    );
+  }
+
   const totalDealValue = {
     low: Math.round(adjustedMedian * (1 - rangeWidth)),
     median: adjustedMedian,
@@ -693,7 +702,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   // Calculate milestone allocations
   // Disease-modifying neurology assets use rebalanced milestones (more dev-weighted)
-  const dmPhaseAdjust = (benchmarks as any).neurologyDiseaseModifyingPhaseAdjustment;
+  const dmPhaseAdjust = benchmarks.neurologyDiseaseModifyingPhaseAdjustment;
   const useDMRebalance = isNeurology && input.treatmentApproach === 'diseaseModifying' && dmPhaseAdjust;
   const milestoneAlloc = useDMRebalance
     ? dmPhaseAdjust.milestoneRebalance[input.phase]
