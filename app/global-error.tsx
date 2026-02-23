@@ -39,25 +39,49 @@ export default function GlobalError({
             <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
               Something Went Wrong
             </h1>
-            <p style={{ color: '#94a3b8', marginBottom: 32 }}>
+            <p style={{ color: '#94a3b8', marginBottom: 8 }}>
               A critical error occurred. Our team has been notified.
             </p>
+            {error.digest && (
+              <p style={{ color: '#64748b', fontSize: 12, fontFamily: 'monospace', marginBottom: 32 }}>
+                Error ID: {error.digest}
+              </p>
+            )}
+            {!error.digest && <div style={{ marginBottom: 32 }} />}
 
-            <button
-              onClick={reset}
-              style={{
-                padding: '10px 24px',
-                background: 'linear-gradient(to right, #14b8a6, #06b6d4)',
-                color: '#fff',
-                fontWeight: 600,
-                borderRadius: 12,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 14,
-              }}
-            >
-              Try Again
-            </button>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={reset}
+                style={{
+                  padding: '10px 24px',
+                  background: 'linear-gradient(to right, #14b8a6, #06b6d4)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  borderRadius: 12,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                }}
+              >
+                Try Again
+              </button>
+              <a
+                href="/"
+                style={{
+                  padding: '10px 24px',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: '#cbd5e1',
+                  fontWeight: 500,
+                  borderRadius: 12,
+                  border: 'none',
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  display: 'inline-block',
+                }}
+              >
+                Back to Home
+              </a>
+            </div>
           </div>
         </div>
       </body>

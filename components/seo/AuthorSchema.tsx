@@ -5,6 +5,7 @@ interface AuthorSchemaProps {
   publishedTime: string;
   modifiedTime?: string;
   category?: string;
+  imageUrl?: string;
 }
 
 export function AuthorSchema({
@@ -14,15 +15,17 @@ export function AuthorSchema({
   publishedTime,
   modifiedTime,
   category,
+  imageUrl,
 }: AuthorSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: articleTitle,
     description: articleDescription,
     url: articleUrl,
     datePublished: publishedTime,
     dateModified: modifiedTime || publishedTime,
+    ...(imageUrl ? { image: { '@type': 'ImageObject', url: imageUrl } } : {}),
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',

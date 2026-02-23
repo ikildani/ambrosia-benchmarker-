@@ -201,7 +201,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signin')}
-                  className="text-teal-600 font-semibold hover:text-teal-700 transition-colors"
+                  className="text-teal-700 font-semibold hover:text-teal-800 transition-colors"
                 >
                   Sign In
                 </button>
@@ -213,7 +213,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signup')}
-                  className="text-teal-600 font-semibold hover:text-teal-700 transition-colors"
+                  className="text-teal-700 font-semibold hover:text-teal-800 transition-colors"
                 >
                   Sign Up Free
                 </button>
@@ -225,7 +225,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signin')}
-                  className="text-teal-600 font-semibold hover:text-teal-700 transition-colors"
+                  className="text-teal-700 font-semibold hover:text-teal-800 transition-colors"
                 >
                   Sign In
                 </button>

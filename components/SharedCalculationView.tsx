@@ -65,7 +65,7 @@ export default function SharedCalculationView({ results, labels }: SharedCalcula
           <p className="text-sm text-neutral-500 mb-1">Upfront Payment</p>
           <p className="text-xl font-bold text-navy-800">{formatRange(terms.upfront)}</p>
           <p className="text-sm text-neutral-500 mt-1">
-            Expected: <span className="font-semibold text-teal-600">{formatCurrency(terms.upfront.median)}</span>
+            Expected: <span className="font-semibold text-teal-700">{formatCurrency(terms.upfront.median)}</span>
           </p>
         </div>
 

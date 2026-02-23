@@ -139,6 +139,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         publishedTime={post.published_at || new Date().toISOString()}
         modifiedTime={post.updated_at || undefined}
         category={post.category || undefined}
+        imageUrl={post.featured_image_url || `https://calculator.ambrosiaventures.co/api/og?title=${encodeURIComponent(post.title)}&type=blog`}
       />
 
       {/* Header */}
