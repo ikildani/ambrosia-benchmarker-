@@ -3,15 +3,83 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+// Brand colors
+const COLORS = {
+  bgDark: '#0c0e1f',
+  bgMid: '#141732',
+  teal: '#00c7c7',
+  tealBright: '#2EEAEA',
+  tealDim: '#00BABA',
+  white: '#ffffff',
+  slate: '#94a3b8',
+  slateLight: '#cbd5e1',
+  slateDark: '#475569',
+  amber: '#f59e0b',
+  cyan: '#06b6d4',
+};
+
+// Shared DT branding block
+function DTBranding({ accent = COLORS.tealBright }: { accent?: string }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: '48px',
+        left: '60px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+      }}
+    >
+      <div
+        style={{
+          fontSize: '36px',
+          fontWeight: 900,
+          color: accent,
+          letterSpacing: '-1px',
+          lineHeight: 1,
+        }}
+      >
+        DT
+      </div>
+      <div
+        style={{
+          width: '1px',
+          height: '28px',
+          backgroundColor: COLORS.slateDark,
+        }}
+      />
+      <span style={{ color: COLORS.slateLight, fontSize: '22px', fontWeight: 600 }}>
+        Ambrosia Ventures
+      </span>
+    </div>
+  );
+}
+
+// Bottom accent bar
+function AccentBar({ from = COLORS.tealBright, to = COLORS.tealDim }: { from?: string; to?: string }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '6px',
+        background: `linear-gradient(90deg, ${from}, ${to})`,
+      }}
+    />
+  );
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title');
   const subtitle = searchParams.get('subtitle');
   const type = searchParams.get('type') || 'default';
-
   const stat = searchParams.get('stat');
 
-  // Insight type: bold stat + title for LinkedIn sharing
+  // --- Insight type: bold stat + title (for LinkedIn sharing) ---
   if (type === 'insight' && stat) {
     return new ImageResponse(
       (
@@ -23,11 +91,12 @@ export async function GET(request: NextRequest) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#020617',
+            backgroundColor: COLORS.bgDark,
             padding: '60px',
             position: 'relative',
           }}
         >
+          {/* Ambient glow */}
           <div
             style={{
               position: 'absolute',
@@ -36,45 +105,16 @@ export async function GET(request: NextRequest) {
               transform: 'translateX(-50%)',
               width: '800px',
               height: '800px',
-              background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 60%)',
+              background: `radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 60%)`,
             }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              top: '40px',
-              left: '60px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-            }}
-          >
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: '#14b8a6',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                color: 'white',
-                fontWeight: 'bold',
-              }}
-            >
-              A
-            </div>
-            <span style={{ color: '#64748b', fontSize: '20px', fontWeight: 600 }}>
-              Ambrosia Ventures
-            </span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+          <DTBranding accent={COLORS.amber} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '28px' }}>
             <div
               style={{
                 fontSize: '96px',
-                fontWeight: 'bold',
-                color: '#f59e0b',
+                fontWeight: 900,
+                color: COLORS.amber,
                 lineHeight: 1,
                 textAlign: 'center',
               }}
@@ -85,7 +125,7 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: '36px',
                 fontWeight: 600,
-                color: 'white',
+                color: COLORS.white,
                 textAlign: 'center',
                 lineHeight: 1.3,
                 maxWidth: '900px',
@@ -94,7 +134,7 @@ export async function GET(request: NextRequest) {
               {title}
             </div>
             {subtitle && (
-              <div style={{ fontSize: '22px', color: '#94a3b8', textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', color: COLORS.slate, textAlign: 'center' }}>
                 {subtitle}
               </div>
             )}
@@ -103,40 +143,28 @@ export async function GET(request: NextRequest) {
             style={{
               position: 'absolute',
               bottom: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#475569',
+              color: COLORS.slateDark,
               fontSize: '18px',
             }}
           >
             calculator.ambrosiaventures.co
           </div>
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '6px',
-              background: 'linear-gradient(90deg, #f59e0b, #14b8a6)',
-            }}
-          />
+          <AccentBar from={COLORS.amber} to={COLORS.teal} />
         </div>
       ),
       { width: 1200, height: 630 }
     );
   }
 
-  // If custom title provided, use dynamic template
+  // --- Dynamic template (when ?title= is provided) ---
   if (title) {
-    const colors = {
-      default: { bg: '#0f172a', accent: '#14b8a6' },
-      blog: { bg: '#1e293b', accent: '#06b6d4' },
-      landing: { bg: '#0f172a', accent: '#14b8a6' },
-      insight: { bg: '#020617', accent: '#f59e0b' },
+    const schemes = {
+      default: { accent: COLORS.teal, highlight: COLORS.tealBright },
+      blog: { accent: COLORS.cyan, highlight: '#22d3ee' },
+      landing: { accent: COLORS.teal, highlight: COLORS.tealBright },
+      insight: { accent: COLORS.amber, highlight: '#fbbf24' },
     };
-    const scheme = colors[type as keyof typeof colors] || colors.default;
+    const scheme = schemes[type as keyof typeof schemes] || schemes.default;
 
     return new ImageResponse(
       (
@@ -148,11 +176,12 @@ export async function GET(request: NextRequest) {
             flexDirection: 'column',
             alignItems: 'flex-start',
             justifyContent: 'flex-end',
-            backgroundColor: scheme.bg,
+            backgroundColor: COLORS.bgDark,
             padding: '60px',
             position: 'relative',
           }}
         >
+          {/* Ambient glow */}
           <div
             style={{
               position: 'absolute',
@@ -160,45 +189,16 @@ export async function GET(request: NextRequest) {
               right: 0,
               width: '600px',
               height: '600px',
-              background: `radial-gradient(circle, ${scheme.accent}20 0%, transparent 70%)`,
+              background: `radial-gradient(circle, ${scheme.accent}18 0%, transparent 70%)`,
             }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              top: '60px',
-              left: '60px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-            }}
-          >
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                backgroundColor: scheme.accent,
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                color: 'white',
-                fontWeight: 'bold',
-              }}
-            >
-              A
-            </div>
-            <span style={{ color: 'white', fontSize: '24px', fontWeight: 600 }}>
-              Ambrosia Ventures
-            </span>
-          </div>
+          <DTBranding accent={scheme.highlight} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px' }}>
             <h1
               style={{
-                fontSize: title.length > 50 ? '48px' : '56px',
-                fontWeight: 'bold',
-                color: 'white',
+                fontSize: title.length > 50 ? '46px' : '56px',
+                fontWeight: 800,
+                color: COLORS.white,
                 lineHeight: 1.2,
                 margin: 0,
               }}
@@ -206,28 +206,19 @@ export async function GET(request: NextRequest) {
               {title}
             </h1>
             {subtitle && (
-              <p style={{ fontSize: '24px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '24px', color: COLORS.slate, margin: 0, lineHeight: 1.4 }}>
                 {subtitle}
               </p>
             )}
           </div>
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '8px',
-              background: `linear-gradient(90deg, ${scheme.accent}, #06b6d4)`,
-            }}
-          />
+          <AccentBar from={scheme.highlight} to={scheme.accent} />
         </div>
       ),
       { width: 1200, height: 630 }
     );
   }
 
-  // Default OG image (existing code)
+  // --- Default OG image (main site link preview) ---
   return new ImageResponse(
     (
       <div
@@ -236,156 +227,132 @@ export async function GET(request: NextRequest) {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
-          backgroundColor: '#1a1e42',
-          backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(20, 184, 166, 0.15) 0%, transparent 50%)',
+          backgroundColor: COLORS.bgDark,
+          backgroundImage: `radial-gradient(circle at 85% 20%, rgba(0,199,199,0.08) 0%, transparent 50%)`,
+          padding: '60px 60px 60px 80px',
+          position: 'relative',
         }}
       >
-        {/* Logo area with DNA/gear icon */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 40,
-          }}
-        >
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 64 64"
-            fill="none"
-          >
-            {/* DNA Helix */}
-            <path
-              d="M16 8C16 8 24 16 32 16C40 16 48 8 48 8"
-              stroke="#14b8a6"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M16 20C16 20 24 28 32 28C40 28 48 20 48 20"
-              stroke="#14b8a6"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M16 32C16 32 24 40 32 40C40 40 48 32 48 32"
-              stroke="#06b6d4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M16 8V32"
-              stroke="#14b8a6"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M48 8V32"
-              stroke="#06b6d4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            {/* Gear */}
-            <circle cx="40" cy="44" r="10" stroke="#64748b" strokeWidth="2.5" fill="none" />
-            <circle cx="40" cy="44" r="4" fill="#64748b" />
-            <path
-              d="M40 32V36M40 52V56M28 44H32M48 44H52M32.3 36.3L35.1 39.1M44.9 48.9L47.7 51.7M47.7 36.3L44.9 39.1M35.1 48.9L32.3 51.7"
-              stroke="#64748b"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            {/* Arrow */}
-            <path
-              d="M24 48L20 44L24 40"
-              stroke="#14b8a6"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d="M20 44H30" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
+        {/* DT Branding — top left */}
+        <DTBranding />
 
-        {/* Title */}
+        {/* Main content */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
+            gap: '24px',
+            marginTop: '60px',
           }}
         >
+          {/* Title */}
           <div
             style={{
-              fontSize: 64,
-              fontWeight: 700,
-              color: 'white',
-              textAlign: 'center',
-              lineHeight: 1.1,
-              marginBottom: 16,
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            Life Sciences
+            <div
+              style={{
+                fontSize: '64px',
+                fontWeight: 900,
+                color: COLORS.white,
+                lineHeight: 1.1,
+                letterSpacing: '-1px',
+              }}
+            >
+              Deal Terms
+            </div>
+            <div
+              style={{
+                fontSize: '64px',
+                fontWeight: 900,
+                color: COLORS.tealBright,
+                lineHeight: 1.1,
+                letterSpacing: '-1px',
+              }}
+            >
+              Calculator
+            </div>
           </div>
+
+          {/* Tagline */}
           <div
             style={{
-              fontSize: 64,
-              fontWeight: 700,
-              color: '#14b8a6',
-              textAlign: 'center',
-              lineHeight: 1.1,
-              marginBottom: 32,
+              fontSize: '26px',
+              color: COLORS.slate,
+              lineHeight: 1.4,
+              maxWidth: '700px',
             }}
           >
-            Deal Calculator
+            Data-driven benchmarks for biopharma licensing deals across oncology, neurology, immunology & metabolic
+          </div>
+
+          {/* Credibility pill */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              marginTop: '8px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: `1.5px solid ${COLORS.teal}60`,
+                borderRadius: '100px',
+                padding: '8px 20px',
+              }}
+            >
+              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
+                600+
+              </div>
+              <div style={{ fontSize: '16px', color: COLORS.slate }}>
+                Deals Analyzed
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: `1.5px solid ${COLORS.teal}60`,
+                borderRadius: '100px',
+                padding: '8px 20px',
+              }}
+            >
+              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
+                4
+              </div>
+              <div style={{ fontSize: '16px', color: COLORS.slate }}>
+                Therapeutic Areas
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Tagline */}
+        {/* Domain — bottom right */}
         <div
           style={{
-            fontSize: 28,
-            color: '#94a3b8',
-            textAlign: 'center',
-            marginBottom: 48,
+            position: 'absolute',
+            bottom: '40px',
+            right: '60px',
+            fontSize: '18px',
+            color: COLORS.slateDark,
           }}
         >
-          Data-driven deal estimates across oncology, neurology, immunology, and metabolic/obesity
+          calculator.ambrosiaventures.co
         </div>
 
-        {/* Ambrosia Ventures branding */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 20,
-              color: '#64748b',
-            }}
-          >
-            Powered by
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 600,
-              color: '#94a3b8',
-            }}
-          >
-            Ambrosia Ventures
-          </div>
-        </div>
+        {/* Accent bar */}
+        <AccentBar />
       </div>
     ),
-    {
-      width: 1200,
-      height: 630,
-    }
+    { width: 1200, height: 630 }
   );
 }
