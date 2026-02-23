@@ -269,10 +269,10 @@ export default function NegotiationPlaybookModal({
         aria-modal="true"
         aria-labelledby="playbook-modal-title"
         tabIndex={-1}
-        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-4 sm:my-8 overflow-hidden animate-fade-in print:shadow-none print:my-0"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-2 sm:mx-auto my-4 sm:my-8 overflow-hidden animate-fade-in print:shadow-none print:my-0"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-navy-800 to-navy-900 p-4 sm:p-6 print:bg-navy-800">
+        <div className="bg-gradient-to-r from-navy-800 to-navy-900 p-3 sm:p-4 lg:p-6 print:bg-navy-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow">

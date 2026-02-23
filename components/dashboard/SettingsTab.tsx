@@ -120,7 +120,7 @@ const SettingsTab = React.memo(function SettingsTab({
         {/* Avatar Color Selection */}
         <div className="relative mt-6 pt-6 border-t border-slate-700/50">
           <p className="text-sm font-medium text-slate-400 mb-3">Choose Avatar Color</p>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 sm:gap-3">
             {avatarGradients.map((gradient) => (
               <button
                 key={gradient.id}
@@ -153,7 +153,7 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Personal Information</h3>
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
             <input
@@ -210,7 +210,7 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Professional Details</h3>
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Job Title</label>
             <input

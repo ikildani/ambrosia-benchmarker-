@@ -168,9 +168,9 @@ export default function BenchmarksIndex() {
 
             return (
               <section key={categoryKey}>
-                <div className="flex items-start gap-4 mb-8">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-soft">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-3 sm:gap-4 mb-6 sm:mb-8">
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-soft">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={meta.icon} />
                     </svg>
                   </div>

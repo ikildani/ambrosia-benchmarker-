@@ -134,7 +134,7 @@ export default function PipelineIntelligence({
                 .filter(p => summary.phaseDistribution[p])
                 .map(phase => (
                   <div key={phase} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 dark:text-slate-400 w-28 flex-shrink-0 truncate">{phase}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-20 sm:w-28 flex-shrink-0 truncate">{phase}</span>
                     <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
@@ -151,7 +151,7 @@ export default function PipelineIntelligence({
                 .filter(([p]) => !phaseOrder.includes(p))
                 .map(([phase, count]) => (
                   <div key={phase} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 dark:text-slate-400 w-28 flex-shrink-0 truncate">{phase}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-20 sm:w-28 flex-shrink-0 truncate">{phase}</span>
                     <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-slate-400 to-slate-500 rounded-full transition-all duration-500"

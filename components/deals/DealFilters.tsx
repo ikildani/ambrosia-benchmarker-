@@ -171,7 +171,7 @@ export default function DealFilters({
       {/* Expanded Filters */}
       {isExpanded && (
         <div className="p-4 bg-neutral-50 space-y-4 animate-fade-in">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
             {/* Modality Filter */}
             <div>
               <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
@@ -259,7 +259,7 @@ export default function DealFilters({
 
           {/* Financial Filters */}
           <div className="pt-4 border-t border-neutral-200">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                   Min Upfront ($M)

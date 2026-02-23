@@ -435,7 +435,7 @@ export default function Header({
             {/* Mobile Menu Button - Larger touch target */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-3 -mr-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors touch-feedback rounded-xl"
+              className="md:hidden p-3.5 -mr-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors touch-feedback rounded-xl"
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >

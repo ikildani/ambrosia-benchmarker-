@@ -499,7 +499,7 @@ export default function ReportGenerationModal({
           aria-label="Report generation"
         >
           {/* Header */}
-          <div className="px-6 pt-6 pb-4">
+          <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft">

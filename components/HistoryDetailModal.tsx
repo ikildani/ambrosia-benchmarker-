@@ -220,7 +220,7 @@ export default function HistoryDetailModal({
         tabIndex={-1}
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-6 overflow-hidden">
+        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 sm:px-6 py-5 sm:py-6 overflow-hidden">
           {/* Decorative elements - pointer-events-none so they don't block clicks */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0" style={{

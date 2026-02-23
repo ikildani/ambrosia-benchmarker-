@@ -113,7 +113,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         </div>
 
         {/* Pricing Cards - Three columns */}
-        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 max-w-5xl xl:max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 max-w-5xl xl:max-w-6xl mx-auto">
           {/* Free Tier */}
           <div
             className={`relative bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 xl:p-8 transition-all duration-300 ${
@@ -411,7 +411,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         </div>
 
         {/* Stats */}
-        <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
+        <div className="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-8 max-w-2xl mx-auto">
           {[
             { stat: DEAL_STATS.TOTAL_DEALS, label: 'Real deals analyzed' },
             { stat: '127+', label: 'BD pros upgraded' },

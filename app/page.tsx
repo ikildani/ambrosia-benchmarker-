@@ -123,7 +123,7 @@ function LiveDemoSection() {
               gradient: 'from-teal-400 to-cyan-400',
             },
           ].map((card, idx) => (
-            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 hover:-translate-y-1">
+            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 hover:-translate-y-1">
               <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{card.label}</div>
               <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
                 {card.value}
