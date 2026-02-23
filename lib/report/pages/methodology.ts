@@ -10,7 +10,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(14, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Methodology & Disclaimer</div>
 
@@ -21,7 +21,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           <div class="section-title">How the Model Works</div>
           <div class="card" style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">
             <p style="margin-bottom: 7px;">
-              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against 200+ publicly disclosed pharmaceutical licensing transactions from 2019\u20132025.
+              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against 600+ publicly disclosed pharmaceutical licensing transactions from 2019\u20132026.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Base Valuation:</strong> Initial deal value ranges are established using therapeutic area-specific benchmarks derived from actual transaction data, stratified by development phase.
@@ -43,7 +43,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
               <strong>Parameters:</strong> ${modifierNames.length + 5} input variables across asset profile, competitive dynamics, and deal structure factors.
             </p>
             <p style="margin-bottom: 7px;">
-              <strong>Coverage:</strong> Oncology (solid tumor + hematology), Neurology (CNS), and Immunology/Autoimmune therapeutic areas.
+              <strong>Coverage:</strong> Oncology (solid tumor + hematology), Neurology (CNS), Immunology/Autoimmune, and Metabolic/Obesity therapeutic areas.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Data Sources:</strong> SEC EDGAR filings, ClinicalTrials.gov, company press releases, analyst reports, and proprietary deal databases.

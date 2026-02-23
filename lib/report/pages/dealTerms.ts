@@ -22,7 +22,7 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
 
   return `
     <div class="report-page">
-      ${pageHeader(5, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Deal Terms Detail</div>
 

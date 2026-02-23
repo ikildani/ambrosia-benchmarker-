@@ -43,7 +43,7 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
 
   return `
     <div class="report-page">
-      ${pageHeader(13, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
         <div style="width: 8px; height: 8px; border-radius: 50%; background: ${taColors.primary};"></div>

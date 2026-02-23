@@ -24,7 +24,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(6, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Sensitivity Analysis</div>
 

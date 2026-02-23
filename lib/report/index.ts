@@ -17,7 +17,7 @@ import { renderDealTimelinePage } from './pages/dealTimeline';
 import { renderNegotiationPage } from './pages/negotiation';
 import { renderTherapeuticIntelPage } from './pages/therapeuticIntel';
 import { renderMethodologyPage } from './pages/methodology';
-import type { PDFReportData, ReportMeta } from './types';
+import type { PDFReportData, ReportMeta, TocEntry } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
 
@@ -29,58 +29,63 @@ export function generateReportHTML(data: PDFReportData): string {
   // Build pages dynamically — exclude sections with no data
   const pages: string[] = [];
 
-  // Always-included pages
-  const corePagesPreAI = [
-    renderCoverPage,
-    // TOC placeholder — will be re-rendered with correct count below
-    renderExecutiveDashboard,
-    renderDealStructurePage,
-    renderDealTermsPage,
-    renderSensitivityPage,
-    renderComparablesPage,
-    renderPartnersPage,
-  ];
-
   // Conditionally included AI pages
   const hasAIMemo = !!(data.memoData || data.playbookData);
   const hasPlaybook = !!data.playbookData;
 
-  // Always-included post-AI pages
-  const corePagesPostAI = [
-    renderRiskAnalysisPage,
-    renderDealTimelinePage,
-    renderTherapeuticIntelPage,
-    renderMethodologyPage,
-  ];
+  // Build TOC entries with correct page numbers
+  const tocEntries: TocEntry[] = [];
+  let pageNum = 0;
+  const toc = (title: string, description: string) => { pageNum++; tocEntries.push({ title, page: pageNum, description }); };
+  toc('Cover Page', 'Asset overview, headline valuation, and risk score');
+  toc('Table of Contents', 'Report navigation and section guide');
+  toc('Executive Dashboard', 'Key metrics, value split, and deal recommendation');
+  toc('Deal Structure', 'Payment architecture and milestone waterfall');
+  toc('Deal Terms', 'Detailed term ranges, royalties, and modifiers');
+  toc('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers');
+  toc('Comparable Deals', 'Recent transactions and market benchmarks');
+  toc('Partner Matches', 'Top-ranked potential licensing partners');
+  if (hasAIMemo) toc('AI Deal Memo', 'AI-generated strategic narrative and playbook');
+  if (hasPlaybook) toc('Negotiation Strategy', 'AI-powered negotiation playbook and tactics');
+  toc('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation');
+  toc('Deal Timeline', 'Gantt-style milestone schedule from signing to launch');
+  toc('Therapeutic Intelligence', 'Indication-specific market context and trends');
+  toc('Methodology', 'Model design, data sources, and disclaimer');
 
-  const totalPages = corePagesPreAI.length + (hasAIMemo ? 1 : 0) + (hasPlaybook ? 1 : 0) + corePagesPostAI.length + 1; // +1 for TOC
+  const totalPages = pageNum;
 
   const meta: ReportMeta = {
     reportId: generateReportId(),
     generatedAt: formatDate(),
     version: '2.0',
     pageCount: totalPages,
+    currentPage: 0,
+    tocEntries,
   };
 
-  // Page 1: Cover
-  pages.push(renderCoverPage(data, meta));
-  // Page 2: TOC
-  pages.push(renderTableOfContents(data, meta));
-  // Pages 3-8: Core analysis
-  pages.push(renderExecutiveDashboard(data, meta));
-  pages.push(renderDealStructurePage(data, meta));
-  pages.push(renderDealTermsPage(data, meta));
-  pages.push(renderSensitivityPage(data, meta));
-  pages.push(renderComparablesPage(data, meta));
-  pages.push(renderPartnersPage(data, meta));
+  // Helper to render a page with auto-incrementing page number
+  const addPage = (renderer: (d: PDFReportData, m: ReportMeta) => string) => {
+    meta.currentPage++;
+    pages.push(renderer(data, meta));
+  };
+
+  // Core pages (always included)
+  addPage(renderCoverPage);
+  addPage(renderTableOfContents);
+  addPage(renderExecutiveDashboard);
+  addPage(renderDealStructurePage);
+  addPage(renderDealTermsPage);
+  addPage(renderSensitivityPage);
+  addPage(renderComparablesPage);
+  addPage(renderPartnersPage);
   // AI pages — only if data exists
-  if (hasAIMemo) pages.push(renderAIMemoPage(data, meta));
-  if (hasPlaybook) pages.push(renderNegotiationPage(data, meta));
-  // Remaining pages
-  pages.push(renderRiskAnalysisPage(data, meta));
-  pages.push(renderDealTimelinePage(data, meta));
-  pages.push(renderTherapeuticIntelPage(data, meta));
-  pages.push(renderMethodologyPage(data, meta));
+  if (hasAIMemo) addPage(renderAIMemoPage);
+  if (hasPlaybook) addPage(renderNegotiationPage);
+  // Post-AI pages (always included)
+  addPage(renderRiskAnalysisPage);
+  addPage(renderDealTimelinePage);
+  addPage(renderTherapeuticIntelPage);
+  addPage(renderMethodologyPage);
 
   return `
     <!DOCTYPE html>

@@ -12,7 +12,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
   if (!comparableDeals || comparableDeals.length === 0) {
     return `
       <div class="report-page">
-        ${pageHeader(7, meta.pageCount, 'Deal Valuation Report')}
+        ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
         <div class="section-title-lg">Comparable Transactions</div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400};">No comparable deals available for this asset profile.</div>
@@ -26,7 +26,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(7, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Comparable Transactions</div>
 

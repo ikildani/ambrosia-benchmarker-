@@ -10,7 +10,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
   if (!playbook) {
     return `
       <div class="report-page">
-        ${pageHeader(12, meta.pageCount, 'Negotiation Strategy')}
+        ${pageHeader(meta.currentPage, meta.pageCount, 'Negotiation Strategy')}
 
         <div class="section-title">NEGOTIATION PLAYBOOK</div>
         <div class="section-title-lg">AI Negotiation Strategy</div>
@@ -75,7 +75,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(12, meta.pageCount, 'Negotiation Strategy')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Negotiation Strategy')}
 
       <div class="section-title">NEGOTIATION PLAYBOOK</div>
       <div class="section-title-lg">AI Negotiation Strategy</div>

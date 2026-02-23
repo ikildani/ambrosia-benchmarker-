@@ -30,9 +30,17 @@ export interface PDFReportData {
   historyId?: string;
 }
 
+export interface TocEntry {
+  title: string;
+  page: number;
+  description: string;
+}
+
 export interface ReportMeta {
   reportId: string;
   generatedAt: string;
   version: string;
   pageCount: number;
+  currentPage: number;
+  tocEntries: TocEntry[];
 }

@@ -28,7 +28,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(3, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Executive Dashboard</div>
 

@@ -26,7 +26,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(4, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Deal Structure & Valuation</div>
 
