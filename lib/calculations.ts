@@ -519,9 +519,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   }
   regulatoryBonus = Math.min(regulatoryBonus, regConfig.maxBonus);
 
-  // Look up modality × indication interaction bonus (neurology, immunology, metabolic)
+  // Look up modality × indication interaction bonus (all therapeutic areas)
   let interactionBonus = 0;
-  if (isNeurology || isImmunology || isMetabolic) {
+  {
     const interactionTerms = (benchmarks as any).interactionTerms || {};
     const key = `${input.modality}+${input.indication}`;
     if (interactionTerms[key]) {

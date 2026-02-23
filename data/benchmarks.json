@@ -1,7 +1,7 @@
 {
   "metadata": {
     "lastUpdated": "2026-02",
-    "version": "5.0",
+    "version": "5.1",
     "nextUpdate": "2026-03",
     "updateFrequency": "monthly",
     "sources": [
@@ -14,6 +14,16 @@
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
     "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area — the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts. Metabolic/Obesity added as fourth therapeutic area — the fastest-growing pharma segment ($100B+ obesity market projected by 2030) with GLP-1, dual/triple incretin, and oral peptide deals driving unprecedented valuations.",
     "changelog": [
+      {
+        "date": "2026-02-23",
+        "version": "5.1",
+        "summary": "Oncology Interaction Terms + Engine Parity",
+        "changes": [
+          "Added 18 oncology modality × indication interaction terms (ADC+breast, ADC+lung, radiopharmaceutical+prostate, bispecific+myeloma, CAR-T+myeloma, mRNA+melanoma, PROTAC+breast, molecular glue+AML, etc.)",
+          "Enabled interaction term synergy bonuses for all therapeutic areas (previously excluded oncology)",
+          "Oncology calculations now match neurology/immunology/metabolic in granularity"
+        ]
+      },
       {
         "date": "2026-02-19",
         "version": "5.0",
@@ -601,6 +611,24 @@
   },
   "interactionTerms": {
     "_description": "Modality × indication synergy bonuses that replace simple multiplication. Applied as additive bonus to the combined multiplier.",
+    "adc+breast_her2": { "bonus": 0.10, "context": "ADC + HER2+ breast is the paradigm combination; Enhertu (T-DXd) $4B+ peak; Daiichi/AZ $5.5B deal reset" },
+    "adc+breast_tnbc": { "bonus": 0.08, "context": "ADC + TNBC validated by sacituzumab govitecan (Trodelvy); Trop-2 targeting established" },
+    "adc+lung_nsclc": { "bonus": 0.10, "context": "ADC + NSCLC is the largest opportunity; dato-DXd, T-DXd lung data; Merck/Daiichi deals" },
+    "adc+bladder": { "bonus": 0.08, "context": "ADC + bladder validated by enfortumab vedotin (Padcev); Nectin-4/EV+pembro paradigm shift" },
+    "adc+gastric": { "bonus": 0.06, "context": "ADC + gastric driven by T-DXd data in HER2-low; expanding addressable population" },
+    "bispecific+myeloma": { "bonus": 0.10, "context": "Bispecific + myeloma is the hottest heme combo; teclistamab, talquetamab BCMA/GPRC5D targeting" },
+    "bispecific+dlbcl": { "bonus": 0.08, "context": "Bispecific + DLBCL validated by epcoritamab, glofitamab; CD20×CD3 established; off-the-shelf vs CAR-T" },
+    "carT_heme+myeloma": { "bonus": 0.10, "context": "CAR-T + myeloma is validated; ide-cel, cilta-cel BCMA CAR-T; $40B+ market potential" },
+    "carT_heme+dlbcl": { "bonus": 0.06, "context": "CAR-T + DLBCL is the established paradigm; Yescarta, Kymriah, Breyanzi all approved" },
+    "carT_solid+gbm": { "bonus": 0.10, "context": "CAR-T + GBM is high-risk/high-reward; GD2, IL-13Rα2 targeting; dramatic early responses in trials" },
+    "radiopharmaceutical+prostate": { "bonus": 0.12, "context": "Radiopharmaceutical + prostate is validated; Pluvicto PSMA-617 $1B+; Novartis/Advanced Accelerator $3.9B" },
+    "radiopharmaceutical+myeloma": { "bonus": 0.08, "context": "Radiopharmaceutical + myeloma emerging; BCMA-targeted radiopharmaceuticals in early development" },
+    "mrna+melanoma": { "bonus": 0.10, "context": "mRNA + melanoma is the leading cancer vaccine combo; Moderna/Merck V940+pembro; positive Phase 2b RFS data" },
+    "protac+breast_hr": { "bonus": 0.08, "context": "PROTAC + HR+ breast validated by ARV-471 (vepdegestrant); oral ER degrader paradigm; Pfizer/Arvinas $1B+" },
+    "protac+prostate": { "bonus": 0.06, "context": "PROTAC + mCRPC for AR degradation; next-gen anti-androgen approach; enzalutamide-resistant setting" },
+    "molecularGlue+aml": { "bonus": 0.08, "context": "Molecular glue + AML; GSPT1/IKZF degradation; novel differentiation/apoptosis mechanisms; BMS/Celgene precedent" },
+    "tCellEngager+myeloma": { "bonus": 0.08, "context": "T-cell engager + myeloma; BCMA/GPRC5D off-the-shelf alternative to CAR-T; Pfizer, J&J active" },
+    "oncolyticVirus+melanoma": { "bonus": 0.06, "context": "Oncolytic virus + melanoma is the established paradigm; T-VEC first approved; IO combo potential" },
     "bbbPlatform+alzheimers": { "bonus": 0.10, "context": "BBB platform + AD is the premier combo: multi-program optionality in largest CNS market" },
     "bbbPlatform+parkinsons": { "bonus": 0.08, "context": "BBB crossing critical for PD targets (alpha-synuclein, LRRK2)" },
     "aso+huntingtons": { "bonus": 0.12, "context": "ASO is the leading modality for HD (allele-selective silencing); Wave, uniQure, Ionis" },
