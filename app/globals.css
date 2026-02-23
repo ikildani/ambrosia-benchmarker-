@@ -155,22 +155,6 @@
     @apply opacity-100;
   }
 
-  /* Shimmer loading effect */
-  .shimmer {
-    @apply relative overflow-hidden;
-  }
-
-  .shimmer::after {
-    content: '';
-    @apply absolute inset-0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
-    animation: shimmer 2s infinite;
-  }
 
   /* Number counter animation */
   .number-animate {
@@ -282,45 +266,18 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInRight {
-  0% { opacity: 0; transform: translateX(20px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes scaleIn {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
 }
 
-@keyframes breathe {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 199, 199, 0.2); }
-  50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 199, 199, 0.4); }
-}
 
 @keyframes countUp {
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 1; }
-  100% { transform: scale(1.3); opacity: 0; }
-}
 
 /* Metric card cascade entrance */
 @keyframes metricCascadeIn {
@@ -574,33 +531,7 @@ select::selection {
   animation: fabPulse 2s ease-in-out infinite;
 }
 
-/* Active tab indicator animation */
-@keyframes tabIndicator {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
-}
 
-.animate-tab-indicator {
-  animation: tabIndicator 0.2s ease-out forwards;
-}
-
-/* Swipe hint animation */
-@keyframes swipeHint {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-5px);
-  }
-}
-
-.swipe-hint {
-  animation: swipeHint 1.5s ease-in-out infinite;
-}
 
 /* Bottom sheet animation */
 @keyframes bottomSheetUp {
@@ -764,19 +695,6 @@ select::selection {
   @apply fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 pb-4;
 }
 
-/* Pull to refresh indicator */
-@keyframes pullRefresh {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.pull-refresh-spinner {
-  animation: pullRefresh 1s linear infinite;
-}
 
 /* Smooth slide transitions */
 .slide-enter {
@@ -931,15 +849,6 @@ select::selection {
   animation: progressPulse 1.5s ease-in-out infinite;
 }
 
-/* Download button glow */
-@keyframes downloadGlow {
-  0%, 100% { box-shadow: 0 0 12px rgba(13, 148, 136, 0.3), 0 4px 14px rgba(13, 148, 136, 0.15); }
-  50% { box-shadow: 0 0 24px rgba(13, 148, 136, 0.5), 0 4px 20px rgba(13, 148, 136, 0.3); }
-}
-
-.animate-download-glow {
-  animation: downloadGlow 2s ease-in-out infinite;
-}
 
 /* Step fade-in for each step row */
 @keyframes stepFadeIn {
@@ -1034,8 +943,7 @@ select::selection {
       0 0 0 9999px rgba(13, 15, 33, 0.85);
   }
 
-  .skeleton::after,
-  .shimmer::after {
+  .skeleton::after {
     animation: none !important;
     background: none !important;
   }

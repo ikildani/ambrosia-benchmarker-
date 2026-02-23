@@ -57,8 +57,22 @@ const nextConfig = {
         ],
       },
       {
+        // Cacheable public GET API routes
+        source: '/api/(content|landing-pages|companies/search|health|deals/comparable|trials/intelligence)/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400'
+          },
+        ],
+      },
+      {
         // Mutation/auth API routes: no caching
-        source: '/api/((?!embed).*)',
+        source: '/api/((?!embed|content|landing-pages|companies/search|health|deals/comparable|trials/intelligence).*)',
         headers: [
           {
             key: 'X-Content-Type-Options',

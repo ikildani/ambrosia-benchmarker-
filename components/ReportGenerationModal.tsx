@@ -4,8 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { CalculationResult, CalculationInput, calculateRiskScore } from '@/lib/calculations';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { findComparableDeals } from '@/lib/comparableDeals';
-import { generateReportHTML } from '@/lib/report';
-import { generateExcelReport, PartnerForExcel } from '@/lib/generateExcel';
+import type { PartnerForExcel } from '@/lib/generateExcel';
 import type { PDFReportData, PartnerForPDF } from '@/lib/report';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
@@ -230,6 +229,7 @@ export default function ReportGenerationModal({
 
         if (p.format === 'excel') {
           setCurrentStep('building');
+          const { generateExcelReport } = await import('@/lib/generateExcel');
           const partnersForExcel: PartnerForExcel[] = p.partnerMatches.map(pm => ({
             company_name: pm.company_name,
             match_score: pm.match_score,
@@ -289,6 +289,7 @@ export default function ReportGenerationModal({
         };
         pdfDataRef.current = pdfData;
 
+        const { generateReportHTML } = await import('@/lib/report');
         const html = generateReportHTML(pdfData);
         htmlStringRef.current = html;
         if (hiddenContainerRef.current) {

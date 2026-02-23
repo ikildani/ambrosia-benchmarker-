@@ -1,44 +1,44 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { SavedScenario, COMPARISON_METRICS } from './scenarioComparison';
 
 // Export comparison to Excel
-export function exportComparisonToExcel(scenarios: SavedScenario[]): void {
-  const wb = XLSX.utils.book_new();
+export async function exportComparisonToExcel(scenarios: SavedScenario[]): Promise<void> {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Ambrosia Ventures';
+  wb.created = new Date();
 
-  // Build comparison data
-  const headers = ['Metric', ...scenarios.map((s) => s.name)];
-  const data: (string | number)[][] = [headers];
+  const ws = wb.addWorksheet('Scenario Comparison');
+  ws.columns = [{ width: 20 }, ...scenarios.map(() => ({ width: 25 }))];
+
+  // Header row
+  ws.addRow(['Metric', ...scenarios.map((s) => s.name)]);
 
   // Add all metrics
   COMPARISON_METRICS.forEach((metric) => {
-    const row: (string | number)[] = [metric.label, ...scenarios.map((s) => metric.getValue(s))];
-    data.push(row);
+    ws.addRow([metric.label, ...scenarios.map((s) => metric.getValue(s))]);
   });
 
   // Add empty row
-  data.push([]);
+  ws.addRow([]);
 
   // Add notes section if any scenarios have notes
   const scenariosWithNotes = scenarios.filter((s) => s.notes);
   if (scenariosWithNotes.length > 0) {
-    data.push(['SCENARIO NOTES']);
+    ws.addRow(['SCENARIO NOTES']);
     scenariosWithNotes.forEach((s) => {
-      data.push([s.name, s.notes || '']);
+      ws.addRow([s.name, s.notes || '']);
     });
   }
 
   // Add metadata
-  data.push([]);
-  data.push(['Generated', new Date().toLocaleString()]);
-  data.push(['Source', 'Ambrosia Ventures Deal Calculator']);
+  ws.addRow([]);
+  ws.addRow(['Generated', new Date().toLocaleString()]);
+  ws.addRow(['Source', 'Ambrosia Ventures Deal Calculator']);
 
-  const ws = XLSX.utils.aoa_to_sheet(data);
-
-  // Set column widths
-  ws['!cols'] = [{ wch: 20 }, ...scenarios.map(() => ({ wch: 25 }))];
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Scenario Comparison');
-  XLSX.writeFile(wb, `scenario-comparison-${new Date().toISOString().split('T')[0]}.xlsx`);
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `scenario-comparison-${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 // Export comparison to PDF (via print)

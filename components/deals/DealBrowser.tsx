@@ -205,7 +205,7 @@ export default function DealBrowser() {
                   announced_date: deal.announced_date,
                   terms_disclosed: deal.terms_disclosed,
                 }));
-                generateDealsExcel(dealsForExport, {
+                void generateDealsExcel(dealsForExport, {
                   modality: filters.modality.join(', '),
                   phase: filters.phase.join(', '),
                   indication: filters.indication.join(', '),
