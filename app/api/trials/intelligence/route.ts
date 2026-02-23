@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('company_trials')
       .select('nct_id, trial_title, company_name, phase, status, indication_category, indication_specific, modality, conditions')
-      .in('status', ['recruiting', 'active', 'not_yet_recruiting', 'enrolling_by_invitation']);
+      .in('status', ['recruiting', 'active_not_recruiting', 'not_yet_recruiting', 'enrolling_by_invitation']);
 
     if (indicationCategories.length > 0) {
       query = query.in('indication_category', indicationCategories);
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: trials, error } = await query
-      .order('nct_id', { ascending: false })
+      .order('start_date', { ascending: false })
       .limit(500);
 
     if (error) {
@@ -120,13 +120,13 @@ export async function GET(request: NextRequest) {
 function getIndicationCategories(therapeuticArea: string): string[] {
   switch (therapeuticArea) {
     case 'oncology':
-      return ['solid_tumor', 'hematological', 'oncology'];
+      return ['solid_tumor', 'hematological'];
     case 'neurology':
-      return ['cns', 'neurology', 'neurodegeneration', 'psychiatry'];
+      return ['cns'];
     case 'immunology':
-      return ['autoimmune', 'immunology', 'inflammation', 'dermatology'];
+      return ['autoimmune', 'dermatology'];
     case 'metabolic':
-      return ['metabolic', 'obesity', 'diabetes', 'cardiovascular', 'endocrine'];
+      return ['metabolic', 'cardiovascular'];
     default:
       return [];
   }

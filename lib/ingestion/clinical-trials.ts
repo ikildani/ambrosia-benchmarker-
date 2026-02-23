@@ -398,47 +398,125 @@ export function inferIndicationFromConditions(conditions: string[]): {
     }
   }
 
-  // CNS
+  // CNS / Neurology — specific conditions only, no broad terms
   if (text.includes('alzheimer') || text.includes('parkinson') ||
       text.includes('multiple sclerosis') || text.includes('neurodegenerat') ||
-      text.includes('huntington') || text.includes('als') ||
-      text.includes('amyotrophic lateral') || text.includes('epilepsy') ||
-      text.includes('schizophrenia') || text.includes('depression')) {
+      text.includes('huntington') || text.includes('amyotrophic lateral') ||
+      text.includes('epilepsy') || text.includes('seizure') ||
+      text.includes('schizophrenia') || text.includes('major depressive') ||
+      text.includes('bipolar disorder') || text.includes('anxiety disorder') ||
+      text.includes('generalized anxiety') || text.includes('social anxiety') ||
+      text.includes('obsessive compulsive') || text.includes('ocd') ||
+      text.includes('ptsd') || text.includes('post-traumatic stress') ||
+      text.includes('adhd') || text.includes('attention deficit') ||
+      text.includes('autism spectrum') || text.includes('narcolepsy') ||
+      text.includes('insomnia') || text.includes('migraine') ||
+      text.includes('cluster headache') || text.includes('neuropathic pain') ||
+      text.includes('peripheral neuropathy') || text.includes('diabetic neuropathy') ||
+      text.includes('stroke') || text.includes('cerebrovascular') ||
+      text.includes('traumatic brain injury') || text.includes('spinal cord injury') ||
+      text.includes('dementia') || text.includes('lewy body') ||
+      text.includes('frontotemporal') || text.includes('dystonia') ||
+      text.includes('myasthenia gravis') || text.includes('cerebral palsy') ||
+      text.includes('neuropsychiatric') || text.includes('fibromyalgia') ||
+      text.includes('neuropathy') || text.includes('neuralgia') ||
+      text.includes('glioma') || text.includes('brain tumor')) {
     return { category: 'cns', specific: null };
   }
 
-  // Autoimmune
-  if (text.includes('rheumatoid') || text.includes('lupus') ||
-      text.includes('psoriasis') || text.includes('crohn') ||
-      text.includes('colitis') || text.includes('atopic dermatitis') ||
-      text.includes('inflammatory bowel') || text.includes('ibd')) {
+  // Autoimmune / Immunology — specific conditions, not broad 'immune' or 'inflammatory'
+  if (text.includes('rheumatoid arthritis') || text.includes('lupus') ||
+      text.includes('psoriasis') || text.includes('psoriatic') ||
+      text.includes('crohn') || text.includes('ulcerative colitis') ||
+      text.includes('atopic dermatitis') || text.includes('eczema') ||
+      text.includes('inflammatory bowel') || text.includes('ibd') ||
+      text.includes('ankylosing spondylitis') || text.includes('axial spondyloarthritis') ||
+      text.includes('vasculitis') || text.includes('pemphigus') ||
+      text.includes('scleroderma') || text.includes('systemic sclerosis') ||
+      text.includes('sjögren') || text.includes('sjogren') ||
+      text.includes('celiac') || text.includes('alopecia areata') ||
+      text.includes('vitiligo') || text.includes('graft versus host') ||
+      text.includes('gvhd') || text.includes('transplant rejection') ||
+      text.includes('autoimmune') || text.includes('juvenile arthritis') ||
+      text.includes('uveitis') || text.includes('hidradenitis') ||
+      text.includes('asthma') || text.includes('allergic rhinitis') ||
+      text.includes('food allergy') || text.includes('anaphylaxis') ||
+      text.includes('chronic urticaria') || text.includes('angioedema') ||
+      text.includes('eosinophilic') || text.includes('multiple sclerosis')) {
     return { category: 'autoimmune', specific: null };
   }
 
+  // Dermatology (non-autoimmune skin conditions)
+  if (text.includes('acne') || text.includes('rosacea') ||
+      text.includes('wound healing') || text.includes('dermatitis') ||
+      text.includes('dermatology') || text.includes('pruritus') ||
+      text.includes('prurigo') || text.includes('urticaria') ||
+      text.includes('keloid') || text.includes('scarring')) {
+    return { category: 'dermatology', specific: null };
+  }
+
   // Rare disease
-  if (text.includes('rare') || text.includes('orphan') ||
-      text.includes('duchenne') || text.includes('sma') ||
-      text.includes('spinal muscular') || text.includes('hemophilia') ||
-      text.includes('fabry') || text.includes('gaucher')) {
+  if (text.includes('duchenne') || text.includes('spinal muscular atrophy') ||
+      text.includes('hemophilia') || text.includes('fabry') ||
+      text.includes('gaucher') || text.includes('pompe') ||
+      text.includes('wilson disease') || text.includes('cystic fibrosis') ||
+      text.includes('sickle cell') || text.includes('thalassemia') ||
+      text.includes('phenylketonuria') || text.includes('pku') ||
+      text.includes('lysosomal') || text.includes('hunter syndrome') ||
+      text.includes('hurler') || text.includes('niemann-pick') ||
+      text.includes('batten') || text.includes('friedreich') ||
+      text.includes('progeria') || text.includes('epidermolysis bullosa') ||
+      text.includes('orphan drug')) {
     return { category: 'rare_disease', specific: null };
   }
 
   // Infectious
   if (text.includes('hiv') || text.includes('hepatitis') ||
-      text.includes('covid') || text.includes('rsv') ||
-      text.includes('influenza') || text.includes('infection')) {
+      text.includes('covid') || text.includes('sars-cov') ||
+      text.includes('rsv') || text.includes('respiratory syncytial') ||
+      text.includes('influenza') || text.includes('tuberculosis') ||
+      text.includes('malaria') || text.includes('sepsis') ||
+      text.includes('pneumonia') || text.includes('meningitis') ||
+      text.includes('herpes') || text.includes('cytomegalovirus') ||
+      text.includes('cmv') || text.includes('ebola') ||
+      text.includes('zika') || text.includes('dengue') ||
+      text.includes('antimicrobial') || text.includes('antifungal') ||
+      text.includes('antiviral') || text.includes('antibiotic')) {
     return { category: 'infectious', specific: null };
   }
 
   // Cardiovascular
   if (text.includes('heart failure') || text.includes('cardiovascular') ||
-      text.includes('atherosclerosis') || text.includes('hypertension')) {
+      text.includes('atherosclerosis') || text.includes('hypertension') ||
+      text.includes('atrial fibrillation') || text.includes('arrhythmia') ||
+      text.includes('coronary artery') || text.includes('myocardial infarction') ||
+      text.includes('cardiomyopathy') || text.includes('thrombosis') ||
+      text.includes('pulmonary hypertension') || text.includes('aneurysm') ||
+      text.includes('peripheral artery') || text.includes('cardiac') ||
+      text.includes('venous thromboembolism') || text.includes('pulmonary embolism') ||
+      text.includes('deep vein thrombosis') || text.includes('dvt') ||
+      text.includes('heart disease') || text.includes('angina')) {
     return { category: 'cardiovascular', specific: null };
   }
 
-  // Metabolic
-  if (text.includes('diabetes') || text.includes('obesity') ||
-      text.includes('nash') || text.includes('fatty liver')) {
+  // Metabolic — specific terms, not broad 'weight' or 'insulin'
+  if (text.includes('diabetes') || text.includes('diabetic') ||
+      text.includes('obesity') || text.includes('obese') ||
+      text.includes('nash') || text.includes('fatty liver') ||
+      text.includes('nafld') || text.includes('mash') ||
+      text.includes('metabolic syndrome') || text.includes('dyslipidemia') ||
+      text.includes('hyperlipidemia') || text.includes('hypercholesterolemia') ||
+      text.includes('hypertriglyceridemia') || text.includes('gout') ||
+      text.includes('hyperuricemia') || text.includes('weight management') ||
+      text.includes('weight loss') || text.includes('anti-obesity') ||
+      text.includes('glp-1') || text.includes('incretin') ||
+      text.includes('glycemic control') || text.includes('hba1c') ||
+      text.includes('type 2 diabetes') || text.includes('t2dm') ||
+      text.includes('type 1 diabetes') || text.includes('t1dm') ||
+      text.includes('thyroid') || text.includes('hypothyroid') ||
+      text.includes('hyperthyroid') || text.includes('pcos') ||
+      text.includes('polycystic ovary') || text.includes('growth hormone') ||
+      text.includes('lipodystrophy') || text.includes('endocrine')) {
     return { category: 'metabolic', specific: null };
   }
 
