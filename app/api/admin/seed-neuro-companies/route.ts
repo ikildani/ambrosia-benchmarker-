@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { isAdminEmail } from '@/lib/config/authorized-emails';
-import { getAuthenticatedUser } from '@/lib/auth-helpers';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 // Company profiles for partner matching across all therapeutic areas
 const allCompanies = [
@@ -6827,23 +6826,9 @@ const allCompanies = [
 
 export async function POST(request: NextRequest) {
   try {
-    // Accept either Bearer token or admin email auth
-    const authHeader = request.headers.get('authorization');
-    const adminKey = process.env.ADMIN_API_KEY;
-    const isTokenAuth = adminKey && authHeader === `Bearer ${adminKey}`;
-
-    let isAuthed = isTokenAuth;
-    if (!isAuthed) {
-      const user = await getAuthenticatedUser(request);
-      isAuthed = !!user?.email && isAdminEmail(user.email);
-    }
-
-    if (!isAuthed) {
-      return NextResponse.json(
-        { error: 'Unauthorized - admin access required' },
-        { status: 403 }
-      );
-    }
+    // Admin auth: timing-safe Bearer token or authenticated admin email
+    const authError = await verifyAdminAuth(request);
+    if (authError) return authError;
 
     const supabase = createServiceClient();
 

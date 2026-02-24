@@ -106,7 +106,6 @@ export function useAuth() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: userId,
           anonymous_id: anonymousId,
         }),
       });

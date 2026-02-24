@@ -1,26 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth-helpers';
 
 interface LinkAnonymousRequest {
-  user_id: string;
   anonymous_id: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication — user_id comes from session, never from body
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const supabase = createServiceClient();
     const body: LinkAnonymousRequest = await request.json();
 
-    if (!body.user_id || !body.anonymous_id) {
+    if (!body.anonymous_id) {
       return NextResponse.json(
-        { error: 'user_id and anonymous_id are required' },
+        { error: 'anonymous_id is required' },
         { status: 400 }
       );
     }
 
+    const userId = authUser.id;
+
     // Use the database function to link all anonymous data to the user
     const { error: linkError } = await supabase.rpc('link_anonymous_to_user', {
-      p_user_id: body.user_id,
+      p_user_id: userId,
       p_anonymous_id: body.anonymous_id,
     });
 
@@ -37,17 +48,17 @@ export async function POST(request: NextRequest) {
       supabase
         .from('sessions')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', body.user_id)
+        .eq('user_id', userId)
         .eq('anonymous_id', body.anonymous_id),
       supabase
         .from('events')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', body.user_id)
+        .eq('user_id', userId)
         .eq('anonymous_id', body.anonymous_id),
       supabase
         .from('calculations')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', body.user_id)
+        .eq('user_id', userId)
         .eq('anonymous_id', body.anonymous_id),
     ]);
 

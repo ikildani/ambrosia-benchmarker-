@@ -143,6 +143,9 @@ const SettingsTab = React.memo(function SettingsTab({
         </div>
       </div>
 
+      {/* Appearance */}
+      <AppearanceSettings />
+
       {/* Personal Information */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
@@ -332,9 +335,6 @@ const SettingsTab = React.memo(function SettingsTab({
           ))}
         </div>
       </div>
-
-      {/* Appearance */}
-      <AppearanceSettings />
 
       {/* Data & Privacy */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">

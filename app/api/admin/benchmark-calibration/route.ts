@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runBenchmarkCalibration } from '@/lib/ingestion/benchmark-calibration';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';

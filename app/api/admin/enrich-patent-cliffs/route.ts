@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { ingestOrangeBookPatents } from '@/lib/ingestion/orange-book';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -12,16 +13,9 @@ export const dynamic = 'force-dynamic';
  * Auth: Bearer $ADMIN_API_KEY
  */
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  const adminApiKey = process.env.ADMIN_API_KEY;
-
-  if (!adminApiKey) {
-    return NextResponse.json({ error: 'ADMIN_API_KEY not configured' }, { status: 500 });
-  }
-
-  if (!authHeader || authHeader !== `Bearer ${adminApiKey}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  // Admin auth: timing-safe Bearer token or authenticated admin email
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const supabase = createServiceClient();

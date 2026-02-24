@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { verifyAdminAuth } from '@/lib/admin-auth';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -4797,13 +4798,9 @@ const CURATED_DEALS: Deal[] = [
 
 export async function POST(request: NextRequest) {
   try {
-    // Check for admin auth
-    const authHeader = request.headers.get('authorization');
-    const adminKey = process.env.ADMIN_API_KEY;
-
-    if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Check for admin auth (timing-safe)
+    const authError = await verifyAdminAuth(request);
+    if (authError) return authError;
 
     const supabase = createServiceClient();
     const batchSize = 100;
