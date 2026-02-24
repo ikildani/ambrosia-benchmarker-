@@ -158,9 +158,138 @@ export const checkoutSchema = z.object({
   { message: 'calculationData is required for report purchases', path: ['calculationData'] }
 );
 
+// Deal memo POST body
+export const dealMemoSchema = z.object({
+  reportId: z.string().optional(),
+  inputs: z.record(z.string(), z.unknown()),
+  results: z.record(z.string(), z.unknown()),
+  labels: z.object({
+    phase: z.string(),
+    modality: z.string(),
+    indication: z.string(),
+  }),
+  email: z.string().optional().nullable(),
+  userId: z.string().optional().nullable(),
+});
+
+// Playbook POST body
+export const playbookSchema = z.object({
+  inputs: z.object({
+    modality: z.string().min(1, 'modality is required'),
+    phase: z.string().min(1, 'phase is required'),
+    indication: z.string().min(1, 'indication is required'),
+    territory: z.string().min(1, 'territory is required'),
+    therapeuticArea: z.string().optional(),
+  }),
+  results: z.object({
+    terms: z.record(z.string(), z.unknown()),
+    tieredRoyalties: z.record(z.string(), z.unknown()),
+    dealRecommendation: z.record(z.string(), z.unknown()),
+    negotiationInsight: z.string().optional(),
+    modifiers: z.array(z.record(z.string(), z.unknown())).optional(),
+  }),
+  labels: z.object({
+    phase: z.string(),
+    modality: z.string(),
+    indication: z.string(),
+  }),
+  userId: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  reportId: z.string().optional().nullable(),
+});
+
+// Share POST body
+export const shareSchema = z.object({
+  email: z.string().optional().nullable(),
+  inputs: z.record(z.string(), z.unknown()),
+  results: z.record(z.string(), z.unknown()),
+  labels: z.record(z.string(), z.unknown()).optional(),
+  tier: z.string().optional(), // accepted but ignored (security)
+  expiresIn: z.enum(['7d', '30d', '90d']).optional().nullable(),
+});
+
+// Session POST body
+export const sessionCreateSchema = z.object({
+  anonymous_id: z.string().min(1, 'anonymous_id is required'),
+  user_id: z.string().optional().nullable(),
+  device_type: z.enum(['desktop', 'tablet', 'mobile']).optional().nullable(),
+  referrer_url: z.string().optional().nullable(),
+  utm_source: z.string().optional().nullable(),
+  utm_medium: z.string().optional().nullable(),
+  utm_campaign: z.string().optional().nullable(),
+});
+
+// Session PATCH body
+export const sessionUpdateSchema = z.object({
+  session_id: z.string().min(1, 'session_id is required'),
+  user_id: z.string().optional().nullable(),
+  ended_at: z.string().optional().nullable(),
+  duration_seconds: z.number().optional().nullable(),
+  calculation_count: z.number().optional().nullable(),
+  paywall_hits: z.number().optional().nullable(),
+});
+
+// Watchlist GET query params
+export const watchlistQuerySchema = z.object({
+  user_id: z.string().min(1, 'user_id is required'),
+}).passthrough();
+
+// Watchlist POST body
+export const watchlistAddSchema = z.object({
+  user_id: z.string().min(1, 'user_id is required'),
+  item_type: z.enum(['modality', 'indication', 'company', 'therapeutic_area']),
+  item_value: z.string().min(1, 'item_value is required'),
+  company_id: z.string().optional().nullable(),
+});
+
+// Watchlist DELETE query params
+export const watchlistDeleteSchema = z.object({
+  id: z.string().min(1, 'id is required'),
+  user_id: z.string().min(1, 'user_id is required'),
+}).passthrough();
+
+// Scenarios GET query params
+export const scenariosQuerySchema = z.object({
+  email: z.string().min(1, 'email is required'),
+}).passthrough();
+
+// Scenarios POST body
+export const scenarioCreateSchema = z.object({
+  email: z.string().min(1, 'email is required'),
+  name: z.string().min(1, 'name is required'),
+  notes: z.string().optional().nullable(),
+  inputs: z.record(z.string(), z.unknown()),
+  results: z.record(z.string(), z.unknown()),
+  labels: z.record(z.string(), z.unknown()).optional(),
+});
+
+// Scenarios DELETE query params
+export const scenarioDeleteSchema = z.object({
+  id: z.string().min(1, 'id is required'),
+  email: z.string().min(1, 'email is required'),
+}).passthrough();
+
+// Newsletter POST body
+export const newsletterSchema = z.object({
+  email: z.string().email('Valid email is required'),
+});
+
+// Promo validate POST body
+export const promoValidateSchema = z.object({
+  code: z.string().min(1, 'Code is required'),
+});
+
 /** Format Zod validation errors into a concise string. */
 export function formatZodErrors(error: z.ZodError): string {
   return error.issues.map(i =>
     i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message
   ).join('; ');
+}
+
+/**
+ * Sanitize a number: returns fallback if NaN, Infinity, or -Infinity.
+ * Use at system boundaries to guarantee clean numeric output.
+ */
+export function safeNumber(value: number, fallback: number = 0): number {
+  return Number.isFinite(value) ? value : fallback;
 }

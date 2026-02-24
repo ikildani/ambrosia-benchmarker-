@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,10 +15,7 @@ export async function GET(
     const { token } = params;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token required' },
-        { status: 400 }
-      );
+      return apiError('Token required', 400);
     }
 
     // Fetch shared calculation
@@ -29,24 +27,18 @@ export async function GET(
       .single();
 
     if (error || !shared) {
-      return NextResponse.json(
-        { error: 'Shared calculation not found or expired' },
-        { status: 404 }
-      );
+      return apiError('Shared calculation not found or expired', 404);
     }
 
     // Check expiration
     if (shared.expires_at && new Date(shared.expires_at) < new Date()) {
-      return NextResponse.json(
-        { error: 'This shared link has expired' },
-        { status: 410 }
-      );
+      return apiError('This shared link has expired', 410);
     }
 
     // Increment view count
     await supabase.rpc('increment_share_views', { p_token: token });
 
-    return NextResponse.json({
+    return apiSuccess({
       inputs: shared.inputs,
       results: shared.results,
       labels: shared.labels,
@@ -56,9 +48,6 @@ export async function GET(
     });
   } catch (error) {
     captureApiError(error, 'share-get');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

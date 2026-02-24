@@ -1,16 +1,17 @@
-import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { newsletterSchema, formatZodErrors } from '@/lib/api-validation';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const body = await request.json();
+    const parsed = newsletterSchema.safeParse(body);
 
-    if (!email || !email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Valid email is required' },
-        { status: 400 }
-      );
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
+
+    const { email } = parsed.data;
 
     const supabase = createServiceClient();
 
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
       .single();
 
     if (existing) {
-      return NextResponse.json({ success: true, message: 'Already subscribed' });
+      return apiSuccess({ message: 'Already subscribed' });
     }
 
     // Insert new subscriber
@@ -36,18 +37,12 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('Newsletter subscription error:', error);
-      return NextResponse.json(
-        { error: 'Subscription failed' },
-        { status: 500 }
-      );
+      return apiError('Subscription failed', 500);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     console.error('Newsletter error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

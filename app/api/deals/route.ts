@@ -249,9 +249,8 @@ async function getDistinctValues(
 
     if (!data || data.length === 0) break;
     for (const row of data) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const val = (row as any)[column];
-      if (val) values.add(val as string);
+      const val = (row as unknown as Record<string, unknown>)[column];
+      if (typeof val === 'string' && val) values.add(val);
     }
     if (data.length < pageSize) break;
     offset += pageSize;

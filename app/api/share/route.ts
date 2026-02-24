@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
 import { captureApiError } from '@/lib/sentry-api';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { shareSchema, formatZodErrors } from '@/lib/api-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,14 +12,13 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const body = await request.json();
-    const { email, inputs, results, labels, tier, expiresIn } = body;
 
-    if (!inputs || !results) {
-      return NextResponse.json(
-        { error: 'Inputs and results are required' },
-        { status: 400 }
-      );
+    const parsed = shareSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
+
+    const { email, inputs, results, labels, expiresIn } = parsed.data;
 
     // Verify Pro tier
     let userTier: 'free' | 'pro' | 'report' = 'free';
@@ -34,10 +35,7 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     if (userTier !== 'pro' && userTier !== 'report') {
-      return NextResponse.json(
-        { error: 'Pro subscription required to share calculations' },
-        { status: 403 }
-      );
+      return apiError('Pro subscription required to share calculations', 403);
     }
 
     // Generate unique share token
@@ -82,24 +80,18 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating share:', error);
-      return NextResponse.json(
-        { error: 'Failed to create share link' },
-        { status: 500 }
-      );
+      return apiError('Failed to create share link', 500);
     }
 
     const shareUrl = `https://calculator.ambrosiaventures.co/share/${shareToken}`;
 
-    return NextResponse.json({
+    return apiSuccess({
       shareToken,
       shareUrl,
       expiresAt,
     });
   } catch (error) {
     captureApiError(error, 'share-post');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

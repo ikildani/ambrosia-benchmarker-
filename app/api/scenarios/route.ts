@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { scenariosQuerySchema, scenarioCreateSchema, scenarioDeleteSchema, formatZodErrors } from '@/lib/api-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,25 +14,21 @@ export async function GET(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult));
   }
 
   try {
     const supabase = createServiceClient();
-    const searchParams = request.nextUrl.searchParams;
-    const email = searchParams.get('email');
+    const params = Object.fromEntries(request.nextUrl.searchParams);
+    const parsed = scenariosQuerySchema.safeParse(params);
+
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+
+    const { email } = parsed.data;
     // SECURITY: Removed client tier - never trust client-provided tier
     // const clientTier = searchParams.get('tier');
-
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email required' },
-        { status: 400 }
-      );
-    }
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' | 'report' = 'free';
@@ -48,10 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (userTier !== 'pro' && userTier !== 'report') {
-      return NextResponse.json(
-        { error: 'Pro subscription required', scenarios: [] },
-        { status: 403 }
-      );
+      return apiError('Pro subscription required', 403);
     }
 
     // Fetch scenarios
@@ -64,19 +59,13 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching scenarios:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch scenarios' },
-        { status: 500 }
-      );
+      return apiError('Failed to fetch scenarios', 500);
     }
 
-    return NextResponse.json({ scenarios: scenarios || [] });
+    return apiSuccess({ scenarios: scenarios || [] });
   } catch (error) {
     console.error('Scenarios API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 
@@ -87,25 +76,20 @@ export async function POST(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult));
   }
 
   try {
     const supabase = createServiceClient();
     const body = await request.json();
+    const parsed = scenarioCreateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
 
     // SECURITY: Removed tier from destructuring - never trust client-provided tier
-    const { email, name, notes, inputs, results, labels } = body;
-
-    if (!email || !name || !inputs || !results) {
-      return NextResponse.json(
-        { error: 'Email, name, inputs, and results are required' },
-        { status: 400 }
-      );
-    }
+    const { email, name, notes, inputs, results, labels } = parsed.data;
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
     let userTier: 'free' | 'pro' | 'report' = 'free';
@@ -123,10 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (userTier !== 'pro' && userTier !== 'report') {
-      return NextResponse.json(
-        { error: 'Pro subscription required to save scenarios' },
-        { status: 403 }
-      );
+      return apiError('Pro subscription required to save scenarios', 403);
     }
 
     // Check scenario limit (max 20 per user)
@@ -136,10 +117,7 @@ export async function POST(request: NextRequest) {
       .eq('email', email);
 
     if (count && count >= 20) {
-      return NextResponse.json(
-        { error: 'Maximum of 20 saved scenarios reached. Please delete some to save new ones.' },
-        { status: 400 }
-      );
+      return apiError('Maximum of 20 saved scenarios reached. Please delete some to save new ones.', 400);
     }
 
     // Save scenario
@@ -159,19 +137,13 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error saving scenario:', error);
-      return NextResponse.json(
-        { error: 'Failed to save scenario' },
-        { status: 500 }
-      );
+      return apiError('Failed to save scenario', 500);
     }
 
-    return NextResponse.json({ scenario });
+    return apiSuccess({ scenario });
   } catch (error) {
     console.error('Save scenario error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 
@@ -182,24 +154,19 @@ export async function DELETE(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios-delete', RATE_LIMIT_CONFIGS.default);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult));
   }
 
   try {
     const supabase = createServiceClient();
-    const searchParams = request.nextUrl.searchParams;
-    const id = searchParams.get('id');
-    const email = searchParams.get('email');
+    const params = Object.fromEntries(request.nextUrl.searchParams);
+    const parsed = scenarioDeleteSchema.safeParse(params);
 
-    if (!id || !email) {
-      return NextResponse.json(
-        { error: 'ID and email required' },
-        { status: 400 }
-      );
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
+
+    const { id, email } = parsed.data;
 
     // SECURITY: Verify the scenario belongs to this email before deleting
     const { data: scenario } = await supabase
@@ -209,10 +176,7 @@ export async function DELETE(request: NextRequest) {
       .single();
 
     if (!scenario || scenario.email !== email) {
-      return NextResponse.json(
-        { error: 'Scenario not found' },
-        { status: 404 }
-      );
+      return apiError('Scenario not found', 404);
     }
 
     const { error } = await supabase
@@ -223,18 +187,12 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error deleting scenario:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete scenario' },
-        { status: 500 }
-      );
+      return apiError('Failed to delete scenario', 500);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     console.error('Delete scenario error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

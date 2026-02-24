@@ -18,8 +18,11 @@ import { logoFullColor } from './logo';
 import { renderRiskGauge } from './svg-charts/riskGauge';
 import type { PDFReportData } from './types';
 
+/** Minimum data needed for the executive summary (result, inputs, riskScore). */
+export type ExecutiveSummaryData = Pick<PDFReportData, 'result' | 'inputs' | 'riskScore'>;
+
 /** Builds a single A4 page HTML string for the Executive Summary. */
-export function generateExecutiveSummaryHTML(data: PDFReportData): string {
+export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string {
   const { result, inputs, riskScore } = data;
   const terms = result.terms;
   const indication = result.labels.indication || inputs.indication;
@@ -308,7 +311,7 @@ export function generateExecutiveSummaryHTML(data: PDFReportData): string {
 }
 
 /** Opens a new window and triggers the print dialog for the Executive Summary. */
-export function generateExecutiveSummaryPDF(data: PDFReportData): void {
+export function generateExecutiveSummaryPDF(data: ExecutiveSummaryData): void {
   const html = generateExecutiveSummaryHTML(data);
 
   const printWindow = window.open('', '_blank');

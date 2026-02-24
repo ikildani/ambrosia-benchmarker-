@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { getPlaybookGenerator, PlaybookInput, NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 import { captureApiError } from '@/lib/sentry-api';
+import { createLogger } from '@/lib/logger';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { playbookSchema, formatZodErrors } from '@/lib/api-validation';
 
 export interface PlaybookRequest {
   inputs: {
@@ -29,7 +32,11 @@ export interface PlaybookResponse {
   error?: string;
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<PlaybookResponse>> {
+export async function POST(request: NextRequest): Promise<Response> {
+  const requestId = crypto.randomUUID();
+  const log = createLogger('api:playbook', requestId);
+  const elapsed = log.startTimer();
+
   try {
     // SECURITY: Require Pro tier — this is an expensive AI endpoint
     const supabase = createServiceClient();
@@ -37,6 +44,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
 
     const bodyText = await request.text();
     const body = JSON.parse(bodyText) as PlaybookRequest;
+
+    const parsed = playbookSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
 
     // Auth method 1: Bearer token
     const authHeader = request.headers.get('authorization');
@@ -84,37 +96,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
     }
 
     if (!authorized) {
-      return NextResponse.json(
-        { success: false, error: 'Negotiation playbook requires a Report or Pro subscription.' },
-        { status: 403 }
-      );
-    }
-
-    // Validate required fields
-    if (!body.inputs || !body.results || !body.labels) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields: inputs, results, labels' },
-        { status: 400 }
-      );
-    }
-
-    // Validate inputs structure
-    if (!body.inputs.modality || !body.inputs.phase || !body.inputs.indication || !body.inputs.territory) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid inputs: modality, phase, indication, and territory are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate results structure
-    if (!body.results.terms || !body.results.tieredRoyalties || !body.results.dealRecommendation) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid results: terms, tieredRoyalties, and dealRecommendation are required' },
-        { status: 400 }
-      );
+      return apiError('Negotiation playbook requires a Report or Pro subscription.', 403);
     }
 
     // Generate playbook
+    log.info('Starting playbook generation', { modality: body.inputs?.modality, phase: body.inputs?.phase });
     const generator = getPlaybookGenerator();
     const playbook = await generator.generatePlaybook({
       inputs: body.inputs,
@@ -122,40 +108,27 @@ export async function POST(request: NextRequest): Promise<NextResponse<PlaybookR
       labels: body.labels,
     });
 
-    return NextResponse.json({
-      success: true,
-      playbook,
-    });
+    log.info('Request completed', { durationMs: elapsed() });
+    return apiSuccess({ playbook });
   } catch (error) {
-    captureApiError(error, 'playbook');
+    captureApiError(error, 'playbook', { requestId });
+    log.error('Request failed', { durationMs: elapsed(), error: error instanceof Error ? error.message : String(error) });
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Handle specific error types
     if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
+      return apiError('Invalid JSON in request body', 400);
     }
 
     if (error instanceof Error && error.message.includes('ANTHROPIC_API_KEY')) {
-      return NextResponse.json(
-        { success: false, error: 'AI service configuration error' },
-        { status: 500 }
-      );
+      return apiError('AI service configuration error', 500);
     }
 
     // Include error details for debugging
     if (error instanceof Error && error.message.includes('No JSON found')) {
-      return NextResponse.json(
-        { success: false, error: 'AI response format error. Retrying may help.' },
-        { status: 500 }
-      );
+      return apiError('AI response format error. Retrying may help.', 500);
     }
 
-    return NextResponse.json(
-      { success: false, error: `Generation failed: ${errorMessage.slice(0, 100)}` },
-      { status: 500 }
-    );
+    return apiError(`Generation failed: ${errorMessage.slice(0, 100)}`, 500);
   }
 }

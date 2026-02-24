@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getDealMemoGenerator, DealMemo, DealMemoInput } from '@/lib/ai/deal-memo-generator';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { captureApiError } from '@/lib/sentry-api';
+import { createLogger } from '@/lib/logger';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { dealMemoSchema, formatZodErrors } from '@/lib/api-validation';
 
 export interface DealMemoRequest {
   reportId?: string;
@@ -19,15 +21,17 @@ export interface DealMemoResponse {
   error?: string;
 }
 
-export async function POST(request: Request): Promise<NextResponse<DealMemoResponse>> {
+export async function POST(request: Request): Promise<Response> {
+  const requestId = crypto.randomUUID();
+  const log = createLogger('api:deal-memo', requestId);
+  const elapsed = log.startTimer();
+
   try {
     const body = (await request.json()) as DealMemoRequest;
 
-    if (!body.inputs || !body.results || !body.labels) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields: inputs, results, labels' },
-        { status: 400 }
-      );
+    const parsed = dealMemoSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
 
     const supabase = createServiceClient();
@@ -49,10 +53,7 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
 
         // Return cached memo if already generated
         if (report.memo_content) {
-          return NextResponse.json({
-            success: true,
-            memo: report.memo_content as DealMemo,
-          });
+          return apiSuccess({ memo: report.memo_content as DealMemo });
         }
       }
     }
@@ -79,13 +80,11 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
     // database profile (Check 2 above) to prevent tier escalation via request body.
 
     if (!authorized) {
-      return NextResponse.json(
-        { success: false, error: 'Report purchase or Pro subscription required' },
-        { status: 403 }
-      );
+      return apiError('Report purchase or Pro subscription required', 403);
     }
 
     // Generate memo
+    log.info('Starting memo generation', { reportId: body.reportId, modality: body.inputs?.modality });
     const generator = getDealMemoGenerator();
     const memo = await generator.generateMemo({
       inputs: body.inputs,
@@ -101,35 +100,25 @@ export async function POST(request: Request): Promise<NextResponse<DealMemoRespo
         .eq('id', body.reportId);
     }
 
-    return NextResponse.json({ success: true, memo });
+    log.info('Request completed', { durationMs: elapsed() });
+    return apiSuccess({ memo });
   } catch (error) {
-    captureApiError(error, 'deal-memo');
+    captureApiError(error, 'deal-memo', { requestId });
+    log.error('Request failed', { durationMs: elapsed(), error: error instanceof Error ? error.message : String(error) });
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
+      return apiError('Invalid JSON in request body', 400);
     }
 
     if (error instanceof Error && error.message.includes('ANTHROPIC_API_KEY')) {
-      return NextResponse.json(
-        { success: false, error: 'AI service configuration error' },
-        { status: 500 }
-      );
+      return apiError('AI service configuration error', 500);
     }
 
     if (error instanceof Error && error.message.includes('No JSON found')) {
-      return NextResponse.json(
-        { success: false, error: 'AI response format error. Retrying may help.' },
-        { status: 500 }
-      );
+      return apiError('AI response format error. Retrying may help.', 500);
     }
 
-    return NextResponse.json(
-      { success: false, error: `Generation failed: ${errorMessage.slice(0, 100)}` },
-      { status: 500 }
-    );
+    return apiError(`Generation failed: ${errorMessage.slice(0, 100)}`, 500);
   }
 }

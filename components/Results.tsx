@@ -480,7 +480,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         inputs: fullInputs,
         riskScore: calculateRiskScore(fullInputs),
       };
-      generateExecutiveSummaryPDF(pdfData as any);
+      generateExecutiveSummaryPDF(pdfData);
     });
   }, [fullInputs, result]);
 

@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { promoValidateSchema, formatZodErrors } from '@/lib/api-validation';
 
 export async function POST(request: NextRequest) {
   // Rate limit: 10 requests per minute
@@ -8,23 +10,23 @@ export async function POST(request: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, 'promo_validate', { limit: 10, windowSeconds: 60 });
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { valid: false, error: 'Too many attempts. Please wait a moment.' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many attempts. Please wait a moment.', 429, getRateLimitHeaders(rateLimitResult));
   }
 
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
     if (!stripeSecretKey) {
-      return NextResponse.json({ valid: false, error: 'Payment system not configured' }, { status: 500 });
+      return apiError('Payment system not configured', 500);
     }
 
-    const { code } = await request.json();
-    if (!code || typeof code !== 'string') {
-      return NextResponse.json({ valid: false, error: 'Code is required' }, { status: 400 });
+    const body = await request.json();
+    const parsed = promoValidateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
 
+    const { code } = parsed.data;
     const normalizedCode = code.trim().toUpperCase();
     const stripe = new Stripe(stripeSecretKey);
 
@@ -36,12 +38,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (promoCodes.data.length === 0) {
-      return NextResponse.json({ valid: false, error: 'Invalid or expired promo code' });
+      return apiSuccess({ valid: false, message: 'Invalid or expired promo code' });
     }
 
     const promo = promoCodes.data[0];
     if (!promo.active) {
-      return NextResponse.json({ valid: false, error: 'This promo code is no longer active' });
+      return apiSuccess({ valid: false, message: 'This promo code is no longer active' });
     }
 
     // Get coupon details for discount info
@@ -51,10 +53,10 @@ export async function POST(request: NextRequest) {
       : rawCoupon;
 
     if (!coupon) {
-      return NextResponse.json({ valid: false, error: 'Promo code has no associated discount' });
+      return apiSuccess({ valid: false, message: 'Promo code has no associated discount' });
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       valid: true,
       promoId: promo.id,
       discount: {
@@ -66,6 +68,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Promo validation error:', error);
-    return NextResponse.json({ valid: false, error: 'Failed to validate promo code' }, { status: 500 });
+    return apiError('Failed to validate promo code', 500);
   }
 }

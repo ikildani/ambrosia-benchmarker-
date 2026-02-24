@@ -403,6 +403,23 @@ function safeMultiplier(value: number, fallback: number = 1.0): number {
   return value;
 }
 
+/** Scrub a {low, median, high} range so no NaN/Infinity leaks to the frontend. */
+function sanitizeRange(r: { low: number; median: number; high: number }): { low: number; median: number; high: number } {
+  return {
+    low: Number.isFinite(r.low) ? r.low : 0,
+    median: Number.isFinite(r.median) ? r.median : 0,
+    high: Number.isFinite(r.high) ? r.high : 0,
+  };
+}
+
+/** Scrub a {low, high} range for royalties. */
+function sanitizeRoyaltyRange(r: { low: number; high: number }): { low: number; high: number } {
+  return {
+    low: Number.isFinite(r.low) ? r.low : 0,
+    high: Number.isFinite(r.high) ? r.high : 0,
+  };
+}
+
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const modifiers: { name: string; multiplier: number; context?: string }[] = [];
   const isNeurology = input.therapeuticArea === 'neurology';
@@ -780,14 +797,22 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   return {
     terms: {
-      upfront,
-      devMilestones,
-      regMilestones,
-      commMilestones,
-      totalDealValue
+      upfront: sanitizeRange(upfront),
+      devMilestones: sanitizeRange(devMilestones),
+      regMilestones: sanitizeRange(regMilestones),
+      commMilestones: sanitizeRange(commMilestones),
+      totalDealValue: sanitizeRange(totalDealValue),
     },
-    tieredRoyalties,
-    dealRecommendation,
+    tieredRoyalties: {
+      base: sanitizeRoyaltyRange(tieredRoyalties.base),
+      midTier: sanitizeRoyaltyRange(tieredRoyalties.midTier),
+      highTier: sanitizeRoyaltyRange(tieredRoyalties.highTier),
+    },
+    dealRecommendation: {
+      ...dealRecommendation,
+      upfrontPercent: Number.isFinite(dealRecommendation.upfrontPercent) ? dealRecommendation.upfrontPercent : 15,
+      milestonePercent: Number.isFinite(dealRecommendation.milestonePercent) ? dealRecommendation.milestonePercent : 85,
+    },
     negotiationInsight,
     modifiers,
     labels: {

@@ -1,47 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-
-interface CreateSessionRequest {
-  anonymous_id: string;
-  user_id?: string;
-  device_type?: 'desktop' | 'tablet' | 'mobile';
-  referrer_url?: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-}
-
-interface UpdateSessionRequest {
-  session_id: string;
-  user_id?: string;
-  ended_at?: string;
-  duration_seconds?: number;
-  calculation_count?: number;
-  paywall_hits?: number;
-}
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { sessionCreateSchema, sessionUpdateSchema, formatZodErrors } from '@/lib/api-validation';
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient();
-    const body: CreateSessionRequest = await request.json();
+    const body = await request.json();
 
-    if (!body.anonymous_id) {
-      return NextResponse.json(
-        { error: 'anonymous_id is required' },
-        { status: 400 }
-      );
+    const parsed = sessionCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
+
+    const { anonymous_id, device_type, referrer_url, utm_source, utm_medium, utm_campaign } = parsed.data;
 
     // SECURITY: Never accept user_id from request body — it must come from auth.
     // Sessions start anonymous; user_id is linked later via /api/auth/link-anonymous.
     const sessionData = {
-      anonymous_id: body.anonymous_id,
+      anonymous_id,
       user_id: null,
-      device_type: body.device_type || null,
-      referrer_url: body.referrer_url || null,
-      utm_source: body.utm_source || null,
-      utm_medium: body.utm_medium || null,
-      utm_campaign: body.utm_campaign || null,
+      device_type: device_type || null,
+      referrer_url: referrer_url || null,
+      utm_source: utm_source || null,
+      utm_medium: utm_medium || null,
+      utm_campaign: utm_campaign || null,
     };
 
     const { data, error } = await supabase
@@ -52,86 +35,68 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Session creation error:', error);
-      return NextResponse.json(
-        { error: 'Failed to create session' },
-        { status: 500 }
-      );
+      return apiError('Failed to create session', 500);
     }
 
-    return NextResponse.json({ session_id: data.id });
+    return apiSuccess({ session_id: data.id });
   } catch (error) {
     console.error('Session API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }
 
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = createServiceClient();
-    const body: UpdateSessionRequest = await request.json();
+    const body = await request.json();
 
-    if (!body.session_id) {
-      return NextResponse.json(
-        { error: 'session_id is required' },
-        { status: 400 }
-      );
+    const parsed = sessionUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
+
+    const { session_id, user_id, ended_at, duration_seconds, calculation_count, paywall_hits } = parsed.data;
 
     // SECURITY: Verify session exists and belongs to the anonymous_id or user_id making the request
     const { data: existingSession } = await supabase
       .from('sessions')
       .select('id, anonymous_id, user_id')
-      .eq('id', body.session_id)
+      .eq('id', session_id)
       .single();
 
     if (!existingSession) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+      return apiError('Session not found', 404);
     }
 
     // Only allow updating a session if the caller provides matching anonymous_id or user_id
     // user_id update is only allowed if session has no user_id yet (linking anonymous to user)
     const updateData: Record<string, unknown> = {};
 
-    if (body.user_id !== undefined) {
+    if (user_id !== undefined) {
       // Only allow linking if session has no user or is already linked to this user
-      if (existingSession.user_id && existingSession.user_id !== body.user_id) {
-        return NextResponse.json(
-          { error: 'Session already linked to another user' },
-          { status: 403 }
-        );
+      if (existingSession.user_id && existingSession.user_id !== user_id) {
+        return apiError('Session already linked to another user', 403);
       }
-      updateData.user_id = body.user_id;
+      updateData.user_id = user_id;
     }
-    if (body.ended_at !== undefined) updateData.ended_at = body.ended_at;
-    if (body.duration_seconds !== undefined) updateData.duration_seconds = body.duration_seconds;
-    if (body.calculation_count !== undefined) updateData.calculation_count = body.calculation_count;
-    if (body.paywall_hits !== undefined) updateData.paywall_hits = body.paywall_hits;
+    if (ended_at !== undefined) updateData.ended_at = ended_at;
+    if (duration_seconds !== undefined) updateData.duration_seconds = duration_seconds;
+    if (calculation_count !== undefined) updateData.calculation_count = calculation_count;
+    if (paywall_hits !== undefined) updateData.paywall_hits = paywall_hits;
 
     const { error } = await supabase
       .from('sessions')
       .update(updateData)
-      .eq('id', body.session_id);
+      .eq('id', session_id);
 
     if (error) {
       console.error('Session update error:', error);
-      return NextResponse.json(
-        { error: 'Failed to update session' },
-        { status: 500 }
-      );
+      return apiError('Failed to update session', 500);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     console.error('Session API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

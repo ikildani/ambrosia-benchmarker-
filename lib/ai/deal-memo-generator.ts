@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { ComparableDeal } from '@/lib/comparableDeals';
 import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
+import { CircuitBreaker } from './circuit-breaker';
+import { createLogger } from '@/lib/logger';
 
 // Output types
 export interface DealMemo {
@@ -104,6 +106,25 @@ Respond with ONLY a JSON object (no markdown, no backticks, just the raw JSON):
 
 import { parseJsonResponse } from './parse-json';
 
+// Shared circuit breaker for deal memo API calls
+const circuitBreaker = new CircuitBreaker({
+  name: 'deal-memo',
+  failureThreshold: 3,
+  cooldownMs: 60_000,
+});
+
+/** Exponential backoff with jitter. */
+function backoffDelay(attempt: number, baseMs: number = 1_000): number {
+  const exponential = baseMs * Math.pow(2, attempt);
+  const jitter = Math.random() * baseMs;
+  return exponential + jitter;
+}
+
+function isRetryableError(error: Error): boolean {
+  const msg = error.message.toLowerCase();
+  return msg.includes('timeout') || msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
+}
+
 // Deal Memo Generator class
 export class DealMemoGenerator {
   private client: Anthropic;
@@ -117,6 +138,9 @@ export class DealMemoGenerator {
   }
 
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {
+    const log = createLogger('deal-memo');
+    const elapsed = log.startTimer();
+
     const comparableDeals = await getRelevantDealsWithDB(
       input.inputs.therapeuticArea,
       input.inputs.modality,
@@ -126,38 +150,65 @@ export class DealMemoGenerator {
 
     const prompt = buildMemoPrompt(input, comparableDeals);
     let lastError: Error | null = null;
+    const maxAttempts = 3;
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const message = await this.client.messages.create({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2500,
-          messages: [{ role: 'user', content: prompt }],
-        });
+    return circuitBreaker.execute(async () => {
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          log.info('AI call starting', {
+            model: 'claude-sonnet-4-20250514',
+            attempt: attempt + 1,
+            maxAttempts,
+            circuitState: circuitBreaker.getState(),
+          });
 
-        const textContent = message.content.find((c) => c.type === 'text');
-        if (!textContent || textContent.type !== 'text') {
-          throw new Error('No text content in AI response');
+          const message = await this.client.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2500,
+            messages: [{ role: 'user', content: prompt }],
+          });
+
+          const textContent = message.content.find((c) => c.type === 'text');
+          if (!textContent || textContent.type !== 'text') {
+            throw new Error('No text content in AI response');
+          }
+
+          const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(textContent.text);
+
+          // Validate required fields
+          if (!parsed.executive_summary || !parsed.valuation_rationale || !Array.isArray(parsed.risk_factors)) {
+            throw new Error('AI response missing required fields (executive_summary, valuation_rationale, or risk_factors)');
+          }
+
+          const durationMs = elapsed();
+          log.info('Memo generated', {
+            durationMs,
+            attempt: attempt + 1,
+            tokenUsage: message.usage,
+          });
+
+          return { ...parsed, generatedAt: new Date().toISOString() };
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+          const durationMs = elapsed();
+
+          log.error('AI call failed', {
+            durationMs,
+            attempt: attempt + 1,
+            error: lastError.message,
+            retryable: isRetryableError(lastError),
+          });
+
+          if (!isRetryableError(lastError) || attempt >= maxAttempts - 1) break;
+
+          const delay = backoffDelay(attempt);
+          log.info('Retrying after backoff', { delayMs: Math.round(delay), attempt: attempt + 1 });
+          await new Promise(r => setTimeout(r, delay));
         }
-
-        const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(textContent.text);
-
-        // Validate required fields
-        if (!parsed.executive_summary || !parsed.valuation_rationale || !Array.isArray(parsed.risk_factors)) {
-          throw new Error('AI response missing required fields (executive_summary, valuation_rationale, or risk_factors)');
-        }
-
-        return { ...parsed, generatedAt: new Date().toISOString() };
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-        const msg = lastError.message.toLowerCase();
-        const isRetryable = msg.includes('timeout') || msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
-        if (!isRetryable || attempt > 0) break;
-        await new Promise(r => setTimeout(r, 2_000));
       }
-    }
 
-    throw lastError ?? new Error('Deal memo generation failed');
+      throw lastError ?? new Error('Deal memo generation failed');
+    });
   }
 }
 
@@ -169,4 +220,9 @@ export function getDealMemoGenerator(): DealMemoGenerator {
     generatorInstance = new DealMemoGenerator();
   }
   return generatorInstance;
+}
+
+/** Expose circuit breaker for testing/monitoring. */
+export function getCircuitBreaker(): CircuitBreaker {
+  return circuitBreaker;
 }

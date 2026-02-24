@@ -40,7 +40,7 @@ export async function fetchWithTimeout(
       clearTimeout(timer);
 
       if (TRANSIENT_STATUS_CODES.includes(response.status) && attempt < retries) {
-        const delay = retryDelayMs * Math.pow(2, attempt);
+        const delay = retryDelayMs * Math.pow(2, attempt) + Math.random() * retryDelayMs;
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
@@ -51,7 +51,7 @@ export async function fetchWithTimeout(
       lastError = error instanceof Error ? error : new Error(String(error));
 
       if (attempt < retries) {
-        const delay = retryDelayMs * Math.pow(2, attempt);
+        const delay = retryDelayMs * Math.pow(2, attempt) + Math.random() * retryDelayMs;
         await new Promise(r => setTimeout(r, delay));
         continue;
       }

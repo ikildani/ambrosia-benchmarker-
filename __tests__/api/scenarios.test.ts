@@ -42,7 +42,7 @@ describe('/api/scenarios', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Email required');
+      expect(data.error).toBeDefined();
     });
 
     it('should return 403 for free tier users', async () => {
@@ -115,7 +115,7 @@ describe('/api/scenarios', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('required');
+      expect(data.error).toBeDefined();
     });
 
     it('should return 403 for free tier users', async () => {
@@ -208,7 +208,7 @@ describe('/api/scenarios', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('required');
+      expect(data.error).toBeDefined();
     });
 
     it('should delete scenario with valid params', async () => {
