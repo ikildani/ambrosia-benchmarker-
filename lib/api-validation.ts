@@ -36,7 +36,7 @@ export const calculationRequestSchema = z.object({
 // Report email request
 export const reportEmailSchema = z.object({
   email: z.string().email('Invalid email address'),
-  pdfBase64: z.string().min(1, 'PDF data is required'),
+  pdfBase64: z.string().min(1, 'PDF data is required').max(10_000_000, 'PDF too large (max ~7.5MB)'),
   fileName: z.string()
     .min(1, 'Filename is required')
     .transform(name => name.replace(/[^a-zA-Z0-9._\-() ]/g, '_')), // Sanitize

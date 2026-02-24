@@ -77,8 +77,16 @@ export async function middleware(request: NextRequest) {
           );
         }
       }
-      // If neither Origin nor Referer is present, allow the request —
-      // this can happen with server-to-server calls and fetch() from same origin.
+      // If neither Origin nor Referer is present: block sensitive endpoints,
+      // allow others (same-origin fetch() may omit both headers).
+      const sensitiveRoutes = ['/api/checkout', '/api/billing', '/api/user/delete-data', '/api/user/profile'];
+      const isSensitive = sensitiveRoutes.some(r => request.nextUrl.pathname.startsWith(r));
+      if (isSensitive) {
+        return NextResponse.json(
+          { error: 'Forbidden: origin header required' },
+          { status: 403 }
+        );
+      }
     }
   }
 
@@ -88,7 +96,17 @@ export async function middleware(request: NextRequest) {
     if (rateLimitConfig) {
       const forwarded = request.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-      const identifier = `ip:${ip}`;
+
+      // Prefer user ID from Supabase auth cookie for fairer rate limiting
+      // (avoids shared-IP collisions and rotating-IP bypasses)
+      let identifier = `ip:${ip}`;
+      try {
+        const authCookie = request.cookies.getAll().find(c => c.name.includes('auth-token') && !c.name.includes('.'));
+        if (authCookie?.value) {
+          const payload = JSON.parse(Buffer.from(authCookie.value.split('.')[1], 'base64url').toString());
+          if (payload.sub) identifier = `user:${payload.sub}`;
+        }
+      } catch { /* fall back to IP */ }
 
       try {
         const result = await checkRateLimit(identifier, request.nextUrl.pathname, rateLimitConfig);
@@ -120,7 +138,7 @@ export async function middleware(request: NextRequest) {
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https: http:",
+        "img-src 'self' data: blob: https:",
         "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live",
         "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
         "frame-ancestors 'self'",

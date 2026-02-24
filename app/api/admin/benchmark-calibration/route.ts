@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { timingSafeEqual } from 'crypto';
 import { runBenchmarkCalibration } from '@/lib/ingestion/benchmark-calibration';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 
@@ -8,28 +7,9 @@ export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  // Auth: require ADMIN_API_KEY Bearer token (timing-safe comparison)
-  const authHeader = request.headers.get('authorization');
-  const adminKey = process.env.ADMIN_API_KEY;
-
-  if (!adminKey) {
-    console.error('ADMIN_API_KEY environment variable is not set');
-    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-  }
-
-  const token = authHeader?.replace('Bearer ', '') || '';
-
-  const isValidLength = token.length === adminKey.length;
-  const tokenToCompare = isValidLength ? token : adminKey;
-
-  const isValid = isValidLength && timingSafeEqual(
-    Buffer.from(tokenToCompare),
-    Buffer.from(adminKey)
-  );
-
-  if (!isValid) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Admin auth: timing-safe Bearer token or authenticated admin email
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
 
   try {
     const { searchParams } = new URL(request.url);

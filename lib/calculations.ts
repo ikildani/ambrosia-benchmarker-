@@ -1062,6 +1062,9 @@ export function formatCurrency(value: number | null | undefined): string {
   if (value >= 1000) {
     return `$${(value / 1000).toFixed(1)}B`;
   }
+  if (value < 1 && value > 0) {
+    return `$${(value * 1000).toFixed(0)}K`;
+  }
   return `$${value}M`;
 }
 

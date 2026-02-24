@@ -224,19 +224,31 @@ function computeParameterSensitivity(
     }
 
     // Create modified inputs with only this parameter changed
-    const modifiedInputs = { ...baseInputs, [parameterKey]: opt.value };
-    const modifiedResult = calculateDealTerms(modifiedInputs as CalculationInput);
-    const newTotalValue = modifiedResult.terms.totalDealValue.median;
-    const newUpfront = modifiedResult.terms.upfront.median;
+    try {
+      const modifiedInputs = { ...baseInputs, [parameterKey]: opt.value };
+      const modifiedResult = calculateDealTerms(modifiedInputs as CalculationInput);
+      const newTotalValue = modifiedResult.terms.totalDealValue.median;
+      const newUpfront = modifiedResult.terms.upfront.median;
 
-    return {
-      value: opt.value,
-      label: opt.label,
-      resultingUpfront: newUpfront,
-      resultingTotalValue: newTotalValue,
-      delta: newTotalValue - baseTotalValue,
-      deltaPercent: baseTotalValue > 0 ? ((newTotalValue - baseTotalValue) / baseTotalValue) * 100 : 0,
-    };
+      return {
+        value: opt.value,
+        label: opt.label,
+        resultingUpfront: newUpfront,
+        resultingTotalValue: newTotalValue,
+        delta: newTotalValue - baseTotalValue,
+        deltaPercent: baseTotalValue > 0 ? ((newTotalValue - baseTotalValue) / baseTotalValue) * 100 : 0,
+      };
+    } catch {
+      // If calculation fails for this option, treat as no change
+      return {
+        value: opt.value,
+        label: opt.label,
+        resultingUpfront: baseUpfront,
+        resultingTotalValue: baseTotalValue,
+        delta: 0,
+        deltaPercent: 0,
+      };
+    }
   });
 
   // Calculate impact range

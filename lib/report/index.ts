@@ -103,13 +103,23 @@ export function generateReportHTML(data: PDFReportData): string {
   `;
 }
 
-/** Legacy: opens a new window and triggers print dialog. */
+/** Opens a new window with the report HTML and triggers print dialog. */
 export function generatePDFReport(data: PDFReportData): void {
   const html = generateReportHTML(data);
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    alert('Please allow pop-ups to download the PDF report.');
+    // Fallback: render inline via blob URL (avoids popup blocker)
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    iframe.onload = () => {
+      iframe.contentWindow?.print();
+      setTimeout(() => { document.body.removeChild(iframe); URL.revokeObjectURL(url); }, 1000);
+    };
+    document.body.appendChild(iframe);
     return;
   }
 

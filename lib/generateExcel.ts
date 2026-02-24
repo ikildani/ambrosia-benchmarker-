@@ -115,7 +115,7 @@ function addSectionHeader(ws: ExcelJS.Worksheet, row: number, text: string, cols
 /** Build a visual horizontal bar string using Unicode block characters.
  *  Returns a string of repeated '█' proportional to `value / maxValue`, capped at `maxBlocks`. */
 function buildBarString(value: number, maxValue: number, maxBlocks: number = 25): string {
-  if (maxValue <= 0 || value <= 0) return '';
+  if (maxValue <= 0 || value <= 0) return '\u2014'; // em-dash for zero values
   const blocks = Math.max(1, Math.round((value / maxValue) * maxBlocks));
   return '\u2588'.repeat(blocks);
 }
