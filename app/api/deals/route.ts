@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { clampInt, dealsQuerySchema, formatZodErrors } from '@/lib/api-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,13 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
+
+    // Validate query params with Zod
+    const rawParams = Object.fromEntries(searchParams.entries());
+    const parsed = dealsQuerySchema.safeParse(rawParams);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
 
     // SECURITY: Prefer user_id (UUID, hard to guess) over email (easily spoofable)
     const userId = request.headers.get('x-user-id');
@@ -131,13 +139,8 @@ export async function GET(request: NextRequest) {
       query = query.lte('upfront_usd', parseInt(maxUpfront) * 1000000);
     }
 
-    const yearFromRaw = searchParams.get('year_from');
-    const yearToRaw = searchParams.get('year_to');
-
-    // Validate year inputs to prevent injection (must be 4-digit integers)
-    const yearRegex = /^\d{4}$/;
-    const yearFrom = yearFromRaw && yearRegex.test(yearFromRaw) ? yearFromRaw : null;
-    const yearTo = yearToRaw && yearRegex.test(yearToRaw) ? yearToRaw : null;
+    const yearFrom = parsed.data.year_from || null;
+    const yearTo = parsed.data.year_to || null;
 
     // Apply date filter - include NULL dates OR dates within range
     if (yearFrom && yearTo) {
@@ -166,11 +169,9 @@ export async function GET(request: NextRequest) {
     const limit = Math.max(1, Math.min(parseInt(searchParams.get('limit') || '20') || 20, 50));
     const offset = (page - 1) * limit;
 
-    // Sorting — whitelist allowed columns to prevent injection
-    const ALLOWED_SORT_COLUMNS = ['announced_date', 'upfront_usd', 'total_deal_value_usd', 'licensor_name', 'licensee_name', 'asset_name', 'modality', 'phase_at_signing'];
-    const sortByRaw = searchParams.get('sort_by') || 'announced_date';
-    const sortBy = ALLOWED_SORT_COLUMNS.includes(sortByRaw) ? sortByRaw : 'announced_date';
-    const sortOrder = searchParams.get('sort_order') === 'asc' ? 'asc' : 'desc';
+    // Sorting — Zod validates allowed columns via enum
+    const sortBy = parsed.data.sort_by || 'announced_date';
+    const sortOrder = parsed.data.sort_order || 'desc';
 
     query = query
       .order(sortBy, { ascending: sortOrder === 'asc' })

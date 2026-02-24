@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { eventSchema, formatZodErrors } from '@/lib/api-validation';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
 // Valid event types
 const VALID_EVENT_TYPES = [
@@ -37,36 +39,27 @@ const VALID_EVENT_TYPES = [
 
 type EventType = typeof VALID_EVENT_TYPES[number];
 
-interface EventRequest {
-  event_type: string;
-  event_data: Record<string, unknown>;
-  session_id?: string;
-  anonymous_id?: string;
-  user_id?: string;
-}
-
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'events', RATE_LIMIT_CONFIGS.events);
 
   if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
-    );
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult), 'RATE_LIMITED');
   }
 
   try {
     const supabase = createServiceClient();
-    const body: EventRequest = await request.json();
+    const raw = await request.json();
+    const parsed = eventSchema.safeParse(raw);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+    const body = parsed.data;
 
     // Validate event type
     if (!VALID_EVENT_TYPES.includes(body.event_type as EventType)) {
-      return NextResponse.json(
-        { error: 'Invalid event type' },
-        { status: 400 }
-      );
+      return apiError('Invalid event type', 400);
     }
 
     // SECURITY: Verify user_id via auth header if provided, don't trust body.user_id blindly.
@@ -117,10 +110,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     console.error('Event API error:', error);
     // Fail silently - tracking shouldn't break UX
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   }
 }

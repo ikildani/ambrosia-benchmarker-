@@ -38,6 +38,12 @@ module.exports = async () => {
         testMatch: ['<rootDir>/__tests__/api/**/*.test.ts'],
         setupFilesAfterEnv: ['<rootDir>/jest.setup.api.js'],
       },
+      {
+        ...nextJestConfig,
+        displayName: 'lib',
+        testEnvironment: 'node',
+        testMatch: ['<rootDir>/__tests__/lib/**/*.test.ts'],
+      },
     ],
   };
 };

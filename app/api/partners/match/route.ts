@@ -5,6 +5,7 @@ import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { partnerMatchSchema, formatZodErrors } from '@/lib/api-validation';
 
 // Tier-based match limits
 const MATCH_LIMITS: Record<string, number> = {
@@ -26,25 +27,25 @@ export async function POST(request: NextRequest) {
     const supabase = createServiceClient();
     const body = await request.json();
 
+    const parsed = partnerMatchSchema.safeParse(body);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+
     const {
       calculation_id,
       session_id,
       anonymous_id,
       user_id,
-      user_email, // Email for Pro verification fallback
-      tier: clientTier, // Tier from frontend (localStorage auth)
+      user_email,
+      tier: clientTier,
       modality,
       development_phase,
       indication_category,
       indication_specific,
       territory_scope,
       therapeutic_area,
-    } = body;
-
-    // Validate required fields
-    if (!modality || !development_phase) {
-      return apiError('modality and development_phase are required', 400);
-    }
+    } = parsed.data;
 
     // Determine user tier from verified sources
     let userTier: 'free' | 'pro' | 'report' = 'free';

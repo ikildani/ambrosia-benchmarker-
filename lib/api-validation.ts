@@ -65,3 +65,102 @@ export async function hashEmail(email: string): Promise<string> {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
+
+// --- Zod schemas for API routes ---
+
+// Deals GET query params
+export const dealsQuerySchema = z.object({
+  therapeutic_area: z.string().optional(),
+  modality: z.string().optional(),
+  phase: z.string().optional(),
+  indication: z.string().optional(),
+  deal_type: z.string().optional(),
+  min_upfront: z.string().regex(/^\d+$/, 'min_upfront must be a number').optional(),
+  max_upfront: z.string().regex(/^\d+$/, 'max_upfront must be a number').optional(),
+  year_from: z.string().regex(/^\d{4}$/, 'year_from must be a 4-digit year').optional(),
+  year_to: z.string().regex(/^\d{4}$/, 'year_to must be a 4-digit year').optional(),
+  terms_disclosed: z.enum(['true']).optional(),
+  search: z.string().max(100, 'search must be at most 100 characters').optional(),
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  sort_by: z.enum([
+    'announced_date', 'upfront_usd', 'total_deal_value_usd',
+    'licensor_name', 'licensee_name', 'asset_name', 'modality', 'phase_at_signing',
+  ]).optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
+}).passthrough(); // Allow extra query params (e.g. tracking params)
+
+// Partners match POST body
+export const partnerMatchSchema = z.object({
+  modality: z.string().min(1, 'modality is required'),
+  development_phase: z.string().min(1, 'development_phase is required'),
+  indication_category: z.string().optional().nullable(),
+  indication_specific: z.string().optional().nullable(),
+  territory_scope: z.string().optional().nullable(),
+  therapeutic_area: z.string().optional().nullable(),
+  user_id: z.string().optional().nullable(),
+  user_email: z.string().optional().nullable(),
+  calculation_id: z.string().optional().nullable(),
+  session_id: z.string().optional().nullable(),
+  anonymous_id: z.string().optional().nullable(),
+  tier: z.string().optional(), // accepted but ignored (security)
+}).passthrough();
+
+// Pulse GET query params
+export const pulseQuerySchema = z.object({
+  history: z.enum(['true']).optional(),
+  user_id: z.string().optional().nullable(),
+  week: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'week must be YYYY-MM-DD format').optional(),
+}).passthrough();
+
+// Content GET query params
+export const contentQuerySchema = z.object({
+  status: z.string().optional(),
+  category: z.string().optional(),
+  limit: z.string().optional(),
+  offset: z.string().optional(),
+}).passthrough();
+
+// Content POST body
+export const contentPostSchema = z.object({
+  title: z.string().min(1, 'title is required'),
+  content: z.string().min(1, 'content is required'),
+  slug: z.string().optional(),
+  excerpt: z.string().optional(),
+  meta_description: z.string().optional(),
+  category: z.string().optional(),
+  tags: z.unknown().optional(),
+  modality: z.unknown().optional(),
+  indication: z.unknown().optional(),
+  ai_generated: z.boolean().optional(),
+}).passthrough();
+
+// Events POST body
+export const eventSchema = z.object({
+  event_type: z.string().min(1, 'event_type is required'),
+  event_data: z.record(z.string(), z.unknown()).default({}),
+  session_id: z.string().optional().nullable(),
+  anonymous_id: z.string().optional().nullable(),
+  user_id: z.string().optional().nullable(),
+});
+
+// Checkout POST body
+export const checkoutSchema = z.object({
+  email: z.string().email().optional(),
+  purchaseType: z.enum(['subscription', 'report']).default('subscription'),
+  promoCode: z.string().optional(),
+  calculationData: z.object({
+    inputs: z.record(z.string(), z.unknown()),
+    results: z.record(z.string(), z.unknown()),
+  }).optional(),
+}).refine(
+  (data) => data.purchaseType !== 'report' || data.calculationData,
+  { message: 'calculationData is required for report purchases', path: ['calculationData'] }
+);
+
+/** Format Zod validation errors into a concise string. */
+export function formatZodErrors(error: z.ZodError): string {
+  return error.issues.map(i =>
+    i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message
+  ).join('; ');
+}

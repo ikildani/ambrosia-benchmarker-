@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { pulseQuerySchema, formatZodErrors } from '@/lib/api-validation';
 
 export async function GET(request: NextRequest) {
   const identifier = getIdentifier(request);
@@ -13,11 +14,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const rawParams = Object.fromEntries(new URL(request.url).searchParams.entries());
+    const parsed = pulseQuerySchema.safeParse(rawParams);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+
     const supabase = createServiceClient();
-    const { searchParams } = new URL(request.url);
-    const history = searchParams.get('history') === 'true';
-    const userId = searchParams.get('user_id');
-    const weekParam = searchParams.get('week'); // e.g. "2024-02-05" for deep link from email
+    const history = parsed.data.history === 'true';
+    const userId = parsed.data.user_id || null;
+    const weekParam = parsed.data.week || null;
 
     // Check user tier for gating
     let userTier = 'free';
@@ -68,7 +74,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('snapshot_type', 'weekly');
 
-    if (weekParam && /^\d{4}-\d{2}-\d{2}$/.test(weekParam)) {
+    if (weekParam) {
       snapshotQuery = snapshotQuery.eq('snapshot_date', weekParam);
     } else {
       snapshotQuery = snapshotQuery.order('snapshot_date', { ascending: false }).limit(1);

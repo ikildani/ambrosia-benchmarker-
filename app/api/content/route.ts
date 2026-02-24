@@ -3,7 +3,7 @@ import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { CreateBlogPostRequest, generateSlug } from '@/types/content';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
 import { apiSuccess, apiError } from '@/lib/api-response';
-import { clampInt } from '@/lib/api-validation';
+import { clampInt, contentQuerySchema, contentPostSchema, formatZodErrors } from '@/lib/api-validation';
 
 // Helper to verify admin authentication
 async function verifyAdmin(request: Request): Promise<{ authorized: boolean; error?: NextResponse }> {
@@ -40,8 +40,13 @@ async function verifyAdmin(request: Request): Promise<{ authorized: boolean; err
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const category = searchParams.get('category');
+    const rawParams = Object.fromEntries(searchParams.entries());
+    const parsed = contentQuerySchema.safeParse(rawParams);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+    const status = parsed.data.status;
+    const category = parsed.data.category;
     const limit = clampInt(searchParams.get('limit'), 1, 100, 50);
     const offset = clampInt(searchParams.get('offset'), 0, 100000, 0);
 
@@ -84,11 +89,12 @@ export async function POST(request: Request) {
       return authResult.error;
     }
 
-    const body = (await request.json()) as CreateBlogPostRequest;
-
-    if (!body.title || !body.content) {
-      return apiError('title and content are required', 400);
+    const rawBody = await request.json();
+    const bodyResult = contentPostSchema.safeParse(rawBody);
+    if (!bodyResult.success) {
+      return apiError(formatZodErrors(bodyResult.error), 400);
     }
+    const body = bodyResult.data;
 
     const slug = body.slug || generateSlug(body.title);
     const supabase = createServiceClient();

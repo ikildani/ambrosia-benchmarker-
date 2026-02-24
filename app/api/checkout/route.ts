@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
+import { checkoutSchema, formatZodErrors } from '@/lib/api-validation';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 // Stripe Checkout Session API
 // Supports two purchase types:
@@ -23,41 +25,33 @@ export async function POST(request: NextRequest) {
 
     const stripe = new Stripe(stripeSecretKey);
 
-    let body: Record<string, unknown> = {};
+    let rawBody: Record<string, unknown> = {};
     try {
-      body = await request.json();
+      rawBody = await request.json();
     } catch {
       // No body provided
     }
+    const parsed = checkoutSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
+    }
+    const body = parsed.data;
 
     // SECURITY: Derive userId from auth session, not from request body
     const authUser = await getAuthenticatedUser(request);
     const userId = authUser?.id || null;
-    const customerEmail = (body.email as string | undefined) || authUser?.email || undefined;
-    const promoCode = body.promoCode as string | undefined;
-    const purchaseType = (body.purchaseType as string) || 'subscription';
+    const customerEmail = body.email || authUser?.email || undefined;
+    const promoCode = body.promoCode;
+    const purchaseType = body.purchaseType;
 
     // --- ONE-TIME DEAL REPORT ($149) ---
     if (purchaseType === 'report') {
       const reportPriceId = process.env.STRIPE_REPORT_PRICE_ID?.trim();
       if (!reportPriceId) {
-        return NextResponse.json(
-          { error: 'Report pricing not configured' },
-          { status: 500 }
-        );
+        return apiError('Report pricing not configured', 500);
       }
 
-      const calculationData = body.calculationData as {
-        inputs: Record<string, unknown>;
-        results: Record<string, unknown>;
-      } | undefined;
-
-      if (!calculationData?.inputs || !calculationData?.results) {
-        return NextResponse.json(
-          { error: 'Calculation data required for report purchase' },
-          { status: 400 }
-        );
-      }
+      const calculationData = body.calculationData!; // Zod refine guarantees this exists for report
 
       // Create report_purchase record
       const supabase = createServiceClient();
@@ -75,10 +69,7 @@ export async function POST(request: NextRequest) {
 
       if (insertError || !reportPurchase) {
         console.error('Failed to create report purchase:', insertError);
-        return NextResponse.json(
-          { error: 'Failed to initiate report purchase' },
-          { status: 500 }
-        );
+        return apiError('Failed to initiate report purchase', 500);
       }
 
       const session = await stripe.checkout.sessions.create({
@@ -95,7 +86,7 @@ export async function POST(request: NextRequest) {
         ...(customerEmail ? { customer_email: customerEmail } : {}),
       });
 
-      return NextResponse.json({ url: session.url, reportId: reportPurchase.id });
+      return apiSuccess({ url: session.url, reportId: reportPurchase.id });
     }
 
     // --- SUBSCRIPTION ($99/month Pro) ---
@@ -140,10 +131,7 @@ export async function POST(request: NextRequest) {
           limit: 1,
         });
         if (promoCodes.data.length === 0) {
-          return NextResponse.json(
-            { error: 'Invalid or expired promo code. Please try again without the code.' },
-            { status: 400 }
-          );
+          return apiError('Invalid or expired promo code. Please try again without the code.', 400);
         }
         promoId = promoCodes.data[0].id;
       }
@@ -157,15 +145,12 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
-    return NextResponse.json({ url: session.url });
+    return apiSuccess({ url: session.url });
   } catch (error: unknown) {
     console.error('Checkout error:', error);
     if (error instanceof Stripe.errors.StripeError) {
       console.error('Stripe error type:', error.type, 'message:', error.message);
     }
-    return NextResponse.json(
-      { error: 'Failed to create checkout session. Please try again.' },
-      { status: 500 }
-    );
+    return apiError('Failed to create checkout session. Please try again.', 500);
   }
 }
