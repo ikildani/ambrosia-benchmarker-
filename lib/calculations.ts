@@ -4,7 +4,7 @@ import { getBenchmarksSync } from '@/lib/benchmarks';
 const benchmarks = getBenchmarksSync();
 
 // Therapeutic area type
-export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic';
+export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth';
 
 // Phase types
 export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
@@ -24,7 +24,15 @@ export type Modality =
   // Metabolic-specific modalities
   | 'glp1Agonist' | 'dualIncretin' | 'tripleIncretin'
   | 'sglt2Inhibitor' | 'amylinAnalog' | 'oralPeptide'
-  | 'antiActivin' | 'microbiomeBased';
+  | 'antiActivin' | 'microbiomeBased'
+  // Cardiovascular-specific modalities
+  | 'myosinInhibitor' | 'anticoagulantNovel' | 'rnaCardio' | 'pcsk9Targeting'
+  // Infectious Disease-specific modalities
+  | 'antiviral' | 'antibioticNovel' | 'vaccinePreventive' | 'phageTherapy'
+  // Ophthalmology-specific modalities
+  | 'antiVegf' | 'geneTherapyOcular' | 'intravitreal' | 'topicalOphthalmic'
+  // Women's Health-specific modalities
+  | 'gnrhAntagonist' | 'hormoneTherapy' | 'neuroactiveSteroid';
 
 // Indication types
 export type SolidTumorIndication =
@@ -32,12 +40,18 @@ export type SolidTumorIndication =
   | 'colorectal' | 'pancreatic' | 'melanoma' | 'prostate' | 'ovarian'
   | 'gastric' | 'liver' | 'renal' | 'gbm' | 'bladder' | 'headNeck'
   | 'cholangiocarcinoma' | 'mesothelioma' | 'sarcoma'
-  | 'endometrial' | 'cervical' | 'thyroid' | 'esophageal' | 'smallBowel';
+  | 'endometrial' | 'cervical' | 'thyroid' | 'esophageal' | 'smallBowel'
+  | 'neuroendocrine' | 'uvealMelanoma' | 'testicular' | 'adrenocortical'
+  | 'nasopharyngeal' | 'thymoma' | 'penile' | 'merkelCell'
+  | 'neuroblastoma' | 'retinoblastoma' | 'osteosarcoma'
+  | 'ewingSarcoma' | 'rhabdomyosarcoma' | 'vulvar';
 
 export type HematologicIndication =
   | 'aml' | 'all' | 'cll' | 'myeloma' | 'dlbcl' | 'follicular'
   | 'mantleCell' | 'mds' | 'mpn' | 'tCellLymphoma'
-  | 'cml' | 'waldenstrom' | 'hodgkins';
+  | 'cml' | 'waldenstrom' | 'hodgkins'
+  | 'marginalZone' | 'burkitt' | 'primaryCNSLymphoma' | 'systemicMastocytosis' | 'cmml'
+  | 'hairyCell' | 'amyloidosisAL' | 'castlemanDisease' | 'aplasticAnemia' | 'bpdcn';
 
 export type NeurologyIndication =
   | 'alzheimers' | 'parkinsons' | 'schizophrenia' | 'depression'
@@ -46,7 +60,13 @@ export type NeurologyIndication =
   | 'rareNeuro'
   | 'bipolar' | 'ptsd' | 'ocd'
   | 'autism' | 'rett' | 'friedreichs' | 'dmd'
-  | 'chronicPain';
+  | 'chronicPain'
+  | 'sma' | 'angelman' | 'dravet' | 'myotonicDystrophy'
+  | 'peripheralNeuropathy' | 'spinalCordInjury' | 'tuberousSclerosis' | 'cmt'
+  | 'frontotemporal' | 'lewyBody' | 'adhd' | 'fragileX'
+  | 'cdkl5' | 'neurofibromatosis' | 'clusterHeadache' | 'restlessLeg'
+  | 'insomnia' | 'stiffPerson' | 'lgmd' | 'fshd'
+  | 'praderWilli' | 'batten' | 'gbs' | 'ataxiaTelangiectasia';
 
 export type ImmunologyIndication =
   | 'rheumatoidArthritis' | 'sle_lupus' | 'lupusNephritis'
@@ -61,7 +81,14 @@ export type ImmunologyIndication =
   | 'celiac' | 'vitiligo' | 'pemphigus' | 'itp'
   | 'asthma' | 'eosinophilicEsophagitis'
   | 'gvhd' | 'organTransplant'
-  | 'thyroidEye' | 'pbc';
+  | 'thyroidEye' | 'pbc'
+  | 'ankylosingSpondylitis' | 'giantCellArteritis' | 'sarcoidosis'
+  | 'autoImmuneHepatitis' | 'psc' | 'membranousNephropathy'
+  | 'fsgs' | 'uveitis' | 'behcets' | 'polymyalgiaRheumatica'
+  | 'chronicUrticaria' | 'heredAngioedema' | 'epidermolysis'
+  | 'foodAllergy' | 'ipf' | 'dermatomyositis' | 'antiphospholipid'
+  | 'egpa' | 'systemicJIA' | 'primaryImmunodeficiency'
+  | 'coldAgglutinin' | 'ttpAutoimmune' | 'nephroticSyndrome' | 'copd';
 
 export type MetabolicIndication =
   | 'obesity' | 'type2Diabetes' | 'nashMash'
@@ -70,9 +97,38 @@ export type MetabolicIndication =
   | 'rareMetabolic'
   | 'type1Diabetes' | 'ckdMetabolic'
   | 'hfpef' | 'familialHypercholesterolemia'
-  | 'gout' | 'wilsonDisease' | 'fabry' | 'gaucher';
+  | 'gout' | 'wilsonDisease' | 'fabry' | 'gaucher'
+  | 'pompe' | 'mpsDisorders' | 'aatDeficiency' | 'hyperoxaluria'
+  | 'ureaCycleDisorders' | 'asmd' | 'cystinosis' | 'galactosemia'
+  | 'attrAmyloidosis' | 'sickleCell' | 'betaThalassemia'
+  | 'hemophiliaA' | 'hemophiliaB' | 'cysticFibrosis'
+  | 'acromegaly' | 'cushings' | 'congenitalAdrenalHyperplasia'
+  | 'hypophosphatasia' | 'porphyria' | 'krabbe'
+  | 'hemochromatosis' | 'mitochondrialDisease' | 'congenitalHyperinsulinism';
 
-export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication;
+export type CardiovascularIndication =
+  | 'heartFailureHfref' | 'atrialFibrillation' | 'pulmonaryArterialHypertension'
+  | 'coronaryArteryDisease' | 'peripheralArteryDisease' | 'aorticStenosis'
+  | 'venousThromboembolism' | 'resistantHypertension' | 'dyslipidemia'
+  | 'cardiomyopathy' | 'myocarditis' | 'cardiacArrhythmia' | 'atherosclerosis';
+
+export type InfectiousDiseaseIndication =
+  | 'hivAids' | 'hepatitisB' | 'rsv' | 'influenza' | 'tuberculosis'
+  | 'fungalInfections' | 'amrBacterial' | 'covid' | 'hepatitisD'
+  | 'cmvInfection' | 'clostridioides' | 'dengueMalaria';
+
+export type OphthalmologyIndication =
+  | 'wetAmd' | 'dryAmdGA' | 'diabeticRetinopathy' | 'diabeticMacularEdema'
+  | 'glaucoma' | 'dryEyeDisease' | 'retinitisPigmentosa' | 'uveiticMacular'
+  | 'retinalVeinOcclusion' | 'stargardt' | 'myopiaProgression';
+
+export type WomensHealthIndication =
+  | 'endometriosis' | 'uterineFibroids' | 'pcos' | 'menopause'
+  | 'postpartumDepression' | 'preeclampsia' | 'prematureLabor'
+  | 'fertilityArt' | 'vulvodynia' | 'cervicalDysplasia'
+  | 'contraceptionNovel' | 'breastCancerPrevention';
+
+export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication | CardiovascularIndication | InfectiousDiseaseIndication | OphthalmologyIndication | WomensHealthIndication;
 
 // Territory types (9 options)
 export type Territory =
@@ -104,6 +160,26 @@ export type WeightLossEfficacy = 'superiorEfficacy' | 'competitiveEfficacy' | 'm
 export type RouteOfAdministration = 'oral' | 'injectable' | 'implantable';
 export type ComorbidityBreadth = 'cardiometabolicBenefit' | 'obesityPrimary' | 'organProtective';
 export type MetabolicTreatmentApproach = 'chronicWeightMgmt' | 'glycemicControl' | 'organProtective' | 'metabolicReset';
+
+// Cardiovascular-specific types
+export type CVOutcomeBenefit = 'mortalityReduction' | 'hospitalizationReduction' | 'symptomImprovement';
+export type CVTrialEndpoint = 'maceEndpoint' | 'surrogateBiomarker' | 'functionalEndpoint';
+export type CVPopulationRisk = 'highRisk' | 'moderateRisk' | 'primaryPrevention';
+
+// Infectious Disease-specific types
+export type ResistanceProfile = 'novelTarget' | 'existingClassImproved' | 'broadSpectrum';
+export type InfectionChronicity = 'acute' | 'chronic' | 'latent';
+export type PublicHealthPriority = 'whoUrgent' | 'whoCritical' | 'standard';
+
+// Ophthalmology-specific types
+export type OcularDelivery = 'intravitreal' | 'topical' | 'oral' | 'implant';
+export type TreatmentDurability = 'oneTime' | 'extendedDuration' | 'chronicInjection';
+export type VisionImpact = 'visionThreatening' | 'visionImpairing' | 'symptomRelief';
+
+// Women's Health-specific types
+export type WHTargetPopulation = 'reproductiveAge' | 'perimenopause' | 'postmenopause' | 'pregnancy';
+export type WHUnmetNeed = 'noApprovedTherapy' | 'inadequateOptions' | 'wellServed';
+export type WHRegulatory = 'acceleratedPathway' | 'standardPathway' | 'pregnancyComplexity';
 
 export interface RegulatoryDesignations {
   breakthrough: boolean;
@@ -161,6 +237,22 @@ export interface CalculationInput {
   routeOfAdministration?: RouteOfAdministration;
   comorbidityBreadth?: ComorbidityBreadth;
   metabolicTreatmentApproach?: MetabolicTreatmentApproach;
+  // Cardiovascular-specific optional fields
+  cvOutcomeBenefit?: CVOutcomeBenefit;
+  cvTrialEndpoint?: CVTrialEndpoint;
+  cvPopulationRisk?: CVPopulationRisk;
+  // Infectious Disease-specific optional fields
+  resistanceProfile?: ResistanceProfile;
+  infectionChronicity?: InfectionChronicity;
+  publicHealthPriority?: PublicHealthPriority;
+  // Ophthalmology-specific optional fields
+  ocularDelivery?: OcularDelivery;
+  treatmentDurability?: TreatmentDurability;
+  visionImpact?: VisionImpact;
+  // Women's Health-specific optional fields
+  whTargetPopulation?: WHTargetPopulation;
+  whUnmetNeed?: WHUnmetNeed;
+  whRegulatory?: WHRegulatory;
 }
 
 // Drill-down data for expanded metric views
@@ -209,13 +301,17 @@ export interface CalculationResult {
 }
 
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' {
+function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' {
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
     'gastric', 'liver', 'renal', 'gbm', 'bladder', 'headNeck',
     'cholangiocarcinoma', 'mesothelioma', 'sarcoma',
-    'endometrial', 'cervical', 'thyroid', 'esophageal', 'smallBowel'
+    'endometrial', 'cervical', 'thyroid', 'esophageal', 'smallBowel',
+    'neuroendocrine', 'uvealMelanoma', 'testicular', 'adrenocortical',
+    'nasopharyngeal', 'thymoma', 'penile', 'merkelCell',
+    'neuroblastoma', 'retinoblastoma', 'osteosarcoma',
+    'ewingSarcoma', 'rhabdomyosarcoma', 'vulvar'
   ];
   const neurologyIndications: NeurologyIndication[] = [
     'alzheimers', 'parkinsons', 'schizophrenia', 'depression',
@@ -224,7 +320,13 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'rareNeuro',
     'bipolar', 'ptsd', 'ocd',
     'autism', 'rett', 'friedreichs', 'dmd',
-    'chronicPain'
+    'chronicPain',
+    'sma', 'angelman', 'dravet', 'myotonicDystrophy',
+    'peripheralNeuropathy', 'spinalCordInjury', 'tuberousSclerosis', 'cmt',
+    'frontotemporal', 'lewyBody', 'adhd', 'fragileX',
+    'cdkl5', 'neurofibromatosis', 'clusterHeadache', 'restlessLeg',
+    'insomnia', 'stiffPerson', 'lgmd', 'fshd',
+    'praderWilli', 'batten', 'gbs', 'ataxiaTelangiectasia'
   ];
   const immunologyIndications: ImmunologyIndication[] = [
     'rheumatoidArthritis', 'sle_lupus', 'lupusNephritis',
@@ -239,7 +341,14 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'celiac', 'vitiligo', 'pemphigus', 'itp',
     'asthma', 'eosinophilicEsophagitis',
     'gvhd', 'organTransplant',
-    'thyroidEye', 'pbc'
+    'thyroidEye', 'pbc',
+    'ankylosingSpondylitis', 'giantCellArteritis', 'sarcoidosis',
+    'autoImmuneHepatitis', 'psc', 'membranousNephropathy',
+    'fsgs', 'uveitis', 'behcets', 'polymyalgiaRheumatica',
+    'chronicUrticaria', 'heredAngioedema', 'epidermolysis',
+    'foodAllergy', 'ipf', 'dermatomyositis', 'antiphospholipid',
+    'egpa', 'systemicJIA', 'primaryImmunodeficiency',
+    'coldAgglutinin', 'ttpAutoimmune', 'nephroticSyndrome', 'copd'
   ];
   const metabolicIndications: MetabolicIndication[] = [
     'obesity', 'type2Diabetes', 'nashMash',
@@ -248,12 +357,45 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'rareMetabolic',
     'type1Diabetes', 'ckdMetabolic',
     'hfpef', 'familialHypercholesterolemia',
-    'gout', 'wilsonDisease', 'fabry', 'gaucher'
+    'gout', 'wilsonDisease', 'fabry', 'gaucher',
+    'pompe', 'mpsDisorders', 'aatDeficiency', 'hyperoxaluria',
+    'ureaCycleDisorders', 'asmd', 'cystinosis', 'galactosemia',
+    'attrAmyloidosis', 'sickleCell', 'betaThalassemia',
+    'hemophiliaA', 'hemophiliaB', 'cysticFibrosis',
+    'acromegaly', 'cushings', 'congenitalAdrenalHyperplasia',
+    'hypophosphatasia', 'porphyria', 'krabbe',
+    'hemochromatosis', 'mitochondrialDisease', 'congenitalHyperinsulinism'
+  ];
+  const cardiovascularIndications: CardiovascularIndication[] = [
+    'heartFailureHfref', 'atrialFibrillation', 'pulmonaryArterialHypertension',
+    'coronaryArteryDisease', 'peripheralArteryDisease', 'aorticStenosis',
+    'venousThromboembolism', 'resistantHypertension', 'dyslipidemia',
+    'cardiomyopathy', 'myocarditis', 'cardiacArrhythmia', 'atherosclerosis'
+  ];
+  const infectiousDiseaseIndications: InfectiousDiseaseIndication[] = [
+    'hivAids', 'hepatitisB', 'rsv', 'influenza', 'tuberculosis',
+    'fungalInfections', 'amrBacterial', 'covid', 'hepatitisD',
+    'cmvInfection', 'clostridioides', 'dengueMalaria'
+  ];
+  const ophthalmologyIndications: OphthalmologyIndication[] = [
+    'wetAmd', 'dryAmdGA', 'diabeticRetinopathy', 'diabeticMacularEdema',
+    'glaucoma', 'dryEyeDisease', 'retinitisPigmentosa', 'uveiticMacular',
+    'retinalVeinOcclusion', 'stargardt', 'myopiaProgression'
+  ];
+  const womensHealthIndications: WomensHealthIndication[] = [
+    'endometriosis', 'uterineFibroids', 'pcos', 'menopause',
+    'postpartumDepression', 'preeclampsia', 'prematureLabor',
+    'fertilityArt', 'vulvodynia', 'cervicalDysplasia',
+    'contraceptionNovel', 'breastCancerPrevention'
   ];
   if (solidTumors.includes(indication as SolidTumorIndication)) return 'solidTumor';
   if (neurologyIndications.includes(indication as NeurologyIndication)) return 'neurology';
   if (immunologyIndications.includes(indication as ImmunologyIndication)) return 'immunology';
   if (metabolicIndications.includes(indication as MetabolicIndication)) return 'metabolic';
+  if (cardiovascularIndications.includes(indication as CardiovascularIndication)) return 'cardiovascular';
+  if (infectiousDiseaseIndications.includes(indication as InfectiousDiseaseIndication)) return 'infectiousDisease';
+  if (ophthalmologyIndications.includes(indication as OphthalmologyIndication)) return 'ophthalmology';
+  if (womensHealthIndications.includes(indication as WomensHealthIndication)) return 'womensHealth';
   return 'hematologic';
 }
 
@@ -425,22 +567,33 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const isNeurology = input.therapeuticArea === 'neurology';
   const isImmunology = input.therapeuticArea === 'immunology';
   const isMetabolic = input.therapeuticArea === 'metabolic';
+  const isCardiovascular = input.therapeuticArea === 'cardiovascular';
+  const isInfectiousDisease = input.therapeuticArea === 'infectiousDisease';
+  const isOphthalmology = input.therapeuticArea === 'ophthalmology';
+  const isWomensHealth = input.therapeuticArea === 'womensHealth';
 
-  // Get phase baselines (metabolic vs immunology vs neurology vs oncology)
-  const phaseBaseline = isMetabolic
-    ? benchmarks.metabolicPhaseBaselines[input.phase]
-    : isImmunology
-    ? benchmarks.immunologyPhaseBaselines[input.phase]
-    : isNeurology
-    ? benchmarks.neurologyPhaseBaselines[input.phase]
-    : benchmarks.phaseBaselines[input.phase];
-  const phaseConfig = isMetabolic
-    ? benchmarks.metabolicPhaseConfig
-    : isImmunology
-    ? benchmarks.immunologyPhaseConfig
-    : isNeurology
-    ? benchmarks.neurologyPhaseConfig
-    : benchmarks.phaseConfig;
+  // Get phase baselines per therapeutic area
+  const phaseBaselineMap: Record<string, any> = {
+    metabolic: benchmarks.metabolicPhaseBaselines,
+    immunology: benchmarks.immunologyPhaseBaselines,
+    neurology: benchmarks.neurologyPhaseBaselines,
+    cardiovascular: benchmarks.cardiovascularPhaseBaselines,
+    infectiousDisease: benchmarks.infectiousDiseasePhaseBaselines,
+    ophthalmology: benchmarks.ophthalmologyPhaseBaselines,
+    womensHealth: benchmarks.womensHealthPhaseBaselines,
+  };
+  const phaseBaseline = (phaseBaselineMap[input.therapeuticArea] || benchmarks.phaseBaselines)[input.phase];
+
+  const phaseConfigMap: Record<string, any> = {
+    metabolic: benchmarks.metabolicPhaseConfig,
+    immunology: benchmarks.immunologyPhaseConfig,
+    neurology: benchmarks.neurologyPhaseConfig,
+    cardiovascular: benchmarks.cardiovascularPhaseConfig,
+    infectiousDisease: benchmarks.infectiousDiseasePhaseConfig,
+    ophthalmology: benchmarks.ophthalmologyPhaseConfig,
+    womensHealth: benchmarks.womensHealthPhaseConfig,
+  };
+  const phaseConfig = phaseConfigMap[input.therapeuticArea] || benchmarks.phaseConfig;
 
   // Get multipliers from benchmarks
   const modalityData = benchmarks.modalities[input.modality];
@@ -489,6 +642,38 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     lotMultiplier = taData?.multiplier ?? 1.0;
     if (lotMultiplier !== 1.0) {
       modifiers.push({ name: taData?.label ?? input.treatmentApproach, multiplier: lotMultiplier, context: taData?.context });
+    }
+  } else if (isCardiovascular) {
+    const mc = benchmarks.multiplierConfig;
+    const cvKey = input.cvOutcomeBenefit || 'hospitalizationReduction';
+    const cvData = mc.cvOutcomeBenefit?.[cvKey];
+    lotMultiplier = cvData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: cvData?.label ?? cvKey, multiplier: lotMultiplier, context: cvData?.context });
+    }
+  } else if (isInfectiousDisease) {
+    const mc = benchmarks.multiplierConfig;
+    const icKey = input.infectionChronicity || 'chronic';
+    const icData = mc.infectionChronicity?.[icKey];
+    lotMultiplier = icData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: icData?.label ?? icKey, multiplier: lotMultiplier, context: icData?.context });
+    }
+  } else if (isOphthalmology) {
+    const mc = benchmarks.multiplierConfig;
+    const viKey = input.visionImpact || 'visionImpairing';
+    const viData = mc.visionImpact?.[viKey];
+    lotMultiplier = viData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: viData?.label ?? viKey, multiplier: lotMultiplier, context: viData?.context });
+    }
+  } else if (isWomensHealth) {
+    const mc = benchmarks.multiplierConfig;
+    const whKey = input.whUnmetNeed || 'inadequateOptions';
+    const whData = mc.whUnmetNeed?.[whKey];
+    lotMultiplier = whData?.multiplier ?? 1.0;
+    if (lotMultiplier !== 1.0) {
+      modifiers.push({ name: whData?.label ?? whKey, multiplier: lotMultiplier, context: whData?.context });
     }
   } else {
     const lotData = benchmarks.multiplierConfig.lineOfTherapy[input.lineOfTherapy];
@@ -650,14 +835,90 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     }
   }
 
+  // Get cardiovascular-specific multipliers
+  let cvEndpointMultiplier = 1.0;
+  let cvPopRiskMultiplier = 1.0;
+  if (isCardiovascular) {
+    const mc = benchmarks.multiplierConfig;
+    const teKey = input.cvTrialEndpoint || 'surrogateBiomarker';
+    const teData = mc.cvTrialEndpoint?.[teKey];
+    cvEndpointMultiplier = teData?.multiplier ?? 1.0;
+    if (cvEndpointMultiplier !== 1.0) {
+      modifiers.push({ name: teData?.label ?? teKey, multiplier: cvEndpointMultiplier, context: teData?.context });
+    }
+    const prKey = input.cvPopulationRisk || 'moderateRisk';
+    const prData = mc.cvPopulationRisk?.[prKey];
+    cvPopRiskMultiplier = prData?.multiplier ?? 1.0;
+    if (cvPopRiskMultiplier !== 1.0) {
+      modifiers.push({ name: prData?.label ?? prKey, multiplier: cvPopRiskMultiplier, context: prData?.context });
+    }
+  }
+
+  // Get infectious disease-specific multipliers
+  let resistanceMultiplier = 1.0;
+  let pubHealthMultiplier = 1.0;
+  if (isInfectiousDisease) {
+    const mc = benchmarks.multiplierConfig;
+    const rpKey = input.resistanceProfile || 'existingClassImproved';
+    const rpData = mc.resistanceProfile?.[rpKey];
+    resistanceMultiplier = rpData?.multiplier ?? 1.0;
+    if (resistanceMultiplier !== 1.0) {
+      modifiers.push({ name: rpData?.label ?? rpKey, multiplier: resistanceMultiplier, context: rpData?.context });
+    }
+    const phKey = input.publicHealthPriority || 'standard';
+    const phData = mc.publicHealthPriority?.[phKey];
+    pubHealthMultiplier = phData?.multiplier ?? 1.0;
+    if (pubHealthMultiplier !== 1.0) {
+      modifiers.push({ name: phData?.label ?? phKey, multiplier: pubHealthMultiplier, context: phData?.context });
+    }
+  }
+
+  // Get ophthalmology-specific multipliers
+  let ocularDeliveryMultiplier = 1.0;
+  let durabilityMultiplier = 1.0;
+  if (isOphthalmology) {
+    const mc = benchmarks.multiplierConfig;
+    const odKey = input.ocularDelivery || 'intravitreal';
+    const odData = mc.ocularDelivery?.[odKey];
+    ocularDeliveryMultiplier = odData?.multiplier ?? 1.0;
+    if (ocularDeliveryMultiplier !== 1.0) {
+      modifiers.push({ name: odData?.label ?? odKey, multiplier: ocularDeliveryMultiplier, context: odData?.context });
+    }
+    const tdKey = input.treatmentDurability || 'chronicInjection';
+    const tdData = mc.treatmentDurability?.[tdKey];
+    durabilityMultiplier = tdData?.multiplier ?? 1.0;
+    if (durabilityMultiplier !== 1.0) {
+      modifiers.push({ name: tdData?.label ?? tdKey, multiplier: durabilityMultiplier, context: tdData?.context });
+    }
+  }
+
+  // Get women's health-specific multipliers
+  let whPopMultiplier = 1.0;
+  let whRegMultiplier = 1.0;
+  if (isWomensHealth) {
+    const mc = benchmarks.multiplierConfig;
+    const tpKey = input.whTargetPopulation || 'reproductiveAge';
+    const tpData = mc.whTargetPopulation?.[tpKey];
+    whPopMultiplier = tpData?.multiplier ?? 1.0;
+    if (whPopMultiplier !== 1.0) {
+      modifiers.push({ name: tpData?.label ?? tpKey, multiplier: whPopMultiplier, context: tpData?.context });
+    }
+    const wrKey = input.whRegulatory || 'standardPathway';
+    const wrData = mc.whRegulatory?.[wrKey];
+    whRegMultiplier = wrData?.multiplier ?? 1.0;
+    if (whRegMultiplier !== 1.0) {
+      modifiers.push({ name: wrData?.label ?? wrKey, multiplier: whRegMultiplier, context: wrData?.context });
+    }
+  }
+
   // Apply diminishing multiplier stacking with therapeutic-area-specific exponents
   // Neurology: combo dampening reduced (CNS drugs are inherently combination-limited by BBB)
   // Neurology: indication exponent higher (indication choice matters more in neuro)
   // Immunology: combo therapies very relevant; indication and disease severity matter highly
   // Metabolic: route of admin and weight loss efficacy are the strongest differentiators
-  const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : isMetabolic ? 0.85 : 0.75;
-  const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : 0.80;
-  const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : 0.85;
+  const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : isMetabolic ? 0.85 : isCardiovascular ? 0.80 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.85 : isWomensHealth ? 0.80 : 0.75;
+  const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.90 : isWomensHealth ? 0.85 : 0.80;
+  const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.80 : isOphthalmology ? 0.85 : isWomensHealth ? 0.85 : 0.85;
 
   const effectiveMultiplier =
     safeMultiplier(Math.pow(modalityMultiplier, 1.0)) *
@@ -678,6 +939,14 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     safeMultiplier(Math.pow(weightLossMultiplier, 0.85)) *
     safeMultiplier(Math.pow(routeMultiplier, 0.75)) *
     safeMultiplier(Math.pow(comorbidityMultiplier, 0.70)) *
+    safeMultiplier(Math.pow(cvEndpointMultiplier, 0.80)) *
+    safeMultiplier(Math.pow(cvPopRiskMultiplier, 0.75)) *
+    safeMultiplier(Math.pow(resistanceMultiplier, 0.85)) *
+    safeMultiplier(Math.pow(pubHealthMultiplier, 0.70)) *
+    safeMultiplier(Math.pow(ocularDeliveryMultiplier, 0.80)) *
+    safeMultiplier(Math.pow(durabilityMultiplier, 0.85)) *
+    safeMultiplier(Math.pow(whPopMultiplier, 0.75)) *
+    safeMultiplier(Math.pow(whRegMultiplier, 0.70)) *
     safeMultiplier(1 + regulatoryBonus) *
     safeMultiplier(1 + interactionBonus);
 
@@ -830,6 +1099,18 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     } : {}),
     ...(isMetabolic ? {
       milestoneExplanation: generateMetabolicMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isCardiovascular ? {
+      milestoneExplanation: generateCardiovascularMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isInfectiousDisease ? {
+      milestoneExplanation: generateInfectiousDiseaseMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isOphthalmology ? {
+      milestoneExplanation: generateOphthalmologyMilestoneExplanation(input.phase, recommendedUpfrontPercent)
+    } : {}),
+    ...(isWomensHealth ? {
+      milestoneExplanation: generateWomensHealthMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {})
   };
 }
@@ -877,6 +1158,42 @@ function generateMetabolicMilestoneExplanation(phase: Phase, upfrontPercent: num
   return `Metabolic/obesity deals at ${phase.replace('phase', 'Phase ')} typically allocate ${metUpfrontRanges[phase]} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the commercial-weighted structure of metabolic deals — GLP-1 and incretin programs generate massive recurring revenue ($20B+ semaglutide peak), ` +
     `so deal structures heavily weight commercial milestones tied to formulary access, indication expansion, and blockbuster sales tiers.`;
+}
+
+function generateCardiovascularMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const cvUpfrontRanges: Record<Phase, string> = {
+    preclinical: '5-10%', phase1: '8-15%', phase2: '14-24%', phase3: '22-35%', approved: '30-50%',
+  };
+  return `Cardiovascular deals at ${phase.replace('phase', 'Phase ')} typically allocate ${cvUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the MACE outcome-driven model — CV drugs require large outcome trials (10,000-15,000 patients), ` +
+    `so deal structures heavily weight regulatory milestones and commercial tiers tied to formulary access and CV mortality/hospitalization endpoints.`;
+}
+
+function generateInfectiousDiseaseMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const idUpfrontRanges: Record<Phase, string> = {
+    preclinical: '8-15%', phase1: '12-20%', phase2: '18-30%', phase3: '25-40%', approved: '35-55%',
+  };
+  return `Infectious disease deals at ${phase.replace('phase', 'Phase ')} typically allocate ${idUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the faster clinical timelines in ID — shorter trial durations, clear microbiological endpoints, ` +
+    `and strong regulatory pathways (QIDP, LPAD) allow higher upfronts. Commercial milestones tied to resistance profiles and formulary positioning.`;
+}
+
+function generateOphthalmologyMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const ophUpfrontRanges: Record<Phase, string> = {
+    preclinical: '6-12%', phase1: '10-18%', phase2: '15-25%', phase3: '22-35%', approved: '30-48%',
+  };
+  return `Ophthalmology deals at ${phase.replace('phase', 'Phase ')} typically allocate ${ophUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the durability-driven model — retinal drugs are injection-based with clear visual acuity endpoints. ` +
+    `Deal structures reward treatment interval extension and durability over anti-VEGF standard of care, with heavy commercial milestone weighting.`;
+}
+
+function generateWomensHealthMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
+  const whUpfrontRanges: Record<Phase, string> = {
+    preclinical: '5-10%', phase1: '8-14%', phase2: '12-22%', phase3: '18-30%', approved: '25-42%',
+  };
+  return `Women's health deals at ${phase.replace('phase', 'Phase ')} typically allocate ${whUpfrontRanges[phase]} upfront. ` +
+    `Your estimated ${upfrontPercent}% upfront reflects the historically underinvested nature of the space — recent breakthroughs (Veozah, Zurzuvae, Myfembree) ` +
+    `have validated premium deal structures, with milestones weighted toward regulatory approval and commercial launch given the large, underserved patient populations.`;
 }
 
 function generateDrillDownData(
@@ -1138,6 +1455,22 @@ export const indicationOptions = [
     { value: 'thyroid', label: 'Thyroid (Anaplastic/Medullary)' },
     { value: 'esophageal', label: 'Esophageal' },
     { value: 'smallBowel', label: 'Small Bowel / Appendiceal' },
+    { value: 'neuroendocrine', label: 'Neuroendocrine Tumors (NET)' },
+    { value: 'uvealMelanoma', label: 'Uveal Melanoma' },
+    { value: 'testicular', label: 'Testicular (Germ Cell)' },
+    { value: 'adrenocortical', label: 'Adrenocortical Carcinoma' },
+    { value: 'nasopharyngeal', label: 'Nasopharyngeal Carcinoma' },
+    { value: 'thymoma', label: 'Thymoma / Thymic Carcinoma' },
+    { value: 'penile', label: 'Penile Cancer' },
+    { value: 'merkelCell', label: 'Merkel Cell Carcinoma' },
+    { value: 'vulvar', label: 'Vulvar Cancer' },
+  ]},
+  { group: 'Pediatric Solid Tumors', options: [
+    { value: 'neuroblastoma', label: 'Neuroblastoma' },
+    { value: 'retinoblastoma', label: 'Retinoblastoma' },
+    { value: 'osteosarcoma', label: 'Osteosarcoma' },
+    { value: 'ewingSarcoma', label: 'Ewing Sarcoma' },
+    { value: 'rhabdomyosarcoma', label: 'Rhabdomyosarcoma' },
   ]},
   { group: 'Hematologic Malignancies', options: [
     { value: 'aml', label: 'AML' },
@@ -1153,6 +1486,16 @@ export const indicationOptions = [
     { value: 'cml', label: 'CML' },
     { value: 'waldenstrom', label: "Waldenstrom's Macroglobulinemia" },
     { value: 'hodgkins', label: 'Hodgkin Lymphoma' },
+    { value: 'marginalZone', label: 'Marginal Zone Lymphoma' },
+    { value: 'burkitt', label: 'Burkitt Lymphoma' },
+    { value: 'primaryCNSLymphoma', label: 'Primary CNS Lymphoma' },
+    { value: 'systemicMastocytosis', label: 'Systemic Mastocytosis' },
+    { value: 'cmml', label: 'CMML' },
+    { value: 'hairyCell', label: 'Hairy Cell Leukemia' },
+    { value: 'amyloidosisAL', label: 'AL Amyloidosis' },
+    { value: 'castlemanDisease', label: 'Castleman Disease' },
+    { value: 'aplasticAnemia', label: 'Aplastic Anemia' },
+    { value: 'bpdcn', label: 'BPDCN (Blastic Plasmacytoid)' },
   ]},
 ];
 
@@ -1215,6 +1558,10 @@ export const therapeuticAreaOptions = [
   { value: 'neurology', label: 'Neurology / CNS' },
   { value: 'immunology', label: 'Immunology / Autoimmune' },
   { value: 'metabolic', label: 'Metabolic / Obesity' },
+  { value: 'cardiovascular', label: 'Cardiovascular' },
+  { value: 'infectiousDisease', label: 'Infectious Disease' },
+  { value: 'ophthalmology', label: 'Ophthalmology' },
+  { value: 'womensHealth', label: "Women's Health" },
 ];
 
 // Neurology-specific indication options
@@ -1224,6 +1571,8 @@ export const neurologyIndicationOptions = [
     { value: 'parkinsons', label: "Parkinson's Disease" },
     { value: 'als', label: 'ALS (Amyotrophic Lateral Sclerosis)' },
     { value: 'huntingtons', label: "Huntington's Disease" },
+    { value: 'frontotemporal', label: 'Frontotemporal Dementia (FTD)' },
+    { value: 'lewyBody', label: 'Lewy Body Dementia' },
   ]},
   { group: 'Psychiatry', options: [
     { value: 'schizophrenia', label: 'Schizophrenia / Psychosis' },
@@ -1232,6 +1581,8 @@ export const neurologyIndicationOptions = [
     { value: 'bipolar', label: 'Bipolar Disorder' },
     { value: 'ptsd', label: 'PTSD / Trauma Disorders' },
     { value: 'ocd', label: 'OCD / Anxiety Disorders' },
+    { value: 'adhd', label: 'ADHD' },
+    { value: 'insomnia', label: 'Insomnia / Sleep Disorders' },
   ]},
   { group: 'Movement & Seizure', options: [
     { value: 'epilepsy', label: 'Epilepsy' },
@@ -1244,6 +1595,8 @@ export const neurologyIndicationOptions = [
     { value: 'narcolepsy', label: 'Narcolepsy / Sleep Disorders' },
     { value: 'tbi', label: 'Traumatic Brain Injury / Stroke Recovery' },
     { value: 'chronicPain', label: 'Chronic Pain (Non-Neuropathic)' },
+    { value: 'clusterHeadache', label: 'Cluster Headache' },
+    { value: 'restlessLeg', label: 'Restless Leg Syndrome' },
     { value: 'rareNeuro', label: 'Other Rare Neurological' },
   ]},
   { group: 'Neurodevelopmental & Rare', options: [
@@ -1251,6 +1604,28 @@ export const neurologyIndicationOptions = [
     { value: 'rett', label: 'Rett Syndrome' },
     { value: 'friedreichs', label: "Friedreich's Ataxia" },
     { value: 'dmd', label: 'Duchenne Muscular Dystrophy' },
+    { value: 'sma', label: 'Spinal Muscular Atrophy (SMA)' },
+    { value: 'angelman', label: 'Angelman Syndrome' },
+    { value: 'dravet', label: 'Dravet Syndrome' },
+    { value: 'myotonicDystrophy', label: 'Myotonic Dystrophy' },
+    { value: 'tuberousSclerosis', label: 'Tuberous Sclerosis Complex' },
+    { value: 'cmt', label: 'Charcot-Marie-Tooth Disease' },
+    { value: 'fragileX', label: 'Fragile X Syndrome' },
+    { value: 'cdkl5', label: 'CDKL5 Deficiency Disorder' },
+    { value: 'praderWilli', label: 'Prader-Willi Syndrome' },
+    { value: 'batten', label: 'Batten Disease (CLN)' },
+    { value: 'ataxiaTelangiectasia', label: 'Ataxia Telangiectasia' },
+  ]},
+  { group: 'Neuromuscular', options: [
+    { value: 'lgmd', label: 'Limb-Girdle Muscular Dystrophy' },
+    { value: 'fshd', label: 'FSHD (Facioscapulohumeral Dystrophy)' },
+    { value: 'stiffPerson', label: 'Stiff Person Syndrome' },
+    { value: 'gbs', label: 'Guillain-Barré Syndrome' },
+    { value: 'neurofibromatosis', label: 'Neurofibromatosis (NF1/NF2)' },
+  ]},
+  { group: 'Other Neurology', options: [
+    { value: 'peripheralNeuropathy', label: 'Peripheral Neuropathy' },
+    { value: 'spinalCordInjury', label: 'Spinal Cord Injury' },
   ]},
 ];
 
@@ -1362,6 +1737,8 @@ export const immunologyIndicationOptions = [
     { value: 'alopecia', label: 'Alopecia Areata' },
     { value: 'hidradenitis', label: 'Hidradenitis Suppurativa' },
     { value: 'vitiligo', label: 'Vitiligo' },
+    { value: 'epidermolysis', label: 'Epidermolysis Bullosa' },
+    { value: 'chronicUrticaria', label: 'Chronic Spontaneous Urticaria' },
   ]},
   { group: 'Neuromuscular & Rare', options: [
     { value: 'myastheniaGravis', label: 'Myasthenia Gravis' },
@@ -1370,10 +1747,17 @@ export const immunologyIndicationOptions = [
     { value: 'pnh', label: 'PNH' },
     { value: 'pemphigus', label: 'Pemphigus / Bullous Diseases' },
     { value: 'itp', label: 'Immune Thrombocytopenia (ITP)' },
+    { value: 'dermatomyositis', label: 'Dermatomyositis / Myositis' },
+    { value: 'coldAgglutinin', label: 'Cold Agglutinin Disease' },
+    { value: 'ttpAutoimmune', label: 'Autoimmune TTP' },
   ]},
   { group: 'Respiratory & Allergic', options: [
     { value: 'asthma', label: 'Severe Asthma' },
+    { value: 'copd', label: 'COPD' },
+    { value: 'ipf', label: 'Idiopathic Pulmonary Fibrosis (IPF)' },
     { value: 'eosinophilicEsophagitis', label: 'Eosinophilic Esophagitis (EoE)' },
+    { value: 'foodAllergy', label: 'Food Allergy (IgE-mediated)' },
+    { value: 'heredAngioedema', label: 'Hereditary Angioedema (HAE)' },
   ]},
   { group: 'Transplant', options: [
     { value: 'gvhd', label: 'Graft-vs-Host Disease (GVHD)' },
@@ -1381,9 +1765,28 @@ export const immunologyIndicationOptions = [
   ]},
   { group: 'Renal & Rare', options: [
     { value: 'igan', label: 'IgA Nephropathy' },
+    { value: 'membranousNephropathy', label: 'Membranous Nephropathy' },
+    { value: 'fsgs', label: 'FSGS (Focal Segmental)' },
     { value: 'thyroidEye', label: 'Thyroid Eye Disease' },
     { value: 'pbc', label: 'Primary Biliary Cholangitis (PBC)' },
+    { value: 'psc', label: 'Primary Sclerosing Cholangitis (PSC)' },
+    { value: 'autoImmuneHepatitis', label: 'Autoimmune Hepatitis' },
+    { value: 'nephroticSyndrome', label: 'Nephrotic Syndrome (General)' },
     { value: 'rareAutoimmune', label: 'Other Rare Autoimmune' },
+  ]},
+  { group: 'Musculoskeletal & Vascular', options: [
+    { value: 'ankylosingSpondylitis', label: 'Ankylosing Spondylitis' },
+    { value: 'giantCellArteritis', label: 'Giant Cell Arteritis (GCA)' },
+    { value: 'polymyalgiaRheumatica', label: 'Polymyalgia Rheumatica' },
+    { value: 'behcets', label: "Behcet's Disease" },
+    { value: 'egpa', label: 'EGPA (Eosinophilic Granulomatosis)' },
+    { value: 'antiphospholipid', label: 'Antiphospholipid Syndrome' },
+    { value: 'systemicJIA', label: 'Systemic JIA / Still\'s Disease' },
+  ]},
+  { group: 'Other Autoimmune', options: [
+    { value: 'sarcoidosis', label: 'Sarcoidosis' },
+    { value: 'uveitis', label: 'Autoimmune Uveitis' },
+    { value: 'primaryImmunodeficiency', label: 'Primary Immunodeficiency' },
   ]},
 ];
 
@@ -1457,8 +1860,15 @@ export const metabolicIndicationOptions = [
     { value: 'hfpef', label: 'HFpEF (Heart Failure)' },
     { value: 'familialHypercholesterolemia', label: 'Familial Hypercholesterolemia' },
   ]},
+  { group: 'Endocrine', options: [
+    { value: 'acromegaly', label: 'Acromegaly' },
+    { value: 'cushings', label: "Cushing's Syndrome" },
+    { value: 'congenitalAdrenalHyperplasia', label: 'Congenital Adrenal Hyperplasia (CAH)' },
+    { value: 'congenitalHyperinsulinism', label: 'Congenital Hyperinsulinism' },
+  ]},
   { group: 'Other Metabolic', options: [
     { value: 'gout', label: 'Gout / Hyperuricemia' },
+    { value: 'hemochromatosis', label: 'Hereditary Hemochromatosis' },
   ]},
   { group: 'Rare Metabolic', options: [
     { value: 'glycogenStorage', label: 'Glycogen Storage Disease' },
@@ -1466,7 +1876,29 @@ export const metabolicIndicationOptions = [
     { value: 'wilsonDisease', label: 'Wilson Disease' },
     { value: 'fabry', label: 'Fabry Disease' },
     { value: 'gaucher', label: 'Gaucher Disease' },
+    { value: 'pompe', label: 'Pompe Disease' },
+    { value: 'mpsDisorders', label: 'MPS Disorders (I/II/III/IV)' },
+    { value: 'aatDeficiency', label: 'Alpha-1 Antitrypsin Deficiency' },
+    { value: 'hyperoxaluria', label: 'Primary Hyperoxaluria' },
+    { value: 'ureaCycleDisorders', label: 'Urea Cycle Disorders' },
+    { value: 'asmd', label: 'ASMD (Niemann-Pick B)' },
+    { value: 'cystinosis', label: 'Cystinosis' },
+    { value: 'galactosemia', label: 'Classic Galactosemia' },
+    { value: 'krabbe', label: 'Krabbe Disease' },
+    { value: 'hypophosphatasia', label: 'Hypophosphatasia' },
+    { value: 'porphyria', label: 'Acute Hepatic Porphyria' },
+    { value: 'mitochondrialDisease', label: 'Mitochondrial Disease' },
     { value: 'rareMetabolic', label: 'Other Rare Metabolic' },
+  ]},
+  { group: 'Hematologic (Non-Malignant)', options: [
+    { value: 'sickleCell', label: 'Sickle Cell Disease' },
+    { value: 'betaThalassemia', label: 'Beta-Thalassemia' },
+    { value: 'hemophiliaA', label: 'Hemophilia A' },
+    { value: 'hemophiliaB', label: 'Hemophilia B' },
+    { value: 'attrAmyloidosis', label: 'ATTR Amyloidosis (Cardiac/Neuro)' },
+  ]},
+  { group: 'Respiratory (Genetic)', options: [
+    { value: 'cysticFibrosis', label: 'Cystic Fibrosis' },
   ]},
 ];
 
@@ -1500,4 +1932,257 @@ export const metabolicTreatmentApproachOptions = [
   { value: 'glycemicControl', label: 'Glycemic control' },
   { value: 'organProtective', label: 'Organ-protective' },
   { value: 'metabolicReset', label: 'Metabolic reset / curative' },
+];
+
+// ── Cardiovascular ──
+
+export const cardiovascularModalityOptions = [
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'myosinInhibitor', label: 'Cardiac Myosin Inhibitor' },
+    { value: 'anticoagulantNovel', label: 'Novel Anticoagulant (FXI/FXII)' },
+  ]},
+  { group: 'Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'pcsk9Targeting', label: 'PCSK9-targeting (mAb/siRNA)' },
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+  { group: 'RNA & Gene', options: [
+    { value: 'rnaCardio', label: 'RNA Therapeutics (siRNA/ASO)' },
+    { value: 'geneTherapy', label: 'Gene Therapy (Cardiac)' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'cellTherapy', label: 'Cell Therapy (Cardiac Regeneration)' },
+  ]},
+];
+
+export const cardiovascularIndicationOptions = [
+  { group: 'Heart Failure', options: [
+    { value: 'heartFailureHfref', label: 'Heart Failure (HFrEF)' },
+    { value: 'cardiomyopathy', label: 'Cardiomyopathy (HCM/DCM)' },
+  ]},
+  { group: 'Arrhythmia & Structural', options: [
+    { value: 'atrialFibrillation', label: 'Atrial Fibrillation' },
+    { value: 'cardiacArrhythmia', label: 'Cardiac Arrhythmias' },
+    { value: 'aorticStenosis', label: 'Aortic Stenosis' },
+  ]},
+  { group: 'Vascular', options: [
+    { value: 'pulmonaryArterialHypertension', label: 'Pulmonary Arterial Hypertension (PAH)' },
+    { value: 'coronaryArteryDisease', label: 'Coronary Artery Disease (CAD)' },
+    { value: 'peripheralArteryDisease', label: 'Peripheral Artery Disease (PAD)' },
+    { value: 'atherosclerosis', label: 'Atherosclerosis / ASCVD' },
+  ]},
+  { group: 'Thrombosis & Lipids', options: [
+    { value: 'venousThromboembolism', label: 'Venous Thromboembolism (VTE)' },
+    { value: 'dyslipidemia', label: 'Dyslipidemia' },
+  ]},
+  { group: 'Other Cardiovascular', options: [
+    { value: 'resistantHypertension', label: 'Resistant Hypertension' },
+    { value: 'myocarditis', label: 'Myocarditis / Pericarditis' },
+  ]},
+];
+
+export const cvOutcomeBenefitOptions = [
+  { value: 'mortalityReduction', label: 'CV mortality reduction' },
+  { value: 'hospitalizationReduction', label: 'Hospitalization reduction' },
+  { value: 'symptomImprovement', label: 'Symptom improvement only' },
+];
+
+export const cvTrialEndpointOptions = [
+  { value: 'maceEndpoint', label: 'MACE endpoint (hard outcomes)' },
+  { value: 'surrogateBiomarker', label: 'Surrogate biomarker (NT-proBNP, LDL)' },
+  { value: 'functionalEndpoint', label: 'Functional endpoint (6MWD, KCCQ)' },
+];
+
+export const cvPopulationRiskOptions = [
+  { value: 'highRisk', label: 'High-risk (prior MACE, HF)' },
+  { value: 'moderateRisk', label: 'Moderate risk' },
+  { value: 'primaryPrevention', label: 'Primary prevention' },
+];
+
+// ── Infectious Disease ──
+
+export const infectiousDiseaseModalityOptions = [
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'antiviral', label: 'Small Molecule Antiviral' },
+    { value: 'antibioticNovel', label: 'Novel Antibiotic' },
+  ]},
+  { group: 'Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+  ]},
+  { group: 'Vaccines', options: [
+    { value: 'vaccinePreventive', label: 'Preventive Vaccine (non-mRNA)' },
+    { value: 'mrna', label: 'mRNA Vaccine' },
+  ]},
+  { group: 'Advanced', options: [
+    { value: 'rnai', label: 'RNAi / siRNA' },
+    { value: 'geneTherapy', label: 'Gene Therapy / Gene Editing' },
+    { value: 'phageTherapy', label: 'Bacteriophage Therapy' },
+  ]},
+];
+
+export const infectiousDiseaseIndicationOptions = [
+  { group: 'Viral — Chronic', options: [
+    { value: 'hivAids', label: 'HIV/AIDS' },
+    { value: 'hepatitisB', label: 'Hepatitis B (Chronic)' },
+    { value: 'hepatitisD', label: 'Hepatitis D' },
+    { value: 'cmvInfection', label: 'CMV Infection' },
+  ]},
+  { group: 'Viral — Acute / Respiratory', options: [
+    { value: 'rsv', label: 'RSV' },
+    { value: 'influenza', label: 'Influenza' },
+    { value: 'covid', label: 'COVID-19 / Coronavirus' },
+    { value: 'dengueMalaria', label: 'Dengue / Malaria' },
+  ]},
+  { group: 'Bacterial & Fungal', options: [
+    { value: 'amrBacterial', label: 'AMR / Novel Antibiotics' },
+    { value: 'tuberculosis', label: 'Tuberculosis (TB)' },
+    { value: 'fungalInfections', label: 'Invasive Fungal Infections' },
+    { value: 'clostridioides', label: 'C. difficile' },
+  ]},
+];
+
+export const resistanceProfileOptions = [
+  { value: 'novelTarget', label: 'Novel target / first-in-class' },
+  { value: 'existingClassImproved', label: 'Existing class, improved profile' },
+  { value: 'broadSpectrum', label: 'Broad-spectrum' },
+];
+
+export const infectionChronicityOptions = [
+  { value: 'acute', label: 'Acute infection' },
+  { value: 'chronic', label: 'Chronic infection' },
+  { value: 'latent', label: 'Latent / prophylaxis' },
+];
+
+export const publicHealthPriorityOptions = [
+  { value: 'whoUrgent', label: 'WHO urgent / BARDA priority' },
+  { value: 'whoCritical', label: 'WHO critical priority' },
+  { value: 'standard', label: 'Standard priority' },
+];
+
+// ── Ophthalmology ──
+
+export const ophthalmologyModalityOptions = [
+  { group: 'Biologics', options: [
+    { value: 'antiVegf', label: 'Anti-VEGF (antibody/fragment)' },
+    { value: 'mab', label: 'Monoclonal Antibody (non-VEGF)' },
+    { value: 'bispecific', label: 'Bispecific Antibody' },
+  ]},
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'topicalOphthalmic', label: 'Topical (Eye Drop)' },
+  ]},
+  { group: 'Delivery & Devices', options: [
+    { value: 'intravitreal', label: 'Intravitreal Implant / Depot' },
+    { value: 'geneTherapyOcular', label: 'Ocular Gene Therapy (AAV)' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'cellTherapy', label: 'Cell Therapy (Retinal)' },
+    { value: 'rnai', label: 'RNAi / Aptamer' },
+  ]},
+];
+
+export const ophthalmologyIndicationOptions = [
+  { group: 'Retinal — AMD', options: [
+    { value: 'wetAmd', label: 'Wet AMD (nAMD)' },
+    { value: 'dryAmdGA', label: 'Dry AMD / Geographic Atrophy' },
+  ]},
+  { group: 'Retinal — Diabetic', options: [
+    { value: 'diabeticRetinopathy', label: 'Diabetic Retinopathy' },
+    { value: 'diabeticMacularEdema', label: 'Diabetic Macular Edema (DME)' },
+  ]},
+  { group: 'Retinal — Other', options: [
+    { value: 'retinitisPigmentosa', label: 'Retinitis Pigmentosa' },
+    { value: 'retinalVeinOcclusion', label: 'Retinal Vein Occlusion' },
+    { value: 'uveiticMacular', label: 'Uveitic Macular Edema' },
+    { value: 'stargardt', label: 'Stargardt Disease' },
+  ]},
+  { group: 'Anterior Segment & Other', options: [
+    { value: 'glaucoma', label: 'Glaucoma' },
+    { value: 'dryEyeDisease', label: 'Dry Eye Disease' },
+    { value: 'myopiaProgression', label: 'Myopia (Progressive)' },
+  ]},
+];
+
+export const ocularDeliveryOptions = [
+  { value: 'intravitreal', label: 'Intravitreal injection' },
+  { value: 'topical', label: 'Topical (eye drop)' },
+  { value: 'oral', label: 'Oral / systemic' },
+  { value: 'implant', label: 'Implant / sustained-release' },
+];
+
+export const treatmentDurabilityOptions = [
+  { value: 'oneTime', label: 'One-time (gene therapy)' },
+  { value: 'extendedDuration', label: 'Extended duration (3-6+ months)' },
+  { value: 'chronicInjection', label: 'Chronic injection (monthly-bimonthly)' },
+];
+
+export const visionImpactOptions = [
+  { value: 'visionThreatening', label: 'Vision-threatening' },
+  { value: 'visionImpairing', label: 'Vision-impairing' },
+  { value: 'symptomRelief', label: 'Symptom relief' },
+];
+
+// ── Women's Health ──
+
+export const womensHealthModalityOptions = [
+  { group: 'Small Molecules', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'gnrhAntagonist', label: 'GnRH Antagonist (Oral)' },
+  ]},
+  { group: 'Biologics', options: [
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+  { group: 'Hormonal & Neuroactive', options: [
+    { value: 'hormoneTherapy', label: 'Hormone Therapy / HRT' },
+    { value: 'neuroactiveSteroid', label: 'Neuroactive Steroid' },
+  ]},
+  { group: 'Advanced', options: [
+    { value: 'geneTherapy', label: 'Gene Therapy' },
+    { value: 'cellTherapy', label: 'Cell Therapy' },
+  ]},
+];
+
+export const womensHealthIndicationOptions = [
+  { group: 'Reproductive', options: [
+    { value: 'endometriosis', label: 'Endometriosis' },
+    { value: 'uterineFibroids', label: 'Uterine Fibroids' },
+    { value: 'pcos', label: 'Polycystic Ovary Syndrome (PCOS)' },
+    { value: 'fertilityArt', label: 'Fertility / IVF' },
+    { value: 'contraceptionNovel', label: 'Novel Contraception' },
+  ]},
+  { group: 'Menopause & Hormonal', options: [
+    { value: 'menopause', label: 'Menopause / Vasomotor Symptoms' },
+  ]},
+  { group: 'Maternal', options: [
+    { value: 'postpartumDepression', label: 'Postpartum Depression' },
+    { value: 'preeclampsia', label: 'Preeclampsia' },
+    { value: 'prematureLabor', label: 'Premature Labor / Preterm Birth' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'vulvodynia', label: 'Vulvodynia / Chronic Pelvic Pain' },
+    { value: 'cervicalDysplasia', label: 'Cervical Dysplasia / HPV Therapeutics' },
+    { value: 'breastCancerPrevention', label: 'Breast Cancer Prevention' },
+  ]},
+];
+
+export const whTargetPopulationOptions = [
+  { value: 'reproductiveAge', label: 'Reproductive age' },
+  { value: 'perimenopause', label: 'Perimenopause' },
+  { value: 'postmenopause', label: 'Postmenopause' },
+  { value: 'pregnancy', label: 'Pregnancy / peripartum' },
+];
+
+export const whUnmetNeedOptions = [
+  { value: 'noApprovedTherapy', label: 'No approved therapy' },
+  { value: 'inadequateOptions', label: 'Inadequate options' },
+  { value: 'wellServed', label: 'Well-served market' },
+];
+
+export const whRegulatoryOptions = [
+  { value: 'acceleratedPathway', label: 'Accelerated pathway' },
+  { value: 'standardPathway', label: 'Standard pathway' },
+  { value: 'pregnancyComplexity', label: 'Pregnancy complexity (REMS/safety)' },
 ];

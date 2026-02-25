@@ -20,6 +20,18 @@ import type {
   RouteOfAdministration,
   ComorbidityBreadth,
   MetabolicTreatmentApproach,
+  CVOutcomeBenefit,
+  CVTrialEndpoint,
+  CVPopulationRisk,
+  ResistanceProfile,
+  InfectionChronicity,
+  PublicHealthPriority,
+  OcularDelivery,
+  TreatmentDurability,
+  VisionImpact,
+  WHTargetPopulation,
+  WHUnmetNeed,
+  WHRegulatory,
 } from '@/lib/calculations';
 import {
   territoryOptions,
@@ -41,6 +53,18 @@ import {
   routeOfAdministrationOptions,
   comorbidityBreadthOptions,
   metabolicTreatmentApproachOptions,
+  cvOutcomeBenefitOptions,
+  cvTrialEndpointOptions,
+  cvPopulationRiskOptions,
+  resistanceProfileOptions,
+  infectionChronicityOptions,
+  publicHealthPriorityOptions,
+  ocularDeliveryOptions,
+  treatmentDurabilityOptions,
+  visionImpactOptions,
+  whTargetPopulationOptions,
+  whUnmetNeedOptions,
+  whRegulatoryOptions,
 } from '@/lib/calculations';
 import {
   competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions,
@@ -49,6 +73,10 @@ import {
   immuneResetDescriptions, targetSpecificityDescriptions, diseaseSeverityDescriptions,
   metabolicTreatmentApproachDescriptions, mechanismDifferentiationDescriptions,
   weightLossEfficacyDescriptions, routeOfAdministrationDescriptions, comorbidityBreadthDescriptions,
+  cvOutcomeBenefitDescriptions, cvTrialEndpointDescriptions, cvPopulationRiskDescriptions,
+  resistanceProfileDescriptions, infectionChronicityDescriptions, publicHealthPriorityDescriptions,
+  ocularDeliveryDescriptions, treatmentDurabilityDescriptions, visionImpactDescriptions,
+  whTargetPopulationDescriptions, whUnmetNeedDescriptions, whRegulatoryDescriptions,
   territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
@@ -135,6 +163,62 @@ comorbidityBreadthOptions.forEach(opt => {
   comorbidityBreadthBadges[opt.value] = getMultiplierImpactBadge('comorbidityBreadth', opt.value);
 });
 
+// Target Profile badges — cardiovascular
+const cvOutcomeBenefitBadges: Record<string, ImpactBadge> = {};
+cvOutcomeBenefitOptions.forEach(opt => {
+  cvOutcomeBenefitBadges[opt.value] = getMultiplierImpactBadge('cvOutcomeBenefit', opt.value);
+});
+const cvTrialEndpointBadges: Record<string, ImpactBadge> = {};
+cvTrialEndpointOptions.forEach(opt => {
+  cvTrialEndpointBadges[opt.value] = getMultiplierImpactBadge('cvTrialEndpoint', opt.value);
+});
+const cvPopulationRiskBadges: Record<string, ImpactBadge> = {};
+cvPopulationRiskOptions.forEach(opt => {
+  cvPopulationRiskBadges[opt.value] = getMultiplierImpactBadge('cvPopulationRisk', opt.value);
+});
+
+// Target Profile badges — infectious disease
+const resistanceProfileBadges: Record<string, ImpactBadge> = {};
+resistanceProfileOptions.forEach(opt => {
+  resistanceProfileBadges[opt.value] = getMultiplierImpactBadge('resistanceProfile', opt.value);
+});
+const infectionChronicityBadges: Record<string, ImpactBadge> = {};
+infectionChronicityOptions.forEach(opt => {
+  infectionChronicityBadges[opt.value] = getMultiplierImpactBadge('infectionChronicity', opt.value);
+});
+const publicHealthPriorityBadges: Record<string, ImpactBadge> = {};
+publicHealthPriorityOptions.forEach(opt => {
+  publicHealthPriorityBadges[opt.value] = getMultiplierImpactBadge('publicHealthPriority', opt.value);
+});
+
+// Target Profile badges — ophthalmology
+const ocularDeliveryBadges: Record<string, ImpactBadge> = {};
+ocularDeliveryOptions.forEach(opt => {
+  ocularDeliveryBadges[opt.value] = getMultiplierImpactBadge('ocularDelivery', opt.value);
+});
+const treatmentDurabilityBadges: Record<string, ImpactBadge> = {};
+treatmentDurabilityOptions.forEach(opt => {
+  treatmentDurabilityBadges[opt.value] = getMultiplierImpactBadge('treatmentDurability', opt.value);
+});
+const visionImpactBadges: Record<string, ImpactBadge> = {};
+visionImpactOptions.forEach(opt => {
+  visionImpactBadges[opt.value] = getMultiplierImpactBadge('visionImpact', opt.value);
+});
+
+// Target Profile badges — women's health
+const whTargetPopulationBadges: Record<string, ImpactBadge> = {};
+whTargetPopulationOptions.forEach(opt => {
+  whTargetPopulationBadges[opt.value] = getMultiplierImpactBadge('whTargetPopulation', opt.value);
+});
+const whUnmetNeedBadges: Record<string, ImpactBadge> = {};
+whUnmetNeedOptions.forEach(opt => {
+  whUnmetNeedBadges[opt.value] = getMultiplierImpactBadge('whUnmetNeed', opt.value);
+});
+const whRegulatoryBadges: Record<string, ImpactBadge> = {};
+whRegulatoryOptions.forEach(opt => {
+  whRegulatoryBadges[opt.value] = getMultiplierImpactBadge('whRegulatory', opt.value);
+});
+
 // Deal Scope badges
 const territoryBadges: Record<string, ImpactBadge> = {};
 territoryOptions.forEach(opt => {
@@ -192,6 +276,34 @@ interface AdvancedOptionsSectionProps {
   onRouteOfAdministrationChange: (value: RouteOfAdministration) => void;
   onComorbidityBreadthChange: (value: ComorbidityBreadth) => void;
   onMetabolicTreatmentApproachChange: (value: MetabolicTreatmentApproach) => void;
+  // Cardiovascular-specific
+  cvOutcomeBenefit: CVOutcomeBenefit;
+  cvTrialEndpoint: CVTrialEndpoint;
+  cvPopulationRisk: CVPopulationRisk;
+  onCvOutcomeBenefitChange: (value: CVOutcomeBenefit) => void;
+  onCvTrialEndpointChange: (value: CVTrialEndpoint) => void;
+  onCvPopulationRiskChange: (value: CVPopulationRisk) => void;
+  // Infectious Disease-specific
+  resistanceProfile: ResistanceProfile;
+  infectionChronicity: InfectionChronicity;
+  publicHealthPriority: PublicHealthPriority;
+  onResistanceProfileChange: (value: ResistanceProfile) => void;
+  onInfectionChronicityChange: (value: InfectionChronicity) => void;
+  onPublicHealthPriorityChange: (value: PublicHealthPriority) => void;
+  // Ophthalmology-specific
+  ocularDelivery: OcularDelivery;
+  treatmentDurability: TreatmentDurability;
+  visionImpact: VisionImpact;
+  onOcularDeliveryChange: (value: OcularDelivery) => void;
+  onTreatmentDurabilityChange: (value: TreatmentDurability) => void;
+  onVisionImpactChange: (value: VisionImpact) => void;
+  // Women's Health-specific
+  whTargetPopulation: WHTargetPopulation;
+  whUnmetNeed: WHUnmetNeed;
+  whRegulatory: WHRegulatory;
+  onWhTargetPopulationChange: (value: WHTargetPopulation) => void;
+  onWhUnmetNeedChange: (value: WHUnmetNeed) => void;
+  onWhRegulatoryChange: (value: WHRegulatory) => void;
 }
 
 const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
@@ -236,6 +348,30 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onRouteOfAdministrationChange,
   onComorbidityBreadthChange,
   onMetabolicTreatmentApproachChange,
+  cvOutcomeBenefit,
+  cvTrialEndpoint,
+  cvPopulationRisk,
+  onCvOutcomeBenefitChange,
+  onCvTrialEndpointChange,
+  onCvPopulationRiskChange,
+  resistanceProfile,
+  infectionChronicity,
+  publicHealthPriority,
+  onResistanceProfileChange,
+  onInfectionChronicityChange,
+  onPublicHealthPriorityChange,
+  ocularDelivery,
+  treatmentDurability,
+  visionImpact,
+  onOcularDeliveryChange,
+  onTreatmentDurabilityChange,
+  onVisionImpactChange,
+  whTargetPopulation,
+  whUnmetNeed,
+  whRegulatory,
+  onWhTargetPopulationChange,
+  onWhUnmetNeedChange,
+  onWhRegulatoryChange,
   column,
 }: AdvancedOptionsSectionProps) {
   const accent = STEP_ACCENTS[therapeuticArea];
@@ -504,6 +640,54 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               onChange={onTreatmentGoalChange}
               columns={3}
             />
+          ) : therapeuticArea === 'cardiovascular' ? (
+            <OptionCardGroup
+              id="cv-outcome-benefit-select"
+              label="CV Outcome Benefit"
+              helpText={sectionHelp.cvOutcomeBenefit}
+              options={cvOutcomeBenefitOptions}
+              descriptions={cvOutcomeBenefitDescriptions}
+              impactBadges={cvOutcomeBenefitBadges}
+              value={cvOutcomeBenefit}
+              onChange={onCvOutcomeBenefitChange}
+              columns={3}
+            />
+          ) : therapeuticArea === 'infectiousDisease' ? (
+            <OptionCardGroup
+              id="resistance-profile-select"
+              label="Resistance Profile"
+              helpText={sectionHelp.resistanceProfile}
+              options={resistanceProfileOptions}
+              descriptions={resistanceProfileDescriptions}
+              impactBadges={resistanceProfileBadges}
+              value={resistanceProfile}
+              onChange={onResistanceProfileChange}
+              columns={3}
+            />
+          ) : therapeuticArea === 'ophthalmology' ? (
+            <OptionCardGroup
+              id="ocular-delivery-select"
+              label="Ocular Delivery"
+              helpText={sectionHelp.ocularDelivery}
+              options={ocularDeliveryOptions}
+              descriptions={ocularDeliveryDescriptions}
+              impactBadges={ocularDeliveryBadges}
+              value={ocularDelivery}
+              onChange={onOcularDeliveryChange}
+              columns={3}
+            />
+          ) : therapeuticArea === 'womensHealth' ? (
+            <OptionCardGroup
+              id="wh-target-population-select"
+              label="Target Population"
+              helpText={sectionHelp.whTargetPopulation}
+              options={whTargetPopulationOptions}
+              descriptions={whTargetPopulationDescriptions}
+              impactBadges={whTargetPopulationBadges}
+              value={whTargetPopulation}
+              onChange={onWhTargetPopulationChange}
+              columns={3}
+            />
           ) : (
             <OptionCardGroup
               id="line-of-therapy-select"
@@ -639,6 +823,114 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={comorbidityBreadthBadges}
                 value={comorbidityBreadth}
                 onChange={onComorbidityBreadthChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'cardiovascular' && (
+            <>
+              <OptionCardGroup
+                id="cv-trial-endpoint-select"
+                label="Trial Endpoint"
+                helpText={sectionHelp.cvTrialEndpoint}
+                options={cvTrialEndpointOptions}
+                descriptions={cvTrialEndpointDescriptions}
+                impactBadges={cvTrialEndpointBadges}
+                value={cvTrialEndpoint}
+                onChange={onCvTrialEndpointChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="cv-population-risk-select"
+                label="Population Risk"
+                helpText={sectionHelp.cvPopulationRisk}
+                options={cvPopulationRiskOptions}
+                descriptions={cvPopulationRiskDescriptions}
+                impactBadges={cvPopulationRiskBadges}
+                value={cvPopulationRisk}
+                onChange={onCvPopulationRiskChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'infectiousDisease' && (
+            <>
+              <OptionCardGroup
+                id="infection-chronicity-select"
+                label="Infection Chronicity"
+                helpText={sectionHelp.infectionChronicity}
+                options={infectionChronicityOptions}
+                descriptions={infectionChronicityDescriptions}
+                impactBadges={infectionChronicityBadges}
+                value={infectionChronicity}
+                onChange={onInfectionChronicityChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="public-health-priority-select"
+                label="Public Health Priority"
+                helpText={sectionHelp.publicHealthPriority}
+                options={publicHealthPriorityOptions}
+                descriptions={publicHealthPriorityDescriptions}
+                impactBadges={publicHealthPriorityBadges}
+                value={publicHealthPriority}
+                onChange={onPublicHealthPriorityChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'ophthalmology' && (
+            <>
+              <OptionCardGroup
+                id="treatment-durability-select"
+                label="Treatment Durability"
+                helpText={sectionHelp.treatmentDurability}
+                options={treatmentDurabilityOptions}
+                descriptions={treatmentDurabilityDescriptions}
+                impactBadges={treatmentDurabilityBadges}
+                value={treatmentDurability}
+                onChange={onTreatmentDurabilityChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="vision-impact-select"
+                label="Vision Impact"
+                helpText={sectionHelp.visionImpact}
+                options={visionImpactOptions}
+                descriptions={visionImpactDescriptions}
+                impactBadges={visionImpactBadges}
+                value={visionImpact}
+                onChange={onVisionImpactChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'womensHealth' && (
+            <>
+              <OptionCardGroup
+                id="wh-unmet-need-select"
+                label="Unmet Need"
+                helpText={sectionHelp.whUnmetNeed}
+                options={whUnmetNeedOptions}
+                descriptions={whUnmetNeedDescriptions}
+                impactBadges={whUnmetNeedBadges}
+                value={whUnmetNeed}
+                onChange={onWhUnmetNeedChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="wh-regulatory-select"
+                label="Regulatory Pathway"
+                helpText={sectionHelp.whRegulatory}
+                options={whRegulatoryOptions}
+                descriptions={whRegulatoryDescriptions}
+                impactBadges={whRegulatoryBadges}
+                value={whRegulatory}
+                onChange={onWhRegulatoryChange}
                 columns={3}
               />
             </>

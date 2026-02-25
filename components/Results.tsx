@@ -931,6 +931,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               {fullInputs?.therapeuticArea === 'immunology' ? 'Why Immunology Deal Structures Differ'
                 : fullInputs?.therapeuticArea === 'metabolic' ? 'Why Metabolic/Obesity Deal Structures Differ'
                 : fullInputs?.therapeuticArea === 'oncology' ? 'Why Oncology Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'cardiovascular' ? 'Why Cardiovascular Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'infectiousDisease' ? 'Why Infectious Disease Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'ophthalmology' ? 'Why Ophthalmology Deal Structures Differ'
+                : fullInputs?.therapeuticArea === 'womensHealth' ? "Why Women's Health Deal Structures Differ"
                 : 'Why Neurology Deal Structures Differ'}
             </h4>
             <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">

@@ -24,6 +24,18 @@ import type {
   RouteOfAdministration,
   ComorbidityBreadth,
   MetabolicTreatmentApproach,
+  CVOutcomeBenefit,
+  CVTrialEndpoint,
+  CVPopulationRisk,
+  ResistanceProfile,
+  InfectionChronicity,
+  PublicHealthPriority,
+  OcularDelivery,
+  TreatmentDurability,
+  VisionImpact,
+  WHTargetPopulation,
+  WHUnmetNeed,
+  WHRegulatory,
 } from '@/lib/calculations';
 import type { DealTemplate } from './types';
 
@@ -58,6 +70,22 @@ export interface CalculatorFormState {
   routeOfAdministration: RouteOfAdministration;
   comorbidityBreadth: ComorbidityBreadth;
   metabolicTreatmentApproach: MetabolicTreatmentApproach;
+  // Cardiovascular-specific
+  cvOutcomeBenefit: CVOutcomeBenefit;
+  cvTrialEndpoint: CVTrialEndpoint;
+  cvPopulationRisk: CVPopulationRisk;
+  // Infectious Disease-specific
+  resistanceProfile: ResistanceProfile;
+  infectionChronicity: InfectionChronicity;
+  publicHealthPriority: PublicHealthPriority;
+  // Ophthalmology-specific
+  ocularDelivery: OcularDelivery;
+  treatmentDurability: TreatmentDurability;
+  visionImpact: VisionImpact;
+  // Women's Health-specific
+  whTargetPopulation: WHTargetPopulation;
+  whUnmetNeed: WHUnmetNeed;
+  whRegulatory: WHRegulatory;
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -90,6 +118,18 @@ export const INITIAL_STATE: CalculatorFormState = {
   routeOfAdministration: 'injectable',
   comorbidityBreadth: 'obesityPrimary',
   metabolicTreatmentApproach: 'chronicWeightMgmt',
+  cvOutcomeBenefit: 'hospitalizationReduction',
+  cvTrialEndpoint: 'surrogateBiomarker',
+  cvPopulationRisk: 'moderateRisk',
+  resistanceProfile: 'existingClassImproved',
+  infectionChronicity: 'acute',
+  publicHealthPriority: 'standard',
+  ocularDelivery: 'intravitreal',
+  treatmentDurability: 'chronicInjection',
+  visionImpact: 'visionImpairing',
+  whTargetPopulation: 'reproductiveAge',
+  whUnmetNeed: 'inadequateOptions',
+  whRegulatory: 'standardPathway',
   wizardStep: 0,
   quickMode: true,
   showTemplates: true,
@@ -142,6 +182,46 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
           weightLossEfficacy: 'competitiveEfficacy',
           routeOfAdministration: 'injectable',
           comorbidityBreadth: 'obesityPrimary',
+        };
+      }
+      if (action.area === 'cardiovascular') {
+        return {
+          ...state, ...base,
+          indication: 'heartFailure' as Indication,
+          modality: 'smallMolecule' as Modality,
+          cvOutcomeBenefit: 'hospitalizationReduction',
+          cvTrialEndpoint: 'surrogateBiomarker',
+          cvPopulationRisk: 'moderateRisk',
+        };
+      }
+      if (action.area === 'infectiousDisease') {
+        return {
+          ...state, ...base,
+          indication: 'hepatitisB' as Indication,
+          modality: 'antiviral' as Modality,
+          resistanceProfile: 'existingClassImproved',
+          infectionChronicity: 'chronic',
+          publicHealthPriority: 'standard',
+        };
+      }
+      if (action.area === 'ophthalmology') {
+        return {
+          ...state, ...base,
+          indication: 'wetAmd' as Indication,
+          modality: 'antiVegf' as Modality,
+          ocularDelivery: 'intravitreal',
+          treatmentDurability: 'chronicInjection',
+          visionImpact: 'visionThreatening',
+        };
+      }
+      if (action.area === 'womensHealth') {
+        return {
+          ...state, ...base,
+          indication: 'endometriosis' as Indication,
+          modality: 'gnrhAntagonist' as Modality,
+          whTargetPopulation: 'reproductiveAge',
+          whUnmetNeed: 'inadequateOptions',
+          whRegulatory: 'standardPathway',
         };
       }
       // oncology
@@ -228,6 +308,18 @@ export interface CalculatorActions {
   setRouteOfAdministration: (v: RouteOfAdministration) => void;
   setComorbidityBreadth: (v: ComorbidityBreadth) => void;
   setMetabolicTreatmentApproach: (v: MetabolicTreatmentApproach) => void;
+  setCvOutcomeBenefit: (v: CVOutcomeBenefit) => void;
+  setCvTrialEndpoint: (v: CVTrialEndpoint) => void;
+  setCvPopulationRisk: (v: CVPopulationRisk) => void;
+  setResistanceProfile: (v: ResistanceProfile) => void;
+  setInfectionChronicity: (v: InfectionChronicity) => void;
+  setPublicHealthPriority: (v: PublicHealthPriority) => void;
+  setOcularDelivery: (v: OcularDelivery) => void;
+  setTreatmentDurability: (v: TreatmentDurability) => void;
+  setVisionImpact: (v: VisionImpact) => void;
+  setWhTargetPopulation: (v: WHTargetPopulation) => void;
+  setWhUnmetNeed: (v: WHUnmetNeed) => void;
+  setWhRegulatory: (v: WHRegulatory) => void;
   setWizardStep: (v: number) => void;
   setQuickMode: (v: boolean) => void;
   setShowTemplates: (v: boolean) => void;
@@ -270,6 +362,18 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     setRouteOfAdministration: (v) => dispatch({ type: 'SET_FIELD', field: 'routeOfAdministration', value: v }),
     setComorbidityBreadth: (v) => dispatch({ type: 'SET_FIELD', field: 'comorbidityBreadth', value: v }),
     setMetabolicTreatmentApproach: (v) => dispatch({ type: 'SET_FIELD', field: 'metabolicTreatmentApproach', value: v }),
+    setCvOutcomeBenefit: (v) => dispatch({ type: 'SET_FIELD', field: 'cvOutcomeBenefit', value: v }),
+    setCvTrialEndpoint: (v) => dispatch({ type: 'SET_FIELD', field: 'cvTrialEndpoint', value: v }),
+    setCvPopulationRisk: (v) => dispatch({ type: 'SET_FIELD', field: 'cvPopulationRisk', value: v }),
+    setResistanceProfile: (v) => dispatch({ type: 'SET_FIELD', field: 'resistanceProfile', value: v }),
+    setInfectionChronicity: (v) => dispatch({ type: 'SET_FIELD', field: 'infectionChronicity', value: v }),
+    setPublicHealthPriority: (v) => dispatch({ type: 'SET_FIELD', field: 'publicHealthPriority', value: v }),
+    setOcularDelivery: (v) => dispatch({ type: 'SET_FIELD', field: 'ocularDelivery', value: v }),
+    setTreatmentDurability: (v) => dispatch({ type: 'SET_FIELD', field: 'treatmentDurability', value: v }),
+    setVisionImpact: (v) => dispatch({ type: 'SET_FIELD', field: 'visionImpact', value: v }),
+    setWhTargetPopulation: (v) => dispatch({ type: 'SET_FIELD', field: 'whTargetPopulation', value: v }),
+    setWhUnmetNeed: (v) => dispatch({ type: 'SET_FIELD', field: 'whUnmetNeed', value: v }),
+    setWhRegulatory: (v) => dispatch({ type: 'SET_FIELD', field: 'whRegulatory', value: v }),
     setWizardStep: (v) => dispatch({ type: 'SET_STEP', step: v }),
     setQuickMode: (v) => dispatch({ type: 'SET_FIELD', field: 'quickMode', value: v }),
     setShowTemplates: (v) => dispatch({ type: 'SET_FIELD', field: 'showTemplates', value: v }),

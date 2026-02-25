@@ -12,10 +12,18 @@ import {
   neurologyModalityOptions,
   immunologyModalityOptions,
   metabolicModalityOptions,
+  cardiovascularModalityOptions,
+  infectiousDiseaseModalityOptions,
+  ophthalmologyModalityOptions,
+  womensHealthModalityOptions,
   indicationOptions,
   neurologyIndicationOptions,
   immunologyIndicationOptions,
   metabolicIndicationOptions,
+  cardiovascularIndicationOptions,
+  infectiousDiseaseIndicationOptions,
+  ophthalmologyIndicationOptions,
+  womensHealthIndicationOptions,
   biomarkerOptions,
 } from '@/lib/calculations';
 import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
@@ -56,21 +64,29 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   onBiomarkerChange,
   onShowAdvanced,
 }: AssetDetailsSectionProps) {
-  const modalityOptionsList = therapeuticArea === 'metabolic'
-    ? metabolicModalityOptions
-    : therapeuticArea === 'neurology'
-    ? neurologyModalityOptions
-    : therapeuticArea === 'immunology'
-    ? immunologyModalityOptions
-    : modalityOptions;
+  const modalityMap: Record<TherapeuticArea, typeof modalityOptions> = {
+    oncology: modalityOptions,
+    neurology: neurologyModalityOptions,
+    immunology: immunologyModalityOptions,
+    metabolic: metabolicModalityOptions,
+    cardiovascular: cardiovascularModalityOptions,
+    infectiousDisease: infectiousDiseaseModalityOptions,
+    ophthalmology: ophthalmologyModalityOptions,
+    womensHealth: womensHealthModalityOptions,
+  };
+  const modalityOptionsList = modalityMap[therapeuticArea] || modalityOptions;
 
-  const indicationOptionsList = therapeuticArea === 'metabolic'
-    ? metabolicIndicationOptions
-    : therapeuticArea === 'neurology'
-    ? neurologyIndicationOptions
-    : therapeuticArea === 'immunology'
-    ? immunologyIndicationOptions
-    : indicationOptions;
+  const indicationMap: Record<TherapeuticArea, typeof indicationOptions> = {
+    oncology: indicationOptions,
+    neurology: neurologyIndicationOptions,
+    immunology: immunologyIndicationOptions,
+    metabolic: metabolicIndicationOptions,
+    cardiovascular: cardiovascularIndicationOptions,
+    infectiousDisease: infectiousDiseaseIndicationOptions,
+    ophthalmology: ophthalmologyIndicationOptions,
+    womensHealth: womensHealthIndicationOptions,
+  };
+  const indicationOptionsList = indicationMap[therapeuticArea] || indicationOptions;
 
   const phaseImpactBadges = useMemo(() => {
     const badges: Record<string, ImpactBadge> = {};

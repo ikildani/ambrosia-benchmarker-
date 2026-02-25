@@ -384,6 +384,7 @@ export function getReportStyles(): string {
       display: flex;
       justify-content: center;
       margin: 6px 0;
+      overflow: hidden;
     }
 
     .chart-container svg {

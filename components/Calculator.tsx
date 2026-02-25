@@ -27,6 +27,18 @@ import type {
   RouteOfAdministration,
   ComorbidityBreadth,
   MetabolicTreatmentApproach,
+  CVOutcomeBenefit,
+  CVTrialEndpoint,
+  CVPopulationRisk,
+  ResistanceProfile,
+  InfectionChronicity,
+  PublicHealthPriority,
+  OcularDelivery,
+  TreatmentDurability,
+  VisionImpact,
+  WHTargetPopulation,
+  WHUnmetNeed,
+  WHRegulatory,
 } from '@/lib/calculations';
 import { calculateDealTerms } from '@/lib/calculations';
 import { BENCHMARK_VERSION } from '@/lib/config/constants';
@@ -393,6 +405,34 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   onRouteOfAdministrationChange: (newValue: RouteOfAdministration) => { trackParameterChange('routeOfAdministration', state.routeOfAdministration, newValue); actions.setRouteOfAdministration(newValue); },
                   onComorbidityBreadthChange: (newValue: ComorbidityBreadth) => { trackParameterChange('comorbidityBreadth', state.comorbidityBreadth, newValue); actions.setComorbidityBreadth(newValue); },
                   onMetabolicTreatmentApproachChange: (newValue: MetabolicTreatmentApproach) => { trackParameterChange('metabolicTreatmentApproach', state.metabolicTreatmentApproach, newValue); actions.setMetabolicTreatmentApproach(newValue); },
+                  // Cardiovascular
+                  cvOutcomeBenefit: state.cvOutcomeBenefit,
+                  cvTrialEndpoint: state.cvTrialEndpoint,
+                  cvPopulationRisk: state.cvPopulationRisk,
+                  onCvOutcomeBenefitChange: (newValue: CVOutcomeBenefit) => { trackParameterChange('cvOutcomeBenefit', state.cvOutcomeBenefit, newValue); actions.setCvOutcomeBenefit(newValue); },
+                  onCvTrialEndpointChange: (newValue: CVTrialEndpoint) => { trackParameterChange('cvTrialEndpoint', state.cvTrialEndpoint, newValue); actions.setCvTrialEndpoint(newValue); },
+                  onCvPopulationRiskChange: (newValue: CVPopulationRisk) => { trackParameterChange('cvPopulationRisk', state.cvPopulationRisk, newValue); actions.setCvPopulationRisk(newValue); },
+                  // Infectious Disease
+                  resistanceProfile: state.resistanceProfile,
+                  infectionChronicity: state.infectionChronicity,
+                  publicHealthPriority: state.publicHealthPriority,
+                  onResistanceProfileChange: (newValue: ResistanceProfile) => { trackParameterChange('resistanceProfile', state.resistanceProfile, newValue); actions.setResistanceProfile(newValue); },
+                  onInfectionChronicityChange: (newValue: InfectionChronicity) => { trackParameterChange('infectionChronicity', state.infectionChronicity, newValue); actions.setInfectionChronicity(newValue); },
+                  onPublicHealthPriorityChange: (newValue: PublicHealthPriority) => { trackParameterChange('publicHealthPriority', state.publicHealthPriority, newValue); actions.setPublicHealthPriority(newValue); },
+                  // Ophthalmology
+                  ocularDelivery: state.ocularDelivery,
+                  treatmentDurability: state.treatmentDurability,
+                  visionImpact: state.visionImpact,
+                  onOcularDeliveryChange: (newValue: OcularDelivery) => { trackParameterChange('ocularDelivery', state.ocularDelivery, newValue); actions.setOcularDelivery(newValue); },
+                  onTreatmentDurabilityChange: (newValue: TreatmentDurability) => { trackParameterChange('treatmentDurability', state.treatmentDurability, newValue); actions.setTreatmentDurability(newValue); },
+                  onVisionImpactChange: (newValue: VisionImpact) => { trackParameterChange('visionImpact', state.visionImpact, newValue); actions.setVisionImpact(newValue); },
+                  // Women's Health
+                  whTargetPopulation: state.whTargetPopulation,
+                  whUnmetNeed: state.whUnmetNeed,
+                  whRegulatory: state.whRegulatory,
+                  onWhTargetPopulationChange: (newValue: WHTargetPopulation) => { trackParameterChange('whTargetPopulation', state.whTargetPopulation, newValue); actions.setWhTargetPopulation(newValue); },
+                  onWhUnmetNeedChange: (newValue: WHUnmetNeed) => { trackParameterChange('whUnmetNeed', state.whUnmetNeed, newValue); actions.setWhUnmetNeed(newValue); },
+                  onWhRegulatoryChange: (newValue: WHRegulatory) => { trackParameterChange('whRegulatory', state.whRegulatory, newValue); actions.setWhRegulatory(newValue); },
                 } as const;
 
                 // Determine which fields are visible on this step for filtering warnings

@@ -202,6 +202,14 @@ export function getTAColors(ta: string): { primary: string; light: string; label
       return { primary: COLORS.blue, light: COLORS.blueLight, label: 'Immunology' };
     case 'metabolic':
       return { primary: COLORS.green, light: COLORS.greenLight, label: 'Metabolic / Obesity' };
+    case 'cardiovascular':
+      return { primary: COLORS.rose, light: COLORS.roseLight, label: 'Cardiovascular' };
+    case 'infectiousDisease':
+      return { primary: '#f97316', light: '#fff7ed', label: 'Infectious Disease' };
+    case 'ophthalmology':
+      return { primary: COLORS.teal, light: COLORS.tealLight, label: 'Ophthalmology' };
+    case 'womensHealth':
+      return { primary: '#ec4899', light: '#fdf2f8', label: "Women's Health" };
     default:
       return { primary: COLORS.teal, light: COLORS.tealLight, label: ta };
   }

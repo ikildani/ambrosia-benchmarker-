@@ -54,6 +54,7 @@ export default function PartnerMatchesContainer({
   const [matchesShown, setMatchesShown] = useState(0);
   const [upgradeCta, setUpgradeCta] = useState<any>(null);
   const [advisoryCta, setAdvisoryCta] = useState<any>(null);
+  const [serverTier, setServerTier] = useState<'free' | 'pro' | 'report'>(tier);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [calculationId, setCalculationId] = useState<string | undefined>();
@@ -93,6 +94,10 @@ export default function PartnerMatchesContainer({
       setUpgradeCta(data.upgrade_cta || null);
       setAdvisoryCta(data.advisory_cta || null);
       setCalculationId(data.calculation_id);
+      // Use server-verified tier (source of truth) for UI decisions
+      if (data.user_tier) {
+        setServerTier(data.user_tier);
+      }
 
       // Notify parent of loaded matches for PDF export and Market Urgency
       if (onMatchesLoaded && fetchedMatches.length > 0) {
@@ -177,7 +182,7 @@ export default function PartnerMatchesContainer({
       matches={matches}
       totalMatches={totalMatches}
       matchesShown={matchesShown}
-      userTier={tier}
+      userTier={serverTier}
       upgradeCta={upgradeCta}
       advisoryCta={advisoryCta}
       onUpgradeClick={onUpgrade}

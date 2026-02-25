@@ -124,6 +124,84 @@ export const comorbidityBreadthDescriptions: Record<string, string> = {
   organProtective: 'Liver, kidney, or heart protection',
 };
 
+// --- Target Profile descriptions (cardiovascular) ---
+export const cvOutcomeBenefitDescriptions: Record<string, string> = {
+  mortalityReduction: 'Gold standard, DAPA-HF/EMPEROR-like',
+  hospitalizationReduction: 'HF hospitalization, strong value',
+  symptomImprovement: 'Functional endpoints, baseline value',
+};
+
+export const cvTrialEndpointDescriptions: Record<string, string> = {
+  maceEndpoint: 'Hard outcomes, costlier but definitive',
+  surrogateBiomarker: 'NT-proBNP, imaging surrogate',
+  functionalEndpoint: '6MWT, KCCQ, standard burden',
+};
+
+export const cvPopulationRiskDescriptions: Record<string, string> = {
+  highRisk: 'Post-MI/HF, highest urgency',
+  moderateRisk: 'Established CVD, standard',
+  primaryPrevention: 'Largest market, lowest urgency',
+};
+
+// --- Target Profile descriptions (infectious disease) ---
+export const resistanceProfileDescriptions: Record<string, string> = {
+  novelTarget: 'New MOA, addresses resistance',
+  existingClassImproved: 'Better PK/tolerability vs. class',
+  broadSpectrum: 'Wide coverage, standard class',
+};
+
+export const infectionChronicityDescriptions: Record<string, string> = {
+  acute: 'Short treatment, fast trials',
+  chronic: 'HBV/HIV-like, recurring revenue',
+  latent: 'TB/HSV-like, eradication potential',
+};
+
+export const publicHealthPriorityDescriptions: Record<string, string> = {
+  whoUrgent: 'WHO urgent, BARDA/CARB-X eligible',
+  whoCritical: 'WHO critical, push+pull incentives',
+  standard: 'Standard priority pathogen',
+};
+
+// --- Target Profile descriptions (ophthalmology) ---
+export const ocularDeliveryDescriptions: Record<string, string> = {
+  intravitreal: 'Standard injection, proven route',
+  topical: 'Patient-friendly, limited reach',
+  oral: 'Systemic, off-target risk',
+  implant: 'Sustained-release, reduced burden',
+};
+
+export const treatmentDurabilityDescriptions: Record<string, string> = {
+  oneTime: 'Gene therapy cure, highest premium',
+  extendedDuration: 'Quarterly+, reduced burden',
+  chronicInjection: 'Monthly/bimonthly, standard',
+};
+
+export const visionImpactDescriptions: Record<string, string> = {
+  visionThreatening: 'Blindness risk, highest urgency',
+  visionImpairing: 'Significant visual loss',
+  symptomRelief: 'Comfort/quality of life',
+};
+
+// --- Target Profile descriptions (women's health) ---
+export const whTargetPopulationDescriptions: Record<string, string> = {
+  reproductiveAge: 'Largest population, chronic use',
+  perimenopause: 'Growing market, emerging targets',
+  postmenopause: 'HRT/osteoporosis, established',
+  pregnancy: 'High unmet need, regulatory complexity',
+};
+
+export const whUnmetNeedDescriptions: Record<string, string> = {
+  noApprovedTherapy: 'No FDA-approved option, highest premium',
+  inadequateOptions: 'Options exist but insufficient',
+  wellServed: 'Multiple approved therapies',
+};
+
+export const whRegulatoryDescriptions: Record<string, string> = {
+  acceleratedPathway: 'Breakthrough/fast track eligible',
+  standardPathway: 'Conventional regulatory path',
+  pregnancyComplexity: 'Teratogenicity studies required',
+};
+
 // --- Biomarker Status descriptions ---
 export const biomarkerDescriptions: Record<string, string> = {
   selected: 'Enriched population, higher response rates',
@@ -167,4 +245,20 @@ export const sectionHelp: Record<string, string> = {
   weightLossEfficacy: 'Superior weight loss (>20%) commands 30% premium. Modest (<15%) carries 15% discount vs. GLP-1 standard.',
   routeOfAdministration: 'Oral administration is the biggest competitive advantage in metabolic (+30%). Injectable is the baseline.',
   comorbidityBreadth: 'Cardiometabolic benefit (CV + metabolic data) adds 25% through label expansion potential.',
+  // Cardiovascular
+  cvOutcomeBenefit: 'Mortality reduction is the gold standard in CV, commanding 30%+ premiums. Symptom improvement is the baseline.',
+  cvTrialEndpoint: 'MACE endpoint trials are costlier but de-risk the asset significantly (+25%). Surrogate biomarkers are standard.',
+  cvPopulationRisk: 'High-risk populations justify premium pricing and faster enrollment. Primary prevention targets the largest market but lowest urgency.',
+  // Infectious Disease
+  resistanceProfile: 'Novel-target antibiotics/antivirals addressing resistance command 30% premiums. Broad-spectrum is baseline.',
+  infectionChronicity: 'Chronic infections (HBV, HIV) offer recurring revenue and 20% premiums. Acute infections have faster trials but smaller per-patient value.',
+  publicHealthPriority: 'WHO urgent/critical priority pathogens qualify for CARB-X, BARDA, and pull incentives adding 25%+ to deal value.',
+  // Ophthalmology
+  ocularDelivery: 'Implant/sustained-release delivery reduces injection burden, commanding 25% premium. Intravitreal injection is the baseline.',
+  treatmentDurability: 'One-time gene therapy cures command 35%+ premium. Extended-duration (quarterly) adds 15% vs. monthly injections.',
+  visionImpact: 'Vision-threatening conditions (wet AMD, inherited retinal dystrophies) justify premium pricing (+20%). Symptom relief is baseline.',
+  // Women's Health
+  whTargetPopulation: 'Reproductive-age women represent the largest addressable population. Pregnancy-related conditions carry regulatory complexity but high unmet need.',
+  whUnmetNeed: 'No-approved-therapy indications command 25%+ premium. Inadequate options add 10%. Well-served markets are baseline.',
+  whRegulatory: 'Accelerated pathways (breakthrough, fast track) add 15-20% premium. Pregnancy-related regulatory complexity can delay but doesn\'t reduce deal value.',
 };

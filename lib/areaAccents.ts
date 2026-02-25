@@ -44,4 +44,32 @@ export const STEP_ACCENTS: Record<TherapeuticArea, StepAccent> = {
     bg30: 'bg-emerald-500/30',
     text30: 'text-emerald-700 dark:text-emerald-300',
   },
+  cardiovascular: {
+    bg: 'bg-rose-500',
+    bg70: 'bg-rose-500/70',
+    bg50: 'bg-rose-500/50',
+    bg30: 'bg-rose-500/30',
+    text30: 'text-rose-700 dark:text-rose-300',
+  },
+  infectiousDisease: {
+    bg: 'bg-orange-500',
+    bg70: 'bg-orange-500/70',
+    bg50: 'bg-orange-500/50',
+    bg30: 'bg-orange-500/30',
+    text30: 'text-orange-700 dark:text-orange-300',
+  },
+  ophthalmology: {
+    bg: 'bg-cyan-500',
+    bg70: 'bg-cyan-500/70',
+    bg50: 'bg-cyan-500/50',
+    bg30: 'bg-cyan-500/30',
+    text30: 'text-cyan-700 dark:text-cyan-300',
+  },
+  womensHealth: {
+    bg: 'bg-pink-500',
+    bg70: 'bg-pink-500/70',
+    bg50: 'bg-pink-500/50',
+    bg30: 'bg-pink-500/30',
+    text30: 'text-pink-700 dark:text-pink-300',
+  },
 };

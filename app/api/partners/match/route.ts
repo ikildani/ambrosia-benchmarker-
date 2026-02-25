@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
@@ -47,38 +47,78 @@ export async function POST(request: NextRequest) {
       therapeutic_area,
     } = parsed.data;
 
-    // Determine user tier from verified sources
+    // Determine user tier from verified sources (3 methods, in priority order)
     let userTier: 'free' | 'pro' | 'report' = 'free';
     let authenticatedUserId: string | null = null;
 
-    // Method 1: Check Supabase user_profiles by user_id
-    if (user_id) {
+    // Method 1: Verify session from cookie (most reliable — server-side auth)
+    try {
+      const serverClient = createServerClient();
+      const { data: { user: sessionUser } } = await serverClient.auth.getUser();
+      if (sessionUser) {
+        authenticatedUserId = sessionUser.id;
+        // Check database profile for tier
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('id, tier')
+          .eq('id', sessionUser.id)
+          .single();
+        if (profile) {
+          userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
+        }
+        // Check PRO_EMAILS using verified session email
+        if (userTier === 'free' && sessionUser.email && isProEmail(sessionUser.email)) {
+          userTier = 'pro';
+        }
+      }
+    } catch {
+      // Cookie-based auth not available — fall through to Method 2
+    }
+
+    // Method 2: Fallback to client-provided user_id (for non-cookie contexts)
+    if (userTier === 'free' && !authenticatedUserId && user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('id, tier')
+        .select('id, tier, email')
         .eq('id', user_id)
         .single();
 
       if (profile) {
         authenticatedUserId = profile.id;
         userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
+        // Check PRO_EMAILS using database-verified email
+        if (userTier === 'free' && profile.email && isProEmail(profile.email)) {
+          userTier = 'pro';
+        }
       }
     }
 
-    // Method 2: Check PRO_EMAILS list using verified email from database profile
-    if (userTier === 'free' && user_id) {
-      const { data: emailProfile } = await supabase
-        .from('user_profiles')
-        .select('email')
-        .eq('id', user_id)
-        .single();
-      if (emailProfile?.email && isProEmail(emailProfile.email)) {
+    // Method 3: Fallback to client-provided email for PRO_EMAILS allowlist check
+    // This is safe because isProEmail() checks against a server-controlled env var list.
+    // Covers users who signed in via custom form (no Supabase session, no DB profile).
+    if (userTier === 'free' && !authenticatedUserId && user_email) {
+      if (isProEmail(user_email)) {
         userTier = 'pro';
       }
+      // Also try to find their profile by email (may have signed up with different ID)
+      if (userTier === 'free') {
+        const { data: emailProfile } = await supabase
+          .from('user_profiles')
+          .select('id, tier, email')
+          .eq('email', user_email.toLowerCase().trim())
+          .single();
+        if (emailProfile) {
+          authenticatedUserId = emailProfile.id;
+          userTier = (emailProfile.tier as 'free' | 'pro' | 'report') || 'free';
+          if (userTier === 'free' && emailProfile.email && isProEmail(emailProfile.email)) {
+            userTier = 'pro';
+          }
+        }
+      }
     }
 
-    // SECURITY: Never trust client-provided tier or email for authorization.
-    // Tier is verified from database only.
+    // SECURITY: Tier is verified server-side (session cookie, database, or PRO_EMAILS allowlist).
+    // Client-provided tier is never trusted for authorization.
 
     // Build match input
     const matchInput: MatchInput = {

@@ -54,12 +54,20 @@ export interface Benchmarks {
   neurologyPhaseBaselines: PhaseBaselines;
   immunologyPhaseBaselines: PhaseBaselines;
   metabolicPhaseBaselines: PhaseBaselines;
+  cardiovascularPhaseBaselines: PhaseBaselines;
+  infectiousDiseasePhaseBaselines: PhaseBaselines;
+  ophthalmologyPhaseBaselines: PhaseBaselines;
+  womensHealthPhaseBaselines: PhaseBaselines;
 
   // Phase config per therapeutic area
   phaseConfig: PhaseConfig;
   neurologyPhaseConfig: PhaseConfig;
   immunologyPhaseConfig: PhaseConfig;
   metabolicPhaseConfig: PhaseConfig;
+  cardiovascularPhaseConfig: PhaseConfig;
+  infectiousDiseasePhaseConfig: PhaseConfig;
+  ophthalmologyPhaseConfig: PhaseConfig;
+  womensHealthPhaseConfig: PhaseConfig;
 
   // Modalities & territories
   modalities: Record<string, MultiplierOption>;
@@ -72,6 +80,10 @@ export interface Benchmarks {
     neurology: Record<string, MultiplierOption>;
     immunology: Record<string, MultiplierOption>;
     metabolic: Record<string, MultiplierOption>;
+    cardiovascular: Record<string, MultiplierOption>;
+    infectiousDisease: Record<string, MultiplierOption>;
+    ophthalmology: Record<string, MultiplierOption>;
+    womensHealth: Record<string, MultiplierOption>;
   };
 
   // Multiplier config — all 19 categories
@@ -101,6 +113,22 @@ export interface Benchmarks {
     routeOfAdministration: MultiplierCategory;
     comorbidityBreadth: MultiplierCategory;
     metabolicTreatmentApproach: MultiplierCategory;
+    // Cardiovascular
+    cvOutcomeBenefit: MultiplierCategory;
+    cvTrialEndpoint: MultiplierCategory;
+    cvPopulationRisk: MultiplierCategory;
+    // Infectious Disease
+    resistanceProfile: MultiplierCategory;
+    infectionChronicity: MultiplierCategory;
+    publicHealthPriority: MultiplierCategory;
+    // Ophthalmology
+    ocularDelivery: MultiplierCategory;
+    treatmentDurability: MultiplierCategory;
+    visionImpact: MultiplierCategory;
+    // Women's Health
+    whTargetPopulation: MultiplierCategory;
+    whUnmetNeed: MultiplierCategory;
+    whRegulatory: MultiplierCategory;
   };
 
   // Interaction terms and special adjustments
@@ -145,12 +173,16 @@ interface CalibrationRow {
 }
 
 // Map therapeutic_area to the correct baselines key in Benchmarks
-type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines';
+type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines' | 'cardiovascularPhaseBaselines' | 'infectiousDiseasePhaseBaselines' | 'ophthalmologyPhaseBaselines' | 'womensHealthPhaseBaselines';
 const TA_BASELINES_KEY: Record<string, PhaseBaselinesKey> = {
   'oncology': 'phaseBaselines',
   'neurology': 'neurologyPhaseBaselines',
   'immunology': 'immunologyPhaseBaselines',
   'metabolic': 'metabolicPhaseBaselines',
+  'cardiovascular': 'cardiovascularPhaseBaselines',
+  'infectiousDisease': 'infectiousDiseasePhaseBaselines',
+  'ophthalmology': 'ophthalmologyPhaseBaselines',
+  'womensHealth': 'womensHealthPhaseBaselines',
 };
 
 /**

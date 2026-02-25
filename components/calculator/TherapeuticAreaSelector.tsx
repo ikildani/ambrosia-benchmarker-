@@ -6,8 +6,12 @@ import {
   neurologyIndicationOptions,
   immunologyIndicationOptions,
   metabolicIndicationOptions,
+  cardiovascularIndicationOptions,
+  infectiousDiseaseIndicationOptions,
+  ophthalmologyIndicationOptions,
+  womensHealthIndicationOptions,
 } from '@/lib/calculations';
-import { Microscope, Brain, ShieldCheck, HeartPulse, Check } from 'lucide-react';
+import { Microscope, Brain, ShieldCheck, HeartPulse, Check, Heart, Bug, Eye, Baby } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 // Compute indication counts per area
@@ -23,6 +27,10 @@ const INDICATION_COUNTS: Record<TherapeuticArea, { total: number; groups: number
   neurology: countIndications(neurologyIndicationOptions),
   immunology: countIndications(immunologyIndicationOptions),
   metabolic: countIndications(metabolicIndicationOptions),
+  cardiovascular: countIndications(cardiovascularIndicationOptions),
+  infectiousDisease: countIndications(infectiousDiseaseIndicationOptions),
+  ophthalmology: countIndications(ophthalmologyIndicationOptions),
+  womensHealth: countIndications(womensHealthIndicationOptions),
 };
 
 interface AreaMeta {
@@ -71,6 +79,42 @@ const AREA_META: Record<TherapeuticArea, AreaMeta> = {
     iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
     iconBgSelectedClass: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400',
     hoverBorderClass: 'hover:border-emerald-300 dark:hover:border-emerald-600',
+  },
+  cardiovascular: {
+    icon: Heart,
+    description: 'Heart failure, arrhythmia & vascular',
+    accentClass: 'border-rose-500 text-rose-700 dark:text-rose-400',
+    accentBgClass: 'bg-rose-50 dark:bg-rose-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400',
+    hoverBorderClass: 'hover:border-rose-300 dark:hover:border-rose-600',
+  },
+  infectiousDisease: {
+    icon: Bug,
+    description: 'Antivirals, vaccines & AMR',
+    accentClass: 'border-orange-500 text-orange-700 dark:text-orange-400',
+    accentBgClass: 'bg-orange-50 dark:bg-orange-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400',
+    hoverBorderClass: 'hover:border-orange-300 dark:hover:border-orange-600',
+  },
+  ophthalmology: {
+    icon: Eye,
+    description: 'Retinal, glaucoma & ocular surface',
+    accentClass: 'border-cyan-500 text-cyan-700 dark:text-cyan-400',
+    accentBgClass: 'bg-cyan-50 dark:bg-cyan-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400',
+    hoverBorderClass: 'hover:border-cyan-300 dark:hover:border-cyan-600',
+  },
+  womensHealth: {
+    icon: Baby,
+    description: "Reproductive, maternal & menopause",
+    accentClass: 'border-pink-500 text-pink-700 dark:text-pink-400',
+    accentBgClass: 'bg-pink-50 dark:bg-pink-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400',
+    hoverBorderClass: 'hover:border-pink-300 dark:hover:border-pink-600',
   },
 };
 
@@ -128,7 +172,7 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
   return (
     <div className="mb-6 lg:mb-8">
       <label id="therapeutic-area-label" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">Therapeutic Area</label>
-      <div ref={groupRef} role="radiogroup" aria-labelledby="therapeutic-area-label" onKeyDown={handleKeyDown} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div ref={groupRef} role="radiogroup" aria-labelledby="therapeutic-area-label" onKeyDown={handleKeyDown} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         {therapeuticAreaOptions.map((option) => {
           const area = option.value as TherapeuticArea;
           const isSelected = therapeuticArea === area;

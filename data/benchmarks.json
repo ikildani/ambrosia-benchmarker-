@@ -237,6 +237,114 @@
       "royalty": { "base": 20, "max": 32 }
     }
   },
+  "cardiovascularPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 15, "median": 35, "high": 80 },
+      "totalValue": { "low": 200, "median": 500, "high": 1200 },
+      "royalty": { "base": 4, "max": 8 }
+    },
+    "phase1": {
+      "upfront": { "low": 40, "median": 85, "high": 200 },
+      "totalValue": { "low": 400, "median": 800, "high": 1800 },
+      "royalty": { "base": 6, "max": 12 }
+    },
+    "phase2": {
+      "upfront": { "low": 100, "median": 250, "high": 600 },
+      "totalValue": { "low": 800, "median": 1800, "high": 4000 },
+      "royalty": { "base": 8, "max": 16 }
+    },
+    "phase3": {
+      "upfront": { "low": 250, "median": 550, "high": 1200 },
+      "totalValue": { "low": 1500, "median": 3200, "high": 7000 },
+      "royalty": { "base": 12, "max": 22 }
+    },
+    "approved": {
+      "upfront": { "low": 500, "median": 1200, "high": 3000 },
+      "totalValue": { "low": 3000, "median": 6000, "high": 12000 },
+      "royalty": { "base": 16, "max": 28 }
+    }
+  },
+  "infectiousDiseasePhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 10, "median": 30, "high": 75 },
+      "totalValue": { "low": 150, "median": 400, "high": 1000 },
+      "royalty": { "base": 3, "max": 7 }
+    },
+    "phase1": {
+      "upfront": { "low": 35, "median": 80, "high": 180 },
+      "totalValue": { "low": 350, "median": 700, "high": 1500 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase2": {
+      "upfront": { "low": 80, "median": 200, "high": 500 },
+      "totalValue": { "low": 600, "median": 1400, "high": 3200 },
+      "royalty": { "base": 7, "max": 14 }
+    },
+    "phase3": {
+      "upfront": { "low": 200, "median": 450, "high": 1000 },
+      "totalValue": { "low": 1200, "median": 2500, "high": 5500 },
+      "royalty": { "base": 10, "max": 20 }
+    },
+    "approved": {
+      "upfront": { "low": 400, "median": 900, "high": 2500 },
+      "totalValue": { "low": 2500, "median": 5000, "high": 10000 },
+      "royalty": { "base": 14, "max": 25 }
+    }
+  },
+  "ophthalmologyPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 12, "median": 30, "high": 70 },
+      "totalValue": { "low": 180, "median": 450, "high": 1100 },
+      "royalty": { "base": 4, "max": 8 }
+    },
+    "phase1": {
+      "upfront": { "low": 30, "median": 75, "high": 180 },
+      "totalValue": { "low": 350, "median": 750, "high": 1600 },
+      "royalty": { "base": 6, "max": 12 }
+    },
+    "phase2": {
+      "upfront": { "low": 80, "median": 220, "high": 550 },
+      "totalValue": { "low": 700, "median": 1600, "high": 3500 },
+      "royalty": { "base": 8, "max": 16 }
+    },
+    "phase3": {
+      "upfront": { "low": 200, "median": 500, "high": 1100 },
+      "totalValue": { "low": 1400, "median": 3000, "high": 6500 },
+      "royalty": { "base": 12, "max": 22 }
+    },
+    "approved": {
+      "upfront": { "low": 500, "median": 1100, "high": 2800 },
+      "totalValue": { "low": 2800, "median": 5500, "high": 11000 },
+      "royalty": { "base": 16, "max": 27 }
+    }
+  },
+  "womensHealthPhaseBaselines": {
+    "preclinical": {
+      "upfront": { "low": 8, "median": 22, "high": 55 },
+      "totalValue": { "low": 120, "median": 350, "high": 800 },
+      "royalty": { "base": 3, "max": 7 }
+    },
+    "phase1": {
+      "upfront": { "low": 25, "median": 60, "high": 140 },
+      "totalValue": { "low": 250, "median": 550, "high": 1200 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase2": {
+      "upfront": { "low": 60, "median": 150, "high": 400 },
+      "totalValue": { "low": 500, "median": 1200, "high": 2800 },
+      "royalty": { "base": 7, "max": 14 }
+    },
+    "phase3": {
+      "upfront": { "low": 150, "median": 380, "high": 850 },
+      "totalValue": { "low": 1000, "median": 2200, "high": 5000 },
+      "royalty": { "base": 10, "max": 18 }
+    },
+    "approved": {
+      "upfront": { "low": 300, "median": 750, "high": 2000 },
+      "totalValue": { "low": 2000, "median": 4200, "high": 8500 },
+      "royalty": { "base": 14, "max": 24 }
+    }
+  },
   "phaseConfig": {
     "rangeWidths": {
       "preclinical": 0.60,
@@ -329,6 +437,74 @@
       "approved": { "dev": 0.05, "reg": 0.10, "comm": 0.85 }
     }
   },
+  "cardiovascularPhaseConfig": {
+    "rangeWidths": { "preclinical": 0.55, "phase1": 0.45, "phase2": 0.35, "phase3": 0.25, "approved": 0.15 },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.05, "high": 0.10 },
+      "phase1": { "low": 0.08, "high": 0.15 },
+      "phase2": { "low": 0.14, "high": 0.24 },
+      "phase3": { "low": 0.22, "high": 0.35 },
+      "approved": { "low": 0.30, "high": 0.50 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.40, "reg": 0.30, "comm": 0.30 },
+      "phase1": { "dev": 0.35, "reg": 0.30, "comm": 0.35 },
+      "phase2": { "dev": 0.22, "reg": 0.28, "comm": 0.50 },
+      "phase3": { "dev": 0.10, "reg": 0.25, "comm": 0.65 },
+      "approved": { "dev": 0.05, "reg": 0.12, "comm": 0.83 }
+    }
+  },
+  "infectiousDiseasePhaseConfig": {
+    "rangeWidths": { "preclinical": 0.50, "phase1": 0.40, "phase2": 0.32, "phase3": 0.22, "approved": 0.12 },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.08, "high": 0.15 },
+      "phase1": { "low": 0.12, "high": 0.20 },
+      "phase2": { "low": 0.18, "high": 0.30 },
+      "phase3": { "low": 0.25, "high": 0.40 },
+      "approved": { "low": 0.35, "high": 0.55 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.45, "reg": 0.25, "comm": 0.30 },
+      "phase1": { "dev": 0.35, "reg": 0.25, "comm": 0.40 },
+      "phase2": { "dev": 0.22, "reg": 0.23, "comm": 0.55 },
+      "phase3": { "dev": 0.10, "reg": 0.20, "comm": 0.70 },
+      "approved": { "dev": 0.05, "reg": 0.10, "comm": 0.85 }
+    }
+  },
+  "ophthalmologyPhaseConfig": {
+    "rangeWidths": { "preclinical": 0.55, "phase1": 0.45, "phase2": 0.35, "phase3": 0.25, "approved": 0.15 },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.06, "high": 0.12 },
+      "phase1": { "low": 0.10, "high": 0.18 },
+      "phase2": { "low": 0.15, "high": 0.25 },
+      "phase3": { "low": 0.22, "high": 0.35 },
+      "approved": { "low": 0.30, "high": 0.48 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.42, "reg": 0.28, "comm": 0.30 },
+      "phase1": { "dev": 0.32, "reg": 0.28, "comm": 0.40 },
+      "phase2": { "dev": 0.20, "reg": 0.25, "comm": 0.55 },
+      "phase3": { "dev": 0.10, "reg": 0.22, "comm": 0.68 },
+      "approved": { "dev": 0.05, "reg": 0.12, "comm": 0.83 }
+    }
+  },
+  "womensHealthPhaseConfig": {
+    "rangeWidths": { "preclinical": 0.55, "phase1": 0.45, "phase2": 0.38, "phase3": 0.28, "approved": 0.18 },
+    "upfrontRatios": {
+      "preclinical": { "low": 0.05, "high": 0.10 },
+      "phase1": { "low": 0.08, "high": 0.14 },
+      "phase2": { "low": 0.12, "high": 0.22 },
+      "phase3": { "low": 0.18, "high": 0.30 },
+      "approved": { "low": 0.25, "high": 0.42 }
+    },
+    "milestoneAllocations": {
+      "preclinical": { "dev": 0.42, "reg": 0.28, "comm": 0.30 },
+      "phase1": { "dev": 0.35, "reg": 0.25, "comm": 0.40 },
+      "phase2": { "dev": 0.22, "reg": 0.23, "comm": 0.55 },
+      "phase3": { "dev": 0.10, "reg": 0.20, "comm": 0.70 },
+      "approved": { "dev": 0.05, "reg": 0.12, "comm": 0.83 }
+    }
+  },
   "modalities": {
     "smallMolecule": { "multiplier": 1.00, "label": "Small Molecule", "context": "Baseline" },
     "mab": { "multiplier": 1.03, "label": "Monoclonal Antibody (naked)", "context": "Mature, commoditizing" },
@@ -371,7 +547,22 @@
     "amylinAnalog": { "multiplier": 1.35, "label": "Amylin Analog", "context": "Novo cagrilintide/sema combo (CagriSema); satiety mechanism complementary to GLP-1" },
     "oralPeptide": { "multiplier": 1.55, "label": "Oral Peptide", "context": "Oral semaglutide breakthrough; oral convenience premium; Rybelsus $2B+" },
     "antiActivin": { "multiplier": 1.40, "label": "Anti-Activin / Myostatin", "context": "Muscle-sparing weight loss; Scholar Rock/Lilly; differentiates from pure GLP-1" },
-    "microbiomeBased": { "multiplier": 0.90, "label": "Microbiome-Based Therapy", "context": "Early-stage; no FDA approvals; no major licensing precedents; high clinical risk" }
+    "microbiomeBased": { "multiplier": 0.90, "label": "Microbiome-Based Therapy", "context": "Early-stage; no FDA approvals; no major licensing precedents; high clinical risk" },
+    "myosinInhibitor": { "multiplier": 1.30, "label": "Cardiac Myosin Inhibitor", "context": "Mavacamten (Camzyos) first-in-class HCM approval; aficamten Phase 3; validated cardiac mechanism" },
+    "anticoagulantNovel": { "multiplier": 1.20, "label": "Novel Anticoagulant (FXI/FXII)", "context": "Factor XI/XII targeting for reduced bleeding risk; Abelacimab, milvexian, asundexian in Phase 3" },
+    "rnaCardio": { "multiplier": 1.25, "label": "RNA Therapeutics (Cardiac)", "context": "Inclisiran (Novartis) PCSK9 siRNA approved; zilebesiran (Alnylam) HTN Phase 2; cardiac RNA validated" },
+    "pcsk9Targeting": { "multiplier": 1.15, "label": "PCSK9-targeting", "context": "Repatha/Praluent antibodies + inclisiran siRNA established; LDL lowering validated CV outcomes" },
+    "antiviral": { "multiplier": 1.10, "label": "Small Molecule Antiviral", "context": "Established modality; Paxlovid ($18B peak), sofosbuvir HCV cure precedent; clear endpoints" },
+    "antibioticNovel": { "multiplier": 1.15, "label": "Novel Antibiotic", "context": "PASTEUR Act pull incentives; BARDA support; WHO AMR priority; challenging commercial model" },
+    "vaccinePreventive": { "multiplier": 1.20, "label": "Preventive Vaccine", "context": "RSV vaccine approvals (Arexvy, Abrysvo) validated; pandemic preparedness funding; large populations" },
+    "phageTherapy": { "multiplier": 0.85, "label": "Bacteriophage Therapy", "context": "Emerging modality; no FDA-approved products; regulatory pathway unclear; compassionate use only" },
+    "antiVegf": { "multiplier": 1.15, "label": "Anti-VEGF (Ocular)", "context": "Eylea/Lucentis franchise $15B+; faricimab bispecific; biosimilar pressure on first-gen; durability differentiation" },
+    "geneTherapyOcular": { "multiplier": 1.35, "label": "Ocular Gene Therapy", "context": "Luxturna (Spark) breakthrough approval; AAV retinal delivery validated; one-time treatment paradigm" },
+    "intravitreal": { "multiplier": 1.18, "label": "Intravitreal Implant/Depot", "context": "Susvimo port delivery system; Ozurdex dexamethasone implant; treatment burden reduction premium" },
+    "topicalOphthalmic": { "multiplier": 0.95, "label": "Topical Eye Drop", "context": "Standard ophthalmic delivery; large market but moderate differentiation; compliance challenges" },
+    "gnrhAntagonist": { "multiplier": 1.22, "label": "GnRH Antagonist (Oral)", "context": "Orilissa/Myfembree validated oral GnRH for endometriosis/fibroids; AbbVie/Myovant $6.7B deal precedent" },
+    "hormoneTherapy": { "multiplier": 1.05, "label": "Hormone Therapy / HRT", "context": "Established modality; growing market with menopause awareness; moderate innovation premium" },
+    "neuroactiveSteroid": { "multiplier": 1.28, "label": "Neuroactive Steroid", "context": "Zuranolone (Zurzuvae) approved for PPD; brexanolone IV precedent; GABA modulation validated for maternal MH" }
   },
   "indications": {
     "solidTumor": {
@@ -398,22 +589,46 @@
       "cervical": { "multiplier": 1.08, "label": "Cervical", "context": "IO approvals + tisotumab vedotin ADC activity; moderate deal interest" },
       "thyroid": { "multiplier": 1.18, "label": "Thyroid (Anaplastic/Medullary)", "context": "High unmet need in anaplastic; RET targeting in medullary; orphan potential" },
       "esophageal": { "multiplier": 1.05, "label": "Esophageal", "context": "IO standard in 1L; overlap with gastric/GEJ; moderate interest" },
-      "smallBowel": { "multiplier": 1.20, "label": "Small Bowel / Appendiceal", "context": "Rare GI tumors; very few therapeutic options; orphan premiums" }
+      "smallBowel": { "multiplier": 1.20, "label": "Small Bowel / Appendiceal", "context": "Rare GI tumors; very few therapeutic options; orphan premiums" },
+      "neuroendocrine": { "multiplier": 1.18, "label": "Neuroendocrine Tumors (NET)", "context": "Lutathera precedent; PRRT expansion; orphan potential" },
+      "uvealMelanoma": { "multiplier": 1.22, "label": "Uveal Melanoma", "context": "Tebentafusp (Immunocore) first-in-class approval; rare, high unmet need" },
+      "testicular": { "multiplier": 0.92, "label": "Testicular (Germ Cell)", "context": "High cure rate with chemo; limited pharma interest" },
+      "adrenocortical": { "multiplier": 1.25, "label": "Adrenocortical Carcinoma", "context": "Ultra-rare; no approved systemic therapy; orphan premiums" },
+      "nasopharyngeal": { "multiplier": 1.08, "label": "Nasopharyngeal Carcinoma", "context": "Endemic in Asia; IO combinations active; growing deal interest" },
+      "thymoma": { "multiplier": 1.15, "label": "Thymoma / Thymic Carcinoma", "context": "Rare thoracic; limited options; orphan-adjacent" },
+      "penile": { "multiplier": 1.10, "label": "Penile Cancer", "context": "Ultra-rare; IO emerging; orphan potential" },
+      "merkelCell": { "multiplier": 1.20, "label": "Merkel Cell Carcinoma", "context": "Avelumab approved; CPI-validated; rare skin malignancy" },
+      "neuroblastoma": { "multiplier": 1.22, "label": "Neuroblastoma", "context": "Pediatric; ALK/GD2 targets; dinutuximab precedent; orphan" },
+      "retinoblastoma": { "multiplier": 1.25, "label": "Retinoblastoma", "context": "Pediatric; gene therapy potential; intra-arterial chemo; orphan" },
+      "osteosarcoma": { "multiplier": 1.18, "label": "Osteosarcoma", "context": "Pediatric bone cancer; limited progress in 30 years; immunotherapy emerging" },
+      "ewingSarcoma": { "multiplier": 1.20, "label": "Ewing Sarcoma", "context": "Pediatric; EWS-FLI1 target; T-cell engaging approaches; orphan" },
+      "rhabdomyosarcoma": { "multiplier": 1.20, "label": "Rhabdomyosarcoma", "context": "Pediatric soft tissue sarcoma; limited progress; orphan premiums" },
+      "vulvar": { "multiplier": 1.12, "label": "Vulvar Cancer", "context": "Rare gynecologic; IO emerging; HPV-associated subset; orphan potential" }
     },
     "hematologic": {
-      "aml": { "multiplier": 1.18, "label": "AML", "context": "High unmet need, targeted agents active" },
-      "all": { "multiplier": 1.12, "label": "ALL", "context": "CAR-T/bispecific success story" },
-      "cll": { "multiplier": 1.00, "label": "CLL", "context": "BTK dominated, mature market" },
-      "myeloma": { "multiplier": 1.15, "label": "Multiple Myeloma", "context": "BCMA hot target, large market" },
-      "dlbcl": { "multiplier": 1.05, "label": "DLBCL", "context": "CAR-T established, bispecifics rising" },
+      "aml": { "multiplier": 1.18, "label": "AML", "context": "High unmet need; venetoclax combinations standard; menin inhibitors (revumenib) emerging; FLT3/IDH targets active" },
+      "all": { "multiplier": 1.15, "label": "ALL", "context": "CAR-T birthplace (Kymriah); bispecifics expanding; pediatric B-ALL high unmet need" },
+      "cll": { "multiplier": 1.00, "label": "CLL", "context": "BTK dominated (ibrutinib, acalabrutinib, zanubrutinib); BCL-2 (venetoclax); mature market with limited novel deal activity" },
+      "myeloma": { "multiplier": 1.22, "label": "Multiple Myeloma", "context": "Hottest heme market; BCMA CAR-T/bispecific/CELMoD frenzy; J&J, BMS, Pfizer all active; $40B+ pipeline" },
+      "dlbcl": { "multiplier": 1.08, "label": "DLBCL", "context": "CAR-T established (Yescarta, Kymriah, Breyanzi); bispecifics (epcoritamab, glofitamab) expanding; second-largest NHL market" },
       "follicular": { "multiplier": 1.00, "label": "Follicular Lymphoma", "context": "Indolent course, established options" },
       "mantleCell": { "multiplier": 1.10, "label": "Mantle Cell Lymphoma", "context": "BTK standard, need for refractory" },
-      "mds": { "multiplier": 1.15, "label": "MDS", "context": "HMA backbone, high unmet need" },
+      "mds": { "multiplier": 1.15, "label": "MDS", "context": "HMA + venetoclax backbone; luspatercept (Reblozyl) validated; TP53-mutant high unmet need; magrolimab interest" },
       "mpn": { "multiplier": 1.10, "label": "MPN", "context": "JAK inhibitor standard" },
       "tCellLymphoma": { "multiplier": 1.20, "label": "T-cell Lymphomas", "context": "High unmet need, few options" },
       "cml": { "multiplier": 0.95, "label": "CML", "context": "Well-served by TKIs; generic imatinib; limited deal activity" },
       "waldenstrom": { "multiplier": 1.15, "label": "Waldenstrom's Macroglobulinemia", "context": "BTK inhibitor success; limited competition; orphan-adjacent" },
-      "hodgkins": { "multiplier": 1.05, "label": "Hodgkin Lymphoma", "context": "BV + IO standard; cure-oriented but well-served" }
+      "hodgkins": { "multiplier": 1.05, "label": "Hodgkin Lymphoma", "context": "BV + IO standard; cure-oriented but well-served" },
+      "marginalZone": { "multiplier": 1.08, "label": "Marginal Zone Lymphoma", "context": "BTK/PI3K overlap; indolent but treatment gap" },
+      "burkitt": { "multiplier": 1.15, "label": "Burkitt Lymphoma", "context": "Aggressive; CAR-T/bispecific interest; pediatric unmet need" },
+      "primaryCNSLymphoma": { "multiplier": 1.25, "label": "Primary CNS Lymphoma", "context": "BBB challenge; rare; high unmet need" },
+      "systemicMastocytosis": { "multiplier": 1.22, "label": "Systemic Mastocytosis", "context": "Avapritinib (Blueprint) approval; KIT-driven; orphan" },
+      "cmml": { "multiplier": 1.12, "label": "CMML", "context": "Overlap with MDS/MPN; limited options" },
+      "hairyCell": { "multiplier": 1.10, "label": "Hairy Cell Leukemia", "context": "BRAF-mutant; vemurafenib off-label; cladribine standard; orphan" },
+      "amyloidosisAL": { "multiplier": 1.25, "label": "AL Amyloidosis", "context": "Daratumumab validated; BCMA emerging; high unmet need; plasma cell overlap" },
+      "castlemanDisease": { "multiplier": 1.22, "label": "Castleman Disease", "context": "Anti-IL-6 (siltuximab) validated; orphan; multicentric form high need" },
+      "aplasticAnemia": { "multiplier": 1.20, "label": "Aplastic Anemia", "context": "Eltrombopag (Promacta) validated; eculizumab in PNH/AA overlap; high unmet need" },
+      "bpdcn": { "multiplier": 1.28, "label": "BPDCN (Blastic Plasmacytoid)", "context": "Tagraxofusp (CD123) approved; ultra-rare; orphan premiums" }
     },
     "neurology": {
       "alzheimers": { "multiplier": 1.30, "label": "Alzheimer's Disease", "context": "Anti-amyloid approvals reset market; BBB delivery premium; $15B+ projected TAM" },
@@ -438,7 +653,31 @@
       "rett": { "multiplier": 1.30, "label": "Rett Syndrome", "context": "Trofinetide (Acadia) approved; gene therapy approaches advancing; orphan premiums" },
       "friedreichs": { "multiplier": 1.28, "label": "Friedreich's Ataxia", "context": "Orphan; frataxin gene therapy advancing; Biogen active" },
       "dmd": { "multiplier": 1.32, "label": "Duchenne Muscular Dystrophy", "context": "Gene therapy paradigm; Sarepta delandistrogene precedent; highest pediatric neuro unmet need" },
-      "chronicPain": { "multiplier": 0.95, "label": "Chronic Pain (Non-Neuropathic)", "context": "Opioid alternative market; Nav1.7/Nav1.8 targets; large but regulatory-complex" }
+      "chronicPain": { "multiplier": 0.95, "label": "Chronic Pain (Non-Neuropathic)", "context": "Opioid alternative market; Nav1.7/Nav1.8 targets; large but regulatory-complex" },
+      "sma": { "multiplier": 1.32, "label": "Spinal Muscular Atrophy (SMA)", "context": "Zolgensma $2.1M gene therapy; Spinraza ASO; highest pediatric deal activity" },
+      "angelman": { "multiplier": 1.28, "label": "Angelman Syndrome", "context": "Gene therapy + ASO approaches; GeneTx/Ultragenyx activity; orphan" },
+      "dravet": { "multiplier": 1.22, "label": "Dravet Syndrome", "context": "Rare epilepsy; Epidiolex + Fintepla approved; gene therapy emerging" },
+      "myotonicDystrophy": { "multiplier": 1.25, "label": "Myotonic Dystrophy", "context": "RNA-targeting approaches (ASO, siRNA); Dyne/Avidity active; high unmet need" },
+      "peripheralNeuropathy": { "multiplier": 1.05, "label": "Peripheral Neuropathy", "context": "Large market; diabetic and CIDP overlap; moderate deal interest" },
+      "spinalCordInjury": { "multiplier": 1.18, "label": "Spinal Cord Injury", "context": "Regenerative medicine approaches; cell therapy; high unmet need" },
+      "tuberousSclerosis": { "multiplier": 1.20, "label": "Tuberous Sclerosis Complex", "context": "mTOR validated; gene therapy emerging; orphan premiums" },
+      "cmt": { "multiplier": 1.25, "label": "Charcot-Marie-Tooth Disease", "context": "Gene therapy (PMP22 targeting for CMT1A); Passage Bio, Ionis active; high orphan value" },
+      "frontotemporal": { "multiplier": 1.25, "label": "Frontotemporal Dementia (FTD)", "context": "GRN/MAPT targets; progranulin gene therapy; growing pharma interest" },
+      "lewyBody": { "multiplier": 1.22, "label": "Lewy Body Dementia", "context": "Overlap PD/AD; alpha-synuclein targets; growing recognition; high unmet need" },
+      "adhd": { "multiplier": 1.00, "label": "ADHD", "context": "Large market but well-served by stimulants; non-stimulant approaches emerging" },
+      "fragileX": { "multiplier": 1.28, "label": "Fragile X Syndrome", "context": "Orphan; FMRP gene replacement advancing; mGluR5 approaches failed; AAV-mediated delivery" },
+      "cdkl5": { "multiplier": 1.30, "label": "CDKL5 Deficiency Disorder", "context": "Ultra-rare; ganaxolone (Ztalmy/Marinus) approved; gene therapy emerging; orphan premiums" },
+      "neurofibromatosis": { "multiplier": 1.20, "label": "Neurofibromatosis (NF1/NF2)", "context": "MEK inhibitor (selumetinib) approved; AstraZeneca precedent; orphan" },
+      "clusterHeadache": { "multiplier": 1.12, "label": "Cluster Headache", "context": "Severe pain; limited options; CGRP expanding into cluster; orphan-adjacent" },
+      "restlessLeg": { "multiplier": 0.95, "label": "Restless Leg Syndrome", "context": "Dopamine agonists established; limited novel deal interest" },
+      "insomnia": { "multiplier": 0.92, "label": "Insomnia / Sleep Disorders", "context": "DORA class established (suvorexant, lemborexant); crowded market" },
+      "stiffPerson": { "multiplier": 1.25, "label": "Stiff Person Syndrome", "context": "Rare autoimmune-neurologic; orphan; growing awareness post-Celine Dion" },
+      "lgmd": { "multiplier": 1.28, "label": "Limb-Girdle Muscular Dystrophy", "context": "Gene therapy active; Sarepta multiple subtypes; orphan premiums" },
+      "fshd": { "multiplier": 1.22, "label": "FSHD (Facioscapulohumeral Dystrophy)", "context": "DUX4 targeting; Fulcrum/Avidity active; orphan" },
+      "praderWilli": { "multiplier": 1.25, "label": "Prader-Willi Syndrome", "context": "Orphan; multiple approaches (DCCR, oxytocin); Soleno Therapeutics active" },
+      "batten": { "multiplier": 1.30, "label": "Batten Disease (CLN)", "context": "Gene therapy; BioMarin Brineura (CLN2) precedent; ultra-rare pediatric" },
+      "gbs": { "multiplier": 1.18, "label": "Guillain-Barré Syndrome", "context": "Acute autoimmune neuropathy; FcRn/complement potential; IVIg standard" },
+      "ataxiaTelangiectasia": { "multiplier": 1.25, "label": "Ataxia Telangiectasia", "context": "Orphan; DNA repair defect; gene therapy emerging; pediatric" }
     },
     "immunology": {
       "ulcerativeColitis": { "multiplier": 1.20, "label": "Ulcerative Colitis", "context": "Largest IBD market; S1P, JAK, TL1A, integrin all competing" },
@@ -470,7 +709,31 @@
       "gvhd": { "multiplier": 1.25, "label": "Graft-vs-Host Disease (GVHD)", "context": "Orphan; JAK inhibitors approved; CAR-T and Treg approaches" },
       "organTransplant": { "multiplier": 1.22, "label": "Solid Organ Transplant Rejection", "context": "Calcineurin-free regimens needed; Tegoprubart deal activity; massive unmet need" },
       "thyroidEye": { "multiplier": 1.22, "label": "Thyroid Eye Disease", "context": "Tepezza $2B peak; IGF-1R targeting validated; expansion indications" },
-      "pbc": { "multiplier": 1.20, "label": "Primary Biliary Cholangitis (PBC)", "context": "Elafibranor approved; PPAR agonists; orphan potential" }
+      "pbc": { "multiplier": 1.20, "label": "Primary Biliary Cholangitis (PBC)", "context": "Elafibranor approved; PPAR agonists; orphan potential" },
+      "ankylosingSpondylitis": { "multiplier": 1.10, "label": "Ankylosing Spondylitis", "context": "IL-17 validated; TNF/JAK options; moderate pipeline" },
+      "giantCellArteritis": { "multiplier": 1.22, "label": "Giant Cell Arteritis (GCA)", "context": "Actemra validated; IL-6/complement expanding; orphan-adjacent" },
+      "sarcoidosis": { "multiplier": 1.18, "label": "Sarcoidosis", "context": "No approved therapy; high unmet need; multiple Phase 2 trials" },
+      "autoImmuneHepatitis": { "multiplier": 1.20, "label": "Autoimmune Hepatitis", "context": "No targeted therapy approved; steroid-sparing need; orphan potential" },
+      "psc": { "multiplier": 1.25, "label": "Primary Sclerosing Cholangitis (PSC)", "context": "No approved therapy; massive unmet need; FXR/PPAR targets" },
+      "membranousNephropathy": { "multiplier": 1.22, "label": "Membranous Nephropathy", "context": "Anti-PLA2R validated; rituximab standard; complement emerging" },
+      "fsgs": { "multiplier": 1.28, "label": "FSGS (Focal Segmental)", "context": "High unmet need; Travere sparsentan (Filspari) approved; orphan premiums" },
+      "uveitis": { "multiplier": 1.15, "label": "Autoimmune Uveitis", "context": "Humira only approval; high unmet need; AbbVie franchise" },
+      "behcets": { "multiplier": 1.18, "label": "Behcet's Disease", "context": "Apremilast approved for oral ulcers; IL-17/TNF active; systemic disease unmet need; orphan" },
+      "polymyalgiaRheumatica": { "multiplier": 1.10, "label": "Polymyalgia Rheumatica", "context": "IL-6 interest; steroid-sparing need; aging population" },
+      "chronicUrticaria": { "multiplier": 1.15, "label": "Chronic Spontaneous Urticaria", "context": "Anti-IgE (omalizumab) established; BTK inhibitors emerging; large population" },
+      "heredAngioedema": { "multiplier": 1.25, "label": "Hereditary Angioedema (HAE)", "context": "Kallikrein validated; Takeda/BioCryst franchise; Factor XIIa; orphan" },
+      "epidermolysis": { "multiplier": 1.30, "label": "Epidermolysis Bullosa", "context": "Gene therapy (Vyjuvek/Krystal Biotech) approved; cell therapy; orphan" },
+      "foodAllergy": { "multiplier": 1.15, "label": "Food Allergy (IgE-mediated)", "context": "Peanut allergy Palforzia; omalizumab for multi-food; growing market" },
+      "ipf": { "multiplier": 1.22, "label": "Idiopathic Pulmonary Fibrosis (IPF)", "context": "Nintedanib/pirfenidone standard; massive unmet need; anti-fibrotic pipeline" },
+      "dermatomyositis": { "multiplier": 1.20, "label": "Dermatomyositis / Myositis", "context": "High unmet need; anti-IFN, complement, CAR-T emerging" },
+      "antiphospholipid": { "multiplier": 1.18, "label": "Antiphospholipid Syndrome", "context": "Thrombotic autoimmune; complement targeting; high unmet need" },
+      "egpa": { "multiplier": 1.20, "label": "EGPA (Eosinophilic Granulomatosis)", "context": "Mepolizumab approved; orphan; eosinophilic vasculitis" },
+      "systemicJIA": { "multiplier": 1.22, "label": "Systemic JIA / Still's Disease", "context": "IL-1/IL-6 validated; MAS risk; pediatric unmet need" },
+      "primaryImmunodeficiency": { "multiplier": 1.22, "label": "Primary Immunodeficiency", "context": "Gene therapy frontier; SCID-X1 paradigm; multiple subtypes" },
+      "coldAgglutinin": { "multiplier": 1.20, "label": "Cold Agglutinin Disease", "context": "Complement-mediated; sutimlimab (Enjaymo) approved; orphan" },
+      "ttpAutoimmune": { "multiplier": 1.22, "label": "Autoimmune TTP", "context": "Caplacizumab (Cablivi) anti-VWF validated; anti-ADAMTS13 autoantibody driven; orphan" },
+      "nephroticSyndrome": { "multiplier": 1.18, "label": "Nephrotic Syndrome (General)", "context": "Beyond specific types; sparsentan; broad renal unmet need" },
+      "copd": { "multiplier": 1.08, "label": "COPD", "context": "Largest respiratory market $20B+; biologics expanding; dupilumab data" }
     },
     "metabolic": {
       "obesity": { "multiplier": 1.35, "label": "Obesity / Chronic Weight Management", "context": "$100B+ projected market by 2030; GLP-1 class dominates" },
@@ -488,7 +751,86 @@
       "gout": { "multiplier": 1.05, "label": "Gout / Hyperuricemia", "context": "Large market but generic ULT dominates; biologics for refractory (pegloticase)" },
       "wilsonDisease": { "multiplier": 1.30, "label": "Wilson Disease", "context": "Orphan; gene therapy approaches; very high unmet need" },
       "fabry": { "multiplier": 1.28, "label": "Fabry Disease", "context": "ERT established but gene therapy premium; $2B+ market; Sanofi, Chiesi active" },
-      "gaucher": { "multiplier": 1.25, "label": "Gaucher Disease", "context": "ERT/SRT established; gene therapy potential; Sanofi Cerdelga precedent" }
+      "gaucher": { "multiplier": 1.25, "label": "Gaucher Disease", "context": "ERT/SRT established; gene therapy potential; Sanofi Cerdelga precedent" },
+      "pompe": { "multiplier": 1.28, "label": "Pompe Disease", "context": "ERT established (Myozyme); next-gen ERT + gene therapy; Sanofi/Amicus active" },
+      "mpsDisorders": { "multiplier": 1.25, "label": "MPS Disorders (I/II/III/IV)", "context": "ERT + gene therapy approaches; orphan premiums; Ultragenyx active" },
+      "aatDeficiency": { "multiplier": 1.22, "label": "Alpha-1 Antitrypsin Deficiency", "context": "Augmentation therapy established; gene therapy + siRNA emerging; Arrowhead active" },
+      "hyperoxaluria": { "multiplier": 1.30, "label": "Primary Hyperoxaluria", "context": "Oxlumo (lumasiran) RNAi precedent; Alnylam franchise; orphan" },
+      "ureaCycleDisorders": { "multiplier": 1.25, "label": "Urea Cycle Disorders", "context": "Gene therapy approaches; Ultragenyx/Arcturus active; orphan" },
+      "asmd": { "multiplier": 1.28, "label": "ASMD (Niemann-Pick B)", "context": "Olipudase alfa (Sanofi) approved; ERT validated; orphan" },
+      "cystinosis": { "multiplier": 1.22, "label": "Cystinosis", "context": "Cysteamine standard; gene therapy potential; orphan" },
+      "galactosemia": { "multiplier": 1.20, "label": "Classic Galactosemia", "context": "No approved therapy; mRNA approaches emerging; orphan" },
+      "attrAmyloidosis": { "multiplier": 1.32, "label": "ATTR Amyloidosis (Cardiac/Neuro)", "context": "Patisiran/vutrisiran RNAi; Alnylam franchise; $5B+ deal precedent; CRISPR emerging" },
+      "sickleCell": { "multiplier": 1.32, "label": "Sickle Cell Disease", "context": "Casgevy (CRISPR) + Lyfgenia gene therapy; curative revolution; orphan" },
+      "betaThalassemia": { "multiplier": 1.30, "label": "Beta-Thalassemia", "context": "Zynteglo gene therapy; Casgevy cross-label; transfusion independence; orphan" },
+      "hemophiliaA": { "multiplier": 1.28, "label": "Hemophilia A", "context": "Roctavian gene therapy; fitusiran RNAi; emicizumab bispecific standard" },
+      "hemophiliaB": { "multiplier": 1.28, "label": "Hemophilia B", "context": "Hemgenix gene therapy ($3.5M); FIX-Padua variant; orphan" },
+      "cysticFibrosis": { "multiplier": 1.25, "label": "Cystic Fibrosis", "context": "Trikafta dominance; next-gen CFTR modulators; mRNA approaches; $10B+ market" },
+      "acromegaly": { "multiplier": 1.15, "label": "Acromegaly", "context": "Somatostatin analogs standard; GH receptor antagonist; pituitary orphan" },
+      "cushings": { "multiplier": 1.20, "label": "Cushing's Syndrome", "context": "Osilodrostat/mifepristone validated; cortisol modulation; orphan" },
+      "congenitalAdrenalHyperplasia": { "multiplier": 1.22, "label": "Congenital Adrenal Hyperplasia (CAH)", "context": "Crinecerfont (Neurocrine) breakthrough; CRF1 antagonist paradigm; orphan" },
+      "hypophosphatasia": { "multiplier": 1.25, "label": "Hypophosphatasia", "context": "Asfotase alfa (Strensiq) ERT precedent; orphan; bone mineralization" },
+      "porphyria": { "multiplier": 1.28, "label": "Acute Hepatic Porphyria", "context": "Givosiran (Givlaari) RNAi validated; Alnylam; orphan" },
+      "krabbe": { "multiplier": 1.28, "label": "Krabbe Disease", "context": "Gene therapy; GALC deficiency; ultra-rare pediatric leukodystrophy" },
+      "hemochromatosis": { "multiplier": 1.10, "label": "Hereditary Hemochromatosis", "context": "Iron overload; hepcidin agonists emerging; high prevalence but underdiagnosed" },
+      "mitochondrialDisease": { "multiplier": 1.25, "label": "Mitochondrial Disease", "context": "Gene therapy approaches; multiple subtypes; orphan premiums" },
+      "congenitalHyperinsulinism": { "multiplier": 1.22, "label": "Congenital Hyperinsulinism", "context": "Orphan; diazoxide alternatives needed; Zealand Pharma (dasiglucagon) and Crinetics active" }
+    },
+    "cardiovascular": {
+      "heartFailureHfref": { "multiplier": 1.15, "label": "Heart Failure (HFrEF)", "context": "Large market; sacubitril/valsartan (Entresto) $6B+; SGLT2 crossover validated; pillar-of-therapy approach" },
+      "atrialFibrillation": { "multiplier": 1.10, "label": "Atrial Fibrillation", "context": "DOACs dominant; ablation devices crossing; large patient pool (33M+ globally); rate vs rhythm control" },
+      "pulmonaryArterialHypertension": { "multiplier": 1.28, "label": "Pulmonary Arterial Hypertension (PAH)", "context": "Orphan-adjacent; sotatercept (Merck $11.5B Acceleron) breakthrough; activin signaling validated" },
+      "coronaryArteryDisease": { "multiplier": 1.05, "label": "Coronary Artery Disease (CAD)", "context": "Massive market but generic statins/antiplatelets dominant; PCSK9 and anti-inflammatory emerging" },
+      "peripheralArteryDisease": { "multiplier": 1.12, "label": "Peripheral Artery Disease (PAD)", "context": "Underserved; rivaroxaban COMPASS trial expanded market; gene therapy for CLI emerging" },
+      "aorticStenosis": { "multiplier": 1.18, "label": "Aortic Stenosis", "context": "TAVR device dominance; medical therapy gap for non-surgical candidates; structural heart" },
+      "venousThromboembolism": { "multiplier": 1.08, "label": "Venous Thromboembolism (VTE)", "context": "DOAC dominated; factor XI/XII next wave (abelacimab, milvexian); bleeding risk reduction" },
+      "resistantHypertension": { "multiplier": 1.15, "label": "Resistant Hypertension", "context": "Device + pharma interest; Alnylam zilebesiran siRNA Phase 2; 10-15% of HTN patients resistant" },
+      "dyslipidemia": { "multiplier": 1.12, "label": "Dyslipidemia", "context": "PCSK9 mAbs + inclisiran siRNA validated; LDL lowering CV outcomes proven; large market" },
+      "cardiomyopathy": { "multiplier": 1.22, "label": "Cardiomyopathy (HCM/DCM)", "context": "Mavacamten (Camzyos) first-in-class HCM approval; aficamten (Cytokinetics); gene therapy for DCM" },
+      "myocarditis": { "multiplier": 1.15, "label": "Myocarditis / Pericarditis", "context": "High unmet need; rilonacept (Arcalyst) for recurrent pericarditis validated anti-IL-1" },
+      "cardiacArrhythmia": { "multiplier": 1.08, "label": "Cardiac Arrhythmias", "context": "Antiarrhythmic market mature; select novel ion channel approaches; device competition" },
+      "atherosclerosis": { "multiplier": 1.10, "label": "Atherosclerosis / ASCVD", "context": "Anti-inflammatory validated (canakinumab CANTOS); residual risk targets (Lp(a), inflammation)" }
+    },
+    "infectiousDisease": {
+      "hivAids": { "multiplier": 1.15, "label": "HIV/AIDS", "context": "Long-acting revolution; cabotegravir/lenacapavir validated; broadly neutralizing antibodies; cure research" },
+      "hepatitisB": { "multiplier": 1.25, "label": "Hepatitis B (Chronic)", "context": "Functional cure pursuit; 300M+ patients globally; siRNA (Arrowhead/JNJ) and ASO active; massive unmet need" },
+      "rsv": { "multiplier": 1.20, "label": "RSV", "context": "Arexvy (GSK) + Abrysvo (Pfizer) approved 2023; nirsevimab (Beyfortus) mAb validated; pediatric + elderly" },
+      "influenza": { "multiplier": 1.08, "label": "Influenza", "context": "Baloxavir validated; universal flu vaccine pursuit; pandemic preparedness BARDA funding" },
+      "tuberculosis": { "multiplier": 1.18, "label": "Tuberculosis (TB)", "context": "MDR-TB unmet need; pretomanid/BPaL (TB Alliance) breakthrough; global health; 10M+ cases/year" },
+      "fungalInfections": { "multiplier": 1.22, "label": "Invasive Fungal Infections", "context": "Rezafungin (Cidara) first-in-class echinocandin; olorofim (F2G); rising immunocompromised population" },
+      "amrBacterial": { "multiplier": 1.28, "label": "AMR / Novel Antibiotics", "context": "PASTEUR Act pull incentives; BARDA support; WHO priority pathogens; 1.27M AMR deaths/year" },
+      "covid": { "multiplier": 0.90, "label": "COVID-19 / Coronavirus", "context": "Post-pandemic; market saturated; Paxlovid revenue declining; next-gen antivirals modest interest" },
+      "hepatitisD": { "multiplier": 1.30, "label": "Hepatitis D", "context": "Bulevirtide (Hepcludex) first-ever HDV approval; ultra-rare (~15M globally); high orphan value" },
+      "cmvInfection": { "multiplier": 1.15, "label": "CMV Infection", "context": "Maribavir (Takeda) approved for transplant CMV; letermovir prophylaxis; antiviral resistance gap" },
+      "clostridioides": { "multiplier": 1.18, "label": "C. difficile", "context": "Bezlotoxumab (Zinplava) mAb validated; microbiome approaches (Vowst, SER-109); high recurrence rates" },
+      "dengueMalaria": { "multiplier": 1.12, "label": "Dengue / Malaria", "context": "Qdenga (Takeda) dengue vaccine; RTS,S (Mosquirix) malaria vaccine; global health funding" }
+    },
+    "ophthalmology": {
+      "wetAmd": { "multiplier": 1.18, "label": "Wet AMD (nAMD)", "context": "Anti-VEGF $15B+ market; Eylea/Lucentis franchise; faricimab (Vabysmo) bispecific durability; biosimilar wave" },
+      "dryAmdGA": { "multiplier": 1.30, "label": "Dry AMD / Geographic Atrophy", "context": "Syfovre (pegcetacoplan) + Izervay (avacincaptad pegol) first-ever GA approvals 2023; massive unmet need" },
+      "diabeticRetinopathy": { "multiplier": 1.15, "label": "Diabetic Retinopathy", "context": "Anti-VEGF validated; growing prevalence with diabetes epidemic; biosimilar threat to first-gen" },
+      "diabeticMacularEdema": { "multiplier": 1.15, "label": "Diabetic Macular Edema (DME)", "context": "Faricimab/aflibercept dominant; durability differentiation key; large type 2 diabetes overlap" },
+      "glaucoma": { "multiplier": 1.10, "label": "Glaucoma", "context": "Prostaglandin generics; Rhopressa/Rocklatan (Rho kinase); sustained-release devices; large market" },
+      "dryEyeDisease": { "multiplier": 1.08, "label": "Dry Eye Disease", "context": "Restasis/Xiidra precedent; Tyrvaya (varenicline) nasal spray; large market; moderate differentiation" },
+      "retinitisPigmentosa": { "multiplier": 1.32, "label": "Retinitis Pigmentosa", "context": "Luxturna gene therapy breakthrough; optogenetics emerging (GenSight); orphan designation; one-time treatment" },
+      "uveiticMacular": { "multiplier": 1.20, "label": "Uveitic Macular Edema", "context": "Ozurdex validated; steroid-sparing need; Humira for uveitis; niche but high unmet need" },
+      "retinalVeinOcclusion": { "multiplier": 1.12, "label": "Retinal Vein Occlusion", "context": "Anti-VEGF standard; complement emerging; moderate market size; treatment burden challenge" },
+      "stargardt": { "multiplier": 1.28, "label": "Stargardt Disease", "context": "Gene therapy approaches; complement + visual cycle targets; orphan designation; no approved therapy" },
+      "myopiaProgression": { "multiplier": 1.10, "label": "Myopia (Progressive)", "context": "Low-dose atropine (Vyluma); growing prevalence especially Asia-Pacific; prevention paradigm" }
+    },
+    "womensHealth": {
+      "endometriosis": { "multiplier": 1.22, "label": "Endometriosis", "context": "Orilissa (elagolix) + Myfembree validated oral GnRH; AbbVie/Myovant $6.7B; massive underserved population; 10yr diagnostic delay" },
+      "uterineFibroids": { "multiplier": 1.18, "label": "Uterine Fibroids", "context": "Myfembree/Oriahnn approved; large market; surgical alternative demand; GnRH antagonist class validated" },
+      "pcos": { "multiplier": 1.20, "label": "Polycystic Ovary Syndrome (PCOS)", "context": "No FDA-approved therapy for PCOS itself; massive unmet need (10-15% of women); emerging targets" },
+      "menopause": { "multiplier": 1.15, "label": "Menopause / Vasomotor Symptoms", "context": "Veozah (fezolinetant) NK3 antagonist breakthrough; Astellas launch; $2B+ peak potential; non-hormonal" },
+      "postpartumDepression": { "multiplier": 1.25, "label": "Postpartum Depression", "context": "Zuranolone (Zurzuvae) fast approval 2023; neuroactive steroid validated; Sage/Biogen; large market" },
+      "preeclampsia": { "multiplier": 1.28, "label": "Preeclampsia", "context": "No approved therapy; anti-sFlt1 approaches; high maternal mortality risk; aspirin prevention only" },
+      "prematureLabor": { "multiplier": 1.20, "label": "Premature Labor / Preterm Birth", "context": "Makena withdrawn for efficacy; massive prevention gap; global burden (15M preterm births/year)" },
+      "fertilityArt": { "multiplier": 1.12, "label": "Fertility / IVF", "context": "Growing market; biosimilar gonadotropins; Ferring/Organon active; tech integration; moderate pharma interest" },
+      "vulvodynia": { "multiplier": 1.15, "label": "Vulvodynia / Chronic Pelvic Pain", "context": "High unmet need; stigmatized condition; limited approved options; off-label gabapentin/amitriptyline" },
+      "cervicalDysplasia": { "multiplier": 1.18, "label": "Cervical Dysplasia / HPV Therapeutics", "context": "Therapeutic HPV vaccines in development; checkpoint immunotherapy crossover; Inovio active" },
+      "contraceptionNovel": { "multiplier": 1.10, "label": "Novel Contraception", "context": "Non-hormonal pursuit; male contraception pipeline (YCT529, ADAM); moderate pharma deal interest" },
+      "breastCancerPrevention": { "multiplier": 1.12, "label": "Breast Cancer Prevention", "context": "Tamoxifen/aromatase inhibitors established; PARP preventive potential; chemoprevention underutilized" }
     }
   },
   "territories": {
@@ -607,6 +949,68 @@
       "glycemicControl": { "multiplier": 1.00, "label": "Glycemic control", "context": "Established diabetes indication; HbA1c endpoints" },
       "organProtective": { "multiplier": 1.15, "label": "Organ-protective", "context": "MASH resolution, CKD, CV outcomes; label expansion value" },
       "metabolicReset": { "multiplier": 1.25, "label": "Metabolic reset / curative", "context": "Gene therapy or one-time intervention; highest premium" }
+    },
+    "cvOutcomeBenefit": {
+      "mortalityReduction": { "multiplier": 1.25, "label": "CV mortality reduction", "context": "Gold standard; MACE mortality endpoint trials command premium; FDA priority" },
+      "hospitalizationReduction": { "multiplier": 1.10, "label": "Hospitalization reduction", "context": "HF hospitalization validated by SGLT2/sacubitril; payer value; large market impact" },
+      "symptomImprovement": { "multiplier": 0.90, "label": "Symptom improvement only", "context": "Symptom-only endpoints viewed as less durable; lower reimbursement confidence" }
+    },
+    "cvTrialEndpoint": {
+      "maceEndpoint": { "multiplier": 1.20, "label": "MACE endpoint (hard outcomes)", "context": "Major adverse cardiovascular events; 10,000-15,000 patient trials; FDA gold standard" },
+      "surrogateBiomarker": { "multiplier": 1.00, "label": "Surrogate biomarker", "context": "NT-proBNP, LDL-C, blood pressure; accelerated approval path; confirmatory trial required" },
+      "functionalEndpoint": { "multiplier": 1.08, "label": "Functional endpoint", "context": "6-minute walk distance, KCCQ score; PAH/HF validated; faster trials but less definitive" }
+    },
+    "cvPopulationRisk": {
+      "highRisk": { "multiplier": 1.15, "label": "High-risk (prior MACE, HF)", "context": "Secondary prevention; clear unmet need; MACE event-enriched trials; higher reimbursement" },
+      "moderateRisk": { "multiplier": 1.00, "label": "Moderate risk", "context": "Primary prevention with risk factors; standard endpoint expectations" },
+      "primaryPrevention": { "multiplier": 0.85, "label": "Primary prevention", "context": "Largest market but lowest event rates; enormous trial sizes needed; payer resistance" }
+    },
+    "resistanceProfile": {
+      "novelTarget": { "multiplier": 1.25, "label": "Novel target / first-in-class", "context": "New mechanism of action; WHO/BARDA priority; PASTEUR Act incentives; highest premium" },
+      "existingClassImproved": { "multiplier": 1.00, "label": "Existing class, improved profile", "context": "Improved PK/resistance profile within known class; moderate differentiation" },
+      "broadSpectrum": { "multiplier": 1.10, "label": "Broad-spectrum", "context": "Multi-pathogen coverage; empiric therapy potential; large initial patient pool" }
+    },
+    "infectionChronicity": {
+      "acute": { "multiplier": 1.10, "label": "Acute infection", "context": "Short treatment courses; clear cure endpoints; faster trials; lower per-patient revenue" },
+      "chronic": { "multiplier": 1.15, "label": "Chronic infection", "context": "Long-term treatment or functional cure pursuit; recurring revenue; HIV/HBV model" },
+      "latent": { "multiplier": 0.95, "label": "Latent / prophylaxis", "context": "Prevention/prophylaxis model; large populations but lower per-patient value" }
+    },
+    "publicHealthPriority": {
+      "whoUrgent": { "multiplier": 1.20, "label": "WHO urgent / BARDA priority", "context": "BARDA/CARB-X funding; PASTEUR Act pull incentives; government procurement guaranteed" },
+      "whoCritical": { "multiplier": 1.10, "label": "WHO critical priority", "context": "WHO critical pathogen list; antimicrobial stewardship emphasis; moderate incentives" },
+      "standard": { "multiplier": 1.00, "label": "Standard priority", "context": "Standard commercial model; no special incentives; market-driven pricing" }
+    },
+    "ocularDelivery": {
+      "intravitreal": { "multiplier": 1.10, "label": "Intravitreal injection", "context": "Gold standard retinal delivery; treatment burden challenge; durability differentiation key" },
+      "topical": { "multiplier": 0.90, "label": "Topical (eye drop)", "context": "Patient-friendly; compliance challenges; anterior segment mainly; large market" },
+      "oral": { "multiplier": 0.85, "label": "Oral / systemic", "context": "Systemic exposure concerns; retinal penetration challenge; convenience premium if effective" },
+      "implant": { "multiplier": 1.20, "label": "Implant / sustained-release", "context": "Treatment burden elimination; Susvimo port system; premium for 6-12+ month duration" }
+    },
+    "treatmentDurability": {
+      "oneTime": { "multiplier": 1.30, "label": "One-time (gene therapy)", "context": "Luxturna paradigm; one-time treatment premium; reimbursement via outcomes-based contracts" },
+      "extendedDuration": { "multiplier": 1.15, "label": "Extended duration (3-6+ months)", "context": "Faricimab extended dosing validated; high-dose aflibercept; treatment burden reduction" },
+      "chronicInjection": { "multiplier": 1.00, "label": "Chronic injection (monthly-bimonthly)", "context": "Standard anti-VEGF model; biosimilar pressure emerging; treatment burden disadvantage" }
+    },
+    "visionImpact": {
+      "visionThreatening": { "multiplier": 1.20, "label": "Vision-threatening", "context": "Wet AMD, diabetic retinopathy; urgent unmet need; high willingness to pay; priority review" },
+      "visionImpairing": { "multiplier": 1.05, "label": "Vision-impairing", "context": "Glaucoma progression, dry AMD; chronic management; moderate urgency" },
+      "symptomRelief": { "multiplier": 0.90, "label": "Symptom relief", "context": "Dry eye, allergy; quality of life improvement; competitive market; OTC alternatives" }
+    },
+    "whTargetPopulation": {
+      "reproductiveAge": { "multiplier": 1.10, "label": "Reproductive age", "context": "Largest women's health population; endometriosis, fibroids, PCOS; long treatment duration" },
+      "perimenopause": { "multiplier": 1.05, "label": "Perimenopause", "context": "Growing awareness; hormone transition management; moderate market size" },
+      "postmenopause": { "multiplier": 1.00, "label": "Postmenopause", "context": "Vasomotor symptoms, osteoporosis; established market; HRT alternative demand" },
+      "pregnancy": { "multiplier": 1.15, "label": "Pregnancy / peripartum", "context": "Highest unmet need; preeclampsia/PPD; safety bar extremely high; REMS likely" }
+    },
+    "whUnmetNeed": {
+      "noApprovedTherapy": { "multiplier": 1.25, "label": "No approved therapy", "context": "PCOS, preeclampsia; massive first-mover advantage; priority review potential" },
+      "inadequateOptions": { "multiplier": 1.10, "label": "Inadequate options", "context": "Endometriosis, fibroids; existing therapies have significant limitations; improvement premium" },
+      "wellServed": { "multiplier": 0.90, "label": "Well-served market", "context": "Contraception, fertility; established options; differentiation required for premium" }
+    },
+    "whRegulatory": {
+      "acceleratedPathway": { "multiplier": 1.15, "label": "Accelerated pathway", "context": "Breakthrough/fast track for severe conditions; Zurzuvae precedent" },
+      "standardPathway": { "multiplier": 1.00, "label": "Standard pathway", "context": "Standard NDA/BLA review timeline; no special designations" },
+      "pregnancyComplexity": { "multiplier": 0.90, "label": "Pregnancy complexity (REMS/safety)", "context": "Teratogenicity concerns; REMS required; pregnancy registry; higher development cost" }
     }
   },
   "interactionTerms": {
@@ -675,13 +1079,50 @@
     "mab+asthma": { "bonus": 0.06, "context": "Biologic mAbs transforming severe asthma; TSLP, IL-33, IL-4/13 targets" },
     "mab+eosinophilicEsophagitis": { "bonus": 0.08, "context": "Dupixent first biologic for EoE; anti-IL-13 and TSLP pipeline expanding" },
     "geneTherapy+fabry": { "bonus": 0.10, "context": "Gene therapy replacing lifelong ERT in Fabry; 4D Molecular, Freeline precedents" },
-    "geneTherapy+gaucher": { "bonus": 0.08, "context": "Gene therapy for GSD type 1; replacing chronic ERT with one-time treatment" },
+    "geneTherapy+gaucher": { "bonus": 0.08, "context": "Gene therapy for Gaucher disease; replacing chronic ERT/SRT with one-time treatment; Prevail/Lilly active" },
     "geneTherapy+wilsonDisease": { "bonus": 0.10, "context": "ATP7B gene replacement for Wilson disease; curative potential for orphan copper disorder" },
     "geneTherapy+type1Diabetes": { "bonus": 0.10, "context": "Islet cell encapsulation and gene editing for T1D; immune evasion approaches" },
     "sglt2Inhibitor+hfpef": { "bonus": 0.08, "context": "SGLT2 validated in HFpEF (EMPEROR-Preserved, DELIVER); cardio-renal-metabolic nexus" },
     "sglt2Inhibitor+ckdMetabolic": { "bonus": 0.08, "context": "SGLT2 validated in CKD (DAPA-CKD, EMPA-KIDNEY); renal protection beyond glycemic control" },
     "glp1Agonist+hfpef": { "bonus": 0.06, "context": "GLP-1 showing HFpEF benefit via weight loss and metabolic improvement; SELECT trial" },
-    "rnai+familialHypercholesterolemia": { "bonus": 0.08, "context": "siRNA inclisiran validated for FH; Novartis franchise; PCSK9 silencing paradigm" }
+    "rnai+familialHypercholesterolemia": { "bonus": 0.08, "context": "siRNA inclisiran validated for FH; Novartis franchise; PCSK9 silencing paradigm" },
+    "geneTherapy+sma": { "bonus": 0.12, "context": "Zolgensma $2.1M one-time gene therapy; Novartis paradigm; highest-value pediatric gene therapy deal" },
+    "aso+sma": { "bonus": 0.10, "context": "Spinraza (nusinersen) ASO validated SMA; Biogen/Ionis ~$2B peak revenue; intrathecal delivery" },
+    "geneTherapy+hemophiliaA": { "bonus": 0.10, "context": "Roctavian (BioMarin) gene therapy approved; single-dose curative potential; factor replacement disruption" },
+    "geneTherapy+hemophiliaB": { "bonus": 0.12, "context": "Hemgenix $3.5M gene therapy; CSL/uniQure; highest per-dose price; FIX-Padua advantage" },
+    "geneTherapy+sickleCell": { "bonus": 0.12, "context": "Lyfgenia (bluebird) gene therapy + Casgevy (CRISPR) gene editing; curative revolution" },
+    "geneTherapy+betaThalassemia": { "bonus": 0.10, "context": "Zynteglo gene therapy + Casgevy; transfusion independence achieved; curative" },
+    "geneTherapy+lgmd": { "bonus": 0.10, "context": "Sarepta SRP-9001 approach expanding to LGMD subtypes; AAV gene replacement" },
+    "geneTherapy+batten": { "bonus": 0.10, "context": "BioMarin Brineura (CLN2) ERT precedent; AAV gene therapy for other CLN forms" },
+    "geneTherapy+fragileX": { "bonus": 0.10, "context": "FMRP gene replacement; AAV-mediated; preclinical programs advancing" },
+    "geneTherapy+cdkl5": { "bonus": 0.10, "context": "CDKL5 gene replacement via AAV; academic and biotech programs advancing; ultra-rare curative potential" },
+    "geneTherapy+cysticFibrosis": { "bonus": 0.08, "context": "mRNA and gene editing for CFTR; next-gen beyond Trikafta; lung delivery challenge" },
+    "geneTherapy+krabbe": { "bonus": 0.10, "context": "GALC gene replacement for Krabbe; pediatric leukodystrophy; curative potential" },
+    "rnai+attrAmyloidosis": { "bonus": 0.12, "context": "Patisiran/vutrisiran RNAi validated; Alnylam $5B+ franchise; TTR silencing paradigm" },
+    "aso+myotonicDystrophy": { "bonus": 0.10, "context": "DMPK-targeting ASOs; Dyne/Avidity active; RNA toxic gain-of-function target" },
+    "complementInhibitor+coldAgglutinin": { "bonus": 0.10, "context": "Sutimlimab (Enjaymo) approved for CAD; classical pathway complement validated" },
+    "fcrnAntagonist+cidp": { "bonus": 0.08, "context": "Vyvgart approved for CIDP; FcRn validated across autoantibody diseases" },
+    "complementInhibitor+aplasticAnemia": { "bonus": 0.08, "context": "Eculizumab in PNH/AA overlap; complement-mediated marrow failure subset; emerging approaches" },
+    "geneTherapy+retinoblastoma": { "bonus": 0.08, "context": "Ocular gene therapy approaches; Luxturna (RPE65) paradigm for eye delivery" },
+    "carT_autoimmune+dermatomyositis": { "bonus": 0.08, "context": "CD19 CAR-T showing responses in inflammatory myopathies; autoimmune expansion" },
+    "myosinInhibitor+cardiomyopathy": { "bonus": 0.12, "context": "Mavacamten (Camzyos) first-in-class HCM; aficamten Phase 3; cardiac myosin mechanism validated" },
+    "rnaCardio+resistantHypertension": { "bonus": 0.10, "context": "Zilebesiran (Alnylam) siRNA for AGT; 6-month dosing; BP reduction sustained" },
+    "pcsk9Targeting+dyslipidemia": { "bonus": 0.08, "context": "Repatha, Praluent, inclisiran validated; LDL lowering to CV outcomes proven" },
+    "anticoagulantNovel+venousThromboembolism": { "bonus": 0.10, "context": "Factor XI inhibitors (abelacimab, milvexian) reduced bleeding vs DOACs; next-gen anticoagulation" },
+    "mab+pulmonaryArterialHypertension": { "bonus": 0.10, "context": "Sotatercept (Winrevair) breakthrough; Merck $11.5B Acceleron acquisition; activin signaling" },
+    "antiviral+hepatitisB": { "bonus": 0.10, "context": "Functional cure pursuit; combination approaches (siRNA + capsid inhibitor); massive global market" },
+    "rnai+hepatitisB": { "bonus": 0.12, "context": "Arrowhead/JNJ bepirovirsen siRNA; VIR-2218 (Gilead); HBsAg knockdown validated" },
+    "vaccinePreventive+rsv": { "bonus": 0.10, "context": "RSV vaccine market created 2023; Arexvy (GSK), Abrysvo (Pfizer); maternal + elderly segments" },
+    "antibioticNovel+amrBacterial": { "bonus": 0.10, "context": "PASTEUR Act pull incentives; BARDA/CARB-X push funding; WHO urgent priority pathogen targeting" },
+    "mrna+influenza": { "bonus": 0.08, "context": "mRNA flu vaccines (Moderna, Pfizer) in Phase 3; pandemic preparedness dual-use potential" },
+    "antiVegf+wetAmd": { "bonus": 0.10, "context": "Anti-VEGF + wet AMD is the paradigm; $15B+ market; durability and biosimilar differentiation" },
+    "geneTherapyOcular+retinitisPigmentosa": { "bonus": 0.15, "context": "Luxturna validated ocular gene therapy; AAV retinal delivery; one-time treatment for inherited blindness" },
+    "intravitreal+dryAmdGA": { "bonus": 0.10, "context": "Syfovre/Izervay intravitreal complement inhibitors; first-ever GA treatments; sustained delivery" },
+    "antiVegf+diabeticMacularEdema": { "bonus": 0.08, "context": "Faricimab bispecific durability advantage; high-dose aflibercept; DME treatment paradigm" },
+    "gnrhAntagonist+endometriosis": { "bonus": 0.10, "context": "Orilissa/Myfembree oral GnRH for endometriosis; AbbVie/Myovant deals; surgical alternative" },
+    "gnrhAntagonist+uterineFibroids": { "bonus": 0.08, "context": "Myfembree/Oriahnn approved for fibroids; oral GnRH antagonist class validated" },
+    "neuroactiveSteroid+postpartumDepression": { "bonus": 0.12, "context": "Zuranolone (Zurzuvae) rapid-onset PPD treatment; neuroactive steroid GABA modulation validated" },
+    "smallMolecule+menopause": { "bonus": 0.08, "context": "Veozah (fezolinetant) NK3 antagonist for VMS; non-hormonal first-in-class; Astellas launch" }
   },
   "neurologyDiseaseModifyingPhaseAdjustment": {
     "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",

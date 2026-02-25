@@ -59,7 +59,7 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
           <!-- Risk Gauge -->
           <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 18px 20px;">
             <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">Risk Factor Score</div>
-            <div style="display: flex; align-items: center; justify-content: center;">
+            <div style="display: flex; align-items: center; justify-content: center; overflow: hidden;">
               ${gaugeHtml}
             </div>
           </div>

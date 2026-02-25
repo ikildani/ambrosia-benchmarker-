@@ -47,7 +47,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
           <div class="kpi-sub">${upfrontPct}% of total deal value</div>
         </div>
         <!-- Risk Gauge -->
-        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div class="kpi-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
           <div class="kpi-label" style="margin-top: 0; margin-bottom: 8px;">Risk Factor Score</div>
           ${gaugeHtml}
         </div>

@@ -22,8 +22,14 @@ const mockSupabase = {
   in: jest.fn().mockReturnThis(),
 };
 
+// Mock for cookie-based auth (Method 1) — default: no session
+const mockGetUser = jest.fn().mockResolvedValue({ data: { user: null }, error: null });
+
 jest.mock('@/lib/supabase/server', () => ({
   createServiceClient: () => mockSupabase,
+  createServerClient: () => ({
+    auth: { getUser: mockGetUser },
+  }),
 }));
 
 jest.mock('@/lib/services/partner-matching');
@@ -227,13 +233,9 @@ describe('/api/partners/match', () => {
 
     it('should accept client tier as fallback for localStorage-based Pro users', async () => {
       // Mock free user lookup in database (Stripe purchase stored in localStorage, not yet synced)
+      // Method 2 now does a single combined query for id, tier, email
       mockSupabase.single.mockResolvedValueOnce({
-        data: { id: '123', tier: 'free' },
-        error: null,
-      });
-      // Mock Method 2: email lookup (also returns non-Pro email)
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { email: 'user@example.com' },
+        data: { id: '123', tier: 'free', email: 'user@example.com' },
         error: null,
       });
 

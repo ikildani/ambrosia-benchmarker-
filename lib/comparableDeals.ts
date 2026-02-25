@@ -9,7 +9,7 @@ export interface ComparableDeal {
   relevance: string;
   modalities?: string[];
   indications?: string[];
-  therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'both';
+  therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'both';
 }
 
 export const COMPARABLE_DEALS: ComparableDeal[] = [

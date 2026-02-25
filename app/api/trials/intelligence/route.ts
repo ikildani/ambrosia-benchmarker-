@@ -126,7 +126,15 @@ function getIndicationCategories(therapeuticArea: string): string[] {
     case 'immunology':
       return ['autoimmune', 'dermatology'];
     case 'metabolic':
-      return ['metabolic', 'cardiovascular'];
+      return ['metabolic'];
+    case 'cardiovascular':
+      return ['cardiovascular'];
+    case 'infectiousDisease':
+      return ['infectious_disease', 'antiviral', 'antibiotic'];
+    case 'ophthalmology':
+      return ['ophthalmology', 'retinal'];
+    case 'womensHealth':
+      return ['reproductive', 'gynecology', 'obstetric'];
     default:
       return [];
   }

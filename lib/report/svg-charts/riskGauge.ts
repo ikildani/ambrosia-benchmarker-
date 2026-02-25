@@ -4,11 +4,12 @@
 import { COLORS } from '../helpers';
 
 export function renderRiskGauge(score: number, size: number = 120): string {
-  const pad = 10;
+  const strokeWidth = Math.max(8, size * 0.09);
+  // Pad enough to contain round linecaps (strokeWidth/2) plus breathing room
+  const pad = Math.ceil(strokeWidth / 2) + 6;
   const cx = size / 2 + pad;
   const cy = size / 2 + pad;
   const r = size / 2 - 10;
-  const strokeWidth = Math.max(8, size * 0.09);
   const vbW = size + pad * 2;
   const vbH = size * 0.62 + pad * 2;
 
@@ -37,7 +38,7 @@ export function renderRiskGauge(score: number, size: number = 120): string {
   const gradId = `gauge-${size}`;
 
   return `
-    <svg width="${size}" height="${Math.round(size * 0.65)}" viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+    <svg width="${vbW}" height="${vbH}" viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" overflow="hidden">
       <defs>
         <linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="${COLORS.green}" />

@@ -11,10 +11,13 @@ export const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS || '')
 
 // Pro emails - users who get pro tier access regardless of subscription status
 // (e.g., team members, beta testers)
-export const PRO_EMAILS: string[] = (process.env.PRO_EMAILS || '')
-  .split(',')
-  .map(e => e.trim().toLowerCase())
-  .filter(e => e.length > 0);
+// Check both PRO_EMAILS (server-only) and NEXT_PUBLIC_PRO_EMAILS (shared) to avoid env var mismatch
+export const PRO_EMAILS: string[] = [
+  ...new Set([
+    ...(process.env.PRO_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(e => e.length > 0),
+    ...(process.env.NEXT_PUBLIC_PRO_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(e => e.length > 0),
+  ])
+];
 
 /**
  * Check if an email has admin access

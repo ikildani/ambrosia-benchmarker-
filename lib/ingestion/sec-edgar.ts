@@ -720,6 +720,19 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
       return 'immunology';
     case 'metabolic':
       return 'metabolic';
+    case 'cardiovascular':
+      return 'cardiovascular';
+    case 'infectious_disease':
+    case 'antiviral':
+    case 'antibiotic':
+      return 'infectiousDisease';
+    case 'ophthalmology':
+    case 'retinal':
+      return 'ophthalmology';
+    case 'reproductive':
+    case 'gynecology':
+    case 'obstetric':
+      return 'womensHealth';
     default:
       return 'other';
   }

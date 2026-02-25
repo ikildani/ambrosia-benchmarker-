@@ -87,7 +87,7 @@ export interface NeurologyInsight {
   title: string;
   description: string;
   impactLevel: ImpactLevel;
-  category: 'bbb_penetration' | 'disease_progression' | 'biomarker_validation' | 'competitive_landscape' | 'line_of_therapy' | 'combination_strategy';
+  category: 'bbb_penetration' | 'disease_progression' | 'biomarker_validation' | 'competitive_landscape' | 'line_of_therapy' | 'combination_strategy' | 'cv_outcome' | 'trial_endpoint' | 'resistance_profile' | 'infection_chronicity' | 'ocular_delivery' | 'treatment_durability' | 'unmet_need' | 'regulatory_pathway';
 }
 
 export interface SensitivityData {
@@ -610,26 +610,186 @@ function generateOncologyInsights(inputs: CalculationInput): NeurologyInsight[] 
   return insights;
 }
 
+// Generate cardiovascular-specific insights
+function generateCardiovascularInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'cardiovascular') return [];
+  const insights: NeurologyInsight[] = [];
+
+  const outcomeLevel: ImpactLevel = inputs.cvOutcomeBenefit === 'mortalityReduction' ? 'VERY HIGH'
+    : inputs.cvOutcomeBenefit === 'hospitalizationReduction' ? 'HIGH' : 'MEDIUM';
+  insights.push({
+    title: 'CV Outcome Evidence',
+    description: outcomeLevel === 'VERY HIGH'
+      ? 'Mortality reduction is the gold standard in CV — DAPA-HF, EMPEROR-Reduced set the bar. Expect premium valuations but require large, long CVOT trials ($500M+ investment). Milestone-heavy structures with back-loaded payments.'
+      : outcomeLevel === 'HIGH'
+      ? 'Hospitalization reduction (PARADIGM-HF model) is a strong endpoint accepted by FDA/EMA. Moderate trial investment with clear clinical benefit. Balanced deal structures with meaningful development milestones.'
+      : 'Symptom improvement endpoints (6MWT, KCCQ) allow faster/smaller trials but face payer pushback. Partners may request CVOT commitment as a post-deal milestone. Lower total deal value but faster path to market.',
+    impactLevel: outcomeLevel,
+    category: 'cv_outcome',
+  });
+
+  const endpointLevel: ImpactLevel = inputs.cvTrialEndpoint === 'maceEndpoint' ? 'HIGH'
+    : inputs.cvTrialEndpoint === 'surrogateBiomarker' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'Trial Endpoint Strategy',
+    description: endpointLevel === 'HIGH'
+      ? 'MACE endpoint trials are the most definitive but require 10,000+ patients and 3-5 years. De-risks the asset substantially — partners pay premiums for hard outcome data. CVOT commitment often negotiated as milestone.'
+      : endpointLevel === 'MEDIUM'
+      ? 'Surrogate biomarker endpoints (NT-proBNP, imaging) enable faster approvals. Moderate de-risking but payers increasingly demand outcomes data. Partners may structure conditional milestones around CVOT outcomes.'
+      : 'Functional endpoints (6MWT, KCCQ) allow efficient trials but limited regulatory and payer acceptance for new mechanisms. Consider as a bridge strategy with CVOT commitment in deal terms.',
+    impactLevel: endpointLevel,
+    category: 'trial_endpoint',
+  });
+
+  return insights;
+}
+
+// Generate infectious disease-specific insights
+function generateInfectiousDiseaseInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'infectiousDisease') return [];
+  const insights: NeurologyInsight[] = [];
+
+  const resistLevel: ImpactLevel = inputs.resistanceProfile === 'novelTarget' ? 'LOW'
+    : inputs.resistanceProfile === 'existingClassImproved' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Antimicrobial Resistance Positioning',
+    description: resistLevel === 'LOW'
+      ? 'Novel target addressing resistance commands the highest premiums. CARB-X and BARDA funding available. Pull incentives (PASTEUR Act, UK subscription model) add non-dilutive value. Partners value novel mechanisms for portfolio protection.'
+      : resistLevel === 'MEDIUM'
+      ? 'Improved within existing class — better PK, tolerability, or resistance profile. Moderate differentiation. Partners will benchmark against generic alternatives and require head-to-head data to justify premium pricing.'
+      : 'Broad-spectrum coverage is standard positioning. Competition from generics is intense. Pull incentives favor targeted agents. Consider partnership with specialty anti-infective companies rather than big pharma.',
+    impactLevel: resistLevel,
+    category: 'resistance_profile',
+  });
+
+  const chronicityLevel: ImpactLevel = inputs.infectionChronicity === 'chronic' ? 'LOW'
+    : inputs.infectionChronicity === 'latent' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Infection Chronicity Impact',
+    description: chronicityLevel === 'LOW'
+      ? 'Chronic infections (HBV, HIV) offer the most attractive commercial profile — recurring revenue, large patient pools, and established regulatory pathways. Functional cure approaches command the highest premiums in current deal landscape.'
+      : chronicityLevel === 'MEDIUM'
+      ? 'Latent infections (TB, HSV) offer eradication potential but face complex clinical trial design. Sterilizing cure is the holy grail — demonstrated in HCV with DAAs. Partners value curative approaches if clinical data supports them.'
+      : 'Acute infection treatments face fast development but limited per-patient revenue. Market size depends on incidence rates. Pandemic preparedness programs (BARDA) provide non-dilutive funding for priority pathogens.',
+    impactLevel: chronicityLevel,
+    category: 'infection_chronicity',
+  });
+
+  return insights;
+}
+
+// Generate ophthalmology-specific insights
+function generateOphthalmologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'ophthalmology') return [];
+  const insights: NeurologyInsight[] = [];
+
+  const deliveryLevel: ImpactLevel = inputs.ocularDelivery === 'implant' ? 'LOW'
+    : inputs.ocularDelivery === 'intravitreal' ? 'MEDIUM'
+    : inputs.ocularDelivery === 'topical' ? 'HIGH' : 'VERY HIGH';
+  insights.push({
+    title: 'Ocular Delivery Strategy',
+    description: deliveryLevel === 'LOW'
+      ? 'Sustained-release implant delivery reduces treatment burden dramatically — key differentiator in a space dominated by monthly/bimonthly injections. PDS (Susvimo), gene therapy, and long-acting formulations command premium valuations.'
+      : deliveryLevel === 'MEDIUM'
+      ? 'Intravitreal injection is the established standard. Competition with aflibercept, ranibizumab, faricimab is intense. Differentiation through durability, efficacy, or novel targets is essential. Standard deal structures.'
+      : deliveryLevel === 'HIGH'
+      ? 'Topical delivery is patient-friendly but limited to anterior segment. Posterior segment conditions require alternative delivery. Consider topical as combination partner or for front-of-eye indications.'
+      : 'Oral delivery for ocular conditions faces bioavailability challenges and systemic exposure risks. Limited partner interest unless targeting inflammatory/systemic components. Niche positioning required.',
+    impactLevel: deliveryLevel,
+    category: 'ocular_delivery',
+  });
+
+  const durabilityLevel: ImpactLevel = inputs.treatmentDurability === 'oneTime' ? 'LOW'
+    : inputs.treatmentDurability === 'extendedDuration' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Treatment Durability Value',
+    description: durabilityLevel === 'LOW'
+      ? 'One-time gene therapy cures (Luxturna model) command the highest premiums in ophthalmology. Outcome-based pricing and NTAP/LTSS reimbursement pathways support $500K-$2M+ per-treatment pricing. Partners value the transformative narrative.'
+      : durabilityLevel === 'MEDIUM'
+      ? 'Extended-duration treatments (quarterly+) reduce injection burden — the #1 patient/physician concern. Faricimab and high-dose aflibercept set the standard. Durability data is the key differentiator in current deals.'
+      : 'Chronic injection regimen (monthly/bimonthly) is the baseline in retinal disease. Without durability advantage, differentiation must come from efficacy, safety, or novel mechanism. Standard valuations with intense generic/biosimilar competition.',
+    impactLevel: durabilityLevel,
+    category: 'treatment_durability',
+  });
+
+  return insights;
+}
+
+// Generate women's health-specific insights
+function generateWomensHealthInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'womensHealth') return [];
+  const insights: NeurologyInsight[] = [];
+
+  const unmetLevel: ImpactLevel = inputs.whUnmetNeed === 'noApprovedTherapy' ? 'LOW'
+    : inputs.whUnmetNeed === 'inadequateOptions' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Unmet Need Assessment',
+    description: unmetLevel === 'LOW'
+      ? 'No approved therapy represents the highest value opportunity in women\'s health. Breakthrough therapy designation likely. Myovant (relugolix), Dare Bioscience, and ObsEva precedents show 25%+ deal premiums for first-to-market assets.'
+      : unmetLevel === 'MEDIUM'
+      ? 'Existing options are inadequate — either poor efficacy, significant side effects, or limited to short-term use. Meaningful differentiation can capture premium share. Partners value improved safety/tolerability profiles.'
+      : 'Well-served therapeutic areas with multiple approved options. Competition is intense and pricing pressure from generics is significant. Differentiation through convenience, route of administration, or novel mechanism required.',
+    impactLevel: unmetLevel,
+    category: 'unmet_need',
+  });
+
+  const regulatoryLevel: ImpactLevel = inputs.whRegulatory === 'pregnancyComplexity' ? 'VERY HIGH'
+    : inputs.whRegulatory === 'standardPathway' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'Regulatory Pathway Complexity',
+    description: regulatoryLevel === 'VERY HIGH'
+      ? 'Pregnancy-related indications face complex regulatory requirements — teratogenicity studies, REMS programs, restricted distribution. Development timelines are longer but unmet need is enormous. Partners value the high barrier to competition.'
+      : regulatoryLevel === 'MEDIUM'
+      ? 'Standard regulatory pathway with established endpoints and trial designs. FDA Women\'s Health Office provides guidance. 505(b)(2) and biosimilar pathways available for follow-on products. Standard deal structures.'
+      : 'Accelerated pathway eligibility (breakthrough, fast track) significantly de-risks the program. Shorter development timelines attract partner interest. Premium valuations for assets with FDA-granted designations.',
+    impactLevel: regulatoryLevel,
+    category: 'regulatory_pathway',
+  });
+
+  return insights;
+}
+
 // Main function to compute full sensitivity analysis
 export function computeSensitivityAnalysis(
   inputs: CalculationInput,
   result: CalculationResult
 ): SensitivityData {
-  const isNeurology = inputs.therapeuticArea === 'neurology';
-  const isImmunology = inputs.therapeuticArea === 'immunology';
-  const isMetabolic = inputs.therapeuticArea === 'metabolic';
+  const ta = inputs.therapeuticArea;
+  const isNeurology = ta === 'neurology';
+  const isImmunology = ta === 'immunology';
+  const isMetabolic = ta === 'metabolic';
+  const isCardiovascular = ta === 'cardiovascular';
+  const isInfectiousDisease = ta === 'infectiousDisease';
+  const isOphthalmology = ta === 'ophthalmology';
+  const isWomensHealth = ta === 'womensHealth';
+
+  // Determine the first area-specific parameter (treatment approach equivalent)
+  const areaFirstParam: keyof CalculationInput =
+    isNeurology ? 'treatmentApproach' :
+    isImmunology ? 'treatmentGoal' :
+    isMetabolic ? 'metabolicTreatmentApproach' :
+    isCardiovascular ? 'cvOutcomeBenefit' :
+    isInfectiousDisease ? 'resistanceProfile' :
+    isOphthalmology ? 'ocularDelivery' :
+    isWomensHealth ? 'whTargetPopulation' :
+    'lineOfTherapy';
+
   const parametersToAnalyze: Array<keyof CalculationInput> = [
     'phase',
     'territory',
     'competitivePosition',
     'modality',
     'dataQuality',
-    isNeurology ? 'treatmentApproach' : isImmunology ? 'treatmentGoal' : isMetabolic ? 'metabolicTreatmentApproach' : 'lineOfTherapy',
+    areaFirstParam,
     'biomarker',
     'combinationPotential',
     ...(isNeurology ? ['bbbPenetration' as keyof CalculationInput, 'diseaseProgression' as keyof CalculationInput, 'biomarkerValidation' as keyof CalculationInput] : []),
     ...(isImmunology ? ['immuneResetPotential' as keyof CalculationInput, 'targetSpecificity' as keyof CalculationInput, 'diseaseSeverity' as keyof CalculationInput] : []),
     ...(isMetabolic ? ['mechanismDifferentiation' as keyof CalculationInput, 'weightLossEfficacy' as keyof CalculationInput, 'routeOfAdministration' as keyof CalculationInput, 'comorbidityBreadth' as keyof CalculationInput] : []),
+    ...(isCardiovascular ? ['cvTrialEndpoint' as keyof CalculationInput, 'cvPopulationRisk' as keyof CalculationInput] : []),
+    ...(isInfectiousDisease ? ['infectionChronicity' as keyof CalculationInput, 'publicHealthPriority' as keyof CalculationInput] : []),
+    ...(isOphthalmology ? ['treatmentDurability' as keyof CalculationInput, 'visionImpact' as keyof CalculationInput] : []),
+    ...(isWomensHealth ? ['whUnmetNeed' as keyof CalculationInput, 'whRegulatory' as keyof CalculationInput] : []),
   ];
 
   const parameters: ParameterSensitivity[] = parametersToAnalyze
@@ -643,7 +803,15 @@ export function computeSensitivityAnalysis(
   const topValueDriver = findTopValueDriver(parameters);
 
   // Generate therapeutic-area-specific insights
-  const neurologyInsights = isMetabolic
+  const neurologyInsights = isCardiovascular
+    ? generateCardiovascularInsights(inputs)
+    : isInfectiousDisease
+    ? generateInfectiousDiseaseInsights(inputs)
+    : isOphthalmology
+    ? generateOphthalmologyInsights(inputs)
+    : isWomensHealth
+    ? generateWomensHealthInsights(inputs)
+    : isMetabolic
     ? generateMetabolicInsights(inputs)
     : isImmunology
     ? generateImmunologyInsights(inputs)

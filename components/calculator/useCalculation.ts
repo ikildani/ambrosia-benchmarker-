@@ -27,6 +27,10 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     ...(s.therapeuticArea === 'neurology' ? { bbbPenetration: s.bbbPenetration, diseaseProgression: s.diseaseProgression, biomarkerValidation: s.biomarkerValidation } : {}),
     ...(s.therapeuticArea === 'immunology' ? { immuneResetPotential: s.immuneResetPotential, targetSpecificity: s.targetSpecificity, diseaseSeverity: s.diseaseSeverity, treatmentGoal: s.treatmentGoal } : {}),
     ...(s.therapeuticArea === 'metabolic' ? { mechanismDifferentiation: s.mechanismDifferentiation, weightLossEfficacy: s.weightLossEfficacy, routeOfAdministration: s.routeOfAdministration, comorbidityBreadth: s.comorbidityBreadth, metabolicTreatmentApproach: s.metabolicTreatmentApproach } : {}),
+    ...(s.therapeuticArea === 'cardiovascular' ? { cvOutcomeBenefit: s.cvOutcomeBenefit, cvTrialEndpoint: s.cvTrialEndpoint, cvPopulationRisk: s.cvPopulationRisk } : {}),
+    ...(s.therapeuticArea === 'infectiousDisease' ? { resistanceProfile: s.resistanceProfile, infectionChronicity: s.infectionChronicity, publicHealthPriority: s.publicHealthPriority } : {}),
+    ...(s.therapeuticArea === 'ophthalmology' ? { ocularDelivery: s.ocularDelivery, treatmentDurability: s.treatmentDurability, visionImpact: s.visionImpact } : {}),
+    ...(s.therapeuticArea === 'womensHealth' ? { whTargetPopulation: s.whTargetPopulation, whUnmetNeed: s.whUnmetNeed, whRegulatory: s.whRegulatory } : {}),
   };
 }
 
