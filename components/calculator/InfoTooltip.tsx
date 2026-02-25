@@ -15,6 +15,7 @@ function InfoTooltipInner({ content }: InfoTooltipProps) {
 
   const show = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setAlignLeft(false); // Reset so useLayoutEffect re-measures
     setIsOpen(true);
   }, []);
 
@@ -22,12 +23,14 @@ function InfoTooltipInner({ content }: InfoTooltipProps) {
     timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   }, []);
 
-  // Check if tooltip would overflow viewport and adjust alignment
+  // After render, check if tooltip overflows viewport and clamp it
   useLayoutEffect(() => {
-    if (!isOpen || !triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    // If trigger is within 120px of left edge, align tooltip to the left instead of centering
-    setAlignLeft(rect.left < 120);
+    if (!isOpen || !tooltipRef.current) return;
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    // If left edge clips the viewport, switch to left-aligned
+    if (tooltipRect.left < 8) {
+      setAlignLeft(true);
+    }
   }, [isOpen]);
 
   // Close on outside click
