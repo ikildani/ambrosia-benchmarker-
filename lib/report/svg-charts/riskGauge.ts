@@ -23,10 +23,10 @@ export function renderRiskGauge(score: number, size: number = 120): string {
   const bgX2 = cx + r * Math.cos(0);
   const bgY2 = cy - r * Math.sin(0);
 
-  // Score arc
+  // Score arc — always < 180° on a semicircle gauge, so largeArc is always 0
   const sX = cx + r * Math.cos(scoreAngle);
   const sY = cy - r * Math.sin(scoreAngle);
-  const largeArc = score > 50 ? 1 : 0;
+  const largeArc = 0;
 
   // Color based on score
   let color = COLORS.green;
@@ -34,8 +34,8 @@ export function renderRiskGauge(score: number, size: number = 120): string {
   if (score >= 70) { color = COLORS.rose; label = 'HIGH'; }
   else if (score >= 40) { color = COLORS.amber; label = 'MEDIUM'; }
 
-  // Use unique gradient ID to avoid conflicts when multiple gauges on same page
-  const gradId = `gauge-${size}`;
+  // Use unique gradient ID to avoid conflicts when multiple gauges in same HTML document
+  const gradId = `gauge-${size}-${Math.random().toString(36).slice(2, 8)}`;
 
   return `
     <svg width="${vbW}" height="${vbH}" viewBox="0 0 ${vbW} ${vbH}" xmlns="http://www.w3.org/2000/svg" overflow="hidden">

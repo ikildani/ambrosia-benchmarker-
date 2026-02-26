@@ -212,8 +212,10 @@ export default function Dashboard({
   const handleDeleteHistory = async (id: string) => {
     try {
       await deleteHistoryItem(id);
+      toast.success('Analysis deleted');
     } catch (error) {
       console.error('Failed to delete history item:', error);
+      toast.error('Failed to delete. Please try again.');
     }
   };
 

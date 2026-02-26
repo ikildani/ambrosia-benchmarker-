@@ -205,12 +205,12 @@ describe('generateReportHTML', () => {
   });
 
   describe('Page count', () => {
-    it('renders 12 core pages when no AI data is provided', () => {
+    it('renders 13 core pages (AI memo page always included as fallback)', () => {
       const html = generateReportHTML(buildOncologyData());
-      expect(countPages(html)).toBe(12);
+      expect(countPages(html)).toBe(13);
     });
 
-    it('renders 13 pages when memoData is provided (adds AI Deal Memo)', () => {
+    it('renders 13 pages when memoData is provided (AI Deal Memo with content)', () => {
       const html = generateReportHTML(buildOncologyData({ memoData: fakeMemo }));
       expect(countPages(html)).toBe(13);
     });
@@ -297,8 +297,8 @@ describe('generateReportHTML', () => {
 
     it('includes total page count in the TOC metadata area', () => {
       const html = generateReportHTML(buildOncologyData());
-      // TOC renders "12 pages" (or 13/14 with AI sections)
-      expect(html).toContain('12 pages');
+      // TOC renders "13 pages" (AI memo page always included, even as fallback)
+      expect(html).toContain('13 pages');
     });
   });
 });

@@ -199,8 +199,13 @@ export default function ReportGenerationModal({
               const data = await response.json();
               return (data.memo || data) as DealMemo;
             }
+            const errorText = await response.text().catch(() => 'unknown');
+            console.error(`Deal memo API failed (${response.status}):`, errorText);
             return null;
-          }).catch(() => null);
+          }).catch((err) => {
+            console.error('Deal memo fetch error:', err);
+            return null;
+          });
         }
         if (p.format === 'pdf') {
           playbookPromise = fetch('/api/playbook', {
@@ -229,8 +234,13 @@ export default function ReportGenerationModal({
               const data = await response.json();
               return (data.playbook || null) as NegotiationPlaybook | null;
             }
+            const errorText = await response.text().catch(() => 'unknown');
+            console.error(`Playbook API failed (${response.status}):`, errorText);
             return null;
-          }).catch(() => null);
+          }).catch((err) => {
+            console.error('Playbook fetch error:', err);
+            return null;
+          });
         }
 
         await delay(300);

@@ -33,8 +33,7 @@ export function generateReportHTML(data: PDFReportData): string {
   // Build pages dynamically — exclude sections with no data
   const pages: string[] = [];
 
-  // Conditionally included AI pages
-  const hasAIMemo = !!(data.memoData || data.playbookData);
+  // Conditionally included pages
   const hasPlaybook = !!data.playbookData;
   const hasFinancialModel = !!data.rnpvResult;
 
@@ -50,7 +49,7 @@ export function generateReportHTML(data: PDFReportData): string {
   toc('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers');
   toc('Comparable Deals', 'Recent transactions and market benchmarks');
   toc('Partner Matches', 'Top-ranked potential licensing partners');
-  if (hasAIMemo) toc('AI Deal Memo', 'AI-generated strategic narrative and playbook');
+  toc('AI Deal Memo', 'AI-generated strategic narrative and playbook');
   if (hasPlaybook) toc('Negotiation Strategy', 'AI-powered negotiation playbook and tactics');
   toc('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation');
   toc('Deal Timeline', 'Gantt-style milestone schedule from signing to launch');
@@ -89,8 +88,8 @@ export function generateReportHTML(data: PDFReportData): string {
   addPage(renderSensitivityPage);
   addPage(renderComparablesPage);
   addPage(renderPartnersPage);
-  // AI pages — only if data exists
-  if (hasAIMemo) addPage(renderAIMemoPage);
+  // AI pages — always include memo page (shows fallback if generation failed)
+  addPage(renderAIMemoPage);
   if (hasPlaybook) addPage(renderNegotiationPage);
   // Post-AI pages (always included)
   addPage(renderRiskAnalysisPage);
