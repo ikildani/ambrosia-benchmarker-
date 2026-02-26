@@ -55,6 +55,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="alternate" type="application/rss+xml" title="Ambrosia Ventures Blog" href="/feed.xml" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
+        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
       <body className={inter.className}>
         <a

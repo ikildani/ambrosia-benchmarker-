@@ -63,6 +63,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+// ISR: regenerate landing pages every 2 hours
+export const revalidate = 7200;
+
 export async function generateStaticParams() {
   try {
     const supabase = createServiceClient();

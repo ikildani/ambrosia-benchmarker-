@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
 import CompanyPageClient from './CompanyPageClient';
 
+// ISR: regenerate company pages every hour
+export const revalidate = 3600;
+
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface Props {

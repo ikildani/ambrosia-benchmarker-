@@ -1,9 +1,9 @@
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
 import { SavedScenario, COMPARISON_METRICS } from './scenarioComparison';
 
-// Export comparison to Excel
+// Export comparison to Excel (ExcelJS + file-saver lazy-loaded to avoid 22MB in main bundle)
 export async function exportComparisonToExcel(scenarios: SavedScenario[]): Promise<void> {
+  const ExcelJS = (await import('exceljs')).default;
+  const { saveAs } = await import('file-saver');
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Ambrosia Ventures';
   wb.created = new Date();
