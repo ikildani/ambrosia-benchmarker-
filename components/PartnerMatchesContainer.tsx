@@ -195,18 +195,28 @@ export default function PartnerMatchesContainer({
 // Map frontend values to backend enum values
 function mapModality(modality: string): string {
   const map: Record<string, string> = {
-    // Core modalities
+    // Core oncology modalities
     smallMolecule: 'small_molecule',
+    protac: 'small_molecule',          // PROTACs are small molecule degraders
+    molecularGlue: 'small_molecule',   // molecular glues are small molecule degraders
     antibody: 'antibody',
+    mab: 'antibody',                   // monoclonal antibody
     adc: 'adc',
     bispecific: 'bispecific',
+    tCellEngager: 'bispecific',        // T-cell engagers are bispecific-adjacent
     carT: 'car_t',
+    carT_heme: 'car_t',               // CAR-T hematologic
+    carT_solid: 'car_t',              // CAR-T solid tumor
     cellTherapy: 'cell_therapy',
     geneTherapy: 'gene_therapy',
     mrna: 'mrna',
+    rnai: 'rnai',                      // RNAi / siRNA
     peptide: 'peptide',
     oligonucleotide: 'oligonucleotide',
+    therapeuticVaccine: 'vaccine',      // non-mRNA therapeutic vaccine
     radiopharm: 'radiopharm',
+    radiopharmaceutical: 'radiopharm',  // alternate frontend key
+    oncolyticVirus: 'other',           // oncolytic virus
     other: 'other',
     // Neurology-specific
     aso: 'aso',
@@ -219,10 +229,18 @@ function mapModality(modality: string): string {
     carT_autoimmune: 'car_t',
     tl1aInhibitor: 'antibody',
     jak_tyk2Inhibitor: 'small_molecule',
+    jakInhibitor: 'small_molecule',    // JAK / TYK2 inhibitor
+    s1pModulator: 'small_molecule',    // S1P receptor modulator
+    oralIntegrin: 'small_molecule',    // oral integrin inhibitor
     ilInhibitor: 'antibody',
+    fcrnAntagonist: 'antibody',        // FcRn antagonist
+    dualAntagonist: 'antibody',        // dual BAFF/APRIL antagonist
+    complementInhibitor: 'antibody',   // complement inhibitor
     complement: 'antibody',
     sphingosine: 'small_molecule',
     btk_degrader: 'small_molecule',
+    inVivoCarT: 'car_t',              // in vivo CAR-T (LNP)
+    carTreg: 'cell_therapy',           // CAR-Treg / tolerizing
     // Metabolic-specific
     glp1Agonist: 'peptide',
     dualIncretin: 'peptide',
@@ -232,6 +250,25 @@ function mapModality(modality: string): string {
     sglt2Inhibitor: 'small_molecule',
     antiActivin: 'antibody',
     microbiomeBased: 'other',
+    // Cardiovascular-specific
+    myosinInhibitor: 'small_molecule',     // cardiac myosin inhibitor
+    anticoagulantNovel: 'small_molecule',  // novel anticoagulant (FXI/FXII)
+    pcsk9Targeting: 'antibody',            // PCSK9-targeting (mAb/siRNA)
+    rnaCardio: 'rnai',                     // RNA therapeutics for cardiovascular
+    // Infectious disease-specific
+    antiviral: 'small_molecule',           // small molecule antiviral
+    antibioticNovel: 'small_molecule',     // novel antibiotic
+    vaccinePreventive: 'vaccine',          // preventive vaccine (non-mRNA)
+    phageTherapy: 'other',                // bacteriophage therapy
+    // Ophthalmology-specific
+    antiVegf: 'antibody',                 // anti-VEGF antibody/fragment
+    topicalOphthalmic: 'small_molecule',  // topical eye drop
+    intravitreal: 'other',               // intravitreal implant / depot
+    geneTherapyOcular: 'gene_therapy',   // ocular gene therapy (AAV)
+    // Women's health-specific
+    gnrhAntagonist: 'small_molecule',     // GnRH antagonist (oral)
+    hormoneTherapy: 'small_molecule',     // hormone therapy / HRT
+    neuroactiveSteroid: 'small_molecule', // neuroactive steroid
   };
   return map[modality] || modality;
 }

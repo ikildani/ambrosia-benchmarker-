@@ -384,7 +384,7 @@ describe('findPartnerMatches — activity scoring', () => {
 // TERRITORY SCORING
 // ---------------------------------------------------------------------------
 describe('findPartnerMatches — territory scoring', () => {
-  test('16. global territory company matches any territory input (10 points)', async () => {
+  test('16. global territory company matches any territory input (15 points)', async () => {
     const company = makeCompany({
       id: 'terr-global',
       territory_focus: ['global'],
@@ -395,10 +395,10 @@ describe('findPartnerMatches — territory scoring', () => {
     const result = await findPartnerMatches(supabase, input);
 
     expect(result.matches.length).toBeGreaterThanOrEqual(1);
-    expect(result.matches[0].score_breakdown.territory).toBe(10);
+    expect(result.matches[0].score_breakdown.territory).toBe(15);
   });
 
-  test('17. US company with US territory input yields territory match (10 points)', async () => {
+  test('17. US company with US territory input yields territory match (15 points)', async () => {
     const company = makeCompany({
       id: 'terr-us',
       territory_focus: ['us'],
@@ -409,7 +409,7 @@ describe('findPartnerMatches — territory scoring', () => {
     const result = await findPartnerMatches(supabase, input);
 
     expect(result.matches.length).toBeGreaterThanOrEqual(1);
-    expect(result.matches[0].score_breakdown.territory).toBe(10);
+    expect(result.matches[0].score_breakdown.territory).toBe(15);
   });
 });
 

@@ -92,13 +92,16 @@ const WEIGHTS = {
   strategic_pipeline_gap: 10,
   strategic_priority_match: 8,
 
-  // Territory alignment (max 10 points)
-  territory_match: 10,
-  territory_partial: 5,
+  // Territory alignment (max 15 points)
+  territory_match: 15,
+  territory_partial: 8,
 
   // Company quality bonus (max 10 points)
   data_quality_high: 5,
   actively_acquiring: 5,
+
+  // Company capacity (max 8 points) - large pharma for late-stage, biotech for early-stage
+  company_capacity: 8,
 };
 
 // Modality adjacency map - related modalities that indicate interest
@@ -112,7 +115,7 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   'mrna': ['gene_therapy', 'vaccine', 'oligonucleotide'],
   'radiopharm': ['antibody', 'small_molecule', 'peptide'],
   'small_molecule': ['peptide', 'ion_channel', 'psychedelic'],
-  'oligonucleotide': ['gene_therapy', 'mrna', 'aso'],
+  'oligonucleotide': ['gene_therapy', 'mrna', 'aso', 'rnai'],
   'peptide': ['small_molecule', 'antibody'],
   'vaccine': ['mrna', 'antibody'],
   'aso': ['oligonucleotide', 'gene_therapy', 'rnai'],
@@ -121,6 +124,7 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   'ion_channel': ['small_molecule', 'psychedelic', 'peptide'],
   'tau_targeting': ['antibody', 'small_molecule', 'aso'],
   'stem_cell': ['cell_therapy', 'gene_therapy'],
+  'rnai': ['oligonucleotide', 'aso', 'gene_therapy', 'mrna'],
   // Metabolic modalities map to core types but also cross-link
   'sglt2_inhibitor': ['small_molecule', 'peptide'],
 };
@@ -642,6 +646,9 @@ function calculateMatchScore(
       (input.territory_scope === 'ex_us' && !companyTerritories.includes('us'))
     ) {
       breakdown.territory = WEIGHTS.territory_partial;
+    } else if (companyTerritories.length > 0 && !companyTerritories.includes('global')) {
+      // Territory mismatch: company has a territory focus that doesn't include user's territory
+      breakdown.territory = -5;
     }
   }
 
@@ -653,7 +660,23 @@ function calculateMatchScore(
     breakdown.quality += WEIGHTS.actively_acquiring;
   }
 
-  // 8. THERAPEUTIC AREA RELEVANCE
+  // 8b. COMPANY CAPACITY
+  // Large pharma suited for late-stage, biotech for early-stage
+  const isLateStage = inputPhaseRank >= 3; // phase_2 or later
+  const isEarlyStage = inputPhaseRank <= 1; // discovery or preclinical
+  const companyType = (company.company_type || '').toLowerCase();
+
+  if (companyType.includes('large_pharma') || companyType.includes('mega_pharma')) {
+    if (isLateStage) breakdown.quality += 8;
+    else if (!isEarlyStage) breakdown.quality += 4;
+  } else if (companyType.includes('biotech') || companyType.includes('specialty')) {
+    if (isEarlyStage) breakdown.quality += 6;
+    else if (!isLateStage) breakdown.quality += 3;
+  } else if (companyType.includes('mid_pharma')) {
+    breakdown.quality += 5; // mid-pharma is versatile
+  }
+
+  // 8c. THERAPEUTIC AREA RELEVANCE
   // Ensures companies are relevant to the user's therapeutic area, not just
   // coincidentally sharing a modality (e.g., oncology peptide vs metabolic peptide)
   if (input.therapeutic_area) {
@@ -713,7 +736,8 @@ function calculateMatchScore(
     WEIGHTS.strategic_priority_match +
     WEIGHTS.territory_match +
     WEIGHTS.data_quality_high +
-    WEIGHTS.actively_acquiring;
+    WEIGHTS.actively_acquiring +
+    WEIGHTS.company_capacity;
 
   const normalizedScore = Math.min(100, Math.round((breakdown.total / maxPossibleScore) * 100));
 

@@ -86,42 +86,329 @@ const metricTooltips: Record<string, string> = {
   royalties: 'Ongoing percentage of net sales paid to the licensor. Tiered rates increase at higher sales thresholds. Typically range from single-digit to low-twenties percent.',
 };
 
-// Helper to extract indication category from specific indication
+// Helper to extract indication category from specific indication.
+// Returns the most specific category key that exists in INDICATION_ADJACENCY
+// (from partner-matching.ts). Falls back to broad therapeutic-area categories.
 function getIndicationCategory(indication: string): string | null {
-  if (indication.startsWith('lung_') || indication.startsWith('breast_') ||
-      indication.startsWith('colorectal') || indication.startsWith('pancreatic') ||
-      indication.startsWith('gastric') || indication.startsWith('ovarian') ||
-      indication.startsWith('prostate') || indication.startsWith('melanoma') ||
-      indication.startsWith('rcc') || indication.startsWith('hcc') ||
-      indication.startsWith('bladder') || indication.startsWith('head_neck') ||
-      indication.startsWith('glioblastoma') || indication.startsWith('solid')) {
-    return 'solid_tumor';
-  }
-  if (indication.startsWith('aml') || indication.startsWith('all') ||
-      indication.startsWith('cll') || indication.startsWith('dlbcl') ||
-      indication.startsWith('follicular') || indication.startsWith('myeloma') ||
-      indication.startsWith('mds') || indication.startsWith('lymphoma') ||
-      indication.startsWith('heme')) {
-    return 'hematological';
-  }
-  if (indication.startsWith('ra_') || indication.startsWith('lupus') ||
-      indication.startsWith('ibd') || indication.startsWith('psoriasis') ||
-      indication.startsWith('ms_') || indication.startsWith('autoimmune')) {
-    return 'autoimmune';
-  }
-  if (indication.startsWith('alzheimer') || indication.startsWith('parkinson') ||
-      indication.startsWith('depression') || indication.startsWith('schizophrenia') ||
-      indication.startsWith('pain') || indication.startsWith('cns')) {
-    return 'cns';
-  }
-  if (indication.startsWith('rare_') || indication.startsWith('orphan')) {
-    return 'rare_disease';
-  }
-  if (indication.startsWith('hiv') || indication.startsWith('hep') ||
-      indication.startsWith('covid') || indication.startsWith('infectious')) {
-    return 'infectious';
-  }
-  return null;
+  // Explicit mapping from every indication value to its INDICATION_ADJACENCY key.
+  // Grouped by therapeutic area for readability.
+  const map: Record<string, string> = {
+    // ── Oncology: Solid Tumors ──
+    'lung_nsclc': 'solid_tumor',
+    'lung_sclc': 'solid_tumor',
+    'breast_her2': 'solid_tumor',
+    'breast_tnbc': 'solid_tumor',
+    'breast_hr': 'solid_tumor',
+    'colorectal': 'solid_tumor',
+    'pancreatic': 'solid_tumor',
+    'melanoma': 'solid_tumor',
+    'prostate': 'solid_tumor',
+    'ovarian': 'solid_tumor',
+    'gastric': 'solid_tumor',
+    'liver': 'solid_tumor',
+    'renal': 'solid_tumor',
+    'gbm': 'solid_tumor',
+    'bladder': 'solid_tumor',
+    'headNeck': 'solid_tumor',
+    'cholangiocarcinoma': 'solid_tumor',
+    'mesothelioma': 'solid_tumor',
+    'sarcoma': 'solid_tumor',
+    'endometrial': 'solid_tumor',
+    'cervical': 'solid_tumor',
+    'thyroid': 'solid_tumor',
+    'esophageal': 'solid_tumor',
+    'smallBowel': 'solid_tumor',
+    'neuroendocrine': 'solid_tumor',
+    'uvealMelanoma': 'solid_tumor',
+    'testicular': 'solid_tumor',
+    'adrenocortical': 'solid_tumor',
+    'nasopharyngeal': 'solid_tumor',
+    'thymoma': 'solid_tumor',
+    'penile': 'solid_tumor',
+    'merkelCell': 'solid_tumor',
+    'vulvar': 'solid_tumor',
+    // Pediatric solid tumors
+    'neuroblastoma': 'solid_tumor',
+    'retinoblastoma': 'solid_tumor',
+    'osteosarcoma': 'solid_tumor',
+    'ewingSarcoma': 'solid_tumor',
+    'rhabdomyosarcoma': 'solid_tumor',
+
+    // ── Oncology: Hematologic Malignancies ──
+    'aml': 'hematological',
+    'all': 'hematological',
+    'cll': 'hematological',
+    'myeloma': 'hematological',
+    'dlbcl': 'hematological',
+    'follicular': 'hematological',
+    'mantleCell': 'hematological',
+    'mds': 'hematological',
+    'mpn': 'hematological',
+    'tCellLymphoma': 'hematological',
+    'cml': 'hematological',
+    'waldenstrom': 'hematological',
+    'hodgkins': 'hematological',
+    'marginalZone': 'hematological',
+    'burkitt': 'hematological',
+    'primaryCNSLymphoma': 'hematological',
+    'systemicMastocytosis': 'hematological',
+    'cmml': 'hematological',
+    'hairyCell': 'hematological',
+    'amyloidosisAL': 'hematological',
+    'castlemanDisease': 'hematological',
+    'aplasticAnemia': 'hematological',
+    'bpdcn': 'hematological',
+
+    // ── Neurology: Neurodegeneration ──
+    'alzheimers': 'alzheimers',
+    'parkinsons': 'parkinsons',
+    'als': 'als',
+    'huntingtons': 'huntingtons',
+    'frontotemporal': 'alzheimers',   // FTD is closest to alzheimers (dementia family)
+    'lewyBody': 'alzheimers',         // Lewy Body Dementia closest to alzheimers
+
+    // ── Neurology: Psychiatry ──
+    'schizophrenia': 'schizophrenia',
+    'depression': 'depression',
+    'addiction': 'addiction',
+    'bipolar': 'depression',           // bipolar maps to depression (mood disorder family)
+    'ptsd': 'depression',              // PTSD maps to depression
+    'ocd': 'depression',               // OCD/anxiety maps to depression
+    'adhd': 'cns',                     // ADHD — broad CNS
+    'insomnia': 'narcolepsy',          // sleep disorders → narcolepsy
+
+    // ── Neurology: Movement & Seizure ──
+    'epilepsy': 'epilepsy',
+    'tremor': 'tremor',
+
+    // ── Neurology: Other CNS ──
+    'pain': 'pain',
+    'ms': 'multiple_sclerosis',
+    'migraine': 'migraine',
+    'narcolepsy': 'narcolepsy',
+    'tbi': 'tbi',
+    'chronicPain': 'pain',            // chronic non-neuropathic → pain
+    'clusterHeadache': 'migraine',    // cluster headache → migraine
+    'restlessLeg': 'cns',             // no specific key, broad CNS
+    'rareNeuro': 'rare_neurological',
+
+    // ── Neurology: Neurodevelopmental & Rare ──
+    'autism': 'rare_neurological',
+    'rett': 'rare_neurological',
+    'friedreichs': 'rare_neurological',
+    'dmd': 'neuromuscular',
+    'sma': 'neuromuscular',
+    'angelman': 'rare_neurological',
+    'dravet': 'epilepsy',             // Dravet is an epilepsy syndrome
+    'myotonicDystrophy': 'neuromuscular',
+    'tuberousSclerosis': 'rare_neurological',
+    'cmt': 'neuromuscular',
+    'fragileX': 'rare_neurological',
+    'cdkl5': 'rare_neurological',
+    'praderWilli': 'rare_neurological',
+    'batten': 'rare_neurological',
+    'ataxiaTelangiectasia': 'rare_neurological',
+
+    // ── Neurology: Neuromuscular ──
+    'lgmd': 'neuromuscular',
+    'fshd': 'neuromuscular',
+    'stiffPerson': 'neuromuscular',
+    'gbs': 'neuromuscular',
+    'neurofibromatosis': 'rare_neurological',
+
+    // ── Neurology: Other ──
+    'peripheralNeuropathy': 'pain',
+    'spinalCordInjury': 'tbi',        // spinal cord injury → tbi (trauma family)
+
+    // ── Immunology: Inflammatory Bowel ──
+    'ulcerativeColitis': 'ibd',
+    'crohns': 'ibd',
+    'ibd_broad': 'ibd',
+    'celiac': 'autoimmune',           // celiac → autoimmune (no specific key)
+
+    // ── Immunology: Rheumatologic ──
+    'rheumatoidArthritis': 'rheumatology',
+    'sle_lupus': 'rheumatology',
+    'lupusNephritis': 'nephrology',
+    'systemicSclerosis': 'rheumatology',
+    'sjogrens': 'rheumatology',
+    'aancaVasculitis': 'rheumatology',
+
+    // ── Immunology: Dermatologic ──
+    'atopicderm': 'dermatology',
+    'psoriasis': 'dermatology',
+    'psoriaticArthritis': 'dermatology',
+    'alopecia': 'dermatology',
+    'hidradenitis': 'dermatology',
+    'vitiligo': 'dermatology',
+    'epidermolysis': 'dermatology',
+    'chronicUrticaria': 'dermatology',
+
+    // ── Immunology: Neuromuscular & Rare ──
+    'myastheniaGravis': 'neuromuscular',
+    'cidp': 'neuromuscular',
+    'multipleSclerosisMod': 'multiple_sclerosis',
+    'pnh': 'complement',
+    'pemphigus': 'autoimmune',
+    'itp': 'complement',
+    'dermatomyositis': 'neuromuscular',
+    'coldAgglutinin': 'complement',
+    'ttpAutoimmune': 'complement',
+
+    // ── Immunology: Respiratory & Allergic ──
+    'asthma': 'respiratory',
+    'copd': 'respiratory',
+    'ipf': 'respiratory',
+    'eosinophilicEsophagitis': 'autoimmune',
+    'foodAllergy': 'autoimmune',
+    'heredAngioedema': 'complement',
+
+    // ── Immunology: Transplant ──
+    'gvhd': 'autoimmune',
+    'organTransplant': 'autoimmune',
+
+    // ── Immunology: Renal & Rare ──
+    'igan': 'nephrology',
+    'membranousNephropathy': 'nephrology',
+    'fsgs': 'nephrology',
+    'thyroidEye': 'autoimmune',
+    'pbc': 'autoimmune',
+    'psc': 'autoimmune',
+    'autoImmuneHepatitis': 'autoimmune',
+    'nephroticSyndrome': 'nephrology',
+    'rareAutoimmune': 'autoimmune',
+
+    // ── Immunology: Musculoskeletal & Vascular ──
+    'ankylosingSpondylitis': 'rheumatology',
+    'giantCellArteritis': 'rheumatology',
+    'polymyalgiaRheumatica': 'rheumatology',
+    'behcets': 'rheumatology',
+    'egpa': 'rheumatology',
+    'antiphospholipid': 'rheumatology',
+    'systemicJIA': 'rheumatology',
+
+    // ── Immunology: Other Autoimmune ──
+    'sarcoidosis': 'autoimmune',
+    'uveitis': 'autoimmune',
+    'primaryImmunodeficiency': 'autoimmune',
+
+    // ── Metabolic: Obesity & Weight ──
+    'obesity': 'obesity',
+    'metabolicSyndrome': 'metabolic_syndrome',
+
+    // ── Metabolic: Diabetes & Glycemic ──
+    'type2Diabetes': 'type2_diabetes',
+    'type1Diabetes': 'metabolic',      // T1D — no specific key, broad metabolic
+
+    // ── Metabolic: Organ-Specific ──
+    'nashMash': 'nash_mash',
+    'lipodystrophy': 'lipodystrophy',
+    'ckdMetabolic': 'metabolic',
+
+    // ── Metabolic: Cardiovascular-Metabolic ──
+    'hfpef': 'cardiovascular',
+    'familialHypercholesterolemia': 'cardiovascular',
+
+    // ── Metabolic: Endocrine ──
+    'acromegaly': 'metabolic',
+    'cushings': 'metabolic',
+    'congenitalAdrenalHyperplasia': 'metabolic',
+    'congenitalHyperinsulinism': 'metabolic',
+
+    // ── Metabolic: Other ──
+    'gout': 'metabolic',
+    'hemochromatosis': 'metabolic',
+
+    // ── Metabolic: Rare Metabolic ──
+    'glycogenStorage': 'glycogen_storage',
+    'pku': 'pku',
+    'wilsonDisease': 'rare_metabolic',
+    'fabry': 'rare_metabolic',
+    'gaucher': 'rare_metabolic',
+    'pompe': 'rare_metabolic',
+    'mpsDisorders': 'rare_metabolic',
+    'aatDeficiency': 'rare_metabolic',
+    'hyperoxaluria': 'rare_metabolic',
+    'ureaCycleDisorders': 'rare_metabolic',
+    'asmd': 'rare_metabolic',
+    'cystinosis': 'rare_metabolic',
+    'galactosemia': 'rare_metabolic',
+    'krabbe': 'rare_metabolic',
+    'hypophosphatasia': 'rare_metabolic',
+    'porphyria': 'rare_metabolic',
+    'mitochondrialDisease': 'rare_metabolic',
+    'rareMetabolic': 'rare_metabolic',
+
+    // ── Metabolic: Hematologic (Non-Malignant) ──
+    'sickleCell': 'rare_disease',
+    'betaThalassemia': 'rare_disease',
+    'hemophiliaA': 'rare_disease',
+    'hemophiliaB': 'rare_disease',
+    'attrAmyloidosis': 'rare_disease',
+
+    // ── Metabolic: Respiratory (Genetic) ──
+    'cysticFibrosis': 'rare_disease',
+
+    // ── Cardiovascular ──
+    'heartFailureHfref': 'cardiovascular',
+    'cardiomyopathy': 'cardiovascular',
+    'atrialFibrillation': 'cardiovascular',
+    'cardiacArrhythmia': 'cardiovascular',
+    'aorticStenosis': 'cardiovascular',
+    'pulmonaryArterialHypertension': 'cardiovascular',
+    'coronaryArteryDisease': 'cardiovascular',
+    'peripheralArteryDisease': 'cardiovascular',
+    'atherosclerosis': 'cardiovascular',
+    'venousThromboembolism': 'cardiovascular',
+    'dyslipidemia': 'cardiovascular',
+    'resistantHypertension': 'cardiovascular',
+    'myocarditis': 'cardiovascular',
+
+    // ── Infectious Disease ──
+    'hivAids': 'infectious',
+    'hepatitisB': 'infectious',
+    'hepatitisD': 'infectious',
+    'cmvInfection': 'infectious',
+    'rsv': 'infectious',
+    'influenza': 'infectious',
+    'covid': 'infectious',
+    'dengueMalaria': 'infectious',
+    'amrBacterial': 'infectious',
+    'tuberculosis': 'infectious',
+    'fungalInfections': 'infectious',
+    'clostridioides': 'infectious',
+
+    // ── Ophthalmology ──
+    'wetAmd': 'ophthalmology',
+    'dryAmdGA': 'ophthalmology',
+    'diabeticRetinopathy': 'ophthalmology',
+    'diabeticMacularEdema': 'ophthalmology',
+    'retinitisPigmentosa': 'ophthalmology',
+    'retinalVeinOcclusion': 'ophthalmology',
+    'uveiticMacular': 'ophthalmology',
+    'stargardt': 'ophthalmology',
+    'glaucoma': 'ophthalmology',
+    'dryEyeDisease': 'ophthalmology',
+    'myopiaProgression': 'ophthalmology',
+
+    // ── Women's Health ──
+    // No specific INDICATION_ADJACENCY key for women's health indications.
+    // Map to the closest broad category where possible.
+    'endometriosis': 'autoimmune',           // inflammatory component, closest match
+    'uterineFibroids': 'rare_disease',       // niche, limited partner overlap
+    'pcos': 'metabolic',                     // strong metabolic component
+    'fertilityArt': 'rare_disease',          // niche
+    'contraceptionNovel': 'rare_disease',    // niche
+    'menopause': 'metabolic',                // hormonal/metabolic overlap
+    'postpartumDepression': 'depression',    // maps to depression (CNS)
+    'preeclampsia': 'cardiovascular',        // vascular/CV overlap
+    'prematureLabor': 'rare_disease',        // niche
+    'vulvodynia': 'pain',                    // chronic pain
+    'cervicalDysplasia': 'infectious',       // HPV-related
+    'breastCancerPrevention': 'solid_tumor', // oncology-adjacent
+  };
+
+  return map[indication] ?? null;
 }
 
 // Methodology Section component
