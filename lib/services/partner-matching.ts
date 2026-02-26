@@ -191,7 +191,15 @@ const THERAPEUTIC_AREA_INDICATIONS: Record<string, string[]> = {
   'immunology': ['autoimmune', 'dermatology', 'rheumatology', 'ibd', 'nephrology',
     'neuromuscular', 'complement'],
   'metabolic': ['metabolic', 'obesity', 'type2_diabetes', 'nash_mash', 'metabolic_syndrome',
-    'lipodystrophy', 'glycogen_storage', 'pku', 'rare_metabolic', 'cardiovascular'],
+    'lipodystrophy', 'glycogen_storage', 'pku', 'rare_metabolic'],
+  'cardiovascular': ['cardiovascular', 'heart_failure', 'atherosclerosis', 'hypertension',
+    'arrhythmia', 'thrombosis', 'pulmonary_hypertension', 'aortic_stenosis'],
+  'infectiousDisease': ['infectious', 'hiv', 'hbv', 'hcv', 'tuberculosis', 'amr',
+    'respiratory_infection', 'fungal', 'vaccine'],
+  'ophthalmology': ['ophthalmology', 'retinal', 'macular_degeneration', 'glaucoma',
+    'diabetic_retinopathy', 'uveitis', 'dry_eye', 'inherited_retinal'],
+  'womensHealth': ['womens_health', 'endometriosis', 'uterine_fibroids', 'fertility',
+    'menopause', 'preeclampsia', 'pcos', 'contraception', 'postpartum'],
 };
 
 const TA_LABELS: Record<string, string> = {
@@ -199,6 +207,10 @@ const TA_LABELS: Record<string, string> = {
   'neurology': 'Neurology',
   'immunology': 'Immunology',
   'metabolic': 'Metabolic/Obesity',
+  'cardiovascular': 'Cardiovascular',
+  'infectiousDisease': 'Infectious Disease',
+  'ophthalmology': 'Ophthalmology',
+  'womensHealth': 'Women\'s Health',
 };
 
 // Phase ranking for comparison
