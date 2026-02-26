@@ -13,8 +13,8 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "Life Sciences Deal Calculator | Ambrosia Ventures",
-  description: "Estimate upfront payments, milestones, and royalties for biopharma licensing deals across oncology, neurology, immunology, and metabolic/obesity. Powered by Ambrosia Ventures.",
-  keywords: ["biotech", "licensing", "deal terms", "oncology", "neurology", "CNS", "immunology", "autoimmune", "metabolic", "obesity", "GLP-1", "milestones", "royalties", "M&A", "life sciences"],
+  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and AI-powered market intelligence for biopharma licensing deals across 8 therapeutic areas. 600+ deals, 120+ company profiles.",
+  keywords: ["biotech", "licensing", "deal terms", "rNPV", "Monte Carlo", "deal benchmarks", "oncology", "neurology", "CNS", "immunology", "autoimmune", "metabolic", "obesity", "GLP-1", "milestones", "royalties", "M&A", "life sciences", "partner matching"],
   authors: [{ name: "Ambrosia Ventures" }],
   metadataBase: new URL("https://calculator.ambrosiaventures.co"),
   verification: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Life Sciences Deal Calculator",
-    description: "Data-driven estimates for biopharma licensing deals across oncology, neurology, immunology, and metabolic/obesity",
+    description: "rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. 600+ deals, 120+ company profiles, 8 therapeutic areas.",
     type: "website",
     url: "https://calculator.ambrosiaventures.co",
     siteName: "Ambrosia Ventures",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Life Sciences Deal Calculator",
-    description: "Data-driven estimates for biopharma licensing deals",
+    description: "rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. 600+ deals, 120+ companies.",
     images: ["/api/og"],
   },
 };

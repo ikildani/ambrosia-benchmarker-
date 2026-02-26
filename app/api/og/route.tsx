@@ -287,10 +287,10 @@ export async function GET(request: NextRequest) {
               maxWidth: '700px',
             }}
           >
-            Data-driven benchmarks for biopharma licensing deals across oncology, neurology, immunology & metabolic
+            rNPV modeling, Monte Carlo simulation & market intelligence for biopharma licensing deals
           </div>
 
-          {/* Credibility pill */}
+          {/* Credibility pills */}
           <div
             style={{
               display: 'flex',
@@ -327,10 +327,27 @@ export async function GET(request: NextRequest) {
               }}
             >
               <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                4
+                8
               </div>
               <div style={{ fontSize: '16px', color: COLORS.slate }}>
                 Therapeutic Areas
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: `1.5px solid ${COLORS.teal}60`,
+                borderRadius: '100px',
+                padding: '8px 20px',
+              }}
+            >
+              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
+                120+
+              </div>
+              <div style={{ fontSize: '16px', color: COLORS.slate }}>
+                Company Profiles
               </div>
             </div>
           </div>
