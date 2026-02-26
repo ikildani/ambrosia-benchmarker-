@@ -72,38 +72,36 @@ export async function DELETE(request: NextRequest) {
     await deleteFrom('sessions', 'user_id', user.id);
     await deleteFrom('lead_scores', 'user_id', user.id);
 
-    // --- Phase 4: Delete user profile (critical) ---
+    // --- Phase 4 & 5: Delete profile + auth user (both critical, must succeed together) ---
+    // Delete auth user FIRST — if it fails, profile is still intact and user can retry.
+    // If we deleted profile first and auth fails, user has orphaned auth record with no profile.
+    const { error: authDeleteError } = await supabase.auth.admin.deleteUser(user.id);
+
+    if (authDeleteError) {
+      console.error('Error deleting auth user:', authDeleteError);
+      captureApiError(authDeleteError, 'data-deletion-auth');
+      return NextResponse.json(
+        {
+          error: 'Failed to delete account. Please try again or contact support.',
+          partial_deletion: deletionErrors.length > 0,
+          failed_tables: [...deletionErrors, 'auth_user'],
+        },
+        { status: 500 }
+      );
+    }
+
+    // Auth user deleted — now delete profile (safe: user can't log in anymore)
     const { error: profileError } = await supabase
       .from('user_profiles')
       .delete()
       .eq('id', user.id);
 
     if (profileError) {
-      console.error('Error deleting profile:', profileError);
+      // Non-fatal: auth user is gone so user is effectively deleted.
+      // Profile row is orphaned but harmless. Log for cleanup.
+      console.error('Error deleting profile (auth user already deleted):', profileError);
+      captureApiError(profileError, 'data-deletion-profile-orphan');
       deletionErrors.push('user_profile');
-      return NextResponse.json(
-        {
-          error: 'Failed to delete user profile',
-          partial_deletion: deletionErrors.length > 1,
-          failed_tables: deletionErrors,
-        },
-        { status: 500 }
-      );
-    }
-
-    // --- Phase 5: Delete the auth user (critical) ---
-    const { error: authDeleteError } = await supabase.auth.admin.deleteUser(user.id);
-
-    if (authDeleteError) {
-      console.error('Error deleting auth user:', authDeleteError);
-      return NextResponse.json(
-        {
-          error: 'Failed to delete auth account. Profile data was removed but auth record remains.',
-          partial_deletion: true,
-          failed_tables: ['auth_user'],
-        },
-        { status: 500 }
-      );
     }
 
     return NextResponse.json({

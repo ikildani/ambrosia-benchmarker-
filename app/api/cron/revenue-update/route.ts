@@ -76,6 +76,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron-revenue-update');
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Revenue update failed' }, { status: 500 });
   }
 }

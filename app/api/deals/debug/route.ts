@@ -1,9 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = await checkRateLimit(identifier, 'deals-debug', RATE_LIMIT_CONFIGS.default);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
 
@@ -45,9 +57,8 @@ export async function GET() {
       sampleModalities: [...new Set((modalities || []).map(d => d.modality))].slice(0, 5)
     });
   } catch (err) {
-    return NextResponse.json({
-      error: err instanceof Error ? err.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Deals debug error:', err);
+    return NextResponse.json({ error: 'Debug query failed' }, { status: 500 });
   }
 }
 

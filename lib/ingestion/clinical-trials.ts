@@ -666,7 +666,7 @@ export async function runWeeklyIngestion(
           continue;
         }
 
-        // Find or create company
+        // Find or create company (atomic upsert to prevent race conditions)
         let companyId = companyLookup.get(companyName.toLowerCase())?.id;
 
         if (!companyId) {
@@ -681,13 +681,15 @@ export async function runWeeklyIngestion(
           if (found) {
             companyId = found.id;
           } else {
+            // Use upsert with ON CONFLICT to prevent duplicate companies
+            // under concurrent ingestion
             const { data: newCompany } = await supabase
               .from('companies')
-              .insert({
+              .upsert({
                 name: companyName,
                 name_variations: [companyName],
                 data_sources: ['clinicaltrials'],
-              })
+              }, { onConflict: 'name', ignoreDuplicates: false })
               .select('id')
               .single();
             companyId = newCompany?.id;

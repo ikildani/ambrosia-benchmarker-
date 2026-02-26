@@ -101,6 +101,16 @@ function makeRequest(
 describe('/api/playbook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Ensure env vars are set for createClient guard
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
+
+    // Re-establish mock chain after clearAllMocks
+    mockSupabase.from.mockReturnThis();
+    mockSupabase.select.mockReturnThis();
+    mockSupabase.insert.mockReturnThis();
+    mockSupabase.update.mockReturnThis();
+    mockSupabase.eq.mockReturnThis();
 
     // Default: single() resolves to no data (unauthorized by default)
     mockSupabase.single.mockResolvedValue({ data: null, error: null });

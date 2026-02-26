@@ -49,6 +49,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Clinical trials update error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Clinical trials update failed' }, { status: 500 });
   }
 }

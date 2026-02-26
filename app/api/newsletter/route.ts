@@ -1,8 +1,18 @@
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { apiSuccess, apiError } from '@/lib/api-response';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { newsletterSchema, formatZodErrors } from '@/lib/api-validation';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Rate limiting — prevent spam signups
+  const identifier = getIdentifier(request);
+  const rateLimitResult = await checkRateLimit(identifier, 'newsletter', { limit: 5, windowSeconds: 60 });
+
+  if (!rateLimitResult.success) {
+    return apiErrorWithHeaders('Too many requests', 429, getRateLimitHeaders(rateLimitResult));
+  }
+
   try {
     const body = await request.json();
     const parsed = newsletterSchema.safeParse(body);

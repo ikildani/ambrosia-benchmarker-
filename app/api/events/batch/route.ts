@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 const MAX_BATCH_SIZE = 100;
 
@@ -38,6 +39,17 @@ interface BatchRequest {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const identifier = getIdentifier(request);
+  const rateLimitResult = await checkRateLimit(identifier, 'events-batch', RATE_LIMIT_CONFIGS.events);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const supabase = createServiceClient();
     const body: BatchRequest = await request.json();

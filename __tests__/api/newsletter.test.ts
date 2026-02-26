@@ -23,6 +23,13 @@ jest.mock('@/lib/supabase/server', () => ({
   createServiceClient: () => mockSupabase,
 }));
 
+jest.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: jest.fn().mockResolvedValue({ success: true, remaining: 10 }),
+  getIdentifier: jest.fn().mockReturnValue('test-ip'),
+  getRateLimitHeaders: jest.fn().mockReturnValue({ 'X-RateLimit-Remaining': '10' }),
+  RATE_LIMIT_CONFIGS: { default: { limit: 60, windowSeconds: 60 } },
+}));
+
 // Import after mocking
 import { POST } from '@/app/api/newsletter/route';
 

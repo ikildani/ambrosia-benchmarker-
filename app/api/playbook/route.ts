@@ -55,10 +55,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7);
       const { createClient } = await import('@supabase/supabase-js');
-      const authClient = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return apiError('Server configuration error', 500);
+      }
+      const authClient = createClient(supabaseUrl, supabaseAnonKey);
       const { data: { user } } = await authClient.auth.getUser(token);
       if (user) {
         const { data: profile } = await supabase
