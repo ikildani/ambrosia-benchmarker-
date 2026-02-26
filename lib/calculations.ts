@@ -298,6 +298,24 @@ export interface CalculationResult {
   drillDown: DrillDownCollection;
   phase: Phase;
   milestoneExplanation?: string;
+
+  // Financial modeling results (populated for pro/report tier)
+  financialModel?: {
+    rnpv?: import('./financial/types').RNPVResult;
+    monteCarlo?: import('./financial/types').MonteCarloResult;
+    marketSize?: import('./financial/types').MarketSizeEstimate;
+    fxSensitivity?: import('./financial/types').FXSensitivity;
+    scenarios?: import('./financial/types').ScenarioResult[];
+    defensiveAnalysis?: {
+      worstCase: import('./financial/types').ScenarioResult;
+      bestCase: import('./financial/types').ScenarioResult;
+      defensiveFloor: number;
+      walkAwayThreshold: number;
+      narrative: string;
+    };
+    competitiveLandscape?: import('./financial/types').CompetitiveLandscape;
+    dealFlowForecast?: import('./financial/types').DealFlowForecast;
+  };
 }
 
 // Helper to get indication category

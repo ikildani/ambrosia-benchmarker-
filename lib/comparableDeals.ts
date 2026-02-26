@@ -1,5 +1,9 @@
 // Comparable deal references for PDF/Excel reports
-// Data sourced from publicly disclosed deal terms (2023-2026)
+// Data sourced from publicly disclosed deal terms (2020-2026)
+// Includes 84 extended deals covering CV, ID, ophthalmology, women's health,
+// combination therapy, and geographic-specific transactions.
+
+import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
 
 export interface ComparableDeal {
   licensor: string;
@@ -90,6 +94,32 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Fractyl Health', licensee: 'Johnson & Johnson', value: '$1.5B', year: 2025, relevance: 'Revita DMR device + GLP-1 (T2D remission)', modalities: ['medicalDevice'], indications: ['type2Diabetes'], therapeuticArea: 'metabolic' },
 ];
 
+// Convert extended deal to base ComparableDeal format
+function toComparableDeal(d: ExtendedComparableDeal): ComparableDeal {
+  const value = d.totalDealValue >= 1000
+    ? `$${(d.totalDealValue / 1000).toFixed(1)}B`
+    : `$${d.totalDealValue}M`;
+  return {
+    licensor: d.licensor,
+    licensee: d.licensee,
+    value,
+    year: d.year,
+    relevance: d.headline,
+    modalities: [d.modality],
+    indications: [d.indication_specific],
+    therapeuticArea: d.therapeuticArea as ComparableDeal['therapeuticArea'],
+  };
+}
+
+// Merge curated deals with extended deals (deduplicate by licensor+licensee+year)
+const ALL_DEALS: ComparableDeal[] = (() => {
+  const seen = new Set(COMPARABLE_DEALS.map(d => `${d.licensor}|${d.licensee}|${d.year}`));
+  const extended = EXTENDED_COMPARABLE_DEALS
+    .filter(d => !seen.has(`${d.licensor}|${d.licensee}|${d.year}`))
+    .map(toComparableDeal);
+  return [...COMPARABLE_DEALS, ...extended];
+})();
+
 // Extended interface for web UI component
 export interface ComparableDealForUI {
   id: string;
@@ -106,7 +136,7 @@ export function findComparableDeals(
   inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string },
   maxDeals: number = 5
 ): ComparableDealForUI[] {
-  const scored = COMPARABLE_DEALS.map((deal, idx) => {
+  const scored = ALL_DEALS.map((deal, idx) => {
     let score = 0;
     const reasons: string[] = [];
 
@@ -150,7 +180,7 @@ export function getRelevantDeals(
   indication?: string,
   maxDeals: number = 4
 ): ComparableDeal[] {
-  const scored = COMPARABLE_DEALS.map(deal => {
+  const scored = ALL_DEALS.map(deal => {
     let score = 0;
     if (deal.therapeuticArea === therapeuticArea || deal.therapeuticArea === 'both') score += 1;
     if (modality && deal.modalities?.includes(modality)) score += 3;

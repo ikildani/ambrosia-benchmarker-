@@ -3,6 +3,7 @@ import type { SensitivityData } from '@/lib/sensitivity';
 import type { ComparableDealForUI } from '@/lib/comparableDeals';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
+import type { RNPVResult, MonteCarloResult, MarketSizeEstimate, ScenarioResult, FXSensitivity, CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -28,6 +29,22 @@ export interface PDFReportData {
   memoData?: DealMemo;
   comparableDeals: ComparableDealForUI[];
   historyId?: string;
+
+  // Financial modeling data (pro/report tier)
+  rnpvResult?: RNPVResult;
+  monteCarloResult?: MonteCarloResult;
+  marketSizeEstimate?: MarketSizeEstimate;
+  scenarioResults?: ScenarioResult[];
+  fxSensitivity?: FXSensitivity;
+  competitiveLandscape?: CompetitiveLandscape;
+  dealFlowForecast?: DealFlowForecast;
+  defensiveAnalysis?: {
+    worstCase: ScenarioResult;
+    bestCase: ScenarioResult;
+    defensiveFloor: number;
+    walkAwayThreshold: number;
+    narrative: string;
+  };
 }
 
 export interface TocEntry {

@@ -12,6 +12,8 @@ import {
 } from '@/lib/calculations';
 import { generatePDFReport, PartnerForPDF } from '@/lib/report';
 import type { PDFReportData } from '@/lib/report';
+import { runFinancialModel } from '@/lib/financial/run-financial-model';
+import epiData from '@/data/epidemiology.json';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { calculateRiskScore } from '@/lib/calculations';
 import { findComparableDeals } from '@/lib/comparableDeals';
@@ -176,6 +178,8 @@ export default function HistoryDetailModal({
           }
         }
 
+        // Run financial modeling pipeline for report
+        const fm = runFinancialModel(fullInputs, result, epiData.indications);
         const pdfData: PDFReportData = {
           result,
           inputs: fullInputs,
@@ -185,6 +189,12 @@ export default function HistoryDetailModal({
           memoData,
           comparableDeals,
           historyId: item?.id,
+          rnpvResult: fm.rnpv,
+          monteCarloResult: fm.monteCarlo,
+          marketSizeEstimate: fm.marketSize ?? undefined,
+          scenarioResults: fm.scenarios,
+          fxSensitivity: fm.fxSensitivity,
+          defensiveAnalysis: fm.defensiveAnalysis,
         };
         generatePDFReport(pdfData);
       } finally {

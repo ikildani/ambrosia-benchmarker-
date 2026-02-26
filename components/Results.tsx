@@ -25,6 +25,12 @@ const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: fa
 const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
 const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false });
 const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligence'), { ssr: false });
+const RnpvAnalysis = dynamic(() => import('./results/RnpvAnalysis'), { ssr: false });
+const MonteCarloResults = dynamic(() => import('./results/MonteCarloResults'), { ssr: false });
+const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr: false });
+const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false });
+const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false });
+const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPanel'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -37,6 +43,9 @@ import MetricCard from './results/MetricCard';
 import DrillDownPanel from './results/DrillDownPanel';
 import DealMemoSection from './results/DealMemoSection';
 import ResultsDisclaimer from './results/ResultsDisclaimer';
+import { runFinancialModel, type FinancialModelResult } from '@/lib/financial/run-financial-model';
+import type { CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
+import epiData from '@/data/epidemiology.json';
 
 interface ResultsProps {
   result: CalculationResult;
@@ -244,6 +253,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [hasHistory, setHasHistory] = useState(false);
   const comparisonRef = useRef<HTMLDivElement>(null);
 
+  // Financial modeling state
+  const [financialModel, setFinancialModel] = useState<FinancialModelResult | null>(null);
+  const [serverData, setServerData] = useState<{ competitiveLandscape?: CompetitiveLandscape; dealFlowForecast?: DealFlowForecast }>({});
+
   // Track previous result values for sensitivity analysis delta badges
   const isFirstRenderRef = useRef(true);
   const [previousTerms, setPreviousTerms] = useState<{
@@ -303,6 +316,29 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       }, 100);
     }
   }, [compareItem]);
+
+  // Run financial modeling pipeline (rNPV, Monte Carlo, scenarios, FX)
+  useEffect(() => {
+    if (!fullInputs || !result) return;
+    const fm = runFinancialModel(fullInputs, result, epiData.indications);
+    setFinancialModel(fm);
+  }, [fullInputs, result]);
+
+  // Fetch server-side financial data (competitive landscape, deal flow forecast)
+  useEffect(() => {
+    if (!fullInputs) return;
+    const params = new URLSearchParams({
+      therapeuticArea: fullInputs.therapeuticArea,
+      indication: fullInputs.indication,
+      modality: fullInputs.modality,
+    });
+    fetch(`/api/financial?${params}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setServerData({ competitiveLandscape: data.competitiveLandscape, dealFlowForecast: data.dealFlowForecast });
+      })
+      .catch(() => { /* non-critical — panels render empty */ });
+  }, [fullInputs]);
 
   // Build compare label from history item
   const compareLabel = compareItem
@@ -969,6 +1005,50 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onUpgrade={onUpgrade}
             onBuyReport={onBuyReport}
           />
+        )}
+
+        {/* Financial Modeling — World-Class Tier */}
+        {financialModel && (
+          <>
+            <RnpvAnalysis
+              rnpvResult={financialModel.rnpv}
+              benchmarkMedian={result.terms.totalDealValue.median}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+            <MonteCarloResults
+              monteCarloResult={financialModel.monteCarlo}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+            <MarketSizePanel
+              marketSize={financialModel.marketSize ?? undefined}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+            <ScenarioPlanner
+              scenarios={financialModel.scenarios}
+              defensiveAnalysis={financialModel.defensiveAnalysis}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+            <CompetitiveLandscapePanel
+              landscape={serverData.competitiveLandscape}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+            <DealFlowForecastPanel
+              forecast={serverData.dealFlowForecast}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+          </>
         )}
 
         {/* AI Deal Memo */}

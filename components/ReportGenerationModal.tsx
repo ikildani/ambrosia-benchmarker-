@@ -6,6 +6,8 @@ import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { findComparableDeals } from '@/lib/comparableDeals';
 import type { PartnerForExcel } from '@/lib/generateExcel';
 import type { PDFReportData, PartnerForPDF } from '@/lib/report';
+import { runFinancialModel } from '@/lib/financial/run-financial-model';
+import epiData from '@/data/epidemiology.json';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 
@@ -277,6 +279,8 @@ export default function ReportGenerationModal({
         setCurrentStep('compiling');
         // Read fresh partner data (may have loaded while memo was fetching)
         const freshPartners = propsRef.current.partnerMatches;
+        // Run financial modeling pipeline for report
+        const fm = runFinancialModel(p.fullInputs, p.result, epiData.indications);
         const pdfData: PDFReportData = {
           result: p.result,
           inputs: p.fullInputs,
@@ -286,6 +290,12 @@ export default function ReportGenerationModal({
           memoData: memo || undefined,
           playbookData: playbook || undefined,
           comparableDeals,
+          rnpvResult: fm.rnpv,
+          monteCarloResult: fm.monteCarlo,
+          marketSizeEstimate: fm.marketSize ?? undefined,
+          scenarioResults: fm.scenarios,
+          fxSensitivity: fm.fxSensitivity,
+          defensiveAnalysis: fm.defensiveAnalysis,
         };
         pdfDataRef.current = pdfData;
 

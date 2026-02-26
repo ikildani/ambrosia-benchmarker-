@@ -17,6 +17,10 @@ import { renderDealTimelinePage } from './pages/dealTimeline';
 import { renderNegotiationPage } from './pages/negotiation';
 import { renderTherapeuticIntelPage } from './pages/therapeuticIntel';
 import { renderMethodologyPage } from './pages/methodology';
+import { renderFinancialModelPage } from './pages/financialModel';
+import { renderCurrencySensitivityPage } from './pages/currencySensitivity';
+import { renderDealFlowContextPage } from './pages/dealFlowContext';
+import { renderDefensiveAdvicePage } from './pages/defensiveAdvice';
 import type { PDFReportData, ReportMeta, TocEntry } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
@@ -32,6 +36,7 @@ export function generateReportHTML(data: PDFReportData): string {
   // Conditionally included AI pages
   const hasAIMemo = !!(data.memoData || data.playbookData);
   const hasPlaybook = !!data.playbookData;
+  const hasFinancialModel = !!data.rnpvResult;
 
   // Build TOC entries with correct page numbers
   const tocEntries: TocEntry[] = [];
@@ -50,6 +55,12 @@ export function generateReportHTML(data: PDFReportData): string {
   toc('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation');
   toc('Deal Timeline', 'Gantt-style milestone schedule from signing to launch');
   toc('Therapeutic Intelligence', 'Indication-specific market context and trends');
+  if (hasFinancialModel) {
+    toc('Financial Model', 'rNPV, Monte Carlo, and cash flow analysis');
+    toc('Currency & Pricing Sensitivity', 'FX impact and regulatory pricing scenarios');
+    toc('Deal Flow & Market Context', 'Historical deal flow, competitive landscape, and market sizing');
+    toc('Defensive Analysis', 'Worst/best case scenarios and walk-away thresholds');
+  }
   toc('Methodology', 'Model design, data sources, and disclaimer');
 
   const totalPages = pageNum;
@@ -85,6 +96,13 @@ export function generateReportHTML(data: PDFReportData): string {
   addPage(renderRiskAnalysisPage);
   addPage(renderDealTimelinePage);
   addPage(renderTherapeuticIntelPage);
+  // Financial modeling pages — only if data exists
+  if (hasFinancialModel) {
+    addPage(renderFinancialModelPage);
+    addPage(renderCurrencySensitivityPage);
+    addPage(renderDealFlowContextPage);
+    addPage(renderDefensiveAdvicePage);
+  }
   addPage(renderMethodologyPage);
 
   return `
