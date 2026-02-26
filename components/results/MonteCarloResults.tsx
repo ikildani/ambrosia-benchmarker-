@@ -1,6 +1,8 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { formatCurrency } from '@/lib/calculations';
+import { BarChart3, Lock, Activity } from 'lucide-react';
 import type { MonteCarloResult } from '@/lib/financial/types';
 
 interface MonteCarloResultsProps {
@@ -17,44 +19,116 @@ function correlationColor(value: number): string {
   return 'text-slate-500 dark:text-slate-400';
 }
 
-function correlationBarWidth(value: number): string {
-  return `${Math.min(Math.abs(value) * 100, 100)}%`;
-}
-
 export default function MonteCarloResults({
   monteCarloResult,
   tier,
   onUpgrade,
   onBuyReport,
 }: MonteCarloResultsProps) {
-  if (!monteCarloResult) return (
-    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-      <p className="text-sm text-slate-500 dark:text-slate-400">Monte Carlo simulation requires rNPV base case to run.</p>
-    </div>
-  );
+  const [hoveredBin, setHoveredBin] = useState<number | null>(null);
 
   const hasAccess = tier === 'pro' || tier === 'report';
   const mc = monteCarloResult;
 
-  // Percentile data for the distribution bars
-  const percentiles = [
-    { label: 'P5', value: mc.percentiles.p5, color: 'bg-red-400 dark:bg-red-500' },
-    { label: 'P25', value: mc.percentiles.p25, color: 'bg-amber-400 dark:bg-amber-500' },
-    { label: 'P50', value: mc.percentiles.p50, color: 'bg-teal-500 dark:bg-teal-400' },
-    { label: 'P75', value: mc.percentiles.p75, color: 'bg-cyan-400 dark:bg-cyan-500' },
-    { label: 'P95', value: mc.percentiles.p95, color: 'bg-indigo-400 dark:bg-indigo-500' },
-  ];
+  // --- Memoized computations ---
 
-  // Normalize bar widths relative to P95
-  const maxVal = Math.max(Math.abs(mc.percentiles.p95), Math.abs(mc.percentiles.p5), 1);
+  const percentiles = useMemo(() => {
+    if (!mc) return [];
+    return [
+      { label: 'P5', value: mc.percentiles.p5, color: 'bg-red-400 dark:bg-red-500' },
+      { label: 'P25', value: mc.percentiles.p25, color: 'bg-amber-400 dark:bg-amber-500' },
+      { label: 'P50', value: mc.percentiles.p50, color: 'bg-teal-500 dark:bg-teal-400' },
+      { label: 'P75', value: mc.percentiles.p75, color: 'bg-cyan-400 dark:bg-cyan-500' },
+      { label: 'P95', value: mc.percentiles.p95, color: 'bg-indigo-400 dark:bg-indigo-500' },
+    ];
+  }, [mc]);
 
-  // Top 3 sensitivity drivers
-  const topDrivers = mc.keyDriverSensitivity
-    .slice()
-    .sort((a, b) => Math.abs(b.correlationWithNPV) - Math.abs(a.correlationWithNPV))
-    .slice(0, 3);
+  const percentileRange = useMemo(() => {
+    if (!mc) return { min: 0, max: 1 };
+    const allValues = [
+      mc.percentiles.p5,
+      mc.percentiles.p25,
+      mc.percentiles.p50,
+      mc.percentiles.p75,
+      mc.percentiles.p95,
+    ];
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    return { min, max };
+  }, [mc]);
 
-  const positiveProbPct = (mc.probabilityOfPositiveNPV * 100).toFixed(1);
+  const topDrivers = useMemo(() => {
+    if (!mc) return [];
+    return mc.keyDriverSensitivity
+      .slice()
+      .sort((a, b) => Math.abs(b.correlationWithNPV) - Math.abs(a.correlationWithNPV))
+      .slice(0, 3);
+  }, [mc]);
+
+  const positiveProbPct = useMemo(() => {
+    if (!mc) return '0.0';
+    return (mc.probabilityOfPositiveNPV * 100).toFixed(1);
+  }, [mc]);
+
+  const histogramData = useMemo(() => {
+    if (!mc || !mc.histogram || mc.histogram.length === 0) return null;
+    const maxCount = Math.max(...mc.histogram.map((b) => b.count));
+    const minBin = mc.histogram[0].binStart;
+    const maxBin = mc.histogram[mc.histogram.length - 1].binEnd;
+    const p50 = mc.percentiles.p50;
+
+    // Find which bin index the P50 falls into
+    let p50BinIndex = -1;
+    for (let i = 0; i < mc.histogram.length; i++) {
+      if (p50 >= mc.histogram[i].binStart && p50 < mc.histogram[i].binEnd) {
+        p50BinIndex = i;
+        break;
+      }
+    }
+    // If P50 equals the last bin's end, assign to the last bin
+    if (p50BinIndex === -1 && p50 >= mc.histogram[mc.histogram.length - 1].binStart) {
+      p50BinIndex = mc.histogram.length - 1;
+    }
+
+    return { maxCount, minBin, maxBin, p50BinIndex };
+  }, [mc]);
+
+  // --- Early return for missing data ---
+
+  if (!mc) {
+    return (
+      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Monte Carlo simulation requires rNPV base case to run.
+        </p>
+      </div>
+    );
+  }
+
+  /**
+   * Compute bar width for a percentile value.
+   * Handles negative values properly by mapping the full range (min..max)
+   * onto 0%..100% bar width.
+   */
+  function percentileBarWidth(value: number): number {
+    const { min, max } = percentileRange;
+    const range = max - min;
+    if (range === 0) return 50;
+    return ((value - min) / range) * 100;
+  }
+
+  /**
+   * Returns a gradient color for histogram bins based on position.
+   * Left (low outcomes) = red/rose, right (high outcomes) = teal/green.
+   */
+  function histogramBinColor(index: number, total: number): string {
+    const ratio = total <= 1 ? 0.5 : index / (total - 1);
+    if (ratio < 0.25) return 'bg-rose-500';
+    if (ratio < 0.4) return 'bg-orange-400';
+    if (ratio < 0.55) return 'bg-amber-400';
+    if (ratio < 0.7) return 'bg-emerald-400';
+    return 'bg-teal-500';
+  }
 
   return (
     <div className="relative mt-6 sm:mt-8">
@@ -68,19 +142,7 @@ export default function MonteCarloResults({
           <div className="flex items-start justify-between gap-3 mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-soft flex-shrink-0">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                  />
-                </svg>
+                <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h4 className="font-bold text-navy-800 dark:text-white text-sm sm:text-base">
@@ -95,7 +157,7 @@ export default function MonteCarloResults({
           </div>
 
           {/* Blurred content for non-pro */}
-          <div className={!hasAccess ? 'blur-sm pointer-events-none' : ''}>
+          <div className={!hasAccess ? 'blur-[6px] pointer-events-none transition-all' : 'transition-all'}>
             {/* Probability of Positive NPV -- Prominent */}
             <div className="mb-5 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-500/10 dark:to-purple-500/10 rounded-lg border border-indigo-100 dark:border-indigo-500/20 text-center">
               <p className="text-xs font-medium text-neutral-500 dark:text-slate-400 uppercase tracking-wide mb-1">
@@ -118,6 +180,81 @@ export default function MonteCarloResults({
               </p>
             </div>
 
+            {/* Histogram Distribution Chart */}
+            {histogramData && mc.histogram.length > 0 && (
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Activity className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                  <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    NPV Distribution
+                  </h5>
+                </div>
+
+                {/* Chart container */}
+                <div className="relative bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 p-3">
+                  {/* Bars */}
+                  <div className="flex items-end gap-[1px] h-32 sm:h-40">
+                    {mc.histogram.map((bin, idx) => {
+                      const heightPct =
+                        histogramData.maxCount > 0
+                          ? (bin.count / histogramData.maxCount) * 100
+                          : 0;
+                      const isP50 = idx === histogramData.p50BinIndex;
+                      const isHovered = hoveredBin === idx;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="relative flex-1 flex flex-col items-center justify-end h-full"
+                          onMouseEnter={() => setHoveredBin(idx)}
+                          onMouseLeave={() => setHoveredBin(null)}
+                        >
+                          {/* Hover tooltip */}
+                          {isHovered && (
+                            <div className="absolute bottom-full mb-2 z-10 bg-slate-800 dark:bg-slate-600 text-white text-[10px] leading-tight rounded px-2 py-1.5 whitespace-nowrap shadow-lg pointer-events-none">
+                              <div className="font-semibold">
+                                {formatCurrency(bin.binStart)} &ndash; {formatCurrency(bin.binEnd)}
+                              </div>
+                              <div className="text-slate-300 mt-0.5">
+                                {bin.count.toLocaleString()} iterations ({bin.percentage.toFixed(1)}%)
+                              </div>
+                            </div>
+                          )}
+
+                          {/* P50 marker */}
+                          {isP50 && (
+                            <div className="absolute -top-5 text-[9px] font-bold text-indigo-600 dark:text-indigo-300 whitespace-nowrap">
+                              P50
+                            </div>
+                          )}
+
+                          {/* Bar */}
+                          <div
+                            className={`w-full rounded-t-sm transition-all duration-200 cursor-pointer ${histogramBinColor(idx, mc.histogram.length)} ${
+                              isHovered ? 'opacity-100 scale-x-110' : 'opacity-80 hover:opacity-100'
+                            } ${isP50 ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 ring-offset-1 ring-offset-slate-50 dark:ring-offset-slate-700' : ''}`}
+                            style={{
+                              height: `${Math.max(heightPct, 1)}%`,
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* X-axis labels */}
+                  <div className="flex justify-between mt-2 px-0.5">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                      {formatCurrency(histogramData.minBin)}
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                      {formatCurrency(histogramData.maxBin)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Distribution Summary - Percentile Bars */}
             <div className="mb-5">
               <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
@@ -133,10 +270,7 @@ export default function MonteCarloResults({
                       <div
                         className={`h-full ${p.color} rounded-full transition-all duration-500`}
                         style={{
-                          width: `${Math.max(
-                            (Math.max(p.value, 0) / maxVal) * 100,
-                            4
-                          )}%`,
+                          width: `${Math.max(percentileBarWidth(p.value), 2)}%`,
                         }}
                       />
                     </div>
@@ -172,50 +306,59 @@ export default function MonteCarloResults({
               </div>
             </div>
 
-            {/* Key Sensitivities - Top 3 Drivers */}
+            {/* Key Sensitivities - Top 3 Drivers (centered-origin correlation bars) */}
             {topDrivers.length > 0 && (
               <div>
                 <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
                   Key Value Drivers
                 </h5>
                 <div className="space-y-2">
-                  {topDrivers.map((driver, idx) => (
-                    <div
-                      key={driver.parameter}
-                      className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600"
-                    >
-                      <span className="w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex-shrink-0">
-                        {idx + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
-                          {driver.label}
-                        </p>
-                        <div className="mt-1 h-1.5 bg-slate-100 dark:bg-slate-600 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              driver.correlationWithNPV >= 0
-                                ? 'bg-teal-500'
-                                : 'bg-red-400'
-                            }`}
-                            style={{
-                              width: correlationBarWidth(
-                                driver.correlationWithNPV
-                              ),
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <span
-                        className={`text-xs font-bold flex-shrink-0 ${correlationColor(
-                          driver.correlationWithNPV
-                        )}`}
+                  {topDrivers.map((driver, idx) => {
+                    const corrPct = Math.abs(driver.correlationWithNPV) * 50; // 50% = full bar on one side
+                    const isPositive = driver.correlationWithNPV >= 0;
+
+                    return (
+                      <div
+                        key={driver.parameter}
+                        className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all"
                       >
-                        {driver.correlationWithNPV > 0 ? '+' : ''}
-                        {driver.correlationWithNPV.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                        <span className="w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex-shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
+                            {driver.label}
+                          </p>
+                          {/* Centered-origin correlation bar */}
+                          <div className="mt-1 h-1.5 bg-slate-100 dark:bg-slate-600 rounded-full overflow-hidden relative">
+                            {/* Center line */}
+                            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300 dark:bg-slate-500 z-10" />
+                            {isPositive ? (
+                              /* Positive: bar extends right from center */
+                              <div
+                                className="absolute top-0 bottom-0 left-1/2 bg-teal-500 rounded-r-full transition-all duration-500"
+                                style={{ width: `${corrPct}%` }}
+                              />
+                            ) : (
+                              /* Negative: bar extends left from center */
+                              <div
+                                className="absolute top-0 bottom-0 right-1/2 bg-rose-500 rounded-l-full transition-all duration-500"
+                                style={{ width: `${corrPct}%` }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <span
+                          className={`text-xs font-bold flex-shrink-0 ${correlationColor(
+                            driver.correlationWithNPV
+                          )}`}
+                        >
+                          {driver.correlationWithNPV > 0 ? '+' : ''}
+                          {driver.correlationWithNPV.toFixed(2)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -228,22 +371,11 @@ export default function MonteCarloResults({
                 onClick={() =>
                   onBuyReport ? onBuyReport() : onUpgrade?.()
                 }
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
+                aria-label="Unlock Monte Carlo Simulation"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow hover:scale-105 transition-all"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                Unlock Financial Modeling
+                <Lock className="w-4 h-4" />
+                Unlock Monte Carlo Simulation
               </button>
             </div>
           )}

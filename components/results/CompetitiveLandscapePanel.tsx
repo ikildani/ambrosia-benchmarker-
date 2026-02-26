@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+import { Target, Lock, Users } from 'lucide-react';
 import type { CompetitiveLandscape } from '@/lib/financial/types';
 
 interface CompetitiveLandscapePanelProps {
@@ -7,6 +9,31 @@ interface CompetitiveLandscapePanelProps {
   tier: string;
   onUpgrade?: () => void;
   onBuyReport?: () => void;
+}
+
+const PHASE_ORDER = ['Preclinical', 'Phase 1', 'Phase 2', 'Phase 3', 'Approved'];
+
+const DENSITY_TICKS = [0, 25, 50, 75, 100];
+
+/** Phase chip color classes keyed by lowercase phase string. */
+const phaseChipColors: Record<string, string> = {
+  preclinical:
+    'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
+  'phase 1':
+    'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  'phase 2':
+    'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
+  'phase 3':
+    'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300',
+  approved:
+    'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+};
+
+function getPhaseChip(phase: string): string {
+  return (
+    phaseChipColors[phase.toLowerCase()] ||
+    'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300'
+  );
 }
 
 function densityColor(score: number): {
@@ -43,41 +70,56 @@ export default function CompetitiveLandscapePanel({
   onUpgrade,
   onBuyReport,
 }: CompetitiveLandscapePanelProps) {
-  if (!landscape) return (
-    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-      <p className="text-sm text-slate-500 dark:text-slate-400">Competitive landscape data is loading or unavailable for this indication.</p>
-    </div>
-  );
+  // ---- Computed values via useMemo ----
+  const computed = useMemo(() => {
+    if (!landscape) return null;
+
+    const ls = landscape;
+    const density = densityColor(ls.competitiveDensityScore);
+    const phaseKeys = Object.keys(ls.byPhase);
+
+    // Build ordered phases: show ALL standard phases (even if zero), plus any extras from data
+    const orderedPhases = [
+      ...PHASE_ORDER,
+      ...phaseKeys.filter(
+        (k) => !PHASE_ORDER.some((p) => p.toLowerCase() === k.toLowerCase()),
+      ),
+    ];
+
+    // Deduplicate (case-insensitive) and collect counts
+    const seen = new Set<string>();
+    const phasesWithCounts: { label: string; count: number }[] = [];
+    for (const phase of orderedPhases) {
+      const key = phase.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const match = phaseKeys.find((k) => k.toLowerCase() === key);
+      phasesWithCounts.push({ label: phase, count: match ? ls.byPhase[match] : 0 });
+    }
+
+    const maxPhaseCount = Math.max(
+      ...phasesWithCounts.map((p) => p.count),
+      1,
+    );
+
+    const erosionPct = (ls.marketShareErosionEstimate * 100).toFixed(0);
+
+    return { ls, density, phasesWithCounts, maxPhaseCount, erosionPct };
+  }, [landscape]);
+
+  // ---- Empty state ----
+  if (!landscape || !computed) {
+    return (
+      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Competitive landscape data is unavailable for this indication.
+        </p>
+      </div>
+    );
+  }
 
   const hasAccess = tier === 'pro' || tier === 'report';
-  const ls = landscape;
-  const density = densityColor(ls.competitiveDensityScore);
-
-  // Phase display order for the bar chart
-  const phaseOrder = ['Preclinical', 'Phase 1', 'Phase 2', 'Phase 3', 'Approved'];
-  const phaseKeys = Object.keys(ls.byPhase);
-  const maxPhaseCount = Math.max(...Object.values(ls.byPhase), 1);
-
-  // Map byPhase keys to display order -- show known phases first, then any extras
-  const orderedPhases = [
-    ...phaseOrder.filter((p) => {
-      // Case-insensitive match against byPhase keys
-      return phaseKeys.some(
-        (k) => k.toLowerCase() === p.toLowerCase()
-      );
-    }),
-    ...phaseKeys.filter(
-      (k) => !phaseOrder.some((p) => p.toLowerCase() === k.toLowerCase())
-    ),
-  ];
-
-  function getPhaseCount(displayLabel: string): number {
-    // Find matching key in byPhase (case-insensitive)
-    const match = phaseKeys.find(
-      (k) => k.toLowerCase() === displayLabel.toLowerCase()
-    );
-    return match ? ls.byPhase[match] : 0;
-  }
+  const { ls, density, phasesWithCounts, maxPhaseCount, erosionPct } = computed;
 
   return (
     <div className="relative mt-6 sm:mt-8">
@@ -87,23 +129,11 @@ export default function CompetitiveLandscapePanel({
             !hasAccess ? 'select-none' : ''
           }`}
         >
-          {/* Header */}
+          {/* ---- Header ---- */}
           <div className="flex items-start justify-between gap-3 mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-soft flex-shrink-0">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
+                <Users className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h4 className="font-bold text-navy-800 dark:text-white text-sm sm:text-base">
@@ -117,8 +147,14 @@ export default function CompetitiveLandscapePanel({
             </div>
           </div>
 
-          {/* Blurred content for non-pro */}
-          <div className={!hasAccess ? 'blur-sm pointer-events-none' : ''}>
+          {/* ---- Blurred content for non-pro ---- */}
+          <div
+            className={
+              !hasAccess
+                ? 'blur-[6px] pointer-events-none transition-all'
+                : 'transition-all'
+            }
+          >
             {/* Density Score Meter */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
@@ -142,75 +178,86 @@ export default function CompetitiveLandscapePanel({
                 />
               </div>
               <div className="flex justify-between mt-1 text-[10px] text-neutral-400 dark:text-slate-500">
-                <span>0</span>
-                <span>30</span>
-                <span>60</span>
-                <span>100</span>
+                {DENSITY_TICKS.map((tick) => (
+                  <span key={tick}>{tick}</span>
+                ))}
               </div>
             </div>
 
-            {/* Competitors by Phase - Bar Visualization */}
+            {/* ---- Pipeline by Phase (bar chart -- ALL phases shown) ---- */}
             <div className="mb-5">
               <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
                 Pipeline by Phase
               </h5>
               <div className="space-y-2">
-                {orderedPhases.map((phase) => {
-                  const count = getPhaseCount(phase);
-                  if (count === 0) return null;
-                  return (
-                    <div key={phase} className="flex items-center gap-3">
-                      <span className="text-xs text-slate-600 dark:text-slate-400 w-20 sm:w-24 flex-shrink-0 truncate">
-                        {phase}
-                      </span>
-                      <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                {phasesWithCounts.map(({ label, count }) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-20 sm:w-24 flex-shrink-0 truncate">
+                      {label}
+                    </span>
+                    <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      {count > 0 && (
                         <div
                           className="h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full transition-all duration-500"
                           style={{
                             width: `${(count / maxPhaseCount) * 100}%`,
                           }}
                         />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 w-8 text-right">
-                        {count}
-                      </span>
+                      )}
                     </div>
-                  );
-                })}
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 w-8 text-right">
+                      {count}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Key Metrics Row */}
+            {/* ---- Key Metrics Row ---- */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-              {ls.expectedNextApproval && (
-                <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
-                  <p className="text-xs text-neutral-500 dark:text-slate-400">
-                    Next Expected Approval
+              {/* Next Expected Approval -- always rendered */}
+              <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
+                <p className="text-xs text-neutral-500 dark:text-slate-400">
+                  Next Expected Approval
+                </p>
+                {ls.expectedNextApproval ? (
+                  <>
+                    <p className="text-sm font-bold text-navy-800 dark:text-white">
+                      {ls.expectedNextApproval.year}
+                    </p>
+                    <p className="text-[10px] text-neutral-400 dark:text-slate-500 truncate">
+                      {ls.expectedNextApproval.company}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm font-bold text-slate-400 dark:text-slate-500">
+                    None imminent
                   </p>
-                  <p className="text-sm font-bold text-navy-800 dark:text-white">
-                    {ls.expectedNextApproval.year}
-                  </p>
-                  <p className="text-[10px] text-neutral-400 dark:text-slate-500 truncate">
-                    {ls.expectedNextApproval.company}
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* Market Share Erosion */}
               <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                 <p className="text-xs text-neutral-500 dark:text-slate-400">
                   Market Share Erosion
+                </p>
+                <p className="text-[10px] text-neutral-400 dark:text-slate-500 mb-0.5">
+                  Est. peak sales reduction
                 </p>
                 <p
                   className={`text-sm font-bold ${
                     ls.marketShareErosionEstimate > 0.3
                       ? 'text-red-600 dark:text-red-400'
                       : ls.marketShareErosionEstimate > 0.15
-                      ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-green-600 dark:text-green-400'
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-green-600 dark:text-green-400'
                   }`}
                 >
-                  {(ls.marketShareErosionEstimate * 100).toFixed(0)}%
+                  {erosionPct}%
                 </p>
               </div>
+
+              {/* First-Mover Advantage */}
               <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                 <p className="text-xs text-neutral-500 dark:text-slate-400">
                   First-Mover Advantage
@@ -221,7 +268,49 @@ export default function CompetitiveLandscapePanel({
               </div>
             </div>
 
-            {/* Narrative Summary */}
+            {/* ---- Key Competitors Section ---- */}
+            {ls.keyCompetitors.length > 0 && (
+              <div className="mb-5">
+                <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-rose-500" />
+                  Key Competitors
+                </h5>
+                <div className="space-y-2">
+                  {ls.keyCompetitors.map((competitor, idx) => (
+                    <div
+                      key={`${competitor.companyName}-${competitor.assetName}-${idx}`}
+                      className="flex items-start gap-3 p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-navy-800 dark:text-white truncate">
+                            {competitor.companyName}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getPhaseChip(competitor.phase)}`}
+                          >
+                            {competitor.phase}
+                          </span>
+                        </div>
+                        <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5 truncate">
+                          {competitor.assetName}
+                          {competitor.expectedApprovalYear
+                            ? ` \u00B7 Expected approval ${competitor.expectedApprovalYear}`
+                            : ''}
+                        </p>
+                        {competitor.differentiator && (
+                          <p className="text-[10px] text-neutral-400 dark:text-slate-500 mt-1 italic">
+                            {competitor.differentiator}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ---- Narrative Summary ---- */}
             <div className="p-3 sm:p-4 bg-gradient-to-r from-rose-50/50 to-pink-50/50 dark:from-rose-500/5 dark:to-pink-500/5 rounded-lg border border-rose-100 dark:border-rose-500/20">
               <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">
                 {ls.narrative}
@@ -229,29 +318,18 @@ export default function CompetitiveLandscapePanel({
             </div>
           </div>
 
-          {/* Pro Gate Overlay */}
+          {/* ---- Pro Gate Overlay ---- */}
           {!hasAccess && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl">
               <button
+                aria-label="Unlock Competitive Intelligence"
                 onClick={() =>
                   onBuyReport ? onBuyReport() : onUpgrade?.()
                 }
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                Unlock Financial Modeling
+                <Lock className="w-4 h-4" />
+                Unlock Competitive Intelligence
               </button>
             </div>
           )}

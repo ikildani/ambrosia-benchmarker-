@@ -127,7 +127,7 @@ export const CALIBRATION_DEALS: CalibrationDeal[] = [
   { id: 'cal_032', year: 2023, licensor: 'Madrigal', licensee: 'No deal (reference)', therapeuticArea: 'metabolic', modality: 'smallMolecule', indication: 'mash', phase: 'phase3', territory: 'global', actualUpfront: 0, actualTotalDeal: 6400, estimatedPeakSales: 4000, biomarkerSelected: false, designations: ['breakthrough'], competitivePosition: 'firstInClass', description: 'Reference: Market cap at resmetirom approval for MASH' },
 
   // Phase 1 licensing deals
-  { id: 'cal_033', year: 2024, licensor: 'Nimbus', licensee: 'Takeda', therapeuticArea: 'immunology', modality: 'smallMolecule', indication: 'psoriasis', phase: 'phase1', territory: 'global', actualUpfront: 100, actualTotalDeal: 6000, biomarkerSelected: false, designations: [], competitivePosition: 'firstInClass', description: 'TYK2 allosteric inhibitor (follow-on to deucravacitinib)' },
+  // cal_033 removed — duplicate of cal_038 (Nimbus/Takeda TYK2 deal)
   { id: 'cal_034', year: 2023, licensor: 'Turning Point', licensee: 'BMS', therapeuticArea: 'oncology', modality: 'smallMolecule', indication: 'lung_nsclc', phase: 'phase2', territory: 'global', actualUpfront: 4100, actualTotalDeal: 4100, estimatedPeakSales: 2000, biomarkerSelected: true, designations: ['breakthrough'], competitivePosition: 'firstInClass', description: 'Acquisition — repotrectinib ROS1/NTRK inhibitor' },
 
   // Large preclinical platform deals
@@ -138,7 +138,7 @@ export const CALIBRATION_DEALS: CalibrationDeal[] = [
   { id: 'cal_037', year: 2023, licensor: 'Ionis', licensee: 'Roche', therapeuticArea: 'neurology', modality: 'aso', indication: 'alzheimers', phase: 'phase1', territory: 'global', actualUpfront: 200, actualTotalDeal: 2200, biomarkerSelected: false, designations: [], competitivePosition: 'racing', description: 'ASO program targeting tau for Alzheimer\'s disease' },
 
   // Multi-phase portfolio deals
-  { id: 'cal_038', year: 2022, licensor: 'Nimbus', licensee: 'Takeda', therapeuticArea: 'metabolic', modality: 'smallMolecule', indication: 'mash', phase: 'phase2', territory: 'global', actualUpfront: 4000, actualTotalDeal: 6000, estimatedPeakSales: 3000, biomarkerSelected: false, designations: [], competitivePosition: 'firstInClass', description: 'ACC inhibitor firsocostat acquisition for NASH/MASH' },
+  { id: 'cal_038', year: 2022, licensor: 'Nimbus', licensee: 'Takeda', therapeuticArea: 'immunology', modality: 'smallMolecule', indication: 'psoriasis', phase: 'phase2', territory: 'global', actualUpfront: 4000, actualTotalDeal: 6000, estimatedPeakSales: 3000, biomarkerSelected: false, designations: [], competitivePosition: 'firstInClass', description: 'TYK2 allosteric inhibitor acquisition for psoriasis/autoimmune' },
 
   // Deals with biomarker enrichment
   { id: 'cal_039', year: 2024, licensor: 'Nuvalent', licensee: 'No deal (reference)', therapeuticArea: 'oncology', modality: 'smallMolecule', indication: 'lung_nsclc', phase: 'phase2', territory: 'global', actualUpfront: 0, actualTotalDeal: 3200, estimatedPeakSales: 2500, biomarkerSelected: true, designations: ['breakthrough', 'orphan'], competitivePosition: 'bestInClass', description: 'Reference — Nuvalent market cap for ALK/ROS1 inhibitor zidesamtinib' },

@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+import { Globe, Lock, Users } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
 import type { MarketSizeEstimate } from '@/lib/financial/types';
 
@@ -11,7 +13,7 @@ interface MarketSizePanelProps {
 }
 
 function formatPatientCount(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 999_500) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
   return value.toLocaleString();
 }
@@ -22,30 +24,63 @@ export default function MarketSizePanel({
   onUpgrade,
   onBuyReport,
 }: MarketSizePanelProps) {
-  if (!marketSize) return (
-    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-      <p className="text-sm text-slate-500 dark:text-slate-400">Market size estimate unavailable — epidemiology data not found for this indication.</p>
-    </div>
-  );
+  // Memoize funnel computations
+  const funnelData = useMemo(() => {
+    if (!marketSize) return null;
+
+    const pf = marketSize.patientFunnel;
+
+    // Funnel steps WITHOUT total population (shown separately as a label)
+    const steps = [
+      { label: 'Prevalent Patients', value: pf.prevalentPatients },
+      { label: 'Diagnosed', value: pf.diagnosedPatients },
+      { label: 'Treated', value: pf.treatedPatients },
+      { label: 'Drug-Eligible', value: pf.drugEligiblePatients },
+      { label: 'Addressable', value: pf.addressablePatients },
+    ];
+
+    const funnelMax = Math.max(pf.prevalentPatients, 1);
+
+    return { steps, funnelMax, totalPopulation: pf.totalPopulation };
+  }, [marketSize]);
+
+  if (!marketSize) {
+    return (
+      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Market size estimate unavailable — epidemiology data not found for this indication.
+        </p>
+      </div>
+    );
+  }
 
   const hasAccess = tier === 'pro' || tier === 'report';
   const ms = marketSize;
 
-  // Patient funnel steps in order from largest to smallest
-  const funnelSteps = [
-    { label: 'Total Population', value: ms.patientFunnel.totalPopulation },
-    { label: 'Prevalent Patients', value: ms.patientFunnel.prevalentPatients },
-    { label: 'Diagnosed', value: ms.patientFunnel.diagnosedPatients },
-    { label: 'Treated', value: ms.patientFunnel.treatedPatients },
-    { label: 'Drug-Eligible', value: ms.patientFunnel.drugEligiblePatients },
-    { label: 'Addressable', value: ms.patientFunnel.addressablePatients },
+  // Color intensities for the 5 funnel bars (light to dark)
+  // Each entry: [gradient classes, use dark text in light mode?]
+  const funnelColors: { gradient: string; useDarkText: boolean }[] = [
+    {
+      gradient: 'from-emerald-200 to-teal-200 dark:from-emerald-800 dark:to-teal-800',
+      useDarkText: true,
+    },
+    {
+      gradient: 'from-emerald-300 to-teal-300 dark:from-emerald-700 dark:to-teal-700',
+      useDarkText: true,
+    },
+    {
+      gradient: 'from-emerald-400 to-teal-400 dark:from-emerald-600 dark:to-teal-600',
+      useDarkText: false,
+    },
+    {
+      gradient: 'from-emerald-500 to-teal-500 dark:from-emerald-500 dark:to-teal-500',
+      useDarkText: false,
+    },
+    {
+      gradient: 'from-emerald-700 to-teal-700 dark:from-emerald-300 dark:to-teal-300',
+      useDarkText: false,
+    },
   ];
-
-  // Max value for funnel width calculation (use prevalent, not total pop, for better visual)
-  const funnelMax = Math.max(
-    ms.patientFunnel.prevalentPatients,
-    1
-  );
 
   return (
     <div className="relative mt-6 sm:mt-8">
@@ -59,34 +94,23 @@ export default function MarketSizePanel({
           <div className="flex items-start justify-between gap-3 mb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-soft flex-shrink-0">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Globe className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h4 className="font-bold text-navy-800 dark:text-white text-sm sm:text-base">
                   Market Size Analysis
                 </h4>
                 <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">
-                  {ms.indication} &middot;{' '}
-                  {ms.territory.toUpperCase()}
+                  {ms.indication} &middot; {ms.territory.toUpperCase()}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Blurred content for non-pro */}
-          <div className={!hasAccess ? 'blur-sm pointer-events-none' : ''}>
+          <div
+            className={`${!hasAccess ? 'blur-[6px] pointer-events-none' : ''} transition-all`}
+          >
             {/* TAM & Peak Sales Headline */}
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="p-3 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 rounded-lg border border-emerald-100 dark:border-emerald-500/20 text-center">
@@ -104,7 +128,7 @@ export default function MarketSizePanel({
                 <p className="text-xl sm:text-2xl font-bold text-teal-700 dark:text-teal-400">
                   {formatCurrency(ms.peakSales.median)}
                 </p>
-                <p className="text-[10px] text-neutral-500 dark:text-slate-400 mt-0.5">
+                <p className="text-[11px] text-neutral-500 dark:text-slate-400 mt-0.5">
                   {formatCurrency(ms.peakSales.low)} &ndash;{' '}
                   {formatCurrency(ms.peakSales.high)}
                 </p>
@@ -113,40 +137,46 @@ export default function MarketSizePanel({
 
             {/* Patient Funnel */}
             <div className="mb-5">
-              <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
+              <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
                 Patient Funnel
               </h5>
+              {/* Total Population shown as a subtle label above the funnel */}
+              {funnelData && (
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-3.5 h-3.5 text-neutral-400 dark:text-slate-500" />
+                  <p className="text-xs text-neutral-500 dark:text-slate-400">
+                    Total Population: {formatPatientCount(funnelData.totalPopulation)}
+                  </p>
+                </div>
+              )}
               <div className="space-y-1.5">
-                {funnelSteps.map((step, idx) => {
-                  // For the first step (total population), show full width; otherwise scale relative to prevalent
-                  const widthPercent =
-                    idx === 0
-                      ? 100
-                      : Math.max(
-                          (step.value / funnelMax) * 100,
-                          8
-                        );
-                  // Gradually darken the funnel color from light to dark
-                  const colorIntensity = [
-                    'from-emerald-200 to-teal-200 dark:from-emerald-800 dark:to-teal-800',
-                    'from-emerald-300 to-teal-300 dark:from-emerald-700 dark:to-teal-700',
-                    'from-emerald-400 to-teal-400 dark:from-emerald-600 dark:to-teal-600',
-                    'from-emerald-500 to-teal-500 dark:from-emerald-500 dark:to-teal-500',
-                    'from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400',
-                    'from-emerald-700 to-teal-700 dark:from-emerald-300 dark:to-teal-300',
-                  ][idx] || 'from-emerald-500 to-teal-500';
+                {funnelData?.steps.map((step, idx) => {
+                  const widthPercent = Math.max(
+                    (step.value / funnelData.funnelMax) * 100,
+                    8
+                  );
+                  const color = funnelColors[idx] || funnelColors[funnelColors.length - 1];
+                  // Light bars need dark text for accessibility; dark bars use white
+                  const textClass = color.useDarkText
+                    ? 'text-slate-700 dark:text-white'
+                    : 'text-white';
 
                   return (
-                    <div key={step.label} className="flex items-center gap-3">
-                      <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 w-24 sm:w-32 flex-shrink-0 text-right">
+                    <div
+                      key={step.label}
+                      className="flex items-center gap-3 group"
+                    >
+                      <span className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 w-24 sm:w-32 flex-shrink-0 text-right">
                         {step.label}
                       </span>
                       <div className="flex-1 flex justify-center">
                         <div
-                          className={`h-6 bg-gradient-to-r ${colorIntensity} rounded transition-all duration-500 flex items-center justify-center`}
+                          className={`h-6 bg-gradient-to-r ${color.gradient} rounded transition-all duration-500 flex items-center justify-center group-hover:opacity-90 group-hover:scale-[1.01]`}
                           style={{ width: `${widthPercent}%` }}
                         >
-                          <span className="text-[10px] font-semibold text-white drop-shadow-sm">
+                          <span
+                            className={`text-[11px] font-semibold ${textClass} drop-shadow-sm`}
+                          >
                             {formatPatientCount(step.value)}
                           </span>
                         </div>
@@ -190,7 +220,7 @@ export default function MarketSizePanel({
               </div>
               {ms.sources.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
-                  <p className="text-[10px] text-neutral-400 dark:text-slate-500">
+                  <p className="text-[11px] text-neutral-400 dark:text-slate-500">
                     Sources: {ms.sources.join('; ')}
                   </p>
                 </div>
@@ -205,22 +235,11 @@ export default function MarketSizePanel({
                 onClick={() =>
                   onBuyReport ? onBuyReport() : onUpgrade?.()
                 }
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg shadow-soft hover:shadow-glow transition-all"
+                aria-label="Unlock Market Size Analysis"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                Unlock Financial Modeling
+                <Lock className="w-4 h-4" />
+                Unlock Market Size Analysis
               </button>
             </div>
           )}

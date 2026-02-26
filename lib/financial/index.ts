@@ -40,6 +40,7 @@ export type {
   EpidemiologyData,
   ScenarioTemplate,
   ScenarioResult,
+  DefensiveAnalysis,
   FXSensitivity,
   TerritoryPricingProfile,
   CompetitiveLandscape,

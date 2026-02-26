@@ -35,6 +35,7 @@ import {
   POS_BY_THERAPEUTIC_AREA,
   POS_MODALITY_ADJUSTMENT,
   PHASE_DURATION,
+  PHASE_COSTS,
   REVENUE_CURVE,
   getCumulativePoS,
 } from './pos-tables';
@@ -54,7 +55,7 @@ const PHASE_ORDER = [
   'phase1',
   'phase2',
   'phase3',
-  'approval',
+  'approved',
 ] as const;
 
 type ClinicalPhase = (typeof PHASE_ORDER)[number];
@@ -77,11 +78,9 @@ const DRIVER_LABELS: Record<string, string> = {
 
 /**
  * Map the Phase type from calculations.ts ('preclinical' | 'phase1' | … |
- * 'approved') to our internal phase index.  'approved' is treated as
- * equivalent to 'approval' (index 4).
+ * 'approved') to our internal phase index.
  */
 function phaseIndex(phase: string): number {
-  if (phase === 'approved') return PHASE_ORDER.indexOf('approval');
   const idx = PHASE_ORDER.indexOf(phase as ClinicalPhase);
   return idx >= 0 ? idx : 0;
 }
@@ -283,32 +282,21 @@ function computeIterationRNPV(
 }
 
 /**
- * Rough estimate of remaining development costs ($M) from the current
- * phase to approval.  These are order-of-magnitude figures drawn from
- * published pharma R&D cost studies (DiMasi et al., Tufts CSDD).
+ * Remaining development costs ($M) from the current phase to approval,
+ * sourced from the shared PHASE_COSTS table in pos-tables.ts.
  */
 function estimateRemainingDevCosts(
   therapeuticArea: string,
   startPhaseIdx: number,
 ): number {
-  // Per-phase cost assumptions ($M) — intentionally conservative
-  const phaseCosts: Record<string, number[]> = {
-    // [preclinical, phase1, phase2, phase3, approval(regulatory)]
-    oncology: [15, 30, 60, 150, 10],
-    neurology: [15, 25, 55, 180, 12],
-    immunology: [12, 25, 50, 140, 10],
-    metabolic: [12, 25, 55, 160, 10],
-    cardiovascular: [12, 25, 60, 200, 12],
-    infectiousDisease: [10, 20, 45, 120, 8],
-    ophthalmology: [10, 20, 40, 100, 8],
-    womensHealth: [10, 20, 40, 110, 8],
-  };
-
-  const costs = phaseCosts[therapeuticArea] ?? phaseCosts['oncology'];
+  const costs = PHASE_COSTS[therapeuticArea] ?? PHASE_COSTS['oncology'];
   let total = 0;
-  for (let i = startPhaseIdx; i < costs.length; i++) {
-    total += costs[i];
+  for (let i = startPhaseIdx; i < PHASE_ORDER.length; i++) {
+    const phaseKey = PHASE_ORDER[i];
+    total += (costs as Record<string, number>)[phaseKey] ?? 0;
   }
+  // Add regulatory cost
+  total += (costs as Record<string, number>)['regulatory'] ?? 5;
   return total;
 }
 
@@ -381,7 +369,22 @@ export function runMonteCarlo(
 ): MonteCarloResult {
   const iterations = input.iterations ?? DEFAULT_ITERATIONS;
   const rng = seedableRandom(seed);
-  const rnpv = input.rnpvInput;
+
+  // --- Input guards ---
+  const VALID_PHASES = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+  const guardedInput = { ...input.rnpvInput };
+  if (!VALID_PHASES.includes(guardedInput.phase)) {
+    guardedInput.phase = 'phase2' as typeof guardedInput.phase;
+  }
+  if (guardedInput.discountRate != null) {
+    guardedInput.discountRate = Math.max(0.01, Math.min(0.40, guardedInput.discountRate));
+  }
+  guardedInput.peakSalesEstimate = {
+    low: Math.max(0, Math.min(1_000_000, guardedInput.peakSalesEstimate.low)),
+    median: Math.max(0, Math.min(1_000_000, guardedInput.peakSalesEstimate.median)),
+    high: Math.max(0, Math.min(1_000_000, guardedInput.peakSalesEstimate.high)),
+  };
+  const rnpv = guardedInput;
 
   // ----- Prepare distribution parameters --------------------------------
 
@@ -475,8 +478,8 @@ export function runMonteCarlo(
     sampledTimeArr[i] = sTime;
     sampledPriceArr[i] = sPrice;
 
-    // Compute rNPV
-    npvResults[i] = computeIterationRNPV(
+    // Compute rNPV with isFinite guard
+    const iterResult = computeIterationRNPV(
       rnpv,
       sPoS,
       sPeak,
@@ -484,6 +487,7 @@ export function runMonteCarlo(
       sTime,
       sPrice,
     );
+    npvResults[i] = isFinite(iterResult) ? iterResult : 0;
   }
 
   // ----- Sort and compute statistics ------------------------------------

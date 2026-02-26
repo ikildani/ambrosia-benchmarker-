@@ -39,20 +39,32 @@ function phaseIndex(phase: string): number {
  * applies phase-specific PoS discounting, and calculates implied deal terms.
  */
 export function calculateRNPV(input: RNPVInput): RNPVResult {
+  // --- Input guards ---
+  const VALID_PHASES = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+  const guardedPhase = VALID_PHASES.includes(input.phase) ? input.phase : 'phase2';
+  const guardedDiscountRate = input.discountRate != null
+    ? Math.max(0.01, Math.min(0.40, input.discountRate))
+    : input.discountRate;
+  const guardedPeakSales = {
+    low: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.low)),
+    median: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.median)),
+    high: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.high)),
+  };
+
   const {
-    phase,
     therapeuticArea,
     modality,
     territory,
-    peakSalesEstimate,
     competitivePosition,
     dataQuality,
     regulatoryDesignations,
     benchmarkDealValue,
   } = input;
+  const phase = guardedPhase as typeof input.phase;
+  const peakSalesEstimate = guardedPeakSales;
 
-  // 1. Get discount rate
-  const discountRate = input.discountRate ?? getDefaultDiscountRate(therapeuticArea, phase);
+  // 1. Get discount rate (use guarded value)
+  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase);
 
   // 2. Calculate cumulative PoS from current phase
   const { cumulativePoS, transitions } = getCumulativePoS(

@@ -510,6 +510,30 @@ export interface ScenarioResult {
   narrative: string;
 }
 
+/**
+ * Defensive analysis summary derived from scenario planning.
+ *
+ * Captures the worst-case / best-case envelope, a defensive floor
+ * (P10 of scenario outcomes), and a walk-away threshold below which
+ * the risk-reward balance favors waiting or alternative strategies.
+ */
+export interface DefensiveAnalysis {
+  /** Worst-case scenario result (lowest adjustedRNPV) */
+  worstCase: ScenarioResult;
+
+  /** Best-case scenario result (highest adjustedRNPV) */
+  bestCase: ScenarioResult;
+
+  /** P10 of all scenario-adjusted rNPV outcomes ($M) */
+  defensiveFloor: number;
+
+  /** Minimum acceptable deal value below which to walk away ($M) */
+  walkAwayThreshold: number;
+
+  /** Human-readable narrative summarizing the defensive posture */
+  narrative: string;
+}
+
 // ---------------------------------------------------------------------------
 // FX / Territory Pricing
 // ---------------------------------------------------------------------------

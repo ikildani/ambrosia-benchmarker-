@@ -23,7 +23,7 @@ import { runMonteCarlo } from './monte-carlo';
 import { estimateMarketSize, getEpidemiologyData } from './market-size';
 import { calculateFXSensitivity } from './fx-sensitivity';
 import { runAllScenarios, getDefensiveAnalysis } from './scenario-planner';
-import { DEFAULT_DISCOUNT_RATES } from './discount-rates';
+import { DEFAULT_DISCOUNT_RATES, TERRITORY_RISK_PREMIUM } from './discount-rates';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -51,12 +51,20 @@ function buildRNPVInput(
   peakSalesOverride?: { low: number; median: number; high: number },
 ): RNPVInput {
   // Estimate peak sales from the deal value if no epidemiology-based estimate
-  // Rule of thumb: total deal value ≈ 20-40% of peak sales NPV
+  // Phase-stratified multipliers: earlier phases have wider uncertainty ranges
   const totalDealMedian = result.terms.totalDealValue.median;
+  const PEAK_SALES_MULTIPLIER: Record<string, { low: number; median: number; high: number }> = {
+    preclinical: { low: 6, median: 12, high: 20 },
+    phase1: { low: 4, median: 8, high: 14 },
+    phase2: { low: 2.5, median: 5, high: 9 },
+    phase3: { low: 1.5, median: 3, high: 5 },
+    approved: { low: 1.0, median: 1.5, high: 2.5 },
+  };
+  const mult = PEAK_SALES_MULTIPLIER[inputs.phase] || PEAK_SALES_MULTIPLIER.phase2;
   const defaultPeakSales = {
-    low: totalDealMedian * 1.5,
-    median: totalDealMedian * 2.5,
-    high: totalDealMedian * 4.0,
+    low: totalDealMedian * mult.low,
+    median: totalDealMedian * mult.median,
+    high: totalDealMedian * mult.high,
   };
 
   return {
@@ -75,7 +83,10 @@ function buildRNPVInput(
       orphan: inputs.regulatoryDesignations?.orphan || false,
       prime: inputs.regulatoryDesignations?.prime || false,
     },
-    discountRate: DEFAULT_DISCOUNT_RATES[inputs.therapeuticArea]?.[inputs.phase],
+    discountRate: (() => {
+      const baseRate = DEFAULT_DISCOUNT_RATES[inputs.therapeuticArea]?.[inputs.phase];
+      return baseRate ? baseRate + (TERRITORY_RISK_PREMIUM[inputs.territory] || 0) : undefined;
+    })(),
     benchmarkDealValue: {
       low: result.terms.totalDealValue.low,
       median: result.terms.totalDealValue.median,
@@ -117,17 +128,17 @@ export function runFinancialModel(
   // Step 3: Monte Carlo simulation (10K iterations, seeded for reproducibility)
   const monteCarlo = runMonteCarlo({ rnpvInput }, 42);
 
-  // Step 4: FX sensitivity
-  const baseRevenue = rnpv.cashFlows.reduce((sum, cf) => sum + cf.revenue, 0);
+  // Step 4: FX sensitivity (use peak annual revenue, not lifetime sum)
+  const baseRevenue = Math.max(...rnpv.cashFlows.map(cf => cf.revenue));
   const fxSensitivity = calculateFXSensitivity(
     inputs.territory,
     baseRevenue,
     rnpv.riskAdjustedNPV,
   );
 
-  // Step 5: Scenario planning
+  // Step 5: Scenario planning (pass precomputed scenarios to avoid duplicate computation)
   const scenarios = runAllScenarios(rnpvInput, rnpv);
-  const defensiveAnalysis = getDefensiveAnalysis(rnpvInput, rnpv);
+  const defensiveAnalysis = getDefensiveAnalysis(rnpvInput, rnpv, scenarios);
 
   return {
     rnpv,

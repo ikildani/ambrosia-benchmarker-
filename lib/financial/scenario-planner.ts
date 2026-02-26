@@ -5,7 +5,7 @@
  * Each scenario modifies rNPV input parameters and re-runs the financial model.
  */
 
-import type { ScenarioTemplate, ScenarioResult, RNPVInput, RNPVResult } from './types';
+import type { ScenarioTemplate, ScenarioResult, RNPVInput, RNPVResult, DefensiveAnalysis } from './types';
 import { calculateRNPV } from './rnpv-engine';
 
 /**
@@ -432,18 +432,14 @@ export function runAllScenarios(
 
 /**
  * Get the defensive scenario summary — what's the downside?
+ * Accepts optional precomputedResults to avoid re-running all scenarios.
  */
 export function getDefensiveAnalysis(
   baseInput: RNPVInput,
   baseResult: RNPVResult,
-): {
-  worstCase: ScenarioResult;
-  bestCase: ScenarioResult;
-  defensiveFloor: number;
-  walkAwayThreshold: number;
-  narrative: string;
-} {
-  const results = runAllScenarios(baseInput, baseResult);
+  precomputedResults?: ScenarioResult[],
+): DefensiveAnalysis {
+  const results = precomputedResults ?? runAllScenarios(baseInput, baseResult);
   const worstCase = results[0];
   const bestCase = results[results.length - 1];
 
