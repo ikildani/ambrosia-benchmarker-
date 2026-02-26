@@ -109,9 +109,12 @@ export default function CompaniesPageClient() {
     }
   }, []);
 
+  const initialFetchDone = useRef(false);
+
   // Initial load
   useEffect(() => {
-    fetchCompanies({ sort: sortBy });
+    initialFetchDone.current = false;
+    fetchCompanies({ sort: sortBy }).then(() => { initialFetchDone.current = true; });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Click outside to close modality dropdown
@@ -125,8 +128,9 @@ export default function CompaniesPageClient() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Debounced search
+  // Debounced filter/sort changes (skip initial mount — handled above)
   useEffect(() => {
+    if (!initialFetchDone.current) return;
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
       setPage(1);
