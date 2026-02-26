@@ -418,6 +418,7 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
 }
 
 // Calculate risk score (0-100, higher = more risk)
+// Adaptive to therapeutic area — each TA has distinct risk drivers
 export function calculateRiskScore(input: CalculationInput): number {
   let score = 0;
 
@@ -452,7 +453,73 @@ export function calculateRiskScore(input: CalculationInput): number {
   };
   score += dataRisk[input.dataQuality];
 
-  return Math.min(score, 100);
+  // Therapeutic-area-specific risk adjustments (up to ±15 points)
+  score += getTherapeuticAreaRiskAdjustment(input);
+
+  return Math.max(0, Math.min(score, 100));
+}
+
+/** TA-specific risk adjustment — reflects unique risk profiles of each therapeutic area */
+function getTherapeuticAreaRiskAdjustment(input: CalculationInput): number {
+  let adj = 0;
+  const ta = input.therapeuticArea;
+
+  if (ta === 'oncology') {
+    // Oncology: competitive intensity + line of therapy + combination potential
+    if (input.lineOfTherapy === '1L') adj += 8; // 1L requires large OS/PFS trials
+    else if (input.lineOfTherapy === '3L+') adj -= 3; // accelerated approval potential
+    if (input.combinationPotential === 'strong') adj -= 4; // expands addressable market
+    else if (input.combinationPotential === 'standalone') adj += 4;
+    // Novel modalities in oncology carry manufacturing risk
+    if (['carT_solid', 'radiopharmaceutical', 'oncolyticVirus'].includes(input.modality)) adj += 5;
+  } else if (ta === 'neurology') {
+    // Neurology: BBB penetration + disease modification complexity + long trials
+    if (input.treatmentApproach === 'diseaseModifying') adj += 10; // 18-36 month trials, unvalidated endpoints
+    else if (input.treatmentApproach === 'symptomatic') adj -= 3; // well-established endpoints
+    if (input.bbbPenetration === 'unproven') adj += 5; // delivery uncertainty
+    else if (input.bbbPenetration === 'provenCNS') adj -= 3;
+    if (['geneTherapy', 'aso', 'bbbPlatform'].includes(input.modality)) adj += 4; // novel CNS delivery
+  } else if (ta === 'immunology') {
+    // Immunology: immune reset risk + target breadth + safety monitoring
+    if (input.immuneResetPotential === 'curativeIntent') adj += 8; // high reward but high risk
+    else if (input.immuneResetPotential === 'chronicTreatment') adj -= 3; // predictable profile
+    if (input.targetSpecificity === 'broadImmunosuppression') adj += 6; // safety concerns
+    else if (input.targetSpecificity === 'antigenSpecific') adj -= 2;
+    if (['carT_autoimmune', 'inVivoCarT', 'carTreg'].includes(input.modality)) adj += 5;
+  } else if (ta === 'metabolic') {
+    // Metabolic: CVOT requirements + competition in GLP-1 space + weight loss endpoints
+    if (['glp1Agonist', 'dualIncretin', 'tripleIncretin'].includes(input.modality)) adj += 6; // Lilly/Novo dominance
+    if (input.metabolicTreatmentApproach === 'metabolicReset') adj += 3; // novel, less validated
+    if (input.weightLossEfficacy === 'superiorEfficacy') adj -= 4; // strong differentiation
+    if (input.comorbidityBreadth === 'cardiometabolicBenefit') adj -= 3; // broad label potential
+    else if (input.comorbidityBreadth === 'obesityPrimary') adj += 2;
+  } else if (ta === 'cardiovascular') {
+    // CV: large CVOT trial requirements + outcome endpoint complexity
+    if (input.cvOutcomeBenefit === 'mortalityReduction') adj += 8; // massive CVOT trials needed
+    else if (input.cvOutcomeBenefit === 'symptomImprovement') adj -= 2; // faster/smaller trials
+    if (input.cvTrialEndpoint === 'maceEndpoint') adj += 5; // 10K+ patients, 3-5 years
+    else if (input.cvTrialEndpoint === 'surrogateBiomarker') adj -= 2;
+  } else if (ta === 'infectiousDisease') {
+    // ID: resistance dynamics + pandemic preparedness + market size uncertainty
+    if (input.resistanceProfile === 'broadSpectrum') adj += 5; // generic competition
+    else if (input.resistanceProfile === 'novelTarget') adj -= 4; // pull incentives available
+    if (input.infectionChronicity === 'acute') adj += 3; // limited per-patient revenue
+    else if (input.infectionChronicity === 'chronic') adj -= 3; // recurring revenue, large pools
+  } else if (ta === 'ophthalmology') {
+    // Ophthalmology: delivery complexity + anti-VEGF competition + durability demands
+    if (input.ocularDelivery === 'oral') adj += 6; // bioavailability challenges
+    else if (input.ocularDelivery === 'implant') adj -= 4; // strong differentiation
+    if (input.treatmentDurability === 'chronicInjection') adj += 3; // biosimilar pressure
+    else if (input.treatmentDurability === 'oneTime') adj -= 4; // gene therapy premium
+  } else if (ta === 'womensHealth') {
+    // Women's Health: pregnancy complexity + regulatory hurdles + unmet need
+    if (input.whRegulatory === 'pregnancyComplexity') adj += 8; // teratogenicity studies, REMS
+    else if (input.whRegulatory === 'acceleratedPathway') adj -= 4;
+    if (input.whUnmetNeed === 'noApprovedTherapy') adj -= 5; // breakthrough potential
+    else if (input.whUnmetNeed === 'wellServed') adj += 3;
+  }
+
+  return adj;
 }
 
 // Get negotiation insight based on inputs

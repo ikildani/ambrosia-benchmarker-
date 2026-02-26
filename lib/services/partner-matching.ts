@@ -102,6 +102,12 @@ const WEIGHTS = {
 
   // Company capacity (max 8 points) - large pharma for late-stage, biotech for early-stage
   company_capacity: 8,
+
+  // Deal size matching (max 10 points) - company's historical deal sizes match asset phase
+  deal_size_match: 10,
+
+  // Regulatory designation match (max 5 points) - company priorities align with designations
+  regulatory_match: 5,
 };
 
 // Modality adjacency map - related modalities that indicate interest
@@ -212,6 +218,12 @@ export interface MatchInput {
   indication_specific: string | null;
   territory_scope: string | null;
   therapeutic_area: string | null;
+  regulatory_designations?: {
+    breakthrough?: boolean;
+    fastTrack?: boolean;
+    orphan?: boolean;
+    prime?: boolean;
+  };
 }
 
 export interface PartnerMatch {
@@ -251,7 +263,7 @@ export interface PartnerMatch {
 }
 
 export interface MatchReason {
-  category: 'modality' | 'indication' | 'phase' | 'activity' | 'territory' | 'strategic';
+  category: 'modality' | 'indication' | 'phase' | 'activity' | 'territory' | 'strategic' | 'deal_size' | 'regulatory';
   reason: string;
   strength: 'strong' | 'moderate' | 'weak';
 }
@@ -341,15 +353,20 @@ export async function findPartnerMatches(
   for (const company of companies as CompanyProfile[]) {
     const { score, breakdown, reasons } = calculateMatchScore(company, input);
 
+    // Apply quick watch-out penalties to all companies before filtering
+    const quickWatchOuts = calculateQuickWatchOuts(company, input);
+    const watchOutPenaltySum = quickWatchOuts.reduce((sum, w) => sum + w.impact, 0);
+    const adjustedScore = Math.max(0, Math.round(score + watchOutPenaltySum * 0.5));
+
     // Only include meaningful matches (score >= 15)
-    if (score >= 15) {
+    if (adjustedScore >= 15) {
       const match: PartnerMatch = {
         company_id: company.id,
         company_name: company.name,
         company_type: company.company_type,
         ticker: company.ticker,
         hq_country: company.hq_country,
-        match_score: Math.round(score),
+        match_score: adjustedScore,
         match_reasons: reasons.slice(0, 4), // Top 4 reasons
         score_breakdown: breakdown,
         modalities_active: company.modalities_active || [],
@@ -676,7 +693,81 @@ function calculateMatchScore(
     breakdown.quality += 5; // mid-pharma is versatile
   }
 
-  // 8c. THERAPEUTIC AREA RELEVANCE
+  // 8c. DEAL SIZE MATCHING
+  // Estimate expected deal range from phase, then check if company's historical deal sizes align
+  const dealSizeRanges: Record<string, [number, number]> = {
+    discovery: [10_000_000, 200_000_000],
+    preclinical: [10_000_000, 200_000_000],
+    phase_1: [50_000_000, 500_000_000],
+    phase_2: [100_000_000, 1_000_000_000],
+    phase_3: [200_000_000, 2_000_000_000],
+    approved: [500_000_000, 5_000_000_000],
+  };
+
+  const expectedRange = dealSizeRanges[input.development_phase];
+  if (expectedRange) {
+    const [rangeLow, rangeHigh] = expectedRange;
+    const companyDealSize = company.median_upfront_usd || company.avg_upfront_usd;
+
+    if (companyDealSize && companyDealSize > 0) {
+      if (companyDealSize >= rangeLow && companyDealSize <= rangeHigh) {
+        // Within expected range: full points
+        breakdown.quality += WEIGHTS.deal_size_match;
+        reasons.push({
+          category: 'deal_size',
+          reason: `Historical deal sizes align with ${formatPhase(input.development_phase)} assets`,
+          strength: 'strong',
+        });
+      } else if (companyDealSize >= rangeLow / 3 && companyDealSize <= rangeHigh * 3) {
+        // Within 3x of range bounds: partial points
+        breakdown.quality += Math.round(WEIGHTS.deal_size_match * 0.5);
+        reasons.push({
+          category: 'deal_size',
+          reason: `Deal size history in reasonable range for ${formatPhase(input.development_phase)} assets`,
+          strength: 'moderate',
+        });
+      }
+    }
+  }
+
+  // 8d. REGULATORY DESIGNATION MATCHING
+  if (input.regulatory_designations) {
+    const priorities = (company.strategic_priorities || []).map((p: string) => p.toLowerCase());
+    const prioritiesText = priorities.join(' ');
+    let regMatch = false;
+
+    if (input.regulatory_designations.breakthrough) {
+      if (prioritiesText.includes('breakthrough') || prioritiesText.includes('accelerated')) {
+        regMatch = true;
+      }
+    }
+    if (input.regulatory_designations.orphan) {
+      if (prioritiesText.includes('orphan') || prioritiesText.includes('rare')) {
+        regMatch = true;
+      }
+    }
+    if (input.regulatory_designations.fastTrack) {
+      if (prioritiesText.includes('fast track') || prioritiesText.includes('priority')) {
+        regMatch = true;
+      }
+    }
+    if (input.regulatory_designations.prime) {
+      if (prioritiesText.includes('prime') || prioritiesText.includes('ema') || prioritiesText.includes('european')) {
+        regMatch = true;
+      }
+    }
+
+    if (regMatch) {
+      breakdown.quality += WEIGHTS.regulatory_match;
+      reasons.push({
+        category: 'regulatory',
+        reason: 'Strategic priorities align with regulatory designations',
+        strength: 'moderate',
+      });
+    }
+  }
+
+  // 8e. THERAPEUTIC AREA RELEVANCE
   // Ensures companies are relevant to the user's therapeutic area, not just
   // coincidentally sharing a modality (e.g., oncology peptide vs metabolic peptide)
   if (input.therapeutic_area) {
@@ -737,7 +828,9 @@ function calculateMatchScore(
     WEIGHTS.territory_match +
     WEIGHTS.data_quality_high +
     WEIGHTS.actively_acquiring +
-    WEIGHTS.company_capacity;
+    WEIGHTS.company_capacity +
+    WEIGHTS.deal_size_match +
+    WEIGHTS.regulatory_match;
 
   const normalizedScore = Math.min(100, Math.round((breakdown.total / maxPossibleScore) * 100));
 
@@ -1113,6 +1206,74 @@ export function buildDetailedBreakdown(
     normalizedTotal: Math.round((rawTotal / Math.max(maxPossible, 1)) * 100),
     maxPossible,
   };
+}
+
+/**
+ * Lightweight watch-out calculation using only company profile data (no deals needed).
+ * Applied to ALL companies before filtering to adjust scores for red flags.
+ */
+export function calculateQuickWatchOuts(
+  company: CompanyProfile,
+  input: MatchInput
+): WatchOutFactor[] {
+  const watchOuts: WatchOutFactor[] = [];
+
+  // 1. Competing internal asset: company has same indication+modality in indications_specific
+  if (
+    input.indication_specific &&
+    (company.indications_specific || []).includes(input.indication_specific) &&
+    (company.modalities_active || []).includes(input.modality)
+  ) {
+    watchOuts.push({
+      title: 'Competing Internal Asset',
+      impact: -10,
+      description: `Existing ${formatModality(input.modality)} program in ${formatIndication(input.indication_specific)} may cause internal competition.`,
+      severity: 'high',
+      category: 'competition',
+    });
+  }
+
+  // 2. Phase mismatch risk: asset phase earlier than company's min by 2+ ranks
+  const inputPhaseRank = PHASE_RANK[input.development_phase] ?? 2;
+  const minPhaseRank = (company.phase_preference_min ? PHASE_RANK[company.phase_preference_min] : undefined) ?? 0;
+  if (inputPhaseRank < minPhaseRank - 1) {
+    watchOuts.push({
+      title: 'Early Stage Hesitation',
+      impact: -5,
+      description: `Historically focuses on ${formatPhase(company.phase_preference_min || 'phase_1')}+ assets.`,
+      severity: 'medium',
+      category: 'strategic',
+    });
+  }
+
+  // 3. Modality mismatch: not in adjacency map AND not in active modalities
+  const companyModalities = company.modalities_active || [];
+  const adjacentModalities = MODALITY_ADJACENCY[input.modality] || [];
+  if (
+    !companyModalities.includes(input.modality) &&
+    !adjacentModalities.some(m => companyModalities.includes(m))
+  ) {
+    watchOuts.push({
+      title: 'Modality Mismatch',
+      impact: -5,
+      description: `No active or adjacent modality overlap with ${formatModality(input.modality)}.`,
+      severity: 'medium',
+      category: 'strategic',
+    });
+  }
+
+  // 4. BD activity slowdown: deals_last_12mo is 0 but deals_last_24mo > 0
+  if (company.deals_last_12mo === 0 && company.deals_last_24mo > 0) {
+    watchOuts.push({
+      title: 'BD Activity Slowdown',
+      impact: -5,
+      description: 'No deals in last 12 months despite prior activity. May indicate internal restructuring.',
+      severity: 'medium',
+      category: 'timing',
+    });
+  }
+
+  return watchOuts;
 }
 
 /**

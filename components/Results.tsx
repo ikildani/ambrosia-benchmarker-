@@ -1375,6 +1375,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               indicationSpecific={inputs.indication}
               territory={inputs.territory}
               therapeuticArea={fullInputs?.therapeuticArea}
+              regulatoryDesignations={fullInputs?.regulatoryDesignations}
               tier={tier}
               onUpgrade={onUpgrade || (() => {})}
               onMatchesLoaded={handlePartnerMatchesLoaded}

@@ -98,6 +98,12 @@ export const partnerMatchSchema = z.object({
   indication_specific: z.string().optional().nullable(),
   territory_scope: z.string().optional().nullable(),
   therapeutic_area: z.string().optional().nullable(),
+  regulatory_designations: z.object({
+    breakthrough: z.boolean().optional(),
+    fastTrack: z.boolean().optional(),
+    orphan: z.boolean().optional(),
+    prime: z.boolean().optional(),
+  }).optional().nullable(),
   user_id: z.string().optional().nullable(),
   user_email: z.string().optional().nullable(),
   calculation_id: z.string().optional().nullable(),

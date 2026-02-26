@@ -27,6 +27,12 @@ interface PartnerMatchesContainerProps {
   indicationSpecific: string | null;
   territory: string;
   therapeuticArea?: string;
+  regulatoryDesignations?: {
+    breakthrough?: boolean;
+    fastTrack?: boolean;
+    orphan?: boolean;
+    prime?: boolean;
+  };
 
   // User context
   tier: 'free' | 'pro' | 'report';
@@ -43,6 +49,7 @@ export default function PartnerMatchesContainer({
   indicationSpecific,
   territory,
   therapeuticArea,
+  regulatoryDesignations,
   tier,
   onUpgrade,
   onMatchesLoaded,
@@ -78,6 +85,7 @@ export default function PartnerMatchesContainer({
           indication_specific: indicationSpecific,
           territory_scope: mapTerritory(territory),
           therapeutic_area: therapeuticArea,
+          regulatory_designations: regulatoryDesignations,
           tier: tier, // Pass tier from frontend as fallback
         }),
       });
@@ -116,7 +124,7 @@ export default function PartnerMatchesContainer({
     }
 
     setLoading(false);
-  }, [modality, phase, indicationCategory, indicationSpecific, territory, userId, sessionId, anonymousId, user?.email]);
+  }, [modality, phase, indicationCategory, indicationSpecific, territory, regulatoryDesignations, userId, sessionId, anonymousId, user?.email]);
 
   useEffect(() => {
     if (modality && phase) {
