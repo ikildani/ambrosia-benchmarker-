@@ -11,9 +11,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Know your asset\'s market value before entering negotiations',
-      'Present data-backed terms with AI-generated deal memos',
-      'Run sensitivity analysis to understand value drivers',
+      'Know your asset\'s market value with rNPV analysis and Monte Carlo simulation',
+      'Present data-backed terms with AI-generated deal memos and negotiation playbooks',
+      'Run sensitivity analysis and model scenario ranges before entering the room',
     ],
   },
   {
@@ -24,9 +24,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Screen inbound licensing opportunities with AI partner matching',
-      'Generate board-ready PDF reports and negotiation playbooks',
-      'Track deal flow with watchlist alerts and weekly market digest',
+      'Screen opportunities with AI partner matching and company intelligence profiles',
+      'Generate board-ready PDF reports, AI deal memos, and negotiation playbooks',
+      'Track deal flow with Market Pulse dashboard and watchlist alerts',
     ],
   },
   {
@@ -37,9 +37,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Validate deal terms against current market benchmarks from 600+ deals',
-      'Compare scenarios side-by-side with saved scenario analysis',
-      'Monitor market trends with benchmark sparklines and deal alerts',
+      'Validate deal terms with rNPV models and benchmarks from 600+ deals across 120+ companies',
+      'Review Monte Carlo probability distributions and scenario comparisons',
+      'Monitor market trends with Market Pulse intelligence and deal alerts',
     ],
   },
   {
@@ -50,9 +50,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Accelerate due diligence with instant benchmarks and comparable deals',
-      'Build data-driven negotiation strategies with AI playbooks',
-      'Export branded PDF and Excel reports for client presentations',
+      'Accelerate due diligence with rNPV models, comparable deals, and company profiles',
+      'Build data-driven negotiation strategies with AI playbooks and outreach templates',
+      'Export branded PDF and Excel reports with full financial modeling for clients',
     ],
   },
 ];

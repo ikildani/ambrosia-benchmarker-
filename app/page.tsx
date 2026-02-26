@@ -283,7 +283,7 @@ export default function Home() {
             Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong> across oncology, neurology, immunology & metabolic/obesity.
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
-            Upfront payments, milestones, royalties & partner matching.
+            rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.
           </p>
 
           {/* CTA Buttons */}
@@ -330,7 +330,7 @@ export default function Home() {
             {[
               { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '600+ deals analyzed' },
               { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '8 therapeutic areas' },
-              { icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', text: 'AI partner matching' },
+              { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', text: '120+ company profiles' },
               { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', text: 'Enterprise-grade security' },
             ].map((feature, idx) => (
               <div
@@ -404,7 +404,7 @@ export default function Home() {
               {
                 step: '3',
                 title: 'Get Full Deal Intelligence',
-                description: 'Receive instant estimates, comparable deals, sensitivity analysis, AI deal memos, partner matching, and negotiation playbooks.',
+                description: 'Receive instant estimates, rNPV analysis, Monte Carlo simulations, comparable deals, AI deal memos, partner matching, company profiles, and negotiation playbooks.',
                 icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
               },
             ].map((item, idx) => (
@@ -473,21 +473,39 @@ export default function Home() {
             {[
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-                title: 'Market Intelligence',
-                description: 'Benchmarks from 600+ real deals with weekly SEC EDGAR ingestion, ClinicalTrials.gov pipeline data, and AI-powered deal memos.',
+                title: 'Deal Benchmarking',
+                description: 'Instant benchmarks from 600+ real deals across 8 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
                 gradient: 'from-teal-500 to-cyan-500',
               },
               {
-                icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
-                title: 'Full Deal Toolkit',
-                description: 'Sensitivity analysis, negotiation playbooks, scenario comparison, watchlist alerts, and AI partner matching across 50+ companies.',
+                icon: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',
+                title: 'Financial Modeling',
+                description: 'Risk-adjusted NPV (rNPV) analysis and Monte Carlo simulation with 10,000 iterations. Model probability-weighted deal outcomes and scenario ranges.',
+                gradient: 'from-cyan-500 to-blue-500',
+              },
+              {
+                icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+                title: 'Market Pulse',
+                description: 'Weekly market intelligence with benchmark sparklines, deal flow trends, competitive landscape analysis, and market size & epidemiology data.',
+                gradient: 'from-teal-400 to-cyan-400',
+              },
+              {
+                icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+                title: 'Company Intelligence',
+                description: 'Deep profiles on 120+ pharma and biotech companies with deal history, pipeline tracking, patent cliff timelines, and AI-powered partner matching.',
                 gradient: 'from-cyan-500 to-teal-500',
+              },
+              {
+                icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
+                title: 'Deal Toolkit',
+                description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 16-page branded PDF reports.',
+                gradient: 'from-teal-500 to-emerald-500',
               },
               {
                 icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
                 title: 'Enterprise-Grade Platform',
-                description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and branded PDF/Excel exports.',
-                gradient: 'from-teal-400 to-cyan-400',
+                description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and weekly SEC EDGAR data ingestion.',
+                gradient: 'from-emerald-400 to-teal-400',
               },
             ].map((feature, idx) => (
               <div
@@ -531,7 +549,7 @@ export default function Home() {
               Find Your Ideal Licensing Partner
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-              Our AI matches your asset profile against 50+ pharma companies to find the best strategic fit
+              Our AI matches your asset profile against 120+ pharma and biotech companies to find the best strategic fit
             </p>
           </div>
 
@@ -566,6 +584,108 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Advanced Analytics Section */}
+      <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 sm:mb-12 lg:mb-16">
+            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded-full px-4 py-1.5 mb-6">
+              <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">Advanced Analytics</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+              Beyond Benchmarks
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Full financial modeling and market intelligence tools that turn data into deal strategy
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+            {/* rNPV & Monte Carlo */}
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all duration-500 hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-soft">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">rNPV & Monte Carlo Simulation</h3>
+              </div>
+              <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
+                Risk-adjusted net present value analysis with 10,000-iteration Monte Carlo simulation. Model probability-weighted deal outcomes across development phases, regulatory milestones, and commercial scenarios.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['Phase-gated probabilities', 'Confidence intervals', 'Scenario ranges', 'Waterfall charts'].map((tag) => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full">{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Market Pulse */}
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-500 hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-soft">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">Market Pulse Intelligence</h3>
+              </div>
+              <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
+                Real-time market intelligence dashboard with benchmark sparklines, deal flow trends by modality, competitive landscape analysis, and market size & epidemiology data across therapeutic areas.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['Benchmark trends', 'Deal flow charts', 'Competitive landscape', 'Market sizing'].map((tag) => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-full">{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Company Intelligence */}
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-cyan-200 dark:hover:border-cyan-500/50 transition-all duration-500 hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white shadow-soft">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">Company Profiles & Pipeline</h3>
+              </div>
+              <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
+                Deep profiles on 120+ pharma and biotech companies with historical deal flow, active pipeline tracking from ClinicalTrials.gov, patent cliff timelines, and AI-powered strategic fit scoring.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['Deal history', 'Pipeline tracker', 'Patent cliffs', 'Strategic fit scores'].map((tag) => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-full">{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Deal Tools */}
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-emerald-200 dark:hover:border-emerald-500/50 transition-all duration-500 hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-soft">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">AI-Powered Deal Tools</h3>
+              </div>
+              <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
+                AI-generated deal memos, negotiation playbooks with counterparty-specific tactics, outreach email templates, and 16-page branded PDF reports — all customized to your specific asset and market position.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['Deal memos', 'Negotiation playbooks', 'Outreach emails', 'Deal reports'].map((tag) => (
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full">{tag}</span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

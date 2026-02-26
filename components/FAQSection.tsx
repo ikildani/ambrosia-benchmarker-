@@ -5,7 +5,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 const faqs = [
   {
     question: "How does the calculator work?",
-    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. You get a data-driven starting point for any deal conversation in seconds.`
+    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. Pro users also get risk-adjusted NPV (rNPV) analysis with Monte Carlo simulation (10,000 iterations), AI-generated deal memos, negotiation playbooks, and partner matching. You get a data-driven starting point for any deal conversation in seconds.`
   },
   {
     question: "What data sources power the benchmarks?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: "What's the difference between Free and Pro?",
-    answer: "The free tier gives you unlimited calculations with headline metrics, 3 comparable deals, and top sensitivity parameters. Pro ($99/mo) unlocks the full platform — unlimited AI deal memos, negotiation playbooks, scenario comparison, watchlist with market alerts, full partner profiles across 50+ companies, branded PDF and Excel exports, and priority support. Individual Deal Reports ($149 each) are also available for one-time analysis."
+    answer: "The free tier gives you unlimited calculations with headline metrics, 3 comparable deals, and top sensitivity parameters. Pro ($99/mo) unlocks the full platform — rNPV analysis with Monte Carlo simulation, Market Pulse intelligence dashboard, unlimited AI deal memos, negotiation playbooks, scenario comparison, watchlist with market alerts, 120+ company profiles with pipeline tracking and patent cliff timelines, AI partner matching, outreach email generation, branded PDF and Excel exports, and priority support. Individual Deal Reports ($149 each) are also available for one-time analysis."
   },
   {
     question: "How often is the data updated?",
