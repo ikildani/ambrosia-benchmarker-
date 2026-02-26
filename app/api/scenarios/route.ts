@@ -1,14 +1,19 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
-import { scenariosQuerySchema, scenarioCreateSchema, scenarioDeleteSchema, formatZodErrors } from '@/lib/api-validation';
+import { scenarioCreateSchema, formatZodErrors } from '@/lib/api-validation';
 
 export const dynamic = 'force-dynamic';
 
 // GET - List saved scenarios for a user
 export async function GET(request: NextRequest) {
+  // SECURITY: Require authenticated session
+  const [user, authError] = await requireAuth(request);
+  if (authError) return authError;
+
   // Rate limiting
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
@@ -19,28 +24,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    const params = Object.fromEntries(request.nextUrl.searchParams);
-    const parsed = scenariosQuerySchema.safeParse(params);
+    const email = user.email!;
 
-    if (!parsed.success) {
-      return apiError(formatZodErrors(parsed.error), 400);
-    }
-
-    const { email } = parsed.data;
-    // SECURITY: Removed client tier - never trust client-provided tier
-    // const clientTier = searchParams.get('tier');
-
-    // SECURITY: Only trust database-verified tier, never client-provided tier
+    // Verify tier from database
     let userTier: 'free' | 'pro' | 'report' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
-      .eq('email', email)
+      .eq('id', user.id)
       .single();
 
     userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
-    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
+    // Check PRO_EMAILS list for authorized users
     if (userTier === 'free' && isProEmail(email)) {
       userTier = 'pro';
     }
@@ -49,7 +45,7 @@ export async function GET(request: NextRequest) {
       return apiError('Pro subscription required', 403);
     }
 
-    // Fetch scenarios
+    // Fetch scenarios for authenticated user only
     const { data: scenarios, error } = await supabase
       .from('saved_scenarios')
       .select('id, name, notes, inputs, results, labels, created_at, updated_at')
@@ -71,6 +67,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Save a new scenario
 export async function POST(request: NextRequest) {
+  // SECURITY: Require authenticated session
+  const [user, authError] = await requireAuth(request);
+  if (authError) return authError;
+
   // Rate limiting
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios', RATE_LIMIT_CONFIGS.default);
@@ -88,20 +88,19 @@ export async function POST(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    // SECURITY: Removed tier from destructuring - never trust client-provided tier
-    const { email, name, notes, inputs, results, labels } = parsed.data;
+    const { name, notes, inputs, results, labels } = parsed.data;
+    const email = user.email!;
 
-    // SECURITY: Only trust database-verified tier, never client-provided tier
+    // Verify tier from database using authenticated user
     let userTier: 'free' | 'pro' | 'report' = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('id, tier')
-      .eq('email', email)
+      .eq('id', user.id)
       .single();
 
     userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
-    // Check PRO_EMAILS list for localStorage auth users (synced with AuthContext)
     if (userTier === 'free' && isProEmail(email)) {
       userTier = 'pro';
     }
@@ -120,11 +119,11 @@ export async function POST(request: NextRequest) {
       return apiError('Maximum of 20 saved scenarios reached. Please delete some to save new ones.', 400);
     }
 
-    // Save scenario
+    // Save scenario for authenticated user
     const { data: scenario, error } = await supabase
       .from('saved_scenarios')
       .insert({
-        user_id: profile?.id || null,
+        user_id: user.id,
         email,
         name,
         notes: notes || null,
@@ -149,6 +148,10 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Delete a scenario
 export async function DELETE(request: NextRequest) {
+  // SECURITY: Require authenticated session
+  const [user, authError] = await requireAuth(request);
+  if (authError) return authError;
+
   // Rate limiting
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'scenarios-delete', RATE_LIMIT_CONFIGS.default);
@@ -160,30 +163,18 @@ export async function DELETE(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const params = Object.fromEntries(request.nextUrl.searchParams);
-    const parsed = scenarioDeleteSchema.safeParse(params);
+    const id = params.id;
 
-    if (!parsed.success) {
-      return apiError(formatZodErrors(parsed.error), 400);
+    if (!id) {
+      return apiError('id is required', 400);
     }
 
-    const { id, email } = parsed.data;
-
-    // SECURITY: Verify the scenario belongs to this email before deleting
-    const { data: scenario } = await supabase
-      .from('saved_scenarios')
-      .select('id, email')
-      .eq('id', id)
-      .single();
-
-    if (!scenario || scenario.email !== email) {
-      return apiError('Scenario not found', 404);
-    }
-
+    // SECURITY: Only delete scenarios owned by the authenticated user
     const { error } = await supabase
       .from('saved_scenarios')
       .delete()
       .eq('id', id)
-      .eq('email', email);
+      .eq('email', user.email!);
 
     if (error) {
       console.error('Error deleting scenario:', error);

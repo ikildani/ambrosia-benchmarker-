@@ -155,8 +155,8 @@ export function calculateFXSensitivity(
     return {
       label: s.label,
       fxChange: s.fxChange,
-      revenueImpact: Math.round(revenueImpact),
-      dealValueImpact: Math.round(dealValueImpact),
+      revenueImpact: Math.round(revenueImpact * 10) / 10,
+      dealValueImpact: Math.round(dealValueImpact * 10) / 10,
     };
   });
 

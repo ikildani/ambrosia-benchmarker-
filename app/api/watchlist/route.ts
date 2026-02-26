@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { watchlistQuerySchema, watchlistAddSchema, watchlistDeleteSchema, formatZodErrors } from '@/lib/api-validation';
@@ -8,21 +9,17 @@ const MAX_WATCHLIST_ITEMS = 25;
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require authenticated session
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
+
     const supabase = createServiceClient();
-    const params = Object.fromEntries(new URL(request.url).searchParams);
-    const parsed = watchlistQuerySchema.safeParse(params);
 
-    if (!parsed.success) {
-      return apiError(formatZodErrors(parsed.error), 400);
-    }
-
-    const { user_id: userId } = parsed.data;
-
-    // Verify user is Pro
+    // Verify user is Pro (using authenticated user's ID, not query param)
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single();
 
     if (profile?.tier !== 'pro') {
@@ -32,7 +29,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('watchlist_items')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -48,6 +45,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // SECURITY: Require authenticated session
+  const [user, authError] = await requireAuth(request);
+  if (authError) return authError;
+
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'calculations', RATE_LIMIT_CONFIGS.calculations);
 
@@ -64,13 +65,13 @@ export async function POST(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const { user_id, item_type, item_value, company_id } = parsed.data;
+    const { item_type, item_value, company_id } = parsed.data;
 
-    // Verify Pro tier
+    // Verify Pro tier using authenticated user
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
-      .eq('id', user_id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.tier !== 'pro') {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
     const { count } = await supabase
       .from('watchlist_items')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user_id);
+      .eq('user_id', user.id);
 
     if ((count || 0) >= MAX_WATCHLIST_ITEMS) {
       return apiError(`Maximum ${MAX_WATCHLIST_ITEMS} watchlist items allowed`, 400);
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('watchlist_items')
       .insert({
-        user_id,
+        user_id: user.id,
         item_type,
         item_value,
         company_id: company_id || null,
@@ -114,6 +115,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  // SECURITY: Require authenticated session
+  const [user, authError] = await requireAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const params = Object.fromEntries(new URL(request.url).searchParams);
@@ -123,13 +128,14 @@ export async function DELETE(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const { id, user_id: userId } = parsed.data;
+    const { id } = parsed.data;
 
+    // SECURITY: Only delete items owned by authenticated user
     const { error } = await supabase
       .from('watchlist_items')
       .delete()
       .eq('id', id)
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Watchlist delete error:', error);

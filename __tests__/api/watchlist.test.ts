@@ -47,6 +47,12 @@ jest.mock('@/lib/supabase/server', () => ({
   createServiceClient: () => mockSupabase,
 }));
 
+// Mock requireAuth — default: authenticated user with id 'u1'
+const mockRequireAuth = jest.fn();
+jest.mock('@/lib/auth-helpers', () => ({
+  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
+}));
+
 jest.mock('@/lib/rate-limit', () => ({
   checkRateLimit: jest.fn().mockResolvedValue({ success: true, remaining: 10 }),
   getIdentifier: jest.fn().mockReturnValue('test-ip'),
@@ -62,20 +68,20 @@ describe('/api/watchlist', () => {
     jest.clearAllMocks();
     fromCallIndex = 0;
     fromChains = [];
+    // Default: authenticated as user 'u1'
+    mockRequireAuth.mockResolvedValue([{ id: 'u1', email: 'u1@test.com' }, null]);
   });
 
   // ─── GET ──────────────────────────────────────────────────────────
 
   describe('GET', () => {
-    it('should return 400 when user_id is missing', async () => {
+    it('should return 401 when not authenticated', async () => {
+      mockRequireAuth.mockResolvedValueOnce([null, new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401 })]);
       const request = new NextRequest('http://localhost/api/watchlist');
 
       const response = await GET(request);
-      const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.success).toBe(false);
-      expect(data.error).toBeDefined();
+      expect(response.status).toBe(401);
     });
 
     it('should return 403 for non-pro tier user', async () => {
@@ -84,7 +90,7 @@ describe('/api/watchlist', () => {
       (tierChain.single as jest.Mock).mockResolvedValueOnce({ data: { tier: 'free' }, error: null });
       fromChains = [tierChain];
 
-      const request = new NextRequest('http://localhost/api/watchlist?user_id=u1');
+      const request = new NextRequest('http://localhost/api/watchlist');
 
       const response = await GET(request);
       const data = await response.json();
@@ -111,7 +117,7 @@ describe('/api/watchlist', () => {
 
       fromChains = [tierChain, itemsChain];
 
-      const request = new NextRequest('http://localhost/api/watchlist?user_id=u1');
+      const request = new NextRequest('http://localhost/api/watchlist');
 
       const response = await GET(request);
       const data = await response.json();
@@ -136,7 +142,7 @@ describe('/api/watchlist', () => {
 
       fromChains = [tierChain, itemsChain];
 
-      const request = new NextRequest('http://localhost/api/watchlist?user_id=u1');
+      const request = new NextRequest('http://localhost/api/watchlist');
 
       const response = await GET(request);
       const data = await response.json();
@@ -150,17 +156,16 @@ describe('/api/watchlist', () => {
   // ─── POST ─────────────────────────────────────────────────────────
 
   describe('POST', () => {
-    it('should return 400 when user_id is missing', async () => {
+    it('should return 401 when not authenticated', async () => {
+      mockRequireAuth.mockResolvedValueOnce([null, new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401 })]);
       const request = new NextRequest('http://localhost/api/watchlist', {
         method: 'POST',
-        body: JSON.stringify({ item_type: 'modality', item_value: 'mab' }),
+        body: JSON.stringify({ user_id: 'u1', item_type: 'modality', item_value: 'mab' }),
       });
 
       const response = await POST(request);
-      const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.success).toBe(false);
+      expect(response.status).toBe(401);
     });
 
     it('should return 400 when item_type is missing', async () => {
@@ -319,20 +324,19 @@ describe('/api/watchlist', () => {
   // ─── DELETE ───────────────────────────────────────────────────────
 
   describe('DELETE', () => {
-    it('should return 400 when id is missing', async () => {
-      const request = new NextRequest('http://localhost/api/watchlist?user_id=u1', {
+    it('should return 401 when not authenticated', async () => {
+      mockRequireAuth.mockResolvedValueOnce([null, new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401 })]);
+      const request = new NextRequest('http://localhost/api/watchlist?id=item1&user_id=u1', {
         method: 'DELETE',
       });
 
       const response = await DELETE(request);
-      const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.success).toBe(false);
+      expect(response.status).toBe(401);
     });
 
-    it('should return 400 when user_id is missing', async () => {
-      const request = new NextRequest('http://localhost/api/watchlist?id=item1', {
+    it('should return 400 when id is missing', async () => {
+      const request = new NextRequest('http://localhost/api/watchlist?user_id=u1', {
         method: 'DELETE',
       });
 

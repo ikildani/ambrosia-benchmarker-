@@ -169,7 +169,7 @@ export async function fetchCompanyTrials(
 
       const data = await response.json();
 
-      if (data.studies) {
+      if (data.studies && data.studies.length > 0) {
         for (const study of data.studies) {
           const protocol = study.protocolSection;
           const identification = protocol?.identificationModule;
@@ -217,6 +217,11 @@ export async function fetchCompanyTrials(
             })),
           });
         }
+      }
+
+      // Break if no studies returned (API may still provide nextPageToken)
+      if (!data.studies || data.studies.length === 0) {
+        break;
       }
 
       pageToken = data.nextPageToken || null;

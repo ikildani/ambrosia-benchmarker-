@@ -467,7 +467,13 @@ ${filingText}`;
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch (parseError) {
+      console.error(`JSON parse failed for extracted deal. Raw: ${jsonMatch[0].substring(0, 200)}`, parseError);
+      return null;
+    }
 
     if (parsed.is_deal === false) {
       console.log(`Not a deal: ${parsed.reason}`);
@@ -581,9 +587,16 @@ export async function runDailyIngestion(
         const deal = await extractDealFromFiling(content, anthropicApiKey);
 
         if (deal && deal.confidence_score >= 75) {
+          // Validate company names before DB operations
+          if (!deal.licensor?.trim() || !deal.licensee?.trim()) {
+            console.warn(`Deal missing licensor or licensee name, skipping`);
+            skipped++;
+            continue;
+          }
+
           // Find or create companies
-          const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
-          const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
+          const licensorId = await findOrCreateCompany(supabase, deal.licensor.trim(), false);
+          const licenseeId = await findOrCreateCompany(supabase, deal.licensee.trim(), true);
 
           // Derive therapeutic_area from indication_category
           const therapeuticArea = deriveTherapeuticArea(deal.indication_category);

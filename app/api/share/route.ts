@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
 import { nanoid } from 'nanoid';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
@@ -10,6 +11,10 @@ export const dynamic = 'force-dynamic';
 // POST - Create a share link
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authenticated session — never trust email from body
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
+
     const supabase = createServiceClient();
     const body = await request.json();
 
@@ -18,22 +23,17 @@ export async function POST(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const { email, inputs, results, labels, expiresIn } = parsed.data;
+    const { inputs, results, labels, expiresIn } = parsed.data;
 
-    // Verify Pro tier
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    // Verify Pro tier from authenticated user's profile
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('tier')
+      .eq('id', user.id)
+      .single();
 
-    if (email) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('id, tier')
-        .eq('email', email)
-        .single();
+    const userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
 
-      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
-    }
-
-    // SECURITY: Only trust database-verified tier, never client-provided tier
     if (userTier !== 'pro' && userTier !== 'report') {
       return apiError('Pro subscription required to share calculations', 403);
     }
@@ -51,24 +51,13 @@ export async function POST(request: NextRequest) {
       expiresAt = expDate.toISOString();
     }
 
-    // Get user_id if available
-    let userId: string | null = null;
-    if (email) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
-      userId = profile?.id || null;
-    }
-
-    // Create shared calculation
+    // Create shared calculation using authenticated user
     const { data: shared, error } = await supabase
       .from('shared_calculations')
       .insert({
         share_token: shareToken,
-        user_id: userId,
-        email,
+        user_id: user.id,
+        email: user.email,
         inputs,
         results,
         labels: labels || {},

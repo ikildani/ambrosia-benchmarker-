@@ -33,6 +33,12 @@ jest.mock('@/lib/sentry-api', () => ({
   captureApiError: jest.fn(),
 }));
 
+// Mock requireAuth — default: authenticated user
+const mockRequireAuth = jest.fn();
+jest.mock('@/lib/auth-helpers', () => ({
+  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
+}));
+
 // Import after mocking
 import { POST } from '@/app/api/share/route';
 import { GET } from '@/app/api/share/[token]/route';
@@ -40,6 +46,7 @@ import { GET } from '@/app/api/share/[token]/route';
 describe('/api/share', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRequireAuth.mockResolvedValue([{ id: 'user-1', email: 'pro@test.com' }, null]);
   });
 
   describe('POST - Create share link', () => {
@@ -92,10 +99,22 @@ describe('/api/share', () => {
       expect(data.error).toBeDefined();
     });
 
+    it('should return 401 when not authenticated', async () => {
+      mockRequireAuth.mockResolvedValueOnce([null, new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401 })]);
+      const request = new NextRequest('http://localhost/api/share', {
+        method: 'POST',
+        body: JSON.stringify(validBody),
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(401);
+    });
+
     it('should return 403 for free tier users', async () => {
       // Mock user profile lookup (tier check) returning free
       mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1', tier: 'free' },
+        data: { tier: 'free' },
         error: null,
       });
 
@@ -114,12 +133,7 @@ describe('/api/share', () => {
     it('should return 200 for pro tier users with shareToken and shareUrl', async () => {
       // Mock tier check
       mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1', tier: 'pro' },
-        error: null,
-      });
-      // Mock user_id lookup
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1' },
+        data: { tier: 'pro' },
         error: null,
       });
       // Mock insert
@@ -142,31 +156,10 @@ describe('/api/share', () => {
       expect(data.shareUrl).toContain('test-token-12');
     });
 
-    it('should return 403 when no email is provided (defaults to free)', async () => {
-      const request = new NextRequest('http://localhost/api/share', {
-        method: 'POST',
-        body: JSON.stringify({
-          inputs: { phase: 'phase2' },
-          results: { upfront: 100 },
-        }),
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(403);
-      expect(data.error).toBe('Pro subscription required to share calculations');
-    });
-
     it('should return 200 with expiresAt when expiresIn is 30d', async () => {
       // Mock tier check
       mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1', tier: 'pro' },
-        error: null,
-      });
-      // Mock user_id lookup
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1' },
+        data: { tier: 'pro' },
         error: null,
       });
       // Mock insert
@@ -192,12 +185,7 @@ describe('/api/share', () => {
     it('should return 500 when DB insert fails', async () => {
       // Mock tier check
       mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1', tier: 'pro' },
-        error: null,
-      });
-      // Mock user_id lookup
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'user-1' },
+        data: { tier: 'pro' },
         error: null,
       });
       // Mock insert failure

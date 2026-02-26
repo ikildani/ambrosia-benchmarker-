@@ -1,34 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require authenticated session — never trust user_id from query
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
+
     const supabase = createServiceClient();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('user_id');
 
-    if (!userId) {
-      return NextResponse.json({ error: 'user_id is required' }, { status: 400 });
-    }
-
-    // Verify Pro tier
+    // Verify Pro tier using authenticated user
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single();
 
     if (profile?.tier !== 'pro') {
       return NextResponse.json({ error: 'Pro subscription required' }, { status: 403 });
     }
 
-    // Fetch watchlist items
+    // Fetch watchlist items for authenticated user only
     const { data: items } = await supabase
       .from('watchlist_items')
       .select('item_type, item_value, company_id')
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (!items || items.length === 0) {
       return NextResponse.json({ activity: [] });

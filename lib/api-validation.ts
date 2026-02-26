@@ -254,25 +254,13 @@ export const watchlistDeleteSchema = z.object({
   user_id: z.string().min(1, 'user_id is required'),
 }).strip();
 
-// Scenarios GET query params
-export const scenariosQuerySchema = z.object({
-  email: z.string().min(1, 'email is required'),
-}).strip();
-
-// Scenarios POST body
+// Scenarios POST body (email comes from authenticated session, not body)
 export const scenarioCreateSchema = z.object({
-  email: z.string().min(1, 'email is required'),
   name: z.string().min(1, 'name is required'),
   notes: z.string().optional().nullable(),
   inputs: z.record(z.string(), z.unknown()),
   results: z.record(z.string(), z.unknown()),
   labels: z.record(z.string(), z.unknown()).optional(),
-});
-
-// Scenarios DELETE query params
-export const scenarioDeleteSchema = z.object({
-  id: z.string().min(1, 'id is required'),
-  email: z.string().min(1, 'email is required'),
 }).strip();
 
 // Newsletter POST body

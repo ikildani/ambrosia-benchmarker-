@@ -116,13 +116,16 @@ export async function GET(request: NextRequest) {
               resend_id: result.id || null,
             });
 
-            // Also log to email_logs if it exists
-            await supabase.from('email_logs').insert({
+            // Also log to email_logs
+            const { error: logError } = await supabase.from('email_logs').insert({
               user_id: user.id,
               email_type: 'weekly_digest',
               status: 'sent',
               metadata: { snapshot_id: snapshot.id },
-            }).then(() => {});
+            });
+            if (logError) {
+              console.warn(`Failed to log digest email for user ${user.id}:`, logError);
+            }
           }
 
           return result;

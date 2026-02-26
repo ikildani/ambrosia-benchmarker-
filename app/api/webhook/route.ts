@@ -39,23 +39,24 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Idempotency check - database-backed to persist across serverless cold starts
-    const { data: existingEvent } = await supabase
+    // Idempotency: insert-first with unique constraint to prevent race conditions.
+    // If two concurrent requests try to insert the same event ID, only one succeeds.
+    const { error: idempotencyError } = await supabase
       .from('processed_webhook_events')
-      .select('stripe_event_id')
-      .eq('stripe_event_id', event.id)
-      .single();
+      .insert({
+        stripe_event_id: event.id,
+        event_type: event.type,
+      });
 
-    if (existingEvent) {
-      console.log('Webhook: Duplicate event, skipping:', event.id);
-      return NextResponse.json({ received: true, duplicate: true });
+    if (idempotencyError) {
+      // Unique constraint violation (23505) = duplicate event, safe to skip
+      if (idempotencyError.code === '23505') {
+        console.log('Webhook: Duplicate event, skipping:', event.id);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      // Other insert errors — log but continue processing to avoid losing events
+      console.error('Webhook: Idempotency insert error (continuing):', idempotencyError);
     }
-
-    // Record event before processing to prevent race conditions
-    await supabase.from('processed_webhook_events').insert({
-      stripe_event_id: event.id,
-      event_type: event.type,
-    });
 
     // Handle the event
     switch (event.type) {
