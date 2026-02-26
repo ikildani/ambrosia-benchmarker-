@@ -160,6 +160,53 @@ export function generateFAQSchema(faqs: Array<{ question: string; answer: string
   };
 }
 
+export function generatePricingSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Life Sciences Deal Calculator',
+    description: 'Data-driven deal benchmarking and valuation tool for biotech licensing transactions.',
+    url: `${BASE_URL}/calculator`,
+    brand: {
+      '@type': 'Organization',
+      name: 'Ambrosia Ventures',
+    },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Free',
+        price: '0',
+        priceCurrency: 'USD',
+        description: 'Core calculator with benchmarks across 8 therapeutic areas',
+        availability: 'https://schema.org/InStock',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Deal Report',
+        price: '149',
+        priceCurrency: 'USD',
+        description: 'Comprehensive PDF report with sensitivity analysis, comparable deals, and partner matches',
+        availability: 'https://schema.org/InStock',
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'Pro',
+        price: '99',
+        priceCurrency: 'USD',
+        description: 'Unlimited reports, AI deal memos, negotiation playbooks, and market intelligence',
+        availability: 'https://schema.org/InStock',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '99',
+          priceCurrency: 'USD',
+          billingDuration: 'P1M',
+          unitText: 'month',
+        },
+      },
+    ],
+  };
+}
+
 export function generateBreadcrumbSchema(
   items: Array<{ name: string; url?: string }>
 ): BreadcrumbSchema {

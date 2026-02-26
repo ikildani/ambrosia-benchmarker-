@@ -144,18 +144,16 @@ describe('partnerMatchSchema', () => {
     }
   });
 
-  // 10. Extra fields pass through (.passthrough())
-  it('preserves extra fields via passthrough', () => {
+  // 10. Extra fields stripped for safety (.strip())
+  it('strips extra fields for safety', () => {
     const result = partnerMatchSchema.safeParse({
       modality: 'ADC',
       development_phase: 'Phase 3',
-      custom_field: 'should survive',
+      custom_field: 'should be removed',
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect((result.data as Record<string, unknown>).custom_field).toBe(
-        'should survive'
-      );
+      expect((result.data as Record<string, unknown>).custom_field).toBeUndefined();
     }
   });
 });

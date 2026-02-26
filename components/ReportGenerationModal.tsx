@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { CalculationResult, CalculationInput, calculateRiskScore } from '@/lib/calculations';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { findComparableDeals } from '@/lib/comparableDeals';
@@ -109,6 +110,13 @@ export default function ReportGenerationModal({
   const startedRef = useRef(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  // Focus trap with Escape handling (replaces manual keyboard handler)
+  const handleEscapeClose = useCallback(() => {
+    abortRef.current = true;
+    onClose();
+  }, [onClose]);
+  useFocusTrap(modalRef, isOpen, handleEscapeClose);
 
   // Stable refs for props used inside the pipeline effect — prevents
   // dependency changes from triggering cleanup (which sets abortRef=true).
@@ -461,19 +469,6 @@ export default function ReportGenerationModal({
     // Continue the pipeline from compiling step
     setCurrentStep('compiling');
   }, [markComplete]);
-
-  // Keyboard handler
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'Escape') {
-        abortRef.current = true;
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

@@ -26,7 +26,7 @@ function renderRangeVisualization(
   // Scale from worst to best
   const minVal = Math.min(worstCase, walkAwayThreshold) * 0.95;
   const maxVal = bestCase * 1.05;
-  const range = maxVal - minVal || 1;
+  const range = Math.max(maxVal - minVal, 1);
 
   const toX = (val: number) => padding + ((val - minVal) / range) * (width - 2 * padding);
 

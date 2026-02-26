@@ -1,30 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
+import { apiError, apiSuccess } from '@/lib/api-response';
+import { emailSendSchema, formatZodErrors } from '@/lib/api-validation';
 import { sendWelcomeEmail, sendCalculationReceipt, sendUpgradeConfirmation } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
 
 export const dynamic = 'force-dynamic';
 
-type EmailType = 'welcome' | 'calculation_receipt' | 'upgrade_confirmation';
-
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient();
-    const body = await request.json();
-    const { email, type, name, data } = body as {
-      email: string;
-      type: EmailType;
-      name: string;
-      data?: Record<string, string>;
-    };
+    // SECURITY: Require authenticated session
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
 
-    if (!email || !type) {
-      return NextResponse.json(
-        { error: 'Email and type are required' },
-        { status: 400 }
-      );
+    const rawBody = await request.json();
+
+    // Validate input with Zod
+    const parsed = emailSendSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
 
+    const { email, type, name, data } = parsed.data;
+
+    // SECURITY: User can only send emails to their own address
+    if (email.toLowerCase() !== user.email?.toLowerCase()) {
+      return apiError('Email must match authenticated user', 403);
+    }
+
+    const supabase = createServiceClient();
     let result;
 
     switch (type) {
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (prefs?.welcome_sent) {
-          return NextResponse.json({ success: true, message: 'Welcome email already sent' });
+          return apiSuccess({ message: 'Welcome email already sent' });
         }
 
         result = await sendWelcomeEmail(email, name || 'there');
@@ -60,14 +65,11 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (receiptPrefs && receiptPrefs.calculation_receipts === false) {
-          return NextResponse.json({ success: true, message: 'Receipts disabled' });
+          return apiSuccess({ message: 'Receipts disabled' });
         }
 
         if (!data) {
-          return NextResponse.json(
-            { error: 'Calculation data required for receipt' },
-            { status: 400 }
-          );
+          return apiError('Calculation data required for receipt', 400);
         }
 
         result = await sendCalculationReceipt(email, name || 'there', {
@@ -84,10 +86,7 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid email type' },
-          { status: 400 }
-        );
+        return apiError('Invalid email type', 400);
     }
 
     // Log the email
@@ -99,18 +98,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (result.success) {
-      return NextResponse.json({ success: true, id: result.id });
+      return apiSuccess({ id: result.id });
     } else {
-      return NextResponse.json(
-        { error: result.error || 'Failed to send email' },
-        { status: 500 }
-      );
+      return apiError(result.error || 'Failed to send email', 500);
     }
   } catch (error) {
     captureApiError(error, 'email-send');
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiError('Internal server error', 500);
   }
 }

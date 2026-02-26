@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import type { TherapeuticArea } from '@/lib/calculations';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface AreaSwitchModalProps {
   isOpen: boolean;
@@ -13,6 +15,9 @@ export default function AreaSwitchModal({
   onConfirm,
   onCancel,
 }: AreaSwitchModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onCancel);
+
   if (!isOpen || !pendingArea) return null;
 
   const areaLabel = pendingArea === 'metabolic'
@@ -26,8 +31,8 @@ export default function AreaSwitchModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Switch Therapeutic Area?</h3>
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="area-switch-title" tabIndex={-1} className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+        <h3 id="area-switch-title" className="text-lg font-bold text-slate-900 dark:text-white mb-2">Switch Therapeutic Area?</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
           Switching to <strong>{areaLabel}</strong> will clear your current results. Your calculation history is still saved.
         </p>

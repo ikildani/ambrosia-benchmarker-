@@ -1,52 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-
-interface ProfileUpdateRequest {
-  full_name?: string;
-  company_name?: string;
-  job_title?: string;
-  phone_number?: string;
-  linkedin_url?: string;
-  deal_role?: string;
-  avatar_gradient?: string;
-}
+import { requireAuth } from '@/lib/auth-helpers';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { profileUpdateSchema, formatZodErrors } from '@/lib/api-validation';
+import { captureApiError } from '@/lib/sentry-api';
 
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
   try {
-    // Get the authenticated user from the Authorization header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // SECURITY: Use middleware-managed session instead of raw token
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
+
+    const rawBody = await request.json();
+
+    // Validate with Zod schema
+    const parsed = profileUpdateSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const token = authHeader.slice(7);
-    const { createClient } = await import('@supabase/supabase-js');
-    const authClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
-
-    const body = (await request.json()) as ProfileUpdateRequest;
-
-    // Only allow known fields
-    const updateData: Record<string, string | undefined> = {};
-    if (body.full_name !== undefined) updateData.full_name = body.full_name;
-    if (body.company_name !== undefined) updateData.company_name = body.company_name;
-    if (body.job_title !== undefined) updateData.job_title = body.job_title;
-    if (body.phone_number !== undefined) updateData.phone_number = body.phone_number;
-    if (body.linkedin_url !== undefined) updateData.linkedin_url = body.linkedin_url;
-    if (body.deal_role !== undefined) updateData.deal_role = body.deal_role;
-    if (body.avatar_gradient !== undefined) updateData.avatar_gradient = body.avatar_gradient;
+    const updateData = parsed.data;
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+      return apiError('No fields to update', 400);
     }
 
+    // Use service client for the update (bypasses RLS for profile writes)
     const supabase = createServiceClient();
     const { error: updateError } = await supabase
       .from('user_profiles')
@@ -54,13 +33,13 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       .eq('id', user.id);
 
     if (updateError) {
-      console.error('Profile update error:', updateError);
-      return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
+      captureApiError(updateError, 'profile-update');
+      return apiError('Failed to save profile', 500);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
-    console.error('Profile PATCH error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    captureApiError(error, 'profile-patch');
+    return apiError('Internal server error', 500);
   }
 }

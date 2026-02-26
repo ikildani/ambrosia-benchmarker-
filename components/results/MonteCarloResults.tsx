@@ -27,7 +27,11 @@ export default function MonteCarloResults({
   onUpgrade,
   onBuyReport,
 }: MonteCarloResultsProps) {
-  if (!monteCarloResult) return null;
+  if (!monteCarloResult) return (
+    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+      <p className="text-sm text-slate-500 dark:text-slate-400">Monte Carlo simulation requires rNPV base case to run.</p>
+    </div>
+  );
 
   const hasAccess = tier === 'pro' || tier === 'report';
   const mc = monteCarloResult;

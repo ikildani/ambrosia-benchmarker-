@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
+import { generatePricingSchema } from '@/lib/seo/structured-data';
 
 interface PricingProps {
   currentTier: 'free' | 'pro' | 'report';
@@ -95,6 +96,10 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
   return (
     <section id="pricing" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generatePricingSchema()) }}
+      />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12 lg:mb-16">

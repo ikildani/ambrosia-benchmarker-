@@ -1000,12 +1000,14 @@ export async function POST(request: NextRequest) {
               .eq('name', company.name);
 
             if (retryError) {
-              results.failed.push(`${company.name}: ${retryError.message}`);
+              console.error(`[seed-companies] Update failed for ${company.name}:`, retryError);
+              results.failed.push(`Failed to process: ${company.name}`);
             } else {
               results.updated.push(company.name);
             }
           } else {
-            results.failed.push(`${company.name}: ${insertError.message}`);
+            console.error(`[seed-companies] Insert failed for ${company.name}:`, insertError);
+            results.failed.push(`Failed to process: ${company.name}`);
           }
         } else {
           results.created.push(company.name);

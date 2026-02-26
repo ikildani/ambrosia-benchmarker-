@@ -37,6 +37,7 @@ import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
 export type { PartnerMatchForPDF };
 
 // Sub-components
+import FinancialErrorBoundary from './results/FinancialErrorBoundary';
 import ResultsHeader from './results/ResultsHeader';
 import InfoTooltip from './calculator/InfoTooltip';
 import MetricCard from './results/MetricCard';
@@ -320,8 +321,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   // Run financial modeling pipeline (rNPV, Monte Carlo, scenarios, FX)
   useEffect(() => {
     if (!fullInputs || !result) return;
-    const fm = runFinancialModel(fullInputs, result, epiData.indications);
-    setFinancialModel(fm);
+    try {
+      const fm = runFinancialModel(fullInputs, result, epiData.indications);
+      setFinancialModel(fm);
+    } catch (err) {
+      console.error('[FinancialModel] Pipeline error:', err);
+    }
   }, [fullInputs, result]);
 
   // Fetch server-side financial data (competitive landscape, deal flow forecast)
@@ -1010,44 +1015,56 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* Financial Modeling — World-Class Tier */}
         {financialModel && (
           <>
-            <RnpvAnalysis
-              rnpvResult={financialModel.rnpv}
-              benchmarkMedian={result.terms.totalDealValue.median}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-            <MonteCarloResults
-              monteCarloResult={financialModel.monteCarlo}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-            <MarketSizePanel
-              marketSize={financialModel.marketSize ?? undefined}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-            <ScenarioPlanner
-              scenarios={financialModel.scenarios}
-              defensiveAnalysis={financialModel.defensiveAnalysis}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-            <CompetitiveLandscapePanel
-              landscape={serverData.competitiveLandscape}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-            <DealFlowForecastPanel
-              forecast={serverData.dealFlowForecast}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
+            <FinancialErrorBoundary fallbackTitle="rNPV Analysis unavailable">
+              <RnpvAnalysis
+                rnpvResult={financialModel.rnpv}
+                benchmarkMedian={result.terms.totalDealValue.median}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
+              <MonteCarloResults
+                monteCarloResult={financialModel.monteCarlo}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Market Size Analysis unavailable">
+              <MarketSizePanel
+                marketSize={financialModel.marketSize ?? undefined}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Scenario Analysis unavailable">
+              <ScenarioPlanner
+                scenarios={financialModel.scenarios}
+                defensiveAnalysis={financialModel.defensiveAnalysis}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Competitive Landscape unavailable">
+              <CompetitiveLandscapePanel
+                landscape={serverData.competitiveLandscape}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Deal Flow Forecast unavailable">
+              <DealFlowForecastPanel
+                forecast={serverData.dealFlowForecast}
+                tier={tier || 'free'}
+                onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
           </>
         )}
 

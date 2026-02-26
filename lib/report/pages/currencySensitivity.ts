@@ -8,6 +8,7 @@ export function renderCurrencySensitivityPage(data: PDFReportData, meta: ReportM
   if (!data.fxSensitivity) return '';
 
   const fx = data.fxSensitivity;
+  if (!fx.scenarios || fx.scenarios.length === 0) return '';
 
   // Determine the max absolute deal value impact for scaling the visual bars
   const maxAbsImpact = Math.max(

@@ -152,6 +152,162 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
       { parameter: 'timeToMarket', operation: 'add', value: 0.5, rationale: '6-month effective delay from slow ramp' },
     ],
   },
+
+  // Manufacturing & Supply Chain scenarios
+  {
+    id: 'cmc_failure',
+    name: 'CMC / Manufacturing Failure',
+    description: 'Critical manufacturing issue (sterility, potency, yield) requires process redesign and delays launch by 18 months.',
+    category: 'clinical',
+    adjustments: [
+      { parameter: 'timeToMarket', operation: 'add', value: 1.5, rationale: '18-month delay for manufacturing process redesign' },
+      { parameter: 'peakSales', operation: 'multiply', value: 0.90, rationale: 'Supply constraints limit initial launch capacity' },
+      { parameter: 'discountRate', operation: 'add', value: 0.01, rationale: 'Increased technical risk perception' },
+    ],
+  },
+  {
+    id: 'supply_disruption',
+    name: 'Post-Launch Supply Disruption',
+    description: 'Manufacturing facility issue or raw material shortage halves supply for 12 months post-launch.',
+    category: 'commercial',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.70, rationale: '30% revenue loss from 12-month supply constraint' },
+    ],
+  },
+
+  // Clinical scenarios (additional)
+  {
+    id: 'biomarker_failure',
+    name: 'Biomarker Enrichment Failure',
+    description: 'Companion diagnostic fails to identify responders, requiring broader (lower-response) population label.',
+    category: 'clinical',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.65, rationale: 'Broader but less effective label reduces adoption' },
+      { parameter: 'pos', operation: 'multiply', value: 0.80, rationale: 'Diluted effect size in unenriched population' },
+    ],
+  },
+  {
+    id: 'subgroup_rescue',
+    name: 'Subgroup-Only Approval',
+    description: 'Overall trial misses but pre-specified biomarker subgroup shows strong benefit. Narrow label approved.',
+    category: 'clinical',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.35, rationale: 'Narrow subgroup = ~35% of original target population' },
+      { parameter: 'timeToMarket', operation: 'add', value: 1.0, rationale: 'Additional 12 months for confirmatory study in subgroup' },
+      { parameter: 'pos', operation: 'multiply', value: 0.70, rationale: 'Higher bar for subgroup-based approval' },
+    ],
+  },
+  {
+    id: 'dose_optimization_success',
+    name: 'Dose Optimization Success',
+    description: 'Improved dosing regimen in Phase 2b dramatically improves therapeutic index and patient compliance.',
+    category: 'clinical',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.15, rationale: 'Better tolerability drives higher compliance and market share' },
+      { parameter: 'pos', operation: 'multiply', value: 1.10, rationale: 'Cleaner safety profile improves Phase 3 success probability' },
+    ],
+  },
+
+  // Regulatory scenarios (additional)
+  {
+    id: 'pediatric_extension',
+    name: 'Pediatric Exclusivity Extension',
+    description: 'FDA grants 6-month pediatric exclusivity, extending market protection and revenue tail.',
+    category: 'regulatory',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.08, rationale: '6-month LOE extension adds ~8% lifecycle revenue' },
+    ],
+  },
+  {
+    id: 'conditional_approval_eu',
+    name: 'EU Conditional Marketing Authorization',
+    description: 'EMA grants conditional approval based on early data, enabling EU revenue 12 months earlier.',
+    category: 'regulatory',
+    adjustments: [
+      { parameter: 'timeToMarket', operation: 'add', value: -1.0, rationale: '12-month earlier EU market access via conditional MA' },
+      { parameter: 'peakSales', operation: 'multiply', value: 1.03, rationale: 'Early EU access builds real-world evidence and KOL support' },
+    ],
+  },
+
+  // Competitive scenarios (additional)
+  {
+    id: 'generic_entry_early',
+    name: 'Early Generic / Biosimilar Entry',
+    description: 'Patent challenge or paragraph IV filing enables generic/biosimilar entry 2 years before expected LOE.',
+    category: 'competitive',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.75, rationale: '25% lifecycle revenue loss from 2-year earlier generic entry' },
+    ],
+  },
+  {
+    id: 'competitor_safety_withdrawal',
+    name: 'Competitor Withdrawal (Safety)',
+    description: 'Key competitor withdrawn from market due to safety signal, creating market share opportunity.',
+    category: 'competitive',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.45, rationale: '45% peak sales uplift from competitor withdrawal' },
+      { parameter: 'pos', operation: 'multiply', value: 1.05, rationale: 'Increased regulatory willingness to approve alternatives' },
+    ],
+  },
+  {
+    id: 'class_effect_concern',
+    name: 'Class-Effect Safety Concern',
+    description: 'Regulatory agency raises class-wide safety concern affecting all drugs with similar mechanism.',
+    category: 'clinical',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.75, rationale: 'Class-wide REMS or label warning reduces prescribing confidence' },
+      { parameter: 'pos', operation: 'multiply', value: 0.85, rationale: 'Heightened regulatory scrutiny on the class' },
+      { parameter: 'discountRate', operation: 'add', value: 0.01, rationale: 'Elevated risk perception across the mechanism class' },
+    ],
+  },
+
+  // Commercial / Market Access scenarios (additional)
+  {
+    id: 'payer_restriction',
+    name: 'Restrictive Payer Coverage',
+    description: 'Major PBMs/payers require step therapy or prior authorization, limiting initial uptake.',
+    category: 'commercial',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.80, rationale: '20% reduced adoption from step therapy / PA requirements' },
+    ],
+  },
+  {
+    id: 'real_world_outperformance',
+    name: 'Real-World Data Outperformance',
+    description: 'Post-launch real-world evidence shows superior outcomes vs. clinical trial data, boosting adoption.',
+    category: 'commercial',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.20, rationale: '20% uplift from strong real-world evidence driving guideline adoption' },
+    ],
+  },
+  {
+    id: 'ira_negotiation_impact',
+    name: 'IRA Price Negotiation (US)',
+    description: 'Drug selected for Medicare price negotiation under IRA, imposing maximum fair price 9+ years post-launch.',
+    category: 'pricing',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 0.85, rationale: '15% price reduction from IRA Medicare negotiation' },
+    ],
+  },
+  {
+    id: 'orphan_premium',
+    name: 'Orphan Drug Premium Pricing',
+    description: 'Orphan designation enables premium pricing ($200K+/year) with limited payer pushback due to small population.',
+    category: 'pricing',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.35, rationale: '35% price premium from orphan designation and unmet need' },
+    ],
+  },
+  {
+    id: 'combination_synergy',
+    name: 'Combination Therapy Approval',
+    description: 'Asset approved as backbone of combination regimen, becoming standard-of-care component.',
+    category: 'commercial',
+    adjustments: [
+      { parameter: 'peakSales', operation: 'multiply', value: 1.50, rationale: '50% TAM expansion as part of combination standard-of-care' },
+      { parameter: 'pos', operation: 'multiply', value: 1.05, rationale: 'Combination data de-risks single-agent efficacy concerns' },
+    ],
+  },
 ];
 
 /**
@@ -297,8 +453,19 @@ export function getDefensiveAnalysis(
   const p10Index = Math.floor(allAdjustedValues.length * 0.10);
   const defensiveFloor = allAdjustedValues[p10Index] || 0;
 
-  // Walk-away threshold: below this, the deal doesn't make financial sense
-  const walkAwayThreshold = Math.round(defensiveFloor * 0.55); // 55% of floor as deal value
+  // Walk-away threshold: phase-adjusted minimum acceptable deal value
+  // Source: Industry practice — earlier-stage deals require lower absolute floor
+  // but higher risk-adjusted return hurdle
+  // Phase-specific walk-away as fraction of base rNPV:
+  //   Preclinical: 8% (high risk, accept low floor)
+  //   Phase 1: 12%, Phase 2: 18%, Phase 3: 25%, Approved: 35%
+  const phaseWalkAwayFractions: Record<string, number> = {
+    preclinical: 0.08, phase1: 0.12, phase2: 0.18, phase3: 0.25, approved: 0.35,
+  };
+  const walkAwayFraction = phaseWalkAwayFractions[baseInput.phase] ?? 0.18;
+  const walkAwayThreshold = Math.round(
+    Math.max(defensiveFloor * 0.50, baseResult.riskAdjustedNPV * walkAwayFraction)
+  );
 
   const narrative = `Scenario analysis across ${results.length} scenarios shows a range of ` +
     `$${Math.round(worstCase.adjustedRNPV)}M to $${Math.round(bestCase.adjustedRNPV)}M rNPV ` +

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { X, Mail, Copy, Check, RefreshCw, Loader2 } from 'lucide-react';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { OutreachEmail, ApproachStrategy, EmailTone } from '@/types/partner-breakdown';
 
 interface OutreachEmailModalProps {
@@ -37,6 +38,9 @@ export function OutreachEmailModal({
   sessionId,
   tier,
 }: OutreachEmailModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen, onClose);
+
   const [tone, setTone] = useState<EmailTone>('formal');
   const [recipientRole, setRecipientRole] = useState('');
   const [email, setEmail] = useState<OutreachEmail | null>(null);
@@ -111,7 +115,7 @@ export function OutreachEmailModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Generate outreach email" tabIndex={-1} className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4">
           <div className="flex items-center justify-between">

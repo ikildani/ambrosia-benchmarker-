@@ -52,8 +52,19 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
     return null;
   };
 
+  const chartDescription = `Tiered royalty structure: Base tier ${royalties.base.low}%-${royalties.base.high}%, Mid tier ($500M+) ${royalties.midTier.low}%-${royalties.midTier.high}%, High tier ($1B+) ${royalties.highTier.low}%-${royalties.highTier.high}%.`;
+
   return (
-    <div className="w-full">
+    <div className="w-full" role="img" aria-label={chartDescription}>
+      <table className="sr-only" aria-label="Tiered royalty rates">
+        <caption>Royalty rates by annual sales tier</caption>
+        <thead><tr><th>Tier</th><th>Sales Threshold</th><th>Low Rate</th><th>High Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Base</td><td>$0-$500M</td><td>{royalties.base.low}%</td><td>{royalties.base.high}%</td></tr>
+          <tr><td>Mid</td><td>$500M-$1B</td><td>{royalties.midTier.low}%</td><td>{royalties.midTier.high}%</td></tr>
+          <tr><td>High</td><td>$1B+</td><td>{royalties.highTier.low}%</td><td>{royalties.highTier.high}%</td></tr>
+        </tbody>
+      </table>
       <div className="h-32 sm:h-52">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart

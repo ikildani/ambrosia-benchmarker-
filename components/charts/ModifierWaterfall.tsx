@@ -104,8 +104,22 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
     );
   }
 
+  const finalValue = data[data.length - 1]?.value ?? baseValue;
+  const chartDescription = `Value modifier impact: Base ${formatCurrency(baseValue)}, ${modifiers.map(m => `${m.name} ${m.multiplier > 1 ? '+' : ''}${((m.multiplier - 1) * 100).toFixed(0)}%`).join(', ')}, Final ${formatCurrency(finalValue)}.`;
+
   return (
-    <div className="w-full h-56 sm:h-80 mb-2">
+    <div className="w-full h-56 sm:h-80 mb-2" role="img" aria-label={chartDescription}>
+      <table className="sr-only" aria-label="Deal value modifiers">
+        <caption>Impact of each modifier on deal value</caption>
+        <thead><tr><th>Modifier</th><th>Impact</th></tr></thead>
+        <tbody>
+          <tr><td>Base Value</td><td>{formatCurrency(baseValue)}</td></tr>
+          {modifiers.map((mod, i) => (
+            <tr key={i}><td>{mod.name}</td><td>{mod.multiplier > 1 ? '+' : ''}{((mod.multiplier - 1) * 100).toFixed(0)}%</td></tr>
+          ))}
+          <tr><td>Final Value</td><td>{formatCurrency(finalValue)}</td></tr>
+        </tbody>
+      </table>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

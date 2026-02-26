@@ -41,7 +41,11 @@ export default function ScenarioPlanner({
   onUpgrade,
   onBuyReport,
 }: ScenarioPlannerProps) {
-  if (!scenarios || scenarios.length === 0) return null;
+  if (!scenarios || scenarios.length === 0) return (
+    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+      <p className="text-sm text-slate-500 dark:text-slate-400">Scenario analysis requires an rNPV base case to stress-test.</p>
+    </div>
+  );
 
   const hasAccess = tier === 'pro' || tier === 'report';
 

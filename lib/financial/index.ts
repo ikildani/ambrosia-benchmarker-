@@ -23,6 +23,12 @@ export {
   getBaselineLOA,
 } from './pos-tables';
 
+// Validation
+export { validateRNPVInput, safeValidateRNPVInput, RNPVInputSchema, MonteCarloInputSchema } from './validation';
+
+// Calibration
+export { CALIBRATION_DEALS, runCalibrationBacktest } from './calibration';
+
 // Types (re-export everything for consumer convenience)
 export type {
   RNPVInput,

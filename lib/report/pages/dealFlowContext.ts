@@ -32,6 +32,9 @@ export function renderDealFlowContextPage(data: PDFReportData, meta: ReportMeta)
 
   if (!df && !cl) return '';
 
+  const safeHistorical = df?.historicalQuarters ?? [];
+  const safeForecast = df?.forecast ?? [];
+
   return `
     <div class="report-page">
       ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
@@ -64,7 +67,7 @@ export function renderDealFlowContextPage(data: PDFReportData, meta: ReportMeta)
                 </tr>
               </thead>
               <tbody>
-                ${df.historicalQuarters.slice(-6).map(q => `
+                ${safeHistorical.slice(-6).map(q => `
                   <tr>
                     <td style="font-weight: 500;">${escapeHtml(q.quarter)}</td>
                     <td style="text-align: right;">${q.dealCount}</td>
@@ -76,7 +79,7 @@ export function renderDealFlowContextPage(data: PDFReportData, meta: ReportMeta)
           </div>
 
           <!-- Forecast Table -->
-          ${df.forecast && df.forecast.length > 0 ? `
+          ${safeForecast.length > 0 ? `
           <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Forecast</div>
           <div class="card" style="padding: 0; overflow: hidden;">
             <table class="data-table">
@@ -88,7 +91,7 @@ export function renderDealFlowContextPage(data: PDFReportData, meta: ReportMeta)
                 </tr>
               </thead>
               <tbody>
-                ${df.forecast.slice(0, 4).map(f => `
+                ${safeForecast.slice(0, 4).map(f => `
                   <tr>
                     <td style="font-weight: 500;">${escapeHtml(f.quarter)}</td>
                     <td style="text-align: right; font-weight: 700; color: ${COLORS.teal};">${f.predictedDeals}</td>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type {
   TherapeuticArea,
   Phase,
@@ -274,6 +274,45 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Unsaved changes warning ────────────────────────────────────────────────
+  // Warn users who change inputs after seeing results, before navigating away
+  const lastCalcInputHashRef = useRef<string>('');
+
+  // Snapshot input state when a new calculation result arrives
+  useEffect(() => {
+    if (calc.result) {
+      lastCalcInputHashRef.current = JSON.stringify({
+        ta: state.therapeuticArea, p: state.phase, m: state.modality,
+        i: state.indication, t: state.territory, b: state.biomarker,
+        cp: state.competitivePosition, dq: state.dataQuality,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calc.result]);
+
+  useEffect(() => {
+    if (!calc.result || !lastCalcInputHashRef.current) return;
+
+    const currentHash = JSON.stringify({
+      ta: state.therapeuticArea, p: state.phase, m: state.modality,
+      i: state.indication, t: state.territory, b: state.biomarker,
+      cp: state.competitivePosition, dq: state.dataQuality,
+    });
+
+    const isDirty = currentHash !== lastCalcInputHashRef.current;
+
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    };
+
+    if (isDirty) {
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [calc.result, state.therapeuticArea, state.phase, state.modality, state.indication, state.territory, state.biomarker, state.competitivePosition, state.dataQuality]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 

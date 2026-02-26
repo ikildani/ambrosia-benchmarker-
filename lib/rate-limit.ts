@@ -5,6 +5,7 @@
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import * as Sentry from '@sentry/nextjs';
 
 export interface RateLimitConfig {
   limit: number;
@@ -117,6 +118,11 @@ export async function checkRateLimit(
       };
     } catch (error) {
       console.error('[RateLimit] Upstash error, falling back to in-memory:', error);
+      Sentry.captureMessage('Rate limiter falling back to in-memory: Upstash Redis unavailable', {
+        level: 'warning',
+        tags: { component: 'rate-limiter', endpoint },
+        extra: { error: error instanceof Error ? error.message : String(error), identifier },
+      });
       return checkInMemory(identifier, endpoint, config);
     }
   }

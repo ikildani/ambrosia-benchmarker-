@@ -18,7 +18,11 @@ export default function RnpvAnalysis({
   onUpgrade,
   onBuyReport,
 }: RnpvAnalysisProps) {
-  if (!rnpvResult) return null;
+  if (!rnpvResult) return (
+    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+      <p className="text-sm text-slate-500 dark:text-slate-400">rNPV analysis requires additional data inputs to calculate.</p>
+    </div>
+  );
 
   const hasAccess = tier === 'pro' || tier === 'report';
 

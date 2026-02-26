@@ -31,7 +31,7 @@ export const calculationRequestSchema = z.object({
     total_deal_value_low: z.number().optional().nullable(),
     total_deal_value_high: z.number().optional().nullable(),
   }).optional().nullable(),
-}).passthrough(); // Allow extra fields without breaking
+}).strip(); // Silently strip extra fields for safety
 
 // Report email request
 export const reportEmailSchema = z.object({
@@ -88,7 +88,7 @@ export const dealsQuerySchema = z.object({
     'licensor_name', 'licensee_name', 'asset_name', 'modality', 'phase_at_signing',
   ]).optional(),
   sort_order: z.enum(['asc', 'desc']).optional(),
-}).passthrough(); // Allow extra query params (e.g. tracking params)
+}).strip(); // Silently strip extra fields for safety
 
 // Partners match POST body
 export const partnerMatchSchema = z.object({
@@ -104,14 +104,14 @@ export const partnerMatchSchema = z.object({
   session_id: z.string().optional().nullable(),
   anonymous_id: z.string().optional().nullable(),
   tier: z.string().optional(), // accepted but ignored (security)
-}).passthrough();
+}).strip();
 
 // Pulse GET query params
 export const pulseQuerySchema = z.object({
   history: z.enum(['true']).optional(),
   user_id: z.string().optional().nullable(),
   week: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'week must be YYYY-MM-DD format').optional(),
-}).passthrough();
+}).strip();
 
 // Content GET query params
 export const contentQuerySchema = z.object({
@@ -119,7 +119,7 @@ export const contentQuerySchema = z.object({
   category: z.string().optional(),
   limit: z.string().optional(),
   offset: z.string().optional(),
-}).passthrough();
+}).strip();
 
 // Content POST body
 export const contentPostSchema = z.object({
@@ -133,7 +133,7 @@ export const contentPostSchema = z.object({
   modality: z.unknown().optional(),
   indication: z.unknown().optional(),
   ai_generated: z.boolean().optional(),
-}).passthrough();
+}).strip();
 
 // Events POST body
 export const eventSchema = z.object({
@@ -232,7 +232,7 @@ export const sessionUpdateSchema = z.object({
 // Watchlist GET query params
 export const watchlistQuerySchema = z.object({
   user_id: z.string().min(1, 'user_id is required'),
-}).passthrough();
+}).strip();
 
 // Watchlist POST body
 export const watchlistAddSchema = z.object({
@@ -246,12 +246,12 @@ export const watchlistAddSchema = z.object({
 export const watchlistDeleteSchema = z.object({
   id: z.string().min(1, 'id is required'),
   user_id: z.string().min(1, 'user_id is required'),
-}).passthrough();
+}).strip();
 
 // Scenarios GET query params
 export const scenariosQuerySchema = z.object({
   email: z.string().min(1, 'email is required'),
-}).passthrough();
+}).strip();
 
 // Scenarios POST body
 export const scenarioCreateSchema = z.object({
@@ -267,7 +267,7 @@ export const scenarioCreateSchema = z.object({
 export const scenarioDeleteSchema = z.object({
   id: z.string().min(1, 'id is required'),
   email: z.string().min(1, 'email is required'),
-}).passthrough();
+}).strip();
 
 // Newsletter POST body
 export const newsletterSchema = z.object({
@@ -285,6 +285,40 @@ export function formatZodErrors(error: z.ZodError): string {
     i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message
   ).join('; ');
 }
+
+// Profile PATCH body
+export const profileUpdateSchema = z.object({
+  full_name: z.string().max(100, 'Name must be under 100 characters').optional(),
+  company_name: z.string().max(200, 'Company name must be under 200 characters').optional(),
+  job_title: z.string().max(100, 'Job title must be under 100 characters').optional(),
+  phone_number: z.string()
+    .max(30, 'Phone number too long')
+    .regex(/^[\d\s\-+().]*$/, 'Invalid phone number format')
+    .optional(),
+  linkedin_url: z.string()
+    .max(300, 'LinkedIn URL too long')
+    .refine(
+      (val) => !val || val.startsWith('https://linkedin.com/') || val.startsWith('https://www.linkedin.com/'),
+      'Must be a valid LinkedIn URL'
+    )
+    .optional(),
+  deal_role: z.string().max(50, 'Deal role too long').optional(),
+  avatar_gradient: z.string().max(100, 'Gradient value too long').optional(),
+}).strip();
+
+// Email send POST body
+export const emailSendSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  type: z.enum(['welcome', 'calculation_receipt', 'upgrade_confirmation']),
+  name: z.string().max(100, 'Name too long').optional().default('there'),
+  data: z.object({
+    modality: z.string().max(100).optional(),
+    phase: z.string().max(100).optional(),
+    indication: z.string().max(100).optional(),
+    upfront: z.string().max(50).optional(),
+    totalValue: z.string().max(50).optional(),
+  }).optional(),
+}).strip();
 
 /**
  * Sanitize a number: returns fallback if NaN, Infinity, or -Infinity.

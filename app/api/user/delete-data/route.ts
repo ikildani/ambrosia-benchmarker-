@@ -1,29 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient, createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
+import { captureApiError } from '@/lib/sentry-api';
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Get auth token from header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Authorization required' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    // Verify the token and get user
-    const authClient = createServerClient();
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    // SECURITY: Use middleware-managed session instead of raw token
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
 
     const supabase = createServiceClient();
 
@@ -43,52 +27,52 @@ export async function DELETE(request: NextRequest) {
     // Track deletion errors for reporting
     const deletionErrors: string[] = [];
 
+    // Helper to delete from a table and track errors
+    const deleteFrom = async (table: string, column: string, value: string) => {
+      const { error } = await supabase.from(table).delete().eq(column, value);
+      if (error) {
+        console.error(`Error deleting from ${table}:`, error);
+        deletionErrors.push(table);
+      }
+    };
+
+    // --- Phase 1: Delete from tables with SET NULL FK (won't auto-delete) ---
+    // These MUST be explicitly deleted for GDPR compliance
+
+    await deleteFrom('outreach_emails', 'user_id', user.id);
+    await deleteFrom('outreach_email_usage', 'user_id', user.id);
+    await deleteFrom('watchlist_items', 'user_id', user.id);
+    await deleteFrom('partner_match_results', 'user_id', user.id);
+    await deleteFrom('report_purchases', 'user_id', user.id);
+
+    // --- Phase 2: Delete from tables that may also have email-keyed data ---
+
+    await deleteFrom('saved_scenarios', 'user_id', user.id);
+    if (user.email) {
+      await deleteFrom('saved_scenarios', 'email', user.email);
+    }
+
+    await deleteFrom('shared_calculations', 'user_id', user.id);
+    if (user.email) {
+      await deleteFrom('shared_calculations', 'email', user.email);
+    }
+
+    if (user.email) {
+      await deleteFrom('email_logs', 'email', user.email);
+      await deleteFrom('newsletter_subscribers', 'email', user.email);
+    }
+
+    await deleteFrom('email_preferences', 'user_id', user.id);
+
+    // --- Phase 3: Original deletions (events → calculations → sessions → lead_scores) ---
     // Delete in correct order (respecting foreign keys)
-    // Events reference sessions, so delete events first
-    const { error: eventsError } = await supabase
-      .from('events')
-      .delete()
-      .eq('user_id', user.id);
 
-    if (eventsError) {
-      console.error('Error deleting events:', eventsError);
-      deletionErrors.push('events');
-    }
+    await deleteFrom('events', 'user_id', user.id);
+    await deleteFrom('calculations', 'user_id', user.id);
+    await deleteFrom('sessions', 'user_id', user.id);
+    await deleteFrom('lead_scores', 'user_id', user.id);
 
-    // Delete calculations
-    const { error: calculationsError } = await supabase
-      .from('calculations')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (calculationsError) {
-      console.error('Error deleting calculations:', calculationsError);
-      deletionErrors.push('calculations');
-    }
-
-    // Delete sessions
-    const { error: sessionsError } = await supabase
-      .from('sessions')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (sessionsError) {
-      console.error('Error deleting sessions:', sessionsError);
-      deletionErrors.push('sessions');
-    }
-
-    // Delete lead score
-    const { error: leadScoreError } = await supabase
-      .from('lead_scores')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (leadScoreError) {
-      console.error('Error deleting lead score:', leadScoreError);
-      deletionErrors.push('lead_scores');
-    }
-
-    // Delete user profile - this is critical
+    // --- Phase 4: Delete user profile (critical) ---
     const { error: profileError } = await supabase
       .from('user_profiles')
       .delete()
@@ -97,7 +81,6 @@ export async function DELETE(request: NextRequest) {
     if (profileError) {
       console.error('Error deleting profile:', profileError);
       deletionErrors.push('user_profile');
-      // Profile deletion failure is critical - stop here
       return NextResponse.json(
         {
           error: 'Failed to delete user profile',
@@ -108,7 +91,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Finally, delete the auth user - this is critical
+    // --- Phase 5: Delete the auth user (critical) ---
     const { error: authDeleteError } = await supabase.auth.admin.deleteUser(user.id);
 
     if (authDeleteError) {
@@ -130,7 +113,7 @@ export async function DELETE(request: NextRequest) {
       warnings: deletionErrors.length > 0 ? `Some non-critical data may not have been deleted: ${deletionErrors.join(', ')}` : undefined,
     });
   } catch (error) {
-    console.error('Data deletion error:', error);
+    captureApiError(error, 'data-deletion');
     return NextResponse.json(
       { error: 'Failed to delete data' },
       { status: 500 }

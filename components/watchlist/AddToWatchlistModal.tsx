@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { WatchlistItem } from '@/lib/hooks/useWatchlist';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface AddToWatchlistModalProps {
   onClose: () => void;
@@ -43,6 +44,9 @@ interface CompanyResult {
 type TabType = 'modality' | 'indication' | 'therapeutic_area' | 'company';
 
 export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: AddToWatchlistModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, true, onClose);
+
   const [activeTab, setActiveTab] = useState<TabType>('modality');
   const [adding, setAdding] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -105,10 +109,10 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="watchlist-modal-title" tabIndex={-1} className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Add to Watchlist</h2>
+          <h2 id="watchlist-modal-title" className="text-lg font-semibold text-slate-900 dark:text-white">Add to Watchlist</h2>
           <button
             onClick={onClose}
             className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
