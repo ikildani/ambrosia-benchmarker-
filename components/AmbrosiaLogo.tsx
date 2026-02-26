@@ -1,27 +1,32 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 
 interface AmbrosiaLogoProps {
   variant?: "color" | "reversed" | "auto";
   height?: number;
 }
 
+// Source image is 1920x400, so width = height * 4.8
 export default function AmbrosiaLogo({ variant = "auto", height = 40 }: AmbrosiaLogoProps) {
+  const width = Math.round(height * 4.8);
+
   if (variant === "auto") {
     return (
       <>
-        <img
+        <Image
           src="/logo-color.png"
           alt="Ambrosia Ventures"
+          width={width}
           height={height}
-          style={{ height, width: "auto" }}
           className="block dark:hidden"
+          priority
         />
-        <img
+        <Image
           src="/logo-white.png"
           alt="Ambrosia Ventures"
+          width={width}
           height={height}
-          style={{ height, width: "auto" }}
           className="hidden dark:block"
+          priority
         />
       </>
     );
@@ -30,11 +35,12 @@ export default function AmbrosiaLogo({ variant = "auto", height = 40 }: Ambrosia
   const src = variant === "color" ? "/logo-color.png" : "/logo-white.png";
 
   return (
-    <img
+    <Image
       src={src}
       alt="Ambrosia Ventures"
+      width={width}
       height={height}
-      style={{ height, width: "auto", display: "block" }}
+      priority
     />
   );
 }

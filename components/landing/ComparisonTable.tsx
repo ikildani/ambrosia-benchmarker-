@@ -10,6 +10,8 @@ const comparisonRows = [
   { feature: 'Partner matching', manual: 'Relationship-based only', ambrosia: 'AI-matched across 50+ companies' },
   { feature: 'Sensitivity analysis', manual: 'Build custom Excel models', ambrosia: 'One-click scenario modeling' },
   { feature: 'Board-ready reports', manual: 'Days of formatting', ambrosia: 'Instant PDF & Excel export' },
+  { feature: 'Negotiation strategy', manual: 'Anecdotal experience', ambrosia: 'AI negotiation playbooks' },
+  { feature: 'Market monitoring', manual: 'Manual tracking', ambrosia: 'Watchlist alerts & weekly digest' },
 ];
 
 export default function ComparisonTable() {

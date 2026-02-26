@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { BlogPost } from '@/types/content';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
 
@@ -61,10 +62,12 @@ export default function BlogCard({ post }: BlogCardProps) {
       {post.featured_image_url && (
         <Link href={`/blog/${post.slug}`}>
           <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-50 relative overflow-hidden">
-            <img
+            <Image
               src={post.featured_image_url}
               alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
         </Link>

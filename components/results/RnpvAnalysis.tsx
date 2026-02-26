@@ -117,7 +117,7 @@ export default function RnpvAnalysis({
             </div>
             <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 flex-shrink-0">
               {rnpvResult.discountRate
-                ? `${(rnpvResult.discountRate * 100).toFixed(0)}% WACC`
+                ? `${(rnpvResult.discountRate * 100).toFixed(1)}% WACC`
                 : 'rNPV'}
             </span>
           </div>

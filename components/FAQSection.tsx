@@ -17,15 +17,15 @@ const faqs = [
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: `We cover oncology, neurology/CNS, and immunology/autoimmune — the three most active therapeutic areas in biopharma licensing. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, and more. Additional therapeutic areas including cardiometabolic and rare disease are in development.`
+    answer: `We cover oncology, neurology/CNS, immunology/autoimmune, and metabolic/obesity across 8 therapeutic areas. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, GLP-1 analogs, and more. Additional therapeutic areas including rare disease and cardiovascular are in development.`
   },
   {
     question: "Is my data kept confidential?",
-    answer: "Yes. We don't store or sell your data. Your inputs and asset details remain completely private."
+    answer: "Yes. All API endpoints are authenticated and rate-limited. Your inputs and asset details remain completely private. We are fully GDPR-compliant — you can export or delete all your data at any time from your dashboard settings. Payments are processed securely through Stripe."
   },
   {
     question: "What's the difference between Free and Pro?",
-    answer: "The free tier gives you basic deal estimates with core parameters. Pro unlocks the full platform — partner matching, deal history, patent cliff data, PDF exports, and expanded benchmarking across additional modalities and deal structures."
+    answer: "The free tier gives you unlimited calculations with headline metrics, 3 comparable deals, and top sensitivity parameters. Pro ($99/mo) unlocks the full platform — unlimited AI deal memos, negotiation playbooks, scenario comparison, watchlist with market alerts, full partner profiles across 50+ companies, branded PDF and Excel exports, and priority support. Individual Deal Reports ($149 each) are also available for one-time analysis."
   },
   {
     question: "How often is the data updated?",
@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     question: "Can I share my results with my team?",
-    answer: "Pro users can export results as PDF reports to share within their organization. We just ask that you don't redistribute the underlying benchmark data externally."
+    answer: "Yes. Pro users can export branded PDF and Excel reports, generate shareable links with configurable expiration, and compare saved scenarios across team members. We just ask that you don't redistribute the underlying benchmark data externally."
   },
   {
     question: "Is this available for academic or research use?",

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
@@ -13,7 +14,7 @@ interface ModifierWaterfallProps {
   baseValue: number;
 }
 
-export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
+function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
   const isMobile = useIsMobile();
   // Build waterfall data
   let runningValue = baseValue;
@@ -163,3 +164,5 @@ export default function ModifierWaterfall({ modifiers, baseValue }: ModifierWate
     </div>
   );
 }
+
+export default React.memo(ModifierWaterfall);

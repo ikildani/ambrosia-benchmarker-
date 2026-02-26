@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DealTerms } from '@/lib/calculations';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -13,7 +14,7 @@ const formatCurrency = (value: number) => {
   return `$${value}M`;
 };
 
-export default function DealValueChart({ terms }: DealValueChartProps) {
+function DealValueChart({ terms }: DealValueChartProps) {
   const isMobile = useIsMobile();
 
   const data = [
@@ -151,3 +152,5 @@ export default function DealValueChart({ terms }: DealValueChartProps) {
     </div>
   );
 }
+
+export default React.memo(DealValueChart);

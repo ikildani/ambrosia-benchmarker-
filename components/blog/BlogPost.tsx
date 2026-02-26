@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { BlogPost as BlogPostType } from '@/types/content';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Twitter, ExternalLink, BookOpen } from 'lucide-react';
@@ -188,11 +189,14 @@ export default function BlogPostComponent({ post }: BlogPostProps) {
 
           {/* Featured Image */}
           {post.featured_image_url && (
-            <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 mb-8">
-              <img
+            <div className="aspect-video rounded-2xl overflow-hidden bg-slate-100 mb-8 relative">
+              <Image
                 src={post.featured_image_url}
                 alt={post.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+                priority
               />
             </div>
           )}

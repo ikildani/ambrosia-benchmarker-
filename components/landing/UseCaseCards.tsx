@@ -12,8 +12,8 @@ const useCases = [
     ),
     bullets: [
       'Know your asset\'s market value before entering negotiations',
-      'Present data-backed terms to potential partners',
-      'Benchmark against 600+ comparable deals instantly',
+      'Present data-backed terms with AI-generated deal memos',
+      'Run sensitivity analysis to understand value drivers',
     ],
   },
   {
@@ -24,9 +24,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Screen inbound licensing opportunities in minutes',
-      'Generate board-ready deal analysis reports',
-      'Compare deal structures across therapeutic areas',
+      'Screen inbound licensing opportunities with AI partner matching',
+      'Generate board-ready PDF reports and negotiation playbooks',
+      'Track deal flow with watchlist alerts and weekly market digest',
     ],
   },
   {
@@ -37,9 +37,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Validate deal terms against current market benchmarks',
-      'Assess risk-adjusted portfolio value',
-      'Track market trends across modalities and phases',
+      'Validate deal terms against current market benchmarks from 600+ deals',
+      'Compare scenarios side-by-side with saved scenario analysis',
+      'Monitor market trends with benchmark sparklines and deal alerts',
     ],
   },
   {
@@ -50,9 +50,9 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Accelerate due diligence with instant benchmarks',
-      'Build data-driven negotiation strategies',
-      'Export PDF and Excel reports for client presentations',
+      'Accelerate due diligence with instant benchmarks and comparable deals',
+      'Build data-driven negotiation strategies with AI playbooks',
+      'Export branded PDF and Excel reports for client presentations',
     ],
   },
 ];

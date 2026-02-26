@@ -122,7 +122,16 @@ export default function DealFlowChart({ trend, isPro }: DealFlowChartProps) {
           </div>
         ) : (
           <div className="relative">
-            <div className="w-full h-64">
+            <div className="w-full h-64" role="img" aria-label={`Deal activity chart showing ${totalDeals} deals over ${trend.length} quarters. ${trend.map(t => `${t.quarter}: ${t.count} deals`).join(', ')}.`}>
+              <table className="sr-only" aria-label="Deal activity data">
+                <caption>Quarterly deal transaction volume</caption>
+                <thead><tr><th>Quarter</th><th>Deal Count</th></tr></thead>
+                <tbody>
+                  {trend.map((t, i) => (
+                    <tr key={i}><td>{t.quarter}</td><td>{t.count}</td></tr>
+                  ))}
+                </tbody>
+              </table>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={trend}

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TieredRoyalties } from '@/lib/calculations';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -8,7 +9,7 @@ interface RoyaltyChartProps {
   royalties: TieredRoyalties;
 }
 
-export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
+function RoyaltyChart({ royalties }: RoyaltyChartProps) {
   const isMobile = useIsMobile();
   // Create data points for the step chart - simplified on mobile
   const data = isMobile ? [
@@ -138,3 +139,5 @@ export default function RoyaltyChart({ royalties }: RoyaltyChartProps) {
     </div>
   );
 }
+
+export default React.memo(RoyaltyChart);

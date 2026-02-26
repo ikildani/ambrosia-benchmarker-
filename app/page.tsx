@@ -329,9 +329,9 @@ export default function Home() {
           <div className={`flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '600+ deals analyzed' },
-              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '4 therapeutic areas' },
+              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '8 therapeutic areas' },
               { icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', text: 'AI partner matching' },
-              { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Results in 3 seconds' },
+              { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', text: 'Enterprise-grade security' },
             ].map((feature, idx) => (
               <div
                 key={idx}
@@ -403,8 +403,8 @@ export default function Home() {
               },
               {
                 step: '3',
-                title: 'Get Deal Estimates',
-                description: 'Receive instant estimates for upfront payments, milestones, royalties, and total deal value.',
+                title: 'Get Full Deal Intelligence',
+                description: 'Receive instant estimates, comparable deals, sensitivity analysis, AI deal memos, partner matching, and negotiation playbooks.',
                 icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
               },
             ].map((item, idx) => (
@@ -473,20 +473,20 @@ export default function Home() {
             {[
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-                title: 'Data-Driven Benchmarks',
-                description: 'Estimates based on publicly available deal terms from SEC filings, press releases, and industry reports.',
+                title: 'Market Intelligence',
+                description: 'Benchmarks from 600+ real deals with weekly SEC EDGAR ingestion, ClinicalTrials.gov pipeline data, and AI-powered deal memos.',
                 gradient: 'from-teal-500 to-cyan-500',
               },
               {
                 icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
-                title: 'Customizable Analysis',
-                description: 'Adjust for development phase, modality, indication type, and competitive positioning for relevant estimates.',
+                title: 'Full Deal Toolkit',
+                description: 'Sensitivity analysis, negotiation playbooks, scenario comparison, watchlist alerts, and AI partner matching across 50+ companies.',
                 gradient: 'from-cyan-500 to-teal-500',
               },
               {
-                icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-                title: 'Instant Results',
-                description: 'Get immediate estimates for upfront payments, development milestones, regulatory milestones, and royalties.',
+                icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+                title: 'Enterprise-Grade Platform',
+                description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and branded PDF/Excel exports.',
                 gradient: 'from-teal-400 to-cyan-400',
               },
             ].map((feature, idx) => (
@@ -583,11 +583,12 @@ export default function Home() {
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
             Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings and press releases. Updated weekly with new transactions.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 xl:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[
               { icon: '📄', label: 'SEC EDGAR 8-K Filings', desc: 'Primary deal data extracted from regulatory filings' },
               { icon: '🔬', label: 'ClinicalTrials.gov', desc: 'Pipeline and trial data for partner intelligence' },
               { icon: '📊', label: 'Weekly Updates', desc: 'New deals ingested every Monday at 4AM UTC' },
+              { icon: '🔒', label: 'Enterprise Security', desc: 'GDPR-compliant, authenticated APIs, encrypted data' },
             ].map((source, idx) => (
               <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 text-left">
                 <div className="text-2xl mb-2">{source.icon}</div>

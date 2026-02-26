@@ -75,11 +75,16 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
         <p className="text-sm text-slate-500 dark:text-slate-400">Average upfront payment by modality over 12 weeks</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" role="group" aria-label="Benchmark trend sparklines by modality">
         {activeModalities.map((modality) => {
           const data = modalityData[modality];
+          const latestValue = data[data.length - 1]?.avg_upfront;
+          const firstValue = data.find(d => d.avg_upfront != null)?.avg_upfront;
+          const trendDir = latestValue != null && firstValue != null
+            ? latestValue > firstValue ? 'trending up' : latestValue < firstValue ? 'trending down' : 'stable'
+            : 'insufficient data';
           return (
-            <div key={modality} className="relative">
+            <div key={modality} className="relative" role="img" aria-label={`${formatModality(modality)} benchmark trend: ${latestValue != null ? formatUsdShort(latestValue) : 'no data'}, ${trendDir}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{formatModality(modality)}</span>
                 {isPro && data[data.length - 1]?.avg_upfront != null && (

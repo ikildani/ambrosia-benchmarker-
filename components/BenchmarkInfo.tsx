@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import benchmarks from '@/data/benchmarks.json';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface ChangelogEntry {
   date: string;
@@ -12,7 +13,10 @@ interface ChangelogEntry {
 
 export default function BenchmarkInfo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { metadata } = benchmarks;
+
+  useFocusTrap(modalRef, isModalOpen, () => setIsModalOpen(false));
   const changelog = (metadata as { changelog?: ChangelogEntry[] }).changelog || [];
 
   const formatDate = (dateStr: string) => {
@@ -46,12 +50,12 @@ export default function BenchmarkInfo() {
           />
 
           {/* Modal Content */}
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-fade-in">
+          <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="benchmark-info-title" tabIndex={-1} className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-fade-in">
             {/* Header */}
             <div className="bg-gradient-to-r from-navy-800 to-navy-900 px-6 py-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-white">Benchmark Data</h3>
+                  <h3 id="benchmark-info-title" className="text-lg font-bold text-white">Benchmark Data</h3>
                   <p className="text-sm text-neutral-300">Version {metadata.version}</p>
                 </div>
                 <button

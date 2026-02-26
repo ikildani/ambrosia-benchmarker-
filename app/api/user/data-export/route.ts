@@ -1,32 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient, createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth-helpers';
+import { captureApiError } from '@/lib/sentry-api';
 
 // Force dynamic rendering since we use request.headers
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get auth token from header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Authorization required' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    // Verify the token and get user
-    const authClient = createServerClient();
-    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const [user, authError] = await requireAuth(request);
+    if (authError) return authError;
 
     const supabase = createServiceClient();
 
@@ -65,7 +48,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Data export error:', error);
+    captureApiError(error, 'data-export');
     return NextResponse.json(
       { error: 'Failed to export data' },
       { status: 500 }
