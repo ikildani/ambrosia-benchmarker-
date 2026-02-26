@@ -211,6 +211,142 @@ const PHASE_RANK: Record<string, number> = {
   'approved': 5,
 };
 
+// ============================================================================
+// STRATEGIC PRIORITY SEMANTIC MATCHING
+// ============================================================================
+// Maps user's asset profile to keyword families that would appear in corporate
+// strategic priority statements. E.g., a user with modality="adc" should match
+// priorities containing "antibody-drug conjugate", "ADC", "targeted payload", etc.
+
+/** Keyword families for therapeutic area matching */
+const TA_PRIORITY_KEYWORDS: Record<string, string[]> = {
+  oncology: ['oncology', 'immuno-oncology', 'io ', 'tumor', 'cancer', 'hematology', 'malignancy', 'solid tumor', 'liquid tumor', 'checkpoint', 'pd-1', 'pd-l1'],
+  neurology: ['neurology', 'neuroscience', 'cns', 'neurodegeneration', 'brain', 'alzheimer', 'parkinson', 'neuro ', 'neuropsych', 'psychiatry', 'mental health'],
+  immunology: ['immunology', 'autoimmune', 'inflammation', 'immune', 'immunomodulat', 'dermatology', 'rheumatology', 'inflammatory bowel', 'ibd'],
+  metabolic: ['metabolic', 'obesity', 'diabetes', 'weight management', 'cardiometabolic', 'nash', 'mash', 'glp-1', 'incretin', 'endocrine'],
+  cardiovascular: ['cardiovascular', 'cardiology', 'heart failure', 'atherosclerosis', 'hypertension', 'thrombosis', 'anticoagulant', 'cv ', 'cardiac'],
+  infectiousDisease: ['infectious', 'anti-infective', 'antiviral', 'antibiotic', 'antimicrobial', 'vaccine', 'pandemic', 'amr ', 'resistance'],
+  ophthalmology: ['ophthalmology', 'ophthalmic', 'retinal', 'ocular', 'eye disease', 'macular', 'glaucoma', 'anti-vegf', 'vision'],
+  womensHealth: ['women\'s health', 'gynecology', 'reproductive', 'fertility', 'endometriosis', 'uterine', 'menopause', 'contracepti', 'obstetric'],
+};
+
+/** Keyword families for modality matching */
+const MODALITY_PRIORITY_KEYWORDS: Record<string, string[]> = {
+  adc: ['adc', 'antibody-drug conjugate', 'antibody drug conjugate', 'targeted payload', 'conjugate'],
+  bispecific: ['bispecific', 'bi-specific', 'dual-target', 'multispecific', 't-cell engager'],
+  antibody: ['antibody', 'monoclonal', 'mab ', 'biologics', 'biologic'],
+  car_t: ['car-t', 'car t', 'cell therapy', 'cell and gene', 'autologous', 'allogeneic', 'engineered cell'],
+  cell_therapy: ['cell therapy', 'cell and gene', 'autologous', 'allogeneic', 'regenerative'],
+  gene_therapy: ['gene therapy', 'cell and gene', 'gene editing', 'aav', 'viral vector', 'genome'],
+  mrna: ['mrna', 'rna therapeutic', 'nucleic acid'],
+  rnai: ['rnai', 'rna interference', 'sirna', 'rna therapeutic'],
+  small_molecule: ['small molecule', 'oral ', 'oral therapy', 'chemical entit', 'synthetic'],
+  radiopharm: ['radiopharm', 'radioligand', 'rlt', 'theranostic', 'nuclear medicine', 'radionuclide'],
+  oligonucleotide: ['oligonucleotide', 'aso', 'antisense', 'nucleic acid', 'rna therapeutic'],
+  peptide: ['peptide', 'cyclic peptide', 'stapled peptide'],
+  protac: ['protac', 'protein degrader', 'degradation', 'molecular glue', 'targeted degradation'],
+  molecular_glue: ['molecular glue', 'protein degrader', 'degradation', 'protac'],
+  vaccine: ['vaccine', 'vaccination', 'immunization', 'prophylactic'],
+  bbb_platform: ['brain delivery', 'bbb', 'blood-brain barrier', 'cns delivery', 'brain penetrant'],
+  psychedelic: ['psychedelic', 'neuroplastogen', 'psilocybin', 'ketamine'],
+  sglt2_inhibitor: ['sglt2', 'renal glucose', 'sodium-glucose'],
+  glp1_agonist: ['glp-1', 'glp1', 'incretin', 'semaglutide', 'tirzepatide'],
+  jak_inhibitor: ['jak ', 'janus kinase', 'jak inhibitor', 'tofacitinib', 'upadacitinib'],
+};
+
+/** Keyword families for treatment approach / combination strategy */
+const APPROACH_PRIORITY_KEYWORDS: Record<string, string[]> = {
+  combination: ['combination', 'combo ', 'backbone', 'add-on', 'complementary', 'synergy', 'combinatorial'],
+  diseaseModifying: ['disease-modifying', 'disease modifying', 'curative', 'transformative', 'durable remission'],
+  firstInClass: ['first-in-class', 'first in class', 'novel mechanism', 'new mechanism', 'novel target', 'new target', 'novel biology'],
+  platform: ['platform', 'pipeline-in-a-product', 'multi-indication', 'multiple indication', 'extensible'],
+  precision: ['precision', 'biomarker-driven', 'biomarker driven', 'personalized', 'companion diagnostic', 'targeted therapy'],
+  rareDisease: ['orphan', 'rare disease', 'ultra-rare', 'unmet need'],
+};
+
+/** Score a company's strategic priorities text against the user's asset profile */
+function matchStrategicPriorities(
+  prioritiesText: string,
+  input: MatchInput
+): { score: number; reason: string } {
+  if (!prioritiesText || prioritiesText.length === 0) {
+    return { score: 0, reason: '' };
+  }
+
+  let totalScore = 0;
+  const matchedAreas: string[] = [];
+
+  // 1. Literal matching (original logic — fast path for exact hits)
+  if (input.indication_category && prioritiesText.includes(input.indication_category.toLowerCase())) {
+    totalScore += 4;
+    matchedAreas.push('indication area');
+  }
+  if (input.indication_specific && prioritiesText.includes(input.indication_specific.replace(/_/g, ' ').toLowerCase())) {
+    totalScore += 4;
+    matchedAreas.push('specific indication');
+  }
+  if (input.modality && prioritiesText.includes(input.modality.replace(/_/g, ' ').toLowerCase())) {
+    totalScore += 4;
+    matchedAreas.push('modality');
+  }
+
+  // 2. Therapeutic area keyword matching
+  if (input.therapeutic_area) {
+    const taKeywords = TA_PRIORITY_KEYWORDS[input.therapeutic_area] || [];
+    const taHits = taKeywords.filter(kw => prioritiesText.includes(kw));
+    if (taHits.length >= 2) {
+      totalScore += 4;
+      matchedAreas.push('therapeutic area focus');
+    } else if (taHits.length === 1) {
+      totalScore += 2;
+      if (!matchedAreas.includes('therapeutic area focus')) matchedAreas.push('therapeutic area');
+    }
+  }
+
+  // 3. Modality keyword matching (broader than literal)
+  const modalityKeywords = MODALITY_PRIORITY_KEYWORDS[input.modality] || [];
+  const modalityHits = modalityKeywords.filter(kw => prioritiesText.includes(kw));
+  if (modalityHits.length >= 1 && !matchedAreas.includes('modality')) {
+    totalScore += 3;
+    matchedAreas.push('modality strategy');
+  }
+
+  // 4. Treatment approach / strategic theme matching
+  for (const [theme, keywords] of Object.entries(APPROACH_PRIORITY_KEYWORDS)) {
+    const hits = keywords.filter(kw => prioritiesText.includes(kw));
+    if (hits.length >= 1) {
+      // Only score if the theme is relevant to the user's asset
+      let relevant = false;
+      if (theme === 'combination' && input.modality) relevant = true; // universal
+      if (theme === 'diseaseModifying') relevant = true;
+      if (theme === 'firstInClass') relevant = true;
+      if (theme === 'platform') relevant = true;
+      if (theme === 'precision') relevant = true;
+      if (theme === 'rareDisease' && input.indication_category &&
+          ['rare_disease', 'rare_neurological', 'rare_metabolic', 'complement'].includes(input.indication_category)) {
+        relevant = true;
+      }
+      if (relevant) {
+        totalScore += 2;
+        matchedAreas.push(theme === 'firstInClass' ? 'novel mechanism focus' :
+                         theme === 'diseaseModifying' ? 'disease-modifying focus' :
+                         theme === 'rareDisease' ? 'rare disease focus' :
+                         `${theme} strategy`);
+        break; // Only count the best theme match
+      }
+    }
+  }
+
+  // Cap at max weight and build reason string
+  const cappedScore = Math.min(WEIGHTS.strategic_priority_match, totalScore);
+  const uniqueAreas = [...new Set(matchedAreas)];
+  const reason = uniqueAreas.length > 0
+    ? `Strategic priorities align with ${uniqueAreas.slice(0, 3).join(', ')}`
+    : '';
+
+  return { score: cappedScore, reason };
+}
+
 export interface MatchInput {
   modality: string;
   development_phase: string;
@@ -614,22 +750,18 @@ function calculateMatchScore(
   }
 
   // Strategic priority match: company's stated priorities align with asset
+  // Uses semantic keyword expansion to catch priorities like "expanding in oncology",
+  // "IO combinations", "CNS pipeline", "cell and gene therapy" etc.
   const priorities = company.strategic_priorities || [];
-  const hasPriorityMatch = priorities.some((p: string) => {
-    const lower = p.toLowerCase();
-    return (
-      (input.indication_category && lower.includes(input.indication_category.toLowerCase())) ||
-      (input.indication_specific && lower.includes(input.indication_specific.toLowerCase())) ||
-      (input.modality && lower.includes(input.modality.replace(/_/g, ' ').toLowerCase()))
-    );
-  });
+  const prioritiesText = priorities.map((p: string) => p.toLowerCase()).join(' ');
+  const priorityMatchResult = matchStrategicPriorities(prioritiesText, input);
 
-  if (hasPriorityMatch) {
-    breakdown.strategic += WEIGHTS.strategic_priority_match;
+  if (priorityMatchResult.score > 0) {
+    breakdown.strategic += Math.min(WEIGHTS.strategic_priority_match, priorityMatchResult.score);
     reasons.push({
       category: 'strategic',
-      reason: `Matches stated strategic priorities`,
-      strength: 'strong',
+      reason: priorityMatchResult.reason,
+      strength: priorityMatchResult.score >= WEIGHTS.strategic_priority_match ? 'strong' : 'moderate',
     });
   }
 
