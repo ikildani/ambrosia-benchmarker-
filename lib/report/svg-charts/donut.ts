@@ -21,11 +21,13 @@ export function renderDonut(segments: DonutSegment[], size: number = 200): strin
     </svg>`;
   }
 
+  const filterId = `donutShadow-${Math.random().toString(36).slice(2, 8)}`;
   let currentAngle = -Math.PI / 2; // Start from top
   const paths: string[] = [];
   const legendItems: string[] = [];
 
-  segments.forEach((seg, i) => {
+  let legendIndex = 0;
+  segments.forEach((seg) => {
     const pct = seg.value / total;
     if (pct === 0) return;
     const angle = pct * 2 * Math.PI;
@@ -43,16 +45,17 @@ export function renderDonut(segments: DonutSegment[], size: number = 200): strin
 
     paths.push(`
       <path d="M ${x1o} ${y1o} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x2i} ${y2i} Z"
-        fill="${seg.color}" filter="url(#donutShadow)" />
+        fill="${seg.color}" filter="url(#${filterId})" />
     `);
 
-    // Legend
-    const ly = size + 18 + i * 18;
+    // Legend — uses legendIndex (only non-zero segments) to avoid gaps
+    const ly = size + 18 + legendIndex * 18;
     legendItems.push(`
       <rect x="8" y="${ly - 8}" width="10" height="10" rx="2" fill="${seg.color}" />
       <text x="24" y="${ly}" font-size="11" fill="#475569">${seg.label}</text>
       <text x="${size - 8}" y="${ly}" font-size="11" fill="#1a1e42" font-weight="600" text-anchor="end">${(pct * 100).toFixed(0)}%</text>
     `);
+    legendIndex++;
 
     currentAngle = endAngle;
   });
@@ -62,7 +65,7 @@ export function renderDonut(segments: DonutSegment[], size: number = 200): strin
   return `
     <svg width="${size}" height="${size + legendHeight}" viewBox="0 0 ${size} ${size + legendHeight}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <filter id="donutShadow" x="-4%" y="-4%" width="108%" height="108%">
+        <filter id="${filterId}" x="-4%" y="-4%" width="108%" height="108%">
           <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06" />
         </filter>
       </defs>

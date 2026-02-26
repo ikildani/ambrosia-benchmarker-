@@ -49,9 +49,12 @@ export function renderDealComparison(
     ['#f97316', '#fb923c'],
   ];
 
+  // Unique ID prefix to avoid gradient collisions
+  const uid = `dc-${Math.random().toString(36).slice(2, 8)}`;
+
   // Build gradient defs
   const gradientDefs = barColors.map((pair, i) => `
-    <linearGradient id="dcGrad${i}" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="${uid}-g${i}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="${pair[0]}" />
       <stop offset="100%" stop-color="${pair[1]}" />
     </linearGradient>
@@ -67,7 +70,7 @@ export function renderDealComparison(
     const label = deal.parties.length > 26 ? deal.parties.substring(0, 24) + '...' : deal.parties;
     bars.push(`
       <text x="${marginLeft - 8}" y="${y + barH / 2 + 3}" text-anchor="end" font-size="10" font-weight="500" fill="${COLORS.gray700}">${label}</text>
-      <rect x="${marginLeft}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="url(#dcGrad${i % barColors.length})" filter="url(#dcShadow)" />
+      <rect x="${marginLeft}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="url(#${uid}-g${i % barColors.length})" filter="url(#${uid}-shadow)" />
       <text x="${marginLeft + barW + 6}" y="${y + barH / 2 + 3}" font-size="10" font-weight="600" fill="${barColors[i % barColors.length][0]}">${deal.totalValue}</text>
     `);
   });
@@ -80,7 +83,7 @@ export function renderDealComparison(
     <svg width="${width}" height="${totalH}" viewBox="0 0 ${width} ${totalH}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         ${gradientDefs}
-        <filter id="dcShadow" x="-2%" y="-4%" width="104%" height="112%">
+        <filter id="${uid}-shadow" x="-2%" y="-4%" width="104%" height="112%">
           <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" />
         </filter>
       </defs>

@@ -27,7 +27,7 @@ export function renderRangeBar(
   const highX = scale(range.high);
 
   // Unique IDs to avoid SVG gradient conflicts when multiple range bars on same page
-  const uid = `rb-${Math.round(range.low)}-${Math.round(range.median)}`;
+  const uid = `rb-${Math.round(range.low)}-${Math.round(range.median)}-${Math.random().toString(36).slice(2, 8)}`;
 
   if (!showLabels) {
     // Simple mode: bar only, no labels

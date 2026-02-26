@@ -750,11 +750,17 @@ export async function generateExcelReport(
 
   // Generate and download
   const timestamp = new Date().toISOString().slice(0, 10);
-  const filename = `deal-analysis-${labels.modality.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.xlsx`;
+  const safeModality = (labels.modality || 'report').toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const filename = `deal-analysis-${safeModality}-${timestamp}.xlsx`;
 
-  const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, filename);
+  try {
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, filename);
+  } catch (err) {
+    console.error('Excel generation failed:', err);
+    throw new Error('Failed to generate Excel report. Please try again.');
+  }
 }
 
 // Deal type for export

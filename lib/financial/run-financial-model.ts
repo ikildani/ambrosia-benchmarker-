@@ -129,7 +129,9 @@ export function runFinancialModel(
   const monteCarlo = runMonteCarlo({ rnpvInput }, 42);
 
   // Step 4: FX sensitivity (use peak annual revenue, not lifetime sum)
-  const baseRevenue = Math.max(...rnpv.cashFlows.map(cf => cf.revenue));
+  const baseRevenue = rnpv.cashFlows.length > 0
+    ? Math.max(...rnpv.cashFlows.map(cf => cf.revenue), 0)
+    : 0;
   const fxSensitivity = calculateFXSensitivity(
     inputs.territory,
     baseRevenue,

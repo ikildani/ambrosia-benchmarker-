@@ -3,7 +3,7 @@
 
 import { renderWaterfall } from '../svg-charts/waterfall';
 import { renderRangeBar } from '../svg-charts/rangeBar';
-import { formatUsd, pageHeader, pageFooter, COLORS } from '../helpers';
+import { formatUsd, escapeHtml, pageHeader, pageFooter, COLORS } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): string {
@@ -83,7 +83,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
 
       <!-- Value Distribution Summary -->
       <div class="callout">
-        <strong>Key Insight:</strong> ${result.negotiationInsight}
+        <strong>Key Insight:</strong> ${escapeHtml(result.negotiationInsight)}
       </div>
 
       ${pageFooter(meta.reportId)}

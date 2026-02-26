@@ -58,6 +58,9 @@ export function renderRoyaltyStep(
     areaPath.push(`${scaleX(tiers[i].xStart)},${scaleY(tiers[i].low)}`);
   }
 
+  // Unique ID prefix to avoid gradient collisions
+  const uid = `rs-${Math.random().toString(36).slice(2, 8)}`;
+
   // Y axis ticks
   const yTicks: string[] = [];
   const tickCount = 4;
@@ -73,20 +76,20 @@ export function renderRoyaltyStep(
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="rsAreaGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="${uid}-area" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="${COLORS.teal}" stop-opacity="0.18" />
           <stop offset="100%" stop-color="${COLORS.teal}" stop-opacity="0.03" />
         </linearGradient>
-        <filter id="rsLineShadow" x="-2%" y="-8%" width="104%" height="116%">
+        <filter id="${uid}-shadow" x="-2%" y="-8%" width="104%" height="116%">
           <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.1" />
         </filter>
       </defs>
       <!-- Grid -->
       ${yTicks.join('')}
       <!-- Shaded area -->
-      <polygon points="${areaPath.join(' ')}" fill="url(#rsAreaGrad)" />
+      <polygon points="${areaPath.join(' ')}" fill="url(#${uid}-area)" />
       <!-- High line -->
-      <polyline points="${highPoints.join(' ')}" fill="none" stroke="${COLORS.teal}" stroke-width="2" filter="url(#rsLineShadow)" />
+      <polyline points="${highPoints.join(' ')}" fill="none" stroke="${COLORS.teal}" stroke-width="2" filter="url(#${uid}-shadow)" />
       <!-- Low line -->
       <polyline points="${lowPoints.join(' ')}" fill="none" stroke="${COLORS.navy}" stroke-width="2" stroke-dasharray="4,3" />
       <!-- Tier labels -->

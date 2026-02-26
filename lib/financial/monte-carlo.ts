@@ -367,7 +367,7 @@ export function runMonteCarlo(
   input: MonteCarloInput,
   seed: number = DEFAULT_SEED,
 ): MonteCarloResult {
-  const iterations = input.iterations ?? DEFAULT_ITERATIONS;
+  const iterations = Math.min(input.iterations ?? DEFAULT_ITERATIONS, 50_000);
   const rng = seedableRandom(seed);
 
   // --- Input guards ---

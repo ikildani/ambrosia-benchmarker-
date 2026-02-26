@@ -27,6 +27,13 @@ export function renderWaterfall(
   width: number = 680,
   height: number = 320
 ): string {
+  // Guard against invalid base values
+  if (!baseValue || baseValue <= 0 || !isFinite(baseValue)) {
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <text x="${width / 2}" y="${height / 2}" text-anchor="middle" font-size="12" fill="#94a3b8">No modifier data</text>
+    </svg>`;
+  }
+
   // Build data
   let runningValue = baseValue;
   const items: { name: string; value: number; impact: number; fill: string; start: number; isBase?: boolean; isFinal?: boolean }[] = [];
@@ -59,6 +66,9 @@ export function renderWaterfall(
   const barH = Math.min(32, (height - marginTop - marginBottom - barGap * (barCount - 1)) / barCount);
   const chartH = barCount * (barH + barGap);
 
+  // Unique ID prefix to avoid gradient collisions when multiple waterfalls on same page
+  const uid = `wf-${Math.random().toString(36).slice(2, 8)}`;
+
   // Find max value for scale
   const allValues = items.map(i => i.isBase || i.isFinal ? i.value : i.start + i.value);
   allValues.push(...items.map(i => i.isBase || i.isFinal ? 0 : i.start));
@@ -75,11 +85,11 @@ export function renderWaterfall(
 
     if (item.isBase || item.isFinal) {
       const barW = scaleX(item.value) - marginLeft;
-      const gradId = item.isBase ? 'url(#wfBaseGrad)' : 'url(#wfFinalGrad)';
+      const gradId = item.isBase ? `url(#${uid}-base)` : `url(#${uid}-final)`;
       bars.push(`
         <!-- ${item.name} -->
         <text x="${marginLeft - 8}" y="${y + barH / 2 + 3}" text-anchor="end" font-size="10" font-weight="500" fill="${COLORS.gray700}">${item.name}</text>
-        <rect x="${marginLeft}" y="${y}" width="${Math.max(barW, 1)}" height="${barH}" rx="3" fill="${gradId}" filter="url(#wfShadow)" />
+        <rect x="${marginLeft}" y="${y}" width="${Math.max(barW, 1)}" height="${barH}" rx="3" fill="${gradId}" filter="url(#${uid}-shadow)" />
         <text x="${scaleX(item.value) + 6}" y="${y + barH / 2 + 3}" font-size="10" font-weight="600" fill="${item.isFinal ? '#0f766e' : COLORS.gray500}">${formatUsd(item.value)}</text>
       `);
       prevEnd = scaleX(item.value);
@@ -88,7 +98,7 @@ export function renderWaterfall(
       const barW = Math.max((item.value / maxVal) * chartW, 2);
       const sign = item.impact >= 0 ? '+' : '';
       const labelColor = item.impact >= 0 ? COLORS.teal : COLORS.amber;
-      const gradId = item.impact >= 0 ? 'url(#wfTealGrad)' : 'url(#wfAmberGrad)';
+      const gradId = item.impact >= 0 ? `url(#${uid}-teal)` : `url(#${uid}-amber)`;
 
       // Connector line from previous bar end
       bars.push(`
@@ -98,7 +108,7 @@ export function renderWaterfall(
       bars.push(`
         <!-- ${item.name} -->
         <text x="${marginLeft - 8}" y="${y + barH / 2 + 3}" text-anchor="end" font-size="10" font-weight="500" fill="${COLORS.gray700}">${item.name}</text>
-        <rect x="${startX}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="${gradId}" filter="url(#wfShadow)" />
+        <rect x="${startX}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="${gradId}" filter="url(#${uid}-shadow)" />
         <text x="${startX + barW + 6}" y="${y + barH / 2 + 3}" font-size="10" font-weight="600" fill="${labelColor}">${sign}${formatUsd(item.impact)}</text>
       `);
       prevEnd = startX + barW;
@@ -119,23 +129,23 @@ export function renderWaterfall(
   return `
     <svg width="${width}" height="${chartH + marginTop + marginBottom}" viewBox="0 0 ${width} ${chartH + marginTop + marginBottom}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="wfTealGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-teal" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#0d9488" />
           <stop offset="100%" stop-color="#06b6d4" />
         </linearGradient>
-        <linearGradient id="wfAmberGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-amber" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#f59e0b" />
           <stop offset="100%" stop-color="#fbbf24" />
         </linearGradient>
-        <linearGradient id="wfBaseGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-base" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#64748b" />
           <stop offset="100%" stop-color="#94a3b8" />
         </linearGradient>
-        <linearGradient id="wfFinalGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-final" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#0f766e" />
           <stop offset="100%" stop-color="#0d9488" />
         </linearGradient>
-        <filter id="wfShadow" x="-2%" y="-4%" width="104%" height="112%">
+        <filter id="${uid}-shadow" x="-2%" y="-4%" width="104%" height="112%">
           <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" />
         </filter>
       </defs>

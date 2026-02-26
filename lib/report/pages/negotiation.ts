@@ -30,6 +30,8 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
     { key: 'openingPosition', icon: '01', color: COLORS.teal },
     { key: 'structureStrategy', icon: '02', color: COLORS.blue },
     { key: 'royaltyFloor', icon: '03', color: COLORS.purple },
+    { key: 'competitiveIntelligence', icon: '04', color: COLORS.amber },
+    { key: 'partnerTactics', icon: '05', color: COLORS.rose },
   ];
 
   const sectionCards = sectionOrder.map(({ key, icon, color }) => {

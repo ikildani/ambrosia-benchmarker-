@@ -17,6 +17,10 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
     neurology: `Neurology deal-making has entered a renaissance period, with record-breaking acquisitions in CNS driven by breakthrough modalities that overcome the blood-brain barrier. ${phase} ${modality} assets represent a particularly compelling profile given the historic difficulty of CNS drug development and the massive unmet need across neurological disorders.`,
     immunology: `Immunology and autoimmune disease has become the fastest-growing therapeutic area for licensing deals, fueled by the next generation of targeted therapies that offer disease modification over symptom management. ${phase} ${modality} assets in ${indication} align with industry priorities around more selective, safer mechanisms.`,
     metabolic: `Metabolic and obesity deal-making has exploded into one of pharma's most competitive arenas, with GLP-1 agonists, dual/triple incretins, and next-generation oral peptides commanding record-breaking valuations. ${phase} ${modality} assets in ${indication} are positioned in a market where differentiation beyond injectable semaglutide/tirzepatide — through oral delivery, muscle-sparing profiles, or MASH co-targeting — drives transformative deal premiums.`,
+    cardiovascular: `Cardiovascular licensing is seeing renewed momentum driven by novel mechanisms targeting heart failure, lipid disorders, and thrombosis. ${phase} ${modality} assets in ${indication} benefit from large patient populations, well-defined regulatory pathways, and established commercial infrastructure at major pharma companies.`,
+    infectiousDisease: `Infectious disease deal-making has shifted post-pandemic toward antivirals, antimicrobial resistance, and vaccine platforms. ${phase} ${modality} assets in ${indication} are positioned in a market where pandemic preparedness funding and pull incentives are expanding the economic case for novel anti-infective development.`,
+    ophthalmology: `Ophthalmology continues to attract high-value licensing deals, driven by gene therapy for inherited retinal diseases, sustained-release implants, and next-generation anti-VEGF agents. ${phase} ${modality} assets in ${indication} benefit from clear clinical endpoints, shorter trial timelines, and strong commercial potential in a market dominated by high-cost biologics.`,
+    womensHealth: `Women's health is emerging as a high-priority therapeutic area after years of underinvestment, with recent blockbuster approvals in menopause, endometriosis, and contraception driving renewed pharma interest. ${phase} ${modality} assets in ${indication} are positioned to benefit from growing advocacy, regulatory tailwinds, and an expanding commercial market.`,
   };
 
   const context = taContext[inputs.therapeuticArea] || `${phase} ${modality} assets in ${indication} are positioned within a dynamic licensing landscape. Current market conditions favor well-differentiated assets with strong clinical data packages.`;
@@ -27,6 +31,10 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
     neurology: { upfront: '20-35%', dev: '15-25%', reg: '15-20%', comm: '25-35%' },
     immunology: { upfront: '15-30%', dev: '20-30%', reg: '10-20%', comm: '25-40%' },
     metabolic: { upfront: '20-35%', dev: '15-25%', reg: '10-20%', comm: '30-45%' },
+    cardiovascular: { upfront: '15-25%', dev: '20-30%', reg: '15-20%', comm: '30-40%' },
+    infectiousDisease: { upfront: '20-30%', dev: '20-30%', reg: '15-25%', comm: '20-35%' },
+    ophthalmology: { upfront: '15-30%', dev: '15-25%', reg: '15-20%', comm: '30-40%' },
+    womensHealth: { upfront: '20-30%', dev: '15-25%', reg: '15-20%', comm: '25-40%' },
   };
 
   const taComp = milestoneComps[inputs.therapeuticArea] || milestoneComps.oncology;
@@ -134,6 +142,16 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
       ${inputs.therapeuticArea === 'metabolic' ? `
       <div class="callout">
         <strong>Metabolic/Obesity Note:</strong> The obesity market is projected to exceed $100B by 2030. Differentiation is key — oral formulations, muscle-sparing profiles, and multi-receptor agonism (GLP-1/GIP/glucagon) command the highest premiums. MASH/NASH co-targeting adds significant optionality value.
+      </div>
+      ` : ''}
+      ${inputs.therapeuticArea === 'cardiovascular' ? `
+      <div class="callout">
+        <strong>CV Note:</strong> Cardiovascular licensing benefits from large, well-characterized patient populations and established regulatory pathways. Novel mechanisms (PCSK9, siRNA-based lipid lowering, myosin activators) are commanding premium deal terms.
+      </div>
+      ` : ''}
+      ${inputs.therapeuticArea === 'ophthalmology' ? `
+      <div class="callout">
+        <strong>Ophthalmology Note:</strong> Gene therapy for inherited retinal diseases and next-generation anti-VEGF/sustained-release platforms are driving the highest-value deals. Clear clinical endpoints and shorter trial timelines make this area attractive for licensing.
       </div>
       ` : ''}
 

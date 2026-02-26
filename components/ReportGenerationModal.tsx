@@ -154,6 +154,10 @@ export default function ReportGenerationModal({
       previousActiveElement.current = document.activeElement as HTMLElement;
       setTimeout(() => modalRef.current?.focus(), 100);
     } else {
+      // Cleanup hidden container to free memory
+      if (hiddenContainerRef.current) {
+        hiddenContainerRef.current.innerHTML = '';
+      }
       previousActiveElement.current?.focus();
     }
   }, [isOpen]);
@@ -417,6 +421,8 @@ export default function ReportGenerationModal({
     if (pdfBlobRef.current) {
       const url = URL.createObjectURL(pdfBlobRef.current);
       window.open(url, '_blank');
+      // Revoke after a delay to allow the new tab to load the blob
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     } else if (htmlStringRef.current) {
       const reportTab = window.open('', '_blank');
       if (reportTab) {

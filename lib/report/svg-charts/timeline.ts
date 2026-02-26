@@ -25,18 +25,20 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
   const maxMonth = Math.max(...milestones.map(m => m.startMonth + m.durationMonths));
   const scale = chartWidth / maxMonth;
 
+  // Unique ID prefix to avoid gradient collisions
+  const uid = `tl-${Math.random().toString(36).slice(2, 8)}`;
+
   // Build gradient defs for each unique color
   const uniqueColors = [...new Set(milestones.map(m => m.color))];
   const gradientDefs = uniqueColors.map((c, i) => {
-    // Lighten the color by mixing toward white
     return `
-      <linearGradient id="tlGrad${i}" x1="0" y1="0" x2="1" y2="0">
+      <linearGradient id="${uid}-g${i}" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stop-color="${c}" />
         <stop offset="100%" stop-color="${c}" stop-opacity="0.7" />
       </linearGradient>
     `;
   }).join('');
-  const colorToGrad = (c: string) => `url(#tlGrad${uniqueColors.indexOf(c)})`;
+  const colorToGrad = (c: string) => `url(#${uid}-g${uniqueColors.indexOf(c)})`;
 
   // Year gridlines
   const yearLines: string[] = [];
@@ -57,7 +59,7 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
 
     return `
       <text x="${leftMargin - 8}" y="${textY}" text-anchor="end" font-size="10" fill="${COLORS.gray600}" font-weight="600">${m.label}</text>
-      <rect x="${x}" y="${y}" width="${w}" height="${barHeight}" rx="3" fill="${colorToGrad(m.color)}" filter="url(#tlShadow)" />
+      <rect x="${x}" y="${y}" width="${w}" height="${barHeight}" rx="3" fill="${colorToGrad(m.color)}" filter="url(#${uid}-shadow)" />
       ${m.value ? `<text x="${x + w + 5}" y="${textY}" font-size="9" fill="${COLORS.gray500}" font-weight="600">${m.value}</text>` : ''}
     `;
   }).join('');
@@ -66,7 +68,7 @@ export function renderDealTimeline(phase: string, milestones: TimelineMilestone[
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         ${gradientDefs}
-        <filter id="tlShadow" x="-2%" y="-4%" width="104%" height="112%">
+        <filter id="${uid}-shadow" x="-2%" y="-4%" width="104%" height="112%">
           <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" />
         </filter>
       </defs>

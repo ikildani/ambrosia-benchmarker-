@@ -59,9 +59,10 @@ export function renderCurrencySensitivityPage(data: PDFReportData, meta: ReportM
               const isPositive = s.dealValueImpact >= 0;
               const barWidth = Math.round((Math.abs(s.dealValueImpact) / maxAbsImpact) * 100);
               const barColor = isPositive ? COLORS.green : COLORS.rose;
+              // fxChange is already a decimal (e.g. 0.05 = 5%), multiply by 100 for display
               const fxLabel = s.fxChange >= 0
-                ? `+${formatPercent(s.fxChange * 100, 0)}`
-                : `${formatPercent(s.fxChange * 100, 0)}`;
+                ? `+${formatPercent(s.fxChange * 100, 1)}`
+                : `${formatPercent(s.fxChange * 100, 1)}`;
 
               return `
                 <tr>

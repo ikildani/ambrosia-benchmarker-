@@ -40,6 +40,9 @@ export function renderTornado(
 
   const scaleDelta = (delta: number) => (delta / maxDelta) * scaleHalf;
 
+  // Unique ID prefix to avoid gradient collisions
+  const uid = `tn-${Math.random().toString(36).slice(2, 8)}`;
+
   const bars: string[] = [];
 
   sorted.forEach((param, i) => {
@@ -55,7 +58,7 @@ export function renderTornado(
     if (param.maxNegativeDelta < 0) {
       const negW = scaleDelta(Math.abs(param.maxNegativeDelta));
       bars.push(`
-        <rect x="${centerX - negW}" y="${y}" width="${negW}" height="${barH}" rx="3" fill="url(#tnNavyGrad)" filter="url(#tnShadow)" />
+        <rect x="${centerX - negW}" y="${y}" width="${negW}" height="${barH}" rx="3" fill="url(#${uid}-navy)" filter="url(#${uid}-shadow)" />
         <text x="${centerX - negW - 4}" y="${y + barH / 2 + 3}" text-anchor="end" font-size="10" fill="${COLORS.navy}" font-weight="500">${formatUsd(param.maxNegativeDelta)}</text>
       `);
     }
@@ -64,7 +67,7 @@ export function renderTornado(
     if (param.maxPositiveDelta > 0) {
       const posW = scaleDelta(param.maxPositiveDelta);
       bars.push(`
-        <rect x="${centerX}" y="${y}" width="${posW}" height="${barH}" rx="3" fill="url(#tnTealGrad)" filter="url(#tnShadow)" />
+        <rect x="${centerX}" y="${y}" width="${posW}" height="${barH}" rx="3" fill="url(#${uid}-teal)" filter="url(#${uid}-shadow)" />
         <text x="${centerX + posW + 4}" y="${y + barH / 2 + 3}" text-anchor="start" font-size="10" fill="${COLORS.teal}" font-weight="500">+${formatUsd(param.maxPositiveDelta)}</text>
       `);
     }
@@ -97,15 +100,15 @@ export function renderTornado(
   return `
     <svg width="${width}" height="${totalH}" viewBox="0 0 ${width} ${totalH}" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="tnTealGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-teal" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#0d9488" />
           <stop offset="100%" stop-color="#06b6d4" />
         </linearGradient>
-        <linearGradient id="tnNavyGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="${uid}-navy" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#334155" />
           <stop offset="100%" stop-color="#1a1e42" />
         </linearGradient>
-        <filter id="tnShadow" x="-2%" y="-4%" width="104%" height="112%">
+        <filter id="${uid}-shadow" x="-2%" y="-4%" width="104%" height="112%">
           <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" />
         </filter>
       </defs>
