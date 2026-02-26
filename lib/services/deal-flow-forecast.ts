@@ -168,6 +168,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
 export async function forecastDealFlow(
   therapeuticArea: string,
   supabase?: SupabaseClient,
+  indication?: string,
 ): Promise<DealFlowForecast> {
   const historical = HISTORICAL_DEAL_FLOW[therapeuticArea] || HISTORICAL_DEAL_FLOW.oncology;
 
@@ -228,7 +229,7 @@ export async function forecastDealFlow(
     const confidence = Math.max(0.50, 0.85 - i * 0.08); // confidence decreases with horizon
 
     forecast.push({
-      quarter: `${year}Q${q}`,
+      quarter: `Q${q} ${year}`,
       predictedDeals: Math.max(1, predicted),
       confidence,
     });
@@ -257,11 +258,18 @@ export async function forecastDealFlow(
     : trend === 'decelerating' ? 'cooling'
     : 'neutral';
 
-  const narrative = generateDealFlowNarrative(therapeuticArea, trend, sentiment, recentAvg, forecast);
+  const narrative = generateDealFlowNarrative(therapeuticArea, trend, sentiment, recentAvg, forecast, indication);
+
+  // Format quarter labels for display (e.g., "2025Q4" → "Q4 2025")
+  const formatQuarter = (q: string) => `Q${q.slice(5)} ${q.slice(0, 4)}`;
 
   return {
     therapeuticArea,
-    historicalQuarters: historical,
+    historicalQuarters: historical.map(q => ({
+      quarter: formatQuarter(q.quarter),
+      dealCount: q.dealCount,
+      totalValue: q.totalValue * 1000, // convert $B → $M for formatCurrency
+    })),
     forecast,
     trend,
     seasonalPattern,
@@ -293,6 +301,7 @@ function generateDealFlowNarrative(
   sentiment: string,
   recentAvgDeals: number,
   forecast: DealFlowForecast['forecast'],
+  indication?: string,
 ): string {
   const taLabels: Record<string, string> = {
     oncology: 'Oncology',
@@ -317,9 +326,17 @@ function generateDealFlowNarrative(
 
   const forecastedDeals = forecast.reduce((sum, f) => sum + f.predictedDeals, 0);
 
+  // Format indication for display (e.g., 'lung_nsclc' → 'Lung NSCLC')
+  const indicationLabel = indication
+    ? indication.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    : null;
+  const indicationContext = indicationLabel
+    ? ` For ${indicationLabel} specifically, deal activity closely tracks broader ${taLabel} trends.`
+    : '';
+
   return `${taLabel} deal flow is ${trendText}. Recent quarterly average: ${recentAvgDeals.toFixed(0)} deals. ` +
     `Market conditions suggest ${sentimentText}. ` +
-    `Our model forecasts approximately ${forecastedDeals} deals over the next 4 quarters. ` +
+    `Our model forecasts approximately ${forecastedDeals} deals over the next 4 quarters.${indicationContext} ` +
     (sentiment === 'hot' || sentiment === 'warm'
       ? 'This is generally a favorable time to pursue licensing or acquisition discussions.'
       : sentiment === 'cooling'

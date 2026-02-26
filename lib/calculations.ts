@@ -1394,13 +1394,15 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
 
 export function formatCurrency(value: number | null | undefined): string {
   if (value == null || isNaN(value)) return '$0M';
-  if (value >= 1000) {
-    return `$${(value / 1000).toFixed(1)}B`;
+  const abs = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+  if (abs >= 1000) {
+    return `${sign}$${(abs / 1000).toFixed(1)}B`;
   }
-  if (value < 1 && value > 0) {
-    return `$${(value * 1000).toFixed(0)}K`;
+  if (abs < 1 && abs > 0) {
+    return `${sign}$${(abs * 1000).toFixed(0)}K`;
   }
-  return `$${value}M`;
+  return `${sign}$${Math.round(abs)}M`;
 }
 
 export function formatRange(range: { low: number; median: number; high: number }): string {

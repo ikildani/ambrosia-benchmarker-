@@ -503,30 +503,31 @@ export function runMonteCarlo(
     sum += npvResults[i];
     sumSq += npvResults[i] * npvResults[i];
   }
-  const mean = sum / iterations;
-  const variance = sumSq / iterations - mean * mean;
-  const stdDev = Math.sqrt(Math.max(0, variance));
+  const mean = Math.round((sum / iterations) * 10) / 10;
+  const variance = sumSq / iterations - (sum / iterations) * (sum / iterations);
+  const stdDev = Math.round(Math.sqrt(Math.max(0, variance)) * 10) / 10;
 
-  // Percentiles
-  const p2_5 = percentile(sortedArr, 2.5);
-  const p5 = percentile(sortedArr, 5);
-  const p10 = percentile(sortedArr, 10);
-  const p25 = percentile(sortedArr, 25);
-  const p50 = percentile(sortedArr, 50);
-  const p75 = percentile(sortedArr, 75);
-  const p90 = percentile(sortedArr, 90);
-  const p95 = percentile(sortedArr, 95);
-  const p97_5 = percentile(sortedArr, 97.5);
+  // Percentiles (round to 1 decimal for clean display)
+  const r1 = (v: number) => Math.round(v * 10) / 10;
+  const p2_5 = r1(percentile(sortedArr, 2.5));
+  const p5 = r1(percentile(sortedArr, 5));
+  const p10 = r1(percentile(sortedArr, 10));
+  const p25 = r1(percentile(sortedArr, 25));
+  const p50 = r1(percentile(sortedArr, 50));
+  const p75 = r1(percentile(sortedArr, 75));
+  const p90 = r1(percentile(sortedArr, 90));
+  const p95 = r1(percentile(sortedArr, 95));
+  const p97_5 = r1(percentile(sortedArr, 97.5));
 
   // ----- Histogram (with percentage per bin) ----------------------------
 
   const rawValues = Array.from(npvResults);
   const rawHistogram = buildHistogram(rawValues, HISTOGRAM_BINS);
   const histogram = rawHistogram.map((bin) => ({
-    binStart: bin.binStart,
-    binEnd: bin.binEnd,
+    binStart: r1(bin.binStart),
+    binEnd: r1(bin.binEnd),
     count: bin.count,
-    percentage: (bin.count / iterations) * 100,
+    percentage: Math.round((bin.count / iterations) * 1000) / 10,
   }));
 
   // ----- Key driver sensitivity (Pearson correlations) -------------------

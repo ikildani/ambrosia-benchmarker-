@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
           console.warn('Competitive landscape analysis failed:', err);
           return null;
         }),
-      forecastDealFlow(therapeuticArea, supabase)
+      forecastDealFlow(therapeuticArea, supabase, indication)
         .catch((err) => {
           console.warn('Deal flow forecast failed:', err);
           return null;
