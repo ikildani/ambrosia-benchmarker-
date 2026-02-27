@@ -180,6 +180,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron-weekly-digest');
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Weekly digest failed' }, { status: 500 });
   }
 }

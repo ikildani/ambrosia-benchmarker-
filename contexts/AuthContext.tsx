@@ -192,16 +192,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               localStorage.setItem('user_tier', 'pro');
             } else {
               // Query actual tier from database (Stripe webhook sets this)
-              supabase.from('user_profiles')
-                .select('tier')
-                .eq('id', supabaseUser.id)
-                .single()
-                .then(({ data: profile, error: tierError }) => {
-                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                    setTierState(profile.tier as 'pro' | 'report');
-                    localStorage.setItem('user_tier', profile.tier);
-                  }
-                });
+              Promise.resolve(
+                supabase.from('user_profiles')
+                  .select('tier')
+                  .eq('id', supabaseUser.id)
+                  .single()
+              ).then(({ data: profile, error: tierError }) => {
+                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                  setTierState(profile.tier as 'pro' | 'report');
+                  localStorage.setItem('user_tier', profile.tier);
+                }
+              }).catch(() => console.warn('[Auth] Tier query failed'));
             }
 
             // Sync usage count from database
@@ -245,16 +246,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               localStorage.setItem('user_tier', 'pro');
             } else {
               // Query actual tier from database (Stripe webhook sets this)
-              supabase.from('user_profiles')
-                .select('tier')
-                .eq('id', supabaseUser.id)
-                .single()
-                .then(({ data: profile, error: tierError }) => {
-                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                    setTierState(profile.tier as 'pro' | 'report');
-                    localStorage.setItem('user_tier', profile.tier);
-                  }
-                });
+              Promise.resolve(
+                supabase.from('user_profiles')
+                  .select('tier')
+                  .eq('id', supabaseUser.id)
+                  .single()
+              ).then(({ data: profile, error: tierError }) => {
+                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                  setTierState(profile.tier as 'pro' | 'report');
+                  localStorage.setItem('user_tier', profile.tier);
+                }
+              }).catch(() => console.warn('[Auth] Tier query failed on sign-in'));
             }
 
             // Sync usage count from database (so it persists across devices)

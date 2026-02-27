@@ -51,24 +51,26 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
     }
   }, []);
 
-  const fetchItems = useCallback(async () => {
+  const fetchItems = useCallback(async (signal?: AbortSignal) => {
     if (!userId || tier !== 'pro') return;
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/watchlist?user_id=${userId}`);
+      const res = await fetch(`/api/watchlist?user_id=${userId}`, { signal });
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
     } finally {
       setIsLoading(false);
     }
   }, [userId, tier]);
 
   useEffect(() => {
-    fetchItems();
+    const controller = new AbortController();
+    fetchItems(controller.signal);
+    return () => controller.abort();
   }, [fetchItems]);
 
   const isWatching = useCallback(

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
-import { apiError, apiSuccess } from '@/lib/api-response';
+import { apiError, apiSuccess, apiErrorWithHeaders } from '@/lib/api-response';
 import { emailSendSchema, formatZodErrors } from '@/lib/api-validation';
 import { sendWelcomeEmail, sendCalculationReceipt, sendUpgradeConfirmation } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,13 @@ export async function POST(request: NextRequest) {
     // SECURITY: Require authenticated session
     const [user, authError] = await requireAuth(request);
     if (authError) return authError;
+
+    // Rate limiting — 5 emails per hour per user
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'email-send', { limit: 5, windowSeconds: 3600 });
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders('Too many email requests', 429, getRateLimitHeaders(rateLimitResult));
+    }
 
     const rawBody = await request.json();
 

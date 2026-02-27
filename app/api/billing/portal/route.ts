@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 // Stripe Customer Portal API
 // Allows customers to manage their subscriptions, update payment methods, and view invoices
 // SECURITY: userId is derived from auth session, never from request body
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — 10 portal requests per hour
+  const identifier = getIdentifier(request);
+  const rateLimitResult = await checkRateLimit(identifier, 'billing-portal', { limit: 10, windowSeconds: 3600 });
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';

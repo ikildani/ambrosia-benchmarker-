@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const maxArticlesPerSource = body.maxArticlesPerSource || 10;
+    const maxArticlesPerSource = typeof body.maxArticlesPerSource === 'number' && body.maxArticlesPerSource > 0 && body.maxArticlesPerSource <= 50
+      ? body.maxArticlesPerSource : 10;
 
     const supabase = createServiceClient();
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -44,6 +45,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[admin] Press release ingestion error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Press release ingestion failed' }, { status: 500 });
   }
 }

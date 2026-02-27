@@ -144,7 +144,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyThemeToDocument(resolved);
 
     // Use requestAnimationFrame for next paint cycle
-    requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       applyThemeToDocument(resolved);
     });
 
@@ -158,6 +158,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }, 150);
 
     return () => {
+      cancelAnimationFrame(rafId);
       clearTimeout(timer1);
       clearTimeout(timer2);
     };

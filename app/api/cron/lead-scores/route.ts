@@ -229,21 +229,30 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Batch upsert all scores at once
-    if (upsertBatch.length > 0) {
+    // Sub-batch upsert (100 per call) for partial failure recovery
+    const BATCH_SIZE = 100;
+    let upserted = 0;
+    let batchErrors = 0;
+
+    for (let i = 0; i < upsertBatch.length; i += BATCH_SIZE) {
+      const chunk = upsertBatch.slice(i, i + BATCH_SIZE);
       const { error: upsertError } = await supabase
         .from('lead_scores')
-        .upsert(upsertBatch);
+        .upsert(chunk);
 
       if (upsertError) {
-        console.error('Lead score batch upsert error:', upsertError);
+        console.error(`Lead score batch upsert error (chunk ${i / BATCH_SIZE + 1}):`, upsertError);
+        batchErrors++;
+      } else {
+        upserted += chunk.length;
       }
     }
 
     return NextResponse.json({
-      success: true,
-      processed: upsertBatch.length,
+      success: batchErrors === 0,
+      processed: upserted,
       total: users.length,
+      batch_errors: batchErrors,
     });
   } catch (error) {
     console.error('Lead scoring error:', error);

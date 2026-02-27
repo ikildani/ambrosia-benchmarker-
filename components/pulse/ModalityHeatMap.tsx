@@ -45,11 +45,19 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
 
   const maxCount = Math.max(1, ...Object.values(modalityData).map((d: any) => d.count || 0));
 
+  const ariaLabel = activeModalities.length > 0
+    ? `Deal activity heat map showing ${activeModalities.length} modalities. Top: ${activeModalities.slice(0, 3).map(m => `${formatModality(m)} (${modalityData[m]?.count || 0})`).join(', ')}`
+    : 'Deal activity heat map: no deal activity this week';
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+    <div
+      role="img"
+      aria-label={ariaLabel}
+      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6"
+    >
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Deal Activity</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">By modality this week</p>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white" aria-hidden="true">Deal Activity</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">By modality this week</p>
       </div>
 
       {activeModalities.length === 0 ? (
@@ -84,6 +92,22 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
           })}
         </div>
       )}
+
+      {/* Accessible data table for screen readers */}
+      <table className="sr-only">
+        <caption>Deal activity by modality this week</caption>
+        <thead>
+          <tr><th scope="col">Modality</th><th scope="col">Deals</th></tr>
+        </thead>
+        <tbody>
+          {activeModalities.map((modality) => (
+            <tr key={`sr-${modality}`}>
+              <td>{formatModality(modality)}</td>
+              <td>{modalityData[modality]?.count || 0}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {/* Legend */}
       <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">

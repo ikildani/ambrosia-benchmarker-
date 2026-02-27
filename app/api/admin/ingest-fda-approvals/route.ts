@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const daysBack = body.daysBack || 90;
+    const daysBack = typeof body.daysBack === 'number' && body.daysBack > 0 && body.daysBack <= 365
+      ? body.daysBack : 90;
 
     const supabase = createServiceClient();
 
@@ -36,6 +37,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[admin] OpenFDA ingestion error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'FDA approval ingestion failed' }, { status: 500 });
   }
 }

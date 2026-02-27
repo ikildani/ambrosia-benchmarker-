@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export async function DELETE(request: NextRequest) {
   try {
     // SECURITY: Use middleware-managed session instead of raw token
     const [user, authError] = await requireAuth(request);
     if (authError) return authError;
+
+    // Rate limiting — 1 deletion per day per user
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'delete-data', { limit: 1, windowSeconds: 86400 });
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Account deletion already requested. Please wait before trying again.' },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
 
     const supabase = createServiceClient();
 

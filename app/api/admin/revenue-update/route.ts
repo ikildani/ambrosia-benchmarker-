@@ -62,6 +62,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[admin/revenue] Error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Revenue update failed' }, { status: 500 });
   }
 }

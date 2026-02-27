@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 // Force dynamic rendering since we use request.headers
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,16 @@ export async function GET(request: NextRequest) {
   try {
     const [user, authError] = await requireAuth(request);
     if (authError) return authError;
+
+    // Rate limiting — 3 exports per hour per user
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'data-export', { limit: 3, windowSeconds: 3600 });
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many export requests. Please try again later.' },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
 
     const supabase = createServiceClient();
 

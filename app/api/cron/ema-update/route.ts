@@ -50,6 +50,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron/ema-update');
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'EMA update failed' }, { status: 500 });
   }
 }

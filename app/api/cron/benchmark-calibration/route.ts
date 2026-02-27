@@ -48,6 +48,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Benchmark calibration cron error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Benchmark calibration failed' }, { status: 500 });
   }
 }

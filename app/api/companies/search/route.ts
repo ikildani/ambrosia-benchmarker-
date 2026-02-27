@@ -66,25 +66,31 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch aggregate stats (only on first page, unfiltered)
+    // Uses the total count from the main query + a lightweight type-only query
     let stats = null;
     if (page === 1 && !typeFilter && !modalityFilter && !q) {
-      const { data: all } = await supabase
-        .from('companies')
-        .select('company_type');
+      // Get type breakdown using per-type counts instead of fetching all rows
+      const typeBreakdown: { type: string; count: number }[] = [];
+      const validTypes = [...VALID_TYPES, null] as const;
 
-      if (all) {
-        const counts: Record<string, number> = {};
-        for (const c of all) {
-          const t = c.company_type || 'other';
-          counts[t] = (counts[t] || 0) + 1;
-        }
-        stats = {
-          total_companies: all.length,
-          type_breakdown: Object.entries(counts)
-            .map(([type, count]) => ({ type, count }))
-            .sort((a, b) => b.count - a.count),
-        };
-      }
+      const typeCounts = await Promise.all(
+        validTypes.map(async (t) => {
+          const query = supabase.from('companies').select('id', { count: 'exact', head: true });
+          if (t) {
+            query.eq('company_type', t);
+          } else {
+            query.is('company_type', null);
+          }
+          const { count: typeCount } = await query;
+          return { type: t || 'other', count: typeCount || 0 };
+        })
+      );
+
+      const totalCompanies = typeCounts.reduce((sum, tc) => sum + tc.count, 0);
+      stats = {
+        total_companies: totalCompanies,
+        type_breakdown: typeCounts.filter(tc => tc.count > 0).sort((a, b) => b.count - a.count),
+      };
     }
 
     return NextResponse.json({

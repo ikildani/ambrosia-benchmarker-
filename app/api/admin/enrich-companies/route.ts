@@ -185,6 +185,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[enrich] Error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Company enrichment failed' }, { status: 500 });
   }
 }
