@@ -51,7 +51,7 @@ function formatIndication(key: string): string {
 }
 
 function getCellIntensity(count: number, maxCount: number): string {
-  if (count === 0) return 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500';
+  if (count === 0) return 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400';
   const ratio = count / maxCount;
   if (ratio <= 0.25) return 'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300';
   if (ratio <= 0.5) return 'bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-200';
@@ -100,7 +100,7 @@ export default function PipelineByIndication({ data, isPro }: PipelineByIndicati
               d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"
             />
           </svg>
-          <p className="text-sm text-slate-400 dark:text-slate-500">No active pipeline data</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">No active pipeline data</p>
         </div>
       </div>
     );

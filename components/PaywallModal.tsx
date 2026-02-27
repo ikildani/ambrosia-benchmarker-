@@ -178,7 +178,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
                   </li>
                 ))}
               </ul>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">For this calculation only</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">For this calculation only</p>
               <button
                 onClick={handleBuyReport}
                 disabled={isReportLoading || !calculationData}
@@ -229,7 +229,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
                   </li>
                 ))}
               </ul>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">For all your calculations</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">For all your calculations</p>
               <button
                 onClick={handleUpgradePro}
                 disabled={isProLoading}
@@ -259,7 +259,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
           </div>
 
           {/* Trust Signals */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 dark:text-slate-500">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -300,7 +300,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
           {/* Close */}
           <button
             onClick={handleClose}
-            className="w-full mt-4 text-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="w-full mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
             Maybe later
           </button>

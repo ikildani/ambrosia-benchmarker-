@@ -40,7 +40,7 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
             </svg>
           </div>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Trends Available Soon</p>
-          <p className="text-xs text-slate-400 max-w-xs">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs">
             Benchmark trends require at least 3 weeks of data. Check back in {3 - snapshots.length} week{3 - snapshots.length !== 1 ? 's' : ''} for modality-level trend lines.
           </p>
         </div>

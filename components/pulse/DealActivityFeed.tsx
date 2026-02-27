@@ -87,7 +87,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                    {deal.licensor_name} <span className="text-slate-400 font-normal">&rarr;</span> {deal.licensee_name}
+                    {deal.licensor_name} <span className="text-slate-500 dark:text-slate-400 font-normal">&rarr;</span> {deal.licensee_name}
                   </p>
                   {deal.asset_name && (
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{deal.asset_name}</p>
@@ -99,7 +99,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                       <span className="text-slate-300 dark:text-slate-600 blur-sm select-none">$XXM</span>
                     )}
                   </div>
-                  <div className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>

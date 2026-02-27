@@ -61,7 +61,7 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
       </div>
 
       {activeModalities.length === 0 ? (
-        <p className="text-sm text-slate-400 py-4 text-center">No deal activity this week.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">No deal activity this week.</p>
       ) : (
         <div className="space-y-2">
           {activeModalities.map((modality) => {
@@ -111,7 +111,7 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
 
       {/* Legend */}
       <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>Less active</span>
           <div className="flex gap-1">
             <div className="w-4 h-3 rounded-sm bg-teal-100 dark:bg-teal-500/10" />

@@ -137,7 +137,7 @@ const PeerComparison = React.memo(function PeerComparison({
               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             No competitive peers found
           </p>
         </div>
@@ -218,14 +218,14 @@ const PeerComparison = React.memo(function PeerComparison({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Deal Activity</span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">{dealCount} deal{dealCount !== 1 ? 's' : ''} (12mo)</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{dealCount} deal{dealCount !== 1 ? 's' : ''} (12mo)</span>
                   </div>
                   <MetricBar value={dealCount} maxValue={maxDealCount} isCurrent={col.isCurrent} />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Modalities</span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">{modalityCount}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{modalityCount}</span>
                   </div>
                   <MetricBar value={modalityCount} maxValue={maxModalityCount} isCurrent={col.isCurrent} />
                 </div>
@@ -348,7 +348,7 @@ const PeerComparison = React.memo(function PeerComparison({
                   : peerStats[idx - 1]?.dealCount || 0;
               return (
                 <div key={col.id} className="text-center">
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {val} deal{val !== 1 ? 's' : ''} (12mo)
                   </span>
                 </div>
@@ -410,7 +410,7 @@ const PeerComparison = React.memo(function PeerComparison({
               const val = col.isCurrent ? 100 : peerStats[idx - 1]?.overlapScore || 0;
               return (
                 <div key={col.id} className="text-center">
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {val}%
                   </span>
                 </div>
@@ -453,7 +453,7 @@ const PeerComparison = React.memo(function PeerComparison({
               return (
                 <div key={col.id} className="flex flex-wrap gap-1">
                   {peer.sharedModalities.length === 0 ? (
-                    <span className="text-xs text-slate-400 dark:text-slate-500">--</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">--</span>
                   ) : (
                     peer.sharedModalities.slice(0, 4).map((m: string) => (
                       <span

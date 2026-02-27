@@ -243,7 +243,7 @@ export default async function LandingPageRoute({ params }: PageProps) {
                       <span className="font-medium text-slate-900">
                         {faq.question}
                       </span>
-                      <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
+                      <ChevronDown className="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform" />
                     </summary>
                     <div className="px-6 pb-6 text-slate-600">
                       {faq.answer}

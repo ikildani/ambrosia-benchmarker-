@@ -79,7 +79,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
         </div>
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-            <svg className="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -103,7 +103,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Analysis Activity</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
           <span>Less</span>
           <div className="w-2.5 h-2.5 rounded-sm bg-slate-100 dark:bg-slate-700" />
           <div className="w-2.5 h-2.5 rounded-sm bg-teal-200 dark:bg-teal-800" />
@@ -117,7 +117,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
         {/* Month labels */}
         <div className="flex ml-8 mb-1">
           {monthLabels.map((m, i) => (
-            <div key={`${m.label}-${i}`} className="text-xs text-slate-400 dark:text-slate-500" style={{ position: 'absolute', left: `${32 + m.col * 14}px` }}>
+            <div key={`${m.label}-${i}`} className="text-xs text-slate-500 dark:text-slate-400" style={{ position: 'absolute', left: `${32 + m.col * 14}px` }}>
               {m.label}
             </div>
           ))}
@@ -127,7 +127,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
           {/* Day-of-week labels */}
           <div className="flex flex-col gap-[2px] mr-1 -ml-8">
             {['', 'Mon', '', 'Wed', '', 'Fri', ''].map((label, i) => (
-              <div key={i} className="h-[11px] text-xs text-slate-400 dark:text-slate-500 leading-[11px]">{label}</div>
+              <div key={i} className="h-[11px] text-xs text-slate-500 dark:text-slate-400 leading-[11px]">{label}</div>
             ))}
           </div>
 

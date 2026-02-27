@@ -267,7 +267,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
                       {faq.question}
                     </span>
                     <svg
-                      className="w-5 h-5 text-slate-400 flex-shrink-0 transition-transform group-open:rotate-180"
+                      className="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform group-open:rotate-180"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

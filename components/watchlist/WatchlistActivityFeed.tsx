@@ -34,7 +34,7 @@ export default function WatchlistActivityFeed({ activity }: WatchlistActivityFee
       </div>
 
       {activity.length === 0 ? (
-        <div className="px-5 py-8 text-center text-slate-400">
+        <div className="px-5 py-8 text-center text-slate-500 dark:text-slate-400">
           <p className="text-sm">No recent activity matching your watchlist.</p>
           <p className="text-xs mt-1">Activity will appear as new deals and trial updates match your watched items.</p>
         </div>
@@ -57,7 +57,7 @@ export default function WatchlistActivityFeed({ activity }: WatchlistActivityFee
                       }`}>
                         {item.type}
                       </span>
-                      <span className="text-xs text-slate-400">{formatDate(item.date)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{formatDate(item.date)}</span>
                     </div>
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.title}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{item.detail}</p>

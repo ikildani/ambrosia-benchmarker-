@@ -128,7 +128,7 @@ function LiveDemoSection() {
               <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
                 {card.value}
               </div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">Median: {card.median}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Median: {card.median}</div>
             </div>
           ))}
         </div>
@@ -145,7 +145,7 @@ function LiveDemoSection() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </Link>
-          <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">Free to use. No account required.</p>
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Free to use. No account required.</p>
         </div>
       </div>
     </section>
@@ -355,7 +355,7 @@ export default function Home() {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block">
-          <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
+          <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
             <span className="text-xs font-medium tracking-wider uppercase">Scroll</span>
             <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

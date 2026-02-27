@@ -230,7 +230,7 @@ export default function CompetitiveLandscapePanel({
                     </p>
                   </>
                 ) : (
-                  <p className="text-sm font-bold text-slate-400 dark:text-slate-500">
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
                     None imminent
                   </p>
                 )}

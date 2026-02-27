@@ -203,7 +203,7 @@ const DealTimeline = React.memo(function DealTimeline({
         </div>
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-            <svg className="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -288,7 +288,7 @@ const DealTimeline = React.memo(function DealTimeline({
                 x={x}
                 y={170}
                 textAnchor="middle"
-                className="text-slate-400 dark:text-slate-500 fill-current"
+                className="text-slate-500 dark:text-slate-400 fill-current"
                 fontSize={11}
                 fontWeight={500}
               >
@@ -328,7 +328,7 @@ const DealTimeline = React.memo(function DealTimeline({
                   x={node.x}
                   y={node.above ? 35 : 155}
                   textAnchor="middle"
-                  className="fill-current text-slate-400 dark:text-slate-500"
+                  className="fill-current text-slate-500 dark:text-slate-400"
                   fontSize={8}
                 >
                   {new Date(node.deal.announced_date).toLocaleDateString(
@@ -416,7 +416,7 @@ const DealTimeline = React.memo(function DealTimeline({
                 />
                 {/* Deal card */}
                 <div className="text-xs">
-                  <div className="text-slate-400 dark:text-slate-500 mb-0.5">
+                  <div className="text-slate-500 dark:text-slate-400 mb-0.5">
                     {new Date(deal.announced_date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

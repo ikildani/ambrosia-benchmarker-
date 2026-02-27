@@ -37,7 +37,7 @@ export default class FinancialErrorBoundary extends Component<Props, State> {
             </svg>
             <span className="text-sm font-medium">{this.props.fallbackTitle || 'Analysis unavailable'}</span>
           </div>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             This section encountered an error and could not render. Other sections are unaffected.
           </p>
         </div>

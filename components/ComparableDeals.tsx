@@ -120,7 +120,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
             <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400">
               +{hiddenCount} more comparable deals
             </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Get Full Report ({PRICING.REPORT_PRICE}) to see all comparables
             </p>
           </button>

@@ -29,7 +29,7 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
               <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                 <svg className="w-2.5 h-2.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
@@ -46,7 +46,7 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
                 <div className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
                 <span className="text-[10px] font-semibold text-teal-700 dark:text-teal-400">Analysis Complete</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                 <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">Phase 2</span>
                 <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">Oncology</span>
                 <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">ADC</span>

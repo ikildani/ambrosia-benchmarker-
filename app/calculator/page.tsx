@@ -120,7 +120,7 @@ export default function CalculatorPage() {
               Visit Website
             </a>
           </div>
-          <p className="text-xs text-slate-400 text-center sm:text-right max-w-sm">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center sm:text-right max-w-sm">
             For informational purposes only. Not financial or legal advice.
           </p>
         </div>

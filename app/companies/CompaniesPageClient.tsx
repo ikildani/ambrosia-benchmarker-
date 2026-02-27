@@ -327,7 +327,7 @@ export default function CompaniesPageClient() {
             <p className="text-slate-500 dark:text-slate-400 font-medium">
               {query.length >= 2 ? `No companies found for "${query}"` : 'No companies match the current filters'}
             </p>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search or filters</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Try adjusting your search or filters</p>
           </div>
         )}
 
@@ -354,7 +354,7 @@ export default function CompaniesPageClient() {
                         <p className="text-xs text-slate-500 dark:text-slate-400">{formatType(company.company_type)}</p>
                       )}
                       {company.hq_country && (
-                        <span className="text-xs text-slate-400 dark:text-slate-500">{company.hq_country}</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">{company.hq_country}</span>
                       )}
                     </div>
                   </div>
@@ -397,7 +397,7 @@ export default function CompaniesPageClient() {
 
                   {/* Modalities */}
                   {company.modalities_active && company.modalities_active.length > 0 && (
-                    <span className="text-slate-400 dark:text-slate-500 truncate">
+                    <span className="text-slate-500 dark:text-slate-400 truncate">
                       {company.modalities_active.slice(0, 2).map(m => m.replace(/_/g, ' ')).join(', ')}
                       {company.modalities_active.length > 2 ? ` +${company.modalities_active.length - 2}` : ''}
                     </span>

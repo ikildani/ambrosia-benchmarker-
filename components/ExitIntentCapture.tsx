@@ -116,7 +116,7 @@ export default function ExitIntentCapture() {
               >
                 {submitting ? 'Subscribing...' : 'Subscribe — Free'}
               </button>
-              <p className="text-xs text-slate-400 dark:text-slate-500 text-center">No spam, unsubscribe anytime.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-center">No spam, unsubscribe anytime.</p>
             </form>
           </>
         )}
