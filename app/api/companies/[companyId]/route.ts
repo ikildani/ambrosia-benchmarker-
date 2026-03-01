@@ -45,7 +45,7 @@ export async function GET(
     }
 
     // Sanitize company name for PostgREST filter safety (commas/dots could break .or() syntax)
-    const companyName = (company.name || '').replace(/[,.()"'\\]/g, '');
+    const companyName = (company.name || '').replace(/[,.()"'\\]/g, '').replace(/[%_]/g, '\\$&');
     const threeYearsAgo = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 

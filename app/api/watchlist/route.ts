@@ -78,16 +78,6 @@ export async function POST(request: NextRequest) {
       return apiError('Pro subscription required', 403);
     }
 
-    // Check item count
-    const { count } = await supabase
-      .from('watchlist_items')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    if ((count || 0) >= MAX_WATCHLIST_ITEMS) {
-      return apiError(`Maximum ${MAX_WATCHLIST_ITEMS} watchlist items allowed`, 400);
-    }
-
     const { data, error } = await supabase
       .from('watchlist_items')
       .insert({
@@ -105,6 +95,16 @@ export async function POST(request: NextRequest) {
       }
       console.error('Watchlist insert error:', error);
       return apiError('Failed to add to watchlist', 500);
+    }
+
+    const { count } = await supabase
+      .from('watchlist_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if ((count || 0) > MAX_WATCHLIST_ITEMS) {
+      await supabase.from('watchlist_items').delete().eq('id', data.id);
+      return apiError(`Maximum ${MAX_WATCHLIST_ITEMS} watchlist items allowed`, 400);
     }
 
     return apiSuccess({ item: data });

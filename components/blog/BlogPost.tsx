@@ -213,9 +213,9 @@ export default function BlogPostComponent({ post }: BlogPostProps) {
         {/* CTA Section */}
         {post.modality && (
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-center mb-12">
-            <h3 className="text-xl font-semibold text-white mb-3">
+            <h2 className="text-xl font-semibold text-white mb-3">
               Calculate Your {modalityLabels[post.modality] || post.modality} Deal Terms
-            </h3>
+            </h2>
             <p className="text-slate-300 mb-6">
               Get instant benchmarks for upfront payments, milestones, and royalties.
             </p>

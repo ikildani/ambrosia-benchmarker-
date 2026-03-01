@@ -59,8 +59,18 @@ export default async function InsightPage({
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${baseUrl}/insights/${slug}`)}&summary=${encodeURIComponent(linkedInText)}`;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      {/* Big stat hero */}
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://calculator.ambrosiaventures.co" },
+          { "@type": "ListItem", "position": 2, "name": "Insights", "item": "https://calculator.ambrosiaventures.co/insights" },
+          { "@type": "ListItem", "position": 3, "name": insight.title }
+        ]
+      })}} />
+      <main className="min-h-screen bg-slate-950 text-white">
+        {/* Big stat hero */}
       <section className="relative overflow-hidden py-24 sm:py-32">
         <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
         <div className="relative mx-auto max-w-3xl px-6 text-center">
@@ -151,5 +161,6 @@ export default async function InsightPage({
         </div>
       </section>
     </main>
+    </>
   );
 }

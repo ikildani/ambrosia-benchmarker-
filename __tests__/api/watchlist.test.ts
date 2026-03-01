@@ -217,11 +217,19 @@ describe('/api/watchlist', () => {
       const tierChain = createChain();
       (tierChain.single as jest.Mock).mockResolvedValueOnce({ data: { tier: 'pro' }, error: null });
 
-      // Chain 1: count query — .from().select('id', opts).eq('user_id', ...) resolves with { count: 25 }
-      const countChain = createChain();
-      (countChain.eq as jest.Mock).mockResolvedValueOnce({ count: 25 });
+      // Chain 1: insert succeeds first
+      const insertChain = createChain();
+      (insertChain.single as jest.Mock).mockResolvedValueOnce({ data: { id: 'new-item' }, error: null });
 
-      fromChains = [tierChain, countChain];
+      // Chain 2: count query returns over limit (triggers rollback)
+      const countChain = createChain();
+      (countChain.eq as jest.Mock).mockResolvedValueOnce({ count: 26 });
+
+      // Chain 3: delete the just-inserted item (rollback)
+      const deleteChain = createChain();
+      (deleteChain.eq as jest.Mock).mockResolvedValueOnce({ error: null });
+
+      fromChains = [tierChain, insertChain, countChain, deleteChain];
 
       const request = new NextRequest('http://localhost/api/watchlist', {
         method: 'POST',
@@ -240,18 +248,14 @@ describe('/api/watchlist', () => {
       const tierChain = createChain();
       (tierChain.single as jest.Mock).mockResolvedValueOnce({ data: { tier: 'pro' }, error: null });
 
-      // Chain 1: count query (under limit)
-      const countChain = createChain();
-      (countChain.eq as jest.Mock).mockResolvedValueOnce({ count: 5 });
-
-      // Chain 2: insert — .from().insert().select().single() returns duplicate error
+      // Chain 1: insert returns duplicate error
       const insertChain = createChain();
       (insertChain.single as jest.Mock).mockResolvedValueOnce({
         data: null,
         error: { code: '23505', message: 'duplicate key value violates unique constraint' },
       });
 
-      fromChains = [tierChain, countChain, insertChain];
+      fromChains = [tierChain, insertChain];
 
       const request = new NextRequest('http://localhost/api/watchlist', {
         method: 'POST',
@@ -279,15 +283,15 @@ describe('/api/watchlist', () => {
       const tierChain = createChain();
       (tierChain.single as jest.Mock).mockResolvedValueOnce({ data: { tier: 'pro' }, error: null });
 
-      // Chain 1: count query (under limit)
-      const countChain = createChain();
-      (countChain.eq as jest.Mock).mockResolvedValueOnce({ count: 5 });
-
-      // Chain 2: insert success
+      // Chain 1: insert success
       const insertChain = createChain();
       (insertChain.single as jest.Mock).mockResolvedValueOnce({ data: newItem, error: null });
 
-      fromChains = [tierChain, countChain, insertChain];
+      // Chain 2: count query (under limit)
+      const countChain = createChain();
+      (countChain.eq as jest.Mock).mockResolvedValueOnce({ count: 5 });
+
+      fromChains = [tierChain, insertChain, countChain];
 
       const request = new NextRequest('http://localhost/api/watchlist', {
         method: 'POST',

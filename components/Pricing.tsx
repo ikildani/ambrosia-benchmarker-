@@ -310,6 +310,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                       }}
                       onClick={(e) => e.stopPropagation()}
                       placeholder="Promo code"
+                      aria-label="Promo code"
                       className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xs
                                  placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-teal-500
                                  focus:border-transparent transition-all"

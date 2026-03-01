@@ -4,6 +4,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { ExtractedDeal } from './sec-edgar';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 
 // === RSS Feed Sources ===
 // Each source provides deal announcements that we filter and extract from
@@ -102,7 +103,8 @@ export interface RSSItem {
 
 export async function fetchRSSFeed(source: FeedSource): Promise<RSSItem[]> {
   try {
-    const response = await fetch(source.url, {
+    const response = await fetchWithTimeout(source.url, {
+      timeoutMs: 15_000,
       headers: {
         'User-Agent': 'Ambrosia Ventures Deal Intelligence research@ambrosiaventures.co',
         'Accept': 'application/rss+xml, application/xml, text/xml',
@@ -191,7 +193,8 @@ function isPotentialDeal(item: RSSItem, keywords: string[]): boolean {
 
 async function fetchArticleContent(url: string): Promise<string> {
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
+      timeoutMs: 15_000,
       headers: {
         'User-Agent': 'Ambrosia Ventures Deal Intelligence research@ambrosiaventures.co',
         'Accept': 'text/html',

@@ -83,19 +83,21 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
     async (itemType: string, itemValue: string, companyId?: string) => {
       if (!userId || tier !== 'pro') return;
 
-      const existing = items.find((i) => i.item_type === itemType && i.item_value === itemValue);
+      let existingItem: WatchlistItem | undefined;
+      setItems((prev) => {
+        existingItem = prev.find((i) => i.item_type === itemType && i.item_value === itemValue);
+        return prev;
+      });
 
-      if (existing) {
-        // Optimistic remove
-        setItems((prev) => prev.filter((i) => i.id !== existing.id));
+      if (existingItem) {
+        const captured = existingItem;
+        setItems((prev) => prev.filter((i) => i.id !== captured.id));
         try {
-          await fetch(`/api/watchlist?id=${existing.id}&user_id=${userId}`, { method: 'DELETE' });
+          await fetch(`/api/watchlist?id=${captured.id}&user_id=${userId}`, { method: 'DELETE' });
         } catch {
-          // Revert on failure
-          setItems((prev) => [...prev, existing]);
+          setItems((prev) => [...prev, captured]);
         }
       } else {
-        // Optimistic add with temp id
         const tempId = `temp-${Date.now()}`;
         const tempItem: WatchlistItem = { id: tempId, item_type: itemType, item_value: itemValue, company_id: companyId };
         setItems((prev) => [...prev, tempItem]);
@@ -107,10 +109,8 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
           });
           if (res.ok) {
             const data = await res.json();
-            // Replace temp with real item
             setItems((prev) => prev.map((i) => (i.id === tempId ? { ...i, id: data.item?.id || tempId } : i)));
           } else {
-            // Revert on failure
             setItems((prev) => prev.filter((i) => i.id !== tempId));
           }
         } catch {
@@ -118,7 +118,7 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
         }
       }
     },
-    [userId, tier, items]
+    [userId, tier]
   );
 
   return (

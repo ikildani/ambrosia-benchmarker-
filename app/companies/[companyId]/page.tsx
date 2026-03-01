@@ -72,6 +72,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function CompanyPage({ params }: Props) {
-  return <CompanyPageClient companyId={params.companyId} />;
+export default async function CompanyPage({ params }: Props) {
+  const { companyId } = params;
+  let companyName = 'Company';
+
+  if (UUID_REGEX.test(companyId)) {
+    try {
+      const supabase = createServiceClient();
+      const { data: company } = await supabase
+        .from('companies')
+        .select('name')
+        .eq('id', companyId)
+        .single();
+      if (company?.name) companyName = company.name;
+    } catch {}
+  }
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://calculator.ambrosiaventures.co" },
+          { "@type": "ListItem", "position": 2, "name": "Companies", "item": "https://calculator.ambrosiaventures.co/companies" },
+          { "@type": "ListItem", "position": 3, "name": companyName }
+        ]
+      })}} />
+      <CompanyPageClient companyId={companyId} />
+    </>
+  );
 }
