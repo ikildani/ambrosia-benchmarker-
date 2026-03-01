@@ -55,7 +55,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
         }),
       });
       const data = await response.json();
-      if (data.url) {
+      if (data.url && (data.url.startsWith('https://') || data.url.startsWith('/'))) {
         window.location.href = data.url;
       } else if (data.error) {
         console.error('Report checkout error:', data.error);

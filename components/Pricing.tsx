@@ -49,7 +49,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         return;
       }
 
-      if (data.url) {
+      if (data.url && (data.url.startsWith('https://') || data.url.startsWith('/'))) {
         window.location.href = data.url;
       } else {
         setError('Unable to start checkout. Please try again.');
@@ -81,7 +81,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         return;
       }
 
-      if (data.url) {
+      if (data.url && (data.url.startsWith('https://') || data.url.startsWith('/'))) {
         window.location.href = data.url;
       } else {
         setError('Unable to open billing portal. Please try again.');

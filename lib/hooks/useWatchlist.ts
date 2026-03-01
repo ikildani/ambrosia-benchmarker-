@@ -30,8 +30,11 @@ export function useWatchlist(userId: string | null) {
 
   const fetchItems = useCallback(async () => {
     if (!userId) return;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
-      const res = await fetch(`/api/watchlist?user_id=${userId}`);
+      const res = await fetch(`/api/watchlist?user_id=${userId}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (res.status === 403) {
         setError('pro_required');
         return;
@@ -41,19 +44,23 @@ export function useWatchlist(userId: string | null) {
       setItems(data.items || []);
       setError(null);
     } catch {
+      clearTimeout(timeoutId);
       setError('Failed to load watchlist');
     }
   }, [userId]);
 
   const fetchActivity = useCallback(async () => {
     if (!userId) return;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
-      const res = await fetch(`/api/watchlist/activity?user_id=${userId}`);
+      const res = await fetch(`/api/watchlist/activity?user_id=${userId}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!res.ok) return;
       const data = await res.json();
       setActivity(data.activity || []);
     } catch {
-      // Activity is non-critical
+      clearTimeout(timeoutId);
     }
   }, [userId]);
 
@@ -73,6 +80,8 @@ export function useWatchlist(userId: string | null) {
   ) => {
     if (!userId) return false;
     try {
+      const addController = new AbortController();
+      setTimeout(() => addController.abort(), 15000);
       const res = await fetch('/api/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,6 +91,7 @@ export function useWatchlist(userId: string | null) {
           item_value: itemValue,
           company_id: companyId,
         }),
+        signal: addController.signal,
       });
       if (!res.ok) {
         const data = await res.json();
@@ -98,8 +108,11 @@ export function useWatchlist(userId: string | null) {
   const removeItem = useCallback(async (id: string) => {
     if (!userId) return false;
     try {
+      const delController = new AbortController();
+      setTimeout(() => delController.abort(), 15000);
       const res = await fetch(`/api/watchlist?id=${id}&user_id=${userId}`, {
         method: 'DELETE',
+        signal: delController.signal,
       });
       if (!res.ok) throw new Error('Failed to remove');
       setItems(prev => prev.filter(i => i.id !== id));

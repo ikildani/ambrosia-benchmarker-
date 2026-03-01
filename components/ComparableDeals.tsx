@@ -26,17 +26,20 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
 
   useEffect(() => {
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     const params = new URLSearchParams({
       therapeuticArea: inputs.therapeuticArea || '',
       modality: inputs.modality || '',
       indication: inputs.indication || '',
       phase: inputs.phase || '',
     });
-    fetch(`/api/deals/comparable?${params}`)
+    fetch(`/api/deals/comparable?${params}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => setDeals(data.deals || []))
       .catch(() => setDeals([]))
-      .finally(() => setLoading(false));
+      .finally(() => { clearTimeout(timeoutId); setLoading(false); });
+    return () => { clearTimeout(timeoutId); controller.abort(); };
   }, [inputs.therapeuticArea, inputs.modality, inputs.indication, inputs.phase]);
 
   if (!loading && deals.length === 0) return null;

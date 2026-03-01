@@ -136,10 +136,13 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
     setLoading(true);
     setError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       if (isAuthenticated && user?.id) {
-        // Fetch from database for authenticated users
-        const response = await fetch(`/api/calculations?user_id=${encodeURIComponent(user.id)}&limit=50`);
+        const response = await fetch(`/api/calculations?user_id=${encodeURIComponent(user.id)}&limit=50`, { signal: controller.signal });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           throw new Error('Failed to fetch calculation history');
@@ -162,9 +165,9 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
         setHistory(getHistory());
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error('Error fetching history:', err);
       setError('Failed to load calculation history');
-      // Fall back to localStorage on error
       setHistory(getHistory());
     } finally {
       setLoading(false);
@@ -175,8 +178,11 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
     try {
       if (isAuthenticated && user?.id) {
         // Delete from database
+        const delController = new AbortController();
+        setTimeout(() => delController.abort(), 15000);
         const response = await fetch(`/api/calculations?id=${encodeURIComponent(id)}&user_id=${encodeURIComponent(user.id)}`, {
           method: 'DELETE',
+          signal: delController.signal,
         });
 
         if (!response.ok) {

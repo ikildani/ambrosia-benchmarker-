@@ -125,16 +125,16 @@ export async function POST(request: NextRequest) {
       user_tier: userTier,
     };
 
-    supabase.from('events').insert(eventData).then(({ error }) => {
+    Promise.resolve(supabase.from('events').insert(eventData)).then(({ error }) => {
       if (error) console.error('Event insert error:', error.message);
-    });
+    }).catch(() => {/* non-critical */});
 
     if (validSessionId) {
-      supabase.rpc('increment_session_calculations', {
+      Promise.resolve(supabase.rpc('increment_session_calculations', {
         p_session_id: validSessionId,
-      }).then(({ error }) => {
+      })).then(({ error }) => {
         if (error) console.error('Session increment error:', error.message);
-      });
+      }).catch(() => {/* non-critical */});
     }
 
     return apiSuccess({ calculation_id: calculation!.id });

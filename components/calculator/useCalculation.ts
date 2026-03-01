@@ -119,7 +119,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
             calculationCountRef.current,
           );
 
-          // Save calculation to database (non-blocking)
+          // Save calculation to database (non-blocking, 15s timeout)
+          const saveController = new AbortController();
+          setTimeout(() => saveController.abort(), 15000);
           fetch('/api/calculations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -146,6 +148,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
                 total_deal_value_high: calculatedResult.terms.totalDealValue.high,
               },
             }),
+            signal: saveController.signal,
           })
             .then(async (response) => {
               if (!response.ok) {

@@ -87,6 +87,8 @@ export default function CompaniesPageClient() {
     q?: string; type?: string; modality?: string; sort?: string; page?: number;
   }) => {
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const params = new URLSearchParams();
       if (!opts.q) params.set('top', '1');
@@ -96,14 +98,15 @@ export default function CompaniesPageClient() {
       if (opts.sort) params.set('sort', opts.sort);
       if (opts.page && opts.page > 1) params.set('page', String(opts.page));
 
-      const res = await fetch(`/api/companies/search?${params.toString()}`);
+      const res = await fetch(`/api/companies/search?${params.toString()}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!res.ok) return;
       const data = await res.json();
       setCompanies(data.companies || []);
       setTotal(data.total || 0);
       if (data.stats) setStats(data.stats);
     } catch {
-      // Silently handle — user can retry
+      clearTimeout(timeoutId);
     } finally {
       setLoading(false);
     }

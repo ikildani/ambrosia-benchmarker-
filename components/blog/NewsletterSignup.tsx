@@ -14,12 +14,16 @@ export function NewsletterSignup() {
 
     setStatus('loading');
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         setStatus('success');
@@ -29,6 +33,7 @@ export function NewsletterSignup() {
         throw new Error('Subscription failed');
       }
     } catch {
+      clearTimeout(timeoutId);
       setStatus('error');
       setMessage('Something went wrong. Please try again.');
     }

@@ -92,10 +92,12 @@ export default function DealBrowser() {
     setLoading(true);
     setError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const params = new URLSearchParams();
 
-      // Non-sensitive filter params stay in URL
       params.set('page', page.toString());
       params.set('sort_by', sortBy);
       params.set('sort_order', sortOrder);
@@ -112,12 +114,12 @@ export default function DealBrowser() {
       if (filters.termsDisclosed) params.set('terms_disclosed', 'true');
       if (filters.search) params.set('search', filters.search);
 
-      // Send user identifiers in headers for tier lookup
       const headers: Record<string, string> = {};
       if (user?.id) headers['X-User-Id'] = user.id;
       if (user?.email) headers['X-User-Email'] = user.email;
 
-      const response = await fetch(`/api/deals?${params.toString()}`, { headers });
+      const response = await fetch(`/api/deals?${params.toString()}`, { headers, signal: controller.signal });
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -129,7 +131,12 @@ export default function DealBrowser() {
       setTotalPages(data.totalPages);
       setFilterOptions(data.filters);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      clearTimeout(timeoutId);
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
     } finally {
       setLoading(false);
     }
