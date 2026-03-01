@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: `Generation failed: ${errorMessage.slice(0, 100)}` },
+      { error: 'Generation failed. Please try again.' },
       { status: 500 }
     );
   }

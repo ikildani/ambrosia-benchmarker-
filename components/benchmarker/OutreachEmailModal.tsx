@@ -54,6 +54,9 @@ export function OutreachEmailModal({
     setIsGenerating(true);
     setError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const res = await fetch('/api/partners/outreach', {
         method: 'POST',
@@ -68,17 +71,24 @@ export function OutreachEmailModal({
           user_id: userId,
           user_email: userEmail,
           session_id: sessionId,
-          tier: tier, // Pass client-side tier for localStorage auth
+          tier: tier,
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await res.json();
 
       if (!res.ok) {
         if (data.rate_limited) {
           setError(`Daily limit reached (${data.usage.emails_generated_today}/${data.usage.daily_limit}). Resets at midnight.`);
         } else if (data.upgrade_required) {
-          setError('Outreach email generation is a Pro feature. Please upgrade to access.');
+          // If user is already pro/report, this is a verification error — not a real gate
+          if (tier === 'pro' || tier === 'report') {
+            setError('Verification error — please refresh the page and try again.');
+          } else {
+            setError('Outreach email generation is a Pro feature. Please upgrade to access.');
+          }
         } else {
           setError(data.error || 'Failed to generate email');
         }
@@ -89,7 +99,12 @@ export function OutreachEmailModal({
       setStrategy(data.approach_strategy);
       setUsage(data.usage);
     } catch (err) {
-      setError('Network error. Please try again.');
+      clearTimeout(timeoutId);
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('Network error. Please try again.');
+      }
     } finally {
       setIsGenerating(false);
     }

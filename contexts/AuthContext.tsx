@@ -190,8 +190,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
               setTierState('pro');
               localStorage.setItem('user_tier', 'pro');
+              setIsLoading(false);
             } else {
               // Query actual tier from database (Stripe webhook sets this)
+              // IMPORTANT: Await tier resolution before clearing isLoading to prevent
+              // components from rendering with default 'free' tier for paid users
               Promise.resolve(
                 supabase.from('user_profiles')
                   .select('tier')
@@ -202,13 +205,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setTierState(profile.tier as 'pro' | 'report');
                   localStorage.setItem('user_tier', profile.tier);
                 }
-              }).catch(() => console.warn('[Auth] Tier query failed'));
+              })
+              .catch(() => console.warn('[Auth] Tier query failed'))
+              .finally(() => setIsLoading(false));
             }
 
             // Sync usage count from database
             syncUsageFromDatabase(supabaseUser.id).catch(console.error);
+          } else {
+            setIsLoading(false);
           }
-          setIsLoading(false);
         }).catch((error) => {
           clearTimeout(sessionTimeout);
           console.error('[Auth] getSession failed:', error);

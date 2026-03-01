@@ -66,8 +66,10 @@ export function ScoreBreakdown({
     setIsRegeneratingStrategy(true);
     setStrategyError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
-      // Call the outreach API which also generates strategy
       const res = await fetch('/api/partners/outreach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,23 +86,35 @@ export function ScoreBreakdown({
           user_id: userId,
           user_email: userEmail,
           session_id: sessionId,
-          tier: tier, // Pass client-side tier for localStorage auth
+          tier: tier,
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await res.json();
 
       if (res.ok && data.approach_strategy) {
         setLocalStrategy(data.approach_strategy);
         setStrategyError(null);
       } else if (data.upgrade_required) {
-        setStrategyError('Upgrade to Pro to generate approach strategies');
+        // If user is already pro/report, this is a verification error — not a real gate
+        if (tier === 'pro' || tier === 'report') {
+          setStrategyError('Verification error — please refresh the page and try again.');
+        } else {
+          setStrategyError('Upgrade to Pro to generate approach strategies');
+        }
       } else {
         setStrategyError(data.error || 'Failed to generate strategy. Please try again.');
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Failed to regenerate strategy:', error);
-      setStrategyError('Network error. Please check your connection and try again.');
+      if (error instanceof Error && error.name === 'AbortError') {
+        setStrategyError('Request timed out. Please try again.');
+      } else {
+        setStrategyError('Network error. Please check your connection and try again.');
+      }
     } finally {
       setIsRegeneratingStrategy(false);
     }

@@ -101,6 +101,7 @@ export default function ReportGenerationModal({
   const [hasPdf, setHasPdf] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState(false);
 
   const hiddenContainerRef = useRef<HTMLDivElement>(null);
   const pdfBlobRef = useRef<Blob | null>(null);
@@ -146,6 +147,7 @@ export default function ReportGenerationModal({
       setHasPdf(false);
       setEmailSending(false);
       setEmailSent(false);
+      setEmailError(false);
       pdfBlobRef.current = null;
       pdfDataRef.current = null;
       htmlStringRef.current = null;
@@ -187,6 +189,8 @@ export default function ReportGenerationModal({
         let memoPromise: Promise<DealMemo | null> | null = null;
         let playbookPromise: Promise<NegotiationPlaybook | null> | null = null;
         if (p.format === 'pdf' && !p.existingMemo) {
+          const memoController = new AbortController();
+          const memoTimeout = setTimeout(() => memoController.abort(), 90000);
           memoPromise = fetch('/api/deal-memo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -198,7 +202,9 @@ export default function ReportGenerationModal({
               results: p.result,
               labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
             }),
+            signal: memoController.signal,
           }).then(async (response) => {
+            clearTimeout(memoTimeout);
             if (response.ok) {
               const data = await response.json();
               return (data.memo || data) as DealMemo;
@@ -207,11 +213,14 @@ export default function ReportGenerationModal({
             console.error(`Deal memo API failed (${response.status}):`, errorText);
             return null;
           }).catch((err) => {
+            clearTimeout(memoTimeout);
             console.error('Deal memo fetch error:', err);
             return null;
           });
         }
         if (p.format === 'pdf') {
+          const playbookController = new AbortController();
+          const playbookTimeout = setTimeout(() => playbookController.abort(), 90000);
           playbookPromise = fetch('/api/playbook', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -233,7 +242,9 @@ export default function ReportGenerationModal({
               },
               labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
             }),
+            signal: playbookController.signal,
           }).then(async (response) => {
+            clearTimeout(playbookTimeout);
             if (response.ok) {
               const data = await response.json();
               return (data.playbook || null) as NegotiationPlaybook | null;
@@ -242,6 +253,7 @@ export default function ReportGenerationModal({
             console.error(`Playbook API failed (${response.status}):`, errorText);
             return null;
           }).catch((err) => {
+            clearTimeout(playbookTimeout);
             console.error('Playbook fetch error:', err);
             return null;
           });
@@ -325,7 +337,11 @@ export default function ReportGenerationModal({
         const html = generateReportHTML(pdfData);
         htmlStringRef.current = html;
         if (hiddenContainerRef.current) {
-          hiddenContainerRef.current.innerHTML = html;
+          // Sanitize HTML to strip script tags and event handlers before DOM insertion
+          const sanitized = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+          hiddenContainerRef.current.innerHTML = sanitized;
         }
         await delay(200);
         if (abortRef.current) return;
@@ -447,6 +463,10 @@ export default function ReportGenerationModal({
   const handleEmailReport = useCallback(async () => {
     if (!pdfBlobRef.current || !userEmail || emailSending) return;
     setEmailSending(true);
+    setEmailError(false);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       const arrayBuffer = await pdfBlobRef.current.arrayBuffer();
@@ -465,15 +485,21 @@ export default function ReportGenerationModal({
           fileName,
           indication: labels.indication,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         setEmailSent(true);
       } else {
         console.error('Email send failed:', await res.text());
+        setEmailError(true);
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error('Email send error:', err);
+      setEmailError(true);
     } finally {
       setEmailSending(false);
     }
@@ -678,6 +704,11 @@ export default function ReportGenerationModal({
                         </button>
                       )}
                     </div>
+                    {emailError && (
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1 text-center">
+                        Failed to send email. Please try again or download the PDF instead.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

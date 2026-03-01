@@ -70,13 +70,16 @@ export default function PartnerMatchesContainer({
     setLoading(true);
     setError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
       const res = await fetch('/api/partners/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          user_email: user?.email, // Pass email for Pro verification
+          user_email: user?.email,
           session_id: sessionId,
           anonymous_id: anonymousId,
           modality: mapModality(modality),
@@ -86,9 +89,12 @@ export default function PartnerMatchesContainer({
           territory_scope: mapTerritory(territory),
           therapeutic_area: therapeuticArea,
           regulatory_designations: regulatoryDesignations,
-          tier: tier, // Pass tier from frontend as fallback
+          tier: tier,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         throw new Error('Failed to fetch partner matches');
@@ -119,8 +125,13 @@ export default function PartnerMatchesContainer({
         })));
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error('Partner matching error:', err);
-      setError('Unable to find partner matches. Please try again.');
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('Unable to find partner matches. Please try again.');
+      }
     }
 
     setLoading(false);

@@ -131,6 +131,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError('AI response format error. Retrying may help.', 500);
     }
 
-    return apiError(`Generation failed: ${errorMessage.slice(0, 100)}`, 500);
+    return apiError('Generation failed. Please try again.', 500);
   }
 }
