@@ -137,6 +137,8 @@ export function useSession() {
     try {
       const utmParams = getUTMParams();
 
+      const sessionController = new AbortController();
+      const sessionTimeoutId = setTimeout(() => sessionController.abort(), 10000);
       const response = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -148,17 +150,19 @@ export function useSession() {
           utm_medium: utmParams.utm_medium,
           utm_campaign: utmParams.utm_campaign,
         }),
+        signal: sessionController.signal,
       });
+      clearTimeout(sessionTimeoutId);
 
       const data = await response.json();
 
       if (data.session_id) {
-        // Update with server-generated session ID
         sessionStorage.setItem(SESSION_KEY, data.session_id);
         setSessionId(data.session_id);
       }
 
-      // Track session_started event
+      const eventController = new AbortController();
+      setTimeout(() => eventController.abort(), 10000);
       await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,6 +175,7 @@ export function useSession() {
             ...utmParams,
           },
         }),
+        signal: eventController.signal,
       });
     } catch (error) {
       console.error('Failed to create session:', error);

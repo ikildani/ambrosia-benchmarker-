@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { CalculationResult, CalculationInput, calculateRiskScore } from '@/lib/calculations';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
@@ -337,11 +338,7 @@ export default function ReportGenerationModal({
         const html = generateReportHTML(pdfData);
         htmlStringRef.current = html;
         if (hiddenContainerRef.current) {
-          // Sanitize HTML to strip script tags and event handlers before DOM insertion
-          const sanitized = html
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-            .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-          hiddenContainerRef.current.innerHTML = sanitized;
+          hiddenContainerRef.current.innerHTML = DOMPurify.sanitize(html);
         }
         await delay(200);
         if (abortRef.current) return;

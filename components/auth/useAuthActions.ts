@@ -90,8 +90,10 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
         console.error('Profile creation error:', profileErr);
       }
 
-      // Submit to Formspree for lead capture
+      // Submit to Formspree for lead capture (10s timeout, non-blocking)
       try {
+        const fsController = new AbortController();
+        setTimeout(() => fsController.abort(), 10000);
         await fetch('https://formspree.io/f/maqbwgbq', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -100,6 +102,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
             source: 'Deal Calculator Sign Up',
             timestamp: new Date().toISOString(),
           }),
+          signal: fsController.signal,
         });
       } catch {
         // Continue even if Formspree fails
@@ -147,9 +150,11 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
     localStorage.setItem('user_data', JSON.stringify(userData));
     localStorage.setItem('is_authenticated', 'true');
 
-    // Submit to Formspree for lead capture (signup only)
+    // Submit to Formspree for lead capture (signup only, 10s timeout)
     if (mode === 'signup') {
       try {
+        const fsController = new AbortController();
+        setTimeout(() => fsController.abort(), 10000);
         await fetch('https://formspree.io/f/maqbwgbq', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -158,6 +163,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
             source: 'Deal Calculator Sign Up',
             timestamp: new Date().toISOString(),
           }),
+          signal: fsController.signal,
         });
       } catch {
         // Continue even if Formspree fails

@@ -39,12 +39,16 @@ export function usePromoCode(initialCode?: string): UsePromoCodeReturn {
     setPromoStatus('validating');
     setPromoError(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch('/api/promo/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: code.trim() }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data.valid) {
@@ -59,6 +63,7 @@ export function usePromoCode(initialCode?: string): UsePromoCodeReturn {
         setPromoError(data.error || 'Invalid promo code');
       }
     } catch {
+      clearTimeout(timeoutId);
       setPromoStatus('invalid');
       setPromoError('Unable to validate code. Try again.');
     }

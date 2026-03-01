@@ -63,14 +63,17 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
       setCompanyLoading(true);
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 10000);
       try {
-        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(companyQuery)}`);
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(companyQuery)}`, { signal: controller.signal });
+        clearTimeout(tid);
         if (res.ok) {
           const data = await res.json();
           setCompanyResults(data.companies || []);
         }
       } catch {
-        // ignore
+        clearTimeout(tid);
       } finally {
         setCompanyLoading(false);
       }
