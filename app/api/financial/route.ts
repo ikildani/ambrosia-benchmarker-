@@ -3,7 +3,6 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
 import { analyzeCompetitiveLandscape } from '@/lib/services/pipeline-intelligence';
 import { forecastDealFlow } from '@/lib/services/deal-flow-forecast';
-import { requireAuth } from '@/lib/auth-helpers';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
@@ -27,12 +26,11 @@ const VALID_THERAPEUTIC_AREAS = [
  * Returns server-side financial intelligence:
  * - Competitive landscape analysis (requires DB for company_trials)
  * - Deal flow forecast (historical data + DB enrichment)
+ *
+ * No auth required — panels handle pro/free gating internally.
+ * Rate-limited by IP to prevent abuse.
  */
 export async function GET(request: NextRequest) {
-  // Authentication
-  const [user, authError] = await requireAuth(request);
-  if (authError) return authError;
-
   // Rate limiting
   const identifier = getIdentifier(request);
   const rateLimitResult = await checkRateLimit(identifier, 'financial', RATE_LIMIT_CONFIGS.calculations);
