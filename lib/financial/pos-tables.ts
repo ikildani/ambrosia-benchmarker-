@@ -53,10 +53,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * improved with biomarker-selected populations and accelerated pathways.
    */
   oncology: {
+    discoveryToPreclinical: 0.45,
     preclinicalToPhase1: 0.60,
     phase1ToPhase2: 0.52,
+    phase1_2ToPhase2: 0.42,
     phase2ToPhase3: 0.29,
+    phase2_3ToPhase3: 0.55,
     phase3ToApproval: 0.55,
+    ndaFiledToApproval: 0.90,
     approvalToLaunch: 0.95,
   },
 
@@ -71,10 +75,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * remains the critical bottleneck.
    */
   neurology: {
+    discoveryToPreclinical: 0.40,
     preclinicalToPhase1: 0.55,
     phase1ToPhase2: 0.48,
+    phase1_2ToPhase2: 0.38,
     phase2ToPhase3: 0.24,
+    phase2_3ToPhase3: 0.48,
     phase3ToApproval: 0.50,
+    ndaFiledToApproval: 0.88,
     approvalToLaunch: 0.93,
   },
 
@@ -88,10 +96,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * but drops for novel targets in diseases like lupus/scleroderma.
    */
   immunology: {
+    discoveryToPreclinical: 0.48,
     preclinicalToPhase1: 0.65,
     phase1ToPhase2: 0.55,
+    phase1_2ToPhase2: 0.45,
     phase2ToPhase3: 0.35,
+    phase2_3ToPhase3: 0.58,
     phase3ToApproval: 0.62,
+    ndaFiledToApproval: 0.92,
     approvalToLaunch: 0.95,
   },
 
@@ -106,10 +118,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * challenging (NASH) indications.
    */
   metabolic: {
+    discoveryToPreclinical: 0.46,
     preclinicalToPhase1: 0.62,
     phase1ToPhase2: 0.54,
+    phase1_2ToPhase2: 0.44,
     phase2ToPhase3: 0.33,
+    phase2_3ToPhase3: 0.56,
     phase3ToApproval: 0.60,
+    ndaFiledToApproval: 0.91,
     approvalToLaunch: 0.95,
   },
 
@@ -124,10 +140,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * outcomes data.
    */
   cardiovascular: {
+    discoveryToPreclinical: 0.44,
     preclinicalToPhase1: 0.60,
     phase1ToPhase2: 0.50,
+    phase1_2ToPhase2: 0.40,
     phase2ToPhase3: 0.30,
+    phase2_3ToPhase3: 0.54,
     phase3ToApproval: 0.58,
+    ndaFiledToApproval: 0.90,
     approvalToLaunch: 0.94,
   },
 
@@ -143,10 +163,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * approvalToLaunch rate.
    */
   infectiousDisease: {
+    discoveryToPreclinical: 0.50,
     preclinicalToPhase1: 0.68,
     phase1ToPhase2: 0.58,
+    phase1_2ToPhase2: 0.48,
     phase2ToPhase3: 0.42,
+    phase2_3ToPhase3: 0.62,
     phase3ToApproval: 0.65,
+    ndaFiledToApproval: 0.93,
     approvalToLaunch: 0.92,
   },
 
@@ -161,10 +185,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * one-time therapies.
    */
   ophthalmology: {
+    discoveryToPreclinical: 0.48,
     preclinicalToPhase1: 0.65,
     phase1ToPhase2: 0.56,
+    phase1_2ToPhase2: 0.46,
     phase2ToPhase3: 0.38,
+    phase2_3ToPhase3: 0.60,
     phase3ToApproval: 0.63,
+    ndaFiledToApproval: 0.92,
     approvalToLaunch: 0.95,
   },
 
@@ -179,10 +207,14 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
    * commercial rather than clinical (payer coverage, patient access).
    */
   womensHealth: {
+    discoveryToPreclinical: 0.47,
     preclinicalToPhase1: 0.63,
     phase1ToPhase2: 0.55,
+    phase1_2ToPhase2: 0.45,
     phase2ToPhase3: 0.36,
+    phase2_3ToPhase3: 0.58,
     phase3ToApproval: 0.62,
+    ndaFiledToApproval: 0.92,
     approvalToLaunch: 0.94,
   },
 };
@@ -423,59 +455,91 @@ export const MAX_REGULATORY_UPLIFT = 1.50;
  */
 export const PHASE_DURATION: Record<string, Record<string, number>> = {
   oncology: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 2.5,
     phase2: 2.5,
+    phase2_3: 3.5,
     phase3: 3.0,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
   neurology: {
+    discovery: 3.5,
     preclinical: 2.5,
     phase1: 1.5,
+    phase1_2: 3.0,
     phase2: 3.0,
+    phase2_3: 4.0,
     phase3: 3.5,
+    nda_filed: 1.5,
     regulatory: 1.5,
   },
   immunology: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 2.5,
     phase2: 2.5,
+    phase2_3: 3.5,
     phase3: 3.0,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
   metabolic: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 2.5,
     phase2: 2.5,
+    phase2_3: 4.0,
     phase3: 3.5,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
   cardiovascular: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 3.0,
     phase2: 3.0,
+    phase2_3: 4.5,
     phase3: 4.0,
+    nda_filed: 1.5,
     regulatory: 1.5,
   },
   infectiousDisease: {
+    discovery: 2.0,
     preclinical: 1.5,
     phase1: 1.0,
+    phase1_2: 2.0,
     phase2: 2.0,
+    phase2_3: 3.0,
     phase3: 2.5,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
   ophthalmology: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 2.0,
     phase2: 2.0,
+    phase2_3: 3.0,
     phase3: 2.5,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
   womensHealth: {
+    discovery: 3.0,
     preclinical: 2.0,
     phase1: 1.5,
+    phase1_2: 2.5,
     phase2: 2.5,
+    phase2_3: 3.5,
     phase3: 3.0,
+    nda_filed: 1.0,
     regulatory: 1.0,
   },
 };
@@ -501,59 +565,91 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
  */
 export const PHASE_COSTS: Record<string, Record<string, number>> = {
   oncology: {
+    discovery: 8,
     preclinical: 15,
     phase1: 25,
+    phase1_2: 45,
     phase2: 50,
+    phase2_3: 120,
     phase3: 150,
+    nda_filed: 5,
     regulatory: 5,
   },
   neurology: {
+    discovery: 10,
     preclinical: 20,
     phase1: 30,
+    phase1_2: 55,
     phase2: 60,
+    phase2_3: 150,
     phase3: 200,
+    nda_filed: 5,
     regulatory: 5,
   },
   immunology: {
+    discovery: 8,
     preclinical: 15,
     phase1: 25,
+    phase1_2: 40,
     phase2: 45,
+    phase2_3: 100,
     phase3: 120,
+    nda_filed: 5,
     regulatory: 5,
   },
   metabolic: {
+    discovery: 8,
     preclinical: 15,
     phase1: 25,
+    phase1_2: 45,
     phase2: 50,
+    phase2_3: 140,
     phase3: 180,
+    nda_filed: 5,
     regulatory: 5,
   },
   cardiovascular: {
+    discovery: 10,
     preclinical: 20,
     phase1: 30,
+    phase1_2: 55,
     phase2: 60,
+    phase2_3: 180,
     phase3: 250,
+    nda_filed: 5,
     regulatory: 5,
   },
   infectiousDisease: {
+    discovery: 5,
     preclinical: 10,
     phase1: 20,
+    phase1_2: 30,
     phase2: 35,
+    phase2_3: 80,
     phase3: 100,
+    nda_filed: 5,
     regulatory: 5,
   },
   ophthalmology: {
+    discovery: 6,
     preclinical: 12,
     phase1: 20,
+    phase1_2: 35,
     phase2: 40,
+    phase2_3: 70,
     phase3: 80,
+    nda_filed: 5,
     regulatory: 5,
   },
   womensHealth: {
+    discovery: 5,
     preclinical: 10,
     phase1: 20,
+    phase1_2: 30,
     phase2: 35,
+    phase2_3: 75,
     phase3: 90,
+    nda_filed: 5,
     regulatory: 5,
   },
 };
@@ -714,11 +810,15 @@ export const SGA_BY_LIFECYCLE_STAGE: Record<string, number> = {
  * transition chain. Used by getCumulativePoS to skip completed phases.
  */
 const PHASE_START_INDEX: Record<string, number> = {
-  preclinical: 0,
-  phase1: 1,
-  phase2: 2,
-  phase3: 3,
-  approved: 4,
+  discovery: 0,
+  preclinical: 1,
+  phase1: 2,
+  phase1_2: 3,
+  phase2: 3,
+  phase2_3: 4,
+  phase3: 4,
+  nda_filed: 5,
+  approved: 6,
 };
 
 /**
@@ -785,10 +885,12 @@ export function getCumulativePoS(
 
   // Ordered list of all phase transitions
   const phases = [
+    { phase: 'Discovery \u2192 Preclinical', rate: baseRates.discoveryToPreclinical ?? 0.45 },
     { phase: 'Preclinical \u2192 Phase 1', rate: baseRates.preclinicalToPhase1 },
     { phase: 'Phase 1 \u2192 Phase 2', rate: baseRates.phase1ToPhase2 },
     { phase: 'Phase 2 \u2192 Phase 3', rate: baseRates.phase2ToPhase3 },
     { phase: 'Phase 3 \u2192 Approval', rate: baseRates.phase3ToApproval },
+    { phase: 'NDA Filed \u2192 Approval', rate: baseRates.ndaFiledToApproval ?? 0.90 },
     { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
   ];
 
@@ -803,23 +905,20 @@ export function getCumulativePoS(
 
     // Apply modality and biomarker adjustments to clinical transitions only
     // (not approval->launch, which is primarily an administrative/commercial step)
-    if (i < 4) {
+    if (i < phases.length - 1) {
       adjustedRate *= modalityAdj * biomarkerAdj;
 
-      // Regulatory uplift is strongest at Phase 3->Approval (direct impact
-      // on regulatory outcome) and has a partial effect on Phase 2->3
+      // Regulatory uplift is strongest at Phase 3->Approval and NDA Filed->Approval
+      // (direct impact on regulatory outcome) and has a partial effect on Phase 2->3
       // (increased FDA interaction improves trial design and endpoint selection).
       // Earlier phases receive no regulatory uplift.
-      if (i === 3) {
-        // Phase 3 -> Approval: full regulatory uplift
+      if (i === 4 || i === 5) {
+        // Phase 3 -> Approval or NDA Filed -> Approval: full regulatory uplift
         adjustedRate *= regAdj;
-      } else if (i === 2) {
+      } else if (i === 3) {
         // Phase 2 -> Phase 3: partial regulatory uplift (sqrt)
-        // Rationale: designations improve trial design guidance but don't
-        // directly affect the Phase 2 efficacy readout
         adjustedRate *= Math.sqrt(regAdj);
       }
-      // Phase transitions before Phase 2->3 receive no regulatory uplift
     }
 
     // Cap individual phase probability at 0.95 to prevent mathematical certainty
@@ -926,10 +1025,12 @@ export function getBaselineLOA(currentPhase: string, therapeuticArea: string): n
     POS_BY_THERAPEUTIC_AREA[therapeuticArea] ?? POS_BY_THERAPEUTIC_AREA.oncology;
 
   const transitions = [
+    baseRates.discoveryToPreclinical ?? 0.45,
     baseRates.preclinicalToPhase1,
     baseRates.phase1ToPhase2,
     baseRates.phase2ToPhase3,
     baseRates.phase3ToApproval,
+    baseRates.ndaFiledToApproval ?? 0.90,
     baseRates.approvalToLaunch,
   ];
 

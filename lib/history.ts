@@ -23,6 +23,7 @@ export interface CalculationHistoryItem {
     combinationPotential?: string;
     competitivePosition?: string;
     dataQuality?: string;
+    dealType?: string;
     regulatoryDesignations?: RegulatoryDesignationsInput;
   };
   results: {
@@ -141,6 +142,7 @@ export const DEFAULT_EXTENDED_INPUTS = {
   combinationPotential: 'some' as const,
   competitivePosition: 'racing' as const,
   dataQuality: 'promising' as const,
+  dealType: 'licensing' as const,
   regulatoryDesignations: {
     breakthrough: false,
     fastTrack: false,

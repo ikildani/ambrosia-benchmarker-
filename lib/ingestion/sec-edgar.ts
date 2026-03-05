@@ -77,7 +77,7 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1526520': 'Protagonist Therapeutics',
   '1447028': 'Revolution Medicines',
   '1603466': 'Y-mAbs Therapeutics',
-  '1821825': 'Legend Biotech',
+  '1801198': 'Legend Biotech',
   '1802749': 'Replimune',
   '1564406': 'Turning Point Therapeutics',
   '1564708': 'MacroGenics',
@@ -155,6 +155,26 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1070494': 'Acadia Pharmaceuticals',
   '1597553': 'Sage Therapeutics',
   '1805387': 'Cerevel Therapeutics',
+
+  // Cardiovascular additions
+  '1061983': 'Cytokinetics',
+  '1743881': 'BridgeBio Pharma',
+  '1840574': 'Verve Therapeutics',
+  '874015': 'Ionis Pharmaceuticals',
+  '1936258': 'NewAmsterdam Pharma',
+
+  // Infectious Disease additions
+  '882095': 'Gilead Sciences',
+  '1706431': 'Vir Biotechnology',
+  '1426800': 'Assembly Biosciences',
+
+  // Ophthalmology additions
+  '1860742': 'Bausch + Lomb',
+  '1372299': 'Ocugen',
+
+  // Women's Health additions
+  '1821825': 'Organon',
+  '1401914': 'Dare Bioscience',
 };
 
 // Search terms for licensing deals

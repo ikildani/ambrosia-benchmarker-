@@ -1,4 +1,5 @@
 import React, { useCallback, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { TherapeuticArea } from '@/lib/calculations';
 import {
   therapeuticAreaOptions,
@@ -132,6 +133,7 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
   hasResult,
 }: TherapeuticAreaSelectorProps) {
   const groupRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const selectArea = useCallback((newArea: TherapeuticArea) => {
     if (newArea !== therapeuticArea) {
@@ -180,13 +182,16 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
           const Icon = meta.icon;
           const counts = INDICATION_COUNTS[area];
           return (
-            <button
+            <motion.button
               key={option.value}
               role="radio"
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => selectArea(area)}
-              className={`relative px-4 py-4 rounded-xl border-2 text-left transition-all duration-200 motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] ${
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className={`relative px-4 py-4 rounded-xl border-2 text-left transition-colors duration-200 ${
                 isSelected
                   ? `${meta.accentClass} ${meta.accentBgClass} shadow-md`
                   : `border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 ${meta.hoverBorderClass} hover:shadow-sm`
@@ -207,11 +212,15 @@ const TherapeuticAreaSelector = React.memo(function TherapeuticAreaSelector({
                 </div>
               </div>
               {isSelected && (
-                <div className={`absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center ${meta.iconBgSelectedClass}`}>
+                <motion.div
+                  layoutId="ta-selected-check"
+                  className={`absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center ${meta.iconBgSelectedClass}`}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                >
                   <Check className="w-3 h-3" />
-                </div>
+                </motion.div>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>

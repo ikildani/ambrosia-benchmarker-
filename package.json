@@ -30,6 +30,7 @@
     "exceljs": "^4.4.0",
     "fflate": "^0.8.2",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.35.0",
     "html2pdf.js": "^0.14.0",
     "lucide-react": "^0.563.0",
     "nanoid": "^5.1.6",

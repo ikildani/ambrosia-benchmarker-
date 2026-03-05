@@ -7,9 +7,9 @@ export const runtime = 'edge';
 const COLORS = {
   bgDark: '#0c0e1f',
   bgMid: '#141732',
-  teal: '#00c7c7',
-  tealBright: '#2EEAEA',
-  tealDim: '#00BABA',
+  teal: '#0EA5A5',
+  tealBright: '#34c2c2',
+  tealDim: '#0c8e8e',
   white: '#ffffff',
   slate: '#94a3b8',
   slateLight: '#cbd5e1',
@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
           alignItems: 'flex-start',
           justifyContent: 'center',
           backgroundColor: COLORS.bgDark,
-          backgroundImage: `radial-gradient(circle at 85% 20%, rgba(0,199,199,0.08) 0%, transparent 50%)`,
+          backgroundImage: `radial-gradient(circle at 85% 20%, rgba(14,165,165,0.08) 0%, transparent 50%)`,
           padding: '60px 60px 60px 80px',
           position: 'relative',
         }}

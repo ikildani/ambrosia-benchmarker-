@@ -14,6 +14,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
   return {
     therapeuticArea: s.therapeuticArea,
     phase: s.phase,
+    dealType: s.dealType,
     modality: s.modality,
     indication: s.indication,
     territory: s.territory,
@@ -41,7 +42,7 @@ interface UseCalculationOptions {
   sessionId: string;
   anonymousId: string;
   trackCalculation: (
-    params: { modality: string; development_phase: string; indication_category: string; indication_specific: string; territory_scope: string },
+    params: { modality: string; development_phase: string; indication_category: string; indication_specific: string; territory_scope: string; deal_type?: string },
     outputs: { upfront_low: number; upfront_mid: number; upfront_high: number; milestones_total: number; royalty_low: number; royalty_high: number; total_deal_value_low: number; total_deal_value_high: number },
     count: number,
   ) => void;
@@ -103,6 +104,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
               indication_category: state.indication.split('_')[0],
               indication_specific: state.indication,
               territory_scope: state.territory,
+              deal_type: state.dealType,
             },
             {
               upfront_low: calculatedResult.terms.upfront.low,
@@ -133,6 +135,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
               indication_category: state.indication.split('_')[0],
               indication_specific: state.indication,
               territory_scope: state.territory,
+              deal_type: state.dealType,
               outputs: {
                 upfront_low: calculatedResult.terms.upfront.low,
                 upfront_mid: calculatedResult.terms.upfront.median,
@@ -171,6 +174,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
               combinationPotential: state.combinationPotential,
               competitivePosition: state.competitivePosition,
               dataQuality: state.dataQuality,
+              dealType: state.dealType,
               regulatoryDesignations: state.regulatoryDesignations,
             },
             results: {

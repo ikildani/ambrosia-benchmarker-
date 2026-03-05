@@ -139,6 +139,162 @@ describe('/api/financial', () => {
       expect(data.dealFlowForecast).toEqual(forecastData);
     });
 
+    // ============================================================
+    // Indication parameter validation
+    // ============================================================
+    describe('indication validation', () => {
+      it('should reject indication with commas', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=lung,nsclc');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid indication format');
+      });
+
+      it('should reject indication with parentheses', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=lung(nsclc)');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid indication format');
+      });
+
+      it('should reject indication with SQL keywords (injection attempt)', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=lung;DROP%20TABLE');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid indication format');
+      });
+
+      it('should reject indication with spaces', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=lung%20nsclc');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid indication format');
+      });
+
+      it('should reject indication starting with a number', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=123lung');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid indication format');
+      });
+
+      it('should accept valid indication: lung_nsclc', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=lung_nsclc');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+
+      it('should accept valid indication: heartFailureHfref', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=cardiovascular&indication=heartFailureHfref');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+
+      it('should accept valid indication: colorectal', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=colorectal');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+    });
+
+    // ============================================================
+    // Modality parameter validation
+    // ============================================================
+    describe('modality validation', () => {
+      it('should reject modality with special characters', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor&modality=adc;drop');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid modality format');
+      });
+
+      it('should reject modality with spaces', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor&modality=small%20molecule');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid modality format');
+      });
+
+      it('should reject modality starting with a number', async () => {
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor&modality=123adc');
+
+        const response = await GET(request);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toContain('Invalid modality format');
+      });
+
+      it('should accept valid modality: adc', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor&modality=adc');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+
+      it('should accept valid modality: smallMolecule', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor&modality=smallMolecule');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+
+      it('should accept request with no modality parameter', async () => {
+        mockAnalyzeCompetitiveLandscape.mockResolvedValueOnce(null);
+        mockForecastDealFlow.mockResolvedValueOnce(null);
+
+        const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor');
+
+        const response = await GET(request);
+
+        expect(response.status).toBe(200);
+      });
+    });
+
     it('should return null for failed sub-analyses without erroring', async () => {
       mockAnalyzeCompetitiveLandscape.mockRejectedValueOnce(new Error('DB error'));
       mockForecastDealFlow.mockRejectedValueOnce(new Error('Forecast error'));

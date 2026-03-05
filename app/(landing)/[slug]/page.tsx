@@ -125,7 +125,7 @@ export default async function LandingPageRoute({ params }: PageProps) {
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-32 pb-20 px-4 overflow-hidden">
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,199,199,0.15),rgba(255,255,255,0))]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.15),rgba(255,255,255,0))]" />
             <div className="absolute top-20 right-[10%] w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-[5%] w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
           </div>

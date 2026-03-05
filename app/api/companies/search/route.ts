@@ -93,8 +93,15 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // Clamp any future last_deal_date to today (defense in depth)
+    const today = new Date().toISOString().slice(0, 10);
+    const companies = (data || []).map(c => ({
+      ...c,
+      last_deal_date: c.last_deal_date && c.last_deal_date > today ? today : c.last_deal_date,
+    }));
+
     return NextResponse.json({
-      companies: data || [],
+      companies,
       total: count || 0,
       page,
       limit,

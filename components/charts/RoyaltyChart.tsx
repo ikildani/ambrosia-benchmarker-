@@ -4,6 +4,7 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TieredRoyalties } from '@/lib/calculations';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { CHART_COLORS } from '@/lib/chartTheme';
 
 interface RoyaltyChartProps {
   royalties: TieredRoyalties;
@@ -79,23 +80,23 @@ function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           >
           <defs>
             <linearGradient id="royaltyGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.05} />
+              <stop offset="5%" stopColor={CHART_COLORS.teal500} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={CHART_COLORS.teal500} stopOpacity={0.05} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="sales"
             tickFormatter={(value) => value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             ticks={isMobile ? [0, 500, 1000, 2000] : [0, 500, 1000, 2000]}
             tickMargin={isMobile ? 2 : 8}
           />
           <YAxis
             domain={[0, Math.max(royalties.highTier.high + 5, 30)]}
             tickFormatter={(value) => `${value}%`}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 28 : 40}
             tickCount={isMobile ? 4 : 6}
           />
@@ -104,19 +105,19 @@ function RoyaltyChart({ royalties }: RoyaltyChartProps) {
             position={isMobile ? { x: 10, y: 10 } : undefined}
             wrapperStyle={isMobile ? { pointerEvents: 'none' } : undefined}
           />
-          <ReferenceLine x={500} stroke="#E5E7EB" strokeDasharray="3 3" />
-          <ReferenceLine x={1000} stroke="#E5E7EB" strokeDasharray="3 3" />
+          <ReferenceLine x={500} stroke={CHART_COLORS.gridLine} strokeDasharray="3 3" />
+          <ReferenceLine x={1000} stroke={CHART_COLORS.gridLine} strokeDasharray="3 3" />
           <Area
             type="stepAfter"
             dataKey="low"
-            stroke="#0D9488"
+            stroke={CHART_COLORS.teal600}
             strokeWidth={2}
             fill="url(#royaltyGradient)"
           />
           <Area
             type="stepAfter"
             dataKey="high"
-            stroke="#14B8A6"
+            stroke={CHART_COLORS.teal500}
             strokeWidth={2}
             fill="none"
             strokeDasharray="4 2"

@@ -2,12 +2,15 @@ import React, { useMemo } from 'react';
 import type {
   TherapeuticArea,
   Phase,
+  DealType,
   Modality,
   Indication,
   BiomarkerStatus,
 } from '@/lib/calculations';
 import {
   phaseOptions,
+  dealTypeOptions,
+  dealTypeDescriptions,
   modalityOptions,
   neurologyModalityOptions,
   immunologyModalityOptions,
@@ -36,6 +39,7 @@ import type { OnboardingStep } from '../OnboardingModal';
 interface AssetDetailsSectionProps {
   therapeuticArea: TherapeuticArea;
   phase: Phase;
+  dealType: DealType;
   modality: Modality;
   indication: Indication;
   biomarker: BiomarkerStatus;
@@ -43,6 +47,7 @@ interface AssetDetailsSectionProps {
   quickMode: boolean;
   onboardingStep: OnboardingStep | null;
   onPhaseChange: (value: Phase) => void;
+  onDealTypeChange: (value: DealType) => void;
   onModalityChange: (value: Modality) => void;
   onIndicationChange: (value: Indication) => void;
   onBiomarkerChange: (value: BiomarkerStatus) => void;
@@ -52,6 +57,7 @@ interface AssetDetailsSectionProps {
 const AssetDetailsSection = React.memo(function AssetDetailsSection({
   therapeuticArea,
   phase,
+  dealType,
   modality,
   indication,
   biomarker,
@@ -59,6 +65,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   quickMode,
   onboardingStep,
   onPhaseChange,
+  onDealTypeChange,
   onModalityChange,
   onIndicationChange,
   onBiomarkerChange,
@@ -141,6 +148,18 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           value={phase}
           onChange={onPhaseChange}
           highlighted={highlightedFields.has('phase')}
+          columns={5}
+        />
+
+        <OptionCardGroup
+          id="deal-type-select"
+          label="Deal Structure"
+          helpText="The type of transaction structure affects upfront/milestone splits and royalty terms."
+          options={dealTypeOptions}
+          descriptions={dealTypeDescriptions}
+          value={dealType}
+          onChange={onDealTypeChange}
+          highlighted={highlightedFields.has('dealType')}
           columns={5}
         />
 

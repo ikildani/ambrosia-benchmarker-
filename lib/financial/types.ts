@@ -27,14 +27,22 @@ import type { Phase, TherapeuticArea, Modality } from '@/lib/calculations';
  * development stage to the next.
  */
 export interface PhaseTransitionRates {
+  /** Target validation through IND-enabling studies */
+  discoveryToPreclinical?: number;
   /** IND-enabling through first-in-human dosing */
   preclinicalToPhase1: number;
   /** Dose-escalation/safety through proof-of-concept */
   phase1ToPhase2: number;
+  /** Phase 1/2 combined trial success (single-step) */
+  phase1_2ToPhase2?: number;
   /** Proof-of-concept through pivotal readout */
   phase2ToPhase3: number;
+  /** Phase 2/3 adaptive trial success (single-step) */
+  phase2_3ToPhase3?: number;
   /** Pivotal data through regulatory approval */
   phase3ToApproval: number;
+  /** NDA/BLA filed through approval decision */
+  ndaFiledToApproval?: number;
   /** Regulatory approval through successful commercial launch */
   approvalToLaunch: number;
 }

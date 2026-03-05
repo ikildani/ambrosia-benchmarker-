@@ -33,6 +33,10 @@ const baselinesMap: Record<string, PhaseBaselines> = {
   neurology: benchmarks.neurologyPhaseBaselines,
   immunology: benchmarks.immunologyPhaseBaselines,
   metabolic: benchmarks.metabolicPhaseBaselines,
+  cardiovascular: benchmarks.cardiovascularPhaseBaselines,
+  infectiousDisease: benchmarks.infectiousDiseasePhaseBaselines,
+  ophthalmology: benchmarks.ophthalmologyPhaseBaselines,
+  womensHealth: benchmarks.womensHealthPhaseBaselines,
 };
 
 export function getPhaseImpactBadge(phase: string, therapeuticArea: string): ImpactBadge {
@@ -69,6 +73,10 @@ const indicationCategoriesMap: Record<string, string[]> = {
   neurology: Object.keys(benchmarks.indications.neurology),
   immunology: Object.keys(benchmarks.indications.immunology),
   metabolic: Object.keys(benchmarks.indications.metabolic),
+  cardiovascular: Object.keys(benchmarks.indications.cardiovascular),
+  infectiousDisease: Object.keys(benchmarks.indications.infectiousDisease),
+  ophthalmology: Object.keys(benchmarks.indications.ophthalmology),
+  womensHealth: Object.keys(benchmarks.indications.womensHealth),
 };
 
 function findIndicationCategory(indicationValue: string): string | null {

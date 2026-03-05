@@ -234,7 +234,7 @@ export default function HistoryDetailModal({
           {/* Decorative elements - pointer-events-none so they don't block clicks */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
               backgroundSize: '24px 24px'
             }} />
           </div>

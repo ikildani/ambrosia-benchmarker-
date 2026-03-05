@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { formatCurrency, DrillDownData } from '@/lib/calculations';
 
 interface DrillDownPanelProps {
@@ -6,21 +7,36 @@ interface DrillDownPanelProps {
   isRoyalty?: boolean;
 }
 
+const staggerChildren = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 25 } },
+};
+
 function DrillDownPanelInner({
   data,
   isRoyalty = false
 }: DrillDownPanelProps) {
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <div className="mt-4 pt-4 xl:mt-5 xl:pt-5 border-t border-neutral-200 dark:border-slate-600 animate-fade-in">
+    <motion.div
+      className="mt-4 pt-4 xl:mt-5 xl:pt-5 border-t border-neutral-200 dark:border-slate-600"
+      variants={prefersReducedMotion ? undefined : staggerChildren}
+      initial={prefersReducedMotion ? false : 'hidden'}
+      animate="visible"
+    >
       {/* Why This Range */}
-      <div className="mb-4">
+      <motion.div className="mb-4" variants={fadeUp}>
         <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Why This Range?</h5>
         <p className="text-sm text-neutral-600 dark:text-slate-300 leading-relaxed">{data.rangeExplanation}</p>
-      </div>
+      </motion.div>
 
       {/* Breakdown Table */}
       {data.breakdown && data.breakdown.length > 0 && (
-        <div className="mb-4">
+        <motion.div className="mb-4" variants={fadeUp}>
           <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             {isRoyalty ? 'Royalty Tiers' : 'Breakdown'}
           </h5>
@@ -57,12 +73,12 @@ function DrillDownPanelInner({
             </table>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Key Factors */}
       {data.factors && data.factors.length > 0 && (
-        <div>
+        <motion.div variants={fadeUp}>
           <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Factors</h5>
           <div className="space-y-1.5">
             {data.factors.slice(0, 5).map((factor, idx) => (
@@ -91,9 +107,9 @@ function DrillDownPanelInner({
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

@@ -63,7 +63,7 @@ function LiveDemoSection() {
     <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3">
             See Your Deal Terms Instantly
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -228,7 +228,7 @@ export default function Home() {
       <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 xl:pt-48 pb-16 sm:pb-20 lg:pb-24 xl:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,199,199,0.12),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,199,199,0.15),rgba(0,0,0,0))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.12),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.15),rgba(0,0,0,0))]" />
           <div className="absolute top-20 right-[10%] w-72 h-72 bg-teal-200/30 dark:bg-teal-500/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-20 left-[5%] w-96 h-96 bg-cyan-100/40 dark:bg-cyan-500/15 rounded-full blur-3xl" />
           <div className="absolute top-1/2 right-[20%] w-64 h-64 bg-navy-100/20 dark:bg-navy-500/20 rounded-full blur-3xl" />
@@ -270,7 +270,7 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className={`text-3xl sm:text-5xl lg:text-7xl font-bold mb-5 sm:mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <h1 className={`text-3xl sm:text-5xl lg:text-7xl font-bold font-display mb-5 sm:mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="text-slate-900 dark:text-white">Deal Terms</span>
             <br />
             <span className="bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-400 dark:from-teal-400 dark:via-cyan-400 dark:to-teal-300 bg-clip-text text-transparent drop-shadow-sm">
@@ -379,7 +379,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Simple Process</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               How It Works
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -461,7 +461,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Why Use This Tool</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               Built for Life Sciences Professionals
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -545,7 +545,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">AI Partner Matching</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3">
               Find Your Ideal Licensing Partner
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -598,7 +598,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">Advanced Analytics</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               Beyond Benchmarks
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -694,7 +694,7 @@ export default function Home() {
       <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
             backgroundSize: '32px 32px'
           }} />
         </div>

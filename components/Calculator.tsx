@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type {
   TherapeuticArea,
   Phase,
+  DealType,
   Modality,
   Indication,
   Territory,
@@ -86,6 +88,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [state, actions] = useCalculatorState();
   const { trackCalculation, trackParameterChange, sessionId, anonymousId } = useTracking();
   const { user, isAuthenticated, openAuthModal } = useAuth();
+  const prefersReducedMotion = useReducedMotion();
 
   const calc = useCalculation({
     tier,
@@ -176,6 +179,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           ...(inputs.competitivePosition ? { competitivePosition: inputs.competitivePosition } : {}),
           ...(inputs.dataQuality ? { dataQuality: inputs.dataQuality } : {}),
           ...(inputs.regulatoryDesignations ? { regulatoryDesignations: inputs.regulatoryDesignations } : {}),
+          ...(inputs.dealType ? { dealType: inputs.dealType } : {}),
           showTemplates: false,
         });
         sessionStorage.removeItem('prefill_calculation');
@@ -197,6 +201,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       const patch: Partial<CalculatorFormState> = {};
       if (s.therapeuticArea) patch.therapeuticArea = s.therapeuticArea;
       if (s.phase) patch.phase = s.phase;
+      if (s.dealType) patch.dealType = s.dealType;
       if (s.modality) patch.modality = s.modality;
       if (s.indication) patch.indication = s.indication;
       if (s.territory) patch.territory = s.territory;
@@ -314,6 +319,18 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     }
   }, [calc.result, state.therapeuticArea, state.phase, state.modality, state.indication, state.territory, state.biomarker, state.competitivePosition, state.dataQuality]);
 
+  // ── Keyboard shortcut: Cmd/Ctrl+Enter to calculate ─────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        calc.handleCalculate(state);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [calc, state]);
+
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   const performAreaSwitch = (newArea: TherapeuticArea) => {
@@ -344,7 +361,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-6 lg:py-8 xl:py-10 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
               backgroundSize: '24px 24px'
             }} />
           </div>
@@ -357,7 +374,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 </svg>
               </div>
               <div className="min-w-0">
-                <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white truncate">
+                <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold font-display text-white truncate">
                   {state.therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : state.therapeuticArea === 'neurology' ? 'Neurology / CNS' : state.therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
@@ -495,6 +512,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       <AssetDetailsSection
                         therapeuticArea={state.therapeuticArea}
                         phase={state.phase}
+                        dealType={state.dealType}
                         modality={state.modality}
                         indication={state.indication}
                         biomarker={state.biomarker}
@@ -502,6 +520,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         quickMode={false}
                         onboardingStep={onboardingStep}
                         onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
+                        onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
                         onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
                         onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
                         onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}
@@ -590,32 +609,42 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       </div>
 
       {/* Results */}
-      {calc.result && (
-        <WatchlistProvider tier={tier}>
-        <div className="mt-8 animate-fade-in results-container" aria-live="polite">
-          <Results
-            result={calc.result}
-            tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
-            onUpgrade={onUpgrade}
-            onBuyReport={() => {
-              setPaywallReason('report_upsell');
-              setShowPaywall(true);
-            }}
-            reportId={reportPurchaseId || undefined}
-            userId={user?.id}
-            userEmail={user?.email}
-            inputs={{
-              modality: state.modality,
-              phase: state.phase,
-              indication: state.indication,
-              territory: state.territory,
-            }}
-            fullInputs={fullInputs}
-            onApplyNewInputs={onSensitivityApply}
-          />
-        </div>
-        </WatchlistProvider>
-      )}
+      <AnimatePresence>
+        {calc.result && (
+          <motion.div
+            key="results"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+          >
+            <WatchlistProvider tier={tier}>
+            <div className="mt-8 results-container" aria-live="polite">
+              <Results
+                result={calc.result}
+                tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
+                onUpgrade={onUpgrade}
+                onBuyReport={() => {
+                  setPaywallReason('report_upsell');
+                  setShowPaywall(true);
+                }}
+                reportId={reportPurchaseId || undefined}
+                userId={user?.id}
+                userEmail={user?.email}
+                inputs={{
+                  modality: state.modality,
+                  phase: state.phase,
+                  indication: state.indication,
+                  territory: state.territory,
+                }}
+                fullInputs={fullInputs}
+                onApplyNewInputs={onSensitivityApply}
+              />
+            </div>
+            </WatchlistProvider>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Area Switch Confirmation */}
       <AreaSwitchModal

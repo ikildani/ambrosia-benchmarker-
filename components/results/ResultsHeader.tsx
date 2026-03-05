@@ -49,7 +49,7 @@ function ResultsHeaderInner({
     <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-4 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-5 lg:py-6 xl:py-8 overflow-hidden">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
           backgroundSize: '20px 20px'
         }} />
       </div>
@@ -98,7 +98,7 @@ function ResultsHeaderInner({
 
         {/* Title + pills */}
         <div>
-          <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-white">Estimated Deal Terms</h3>
+          <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold font-display text-white">Estimated Deal Terms</h3>
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
             <span className="inline-flex items-center px-2 py-0.5 bg-navy-700 rounded text-xs text-neutral-300 font-medium">
               {labels.phase}

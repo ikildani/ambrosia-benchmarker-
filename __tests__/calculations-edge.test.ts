@@ -40,7 +40,7 @@ const baseInput: CalculationInput = {
 // ============================================================
 describe('NaN / Infinity protection', () => {
   it('should never produce NaN in any output field across all phases', () => {
-    const phases: Phase[] = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+    const phases: Phase[] = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
 
     for (const phase of phases) {
       const result = calculateDealTerms({ ...baseInput, phase });
@@ -61,7 +61,7 @@ describe('NaN / Infinity protection', () => {
   });
 
   it('should never produce Infinity in any output field across all phases', () => {
-    const phases: Phase[] = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+    const phases: Phase[] = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
 
     for (const phase of phases) {
       const result = calculateDealTerms({ ...baseInput, phase });
@@ -338,7 +338,7 @@ describe('output structure invariants', () => {
   });
 
   it('should maintain low <= median <= high for upfront across all phases', () => {
-    const phases: Phase[] = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+    const phases: Phase[] = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
 
     for (const phase of phases) {
       const result = calculateDealTerms({ ...baseInput, phase });
@@ -348,7 +348,7 @@ describe('output structure invariants', () => {
   });
 
   it('upfront percent + milestone percent should always equal 100', () => {
-    const phases: Phase[] = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+    const phases: Phase[] = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
 
     for (const phase of phases) {
       const result = calculateDealTerms({ ...baseInput, phase });

@@ -7,7 +7,10 @@ const benchmarks = getBenchmarksSync();
 export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth';
 
 // Phase types
-export type Phase = 'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'approved';
+export type Phase = 'discovery' | 'preclinical' | 'phase1' | 'phase1_2' | 'phase2' | 'phase2_3' | 'phase3' | 'nda_filed' | 'approved';
+
+// Deal structure types
+export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
 
 // Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
@@ -212,6 +215,7 @@ export interface DealRecommendation {
 export interface CalculationInput {
   therapeuticArea: TherapeuticArea;
   phase: Phase;
+  dealType?: DealType;
   modality: Modality;
   indication: Indication;
   territory: Territory;
@@ -424,10 +428,14 @@ export function calculateRiskScore(input: CalculationInput): number {
 
   // Phase risk (earlier = more risk)
   const phaseRisk: Record<Phase, number> = {
+    discovery: 45,
     preclinical: 40,
     phase1: 30,
+    phase1_2: 25,
     phase2: 20,
+    phase2_3: 15,
     phase3: 10,
+    nda_filed: 5,
     approved: 0
   };
   score += phaseRisk[input.phase];
@@ -1038,8 +1046,34 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
   const rangeWidth = phaseConfig.rangeWidths[input.phase];
+  const dealType = input.dealType || 'licensing';
 
-  const adjustedMedian = Math.round(baseTotalValue.median * effectiveMultiplier);
+  // Deal type value multiplier
+  const dealTypeMultipliers: Record<DealType, number> = {
+    licensing: 1.0,
+    acquisition: 1.35,
+    codevelopment: 0.90,
+    option: 0.75,
+    collaboration: 0.65,
+  };
+  const dealTypeMultiplier = dealTypeMultipliers[dealType];
+  if (dealType !== 'licensing') {
+    const dealTypeLabels: Record<DealType, string> = {
+      licensing: 'Licensing', acquisition: 'Acquisition / M&A',
+      codevelopment: 'Co-Development', option: 'Option Agreement',
+      collaboration: 'Research Collaboration',
+    };
+    modifiers.push({
+      name: dealTypeLabels[dealType],
+      multiplier: dealTypeMultiplier,
+      context: dealType === 'acquisition' ? 'Premium for certainty of control' :
+               dealType === 'codevelopment' ? 'Shared economics reduce total value' :
+               dealType === 'option' ? 'Optionality discount, lower commitment' :
+               'Early-stage research partnership',
+    });
+  }
+
+  const adjustedMedian = Math.round(baseTotalValue.median * effectiveMultiplier * dealTypeMultiplier);
 
   if (!Number.isFinite(adjustedMedian) || adjustedMedian < 0) {
     throw new Error(
@@ -1054,8 +1088,18 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
 
+  // Deal type upfront ratio overrides
+  const dealTypeUpfrontOverrides: Record<DealType, { low: number; high: number } | null> = {
+    licensing: null, // use phase-based ratios
+    acquisition: { low: 0.60, high: 0.85 }, // acquisitions are upfront-heavy
+    codevelopment: null, // use phase-based ratios (slightly reduced)
+    option: { low: 0.05, high: 0.12 }, // options have very low upfronts
+    collaboration: null, // use phase-based ratios
+  };
+
   // Calculate upfront based on phase ratios with risk adjustment
-  const upfrontRatios = phaseConfig.upfrontRatios[input.phase];
+  const baseUpfrontRatios = phaseConfig.upfrontRatios[input.phase];
+  const upfrontRatios = dealTypeUpfrontOverrides[dealType] || baseUpfrontRatios;
   const riskScore = calculateRiskScore(input);
   // Higher risk = lower upfront ratio (toward low end)
   const riskFactor = Math.max(0, Math.min(riskScore / 100, 1)); // Clamp 0 to 1
@@ -1066,9 +1110,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const adjustedRatioMedian = (adjustedRatioLow + adjustedRatioHigh) / 2;
 
   const upfront = {
-    low: Math.round(totalDealValue.low * adjustedRatioLow * 0.9), // 10% lower for conservative low estimate
+    low: Math.round(totalDealValue.low * adjustedRatioLow * 0.9),
     median: Math.round(totalDealValue.median * adjustedRatioMedian),
-    high: Math.round(totalDealValue.high * adjustedRatioHigh * 1.1) // 10% higher for optimistic high estimate
+    high: Math.round(totalDealValue.high * adjustedRatioHigh * 1.1)
   };
 
   // Calculate milestone allocations
@@ -1102,12 +1146,13 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(totalMilestones.high * milestoneAlloc.comm)
   };
 
-  // Calculate tiered royalties
+  // Calculate tiered royalties — acquisitions have no royalties
   const baseRoyalty = phaseBaseline.royalty;
   const royaltyMultiplier = Math.pow(effectiveMultiplier, 0.3); // Dampened effect on royalties
+  const isAcquisition = dealType === 'acquisition';
 
-  const baseLow = Math.round(baseRoyalty.base * royaltyMultiplier * 10) / 10;
-  const baseHigh = Math.round(baseRoyalty.max * royaltyMultiplier * 10) / 10;
+  const baseLow = isAcquisition ? 0 : Math.round(baseRoyalty.base * royaltyMultiplier * 10) / 10;
+  const baseHigh = isAcquisition ? 0 : Math.round(baseRoyalty.max * royaltyMultiplier * 10) / 10;
 
   const tieredRoyalties: TieredRoyalties = {
     base: {
@@ -1115,12 +1160,12 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       high: Math.min(baseHigh, 30)
     },
     midTier: {
-      low: Math.min(baseLow + 2, 28),
-      high: Math.min(baseHigh + 2, 33)
+      low: Math.min(baseLow + (isAcquisition ? 0 : 2), 28),
+      high: Math.min(baseHigh + (isAcquisition ? 0 : 2), 33)
     },
     highTier: {
-      low: Math.min(baseLow + 4, 30),
-      high: Math.min(baseHigh + 4, 35)
+      low: Math.min(baseLow + (isAcquisition ? 0 : 4), 30),
+      high: Math.min(baseHigh + (isAcquisition ? 0 : 4), 35)
     }
   };
 
@@ -1200,83 +1245,88 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   };
 }
 
+function phaseRangeLabel(phase: Phase): string {
+  return phase.replace(/_/g, '/').replace('phase', 'Phase ').replace('nda/filed', 'NDA Filed').replace('discovery', 'Discovery');
+}
+
+function lookupRange(ranges: Partial<Record<Phase, string>>, phase: Phase): string {
+  if (ranges[phase]) return ranges[phase]!;
+  // Interpolate intermediate phases to their nearest neighbor
+  const fallbacks: Record<string, Phase> = {
+    discovery: 'preclinical', phase1_2: 'phase1', phase2_3: 'phase2', nda_filed: 'phase3',
+  };
+  return ranges[fallbacks[phase] ?? 'phase2'] ?? 'N/A';
+}
+
 function generateNeuroMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const neuroUpfrontRanges: Record<Phase, string> = {
-    preclinical: '5-12%',
-    phase1: '8-18%',
-    phase2: '12-25%',
-    phase3: '20-35%',
-    approved: '30-50%',
+  const neuroUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '3-8%', preclinical: '5-12%', phase1: '8-18%', phase1_2: '10-20%',
+    phase2: '12-25%', phase2_3: '16-30%', phase3: '20-35%', nda_filed: '25-42%', approved: '30-50%',
   };
-  const oncoUpfrontRanges: Record<Phase, string> = {
-    preclinical: '8-18%',
-    phase1: '12-25%',
-    phase2: '18-35%',
-    phase3: '25-45%',
-    approved: '35-60%',
+  const oncoUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '5-12%', preclinical: '8-18%', phase1: '12-25%', phase1_2: '15-30%',
+    phase2: '18-35%', phase2_3: '22-40%', phase3: '25-45%', nda_filed: '30-52%', approved: '35-60%',
   };
-  return `Neurology deals at ${phase.replace('phase', 'Phase ')} typically allocate ${neuroUpfrontRanges[phase]} upfront (vs ${oncoUpfrontRanges[phase]} in oncology). ` +
+  return `Neurology deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(neuroUpfrontRanges, phase)} upfront (vs ${lookupRange(oncoUpfrontRanges, phase)} in oncology). ` +
     `Your estimated ${upfrontPercent}% upfront reflects the higher clinical risk in CNS programs — longer trials, complex endpoints, and historically lower approval rates shift value toward milestone-based structures that reward de-risking.`;
 }
 
 function generateImmunologyMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const immunoUpfrontRanges: Record<Phase, string> = {
-    preclinical: '5-9%',
-    phase1: '8-13%',
-    phase2: '14-22%',
-    phase3: '20-28%',
-    approved: '28-42%',
+  const immunoUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '3-7%', preclinical: '5-9%', phase1: '8-13%', phase1_2: '11-17%',
+    phase2: '14-22%', phase2_3: '17-25%', phase3: '20-28%', nda_filed: '24-35%', approved: '28-42%',
   };
-  return `Immunology/autoimmune deals at ${phase.replace('phase', 'Phase ')} typically allocate ${immunoUpfrontRanges[phase]} upfront. ` +
+  return `Immunology/autoimmune deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(immunoUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the chronic-disease commercial model — autoimmune drugs generate recurring revenue (Humira $21B peak, Dupixent $13B+), ` +
     `so deal structures weight commercial milestones heavily, with upfronts higher than neurology but structured to reward market access and formulary wins.`;
 }
 
 function generateMetabolicMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const metUpfrontRanges: Record<Phase, string> = {
-    preclinical: '6-10%',
-    phase1: '10-15%',
-    phase2: '15-25%',
-    phase3: '20-30%',
-    approved: '28-42%',
+  const metUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '4-8%', preclinical: '6-10%', phase1: '10-15%', phase1_2: '12-20%',
+    phase2: '15-25%', phase2_3: '18-28%', phase3: '20-30%', nda_filed: '24-36%', approved: '28-42%',
   };
-  return `Metabolic/obesity deals at ${phase.replace('phase', 'Phase ')} typically allocate ${metUpfrontRanges[phase]} upfront. ` +
+  return `Metabolic/obesity deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(metUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the commercial-weighted structure of metabolic deals — GLP-1 and incretin programs generate massive recurring revenue ($20B+ semaglutide peak), ` +
     `so deal structures heavily weight commercial milestones tied to formulary access, indication expansion, and blockbuster sales tiers.`;
 }
 
 function generateCardiovascularMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const cvUpfrontRanges: Record<Phase, string> = {
-    preclinical: '5-10%', phase1: '8-15%', phase2: '14-24%', phase3: '22-35%', approved: '30-50%',
+  const cvUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '3-8%', preclinical: '5-10%', phase1: '8-15%', phase1_2: '11-20%',
+    phase2: '14-24%', phase2_3: '18-30%', phase3: '22-35%', nda_filed: '26-42%', approved: '30-50%',
   };
-  return `Cardiovascular deals at ${phase.replace('phase', 'Phase ')} typically allocate ${cvUpfrontRanges[phase]} upfront. ` +
+  return `Cardiovascular deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(cvUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the MACE outcome-driven model — CV drugs require large outcome trials (10,000-15,000 patients), ` +
     `so deal structures heavily weight regulatory milestones and commercial tiers tied to formulary access and CV mortality/hospitalization endpoints.`;
 }
 
 function generateInfectiousDiseaseMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const idUpfrontRanges: Record<Phase, string> = {
-    preclinical: '8-15%', phase1: '12-20%', phase2: '18-30%', phase3: '25-40%', approved: '35-55%',
+  const idUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '5-10%', preclinical: '8-15%', phase1: '12-20%', phase1_2: '15-25%',
+    phase2: '18-30%', phase2_3: '22-35%', phase3: '25-40%', nda_filed: '30-48%', approved: '35-55%',
   };
-  return `Infectious disease deals at ${phase.replace('phase', 'Phase ')} typically allocate ${idUpfrontRanges[phase]} upfront. ` +
+  return `Infectious disease deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(idUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the faster clinical timelines in ID — shorter trial durations, clear microbiological endpoints, ` +
     `and strong regulatory pathways (QIDP, LPAD) allow higher upfronts. Commercial milestones tied to resistance profiles and formulary positioning.`;
 }
 
 function generateOphthalmologyMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const ophUpfrontRanges: Record<Phase, string> = {
-    preclinical: '6-12%', phase1: '10-18%', phase2: '15-25%', phase3: '22-35%', approved: '30-48%',
+  const ophUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '4-8%', preclinical: '6-12%', phase1: '10-18%', phase1_2: '12-22%',
+    phase2: '15-25%', phase2_3: '18-30%', phase3: '22-35%', nda_filed: '26-42%', approved: '30-48%',
   };
-  return `Ophthalmology deals at ${phase.replace('phase', 'Phase ')} typically allocate ${ophUpfrontRanges[phase]} upfront. ` +
+  return `Ophthalmology deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(ophUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the durability-driven model — retinal drugs are injection-based with clear visual acuity endpoints. ` +
     `Deal structures reward treatment interval extension and durability over anti-VEGF standard of care, with heavy commercial milestone weighting.`;
 }
 
 function generateWomensHealthMilestoneExplanation(phase: Phase, upfrontPercent: number): string {
-  const whUpfrontRanges: Record<Phase, string> = {
-    preclinical: '5-10%', phase1: '8-14%', phase2: '12-22%', phase3: '18-30%', approved: '25-42%',
+  const whUpfrontRanges: Partial<Record<Phase, string>> = {
+    discovery: '3-7%', preclinical: '5-10%', phase1: '8-14%', phase1_2: '10-18%',
+    phase2: '12-22%', phase2_3: '15-26%', phase3: '18-30%', nda_filed: '22-36%', approved: '25-42%',
   };
-  return `Women's health deals at ${phase.replace('phase', 'Phase ')} typically allocate ${whUpfrontRanges[phase]} upfront. ` +
+  return `Women's health deals at ${phaseRangeLabel(phase)} typically allocate ${lookupRange(whUpfrontRanges, phase)} upfront. ` +
     `Your estimated ${upfrontPercent}% upfront reflects the historically underinvested nature of the space — recent breakthroughs (Veozah, Zurzuvae, Myfembree) ` +
     `have validated premium deal structures, with milestones weighted toward regulatory approval and commercial launch given the large, underserved patient populations.`;
 }
@@ -1301,16 +1351,26 @@ function generateDrillDownData(
   }));
 
   // Phase-specific range explanations
-  const rangeExplanations: Record<Phase, string> = {
+  const rangeExplanations: Partial<Record<Phase, string>> = {
+    discovery: `Discovery-stage assets have the widest valuation range (±${rangePercent}%) due to minimal validation and high attrition risk.`,
     preclinical: `Preclinical assets have the widest valuation range (±${rangePercent}%) due to significant development uncertainty and limited clinical validation.`,
     phase1: `Phase 1 assets show moderate variance (±${rangePercent}%) as initial safety data reduces but doesn't eliminate development risk.`,
+    phase1_2: `Phase 1/2 assets show moderate variance (±${rangePercent}%) as initial safety and early efficacy data provide partial de-risking.`,
     phase2: `Phase 2 assets typically see ±${rangePercent}% variance based on efficacy signals, competitive dynamics, and pathway clarity.`,
+    phase2_3: `Phase 2/3 adaptive assets see ±${rangePercent}% variance — efficacy trends from Phase 2 part inform risk, but pivotal data is pending.`,
     phase3: `Phase 3 assets have tighter ranges (±${rangePercent}%) given substantial de-risking, though regulatory and commercial uncertainties remain.`,
-    approved: `Approved assets show the tightest ranges (±${rangePercent}%) with valuations driven primarily by commercial execution factors.`
+    nda_filed: `NDA/BLA-filed assets have narrow ranges (±${rangePercent}%) with primary risk being regulatory decision timing and label breadth.`,
+    approved: `Approved assets show the tightest ranges (±${rangePercent}%) with valuations driven primarily by commercial execution factors.`,
   };
 
   // Development milestone breakdown by phase
-  const devBreakdowns: Record<Phase, MilestoneBreakdown[]> = {
+  const devBreakdowns: Partial<Record<Phase, MilestoneBreakdown[]>> = {
+    discovery: [
+      { label: 'Target Validation', percentage: 20, value: calculateBreakdownValue(devMilestones, 0.20) },
+      { label: 'Lead Optimization', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) },
+      { label: 'IND Filing', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) },
+      { label: 'Phase 1 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) }
+    ],
     preclinical: [
       { label: 'IND Filing', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) },
       { label: 'Phase 1 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) },
@@ -1322,13 +1382,26 @@ function generateDrillDownData(
       { label: 'Phase 2 Start', percentage: 35, value: calculateBreakdownValue(devMilestones, 0.35) },
       { label: 'Phase 3 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) }
     ],
+    phase1_2: [
+      { label: 'Phase 1/2 Completion', percentage: 45, value: calculateBreakdownValue(devMilestones, 0.45) },
+      { label: 'Phase 2/3 Start', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) },
+      { label: 'Phase 3 Start', percentage: 25, value: calculateBreakdownValue(devMilestones, 0.25) }
+    ],
     phase2: [
       { label: 'Phase 2 Completion', percentage: 60, value: calculateBreakdownValue(devMilestones, 0.60) },
       { label: 'Phase 3 Start', percentage: 40, value: calculateBreakdownValue(devMilestones, 0.40) }
     ],
+    phase2_3: [
+      { label: 'Phase 2/3 Completion', percentage: 65, value: calculateBreakdownValue(devMilestones, 0.65) },
+      { label: 'NDA/BLA Filing', percentage: 35, value: calculateBreakdownValue(devMilestones, 0.35) }
+    ],
     phase3: [
       { label: 'Phase 3 Completion', percentage: 70, value: calculateBreakdownValue(devMilestones, 0.70) },
       { label: 'NDA/BLA Filing', percentage: 30, value: calculateBreakdownValue(devMilestones, 0.30) }
+    ],
+    nda_filed: [
+      { label: 'FDA Approval', percentage: 80, value: calculateBreakdownValue(devMilestones, 0.80) },
+      { label: 'Label Expansion', percentage: 20, value: calculateBreakdownValue(devMilestones, 0.20) }
     ],
     approved: [
       { label: 'Label Expansion', percentage: 100, value: calculateBreakdownValue(devMilestones, 1.0) }
@@ -1364,7 +1437,7 @@ function generateDrillDownData(
       factors: factors.filter(f => f.impact !== 'neutral')
     },
     totalDealValue: {
-      rangeExplanation: rangeExplanations[input.phase],
+      rangeExplanation: rangeExplanations[input.phase] ?? rangeExplanations['phase2']!,
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral')
     },
@@ -1372,7 +1445,7 @@ function generateDrillDownData(
       rangeExplanation: `Development milestones are paid upon achieving clinical trial objectives. Earlier-stage deals weight more toward development milestones.`,
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral'),
-      breakdown: devBreakdowns[input.phase]
+      breakdown: devBreakdowns[input.phase] ?? devBreakdowns['phase2']!
     },
     regMilestones: {
       rangeExplanation: `Regulatory milestones are contingent on approval by health authorities. FDA typically accounts for 50% of regulatory milestone value.`,
@@ -1478,12 +1551,32 @@ export function formatRange(range: { low: number; median: number; high: number }
 
 // Option arrays for dropdowns
 export const phaseOptions = [
+  { value: 'discovery', label: 'Discovery (Target Validation)' },
   { value: 'preclinical', label: 'Preclinical (IND-enabling)' },
   { value: 'phase1', label: 'Phase 1' },
+  { value: 'phase1_2', label: 'Phase 1/2' },
   { value: 'phase2', label: 'Phase 2' },
-  { value: 'phase3', label: 'Phase 3' },
-  { value: 'approved', label: 'Approved / NDA Filed' },
+  { value: 'phase2_3', label: 'Phase 2/3 (Adaptive)' },
+  { value: 'phase3', label: 'Phase 3 (Pivotal)' },
+  { value: 'nda_filed', label: 'NDA / BLA Filed' },
+  { value: 'approved', label: 'Approved' },
 ];
+
+export const dealTypeOptions = [
+  { value: 'licensing', label: 'Licensing' },
+  { value: 'acquisition', label: 'Acquisition / M&A' },
+  { value: 'codevelopment', label: 'Co-Development' },
+  { value: 'option', label: 'Option Agreement' },
+  { value: 'collaboration', label: 'Research Collaboration' },
+];
+
+export const dealTypeDescriptions: Record<string, string> = {
+  licensing: 'Standard out-licensing with milestones & royalties',
+  acquisition: 'Full asset or company acquisition, upfront-heavy',
+  codevelopment: 'Shared development costs and commercial rights',
+  option: 'Right to license at a future date, lower upfront',
+  collaboration: 'Early research partnership, milestone-driven',
+};
 
 export const modalityOptions = [
   { group: 'Small Molecules', options: [
@@ -2047,6 +2140,11 @@ export const cardiovascularIndicationOptions = [
   { group: 'Heart Failure', options: [
     { value: 'heartFailureHfref', label: 'Heart Failure (HFrEF)' },
     { value: 'cardiomyopathy', label: 'Cardiomyopathy (HCM/DCM)' },
+    { value: 'attrCardiomyopathy', label: 'ATTR Cardiomyopathy (Transthyretin)' },
+  ]},
+  { group: 'Acute Coronary & Stroke', options: [
+    { value: 'acuteCoronarySyndrome', label: 'Acute Coronary Syndrome (ACS)' },
+    { value: 'stroke', label: 'Stroke (Ischemic/Hemorrhagic)' },
   ]},
   { group: 'Arrhythmia & Structural', options: [
     { value: 'atrialFibrillation', label: 'Atrial Fibrillation' },
@@ -2066,6 +2164,8 @@ export const cardiovascularIndicationOptions = [
   { group: 'Other Cardiovascular', options: [
     { value: 'resistantHypertension', label: 'Resistant Hypertension' },
     { value: 'myocarditis', label: 'Myocarditis / Pericarditis' },
+    { value: 'cardiacFibrosis', label: 'Cardiac Fibrosis' },
+    { value: 'longQtSyndrome', label: 'Long QT Syndrome' },
   ]},
 ];
 
@@ -2115,12 +2215,20 @@ export const infectiousDiseaseIndicationOptions = [
     { value: 'hepatitisB', label: 'Hepatitis B (Chronic)' },
     { value: 'hepatitisD', label: 'Hepatitis D' },
     { value: 'cmvInfection', label: 'CMV Infection' },
+    { value: 'hepatitisC', label: 'Hepatitis C (HCV Cure)' },
+    { value: 'ebv', label: 'Epstein-Barr Virus (EBV)' },
   ]},
   { group: 'Viral — Acute / Respiratory', options: [
     { value: 'rsv', label: 'RSV' },
     { value: 'influenza', label: 'Influenza' },
     { value: 'covid', label: 'COVID-19 / Coronavirus' },
     { value: 'dengueMalaria', label: 'Dengue / Malaria' },
+    { value: 'norovirus', label: 'Norovirus' },
+    { value: 'mpox', label: 'Mpox (Monkeypox)' },
+  ]},
+  { group: 'Vector-Borne & Emerging', options: [
+    { value: 'zika', label: 'Zika Virus' },
+    { value: 'lymeDisease', label: 'Lyme Disease' },
   ]},
   { group: 'Bacterial & Fungal', options: [
     { value: 'amrBacterial', label: 'AMR / Novel Antibiotics' },
@@ -2184,11 +2292,18 @@ export const ophthalmologyIndicationOptions = [
     { value: 'retinalVeinOcclusion', label: 'Retinal Vein Occlusion' },
     { value: 'uveiticMacular', label: 'Uveitic Macular Edema' },
     { value: 'stargardt', label: 'Stargardt Disease' },
+    { value: 'opticNeuritis', label: 'Optic Neuritis' },
   ]},
   { group: 'Anterior Segment & Other', options: [
     { value: 'glaucoma', label: 'Glaucoma' },
     { value: 'dryEyeDisease', label: 'Dry Eye Disease' },
     { value: 'myopiaProgression', label: 'Myopia (Progressive)' },
+    { value: 'keratoconus', label: 'Keratoconus' },
+    { value: 'presbyopia', label: 'Presbyopia' },
+    { value: 'cornealDystrophy', label: 'Corneal Dystrophy' },
+  ]},
+  { group: 'Rare / Genetic', options: [
+    { value: 'achromatopsia', label: 'Achromatopsia / Color Vision' },
   ]},
 ];
 
@@ -2242,16 +2357,24 @@ export const womensHealthIndicationOptions = [
   ]},
   { group: 'Menopause & Hormonal', options: [
     { value: 'menopause', label: 'Menopause / Vasomotor Symptoms' },
+    { value: 'vaginalAtrophy', label: 'Vaginal Atrophy / GSM' },
   ]},
   { group: 'Maternal', options: [
     { value: 'postpartumDepression', label: 'Postpartum Depression' },
     { value: 'preeclampsia', label: 'Preeclampsia' },
     { value: 'prematureLabor', label: 'Premature Labor / Preterm Birth' },
+    { value: 'gestationalDiabetes', label: 'Gestational Diabetes' },
+    { value: 'hyperemesisGravidarum', label: 'Hyperemesis Gravidarum' },
+    { value: 'placentaAccreta', label: 'Placenta Accreta Spectrum' },
   ]},
   { group: 'Other', options: [
     { value: 'vulvodynia', label: 'Vulvodynia / Chronic Pelvic Pain' },
     { value: 'cervicalDysplasia', label: 'Cervical Dysplasia / HPV Therapeutics' },
     { value: 'breastCancerPrevention', label: 'Breast Cancer Prevention' },
+    { value: 'menstrualDisorders', label: 'Menstrual Disorders (HMB/Amenorrhea)' },
+  ]},
+  { group: 'Oncology Prevention', options: [
+    { value: 'ovarianCancerScreening', label: 'Ovarian Cancer Early Detection' },
   ]},
 ];
 

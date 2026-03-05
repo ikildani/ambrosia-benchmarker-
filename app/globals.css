@@ -5,9 +5,10 @@
 :root {
   --foreground: #171717;
   --background: #ffffff;
-  --navy: #1a1e42;
-  --teal: #00c7c7;
+  --navy: #141831;
+  --teal: #0EA5A5;
   --cyan: #00bcd4;
+  --accent: #E6A800;
 }
 
 .dark {
@@ -38,7 +39,7 @@
   }
 
   ::selection {
-    background: rgba(0, 199, 199, 0.2);
+    background: rgba(14, 165, 165, 0.2);
     color: #1a1e42;
   }
 
@@ -142,7 +143,7 @@
   }
 
   .metric-card:hover {
-    box-shadow: 0 0 20px rgba(0, 199, 199, 0.12), 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 20px rgba(14, 165, 165, 0.12), 0 10px 25px -5px rgba(0, 0, 0, 0.08);
   }
 
   .metric-card::before {
@@ -178,7 +179,7 @@
   }
 
   .card-glow-hover:hover {
-    box-shadow: 0 0 20px rgba(0, 199, 199, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 20px rgba(14, 165, 165, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -202,11 +203,11 @@
 
   .bg-mesh-gradient {
     background:
-      radial-gradient(at 40% 20%, rgba(0, 199, 199, 0.1) 0px, transparent 50%),
+      radial-gradient(at 40% 20%, rgba(14, 165, 165, 0.1) 0px, transparent 50%),
       radial-gradient(at 80% 0%, rgba(0, 188, 212, 0.1) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(0, 199, 199, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(14, 165, 165, 0.05) 0px, transparent 50%),
       radial-gradient(at 80% 50%, rgba(0, 188, 212, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, rgba(0, 199, 199, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(14, 165, 165, 0.1) 0px, transparent 50%),
       linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
   }
 
@@ -310,7 +311,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #00c7c7 0%, #00bcd4 100%);
+  background: linear-gradient(180deg, #0EA5A5 0%, #00bcd4 100%);
   border-radius: 5px;
   border: 2px solid #fafafa;
 }
@@ -327,7 +328,7 @@
 input::selection,
 textarea::selection,
 select::selection {
-  background: rgba(0, 199, 199, 0.3);
+  background: rgba(14, 165, 165, 0.3);
 }
 
 /* Smooth page transitions */
@@ -520,10 +521,10 @@ select::selection {
 /* Floating action button pulse */
 @keyframes fabPulse {
   0%, 100% {
-    box-shadow: 0 4px 20px rgba(0, 199, 199, 0.4);
+    box-shadow: 0 4px 20px rgba(14, 165, 165, 0.4);
   }
   50% {
-    box-shadow: 0 4px 30px rgba(0, 199, 199, 0.6);
+    box-shadow: 0 4px 30px rgba(14, 165, 165, 0.6);
   }
 }
 
@@ -592,7 +593,7 @@ select::selection {
 /* Value change flash for live deal preview */
 @keyframes numberFlash {
   0% { color: inherit; }
-  25% { color: #00c7c7; text-shadow: 0 0 8px rgba(0, 199, 199, 0.3); }
+  25% { color: #0EA5A5; text-shadow: 0 0 8px rgba(14, 165, 165, 0.3); }
   100% { color: inherit; text-shadow: none; }
 }
 .animate-number-flash {
@@ -601,8 +602,8 @@ select::selection {
 
 /* Subtle CTA glow pulse for Calculate button */
 @keyframes ctaGlow {
-  0%, 100% { box-shadow: 0 10px 15px -3px rgba(0, 199, 199, 0.25); }
-  50% { box-shadow: 0 10px 25px -3px rgba(0, 199, 199, 0.4); }
+  0%, 100% { box-shadow: 0 10px 15px -3px rgba(14, 165, 165, 0.25); }
+  50% { box-shadow: 0 10px 25px -3px rgba(14, 165, 165, 0.4); }
 }
 @media (prefers-reduced-motion: no-preference) {
   .animate-cta-glow {
@@ -747,8 +748,8 @@ select::selection {
   z-index: 40;
   border-radius: 16px;
   box-shadow:
-    0 0 0 4px rgba(0, 199, 199, 0.6),
-    0 0 20px rgba(0, 199, 199, 0.3),
+    0 0 0 4px rgba(14, 165, 165, 0.6),
+    0 0 20px rgba(14, 165, 165, 0.3),
     0 0 0 9999px rgba(13, 15, 33, 0.85);
   animation: spotlightPulse 2s ease-in-out infinite;
   transition: box-shadow 0.3s ease-out;
@@ -757,14 +758,14 @@ select::selection {
 @keyframes spotlightPulse {
   0%, 100% {
     box-shadow:
-      0 0 0 4px rgba(0, 199, 199, 0.6),
-      0 0 20px rgba(0, 199, 199, 0.3),
+      0 0 0 4px rgba(14, 165, 165, 0.6),
+      0 0 20px rgba(14, 165, 165, 0.3),
       0 0 0 9999px rgba(13, 15, 33, 0.85);
   }
   50% {
     box-shadow:
-      0 0 0 6px rgba(0, 199, 199, 0.4),
-      0 0 30px rgba(0, 199, 199, 0.4),
+      0 0 0 6px rgba(14, 165, 165, 0.4),
+      0 0 30px rgba(14, 165, 165, 0.4),
       0 0 0 9999px rgba(13, 15, 33, 0.85);
   }
 }
@@ -938,8 +939,8 @@ select::selection {
   .onboarding-spotlight {
     animation: none !important;
     box-shadow:
-      0 0 0 4px rgba(0, 199, 199, 0.6),
-      0 0 20px rgba(0, 199, 199, 0.3),
+      0 0 0 4px rgba(14, 165, 165, 0.6),
+      0 0 20px rgba(14, 165, 165, 0.3),
       0 0 0 9999px rgba(13, 15, 33, 0.85);
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DealTerms, TieredRoyalties } from '@/lib/calculations';
 import DealValueChart from './DealValueChart';
 import RoyaltyChart from './RoyaltyChart';
@@ -25,6 +26,7 @@ export default function ChartSection({
 }: ChartSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<ChartTab>('breakdown');
+  const prefersReducedMotion = useReducedMotion();
 
   const tabs: { id: ChartTab; label: string; icon: JSX.Element }[] = [
     {
@@ -75,18 +77,29 @@ export default function ChartSection({
             </span>
           )}
         </div>
-        <svg
-          className={`w-5 h-5 text-teal-500 dark:text-teal-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+        <motion.svg
+          className="w-5 h-5 text-teal-500 dark:text-teal-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        </motion.svg>
       </button>
 
-      {isExpanded && (
-        <div className="mt-3 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-700 overflow-hidden animate-fade-in">
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            key="charts"
+            initial={prefersReducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={{ overflow: 'hidden' }}
+          >
+          <div className="mt-3 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-700 overflow-hidden">
           {isPro ? (
             <>
               {/* Tabs */}
@@ -174,7 +187,9 @@ export default function ChartSection({
             </div>
           )}
         </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

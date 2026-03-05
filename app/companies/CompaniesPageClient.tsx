@@ -155,6 +155,7 @@ export default function CompaniesPageClient() {
   function recencyLabel(dateStr: string | null): string | null {
     if (!dateStr) return null;
     const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (86400 * 1000));
+    if (days < 0) return 'Recently';
     if (days < 7) return 'This week';
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
     if (days < 365) return `${Math.floor(days / 30)}mo ago`;

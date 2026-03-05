@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useMemo, useCallback, useEffect, useLayoutEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { ImpactBadge } from '@/lib/impactBadges';
@@ -46,6 +47,7 @@ function SearchableComboboxInner<T extends string>({
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
   useFocusTrap(sheetRef, isOpen && isMobile, () => setIsOpen(false));
 
   // Find selected option info
@@ -228,8 +230,8 @@ function SearchableComboboxInner<T extends string>({
     </span>
   ) : null;
 
-  // Mobile bottom sheet
-  if (isMobile && isOpen) {
+  // Mobile layout
+  if (isMobile) {
     return (
       <>
         <div className="space-y-2">
@@ -238,11 +240,11 @@ function SearchableComboboxInner<T extends string>({
             ref={triggerRef}
             type="button"
             role="combobox"
-            aria-expanded={true}
+            aria-expanded={isOpen}
             aria-haspopup="listbox"
             aria-labelledby={`${id}-label`}
             className={`select-field text-left flex items-center justify-between gap-2 ${highlighted ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
-            onClick={() => setIsOpen(false)}
+            onClick={() => setIsOpen(!isOpen)}
           >
             <div className="min-w-0">
               <div className="text-[10px] text-neutral-400 dark:text-slate-500 uppercase tracking-wide">{selectedInfo.group}</div>
@@ -250,7 +252,7 @@ function SearchableComboboxInner<T extends string>({
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {badgeChip}
-              <svg className="w-4 h-4 text-neutral-400 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -258,58 +260,73 @@ function SearchableComboboxInner<T extends string>({
         </div>
 
         {/* Mobile bottom sheet */}
-        <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setIsOpen(false)}>
-          <div
-            ref={sheetRef}
-            tabIndex={-1}
-            onClick={(e) => e.stopPropagation()}
-            className="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-bottom-sheet"
-            onKeyDown={handleKeyDown}
-          >
-            {/* Handle bar */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-neutral-300 dark:bg-slate-600" />
-            </div>
-            {/* Header + search */}
-            <div className="px-4 pb-3">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold text-neutral-800 dark:text-white">{label}</h3>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-800"
-                  aria-label="Close"
-                >
-                  <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  role="searchbox"
-                  aria-label={`Search ${label.toLowerCase()}`}
-                  placeholder={`Search ${label.toLowerCase()}...`}
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }}
-                  className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl bg-neutral-50 dark:bg-slate-800 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
-                />
-              </div>
-            </div>
-            {/* Options list */}
-            <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="overflow-y-auto flex-1 pb-safe">
-              {filteredGroups.length > 0 ? renderOptions() : (
-                <div className="px-4 py-8 text-center text-sm text-neutral-400 dark:text-slate-500">
-                  No matches found
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="fixed inset-0 z-50 bg-black/50"
+              onClick={() => setIsOpen(false)}
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                ref={sheetRef}
+                tabIndex={-1}
+                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col"
+                onKeyDown={handleKeyDown}
+                initial={prefersReducedMotion ? false : { y: '100%' }}
+                animate={{ y: 0 }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              >
+                {/* Handle bar */}
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-neutral-300 dark:bg-slate-600" />
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+                {/* Header + search */}
+                <div className="px-4 pb-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-base font-semibold text-neutral-800 dark:text-white">{label}</h3>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-800"
+                      aria-label="Close"
+                    >
+                      <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      role="searchbox"
+                      aria-label={`Search ${label.toLowerCase()}`}
+                      placeholder={`Search ${label.toLowerCase()}...`}
+                      value={searchQuery}
+                      onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }}
+                      className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 dark:border-slate-700 rounded-xl bg-neutral-50 dark:bg-slate-800 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    />
+                  </div>
+                </div>
+                {/* Options list */}
+                <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="overflow-y-auto flex-1 pb-safe">
+                  {filteredGroups.length > 0 ? renderOptions() : (
+                    <div className="px-4 py-8 text-center text-sm text-neutral-400 dark:text-slate-500">
+                      No matches found
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </>
     );
   }
@@ -335,49 +352,62 @@ function SearchableComboboxInner<T extends string>({
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {badgeChip}
-          <svg className={`w-4 h-4 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <motion.svg
+            className="w-4 h-4 text-neutral-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          </motion.svg>
         </div>
       </button>
 
       {/* Desktop dropdown */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          onKeyDown={handleKeyDown}
-          className={`absolute left-0 right-0 z-40 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-600 rounded-xl shadow-lg overflow-hidden ${
-            flipUp ? 'bottom-full mb-1' : 'top-full mt-1'
-          }`}
-        >
-          {/* Search */}
-          <div className="p-2 border-b border-neutral-100 dark:border-slate-700">
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                ref={searchInputRef}
-                type="text"
-                role="searchbox"
-                aria-label={`Search ${label.toLowerCase()}`}
-                placeholder={`Search ${label.toLowerCase()}...`}
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }}
-                className="w-full pl-10 pr-4 py-2 border border-neutral-200 dark:border-slate-600 rounded-lg bg-neutral-50 dark:bg-slate-900 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
-              />
-            </div>
-          </div>
-          {/* Options */}
-          <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="max-h-72 overflow-y-auto">
-            {filteredGroups.length > 0 ? renderOptions() : (
-              <div className="px-4 py-6 text-center text-sm text-neutral-400 dark:text-slate-500">
-                No matches found
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={dropdownRef}
+            onKeyDown={handleKeyDown}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95, y: flipUp ? 8 : -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: flipUp ? 8 : -8 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className={`absolute left-0 right-0 z-40 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-600 rounded-xl shadow-lg overflow-hidden ${
+              flipUp ? 'bottom-full mb-1 origin-bottom' : 'top-full mt-1 origin-top'
+            }`}
+          >
+            {/* Search */}
+            <div className="p-2 border-b border-neutral-100 dark:border-slate-700">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  role="searchbox"
+                  aria-label={`Search ${label.toLowerCase()}`}
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }}
+                  className="w-full pl-10 pr-4 py-2 border border-neutral-200 dark:border-slate-600 rounded-lg bg-neutral-50 dark:bg-slate-900 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                />
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+            {/* Options */}
+            <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="max-h-72 overflow-y-auto">
+              {filteredGroups.length > 0 ? renderOptions() : (
+                <div className="px-4 py-6 text-center text-sm text-neutral-400 dark:text-slate-500">
+                  No matches found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { CHART_COLORS } from '@/lib/chartTheme';
 
 interface Modifier {
   name: string;
@@ -23,7 +24,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
     {
       name: 'Base',
       value: baseValue,
-      fill: '#64748B', // slate-500
+      fill: CHART_COLORS.slate500,
       isBase: true,
     },
     ...modifiers.map((mod) => {
@@ -34,7 +35,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
         fullName: mod.name,
         value: Math.abs(impact),
         impact,
-        fill: mod.multiplier > 1 ? '#14B8A6' : '#F59E0B', // teal or amber
+        fill: mod.multiplier > 1 ? CHART_COLORS.positive : CHART_COLORS.negative,
         isPositive: mod.multiplier > 1,
         start: Math.min(runningValue, newValue),
       };
@@ -44,7 +45,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
     {
       name: 'Final',
       value: runningValue,
-      fill: '#0D9488', // teal-600
+      fill: CHART_COLORS.teal600,
       isFinal: true,
     },
   ];
@@ -133,18 +134,18 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
         >
           <XAxis
             dataKey="name"
-            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
             angle={-30}
             textAnchor="end"
             height={isMobile ? 70 : 90}
             interval={0}
-            axisLine={{ stroke: '#E5E7EB' }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             tickMargin={5}
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: '#6B7280' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 35 : 55}
             tickCount={isMobile ? 4 : 6}
           />
@@ -153,7 +154,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
             position={isMobile ? { x: 10, y: 10 } : undefined}
             wrapperStyle={isMobile ? { pointerEvents: 'none' } : undefined}
           />
-          <ReferenceLine y={baseValue} stroke="#E5E7EB" strokeDasharray="3 3" />
+          <ReferenceLine y={baseValue} stroke={CHART_COLORS.gridLine} strokeDasharray="3 3" />
           <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={50}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />

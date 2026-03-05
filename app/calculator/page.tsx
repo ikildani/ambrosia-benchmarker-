@@ -77,7 +77,7 @@ export default function CalculatorPage() {
             <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 relative overflow-hidden">
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0" style={{
-                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 199, 199, 0.5) 1px, transparent 0)`,
+                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
                   backgroundSize: '24px 24px'
                 }} />
               </div>

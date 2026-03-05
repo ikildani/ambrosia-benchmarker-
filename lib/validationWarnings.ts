@@ -21,20 +21,20 @@ interface ValidationInput {
 export function getValidationWarnings(input: ValidationInput): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
 
-  // Approved + Limited data is contradictory
-  if (input.phase === 'approved' && input.dataQuality === 'limited') {
+  // Approved / NDA Filed + Limited data is contradictory
+  if ((input.phase === 'approved' || input.phase === 'nda_filed') && input.dataQuality === 'limited') {
     warnings.push({
       id: 'approved-limited-data',
-      message: 'Approved products typically have extensive clinical data. "Limited" data quality is unusual here — did you mean a different phase or data quality?',
+      message: 'Late-stage / approved products typically have extensive clinical data. "Limited" data quality is unusual here — did you mean a different phase or data quality?',
       fields: ['phase', 'dataQuality'],
     });
   }
 
-  // Preclinical + Pivotal-ready data is contradictory
-  if (input.phase === 'preclinical' && input.dataQuality === 'pivotalReady') {
+  // Discovery / Preclinical + Pivotal-ready data is contradictory
+  if ((input.phase === 'discovery' || input.phase === 'preclinical') && input.dataQuality === 'pivotalReady') {
     warnings.push({
       id: 'preclinical-pivotal-data',
-      message: 'Preclinical assets rarely have pivotal-ready data. Consider whether "Promising" or "Limited" better describes your data package.',
+      message: 'Early-stage assets rarely have pivotal-ready data. Consider whether "Promising" or "Limited" better describes your data package.',
       fields: ['phase', 'dataQuality'],
     });
   }
@@ -48,11 +48,11 @@ export function getValidationWarnings(input: ValidationInput): ValidationWarning
     });
   }
 
-  // Preclinical + First to pivotal is contradictory
-  if (input.phase === 'preclinical' && input.competitivePosition === 'firstToPivotal') {
+  // Discovery / Preclinical + First to pivotal is contradictory
+  if ((input.phase === 'discovery' || input.phase === 'preclinical') && input.competitivePosition === 'firstToPivotal') {
     warnings.push({
       id: 'preclinical-first-pivotal',
-      message: '"First to Pivotal" implies a Phase 3 race, which is inconsistent with a preclinical asset. Consider "First-in-Class" or "Racing" instead.',
+      message: '"First to Pivotal" implies a Phase 3 race, which is inconsistent with an early-stage asset. Consider "First-in-Class" or "Racing" instead.',
       fields: ['phase', 'competitivePosition'],
     });
   }
@@ -65,11 +65,11 @@ export function getValidationWarnings(input: ValidationInput): ValidationWarning
   // Crowded competitive position + First in class is somewhat contradictory
   // (already covered by the fact that they're different options, skip)
 
-  // Biomarker-selected but preclinical — unusual
-  if (input.phase === 'preclinical' && input.biomarker === 'biomarkerSelected') {
+  // Biomarker-selected but discovery/preclinical — unusual
+  if ((input.phase === 'discovery' || input.phase === 'preclinical') && input.biomarker === 'biomarkerSelected') {
     warnings.push({
       id: 'preclinical-biomarker-selected',
-      message: 'Biomarker-selected populations are typically defined in later clinical stages. Preclinical assets usually have "No biomarker" or "Biomarker identified".',
+      message: 'Biomarker-selected populations are typically defined in later clinical stages. Early-stage assets usually have "No biomarker" or "Biomarker identified".',
       fields: ['phase', 'biomarker'],
     });
   }

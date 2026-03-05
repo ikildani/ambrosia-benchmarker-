@@ -99,6 +99,91 @@ describe('/api/companies/search', () => {
     expect(mockSupabase.range).toHaveBeenCalledWith(20, 29);
   });
 
+  it('should clamp future last_deal_date to today', async () => {
+    const futureCompanies = [
+      {
+        id: 'company-future',
+        name: 'FuturePharma',
+        company_type: 'large_pharma',
+        hq_country: 'US',
+        modalities_active: ['adc'],
+        deals_last_12mo: 3,
+        active_trials_count: 2,
+        acquisition_appetite: 'moderate',
+        last_deal_date: '2099-12-31',
+        last_deal_modality: 'adc',
+        data_quality_score: 0.8,
+      },
+      {
+        id: 'company-past',
+        name: 'PastPharma',
+        company_type: 'mid_biotech',
+        hq_country: 'UK',
+        modalities_active: ['mab'],
+        deals_last_12mo: 1,
+        active_trials_count: 1,
+        acquisition_appetite: 'selective',
+        last_deal_date: '2024-06-15',
+        last_deal_modality: 'mab',
+        data_quality_score: 0.7,
+      },
+    ];
+
+    mockSupabase.range.mockResolvedValueOnce({
+      data: futureCompanies,
+      count: 2,
+      error: null,
+    });
+
+    const request = new NextRequest('http://localhost/api/companies/search?type=large_pharma');
+
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+
+    // The future date should be clamped to today
+    const today = new Date().toISOString().slice(0, 10);
+    const futureCompany = data.companies.find((c: { id: string }) => c.id === 'company-future');
+    expect(futureCompany.last_deal_date).toBe(today);
+
+    // The past date should remain unchanged
+    const pastCompany = data.companies.find((c: { id: string }) => c.id === 'company-past');
+    expect(pastCompany.last_deal_date).toBe('2024-06-15');
+  });
+
+  it('should not clamp null last_deal_date', async () => {
+    const nullDateCompanies = [
+      {
+        id: 'company-null',
+        name: 'NullDatePharma',
+        company_type: 'mid_biotech',
+        hq_country: 'US',
+        modalities_active: [],
+        deals_last_12mo: 0,
+        active_trials_count: 0,
+        acquisition_appetite: null,
+        last_deal_date: null,
+        last_deal_modality: null,
+        data_quality_score: 0.5,
+      },
+    ];
+
+    mockSupabase.range.mockResolvedValueOnce({
+      data: nullDateCompanies,
+      count: 1,
+      error: null,
+    });
+
+    const request = new NextRequest('http://localhost/api/companies/search?type=mid_biotech');
+
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.companies[0].last_deal_date).toBeNull();
+  });
+
   it('should return 500 on database error', async () => {
     mockSupabase.range.mockResolvedValueOnce({
       data: null,

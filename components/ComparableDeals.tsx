@@ -20,9 +20,12 @@ interface ComparableDealsProps {
   onBuyReport?: () => void;
 }
 
+type RecencyFilter = 'all' | '24mo' | '12mo';
+
 export default function ComparableDeals({ inputs, tier, onBuyReport }: ComparableDealsProps) {
   const [deals, setDeals] = useState<ComparableDealForUI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recencyFilter, setRecencyFilter] = useState<RecencyFilter>('all');
 
   useEffect(() => {
     setLoading(true);
@@ -43,17 +46,40 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
 
   const hasFullAccess = tier === 'pro' || tier === 'report';
   const FREE_DEAL_LIMIT = 3;
-  const visibleDeals = hasFullAccess ? deals : deals.slice(0, FREE_DEAL_LIMIT);
-  const hiddenCount = hasFullAccess ? 0 : Math.max(0, deals.length - FREE_DEAL_LIMIT);
+  const currentYear = new Date().getFullYear();
+  const filteredDeals = deals.filter(deal => {
+    if (recencyFilter === '12mo') return deal.year >= currentYear - 1;
+    if (recencyFilter === '24mo') return deal.year >= currentYear - 2;
+    return true;
+  });
+  const visibleDeals = hasFullAccess ? filteredDeals : filteredDeals.slice(0, FREE_DEAL_LIMIT);
+  const hiddenCount = hasFullAccess ? 0 : Math.max(0, filteredDeals.length - FREE_DEAL_LIMIT);
 
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
         Comparable Transactions
       </h3>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        Recent deals with similar characteristics to your asset profile
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Recent deals with similar characteristics
+        </p>
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
+          {([['12mo', 'Last 12mo'], ['24mo', 'Last 24mo'], ['all', 'All time']] as const).map(([value, label]) => (
+            <button
+              key={value}
+              onClick={() => setRecencyFilter(value)}
+              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                recencyFilter === value
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="space-y-3">
         {loading && (
           <div className="space-y-3 animate-pulse">

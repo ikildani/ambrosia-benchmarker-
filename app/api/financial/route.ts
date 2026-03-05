@@ -51,6 +51,15 @@ export async function GET(request: NextRequest) {
       return apiError('therapeuticArea and indication parameters required', 400);
     }
 
+    // Validate indication format (alphanumeric + underscores only, prevents PostgREST filter injection)
+    if (!/^[a-zA-Z][a-zA-Z0-9_]{0,100}$/.test(indication)) {
+      return apiError('Invalid indication format', 400);
+    }
+
+    if (modality && !/^[a-zA-Z][a-zA-Z0-9_]{0,50}$/.test(modality)) {
+      return apiError('Invalid modality format', 400);
+    }
+
     // Validate therapeuticArea against known values
     if (!VALID_THERAPEUTIC_AREAS.includes(therapeuticArea)) {
       return apiError(

@@ -4,6 +4,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DealTerms } from '@/lib/calculations';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { BAR_COLORS, CHART_COLORS } from '@/lib/chartTheme';
 
 interface DealValueChartProps {
   terms: DealTerms;
@@ -23,28 +24,28 @@ function DealValueChart({ terms }: DealValueChartProps) {
       low: terms.upfront.low,
       median: terms.upfront.median,
       high: terms.upfront.high,
-      fill: '#14B8A6', // teal-500
+      fill: BAR_COLORS[0],
     },
     {
       name: isMobile ? 'Dev MS' : 'Dev Milestones',
       low: terms.devMilestones.low,
       median: terms.devMilestones.median,
       high: terms.devMilestones.high,
-      fill: '#06B6D4', // cyan-500
+      fill: BAR_COLORS[1],
     },
     {
       name: isMobile ? 'Reg MS' : 'Reg Milestones',
       low: terms.regMilestones.low,
       median: terms.regMilestones.median,
       high: terms.regMilestones.high,
-      fill: '#0D9488', // teal-600
+      fill: BAR_COLORS[2],
     },
     {
       name: isMobile ? 'Comm MS' : 'Comm Milestones',
       low: terms.commMilestones.low,
       median: terms.commMilestones.median,
       high: terms.commMilestones.high,
-      fill: '#0891B2', // cyan-600
+      fill: BAR_COLORS[3],
     },
   ];
 
@@ -122,15 +123,15 @@ function DealValueChart({ terms }: DealValueChartProps) {
           <XAxis
             type="number"
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 9 : 12, fill: '#6B7280' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: CHART_COLORS.axisLabel }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             tickCount={isMobile ? 4 : 6}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: isMobile ? 9 : 12, fill: '#374151' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: CHART_COLORS.axisLabelBold }}
+            axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 50 : 75}
           />
           <Tooltip

@@ -1,9 +1,33 @@
 import React from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { formatCurrency } from '@/lib/calculations';
 
 interface LiveDealPreviewProps {
   totalDealValue: { low: number; median: number; high: number };
   upfront: { low: number; median: number; high: number };
+}
+
+function AnimatedCurrency({ value, className }: { value: string; className?: string }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <span className={className}>{value}</span>;
+  }
+
+  return (
+    <AnimatePresence mode="popLayout" initial={false}>
+      <motion.span
+        key={value}
+        className={className}
+        initial={{ y: 12, opacity: 0, filter: 'blur(4px)' }}
+        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+        exit={{ y: -12, opacity: 0, filter: 'blur(4px)' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      >
+        {value}
+      </motion.span>
+    </AnimatePresence>
+  );
 }
 
 const LiveDealPreview = React.memo(function LiveDealPreview({
@@ -24,11 +48,11 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
             <div className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-slate-500 mb-1">
               Estimated Deal Value
             </div>
-            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums animate-number-flash" key={totalRange}>
-              {totalRange}
+            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums">
+              <AnimatedCurrency value={totalRange} />
             </div>
             <div className="text-xs text-neutral-500 dark:text-slate-400 mt-1 tabular-nums">
-              Upfront: <span className="font-semibold text-teal-600 dark:text-teal-400">{upfrontMedian}</span>
+              Upfront: <AnimatedCurrency value={upfrontMedian} className="font-semibold text-teal-600 dark:text-teal-400" />
             </div>
           </div>
         </div>
@@ -42,12 +66,14 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
               Est. Deal Value
             </div>
             <div className="text-base font-bold text-navy-800 dark:text-white tabular-nums">
-              {totalRange}
+              <AnimatedCurrency value={totalRange} />
             </div>
           </div>
           <div className="text-right">
             <div className="text-xs text-neutral-400 dark:text-slate-500">Upfront</div>
-            <div className="text-sm font-semibold text-teal-600 dark:text-teal-400 tabular-nums">{upfrontMedian}</div>
+            <div className="text-sm font-semibold text-teal-600 dark:text-teal-400 tabular-nums">
+              <AnimatedCurrency value={upfrontMedian} />
+            </div>
           </div>
         </div>
       </div>

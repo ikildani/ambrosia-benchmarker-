@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo, useEffect, createRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
 import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore } from '@/lib/calculations';
@@ -414,6 +415,7 @@ function getIndicationCategory(indication: string): string | null {
 // Methodology Section component
 function MethodologySection() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div className="mt-6 sm:mt-8">
@@ -429,18 +431,29 @@ function MethodologySection() {
           </div>
           <span className="font-semibold text-navy-800 dark:text-white">How We Calculate This</span>
         </div>
-        <svg
-          className={`w-5 h-5 text-navy-500 dark:text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+        <motion.svg
+          className="w-5 h-5 text-navy-500 dark:text-slate-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        </motion.svg>
       </button>
 
-      {isExpanded && (
-        <div className="mt-3 p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 animate-fade-in">
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            key="methodology"
+            initial={prefersReducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={{ overflow: 'hidden' }}
+          >
+          <div className="mt-3 p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-lg font-bold text-navy-800 dark:text-white">Powered by</span>
             <span className="text-lg font-bold text-teal-600 dark:text-teal-400">Ambrosia Ventures</span>
@@ -482,7 +495,9 @@ function MethodologySection() {
             </p>
           </div>
         </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -845,7 +860,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   };
 
   return (
-    <div aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden animate-slide-up">
+    <div aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden">
       {/* Header */}
       <ResultsHeader
         labels={labels}
@@ -1591,7 +1606,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
               return `${monthNames[parseInt(m, 10) - 1]} ${y}`;
             })()}
-            {' '}&middot;{' '}Deal data refreshed daily via SEC EDGAR
+            {' '}&middot;{' '}350+ curated deals across 8 therapeutic areas{' '}&middot;{' '}Refreshed daily via SEC EDGAR
           </p>
         </div>
 

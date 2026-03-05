@@ -2,6 +2,7 @@ import { useReducer, useCallback, useMemo } from 'react';
 import type {
   TherapeuticArea,
   Phase,
+  DealType,
   Modality,
   Indication,
   Territory,
@@ -45,6 +46,7 @@ export interface CalculatorFormState {
   // Core form fields
   therapeuticArea: TherapeuticArea;
   phase: Phase;
+  dealType: DealType;
   modality: Modality;
   indication: Indication;
   territory: Territory;
@@ -96,6 +98,7 @@ export interface CalculatorFormState {
 export const INITIAL_STATE: CalculatorFormState = {
   therapeuticArea: 'oncology',
   phase: 'phase2',
+  dealType: 'licensing',
   modality: 'smallMolecule',
   indication: 'lung_nsclc',
   territory: 'global',
@@ -286,6 +289,7 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
 export interface CalculatorActions {
   setTherapeuticArea: (v: TherapeuticArea) => void;
   setPhase: (v: Phase) => void;
+  setDealType: (v: DealType) => void;
   setModality: (v: Modality) => void;
   setIndication: (v: Indication) => void;
   setTerritory: (v: Territory) => void;
@@ -340,6 +344,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
   const actions: CalculatorActions = useMemo(() => ({
     setTherapeuticArea: (v) => dispatch({ type: 'SET_FIELD', field: 'therapeuticArea', value: v }),
     setPhase: (v) => dispatch({ type: 'SET_FIELD', field: 'phase', value: v }),
+    setDealType: (v) => dispatch({ type: 'SET_FIELD', field: 'dealType', value: v }),
     setModality: (v) => dispatch({ type: 'SET_FIELD', field: 'modality', value: v }),
     setIndication: (v) => dispatch({ type: 'SET_FIELD', field: 'indication', value: v }),
     setTerritory: (v) => dispatch({ type: 'SET_FIELD', field: 'territory', value: v }),

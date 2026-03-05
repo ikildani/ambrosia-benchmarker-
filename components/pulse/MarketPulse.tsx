@@ -181,6 +181,11 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
 
       {/* Benchmark Sparklines — full width */}
       <BenchmarkSparklines snapshots={historySnapshots} isPro={isPro} />
+
+      {/* Data Freshness */}
+      <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        Data last updated March 2026 &middot; 350+ curated deals across 8 therapeutic areas &middot; Refreshed weekly
+      </p>
     </div>
   );
 }

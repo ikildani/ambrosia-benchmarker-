@@ -2,11 +2,15 @@
 // Used by OptionCardGroup to show context below each option label
 
 export const phaseDescriptions: Record<string, string> = {
+  discovery: 'Target validation, lead optimization',
   preclinical: 'IND-enabling, no human data yet',
   phase1: 'First-in-human, safety & dosing',
+  phase1_2: 'Combined safety & early efficacy',
   phase2: 'Proof of concept, efficacy signal',
+  phase2_3: 'Adaptive design, seamless pivotal',
   phase3: 'Pivotal registration-enabling trial',
-  approved: 'NDA filed or marketed product',
+  nda_filed: 'Regulatory submission under review',
+  approved: 'Marketed product, post-approval',
 };
 
 export const competitivePositionDescriptions: Record<string, string> = {

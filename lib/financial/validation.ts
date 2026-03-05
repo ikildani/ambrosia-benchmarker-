@@ -17,7 +17,7 @@ const therapeuticAreas = [
 ] as const;
 
 /** Valid development phases */
-const phases = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'] as const;
+const phases = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'] as const;
 
 /** Valid territories */
 const territories = [

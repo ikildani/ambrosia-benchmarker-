@@ -32,6 +32,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 24, totalValue: 22.4 },
     { quarter: '2025Q3', dealCount: 22, totalValue: 20.1 },
     { quarter: '2025Q4', dealCount: 27, totalValue: 35.8 },
+    { quarter: '2026Q1', dealCount: 23, totalValue: 21.5 },
   ],
   neurology: [
     { quarter: '2022Q1', dealCount: 8, totalValue: 3.2 },
@@ -50,6 +51,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 14, totalValue: 12.8 },
     { quarter: '2025Q3', dealCount: 12, totalValue: 10.4 },
     { quarter: '2025Q4', dealCount: 16, totalValue: 18.3 },
+    { quarter: '2026Q1', dealCount: 14, totalValue: 13.2 },
   ],
   immunology: [
     { quarter: '2022Q1', dealCount: 10, totalValue: 4.5 },
@@ -68,6 +70,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 17, totalValue: 16.8 },
     { quarter: '2025Q3', dealCount: 16, totalValue: 15.2 },
     { quarter: '2025Q4', dealCount: 20, totalValue: 25.1 },
+    { quarter: '2026Q1', dealCount: 17, totalValue: 16.5 },
   ],
   metabolic: [
     { quarter: '2022Q1', dealCount: 6, totalValue: 2.8 },
@@ -86,6 +89,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 19, totalValue: 26.4 },
     { quarter: '2025Q3', dealCount: 18, totalValue: 24.1 },
     { quarter: '2025Q4', dealCount: 22, totalValue: 32.8 },
+    { quarter: '2026Q1', dealCount: 19, totalValue: 25.8 },
   ],
   cardiovascular: [
     { quarter: '2022Q1', dealCount: 4, totalValue: 1.5 },
@@ -104,6 +108,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 8, totalValue: 7.8 },
     { quarter: '2025Q3', dealCount: 9, totalValue: 8.5 },
     { quarter: '2025Q4', dealCount: 10, totalValue: 12.3 },
+    { quarter: '2026Q1', dealCount: 8, totalValue: 7.2 },
   ],
   infectiousDisease: [
     { quarter: '2022Q1', dealCount: 6, totalValue: 3.5 },
@@ -122,6 +127,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 7, totalValue: 5.2 },
     { quarter: '2025Q3', dealCount: 7, totalValue: 5.8 },
     { quarter: '2025Q4', dealCount: 8, totalValue: 6.8 },
+    { quarter: '2026Q1', dealCount: 7, totalValue: 5.5 },
   ],
   ophthalmology: [
     { quarter: '2022Q1', dealCount: 3, totalValue: 1.2 },
@@ -140,6 +146,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 5, totalValue: 4.2 },
     { quarter: '2025Q3', dealCount: 6, totalValue: 5.1 },
     { quarter: '2025Q4', dealCount: 7, totalValue: 6.5 },
+    { quarter: '2026Q1', dealCount: 5, totalValue: 4.0 },
   ],
   womensHealth: [
     { quarter: '2022Q1', dealCount: 2, totalValue: 0.8 },
@@ -158,6 +165,7 @@ const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number;
     { quarter: '2025Q2', dealCount: 4, totalValue: 2.8 },
     { quarter: '2025Q3', dealCount: 5, totalValue: 3.5 },
     { quarter: '2025Q4', dealCount: 6, totalValue: 4.8 },
+    { quarter: '2026Q1', dealCount: 4, totalValue: 2.8 },
   ],
 };
 

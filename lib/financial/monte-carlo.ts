@@ -371,7 +371,7 @@ export function runMonteCarlo(
   const rng = seedableRandom(seed);
 
   // --- Input guards ---
-  const VALID_PHASES = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+  const VALID_PHASES = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
   const guardedInput = { ...input.rnpvInput };
   if (!VALID_PHASES.includes(guardedInput.phase)) {
     guardedInput.phase = 'phase2' as typeof guardedInput.phase;

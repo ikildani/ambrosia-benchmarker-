@@ -109,7 +109,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             </svg>
             <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Simple Pricing</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-neutral-900 dark:text-white mb-3 sm:mb-4">
             Choose Your Plan
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">

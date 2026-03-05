@@ -1,4 +1,5 @@
 import React, { useCallback, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { ImpactBadge } from '@/lib/impactBadges';
 import InfoTooltip from './InfoTooltip';
 
@@ -28,6 +29,7 @@ function OptionCardGroupInner<T extends string>({
   id,
 }: OptionCardGroupProps<T>) {
   const groupRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const currentIndex = options.findIndex(o => o.value === value);
@@ -62,6 +64,9 @@ function OptionCardGroupInner<T extends string>({
     ? 'grid grid-cols-2 sm:grid-cols-3 gap-2'
     : 'grid grid-cols-1 sm:grid-cols-3 gap-2';
 
+  // Unique layout group per instance
+  const layoutGroupId = `option-card-${id}`;
+
   return (
     <div className="space-y-2">
       <label id={id} className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">
@@ -80,20 +85,30 @@ function OptionCardGroupInner<T extends string>({
           const description = descriptions?.[option.value];
           const badge = impactBadges?.[option.value];
           return (
-            <button
+            <motion.button
               key={option.value}
               type="button"
               role="radio"
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => onChange(option.value as T)}
-              className={`px-3 py-2.5 rounded-xl border-2 text-left transition-all duration-200 touch-feedback
-                motion-safe:active:scale-[0.96] motion-safe:hover:scale-[1.02] ${
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className={`relative px-3 py-2.5 rounded-xl border-2 text-left transition-colors duration-200 touch-feedback ${
                 isSelected
-                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10 motion-safe:scale-[1.01]'
+                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 shadow-sm shadow-teal-500/10'
                   : 'border-neutral-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-neutral-600 dark:text-slate-400 hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-sm'
               } ${highlighted ? 'ring-2 ring-teal-400 ring-offset-1' : ''}`}
             >
+              {/* Animated selection background */}
+              {isSelected && (
+                <motion.div
+                  layoutId={layoutGroupId}
+                  className="absolute inset-0 rounded-[10px] bg-teal-50 dark:bg-teal-900/20 -z-10"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
               <div className={`text-sm font-medium ${isSelected ? 'text-teal-700 dark:text-teal-400' : 'text-neutral-800 dark:text-slate-200'}`}>
                 {option.label}
               </div>
@@ -112,7 +127,7 @@ function OptionCardGroupInner<T extends string>({
                   {badge.label}
                 </span>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>

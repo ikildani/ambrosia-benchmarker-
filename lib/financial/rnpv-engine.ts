@@ -24,7 +24,7 @@ import {
 import { DEFAULT_DISCOUNT_RATES } from './discount-rates';
 
 /** Phase order for iteration */
-const PHASE_ORDER = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'] as const;
+const PHASE_ORDER = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'] as const;
 
 /** Map phase to index */
 function phaseIndex(phase: string): number {
@@ -40,7 +40,7 @@ function phaseIndex(phase: string): number {
  */
 export function calculateRNPV(input: RNPVInput): RNPVResult {
   // --- Input guards ---
-  const VALID_PHASES = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+  const VALID_PHASES = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
   const guardedPhase = VALID_PHASES.includes(input.phase) ? input.phase : 'phase2';
   const guardedDiscountRate = input.discountRate != null
     ? Math.max(0.01, Math.min(0.40, input.discountRate))

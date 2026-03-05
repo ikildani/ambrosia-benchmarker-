@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DrillDownData, formatCurrency } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
 import InfoTooltip from '@/components/calculator/InfoTooltip';
@@ -45,6 +46,21 @@ const iconTextClasses: Record<string, string> = {
   cyan: 'text-cyan-600'
 };
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 16, scale: 0.97 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 260,
+      damping: 24,
+      delay: i * 0.05,
+    },
+  }),
+};
+
 function MetricCardInner({
   title,
   icon,
@@ -67,6 +83,8 @@ function MetricCardInner({
   previousValue,
   currentValue
 }: MetricCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const handleHeaderClick = useCallback(() => {
     if (canExpand) {
       onToggle();
@@ -82,10 +100,16 @@ function MetricCardInner({
     }
   }, [handleHeaderClick]);
 
+  const idx = animationIndex ?? 0;
+
   return (
-    <div
-      className={`group metric-card p-4 sm:p-5 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''} ${typeof animationIndex === 'number' ? 'motion-safe:animate-metric-cascade' : ''}`}
-      style={typeof animationIndex === 'number' ? { animationDelay: `${animationIndex * 100}ms` } : undefined}
+    <motion.div
+      custom={idx}
+      variants={prefersReducedMotion ? undefined : cardVariants}
+      initial={prefersReducedMotion ? false : 'hidden'}
+      animate="visible"
+      whileHover={prefersReducedMotion ? undefined : { y: -2, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+      className={`group metric-card p-4 sm:p-5 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg transition-colors duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
@@ -113,14 +137,16 @@ function MetricCardInner({
               {badge}
             </span>
             {canExpand && (
-              <svg
-                className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              <motion.svg
+                className="w-4 h-4 text-neutral-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              </motion.svg>
             )}
             {!canExpand && !isPro && (
               <div className="p-1 bg-navy-100 dark:bg-slate-600 rounded">
@@ -138,7 +164,7 @@ function MetricCardInner({
           <p className="text-sm text-neutral-500 dark:text-slate-400">
             Expected: <span className={`font-bold ${expectedColor}`}>
               {currentValue !== undefined ? (
-                <AnimatedValue value={currentValue} duration={900 + (animationIndex || 0) * 100} />
+                <AnimatedValue value={currentValue} duration={900 + idx * 100} />
               ) : (
                 expected
               )}
@@ -159,12 +185,11 @@ function MetricCardInner({
           </p>
         </div>
         <div className="progress-bar">
-          <div
-            className={`h-full ${progressColor} rounded-full transition-all duration-1000 ease-out`}
-            style={{
-              width: `${progressWidth}%`,
-              transitionDelay: `${(animationIndex || 0) * 100}ms`,
-            }}
+          <motion.div
+            className={`h-full ${progressColor} rounded-full`}
+            initial={prefersReducedMotion ? { width: `${progressWidth}%` } : { width: '0%' }}
+            animate={{ width: `${progressWidth}%` }}
+            transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 100, damping: 20, delay: idx * 0.05 + 0.2 }}
           />
         </div>
         {contextLine && (
@@ -173,10 +198,21 @@ function MetricCardInner({
       </div>
 
       {/* Drill-down panel */}
-      {isExpanded && drillDown && (
-        <DrillDownPanel data={drillDown} />
-      )}
-    </div>
+      <AnimatePresence initial={false}>
+        {isExpanded && drillDown && (
+          <motion.div
+            key="drilldown"
+            initial={prefersReducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <DrillDownPanel data={drillDown} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
