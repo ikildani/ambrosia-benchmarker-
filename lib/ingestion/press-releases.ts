@@ -342,7 +342,7 @@ ${content}`;
 // === Main Ingestion Function ===
 
 export async function runPressReleaseIngestion(
-  supabase: any,
+  supabase: import('@supabase/supabase-js').SupabaseClient,
   anthropicApiKey: string,
   options?: { maxArticlesPerSource?: number }
 ): Promise<{

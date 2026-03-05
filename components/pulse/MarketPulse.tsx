@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import WeeklyHighlights from './WeeklyHighlights';
 import DealActivityFeed from './DealActivityFeed';
-import BenchmarkSparklines from './BenchmarkSparklines';
 import ModalityHeatMap from './ModalityHeatMap';
+
+const BenchmarkSparklines = dynamic(() => import('./BenchmarkSparklines'), { ssr: false });
 
 interface MarketPulseProps {
   isPro: boolean;

@@ -148,7 +148,7 @@ function getStaticBaseline(therapeuticArea: string, phase: string): { upfrontMed
  * 6. Logs to data_ingestion_log
  */
 export async function runBenchmarkCalibration(
-  supabase: any,
+  supabase: import('@supabase/supabase-js').SupabaseClient,
   options?: CalibrationOptions
 ): Promise<CalibrationReport> {
   const minSampleSize = options?.minSampleSize ?? 5;

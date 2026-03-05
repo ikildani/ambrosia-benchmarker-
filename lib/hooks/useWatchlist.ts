@@ -89,8 +89,8 @@ export function useWatchlist(userId: string | null) {
       }
       await fetchItems();
       return true;
-    } catch (err: any) {
-      console.error('Add to watchlist error:', err.message);
+    } catch (err) {
+      console.error('Add to watchlist error:', err instanceof Error ? err.message : 'Unknown error');
       return false;
     }
   }, [userId, fetchItems]);

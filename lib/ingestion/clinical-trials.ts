@@ -705,7 +705,7 @@ export async function runWeeklyIngestion(
         const modalities = new Set<string>();
         const indications = new Set<string>();
         const indicationsSpecific = new Set<string>();
-        const trialRecords: any[] = [];
+        const trialRecords: Record<string, unknown>[] = [];
 
         for (const trial of trials) {
           const modality = inferModalityFromIntervention(trial.interventions);

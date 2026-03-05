@@ -2,8 +2,15 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+interface PulseSnapshot {
+  snapshot_date: string;
+  week_start: string;
+  modality_breakdown: Record<string, { count: number; avg_upfront: number }>;
+  [key: string]: unknown;
+}
+
 interface BenchmarkSparklinesProps {
-  snapshots: any[];
+  snapshots: PulseSnapshot[];
   isPro: boolean;
 }
 
