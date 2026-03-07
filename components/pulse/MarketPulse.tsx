@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import WeeklyHighlights from './WeeklyHighlights';
 import DealActivityFeed from './DealActivityFeed';
 import ModalityHeatMap from './ModalityHeatMap';
+import TherapeuticAreaBreakdown from './TherapeuticAreaBreakdown';
 
 const BenchmarkSparklines = dynamic(() => import('./BenchmarkSparklines'), { ssr: false });
 
@@ -173,9 +174,10 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
           <DealActivityFeed deals={deals} totalDeals={totalDeals} isPro={isPro} onUpgrade={onUpgrade} />
         </div>
 
-        {/* Modality Heat Map */}
-        <div>
+        {/* Right sidebar: Modality + TA breakdown */}
+        <div className="space-y-8">
           <ModalityHeatMap snapshot={snapshot} isPro={isPro} />
+          <TherapeuticAreaBreakdown snapshot={snapshot} isPro={isPro} />
         </div>
       </div>
 

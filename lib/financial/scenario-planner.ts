@@ -373,12 +373,19 @@ export function applyScenario(
   // Apply PoS adjustment (post-calculation since PoS is internal to the engine)
   let adjustedRNPV = adjustedResult.riskAdjustedNPV;
   if (posOverride !== null) {
-    // Override: scale by ratio of new PoS to original
-    const originalPoS = baseResult.cumulativePoS;
-    if (originalPoS > 0) {
-      adjustedRNPV *= posOverride / originalPoS;
+    if (posOverride === 0) {
+      // Complete failure: use recalculated rNPV directly (zero revenue, costs only).
+      // Don't scale by PoS ratio — that would incorrectly zero out sunk costs,
+      // making failure look like $0 (or even positive when base rNPV is negative).
+      adjustedRNPV = adjustedResult.riskAdjustedNPV;
     } else {
-      adjustedRNPV = 0;
+      // Partial override: scale by ratio of new PoS to original
+      const originalPoS = baseResult.cumulativePoS;
+      if (originalPoS > 0) {
+        adjustedRNPV *= posOverride / originalPoS;
+      } else {
+        adjustedRNPV = 0;
+      }
     }
   } else if (posMultiplier !== 1.0) {
     adjustedRNPV *= posMultiplier;
@@ -391,8 +398,8 @@ export function applyScenario(
   }
 
   const impactDelta = adjustedRNPV - baseResult.riskAdjustedNPV;
-  const impactPercent = baseResult.riskAdjustedNPV > 0
-    ? (impactDelta / baseResult.riskAdjustedNPV) * 100
+  const impactPercent = baseResult.riskAdjustedNPV !== 0
+    ? (impactDelta / Math.abs(baseResult.riskAdjustedNPV)) * 100
     : 0;
 
   // Generate narrative
@@ -463,11 +470,12 @@ export function getDefensiveAnalysis(
     Math.max(defensiveFloor * 0.50, baseResult.riskAdjustedNPV * walkAwayFraction)
   );
 
+  const fmtVal = (v: number) => v < 0 ? `-$${Math.abs(Math.round(v))}M` : `$${Math.round(v)}M`;
   const narrative = `Scenario analysis across ${results.length} scenarios shows a range of ` +
-    `$${Math.round(worstCase.adjustedRNPV)}M to $${Math.round(bestCase.adjustedRNPV)}M rNPV ` +
+    `${fmtVal(worstCase.adjustedRNPV)} to ${fmtVal(bestCase.adjustedRNPV)} rNPV ` +
     `(${worstCase.impactPercent}% to +${bestCase.impactPercent}% from base case). ` +
-    `The defensive floor at the 10th percentile is $${defensiveFloor}M, ` +
-    `implying a walk-away threshold of ~$${walkAwayThreshold}M in total deal value. ` +
+    `The defensive floor at the 10th percentile is ${fmtVal(defensiveFloor)}, ` +
+    `implying a walk-away threshold of ~${fmtVal(walkAwayThreshold)} in total deal value. ` +
     `Below this level, the risk-reward balance favors waiting or alternative strategies.`;
 
   return {

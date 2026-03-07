@@ -89,8 +89,11 @@ export async function POST(request: NextRequest) {
       return apiSuccess({ url: session.url, reportId: reportPurchase.id });
     }
 
-    // --- SUBSCRIPTION ($99/month Pro) ---
-    const priceId = process.env.STRIPE_PRICE_ID?.trim();
+    // --- SUBSCRIPTION (Pro plan — monthly or annual) ---
+    const billingInterval = body.billingInterval || 'monthly';
+    const priceId = billingInterval === 'annual'
+      ? (process.env.STRIPE_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_PRICE_ID?.trim())
+      : process.env.STRIPE_PRICE_ID?.trim();
     if (!priceId) {
       return NextResponse.json({
         demo: true,

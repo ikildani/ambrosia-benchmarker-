@@ -46,6 +46,25 @@ function formatModality(modality: string): string {
   return short[modality] || modality.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+const taColors: Record<string, string> = {
+  oncology: 'bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
+  neurology: 'bg-violet-50 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
+  immunology: 'bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  metabolic: 'bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+  cardiovascular: 'bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+  infectiousDisease: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+  ophthalmology: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
+  womensHealth: 'bg-pink-50 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
+};
+
+function formatTA(ta: string): string {
+  const names: Record<string, string> = {
+    oncology: 'Onc', neurology: 'Neuro', immunology: 'Immuno', metabolic: 'Metab',
+    cardiovascular: 'CV', infectiousDisease: 'ID', ophthalmology: 'Ophth', womensHealth: "Women's",
+  };
+  return names[ta] || ta.charAt(0).toUpperCase() + ta.slice(1);
+}
+
 const phaseColors: Record<string, string> = {
   discovery: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
   preclinical: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
@@ -85,6 +104,11 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                     <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${phaseColors[deal.phase_at_signing] || 'bg-slate-100 text-slate-600'}`}>
                       {formatPhase(deal.phase_at_signing)}
                     </span>
+                    {deal.therapeutic_area && (
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${taColors[deal.therapeutic_area] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
+                        {formatTA(deal.therapeutic_area)}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                     {deal.licensor_name} <span className="text-slate-500 dark:text-slate-400 font-normal">&rarr;</span> {deal.licensee_name}

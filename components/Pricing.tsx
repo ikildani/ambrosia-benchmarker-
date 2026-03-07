@@ -16,6 +16,7 @@ interface PricingProps {
 export default function Pricing({ currentTier, onSelectTier, userEmail, userId, initialPromoCode }: PricingProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isManageLoading, setIsManageLoading] = useState(false);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
   const [error, setError] = useState<string | null>(null);
   const {
     promoCode, setPromoCode, promoStatus, promoDiscount, promoId, promoError,
@@ -34,6 +35,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         body: JSON.stringify({
           email: userEmail,
           userId: userId,
+          billingInterval,
           promoCode: promoId || undefined,
         }),
       });
@@ -115,6 +117,28 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
             Unlimited free calculations. Pay only when you need the full picture.
           </p>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+              Monthly
+            </span>
+            <button
+              onClick={() => setBillingInterval(billingInterval === 'monthly' ? 'annual' : 'monthly')}
+              className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${billingInterval === 'annual' ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+              aria-label={`Switch to ${billingInterval === 'monthly' ? 'annual' : 'monthly'} billing`}
+            >
+              <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform duration-200 ${billingInterval === 'annual' ? 'translate-x-7' : ''}`} />
+            </button>
+            <span className={`text-sm font-medium ${billingInterval === 'annual' ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+              Annual
+            </span>
+            {billingInterval === 'annual' && (
+              <span className="text-xs font-semibold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/20 px-2 py-0.5 rounded-full">
+                Save {PRICING.PRO_ANNUAL_SAVINGS}/yr
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Pricing Cards - Three columns */}
@@ -341,7 +365,17 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                     <span className="text-neutral-400 text-sm">/first mo</span>
                   </div>
                   <p className="text-teal-400 text-xs font-medium mt-0.5">
-                    Then {PRICING.PRO_MONTHLY}
+                    Then {billingInterval === 'annual' ? PRICING.PRO_ANNUAL_MONTHLY : PRICING.PRO_MONTHLY}
+                  </p>
+                </div>
+              ) : billingInterval === 'annual' ? (
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">${PRICING.PRO_ANNUAL_MONTHLY_NUM}</span>
+                    <span className="text-neutral-400 text-sm">/month</span>
+                  </div>
+                  <p className="text-teal-400 text-xs font-medium mt-0.5">
+                    {PRICING.PRO_ANNUAL_PRICE}/yr &middot; Save {PRICING.PRO_ANNUAL_SAVINGS}
                   </p>
                 </div>
               ) : (
@@ -388,7 +422,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                 disabled={isLoading}
                 className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg"
               >
-                {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`}
+                {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : billingInterval === 'annual' ? `Start Pro — ${PRICING.PRO_ANNUAL_MONTHLY}` : `Start Pro — ${PRICING.PRO_MONTHLY}`}
               </button>
             )}
 

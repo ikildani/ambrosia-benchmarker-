@@ -5,7 +5,6 @@ interface ModalityHeatMapProps {
   isPro: boolean;
 }
 
-const THERAPEUTIC_AREAS = ['oncology', 'neurology', 'other'];
 const TOP_MODALITIES = ['adc', 'bispecific_antibody', 'car_t', 'small_molecule', 'radiopharmaceutical', 'gene_therapy', 'monoclonal_antibody', 'rnai'];
 
 function formatModality(modality: string): string {
@@ -17,18 +16,6 @@ function formatModality(modality: string): string {
   return names[modality] || modality.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-function formatTA(ta: string): string {
-  return ta.charAt(0).toUpperCase() + ta.slice(1);
-}
-
-function getHeatColor(count: number, maxCount: number): string {
-  if (count === 0) return 'bg-slate-50 dark:bg-slate-800';
-  const intensity = count / maxCount;
-  if (intensity <= 0.25) return 'bg-teal-50 dark:bg-teal-500/10';
-  if (intensity <= 0.5) return 'bg-teal-100 dark:bg-teal-500/20';
-  if (intensity <= 0.75) return 'bg-teal-200 dark:bg-teal-500/30';
-  return 'bg-teal-300 dark:bg-teal-500/40';
-}
 
 export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProps) {
   // Build a cross-tab from the snapshot data
