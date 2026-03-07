@@ -8,11 +8,19 @@ export const metadata: Metadata = {
   description: 'Comprehensive glossary of biotech licensing deal terms. Learn about upfront payments, milestones, royalties, CVRs, and more pharmaceutical partnership terminology.',
   keywords: ['biotech glossary', 'licensing terms', 'pharma deal terminology', 'milestone payments explained', 'royalty rates', 'biotech M&A terms'],
   openGraph: {
-    title: 'Biotech Licensing Glossary - Deal Terms Explained',
-    description: 'Master the language of biotech licensing deals with our comprehensive glossary.',
+    title: 'Biotech Licensing Glossary — 30+ Deal Terms Explained',
+    description: 'Master the language of biotech licensing deals — upfront payments, milestones, royalties, CVRs, ADCs, CAR-T, and more.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/glossary',
-    images: [{ url: '/api/og?title=Biotech%20Licensing%20Glossary&subtitle=Master%20the%20language%20of%20pharma%20deals&type=landing' }],
+    images: [{ url: '/api/og?title=Biotech%20Licensing%20Glossary&subtitle=30%2B%20Essential%20Deal%20Terms%20Explained&type=landing' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Biotech Licensing Glossary — Deal Terms Explained',
+    description: 'Comprehensive glossary of 30+ biotech licensing deal terms for BD professionals.',
+  },
+  alternates: {
+    canonical: 'https://calculator.ambrosiaventures.co/glossary',
   },
 };
 
@@ -295,14 +303,25 @@ export default function GlossaryPage() {
                       {term.relatedTerms.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           <span className="text-xs text-slate-400">Related:</span>
-                          {term.relatedTerms.map((related) => (
-                            <span
-                              key={related}
-                              className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded"
-                            >
-                              {related}
-                            </span>
-                          ))}
+                          {term.relatedTerms.map((related) => {
+                            const hasEntry = glossaryTerms.some(t => t.term === related);
+                            return hasEntry ? (
+                              <a
+                                key={related}
+                                href={`#${related.toLowerCase().replace(/\s+/g, '-')}`}
+                                className="text-xs px-2 py-0.5 bg-teal-50 text-teal-700 rounded hover:bg-teal-100 transition-colors"
+                              >
+                                {related}
+                              </a>
+                            ) : (
+                              <span
+                                key={related}
+                                className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded"
+                              >
+                                {related}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

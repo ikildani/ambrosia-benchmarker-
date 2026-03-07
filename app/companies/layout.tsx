@@ -1,4 +1,10 @@
 import type { Metadata } from 'next';
+import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
+
+const breadcrumbSchema = generateBreadcrumbSchema([
+  { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
+  { name: 'Company Profiles' },
+]);
 
 export const metadata: Metadata = {
   title: 'Biopharma Company Profiles — Competitive Intelligence & Deal History',
@@ -38,5 +44,13 @@ export const metadata: Metadata = {
 };
 
 export default function CompaniesLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {children}
+    </>
+  );
 }

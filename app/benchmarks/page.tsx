@@ -101,11 +101,30 @@ export default function BenchmarksIndex() {
     ],
   };
 
+  // ItemList schema for carousel rich results
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Biopharma Deal Benchmarks 2026',
+    description: 'Comprehensive licensing deal benchmarks across 8 therapeutic areas and all major modalities.',
+    numberOfItems: pages.length,
+    itemListElement: pages.slice(0, 30).map((page, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: page.h1 || page.title,
+      url: `https://calculator.ambrosiaventures.co/benchmarks/${page.slug}`,
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
 
       <main className="min-h-screen bg-white">

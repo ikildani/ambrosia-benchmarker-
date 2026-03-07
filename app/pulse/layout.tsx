@@ -1,4 +1,10 @@
 import type { Metadata } from 'next';
+import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
+
+const breadcrumbSchema = generateBreadcrumbSchema([
+  { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
+  { name: 'Market Pulse' },
+]);
 
 export const metadata: Metadata = {
   title: 'Market Pulse — Weekly Biopharma Deal Intelligence',
@@ -38,5 +44,13 @@ export const metadata: Metadata = {
 };
 
 export default function PulseLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {children}
+    </>
+  );
 }
