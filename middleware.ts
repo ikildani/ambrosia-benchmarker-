@@ -128,13 +128,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Nonce-based CSP — Next.js 15 propagates nonces to inline scripts automatically
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  // CSP — use 'unsafe-inline' because static/ISR pages don't support nonce injection
   const cspHeader = isApiRoute
     ? '' // API routes don't need CSP
     : [
         "default-src 'self'",
-        `script-src 'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vercel.live`,
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
@@ -148,7 +147,6 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   if (cspHeader) {
-    requestHeaders.set('x-nonce', nonce);
     requestHeaders.set('Content-Security-Policy', cspHeader);
   }
 
