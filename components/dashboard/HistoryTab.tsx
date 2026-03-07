@@ -7,10 +7,10 @@ interface HistoryTabProps {
   filteredHistory: CalculationHistoryItem[];
   historyLoading: boolean;
   historySearch: string;
-  historyAreaFilter: 'all' | 'oncology' | 'neurology' | 'immunology';
+  historyAreaFilter: 'all' | 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth';
   historySort: 'newest' | 'oldest' | 'highest_value' | 'highest_upfront';
   onSearchChange: (value: string) => void;
-  onAreaFilterChange: (value: 'all' | 'oncology' | 'neurology' | 'immunology') => void;
+  onAreaFilterChange: (value: 'all' | 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth') => void;
   onSortChange: (value: 'newest' | 'oldest' | 'highest_value' | 'highest_upfront') => void;
   onHistoryClick: (item: CalculationHistoryItem) => void;
   onDeleteHistory: (id: string) => void;
@@ -64,7 +64,7 @@ const HistoryTab = React.memo(function HistoryTab({
 
             {/* Area Filter Chips */}
             <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar flex-nowrap">
-              {([['all', 'All Areas'], ['oncology', 'Oncology'], ['neurology', 'Neurology'], ['immunology', 'Immunology']] as const).map(([value, label]) => (
+              {([['all', 'All'], ['oncology', 'Onc'], ['neurology', 'Neuro'], ['immunology', 'Immuno'], ['metabolic', 'Metab'], ['cardiovascular', 'CV'], ['infectiousDisease', 'ID'], ['ophthalmology', 'Ophtho'], ['womensHealth', "Women's"]] as const).map(([value, label]) => (
                 <button
                   key={value}
                   onClick={() => onAreaFilterChange(value)}

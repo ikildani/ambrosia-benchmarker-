@@ -391,6 +391,9 @@ export interface EpidemiologyData {
   /** Annual cost of therapy per patient in USD */
   annualCostOfTherapy: number;
 
+  /** Curated peak sales estimate from analyst consensus ($M) */
+  peakSalesRangeM?: { low: number; median: number; high: number };
+
   /** Published sources for the epidemiology data */
   sources: string[];
 }

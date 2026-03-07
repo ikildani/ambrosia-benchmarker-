@@ -118,7 +118,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
       },
     },
     datePublished: '2026-01-15',
-    dateModified: '2026-02-10',
+    dateModified: '2026-03-06',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `https://calculator.ambrosiaventures.co/benchmarks/${slug}`,

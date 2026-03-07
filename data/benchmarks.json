@@ -14,7 +14,7 @@
       "ClinicalTrials.gov pipeline tracking"
     ],
     "disclaimer": "These ranges are based on publicly available data and are intended for illustrative purposes only. Actual deal terms vary significantly based on asset-specific factors, market conditions, and negotiation dynamics.",
-    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area — the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts. Metabolic/Obesity added as fourth therapeutic area — the fastest-growing pharma segment ($100B+ obesity market projected by 2030) with GLP-1, dual/triple incretin, and oral peptide deals driving unprecedented valuations.",
+    "marketNotes": "2026 values reflect continued strength in oncology licensing, with radiopharmaceutical and ADC deals driving premiums. Neurology/CNS calibrated against 88 R&D partnerships totaling $45.9B. Immunology/Autoimmune added as third therapeutic area \u2014 the second-largest biopharma deal market ($246B projected by 2032) with 33 partnerships worth $13B in 2024 alone. CAR-T for autoimmune, anti-TL1A, and FcRn antagonists driving paradigm shifts. Metabolic/Obesity added as fourth therapeutic area \u2014 the fastest-growing pharma segment ($100B+ obesity market projected by 2030) with GLP-1, dual/triple incretin, and oral peptide deals driving unprecedented valuations.",
     "changelog": [
       {
         "date": "2026-03-05",
@@ -38,7 +38,7 @@
         "version": "5.1",
         "summary": "Oncology Interaction Terms + Engine Parity",
         "changes": [
-          "Added 18 oncology modality × indication interaction terms (ADC+breast, ADC+lung, radiopharmaceutical+prostate, bispecific+myeloma, CAR-T+myeloma, mRNA+melanoma, PROTAC+breast, molecular glue+AML, etc.)",
+          "Added 18 oncology modality \u00d7 indication interaction terms (ADC+breast, ADC+lung, radiopharmaceutical+prostate, bispecific+myeloma, CAR-T+myeloma, mRNA+melanoma, PROTAC+breast, molecular glue+AML, etc.)",
           "Enabled interaction term synergy bonuses for all therapeutic areas (previously excluded oncology)",
           "Oncology calculations now match neurology/immunology/metabolic in granularity"
         ]
@@ -66,7 +66,7 @@
           "Added 10 immunology-specific modalities: CAR-T autoimmune, in vivo CAR-T, CAR-Treg, FcRn antagonist, complement inhibitor, JAK/TYK2, S1P modulator, oral integrin, dual BAFF/APRIL antagonist, anti-TL1A",
           "Added 4 immunology-specific parameters: immune reset potential, target specificity, disease severity, treatment goal",
           "Immunology baselines calibrated against 48 real deals including Merck/Prometheus $10.8B, Roche/Telavant $7.1B, Pfizer/Arena $6.7B",
-          "Added 10 immunology modality × indication interaction terms",
+          "Added 10 immunology modality \u00d7 indication interaction terms",
           "Added Oligonucleotide (ASO/siRNA) as oncology modality at 1.18x multiplier",
           "15 immunology comparable deals added for report generation"
         ]
@@ -78,7 +78,7 @@
         "changes": [
           "Expanded neurology indications from 8 to 15: added ALS, Huntington's, migraine, narcolepsy, tremor/dystonia, TBI, addiction",
           "Added 3 new neurology modalities: ion channel modulators, tau-targeting therapies, neural stem cell",
-          "Introduced modality × indication interaction terms for 13 key CNS combinations",
+          "Introduced modality \u00d7 indication interaction terms for 13 key CNS combinations",
           "Recalibrated schizophrenia multiplier to 1.22x reflecting KarXT/Cobenfy $14B reset",
           "Disease-modifying neurology assets now use adjusted milestone allocations reflecting longer development",
           "Neurology multiplier stacking uses therapeutic-area-specific dampening exponents",
@@ -297,14 +297,14 @@
   "neurologyPhaseBaselines": {
     "discovery": {
       "upfront": {
-        "low": 10,
-        "median": 20,
-        "high": 36
+        "low": 12,
+        "median": 38,
+        "high": 78
       },
       "totalValue": {
-        "low": 195,
-        "median": 358,
-        "high": 650
+        "low": 165,
+        "median": 550,
+        "high": 1100
       },
       "royalty": {
         "base": 3,
@@ -523,14 +523,14 @@
     },
     "phase2_3": {
       "upfront": {
-        "low": 225,
-        "median": 475,
-        "high": 1000
+        "low": 170,
+        "median": 340,
+        "high": 680
       },
       "totalValue": {
-        "low": 1200,
-        "median": 2400,
-        "high": 5250
+        "low": 850,
+        "median": 1700,
+        "high": 3700
       },
       "royalty": {
         "base": 14,
@@ -539,14 +539,14 @@
     },
     "phase3": {
       "upfront": {
-        "low": 300,
-        "median": 600,
-        "high": 1200
+        "low": 220,
+        "median": 440,
+        "high": 880
       },
       "totalValue": {
-        "low": 1500,
-        "median": 3000,
-        "high": 6500
+        "low": 1100,
+        "median": 2200,
+        "high": 4800
       },
       "royalty": {
         "base": 16,
@@ -589,9 +589,9 @@
   "metabolicPhaseBaselines": {
     "discovery": {
       "upfront": {
-        "low": 16,
-        "median": 33,
-        "high": 78
+        "low": 10,
+        "median": 22,
+        "high": 48
       },
       "totalValue": {
         "low": 228,
@@ -637,14 +637,14 @@
     },
     "phase1_2": {
       "upfront": {
-        "low": 130,
-        "median": 288,
-        "high": 625
+        "low": 95,
+        "median": 195,
+        "high": 435
       },
       "totalValue": {
-        "low": 900,
-        "median": 1800,
-        "high": 3850
+        "low": 650,
+        "median": 1350,
+        "high": 3000
       },
       "royalty": {
         "base": 10,
@@ -653,14 +653,14 @@
     },
     "phase2": {
       "upfront": {
-        "low": 200,
-        "median": 450,
-        "high": 1000
+        "low": 128,
+        "median": 255,
+        "high": 570
       },
       "totalValue": {
-        "low": 1200,
-        "median": 2500,
-        "high": 5500
+        "low": 850,
+        "median": 1700,
+        "high": 3800
       },
       "royalty": {
         "base": 12,
@@ -669,14 +669,14 @@
     },
     "phase2_3": {
       "upfront": {
-        "low": 300,
-        "median": 625,
-        "high": 1400
+        "low": 176,
+        "median": 352,
+        "high": 784
       },
       "totalValue": {
-        "low": 1600,
-        "median": 3250,
-        "high": 7000
+        "low": 1100,
+        "median": 2200,
+        "high": 4900
       },
       "royalty": {
         "base": 14,
@@ -685,14 +685,14 @@
     },
     "phase3": {
       "upfront": {
-        "low": 400,
-        "median": 800,
-        "high": 1800
+        "low": 238,
+        "median": 476,
+        "high": 1054
       },
       "totalValue": {
-        "low": 2000,
-        "median": 4000,
-        "high": 8500
+        "low": 1400,
+        "median": 2800,
+        "high": 6200
       },
       "royalty": {
         "base": 16,
@@ -701,14 +701,14 @@
     },
     "nda_filed": {
       "upfront": {
-        "low": 630,
-        "median": 1350,
-        "high": 3150
+        "low": 432,
+        "median": 864,
+        "high": 2100
       },
       "totalValue": {
-        "low": 3600,
-        "median": 6750,
-        "high": 13500
+        "low": 2700,
+        "median": 4800,
+        "high": 10500
       },
       "royalty": {
         "base": 19,
@@ -717,14 +717,14 @@
     },
     "approved": {
       "upfront": {
-        "low": 700,
-        "median": 1500,
-        "high": 3500
+        "low": 550,
+        "median": 1100,
+        "high": 2640
       },
       "totalValue": {
-        "low": 4000,
-        "median": 7500,
-        "high": 15000
+        "low": 3000,
+        "median": 5500,
+        "high": 12000
       },
       "royalty": {
         "base": 20,
@@ -2142,9 +2142,9 @@
       "context": "TIL, NK cells"
     },
     "geneTherapy": {
-      "multiplier": 1.12,
+      "multiplier": 0.98,
       "label": "Gene Therapy / Gene Editing",
-      "context": "Cooling - manufacturing/durability concerns"
+      "context": "Cooling \u2014 durability concerns, manufacturing complexity, reimbursement uncertainty (Luxturna pushback, Bluebird withdrawals)"
     },
     "radiopharmaceutical": {
       "multiplier": 1.6,
@@ -2227,9 +2227,9 @@
       "context": "Hottest modality in biopharma 2025-2026; Kyverna filing H1 2026; curative potential; AbbVie/Capstan $2.1B"
     },
     "inVivoCarT": {
-      "multiplier": 1.65,
+      "multiplier": 1.42,
       "label": "In Vivo CAR-T (LNP)",
-      "context": "Next frontier; no apheresis required; AbbVie/Capstan landmark; scalability breakthrough"
+      "context": "Early-stage; AbbVie/Capstan $2.1B validates concept but no human efficacy data yet; scalability and manufacturing unproven"
     },
     "carTreg": {
       "multiplier": 1.3,
@@ -2307,9 +2307,9 @@
       "context": "Muscle-sparing weight loss; Scholar Rock/Lilly; differentiates from pure GLP-1"
     },
     "microbiomeBased": {
-      "multiplier": 0.9,
+      "multiplier": 0.78,
       "label": "Microbiome-Based Therapy",
-      "context": "Early-stage; no FDA approvals; no major licensing precedents; high clinical risk"
+      "context": "Graveyard track record (Seres, Nohla); regulatory uncertainty; manufacturing liability; Vowst sole precedent but narrow CDI indication"
     },
     "myosinInhibitor": {
       "multiplier": 1.3,
@@ -2400,9 +2400,9 @@
         "context": "High unmet need, few effective options"
       },
       "breast_her2": {
-        "multiplier": 1.08,
+        "multiplier": 1.18,
         "label": "Breast (HER2+)",
-        "context": "Established market with strong SOC"
+        "context": "Enhertu paradigm; HER2-low/zero label expansion driving deal activity; Daiichi/AZ $6.9B+ validated premium"
       },
       "breast_tnbc": {
         "multiplier": 1.18,
@@ -2925,7 +2925,7 @@
       },
       "gbs": {
         "multiplier": 1.18,
-        "label": "Guillain-Barré Syndrome",
+        "label": "Guillain-Barr\u00e9 Syndrome",
         "context": "Acute autoimmune neuropathy; FcRn/complement potential; IVIg standard"
       },
       "ataxiaTelangiectasia": {
@@ -3470,7 +3470,7 @@
         "context": "Anti-inflammatory validated (canakinumab CANTOS); residual risk targets (Lp(a), inflammation)"
       },
       "attrCardiomyopathy": {
-        "multiplier": 1.30,
+        "multiplier": 1.3,
         "label": "ATTR Cardiomyopathy (Transthyretin)",
         "context": "Alnylam patisiran, Ionis eplontersen validated; tafamidis blockbuster ($4B+); gene silencing + stabilizers"
       },
@@ -3487,7 +3487,7 @@
       "cardiacFibrosis": {
         "multiplier": 1.25,
         "label": "Cardiac Fibrosis",
-        "context": "No approved anti-fibrotic for heart; pirfenidone repurposing; TGF-β, galectin-3 targets explored"
+        "context": "No approved anti-fibrotic for heart; pirfenidone repurposing; TGF-\u03b2, galectin-3 targets explored"
       },
       "longQtSyndrome": {
         "multiplier": 1.18,
@@ -3557,12 +3557,12 @@
         "context": "Qdenga (Takeda) dengue vaccine; RTS,S (Mosquirix) malaria vaccine; global health funding"
       },
       "hepatitisC": {
-        "multiplier": 0.90,
+        "multiplier": 0.9,
         "label": "Hepatitis C (HCV Cure)",
         "context": "DAA cure rate >95% achieved; market contracting; pan-genotypic regimens standard; vaccine still elusive"
       },
       "ebv": {
-        "multiplier": 1.20,
+        "multiplier": 1.2,
         "label": "Epstein-Barr Virus (EBV)",
         "context": "Moderna mRNA vaccine Phase 1; linked to MS, lymphomas; no approved antiviral; massive unmet need"
       },
@@ -3577,7 +3577,7 @@
         "context": "JYNNEOS vaccine; tecovirimat antiviral; WHO PHEIC 2022/2024; stockpiling + outbreak response"
       },
       "zika": {
-        "multiplier": 1.10,
+        "multiplier": 1.1,
         "label": "Zika Virus",
         "context": "Congenital Zika syndrome concern; no approved vaccine; DNA/mRNA candidates; Aedes vector expanding"
       },
@@ -3654,7 +3654,7 @@
         "context": "Vuity (pilocarpine) first FDA-approved drop; massive addressable population >1B; limited efficacy"
       },
       "cornealDystrophy": {
-        "multiplier": 1.20,
+        "multiplier": 1.2,
         "label": "Corneal Dystrophy",
         "context": "Gene therapy potential for Fuchs (TCF4); corneal transplant current standard; high unmet need"
       },
@@ -3696,9 +3696,9 @@
         "context": "Zuranolone (Zurzuvae) fast approval 2023; neuroactive steroid validated; Sage/Biogen; large market"
       },
       "preeclampsia": {
-        "multiplier": 1.28,
+        "multiplier": 1.38,
         "label": "Preeclampsia",
-        "context": "No approved therapy; anti-sFlt1 approaches; high maternal mortality risk; aspirin prevention only"
+        "context": "No approved therapy; 15M+ cases/year globally; 300K+ maternal deaths; anti-sFlt1 and siRNA approaches active; Pfizer, GSK pursuing"
       },
       "prematureLabor": {
         "multiplier": 1.2,
@@ -3731,7 +3731,7 @@
         "context": "Tamoxifen/aromatase inhibitors established; PARP preventive potential; chemoprevention underutilized"
       },
       "gestationalDiabetes": {
-        "multiplier": 1.10,
+        "multiplier": 1.1,
         "label": "Gestational Diabetes",
         "context": "Metformin/insulin standard; GLP-1 safety in pregnancy unknown; growing prevalence with obesity epidemic"
       },
@@ -3741,7 +3741,7 @@
         "context": "Doxylamine/B6 (Diclegis) limited; ondansetron off-label; neurokinin-1 antagonists explored"
       },
       "placentaAccreta": {
-        "multiplier": 1.20,
+        "multiplier": 1.2,
         "label": "Placenta Accreta Spectrum",
         "context": "Rising with C-section rates; no medical therapy; hemorrhage risk; maternal morbidity/mortality"
       },
@@ -3751,7 +3751,7 @@
         "context": "Topical estrogen standard; ospemifene (Osphena) oral SERM; DHEA (Intrarosa); $1.5B+ market"
       },
       "menstrualDisorders": {
-        "multiplier": 1.10,
+        "multiplier": 1.1,
         "label": "Menstrual Disorders (HMB/Amenorrhea)",
         "context": "Hormonal IUDs, tranexamic acid; relugolix-combo approved; novel approaches for heavy bleeding"
       },
@@ -3784,9 +3784,9 @@
       "context": "IRA creating pricing pressure"
     },
     "china": {
-      "multiplier": 0.22,
+      "multiplier": 0.18,
       "label": "Greater China",
-      "context": "Geopolitical + regulatory uncertainty"
+      "context": "Geopolitical risk, CFIUS scrutiny, domestic innovation push, pricing compression"
     },
     "japan": {
       "multiplier": 0.18,
@@ -3936,7 +3936,7 @@
       "provenCNS": {
         "multiplier": 1.3,
         "label": "Proven CNS penetration",
-        "context": "Demonstrated BBB crossing in human studies — major de-risk"
+        "context": "Demonstrated BBB crossing in human studies \u2014 major de-risk"
       },
       "promisingPreclinical": {
         "multiplier": 1.15,
@@ -4391,7 +4391,7 @@
     }
   },
   "interactionTerms": {
-    "_description": "Modality × indication synergy bonuses that replace simple multiplication. Applied as additive bonus to the combined multiplier.",
+    "_description": "Modality \u00d7 indication synergy bonuses that replace simple multiplication. Applied as additive bonus to the combined multiplier.",
     "adc+breast_her2": {
       "bonus": 0.1,
       "context": "ADC + HER2+ breast is the paradigm combination; Enhertu (T-DXd) $4B+ peak; Daiichi/AZ $5.5B deal reset"
@@ -4418,7 +4418,7 @@
     },
     "bispecific+dlbcl": {
       "bonus": 0.08,
-      "context": "Bispecific + DLBCL validated by epcoritamab, glofitamab; CD20×CD3 established; off-the-shelf vs CAR-T"
+      "context": "Bispecific + DLBCL validated by epcoritamab, glofitamab; CD20\u00d7CD3 established; off-the-shelf vs CAR-T"
     },
     "carT_heme+myeloma": {
       "bonus": 0.1,
@@ -4430,7 +4430,7 @@
     },
     "carT_solid+gbm": {
       "bonus": 0.1,
-      "context": "CAR-T + GBM is high-risk/high-reward; GD2, IL-13Rα2 targeting; dramatic early responses in trials"
+      "context": "CAR-T + GBM is high-risk/high-reward; GD2, IL-13R\u03b12 targeting; dramatic early responses in trials"
     },
     "radiopharmaceutical+prostate": {
       "bonus": 0.12,
@@ -4908,7 +4908,7 @@
         "als": "ALS carries maximum orphan premiums with critical unmet need. ASO/gene therapy approaches lead. Biogen/Ionis tofersen (SOD1) validates genetic targeting in ALS.",
         "huntingtons": "Huntington's is a validated genetic target with orphan premiums. Novartis/PTC $1B upfront sets the benchmark. Allele-selective silencing commands premium.",
         "narcolepsy": "Narcolepsy is an orphan-adjacent market dominated by Jazz and Harmony. Orexin biology expanding. Novel mechanisms can command premium for differentiation.",
-        "epilepsy": "Epilepsy gene therapy and ion channel approaches attract orphan premiums for rare epilepsy syndromes. Broad epilepsy is competitive — differentiate on mechanism.",
+        "epilepsy": "Epilepsy gene therapy and ion channel approaches attract orphan premiums for rare epilepsy syndromes. Broad epilepsy is competitive \u2014 differentiate on mechanism.",
         "tbi": "TBI/stroke recovery has zero approved disease-modifying treatments. Massive unmet need but regulatory path uncertain. Neuroprotection/regeneration data is key.",
         "depression": "MDD is a large but competitive market. Differentiation (novel MOA, rapid onset, reduced side effects) is critical for premium terms.",
         "rareNeuro": "Rare neurological diseases carry orphan drug premiums. Gene therapy and ASO approaches for monogenic CNS disorders can command curative-potential premiums.",
@@ -4942,8 +4942,8 @@
         "myastheniaGravis": "MG was transformed by FcRn antagonists (Vyvgart). Complement and CAR-T approaches expanding. High unmet need in refractory patients.",
         "igan": "IgA Nephropathy validated by Vertex/Alpine $4.9B acquisition. BAFF/APRIL mechanism established. Complement and endothelin approaches expanding.",
         "pnh": "PNH is the cornerstone complement indication. AZ/Alexion franchise ($6B+ revenue). Oral C5 and next-gen complement targets are the frontier.",
-        "rareAutoimmune": "Rare autoimmune conditions carry orphan drug premiums. Myositis, stiff-person syndrome — all attracting CAR-T and novel biologic approaches.",
-        "celiac": "Celiac disease has zero approved therapies — patients rely entirely on dietary gluten avoidance. Massive underserved population (~1% prevalence). Multiple Phase 2 programs active.",
+        "rareAutoimmune": "Rare autoimmune conditions carry orphan drug premiums. Myositis, stiff-person syndrome \u2014 all attracting CAR-T and novel biologic approaches.",
+        "celiac": "Celiac disease has zero approved therapies \u2014 patients rely entirely on dietary gluten avoidance. Massive underserved population (~1% prevalence). Multiple Phase 2 programs active.",
         "vitiligo": "Vitiligo was validated by ruxolitinib cream approval. JAK inhibitors dominate but novel approaches (melanocyte stimulation, immune modulation) can differentiate. Moderate deal sizes.",
         "pemphigus": "Pemphigus/bullous diseases have high unmet need despite rituximab. CAR-T showing dramatic B-cell depletion and skin clearance. Orphan premiums for severe autoimmune blistering.",
         "itp": "ITP is expanding beyond TPO agonists. FcRn antagonists validated the IgG-reduction approach. Complement and novel biologics pipeline growing. Multi-indication expansion potential.",
@@ -4959,7 +4959,7 @@
         "chronicTreatment": "Chronic treatment models have predictable recurring revenue but face biosimilar/generic pressure. Differentiation and adherence advantages are key."
       },
       "targetSpecificity": {
-        "antigenSpecific": "Antigen-specific approaches (CAR-Treg, tolerizing) avoid broad immunosuppression. This is the next frontier — emphasize safety advantage over broad immunosuppressants.",
+        "antigenSpecific": "Antigen-specific approaches (CAR-Treg, tolerizing) avoid broad immunosuppression. This is the next frontier \u2014 emphasize safety advantage over broad immunosuppressants.",
         "broadImmunosuppression": "Broad immunosuppression faces commoditization pressure. Infection risk concerns limit use in milder disease. Focus on rapid onset and bridge-to-maintenance positioning."
       },
       "metabolicModality": {
@@ -4979,7 +4979,7 @@
         "ckdMetabolic": "CKD in the metabolic context is validated by SGLT2 data (DAPA-CKD, EMPA-KIDNEY) and finerenone. GLP-1 agonists showing CKD benefit. Cardio-renal-metabolic nexus deals command multi-indication premiums.",
         "hfpef": "HFpEF is the largest unmet need in cardiology. SGLT2 (empagliflozin, dapagliflozin) validated. GLP-1 and metabolic approaches showing benefit. Premium for cardiometabolic dual-indication data.",
         "familialHypercholesterolemia": "Familial hypercholesterolemia is an orphan indication with validated targets. PCSK9 (mAb and siRNA), ANGPTL3, and Lp(a) approaches all attracting deals. Premium for severe/homozygous FH.",
-        "gout": "Gout is a large market but dominated by generics (allopurinol, febuxostat). Premium terms require differentiation — biologics for refractory (pegloticase), IL-1 inhibition, or novel urate-lowering mechanisms.",
+        "gout": "Gout is a large market but dominated by generics (allopurinol, febuxostat). Premium terms require differentiation \u2014 biologics for refractory (pegloticase), IL-1 inhibition, or novel urate-lowering mechanisms.",
         "wilsonDisease": "Wilson disease is a high-unmet-need orphan condition. Current chelation therapy is poorly tolerated. Gene therapy (ATP7B replacement) commands curative premiums. Very few competitors.",
         "fabry": "Fabry disease has established ERT ($2B+ market) but gene therapy commands significant premium for one-time curative potential. 4D Molecular, Freeline, and others advancing. Replacement of chronic ERT is the thesis.",
         "gaucher": "Gaucher disease pioneered enzyme replacement therapy. Gene therapy and substrate reduction approaches offer next-gen potential. Sanofi franchise ($1B+) established. Premium for durability over ERT."

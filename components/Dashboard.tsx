@@ -66,7 +66,7 @@ export default function Dashboard({
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('ocean');
   const [historySearch, setHistorySearch] = useState('');
-  const [historyAreaFilter, setHistoryAreaFilter] = useState<'all' | 'oncology' | 'neurology' | 'immunology'>('all');
+  const [historyAreaFilter, setHistoryAreaFilter] = useState<'all' | 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth'>('all');
   const [historySort, setHistorySort] = useState<'newest' | 'oldest' | 'highest_value' | 'highest_upfront'>('newest');
   const [watchlistNewCount, setWatchlistNewCount] = useState(0);
 

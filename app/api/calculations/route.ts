@@ -6,6 +6,13 @@ import { captureApiError } from '@/lib/sentry-api';
 import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
+/** Sanitize numeric output — reject NaN/Infinity, return null for invalid */
+function safeNum(v: unknown): number | null {
+  if (v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 export async function POST(request: NextRequest) {
   // Rate limiting
   const identifier = getIdentifier(request);
@@ -62,14 +69,14 @@ export async function POST(request: NextRequest) {
       includes_manufacturing: body.includes_manufacturing || false,
       includes_codev: body.includes_codev || false,
       includes_copromote: body.includes_copromote || false,
-      output_upfront_low: body.outputs?.upfront_low || null,
-      output_upfront_mid: body.outputs?.upfront_mid || null,
-      output_upfront_high: body.outputs?.upfront_high || null,
-      output_milestones_total: body.outputs?.milestones_total || null,
-      output_royalty_low: body.outputs?.royalty_low || null,
-      output_royalty_high: body.outputs?.royalty_high || null,
-      output_total_deal_value_low: body.outputs?.total_deal_value_low || null,
-      output_total_deal_value_high: body.outputs?.total_deal_value_high || null,
+      output_upfront_low: safeNum(body.outputs?.upfront_low),
+      output_upfront_mid: safeNum(body.outputs?.upfront_mid),
+      output_upfront_high: safeNum(body.outputs?.upfront_high),
+      output_milestones_total: safeNum(body.outputs?.milestones_total),
+      output_royalty_low: safeNum(body.outputs?.royalty_low),
+      output_royalty_high: safeNum(body.outputs?.royalty_high),
+      output_total_deal_value_low: safeNum(body.outputs?.total_deal_value_low),
+      output_total_deal_value_high: safeNum(body.outputs?.total_deal_value_high),
       calculation_version: '1.0.0',
     };
 

@@ -1075,7 +1075,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   const adjustedMedian = Math.round(baseTotalValue.median * effectiveMultiplier * dealTypeMultiplier);
 
-  if (!Number.isFinite(adjustedMedian) || adjustedMedian < 0) {
+  if (!Number.isFinite(adjustedMedian) || adjustedMedian <= 0) {
     throw new Error(
       `Invalid calculation: adjustedMedian=${adjustedMedian}, effectiveMultiplier=${effectiveMultiplier}. ` +
       `Input: phase=${input.phase}, modality=${input.modality}, indication=${input.indication}`

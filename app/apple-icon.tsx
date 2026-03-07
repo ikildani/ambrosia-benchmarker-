@@ -23,9 +23,9 @@ export default function AppleIcon() {
             fontSize: 96,
             fontWeight: 800,
             letterSpacing: '-0.04em',
-            background: 'linear-gradient(135deg, #2EEAEA, #00D4D4, #00BABA)',
+            background: 'linear-gradient(135deg, #34c2c2, #0EA5A5, #0c8e8e)',
             backgroundClip: 'text',
-            color: '#2EEAEA',
+            color: '#34c2c2',
           }}
         >
           DT

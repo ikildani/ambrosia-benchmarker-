@@ -103,7 +103,7 @@ function buildRNPVInput(
 export function runFinancialModel(
   inputs: CalculationInput,
   result: CalculationResult,
-  epidemiologyDataset?: Record<string, { prevalencePerMillion: number; incidencePerMillion: number; diagnosedPercent: number; treatedPercent: number; drugEligiblePercent: number; annualCostOfTherapy: number; sources: string[] }>,
+  epidemiologyDataset?: Record<string, { prevalencePerMillion: number; incidencePerMillion: number; diagnosedPercent: number; treatedPercent: number; drugEligiblePercent: number; annualCostOfTherapy: number; peakSalesRangeM?: { low: number; median: number; high: number }; sources: string[] }>,
 ): FinancialModelResult {
   // Step 1: Market size estimation (if epi data available)
   let marketSize: MarketSizeEstimate | null = null;

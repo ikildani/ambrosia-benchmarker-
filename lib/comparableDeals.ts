@@ -66,8 +66,6 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Akero Therapeutics', licensee: 'Novo Nordisk', value: '$1.4B', year: 2024, relevance: 'FGF21 analog efruxifermin for MASH', modalities: ['peptide'], indications: ['nashMash'], therapeuticArea: 'metabolic' },
   { licensor: 'Terns Pharmaceuticals', licensee: 'Roche', value: '$2.1B', year: 2024, relevance: 'GLP-1R agonist for obesity and MASH', modalities: ['glp1Agonist'], indications: ['obesity', 'nashMash'], therapeuticArea: 'metabolic' },
   { licensor: 'Zealand Pharma', licensee: 'Roche', value: '$5.3B', year: 2025, relevance: 'Amylin analog petrelintide for obesity partnership', modalities: ['amylinAnalog'], indications: ['obesity'], therapeuticArea: 'metabolic' },
-  { licensor: 'Metsera', licensee: 'Pfizer', value: '$9.8B', year: 2025, relevance: 'Oral GLP-1 obesity pipeline acquisition', modalities: ['oralPeptide'], indications: ['obesity'], therapeuticArea: 'metabolic' },
-  { licensor: 'CSPC Pharmaceutical', licensee: 'AstraZeneca', value: '$18.5B', year: 2025, relevance: 'Largest metabolic licensing deal - oral GLP-1/GIP dual agonist', modalities: ['dualIncretin', 'oralPeptide'], indications: ['obesity', 'type2Diabetes'], therapeuticArea: 'metabolic' },
   { licensor: 'Madrigal Pharmaceuticals', licensee: 'N/A (standalone)', value: '$7B+ market cap', year: 2024, relevance: 'First approved MASH drug (resmetirom/Rezdiffra)', modalities: ['smallMolecule'], indications: ['nashMash'], therapeuticArea: 'metabolic' },
   { licensor: 'Gubra', licensee: 'AbbVie', value: '$2.2B', year: 2025, relevance: 'GLP-1/amylin dual agonist for obesity', modalities: ['dualIncretin', 'amylinAnalog'], indications: ['obesity'], therapeuticArea: 'metabolic' },
   { licensor: 'Provention Bio', licensee: 'Sanofi', value: '$2.9B', year: 2023, relevance: 'Teplizumab (Tzield) for T1D delay', modalities: ['mab'], indications: ['type1Diabetes'], therapeuticArea: 'metabolic' },
@@ -76,22 +74,9 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Novartis', licensee: 'N/A (standalone)', value: '$2B+ inclisiran', year: 2024, relevance: 'siRNA PCSK9 for familial hypercholesterolemia', modalities: ['rnai'], indications: ['familialHypercholesterolemia'], therapeuticArea: 'metabolic' },
   { licensor: 'Ultragenyx', licensee: 'N/A (standalone)', value: '$800M+ Crysvita', year: 2024, relevance: 'FGF23 antibody for rare metabolic (XLH)', indications: ['rareMetabolic'], therapeuticArea: 'metabolic' },
   { licensor: '4D Molecular Therapeutics', licensee: 'Bayer', value: '$1.5B', year: 2024, relevance: 'AAV gene therapy for Fabry disease', modalities: ['geneTherapy'], indications: ['fabry'], therapeuticArea: 'metabolic' },
-  // 2025-2026 Oncology
-  { licensor: 'SpringWorks Therapeutics', licensee: 'Pfizer', value: '$7.5B', year: 2025, relevance: 'Nirogacestat/gamma-secretase inhibitor (desmoid tumors)', modalities: ['smallMolecule'], indications: ['solid'], therapeuticArea: 'oncology' },
-  { licensor: 'Silver Creek Pharmaceuticals', licensee: 'AstraZeneca', value: '$3.5B', year: 2025, relevance: 'TEAD inhibitor (solid tumors, NF2 mutant)', modalities: ['smallMolecule'], indications: ['solid'], therapeuticArea: 'oncology' },
-  { licensor: 'Haihe Biopharma', licensee: 'Merck', value: '$2.0B', year: 2025, relevance: 'Next-gen ADC (Trop-2) for NSCLC', modalities: ['adc'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
-  { licensor: 'Puma Biotechnology', licensee: 'BMS', value: '$1.8B', year: 2025, relevance: 'Pan-HER inhibitor neratinib (breast cancer combinations)', modalities: ['smallMolecule'], indications: ['breast_her2'], therapeuticArea: 'oncology' },
-  { licensor: 'Summit Therapeutics', licensee: 'Akeso', value: '$5B', year: 2025, relevance: 'PD-1/VEGF bispecific ivonescimab (NSCLC)', modalities: ['bispecific'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
-  // 2025-2026 Neurology
-  { licensor: 'Voyager Therapeutics', licensee: 'Novartis', value: '$1.7B', year: 2025, relevance: 'AAV capsid platform for CNS gene therapy', modalities: ['geneTherapy'], indications: ['parkinsons'], therapeuticArea: 'neurology' },
-  { licensor: 'Ionis Pharmaceuticals', licensee: 'Biogen', value: '$2.2B', year: 2025, relevance: 'ASO for Huntington\'s disease (tominersen successor)', modalities: ['aso'], indications: ['huntingtons'], therapeuticArea: 'neurology' },
-  { licensor: 'Annexon Biosciences', licensee: 'AstraZeneca', value: '$1.6B', year: 2025, relevance: 'C1q inhibitor for neuroinflammation (Guillain-Barré)', modalities: ['mab'], indications: ['autoimmune'], therapeuticArea: 'neurology' },
-  // 2025-2026 Immunology
-  { licensor: 'Acelyrin', licensee: 'AbbVie', value: '$3.8B', year: 2025, relevance: 'IL-6 inhibitor lonigutamab (inflammatory diseases)', modalities: ['mab'], indications: ['rheumatoidArthritis', 'psoriasis'], therapeuticArea: 'immunology' },
-  { licensor: 'Sitala Bio', licensee: 'Gilead', value: '$1.9B', year: 2025, relevance: 'In vivo CAR-T regulatory T cell (lupus, T1D)', modalities: ['inVivoCarT'], indications: ['sle_lupus', 'type1Diabetes'], therapeuticArea: 'immunology' },
-  // 2025-2026 Metabolic
-  { licensor: 'Viking Therapeutics', licensee: 'Eli Lilly', value: '$2.8B', year: 2025, relevance: 'Oral GLP-1/GIP dual agonist (obesity Phase 2)', modalities: ['dualIncretin', 'oralPeptide'], indications: ['obesity'], therapeuticArea: 'metabolic' },
-  { licensor: 'Fractyl Health', licensee: 'Johnson & Johnson', value: '$1.5B', year: 2025, relevance: 'Revita DMR device + GLP-1 (T2D remission)', modalities: ['medicalDevice'], indications: ['type2Diabetes'], therapeuticArea: 'metabolic' },
+  // 2023-2025 Additional Oncology
+  { licensor: 'SpringWorks Therapeutics', licensee: 'Pfizer', value: '$7.5B', year: 2023, relevance: 'Nirogacestat/gamma-secretase inhibitor (desmoid tumors)', modalities: ['smallMolecule'], indications: ['solid'], therapeuticArea: 'oncology' },
+  { licensor: 'Summit Therapeutics', licensee: 'Akeso', value: '$5B', year: 2025, relevance: 'PD-1/VEGF bispecific ivonescimab US rights (NSCLC)', modalities: ['bispecific'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
 ];
 
 // Convert extended deal to base ComparableDeal format

@@ -280,7 +280,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className={`text-sm sm:text-lg lg:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 leading-relaxed font-light transition-all duration-700 delay-300 px-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong> across oncology, neurology, immunology & metabolic/obesity.
+            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong> across 8 therapeutic areas.
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
             rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.

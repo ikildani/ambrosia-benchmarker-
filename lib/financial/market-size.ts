@@ -78,12 +78,16 @@ export function estimateMarketSize(
     high: sam * shareAssumption.high,
   };
 
-  // Peak sales = SOM (represents steady-state annual revenue at peak penetration)
-  const peakSales = {
+  // Peak sales: prefer curated analyst consensus when available,
+  // fall back to bottom-up SOM (which can overestimate for large global indications)
+  const bottomUpPeakSales = {
     low: Math.round(som.low),
     median: Math.round(som.median),
     high: Math.round(som.high),
   };
+  const peakSales = epidemiologyData.peakSalesRangeM
+    ? { ...epidemiologyData.peakSalesRangeM }
+    : bottomUpPeakSales;
 
   return {
     indication,
