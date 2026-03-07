@@ -92,12 +92,36 @@ export function generateOrganizationSchema(): OrganizationSchema {
   };
 }
 
+export function generateWebSiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Ambrosia Ventures Deal Calculator',
+    alternateName: 'Life Sciences Deal Calculator',
+    url: BASE_URL,
+    description: 'Data-driven deal benchmarking, rNPV analysis, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals.',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Ambrosia Ventures',
+      url: BASE_URL,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE_URL}/companies?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
 export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for oncology, neurology, and immunology asset licensing deals with data-driven benchmarks.',
+    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 8 therapeutic areas with data-driven benchmarks from 600+ real transactions.',
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
@@ -190,10 +214,10 @@ export function generatePricingSchema() {
       },
       {
         '@type': 'AggregateOffer',
-        name: 'Pro',
+        name: 'Pro Monthly',
         price: '99',
         priceCurrency: 'USD',
-        description: 'Unlimited reports, AI deal memos, negotiation playbooks, and market intelligence',
+        description: 'Unlimited reports, AI deal memos, negotiation playbooks, and market intelligence — billed monthly',
         availability: 'https://schema.org/InStock',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
@@ -202,6 +226,69 @@ export function generatePricingSchema() {
           billingDuration: 'P1M',
           unitText: 'month',
         },
+      },
+      {
+        '@type': 'AggregateOffer',
+        name: 'Pro Annual',
+        price: '948',
+        priceCurrency: 'USD',
+        description: 'Everything in Pro — billed annually at $79/month (save $240/year)',
+        availability: 'https://schema.org/InStock',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '948',
+          priceCurrency: 'USD',
+          billingDuration: 'P1Y',
+          unitText: 'year',
+          referenceQuantity: {
+            '@type': 'QuantitativeValue',
+            value: '12',
+            unitText: 'month',
+          },
+        },
+      },
+    ],
+  };
+}
+
+export function generateHowToSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Benchmark a Biopharma Licensing Deal',
+    description: 'Use the Ambrosia Ventures Deal Calculator to get instant benchmarks for upfront payments, milestones, and royalties based on 600+ real biopharma transactions.',
+    totalTime: 'PT2M',
+    tool: [
+      { '@type': 'HowToTool', name: 'Ambrosia Ventures Deal Calculator' },
+    ],
+    step: [
+      {
+        '@type': 'HowToStep',
+        position: 1,
+        name: 'Select your asset parameters',
+        text: 'Choose the development phase (Preclinical through Approved), modality (small molecule, mAb, ADC, CAR-T, gene therapy, etc.), and therapeutic area.',
+        url: `${BASE_URL}/calculator`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 2,
+        name: 'Specify deal details',
+        text: 'Select indication, territory scope, deal type, and optional modifiers like regulatory designations (Breakthrough, Fast Track, Orphan).',
+        url: `${BASE_URL}/calculator`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 3,
+        name: 'Get instant benchmarks',
+        text: 'View data-driven ranges for upfront payments, milestone structures, royalty rates, total deal value, and risk-adjusted metrics — all powered by 600+ real transactions.',
+        url: `${BASE_URL}/calculator`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 4,
+        name: 'Run advanced analysis (Pro)',
+        text: 'Access rNPV modeling, Monte Carlo simulation (10,000 iterations), scenario planning, comparable deals, and AI-powered negotiation playbooks.',
+        url: `${BASE_URL}/calculator`,
       },
     ],
   };
@@ -254,13 +341,25 @@ export function generateDatasetSchema(): DatasetSchema {
       'royalty rates',
       'oncology deals',
       'biopharma transactions',
+      'neurology CNS deals',
+      'immunology autoimmune licensing',
+      'metabolic obesity GLP-1 deals',
+      'cardiovascular deal terms',
+      'infectious disease licensing',
+      'ophthalmology deal benchmarks',
+      'women health biopharma deals',
+      'ADC antibody drug conjugate deals',
+      'CAR-T cell therapy licensing',
+      'gene therapy deal terms',
+      'bispecific antibody deals',
+      'radiopharmaceutical licensing',
     ],
     creator: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
       url: BASE_URL,
     },
-    temporalCoverage: '2018/2026',
+    temporalCoverage: '2018/..',
     variableMeasured: [
       'Upfront Payment (USD)',
       'Total Deal Value (USD)',
