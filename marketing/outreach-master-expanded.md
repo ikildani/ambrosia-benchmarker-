@@ -1,6 +1,6 @@
 # MASTER OUTREACH LIST: calculator.ambrosiaventures.co
 
-**Compiled: March 6, 2026 | Total: 323 targets | 225 emails across 21 segments**
+**Compiled: March 6, 2026 | Total: 350 targets | 250+ emails across 23 segments**
 
 > **Disclaimer:** Emails marked [pattern] are derived from verified company email format patterns applied to confirmed executive names. Emails marked [confirmed] appeared in public directories or press releases. Always verify before bulk sending.
 
@@ -460,6 +460,49 @@
 
 ---
 
+## SEGMENT 22: Deal Intelligence Platforms & Valuation Tools (15 contacts)
+*Rationale: Direct competitors, complementary tools, and data providers. Partnership or cross-promotion = guaranteed interest.*
+
+| # | Name / Org | Title | Email | Why |
+|---|-----------|-------|-------|-----|
+| 1 | Biotechgate / Venture Valuation | Digital Partnering Platform | partnering@biotechgate.com [confirmed] | Runs virtual BD partnering events 4x/year |
+| 2 | Lori Gold | Events & Community | ASAP (Alliance Professionals) | lgold@strategic-alliances.org [confirmed] | Annual BioPharma Conference; 1000+ alliance professionals |
+| 3 | Citeline Client Services | Deal Intelligence | Citeline (Norstella) | clientservices@citeline.com [confirmed] | Cortellis competitor; pharma deal data |
+| 4 | Blair Dawson | VP Communications | Citeline (Informa) | blair.dawson@informa.com [confirmed] | Media/partnership contact for Citeline |
+| 5 | Recursion Pharma | AI Drug Discovery Partnering | partner@recursion.com [confirmed on website] | $50M NVIDIA partnership; Roche/Genentech collab |
+| 6 | Acrotech Biopharma | BD Partnering | bd@acrotechbiopharma.com [confirmed on website] | Specialty oncology/dermatology; flexible deal terms |
+| 7 | Vision Lifesciences | BD Advisory | Via visionlifesciences.com | $250B+ deal tracker; cross-border advisory |
+| 8 | BayBridge Bio | Drug Valuation Calculator (Competitor) | Via baybridgebio.com | Free rNPV calculator; Richard Murphey, founder |
+| 9 | BiopharmaVantage | Valuation Consulting (Competitor) | Via biopharmavantage.com | 2026 Valuation Guide publisher |
+| 10 | BioPharma Deals | Conference & Training | Via biopharmadeals.com | Munich Nov 2025 conference; licensing training |
+| 11 | Ryan Murr | Partner, Life Sciences | Gibson Dunn | rmurr@gibsondunn.com [confirmed] | Author of 2026 LS Licensing Outlook |
+| 12 | Branden Berns | Partner, Life Sciences | Gibson Dunn | bberns@gibsondunn.com [confirmed] | Co-author of 2026 LS Licensing Outlook |
+| 13 | Pharma Partnering Summit | Conference Organizer | Via pharma-partnering-summit.com | Boston Nov 2026 + Basel EU Summit |
+| 14 | IQVIA PharmaDeals | Deal Database | Via pharmadeals.net | Strategic BD consultancy + deal data |
+| 15 | Evaluate | BD&L Hub | Via evaluate.com/contact | Market intelligence leader; BD&L solutions |
+
+---
+
+## SEGMENT 23: Additional Pharma BD Submission Channels (12 contacts)
+*Rationale: More official BD intake emails and portals from mid-pharma and specialty companies.*
+
+| # | Company | Email / Channel | Contact Name | Region |
+|---|---------|----------------|-------------|--------|
+| 1 | Regeneron | Via regeneron.com/contact (form) | Nouhad Husseini, SVP BD | US |
+| 2 | Vertex | vrtx.com/our-science/partner-with-us/partnership-inquiries/ (form) | Maggie Lee, Dir External Innovation | US |
+| 3 | Moderna | WeCare@modernatx.com (general); modernatx.com/contact-moderna | BD team | US |
+| 4 | Servier | first.last@servier.com [pattern]; servier.com/partnering | Didier Landais, Global Head Licensing | FR |
+| 5 | Pierre Fabre | Via pierre-fabre.com/partnering | Paul Hellier, Corp BD&L Mgr | FR |
+| 6 | Chiesi | Via chiesi.com/contacts; chiesirarediseases.com/partner-with-us | BD team | IT |
+| 7 | Recordati | corpcomm@recordati.it [confirmed]; recordati.com/partnering | BD team | IT |
+| 8 | Eisai | Via eisai.com/inquiry | Shinji Yoshitake, Corp Licensing Dir | JP |
+| 9 | Otsuka | Via otsuka.co.jp/en/partnering/inquiry-form | Yusuke Ochi, Global Dir BD | JP |
+| 10 | Dr. Reddy's | firstlast@drreddys.com [pattern] | Jasmit Singh Chawla, Head Global In-licensing | IN |
+| 11 | Samsung Bioepis | Via samsungbioepis.com | Josh Sang Hyun Lee, VP BD | KR |
+| 12 | Zydus Lifesciences | info@zfrx.com [confirmed] | BD team | IN |
+
+---
+
 ## SUMMARY
 
 | Segment | Targets | Verified/Confirmed Emails | Pattern Emails |
@@ -485,9 +528,11 @@
 | **Training/Education** | **10** | **7** | **3** |
 | **Sovereign Wealth/FOs** | **10** | **2** | **0** |
 | **Pharma Partnering Portals** | **25** | **16** | **0** |
-| **TOTAL** | **323** | **106** | **119** |
+| **Deal Intel / Valuation Tools** | **15** | **6** | **0** |
+| **Additional Pharma BD Channels** | **12** | **2** | **1** |
+| **TOTAL** | **350** | **114** | **120** |
 
-**Grand total: 323 targets with 225 email addresses (106 confirmed + 119 pattern-based) + 9 web portal submission channels**
+**Grand total: 350 targets with 234 email addresses (114 confirmed + 120 pattern-based) + 15 web portal submission channels**
 
 ### Outreach Strategy Notes
 
