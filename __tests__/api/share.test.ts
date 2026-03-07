@@ -222,7 +222,7 @@ describe('/api/share', () => {
     it('should return 400 if token is missing', async () => {
       const request = new NextRequest('http://localhost/api/share/');
 
-      const response = await GET(request, { params: { token: '' } });
+      const response = await GET(request, { params: Promise.resolve({ token: '' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -237,7 +237,7 @@ describe('/api/share', () => {
 
       const request = new NextRequest('http://localhost/api/share/nonexistent');
 
-      const response = await GET(request, { params: { token: 'nonexistent' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'nonexistent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -257,7 +257,7 @@ describe('/api/share', () => {
 
       const request = new NextRequest('http://localhost/api/share/abc123');
 
-      const response = await GET(request, { params: { token: 'abc123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'abc123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(410);
@@ -272,7 +272,7 @@ describe('/api/share', () => {
 
       const request = new NextRequest('http://localhost/api/share/abc123');
 
-      const response = await GET(request, { params: { token: 'abc123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'abc123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -290,7 +290,7 @@ describe('/api/share', () => {
 
       const request = new NextRequest('http://localhost/api/share/abc123');
 
-      const response = await GET(request, { params: { token: 'abc123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'abc123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -305,7 +305,7 @@ describe('/api/share', () => {
 
       const request = new NextRequest('http://localhost/api/share/abc123');
 
-      await GET(request, { params: { token: 'abc123' } });
+      await GET(request, { params: Promise.resolve({ token: 'abc123' }) });
 
       expect(mockSupabase.rpc).toHaveBeenCalledWith('increment_share_views', { p_token: 'abc123' });
     });

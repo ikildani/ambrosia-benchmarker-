@@ -1692,12 +1692,21 @@ function formatTerritory(territory: string): string {
     global: 'Global',
     worldwide: 'Worldwide',
     us: 'US',
+    us_only: 'US',
     us_eu: 'US & EU',
+    us_japan: 'US & Japan',
     ex_us: 'Ex-US',
     ex_china: 'Ex-China',
     china: 'China',
     japan: 'Japan',
     europe: 'Europe',
+    row: 'Rest of World',
+    canada: 'Canada',
+    australia: 'Australia / NZ',
+    south_korea: 'South Korea',
+    apac_ex_cj: 'APAC ex-China/Japan',
+    latam: 'Latin America',
+    mena: 'Middle East & North Africa',
   };
   return labels[territory] || territory;
 }

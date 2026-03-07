@@ -64,7 +64,7 @@ function WizardStepperInner({
                   isClickable ? 'cursor-pointer hover:scale-105' : isCurrent ? 'cursor-default' : 'cursor-default opacity-50'
                 }`}
               >
-                <div className={`relative w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
+                <div className={`relative w-8 h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
                   isCompleted
                     ? 'bg-teal-500 text-white'
                     : isCurrent

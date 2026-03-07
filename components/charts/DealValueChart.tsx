@@ -116,21 +116,21 @@ function DealValueChart({ terms }: DealValueChartProps) {
           margin={{
             top: 10,
             right: isMobile ? 15 : 30,
-            left: isMobile ? 60 : 80,
+            left: isMobile ? 50 : 80,
             bottom: 10
           }}
         >
           <XAxis
             type="number"
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 9 : 12, fill: CHART_COLORS.axisLabel }}
+            tick={{ fontSize: isMobile ? 10 : 12, fill: CHART_COLORS.axisLabel }}
             axisLine={{ stroke: CHART_COLORS.axisLine }}
             tickCount={isMobile ? 4 : 6}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: isMobile ? 9 : 12, fill: CHART_COLORS.axisLabelBold }}
+            tick={{ fontSize: isMobile ? 10 : 12, fill: CHART_COLORS.axisLabelBold }}
             axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 50 : 75}
           />

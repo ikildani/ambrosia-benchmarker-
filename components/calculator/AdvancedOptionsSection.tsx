@@ -378,7 +378,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
 
   if (column === 'competitive') {
     return (
-      <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
+      <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white dark:bg-slate-800 rounded-xl' : ''}>
         <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
           <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
           Competitive Landscape
@@ -418,7 +418,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             value={combinationPotential}
             onChange={onCombinationPotentialChange}
             highlighted={highlightedFields.has('combinationPotential')}
-            columns={3}
+            columns={5}
           />
         </div>
       </div>
@@ -443,7 +443,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             value={territory}
             onChange={onTerritoryChange}
             highlighted={highlightedFields.has('territory')}
-            columns={3}
+            columns={5}
           />
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300">Regulatory Designations</label>
@@ -494,7 +494,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
     return (
       <>
         {/* Competitive Landscape Section */}
-        <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
+        <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white dark:bg-slate-800 rounded-xl' : ''}>
           <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
             <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
             Competitive Landscape
@@ -545,7 +545,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               value={territory}
               onChange={onTerritoryChange}
               highlighted={highlightedFields.has('territory')}
-              columns={3}
+              columns={5}
             />
 
             <div className="space-y-2">
@@ -614,7 +614,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               value={treatmentApproach}
               onChange={onTreatmentApproachChange}
               highlighted={highlightedFields.has('treatmentApproach')}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'metabolic' ? (
             <OptionCardGroup
@@ -626,7 +626,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={metabolicTreatmentApproachBadges}
               value={metabolicTreatmentApproach}
               onChange={onMetabolicTreatmentApproachChange}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'immunology' ? (
             <OptionCardGroup
@@ -638,7 +638,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={treatmentGoalBadges}
               value={treatmentGoal}
               onChange={onTreatmentGoalChange}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'cardiovascular' ? (
             <OptionCardGroup
@@ -650,7 +650,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={cvOutcomeBenefitBadges}
               value={cvOutcomeBenefit}
               onChange={onCvOutcomeBenefitChange}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'infectiousDisease' ? (
             <OptionCardGroup
@@ -662,7 +662,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={resistanceProfileBadges}
               value={resistanceProfile}
               onChange={onResistanceProfileChange}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'ophthalmology' ? (
             <OptionCardGroup
@@ -674,7 +674,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={ocularDeliveryBadges}
               value={ocularDelivery}
               onChange={onOcularDeliveryChange}
-              columns={3}
+              columns={5}
             />
           ) : therapeuticArea === 'womensHealth' ? (
             <OptionCardGroup
@@ -686,7 +686,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               impactBadges={whTargetPopulationBadges}
               value={whTargetPopulation}
               onChange={onWhTargetPopulationChange}
-              columns={3}
+              columns={5}
             />
           ) : (
             <OptionCardGroup
@@ -699,7 +699,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               value={lineOfTherapy}
               onChange={onLineOfTherapyChange}
               highlighted={highlightedFields.has('lineOfTherapy')}
-              columns={3}
+              columns={5}
             />
           )}
 
@@ -714,7 +714,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={bbbPenetrationBadges}
                 value={bbbPenetration}
                 onChange={onBbbPenetrationChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="disease-progression-select"
@@ -725,7 +725,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={diseaseProgressionBadges}
                 value={diseaseProgression}
                 onChange={onDiseaseProgressionChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="biomarker-validation-select"
@@ -736,7 +736,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={biomarkerValidationBadges}
                 value={biomarkerValidation}
                 onChange={onBiomarkerValidationChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -752,7 +752,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={immuneResetBadges}
                 value={immuneResetPotential}
                 onChange={onImmuneResetPotentialChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="target-specificity-select"
@@ -763,7 +763,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={targetSpecificityBadges}
                 value={targetSpecificity}
                 onChange={onTargetSpecificityChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="disease-severity-select"
@@ -774,7 +774,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={diseaseSeverityBadges}
                 value={diseaseSeverity}
                 onChange={onDiseaseSeverityChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -790,7 +790,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={mechanismDifferentiationBadges}
                 value={mechanismDifferentiation}
                 onChange={onMechanismDifferentiationChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="weight-loss-efficacy-select"
@@ -801,7 +801,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={weightLossEfficacyBadges}
                 value={weightLossEfficacy}
                 onChange={onWeightLossEfficacyChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="route-of-administration-select"
@@ -812,7 +812,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={routeOfAdministrationBadges}
                 value={routeOfAdministration}
                 onChange={onRouteOfAdministrationChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="comorbidity-breadth-select"
@@ -823,7 +823,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={comorbidityBreadthBadges}
                 value={comorbidityBreadth}
                 onChange={onComorbidityBreadthChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -839,7 +839,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={cvTrialEndpointBadges}
                 value={cvTrialEndpoint}
                 onChange={onCvTrialEndpointChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="cv-population-risk-select"
@@ -850,7 +850,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={cvPopulationRiskBadges}
                 value={cvPopulationRisk}
                 onChange={onCvPopulationRiskChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -866,7 +866,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={infectionChronicityBadges}
                 value={infectionChronicity}
                 onChange={onInfectionChronicityChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="public-health-priority-select"
@@ -877,7 +877,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={publicHealthPriorityBadges}
                 value={publicHealthPriority}
                 onChange={onPublicHealthPriorityChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -893,7 +893,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={treatmentDurabilityBadges}
                 value={treatmentDurability}
                 onChange={onTreatmentDurabilityChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="vision-impact-select"
@@ -904,7 +904,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={visionImpactBadges}
                 value={visionImpact}
                 onChange={onVisionImpactChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -920,7 +920,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={whUnmetNeedBadges}
                 value={whUnmetNeed}
                 onChange={onWhUnmetNeedChange}
-                columns={3}
+                columns={5}
               />
               <OptionCardGroup
                 id="wh-regulatory-select"
@@ -931,7 +931,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 impactBadges={whRegulatoryBadges}
                 value={whRegulatory}
                 onChange={onWhRegulatoryChange}
-                columns={3}
+                columns={5}
               />
             </>
           )}
@@ -946,7 +946,7 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             value={combinationPotential}
             onChange={onCombinationPotentialChange}
             highlighted={highlightedFields.has('combinationPotential')}
-            columns={3}
+            columns={5}
           />
         </div>
       </div>

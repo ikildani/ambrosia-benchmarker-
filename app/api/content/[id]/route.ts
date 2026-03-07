@@ -14,7 +14,7 @@ async function verifyAdmin(request: Request): Promise<{ authorized: boolean; err
   }
 
   const token = authHeader.split(' ')[1];
-  const authClient = createServerClient();
+  const authClient = await createServerClient();
   const { data: { user }, error: authError } = await authClient.auth.getUser(token);
 
   if (authError || !user) {

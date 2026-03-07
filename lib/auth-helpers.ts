@@ -10,7 +10,7 @@ export async function getAuthenticatedUser(
   _request: NextRequest
 ): Promise<User | null> {
   try {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error,

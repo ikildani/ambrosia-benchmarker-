@@ -3762,51 +3762,82 @@
       }
     }
   },
+  "_territoryNotes": "Sub-territory multipliers (europe+china+japan+row=0.54) intentionally exceed ex_us (0.45). Standalone territory deals carry a 15-20% optionality premium vs carve-outs from broader ex_us agreements — this reflects real deal economics where individual territory rights are sold at a premium to the aggregate.",
   "territories": {
     "global": {
       "multiplier": 1,
       "label": "Global",
-      "context": "Full worldwide rights - maximum value"
+      "context": "Full worldwide rights — maximum value"
     },
     "us_only": {
       "multiplier": 0.55,
       "label": "US Only",
-      "context": "~55% of global pharma revenue"
+      "context": "~55% of global pharma revenue (IQVIA/EFPIA 2024)"
     },
     "ex_us": {
       "multiplier": 0.45,
       "label": "Ex-US (All)",
-      "context": "Rest of world excluding US"
+      "context": "All territories outside United States"
     },
     "europe": {
-      "multiplier": 0.32,
+      "multiplier": 0.25,
       "label": "Europe Only",
-      "context": "IRA creating pricing pressure"
+      "context": "EU5 + Nordics — HTA-driven pricing, reference pricing across markets"
     },
     "china": {
-      "multiplier": 0.18,
+      "multiplier": 0.12,
       "label": "Greater China",
-      "context": "Geopolitical risk, CFIUS scrutiny, domestic innovation push, pricing compression"
+      "context": "VBP pricing compression, geopolitical risk, CFIUS scrutiny"
     },
     "japan": {
-      "multiplier": 0.18,
+      "multiplier": 0.09,
       "label": "Japan",
-      "context": "Aging population, price controls"
+      "context": "~6% of global revenue, NHI price controls, aging population"
     },
     "row": {
-      "multiplier": 0.12,
+      "multiplier": 0.08,
       "label": "Rest of World",
-      "context": "Emerging markets, limited infrastructure"
+      "context": "Emerging markets, variable infrastructure and access"
     },
     "us_eu": {
-      "multiplier": 0.8,
+      "multiplier": 0.78,
       "label": "US + Europe",
-      "context": "Core developed markets"
+      "context": "Core developed markets — ~80% of global pharma revenue"
     },
     "us_japan": {
-      "multiplier": 0.7,
+      "multiplier": 0.63,
       "label": "US + Japan",
-      "context": "Major markets, Japan access value"
+      "context": "Two largest single-country markets"
+    },
+    "canada": {
+      "multiplier": 0.04,
+      "label": "Canada",
+      "context": "~2-3% of global revenue, PMPRB price controls, CADTH reimbursement"
+    },
+    "australia": {
+      "multiplier": 0.03,
+      "label": "Australia / NZ",
+      "context": "~2% of global revenue, PBS reimbursement, PBAC HTA"
+    },
+    "south_korea": {
+      "multiplier": 0.04,
+      "label": "South Korea",
+      "context": "~2-3% of global revenue, HIRA price controls, growing innovation hub"
+    },
+    "apac_ex_cj": {
+      "multiplier": 0.06,
+      "label": "APAC ex-China/Japan",
+      "context": "India, SE Asia, Taiwan, South Korea — high growth, variable pricing/access"
+    },
+    "latam": {
+      "multiplier": 0.05,
+      "label": "Latin America",
+      "context": "Brazil, Mexico lead — ~3-4% of global revenue, reference pricing, tender markets"
+    },
+    "mena": {
+      "multiplier": 0.03,
+      "label": "Middle East & North Africa",
+      "context": "Gulf states premium-priced, North Africa tender-based — ~2% of global revenue"
     }
   },
   "multiplierConfig": {
@@ -4828,6 +4859,11 @@
   "neurologyDiseaseModifyingPhaseAdjustment": {
     "_description": "Disease-modifying neurology assets have longer development timelines. These multipliers adjust milestone allocations to weight development milestones higher.",
     "milestoneRebalance": {
+      "discovery": {
+        "dev": 0.65,
+        "reg": 0.22,
+        "comm": 0.13
+      },
       "preclinical": {
         "dev": 0.58,
         "reg": 0.26,
@@ -4838,15 +4874,30 @@
         "reg": 0.3,
         "comm": 0.2
       },
+      "phase1_2": {
+        "dev": 0.42,
+        "reg": 0.33,
+        "comm": 0.25
+      },
       "phase2": {
         "dev": 0.33,
         "reg": 0.36,
         "comm": 0.31
       },
+      "phase2_3": {
+        "dev": 0.24,
+        "reg": 0.35,
+        "comm": 0.41
+      },
       "phase3": {
         "dev": 0.15,
         "reg": 0.33,
         "comm": 0.52
+      },
+      "nda_filed": {
+        "dev": 0.08,
+        "reg": 0.30,
+        "comm": 0.62
       },
       "approved": {
         "dev": 0.05,

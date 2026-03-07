@@ -60,13 +60,12 @@ describe('/api/financial', () => {
   });
 
   describe('GET', () => {
-    it('should return 401 when not authenticated', async () => {
-      mockRequireAuth.mockResolvedValueOnce([null, new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401 })]);
-      const request = new NextRequest('http://localhost/api/financial?therapeuticArea=oncology&indication=solid_tumor');
+    it('should return 400 when missing required params', async () => {
+      const request = new NextRequest('http://localhost/api/financial');
 
       const response = await GET(request);
 
-      expect(response.status).toBe(401);
+      expect(response.status).toBe(400);
     });
 
     it('should return 429 when rate limited', async () => {

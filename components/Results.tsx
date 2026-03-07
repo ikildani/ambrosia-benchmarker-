@@ -514,7 +514,7 @@ export function ResultsSkeleton() {
       {/* Metric cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white border border-neutral-100 rounded-xl p-5 space-y-3">
+          <div key={i} className="bg-white dark:bg-slate-800 border border-neutral-100 dark:border-slate-700 rounded-xl p-5 space-y-3">
             <div className="h-3 bg-neutral-100 rounded w-2/3" />
             <div className="h-7 bg-neutral-200 rounded w-full" />
             <div className="h-3 bg-neutral-100 rounded w-1/2" />
@@ -523,7 +523,7 @@ export function ResultsSkeleton() {
       </div>
 
       {/* Chart area skeleton */}
-      <div className="bg-white border border-neutral-100 rounded-xl p-6">
+      <div className="bg-white dark:bg-slate-800 border border-neutral-100 dark:border-slate-700 rounded-xl p-6">
         <div className="h-4 bg-neutral-100 rounded w-1/4 mb-4" />
         <div className="h-48 bg-neutral-50 rounded-lg" />
       </div>
@@ -814,6 +814,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     setShowReportModal(true);
   };
 
+  // Preload ExcelJS chunk on hover so it's cached before the modal opens
+  const handlePreloadExcel = useCallback(() => {
+    import('@/lib/generateExcel').catch(() => {});
+  }, []);
+
   const handleDownloadExecutiveSummary = useCallback(() => {
     if (!fullInputs || !result) return;
 
@@ -870,6 +875,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         inputs={inputs}
         onDownloadPDF={handleDownloadPDF}
         onDownloadExcel={handleDownloadExcel}
+        onPreloadExcel={handlePreloadExcel}
         onFreePDFClick={handleFreePDFClick}
         onShare={() => setShowShareModal(true)}
         onLinkedInShare={handleLinkedInShare}
@@ -1289,30 +1295,36 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Sensitivity Analysis */}
         {fullInputs && onApplyNewInputs && (
-          <SensitivityAnalysis
-            currentInputs={fullInputs}
-            currentResult={result}
-            onApplyChanges={onApplyNewInputs}
-            tier={tier}
-            onUpgrade={onUpgrade}
-            onBuyReport={onBuyReport}
-          />
+          <FinancialErrorBoundary fallbackTitle="Sensitivity Analysis unavailable">
+            <SensitivityAnalysis
+              currentInputs={fullInputs}
+              currentResult={result}
+              onApplyChanges={onApplyNewInputs}
+              tier={tier}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+          </FinancialErrorBoundary>
         )}
 
         {/* Comparable Deals */}
         {fullInputs && (
-          <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
+          <FinancialErrorBoundary fallbackTitle="Comparable Deals unavailable">
+            <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
+          </FinancialErrorBoundary>
         )}
 
         {/* Pipeline Intelligence — Clinical Trials */}
         {fullInputs && (
-          <PipelineIntelligence
-            therapeuticArea={fullInputs.therapeuticArea}
-            modality={fullInputs.modality}
-            tier={tier}
-            onUpgrade={onUpgrade}
-            onBuyReport={onBuyReport}
-          />
+          <FinancialErrorBoundary fallbackTitle="Pipeline Intelligence unavailable">
+            <PipelineIntelligence
+              therapeuticArea={fullInputs.therapeuticArea}
+              modality={fullInputs.modality}
+              tier={tier}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+          </FinancialErrorBoundary>
         )}
 
         {/* Financial Modeling — World-Class Tier */}
@@ -1372,30 +1384,34 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* AI Deal Memo */}
-        <DealMemoSection
-          hasFullAccess={hasFullAccess}
-          dealMemo={dealMemo}
-          memoLoading={memoLoading}
-          memoError={memoError}
-          onGenerateMemo={handleGenerateMemo}
-          onBuyReport={onBuyReport}
-        />
+        <FinancialErrorBoundary fallbackTitle="Deal Memo unavailable">
+          <DealMemoSection
+            hasFullAccess={hasFullAccess}
+            dealMemo={dealMemo}
+            memoLoading={memoLoading}
+            memoError={memoError}
+            onGenerateMemo={handleGenerateMemo}
+            onBuyReport={onBuyReport}
+          />
+        </FinancialErrorBoundary>
 
         {/* Partner Matches */}
         {inputs && (
           <div className="mb-4 sm:mb-6">
-            <PartnerMatchesContainer
-              modality={inputs.modality}
-              phase={inputs.phase}
-              indicationCategory={getIndicationCategory(inputs.indication)}
-              indicationSpecific={inputs.indication}
-              territory={inputs.territory}
-              therapeuticArea={fullInputs?.therapeuticArea}
-              regulatoryDesignations={fullInputs?.regulatoryDesignations}
-              tier={tier}
-              onUpgrade={onUpgrade || (() => {})}
-              onMatchesLoaded={handlePartnerMatchesLoaded}
-            />
+            <FinancialErrorBoundary fallbackTitle="Partner Matches unavailable">
+              <PartnerMatchesContainer
+                modality={inputs.modality}
+                phase={inputs.phase}
+                indicationCategory={getIndicationCategory(inputs.indication)}
+                indicationSpecific={inputs.indication}
+                territory={inputs.territory}
+                therapeuticArea={fullInputs?.therapeuticArea}
+                regulatoryDesignations={fullInputs?.regulatoryDesignations}
+                tier={tier}
+                onUpgrade={onUpgrade || (() => {})}
+                onMatchesLoaded={handlePartnerMatchesLoaded}
+              />
+            </FinancialErrorBoundary>
           </div>
         )}
 

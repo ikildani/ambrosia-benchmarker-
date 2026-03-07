@@ -73,7 +73,7 @@ describe('/api/companies/[companyId]', () => {
     it('should return 400 for invalid UUID format', async () => {
       const request = new NextRequest('http://localhost/api/companies/not-a-uuid');
 
-      const response = await GET(request, { params: { companyId: 'not-a-uuid' } });
+      const response = await GET(request, { params: Promise.resolve({ companyId: 'not-a-uuid' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -92,7 +92,7 @@ describe('/api/companies/[companyId]', () => {
 
       const request = new NextRequest(`http://localhost/api/companies/${VALID_UUID}`);
 
-      const response = await GET(request, { params: { companyId: VALID_UUID } });
+      const response = await GET(request, { params: Promise.resolve({ companyId: VALID_UUID }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -193,7 +193,7 @@ describe('/api/companies/[companyId]', () => {
 
       const request = new NextRequest(`http://localhost/api/companies/${VALID_UUID}`);
 
-      const response = await GET(request, { params: { companyId: VALID_UUID } });
+      const response = await GET(request, { params: Promise.resolve({ companyId: VALID_UUID }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -257,7 +257,7 @@ describe('/api/companies/[companyId]', () => {
       const proUserId = '660e8400-e29b-41d4-a716-446655440001';
       const request = new NextRequest(`http://localhost/api/companies/${VALID_UUID}?user_id=${proUserId}`);
 
-      const response = await GET(request, { params: { companyId: VALID_UUID } });
+      const response = await GET(request, { params: Promise.resolve({ companyId: VALID_UUID }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);

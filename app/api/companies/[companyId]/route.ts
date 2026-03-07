@@ -7,13 +7,13 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { companyId: string } }
+  { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
     const supabase = createServiceClient();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
-    const companyId = params.companyId;
+    const { companyId } = await params;
 
     // Validate UUID format
     if (!UUID_REGEX.test(companyId)) {

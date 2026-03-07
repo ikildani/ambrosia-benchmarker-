@@ -87,7 +87,7 @@ function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           <XAxis
             dataKey="sales"
             tickFormatter={(value) => value === 0 ? '$0' : value >= 1000 ? `$${value/1000}B` : `$${value}M`}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            tick={{ fontSize: isMobile ? 10 : 11, fill: CHART_COLORS.axisLabel }}
             axisLine={{ stroke: CHART_COLORS.axisLine }}
             ticks={isMobile ? [0, 500, 1000, 2000] : [0, 500, 1000, 2000]}
             tickMargin={isMobile ? 2 : 8}
@@ -95,7 +95,7 @@ function RoyaltyChart({ royalties }: RoyaltyChartProps) {
           <YAxis
             domain={[0, Math.max(royalties.highTier.high + 5, 30)]}
             tickFormatter={(value) => `${value}%`}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            tick={{ fontSize: isMobile ? 10 : 11, fill: CHART_COLORS.axisLabel }}
             axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 28 : 40}
             tickCount={isMobile ? 4 : 6}

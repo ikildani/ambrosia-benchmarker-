@@ -8,53 +8,83 @@
       "GlobalData",
       "published epidemiology studies"
     ],
-    "notes": "All prevalence/incidence figures are per million global population. Costs are US list price estimates."
+    "notes": "All prevalence/incidence figures are per million GLOBAL population (not US-specific). US prevalence rates are typically 1.5-2x higher for metabolic/CV diseases. Age-stratified prevalence (e.g., Alzheimer's 65+) is substantially higher than population-level figures shown here. Costs are US list price estimates. Figures represent drug-eligible populations where applicable."
   },
   "territories": {
     "global": {
-      "population": 8100000000,
+      "population": 8200000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.45
+      "pricingIndexVsUS": 0.28
     },
     "us_only": {
-      "population": 335000000,
+      "population": 340000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 1
+      "pricingIndexVsUS": 1.0
     },
     "europe": {
       "population": 450000000,
       "currencyCode": "EUR",
-      "pricingIndexVsUS": 0.65
+      "pricingIndexVsUS": 0.38
     },
     "china": {
-      "population": 1410000000,
+      "population": 1405000000,
       "currencyCode": "CNY",
-      "pricingIndexVsUS": 0.15
+      "pricingIndexVsUS": 0.12
     },
     "japan": {
-      "population": 124000000,
+      "population": 123000000,
       "currencyCode": "JPY",
-      "pricingIndexVsUS": 0.7
-    },
-    "ex_us": {
-      "population": 7765000000,
-      "currencyCode": "USD",
-      "pricingIndexVsUS": 0.4
-    },
-    "row": {
-      "population": 5940000000,
-      "currencyCode": "USD",
       "pricingIndexVsUS": 0.25
     },
-    "us_eu": {
-      "population": 785000000,
+    "ex_us": {
+      "population": 7860000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.85
+      "pricingIndexVsUS": 0.22
+    },
+    "row": {
+      "population": 5882000000,
+      "currencyCode": "USD",
+      "pricingIndexVsUS": 0.15
+    },
+    "us_eu": {
+      "population": 790000000,
+      "currencyCode": "USD",
+      "pricingIndexVsUS": 0.72
     },
     "us_japan": {
-      "population": 459000000,
+      "population": 463000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.9
+      "pricingIndexVsUS": 0.80
+    },
+    "canada": {
+      "population": 41000000,
+      "currencyCode": "CAD",
+      "pricingIndexVsUS": 0.55
+    },
+    "australia": {
+      "population": 31000000,
+      "currencyCode": "AUD",
+      "pricingIndexVsUS": 0.45
+    },
+    "south_korea": {
+      "population": 52000000,
+      "currencyCode": "KRW",
+      "pricingIndexVsUS": 0.30
+    },
+    "apac_ex_cj": {
+      "population": 3200000000,
+      "currencyCode": "USD",
+      "pricingIndexVsUS": 0.10
+    },
+    "latam": {
+      "population": 660000000,
+      "currencyCode": "USD",
+      "pricingIndexVsUS": 0.18
+    },
+    "mena": {
+      "population": 430000000,
+      "currencyCode": "USD",
+      "pricingIndexVsUS": 0.20
     }
   },
   "indications": {

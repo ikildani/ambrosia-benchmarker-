@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Method 1: Verify session from cookie (most reliable — server-side auth)
     try {
-      const serverClient = createServerClient();
+      const serverClient = await createServerClient();
       const { data: { user: sessionUser } } = await serverClient.auth.getUser();
       if (sessionUser) {
         authenticatedUserId = sessionUser.id;

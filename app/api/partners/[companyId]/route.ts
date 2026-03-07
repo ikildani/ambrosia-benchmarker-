@@ -4,11 +4,11 @@ import { isProEmail } from '@/lib/config/authorized-emails';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { companyId: string } }
+  { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
     const supabase = createServiceClient();
-    const { companyId } = params;
+    const { companyId } = await params;
 
     // Get user info from headers (more secure than query params)
     const userId = request.headers.get('x-user-id');

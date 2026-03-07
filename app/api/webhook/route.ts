@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!stripeSecretKey || !webhookSecret) {
-      console.log('Webhook: Stripe not configured, demo mode');
-      return NextResponse.json({ received: true, demo: true });
+      console.error('Webhook: STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET not configured');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
     }
 
     const body = await request.text();

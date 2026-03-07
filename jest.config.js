@@ -28,6 +28,7 @@ module.exports = async () => {
           '<rootDir>/__tests__/sensitivity.test.ts',
           '<rootDir>/__tests__/calculations-edge.test.ts',
           '<rootDir>/__tests__/report.test.ts',
+          '<rootDir>/__tests__/data-accuracy.test.ts',
         ],
         setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       },

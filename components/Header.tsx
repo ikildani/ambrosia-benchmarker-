@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { type JSX, useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
 // Avatar gradient options - premium color combinations (synced with Dashboard.tsx)

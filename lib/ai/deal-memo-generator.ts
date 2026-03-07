@@ -34,6 +34,12 @@ const territoryLabels: Record<string, string> = {
   row: 'Rest of World',
   us_eu: 'US & Europe',
   us_japan: 'US & Japan',
+  canada: 'Canada',
+  australia: 'Australia & New Zealand',
+  south_korea: 'South Korea',
+  apac_ex_cj: 'APAC (ex-China/Japan)',
+  latam: 'Latin America',
+  mena: 'Middle East & North Africa',
 };
 
 // Format currency for prompt

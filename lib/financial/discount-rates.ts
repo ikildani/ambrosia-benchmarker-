@@ -131,4 +131,10 @@ export const TERRITORY_RISK_PREMIUM: Record<string, number> = {
   row: 0.02,           // Higher emerging market risk
   us_eu: 0.0,
   us_japan: 0.0,
+  canada: 0.0,         // Stable market, PMPRB predictable
+  australia: 0.005,    // PBAC strict but predictable
+  south_korea: 0.01,   // HIRA price controls
+  apac_ex_cj: 0.025,   // Fragmented regulatory, access uncertainty
+  latam: 0.02,         // Currency volatility, tender market risk
+  mena: 0.015,         // Mixed — Gulf stable, North Africa volatile
 };

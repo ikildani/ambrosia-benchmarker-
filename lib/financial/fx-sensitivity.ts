@@ -28,7 +28,7 @@ export const TERRITORY_PRICING_PROFILES: Record<string, TerritoryPricingProfile>
   europe: {
     territory: 'europe',
     currencyCode: 'EUR',
-    pricingIndexVsUS: 0.65,
+    pricingIndexVsUS: 0.38,
     regulatoryPressure: 'high',
     referenceBasketDiscount: 0.12, // 12% average reference pricing impact
     volatility12mo: 0.08, // EUR/USD 12-month historical volatility
@@ -56,7 +56,7 @@ export const TERRITORY_PRICING_PROFILES: Record<string, TerritoryPricingProfile>
   japan: {
     territory: 'japan',
     currencyCode: 'JPY',
-    pricingIndexVsUS: 0.70,
+    pricingIndexVsUS: 0.25,
     regulatoryPressure: 'moderate',
     volatility12mo: 0.12, // JPY/USD high volatility recently
     notes: [
@@ -69,7 +69,7 @@ export const TERRITORY_PRICING_PROFILES: Record<string, TerritoryPricingProfile>
   global: {
     territory: 'global',
     currencyCode: 'USD',
-    pricingIndexVsUS: 0.45, // Blended global average
+    pricingIndexVsUS: 0.28, // Blended global average (pharma-accessible markets)
     regulatoryPressure: 'moderate',
     volatility12mo: 0.06, // Trade-weighted USD index volatility
     notes: [
@@ -80,29 +80,29 @@ export const TERRITORY_PRICING_PROFILES: Record<string, TerritoryPricingProfile>
   ex_us: {
     territory: 'ex_us',
     currencyCode: 'USD',
-    pricingIndexVsUS: 0.40,
+    pricingIndexVsUS: 0.22,
     regulatoryPressure: 'high',
     volatility12mo: 0.07,
     notes: [
-      'Ex-US pricing averages 35-45% of US list price',
+      'Ex-US pricing averages 20-30% of US list price',
       'Reference pricing chains amplify discounts across markets',
     ],
   },
   row: {
     territory: 'row',
     currencyCode: 'USD',
-    pricingIndexVsUS: 0.25,
+    pricingIndexVsUS: 0.15,
     regulatoryPressure: 'high',
     volatility12mo: 0.10,
     notes: [
-      'Emerging markets price at 15-30% of US levels',
+      'Emerging markets price at 10-20% of US levels',
       'Access programs and tiered pricing common',
     ],
   },
   us_eu: {
     territory: 'us_eu',
     currencyCode: 'USD',
-    pricingIndexVsUS: 0.85,
+    pricingIndexVsUS: 0.72,
     regulatoryPressure: 'moderate',
     volatility12mo: 0.04,
     notes: ['Combined US+EU rights typically priced at 80-90% of global deal value'],
@@ -110,10 +110,82 @@ export const TERRITORY_PRICING_PROFILES: Record<string, TerritoryPricingProfile>
   us_japan: {
     territory: 'us_japan',
     currencyCode: 'USD',
-    pricingIndexVsUS: 0.90,
+    pricingIndexVsUS: 0.80,
     regulatoryPressure: 'moderate',
     volatility12mo: 0.06,
-    notes: ['US+Japan rights typically priced at 85-95% of global deal value'],
+    notes: ['US+Japan rights typically priced at 60-70% of global deal value'],
+  },
+  canada: {
+    territory: 'canada',
+    currencyCode: 'CAD',
+    pricingIndexVsUS: 0.55,
+    regulatoryPressure: 'moderate',
+    volatility12mo: 0.06,
+    notes: [
+      'PMPRB price controls cap patented drug prices',
+      'CADTH and INESSS drive provincial reimbursement decisions',
+      'Market ~2-3% of global pharma revenue',
+    ],
+  },
+  australia: {
+    territory: 'australia',
+    currencyCode: 'AUD',
+    pricingIndexVsUS: 0.45,
+    regulatoryPressure: 'moderate',
+    volatility12mo: 0.08,
+    notes: [
+      'PBS reimbursement via PBAC HTA — strict cost-effectiveness thresholds',
+      'Market ~2% of global pharma revenue',
+      'Includes New Zealand (PHARMAC)',
+    ],
+  },
+  south_korea: {
+    territory: 'south_korea',
+    currencyCode: 'KRW',
+    pricingIndexVsUS: 0.30,
+    regulatoryPressure: 'moderate',
+    volatility12mo: 0.07,
+    notes: [
+      'HIRA price controls with mandatory price-volume agreements',
+      'Growing biosimilar hub with strong domestic innovation',
+      'Market ~2-3% of global pharma revenue',
+    ],
+  },
+  apac_ex_cj: {
+    territory: 'apac_ex_cj',
+    currencyCode: 'USD',
+    pricingIndexVsUS: 0.10,
+    regulatoryPressure: 'high',
+    volatility12mo: 0.09,
+    notes: [
+      'India, SE Asia, Taiwan — large populations, low per-capita pricing',
+      'India DPCO price controls on essential medicines',
+      'Highly fragmented regulatory landscape',
+    ],
+  },
+  latam: {
+    territory: 'latam',
+    currencyCode: 'USD',
+    pricingIndexVsUS: 0.18,
+    regulatoryPressure: 'high',
+    volatility12mo: 0.12,
+    notes: [
+      'Brazil (ANVISA/CMED) and Mexico lead the region',
+      'Reference pricing and government tenders common',
+      'Currency volatility significant (BRL, MXN, ARS)',
+    ],
+  },
+  mena: {
+    territory: 'mena',
+    currencyCode: 'USD',
+    pricingIndexVsUS: 0.20,
+    regulatoryPressure: 'moderate',
+    volatility12mo: 0.05,
+    notes: [
+      'Gulf states (UAE, Saudi) premium-priced, USD-pegged currencies',
+      'North Africa tender-based, lower pricing',
+      'Market ~2% of global pharma revenue',
+    ],
   },
 };
 
@@ -195,6 +267,12 @@ function getNonUSDRevenueShare(territory: string): number {
     row: 0.90,        // Various non-USD currencies
     us_eu: 0.35,      // ~35% EUR exposure
     us_japan: 0.25,   // ~25% JPY exposure
+    canada: 0.95,     // Almost entirely CAD-denominated
+    australia: 0.95,  // Almost entirely AUD-denominated
+    south_korea: 0.95, // Almost entirely KRW-denominated
+    apac_ex_cj: 0.90, // Mix of INR, THB, TWD, etc.
+    latam: 0.90,      // Mix of BRL, MXN, COP
+    mena: 0.30,       // Gulf states USD-pegged, North Africa local
   };
   return shares[territory] || 0.40;
 }

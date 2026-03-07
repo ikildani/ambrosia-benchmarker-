@@ -27,19 +27,19 @@ export function RecentDealsSection({ deals, maxDeals = 3 }: RecentDealsSectionPr
 
   return (
     <div className="mt-4">
-      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2.5">
+      <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2.5">
         Recent Deal Activity
       </div>
       <div className="space-y-2">
         {deals.slice(0, maxDeals).map((deal, i) => (
           <div
             key={deal.id || i}
-            className="flex items-start gap-3 bg-white border border-gray-100 rounded-lg px-3 py-2.5 hover:border-gray-200 transition-colors"
+            className="flex items-start gap-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg px-3 py-2.5 hover:border-gray-200 dark:hover:border-slate-600 transition-colors"
           >
-            <FileText className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+            <FileText className="w-4 h-4 text-gray-400 dark:text-slate-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium text-gray-900 text-sm">
+                <span className="font-medium text-gray-900 dark:text-slate-100 text-sm">
                   {deal.asset_name}
                 </span>
                 {deal.modality && (

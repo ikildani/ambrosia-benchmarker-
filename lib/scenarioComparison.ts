@@ -40,6 +40,12 @@ const TERRITORY_LABELS: Record<string, string> = {
   row: 'Rest of World',
   us_eu: 'US + EU',
   us_japan: 'US + Japan',
+  canada: 'Canada',
+  australia: 'Australia / NZ',
+  south_korea: 'South Korea',
+  apac_ex_cj: 'APAC ex-CN/JP',
+  latam: 'Latin America',
+  mena: 'MENA',
 };
 
 // Competitive position display labels

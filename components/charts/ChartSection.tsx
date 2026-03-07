@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type JSX, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DealTerms, TieredRoyalties } from '@/lib/calculations';
 import DealValueChart from './DealValueChart';

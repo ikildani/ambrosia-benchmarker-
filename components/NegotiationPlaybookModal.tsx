@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { type JSX, useState, useEffect, useCallback, useRef } from 'react';
 import { CalculationResult } from '@/lib/calculations';
 import { NegotiationPlaybook, PlaybookSection } from '@/lib/ai/playbook-generator';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
@@ -54,19 +54,19 @@ function PlaybookSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
       {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="p-4 bg-neutral-50 rounded-xl">
+        <div key={i} className="p-4 bg-neutral-50 dark:bg-slate-800 rounded-xl">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-neutral-200 rounded-lg" />
-            <div className="h-5 bg-neutral-200 rounded w-40" />
+            <div className="w-10 h-10 bg-neutral-200 dark:bg-slate-700 rounded-lg" />
+            <div className="h-5 bg-neutral-200 dark:bg-slate-700 rounded w-40" />
           </div>
           <div className="space-y-2">
-            <div className="h-4 bg-neutral-200 rounded w-full" />
-            <div className="h-4 bg-neutral-200 rounded w-3/4" />
+            <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-full" />
+            <div className="h-4 bg-neutral-200 dark:bg-slate-700 rounded w-3/4" />
           </div>
           <div className="mt-3 space-y-2">
-            <div className="h-3 bg-neutral-100 rounded w-5/6" />
-            <div className="h-3 bg-neutral-100 rounded w-4/6" />
-            <div className="h-3 bg-neutral-100 rounded w-5/6" />
+            <div className="h-3 bg-neutral-100 dark:bg-slate-600 rounded w-5/6" />
+            <div className="h-3 bg-neutral-100 dark:bg-slate-600 rounded w-4/6" />
+            <div className="h-3 bg-neutral-100 dark:bg-slate-600 rounded w-5/6" />
           </div>
         </div>
       ))}

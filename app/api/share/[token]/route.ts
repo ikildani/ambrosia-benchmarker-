@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 // GET - Get shared calculation by token
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
     const supabase = createServiceClient();
-    const { token } = params;
+    const { token } = await params;
 
     if (!token) {
       return apiError('Token required', 400);

@@ -20,7 +20,7 @@ export function createServiceClient() {
 }
 
 // Server client with anon key for auth operations (uses cookies for PKCE)
-export function createServerClient() {
+export async function createServerClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -28,7 +28,7 @@ export function createServerClient() {
     throw new Error('Missing Supabase environment variables');
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createSSRClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

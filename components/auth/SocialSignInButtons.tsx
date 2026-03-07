@@ -20,8 +20,8 @@ export default function SocialSignInButtons({ mode, actions }: SocialSignInButto
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border border-neutral-300 rounded-xl
-                   hover:bg-neutral-50 hover:border-neutral-400 transition-all duration-200
+          className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white dark:bg-slate-800 border border-neutral-300 dark:border-slate-600 rounded-xl
+                   hover:bg-neutral-50 dark:hover:bg-slate-700 hover:border-neutral-400 dark:hover:border-slate-500 transition-all duration-200
                    disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function SocialSignInButtons({ mode, actions }: SocialSignInButto
           <div className="w-full border-t border-neutral-200"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-neutral-500">or continue with email</span>
+          <span className="px-4 bg-white dark:bg-slate-900 text-neutral-500 dark:text-slate-400">or continue with email</span>
         </div>
       </div>
     </>

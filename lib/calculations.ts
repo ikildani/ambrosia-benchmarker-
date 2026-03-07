@@ -133,10 +133,11 @@ export type WomensHealthIndication =
 
 export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication | CardiovascularIndication | InfectiousDiseaseIndication | OphthalmologyIndication | WomensHealthIndication;
 
-// Territory types (9 options)
+// Territory types (15 options)
 export type Territory =
   | 'global' | 'us_only' | 'ex_us' | 'europe' | 'china'
-  | 'japan' | 'row' | 'us_eu' | 'us_japan';
+  | 'japan' | 'row' | 'us_eu' | 'us_japan'
+  | 'canada' | 'australia' | 'south_korea' | 'apac_ex_cj' | 'latam' | 'mena';
 
 // New multiplier types
 export type BiomarkerStatus = 'selected' | 'unselected';
@@ -667,6 +668,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   // Get phase baselines per therapeutic area
   const phaseBaselineMap: Record<string, any> = {
+    oncology: benchmarks.phaseBaselines,
     metabolic: benchmarks.metabolicPhaseBaselines,
     immunology: benchmarks.immunologyPhaseBaselines,
     neurology: benchmarks.neurologyPhaseBaselines,
@@ -1120,7 +1122,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const dmPhaseAdjust = benchmarks.neurologyDiseaseModifyingPhaseAdjustment;
   const useDMRebalance = isNeurology && input.treatmentApproach === 'diseaseModifying' && dmPhaseAdjust;
   const milestoneAlloc = useDMRebalance
-    ? dmPhaseAdjust.milestoneRebalance[input.phase]
+    ? (dmPhaseAdjust.milestoneRebalance[input.phase] ?? phaseConfig.milestoneAllocations[input.phase])
     : phaseConfig.milestoneAllocations[input.phase];
   const totalMilestones = {
     low: totalDealValue.low - upfront.low,
@@ -1481,11 +1483,21 @@ function calculateBreakdownValue(
 
 function generateRationale(input: CalculationInput, riskScore: number): string {
   const phaseLabel = benchmarks.labels.phases[input.phase];
-  const isNeuro = input.therapeuticArea === 'neurology';
-  const isImmuno = input.therapeuticArea === 'immunology';
-  const isMetab = input.therapeuticArea === 'metabolic';
+  const ta = input.therapeuticArea;
 
-  if (isMetab) {
+  if (ta === 'oncology') {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} oncology asset with strong clinical data and differentiated mechanism justifies premium upfront. Combination potential and line-of-therapy positioning drive aggressive commercial milestones in the $200B+ oncology market.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} oncology asset with moderate risk. Deals are structured around clinical milestones tied to response rates and PFS/OS endpoints. Biomarker-defined patient selection and combination strategies are key value drivers.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage oncology asset with clinical uncertainty. Milestone-heavy structures tied to proof-of-concept data, tumor type expansion, and regulatory de-risking events.`;
+    } else {
+      return `High-risk oncology profile. Expect modest upfront with significant milestone potential tied to early clinical signals, biomarker validation, and IND-enabling milestones.`;
+    }
+  }
+
+  if (ta === 'metabolic') {
     if (riskScore < 25) {
       return `De-risked ${phaseLabel} metabolic asset with validated mechanism and strong efficacy data justifies premium upfront. The enormous commercial potential of obesity/metabolic drugs ($100B+ projected market) drives aggressive commercial milestone structures.`;
     } else if (riskScore < 50) {
@@ -1497,7 +1509,7 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     }
   }
 
-  if (isImmuno) {
+  if (ta === 'immunology') {
     if (riskScore < 25) {
       return `De-risked ${phaseLabel} autoimmune asset with validated mechanism justifies higher upfront. Commercial milestones dominate — chronic autoimmune drugs generate blockbuster recurring revenue.`;
     } else if (riskScore < 50) {
@@ -1509,7 +1521,7 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     }
   }
 
-  if (isNeuro) {
+  if (ta === 'neurology') {
     if (riskScore < 25) {
       return `De-risked ${phaseLabel} CNS asset with proven BBB penetration and strong data justifies a higher upfront component, though milestone-heavy structures remain the norm in neurology.`;
     } else if (riskScore < 50) {
@@ -1521,6 +1533,55 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     }
   }
 
+  if (ta === 'cardiovascular') {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} cardiovascular asset with strong outcome data justifies premium terms. CVOT requirements create high barriers but also strong competitive moats — successful outcome trials command top-tier deal values.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} cardiovascular asset with moderate risk. Deals emphasize regulatory milestones tied to CVOT data and FDA endpoint acceptance. Hard outcome endpoints (MACE, mortality) drive higher milestone values than surrogate markers.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage cardiovascular asset with clinical uncertainty. Long CVOT timelines (3-5 years) and large trial requirements mean deals are milestone-heavy with development-weighted structures.`;
+    } else {
+      return `High-risk cardiovascular profile. Expect minimal upfront given CVOT requirements and long development timelines. Milestone potential tied to surrogate endpoint validation and regulatory interactions.`;
+    }
+  }
+
+  if (ta === 'infectiousDisease') {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} anti-infective asset with established resistance advantage justifies strong terms. Public health priority designations (QIDP, pandemic preparedness) accelerate timelines and improve deal economics.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} infectious disease asset with moderate risk. Resistance dynamics and public health urgency drive deal structures. Novel mechanism with broad-spectrum activity or pandemic readiness commands premium milestones.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage anti-infective with clinical uncertainty. Deals are structured around development milestones tied to spectrum-of-activity data, resistance barrier, and regulatory pathway clarity.`;
+    } else {
+      return `High-risk infectious disease profile. Market access challenges and payer resistance in antibiotics require creative deal structures. Expect milestone-heavy terms tied to clinical proof-of-concept and regulatory designations.`;
+    }
+  }
+
+  if (ta === 'ophthalmology') {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} ophthalmic asset with demonstrated durability advantage justifies premium upfront. In the anti-VEGF dominated market, extended dosing intervals and novel delivery are the primary differentiators commanding top-tier terms.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} ophthalmology asset with moderate risk. Deals emphasize treatment durability and injection frequency reduction. Milestones are tied to dosing interval endpoints, visual acuity outcomes, and geographic atrophy progression.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage ophthalmic asset with clinical uncertainty. Delivery platform differentiation (sustained release, gene therapy) and durability endpoints drive milestone structures.`;
+    } else {
+      return `High-risk ophthalmology profile. Expect minimal upfront with milestones tied to proof-of-concept durability data, delivery feasibility, and anti-VEGF comparator studies.`;
+    }
+  }
+
+  if (ta === 'womensHealth') {
+    if (riskScore < 25) {
+      return `De-risked ${phaseLabel} women's health asset addressing significant unmet need justifies strong terms. Historically underserved therapeutic area with growing investor attention — successful products command premium pricing and loyalty.`;
+    } else if (riskScore < 50) {
+      return `${phaseLabel} women's health asset with moderate risk. Deal structures reflect pregnancy-related regulatory complexity and specialized endpoint requirements. Growing payer recognition of women's health gaps supports commercial milestones.`;
+    } else if (riskScore < 75) {
+      return `Earlier-stage women's health asset with clinical uncertainty. Specialized clinical trial design requirements (pregnancy registries, long-term safety) mean milestone-weighted deal structures.`;
+    } else {
+      return `High-risk women's health profile. Expect minimal upfront given regulatory complexity around reproductive safety and smaller clinical trial populations. Milestones tied to safety data and regulatory clarity.`;
+    }
+  }
+
+  // Generic fallback (should not reach here with all 8 TAs covered)
   if (riskScore < 25) {
     return `De-risked ${phaseLabel} asset with strong competitive position justifies higher upfront.`;
   } else if (riskScore < 50) {
@@ -1685,9 +1746,15 @@ export const territoryOptions = [
   { value: 'ex_us', label: 'Ex-US (All)' },
   { value: 'us_eu', label: 'US + Europe' },
   { value: 'us_japan', label: 'US + Japan' },
-  { value: 'europe', label: 'Europe Only' },
+  { value: 'europe', label: 'Europe' },
   { value: 'japan', label: 'Japan' },
   { value: 'china', label: 'Greater China' },
+  { value: 'canada', label: 'Canada' },
+  { value: 'south_korea', label: 'South Korea' },
+  { value: 'australia', label: 'Australia / NZ' },
+  { value: 'apac_ex_cj', label: 'APAC ex-China/Japan' },
+  { value: 'latam', label: 'Latin America' },
+  { value: 'mena', label: 'Middle East & North Africa' },
   { value: 'row', label: 'Rest of World' },
 ];
 

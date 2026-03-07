@@ -134,7 +134,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
         >
           <XAxis
             dataKey="name"
-            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            tick={{ fontSize: isMobile ? 10 : 11, fill: CHART_COLORS.axisLabel }}
             angle={-30}
             textAnchor="end"
             height={isMobile ? 70 : 90}
@@ -144,7 +144,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(value)}
-            tick={{ fontSize: isMobile ? 8 : 11, fill: CHART_COLORS.axisLabel }}
+            tick={{ fontSize: isMobile ? 10 : 11, fill: CHART_COLORS.axisLabel }}
             axisLine={{ stroke: CHART_COLORS.axisLine }}
             width={isMobile ? 35 : 55}
             tickCount={isMobile ? 4 : 6}

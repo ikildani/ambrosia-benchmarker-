@@ -3,19 +3,20 @@ import { notFound } from 'next/navigation';
 import SharedCalculationView from '@/components/SharedCalculationView';
 
 interface Props {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { token } = await params;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
-  const ogImageUrl = `${baseUrl}/api/og/share/${params.token}`;
+  const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
   // Fetch shared data for dynamic title/description
   let title = 'Shared Deal Analysis | Ambrosia Ventures';
   let description = 'View this shared biotech licensing deal analysis from Ambrosia Ventures Calculator.';
 
   try {
-    const response = await fetch(`${baseUrl}/api/share/${params.token}`, {
+    const response = await fetch(`${baseUrl}/api/share/${token}`, {
       cache: 'no-store',
     });
     if (response.ok) {
@@ -77,7 +78,8 @@ async function getSharedCalculation(token: string) {
 }
 
 export default async function SharePage({ params }: Props) {
-  const data = await getSharedCalculation(params.token);
+  const { token } = await params;
+  const data = await getSharedCalculation(token);
 
   if (!data) {
     notFound();

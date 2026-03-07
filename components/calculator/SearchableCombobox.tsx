@@ -188,7 +188,7 @@ function SearchableComboboxInner<T extends string>({
               data-option-index={idx}
               onClick={() => handleSelect(option.value)}
               onMouseEnter={() => setActiveIndex(idx)}
-              className={`px-3 py-2.5 text-sm cursor-pointer flex items-center justify-between transition-colors ${
+              className={`px-3 py-3 sm:py-2.5 text-sm cursor-pointer flex items-center justify-between transition-colors ${
                 isActive
                   ? 'bg-teal-50 dark:bg-teal-900/20'
                   : isSelected
@@ -291,7 +291,7 @@ function SearchableComboboxInner<T extends string>({
                     <h3 className="text-base font-semibold text-neutral-800 dark:text-white">{label}</h3>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-800"
+                      className="p-2.5 -m-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-slate-800"
                       aria-label="Close"
                     >
                       <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

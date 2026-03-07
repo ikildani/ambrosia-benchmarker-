@@ -10,15 +10,21 @@ import type { MarketSizeEstimate, EpidemiologyData } from './types';
 
 // Territory population and pricing data (inline to avoid JSON import issues)
 const TERRITORY_DATA: Record<string, { population: number; pricingIndexVsUS: number }> = {
-  global: { population: 8_100_000_000, pricingIndexVsUS: 0.45 },
-  us_only: { population: 335_000_000, pricingIndexVsUS: 1.00 },
-  europe: { population: 450_000_000, pricingIndexVsUS: 0.65 },
-  china: { population: 1_410_000_000, pricingIndexVsUS: 0.15 },
-  japan: { population: 124_000_000, pricingIndexVsUS: 0.70 },
-  ex_us: { population: 7_765_000_000, pricingIndexVsUS: 0.40 },
-  row: { population: 5_940_000_000, pricingIndexVsUS: 0.25 },
-  us_eu: { population: 785_000_000, pricingIndexVsUS: 0.85 },
-  us_japan: { population: 459_000_000, pricingIndexVsUS: 0.90 },
+  global: { population: 8_200_000_000, pricingIndexVsUS: 0.28 },
+  us_only: { population: 340_000_000, pricingIndexVsUS: 1.00 },
+  europe: { population: 450_000_000, pricingIndexVsUS: 0.38 },
+  china: { population: 1_405_000_000, pricingIndexVsUS: 0.12 },
+  japan: { population: 123_000_000, pricingIndexVsUS: 0.25 },
+  ex_us: { population: 7_860_000_000, pricingIndexVsUS: 0.22 },
+  row: { population: 5_882_000_000, pricingIndexVsUS: 0.15 },
+  us_eu: { population: 790_000_000, pricingIndexVsUS: 0.72 },
+  us_japan: { population: 463_000_000, pricingIndexVsUS: 0.80 },
+  canada: { population: 41_000_000, pricingIndexVsUS: 0.55 },
+  australia: { population: 31_000_000, pricingIndexVsUS: 0.45 },
+  south_korea: { population: 52_000_000, pricingIndexVsUS: 0.30 },
+  apac_ex_cj: { population: 3_200_000_000, pricingIndexVsUS: 0.10 },
+  latam: { population: 660_000_000, pricingIndexVsUS: 0.18 },
+  mena: { population: 430_000_000, pricingIndexVsUS: 0.20 },
 };
 
 /** Market share assumptions by competitive position */

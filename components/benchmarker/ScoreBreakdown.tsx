@@ -120,7 +120,7 @@ export function ScoreBreakdown({
   };
 
   return (
-    <div className="border-t border-gray-100 px-3 sm:px-4 py-4 sm:py-5 bg-gradient-to-b from-gray-50/50 to-white animate-fade-in">
+    <div className="border-t border-gray-100 px-3 sm:px-4 py-4 sm:py-5 bg-gradient-to-b from-gray-50/50 to-white dark:from-slate-800/50 dark:to-slate-800 animate-fade-in">
       {/* Score Progress Bar */}
       <ScoreProgressBar score={matchScore} />
 
@@ -130,7 +130,7 @@ export function ScoreBreakdown({
           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
             Why They Match
           </div>
-          <div className="bg-white border border-gray-100 rounded-lg divide-y divide-gray-100">
+          <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg divide-y divide-gray-100 dark:divide-slate-700">
             {detailedBreakdown.factors.slice(0, 5).map((factor, i) => (
               <div key={i} className="px-3">
                 <MatchFactor factor={factor} />

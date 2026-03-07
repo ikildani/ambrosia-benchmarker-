@@ -110,6 +110,18 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep | null>(null);
 
   const hadPrefillRef = useRef(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const prevResultRef = useRef(calc.result);
+
+  // Scroll to results when they first appear
+  useEffect(() => {
+    if (calc.result && !prevResultRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300); // Allow animation to begin before scrolling
+    }
+    prevResultRef.current = calc.result;
+  }, [calc.result]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const activeSteps = state.quickMode ? QUICK_STEPS : FULL_STEPS;
@@ -619,7 +631,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             transition={{ type: 'spring', stiffness: 200, damping: 24 }}
           >
             <WatchlistProvider tier={tier}>
-            <div className="mt-8 results-container" aria-live="polite">
+            <div ref={resultsRef} className="mt-8 results-container scroll-mt-24" aria-live="polite">
               <Results
                 result={calc.result}
                 tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}

@@ -8,11 +8,11 @@ export const revalidate = 3600;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface Props {
-  params: { companyId: string };
+  params: Promise<{ companyId: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { companyId } = params;
+  const { companyId } = await params;
 
   if (!UUID_REGEX.test(companyId)) {
     return {
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CompanyPage({ params }: Props) {
-  const { companyId } = params;
+  const { companyId } = await params;
   let companyName = 'Company';
 
   if (UUID_REGEX.test(companyId)) {

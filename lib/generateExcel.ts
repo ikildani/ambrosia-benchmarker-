@@ -13,6 +13,29 @@ export interface PartnerForExcel {
   hq_country: string | null;
 }
 
+// Territory labels for Excel reports
+function formatTerritoryLabel(territory?: string): string {
+  if (!territory) return '';
+  const labels: Record<string, string> = {
+    global: 'Global (Worldwide)',
+    us_only: 'US Only',
+    ex_us: 'Ex-US',
+    europe: 'Europe',
+    china: 'Greater China',
+    japan: 'Japan',
+    row: 'Rest of World',
+    us_eu: 'US & Europe',
+    us_japan: 'US & Japan',
+    canada: 'Canada',
+    australia: 'Australia / NZ',
+    south_korea: 'South Korea',
+    apac_ex_cj: 'APAC ex-China/Japan',
+    latam: 'Latin America',
+    mena: 'Middle East & North Africa',
+  };
+  return labels[territory] || territory;
+}
+
 // Brand colors
 const NAVY = '1A1E42';
 const TEAL = '0D9488';
@@ -174,7 +197,7 @@ export async function generateExcelReport(
     ['Development Phase', labels.phase],
     ['Modality', labels.modality],
     ['Indication', labels.indication],
-    ['Territory', inputs?.territory || 'Not specified'],
+    ['Territory', formatTerritoryLabel(inputs?.territory) || 'Not specified'],
   ];
   profileRows.forEach(([key, val], i) => {
     const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
