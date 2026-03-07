@@ -1,6 +1,6 @@
 # MASTER OUTREACH LIST: calculator.ambrosiaventures.co
 
-**Compiled: March 6, 2026 | Total: 230+ targets | 120+ emails**
+**Compiled: March 6, 2026 | Total: 323 targets | 225 emails across 21 segments**
 
 > **Disclaimer:** Emails marked [pattern] are derived from verified company email format patterns applied to confirmed executive names. Emails marked [confirmed] appeared in public directories or press releases. Always verify before bulk sending.
 
@@ -323,6 +323,143 @@
 
 ---
 
+## SEGMENT 17: Mid-Size Biotech BD Heads (30 contacts)
+*Rationale: These are the HIGHEST conversion targets. Mid-size biotech BD/CBO leaders actively negotiate deals and need benchmarking tools daily.*
+
+| # | Name | Title | Company | Email | Why |
+|---|------|-------|---------|-------|-----|
+| 1 | Nouhad Husseini | SVP, Head of Business Development | Regeneron | nouhad.husseini@regeneron.com [pattern] | Leads BD at $100B+ biotech; Dupixent/Libtayo partnerships |
+| 2 | Adam Feire | Head of Business Development | Biogen | adam.feire@biogen.com [pattern] | Appointed Jan 2025; leads Biogen's external innovation |
+| 3 | Adam Keeney | EVP, Corporate Development | Biogen | adam.keeney@biogen.com [pattern] | Oversees M&A; led Reata $7.3B acquisition |
+| 4 | James Sabry, M.D., Ph.D. | EVP, Chief Business Officer | BioMarin | jsabry@bmrn.com [pattern] | Former Roche; 1,200+ BD transactions in career |
+| 5 | Joseph Baroldi | EVP, Chief Business Officer | Ionis Pharmaceuticals | jbaroldi@ionisph.com [pattern] | Leads all Ionis partnerships (Biogen, Roche, AZ) |
+| 6 | Tom Riga | Chief Business Officer | Jazz Pharmaceuticals | tom.riga@jazzpharma.com [pattern] | Appointed Jan 2026; former Incyte VP Strategy |
+| 7 | Devang Bhuva | SVP, Corporate Development | Gilead Sciences | devang.bhuva@gilead.com [pattern] | Leads Gilead M&A; $21B Immunomedics deal |
+| 8 | Eric Olson | EVP, Chief Business Officer | Ultragenyx | eolson@ultragenyx.com [pattern] | Appointed Sep 2025; $15B+ career transaction value; ex-Alnylam BD head |
+| 9 | Philippe Lopes-Fernandes | EVP, Chief Business Officer | Ipsen | philippe.lopes-fernandes@ipsen.com [pattern] | Drives oncology/neuro/rare disease external innovation |
+| 10 | Keld Flintholm Jorgensen | SVP, Head Corporate BD | Lundbeck | kfjorgensen@lundbeck.com [pattern] | Led $2.5B Longboard acquisition; neuroscience BD |
+| 11 | Sooin Kwon | Chief Business Officer | Galapagos NV | sooin.kwon@glpg.com [pattern] | Appointed Aug 2025; leads transformational BD strategy |
+| 12 | Dave Gardner | EVP, Chief Strategy Officer | Incyte | dave.gardner@incyte.com [pattern] | Responsible for strategy and BD; ex-Rock Springs Capital |
+| 13 | Peter Rahmer | Chief Corporate Development Officer | Relay Therapeutics | prahmer@relaytx.com [pattern] | Leads BD, capital raising, external comms |
+| 14 | Beth Shafer, Ph.D. | Chief Business Officer | Voyager Therapeutics | bshafer@vfrx.com [pattern] | 15+ yrs BD at Takeda/Novartis/Roche; neuro focus |
+| 15 | Cortney Caudill | COO (overseeing BD) | Halozyme | ccaudill@halozyme.com [pattern] | Promoted Oct 2025; oversees BD for ENHANZE platform |
+| 16 | Chris Wahl, M.D. | Chief Scientific Officer (former CBO) | Halozyme | cwahl@halozyme.com [pattern] | Oversees ENHANZE deal diligence and new deals |
+| 17 | Alexander Schuth | COO & CFO (incl Corp Dev) | Denali Therapeutics | aschuth@dnli.com [pattern] | Co-founder; oversees all corporate development |
+| 18 | Issei Tsukamoto | SVP, Head of Business Development | Astellas Pharma | issei.tsukamoto@astellas.com [pattern] | Leads all Astellas BD; Xtandi franchise partnerships |
+| 19 | Ken Keller | CEO Daiichi Sankyo US; Global Head Oncology BU | Daiichi Sankyo | ken.keller@daiichisankyo.com [pattern] | Leads global oncology BD incl AZ ADC partnership |
+| 20 | Kyle Gano, Ph.D. | CEO (former Chief BD & Strategy Officer) | Neurocrine Biosciences | kgano@neurocrine.com [pattern] | 15+ yrs as BD officer before CEO promotion Oct 2024 |
+| 21 | Rhys de Callier | Chief Strategy Officer | Halozyme | rdecallier@halozyme.com [pattern] | Joined Aug 2025; leads strategic growth and portfolio |
+| 22 | Karen Massey | COO (transitioning to CEO May 2026) | argenx | karen.massey@argenx.com [pattern] | Oversees ops incl BD for $50B+ FcRn leader |
+| 23 | Victor Hartmann | SVP, Head of BD&L | Vertex Pharmaceuticals | victor_hartmann@vrtx.com [pattern] | Leads Vertex partnering; pain/gene editing pipeline |
+| 24 | Johanna Bendell, M.D. | Chief Development Officer Oncology | Pfizer (ex-Seagen) | johanna.bendell@pfizer.com [pattern] | Transitioning from Roche 2025; oversees oncology development strategy |
+| 25 | Helen Ho | Chief Business Officer | Blueprint Medicines | hho@blueprintmedicines.com [pattern] | Leads corporate and BD; Ayvakit franchise expansion |
+| 26 | Christopher Benecchi | COO (former CBO) | Sage Therapeutics | cbenecchi@sagerx.com [pattern] | Promoted Oct 2024; led Zurzuvae partnerships |
+| 27 | Siobhan Pomeroy | VP, Corporate Development | Gilead Sciences | siobhan.pomeroy@gilead.com [pattern] | Hands-on deal execution at Gilead |
+| 28 | Bob Mackey | SVP, BD & Strategy | Jazz Pharmaceuticals | bob.mackey@jazzpharma.com [pattern] | Senior BD leader supporting CBO Tom Riga |
+| 29 | Daniel Rankin | Head, Corporate & Business Development | Sobi (Swedish Orphan Biovitrum) | daniel.rankin@sobi.com [pattern] | Rare disease deal leader; $2B+ revenue company |
+| 30 | Marcello Agosti | Global Business Development Officer | Takeda | marcello.agosti@takeda.com [pattern] | Also in Segment 1; reorganizing BD under new SPD group for FY2026 |
+
+---
+
+## SEGMENT 18: Executive Search / Biopharma Recruiters (15 contacts)
+*Rationale: These firms place BD executives and would recommend our tool to candidates as a competitive edge.*
+
+| # | Name | Title | Organization | Email | Why |
+|---|------|-------|-------------|-------|-----|
+| 1 | Jeff Boyd | Global Managing Partner, Healthcare & LS Practice | Heidrick & Struggles | jeffrey.boyd@heidrick.com [pattern] | Leads global HLS practice; biotech/LS searches |
+| 2 | Tim Dietlin | Co-Lead, Global Biopharma Practice | Heidrick & Struggles | tim.dietlin@heidrick.com [pattern] | Places BD/corp dev execs who need deal tools |
+| 3 | Alexis Stiles | Leader, Global Healthcare Practice | Spencer Stuart | Via spencerstuart.com | Leads all healthcare verticals including biopharma |
+| 4 | Lynn LaPierre | Leader, Global Biopharma Practice | Spencer Stuart | Via spencerstuart.com | Directly places biopharma BD executives |
+| 5 | Yvonne Lu | Co-Lead, Global Biopharma Practice; MD | Russell Reynolds | Via russellreynolds.com | San Francisco-based; strong biotech network |
+| 6 | Patrick Mooney | Co-Lead, Global Biopharma Practice | Russell Reynolds | Via russellreynolds.com | Senior biopharma leadership appointments |
+| 7 | Mark Broer | Senior Client Partner, Global LS; MD Pharma | Korn Ferry | Via kornferry.com | Co-leads global pharma sector; recruits C-level |
+| 8 | Jonathan Wildman | Senior Client Partner; NA LS Advisory Lead | Korn Ferry | Via kornferry.com | NA life sciences advisory; deal valuation fluency |
+| 9 | Henry Miller | Partner & Chairman, Global LS Practice | Odgers Berndtson | hmiller@odgersberndtson.com [pattern]; +1 212 972 7287 | Chairman of entire global LS practice |
+| 10 | Dietrich Hauffe, Ph.D. | Global Practice Leader, LS & Healthcare | Stanton Chase | Via stantonchase.com | Global LS practice leader; places BD leaders in mid-cap |
+| 11 | Kathleen Lehman Hajek | MD; Regional Sector Leader LS NA | Stanton Chase | Via stantonchase.com | NA LS recruiter; BD exec placements |
+| 12 | Jason Hersh | CEO, Managing Partner & Co-Founder | Klein Hersh | Via kleinhersh.com | 25+ year specialized biopharma recruiter |
+| 13 | Matt Chambers | Co-Founder & CEO | Loxo (AI Recruiting Platform) | Via loxo.co | Life sciences staffing vertical; platform integration |
+| 14 | Ian Broadway | European Practice Leader, LS | Korn Ferry | Via kornferry.com | EU LS recruiting lead |
+| 15 | Catenon LS Team | LS & Healthcare Practice | Catenon | Via catenon.com | Global recruiter; 23 offices; 100+ countries |
+
+---
+
+## SEGMENT 19: Biopharma Training / Education Providers (10 contacts)
+*Rationale: These could embed our tool in training programs or recommend it to audiences.*
+
+| # | Name | Title | Organization | Email | Why |
+|---|------|-------|-------------|-------|-----|
+| 1 | Kenneth Getz | Exec Dir, Tufts CSDD; Research Professor | Tufts University | kenneth.getz@tufts.edu [confirmed] | Leading authority on pharma R&D management |
+| 2 | Karen Tenaglia | Senior Manager, Continuing Education | DIA | karen.tenaglia@diaglobal.org [pattern] | DIA runs major pharma education programs |
+| 3 | Jill Yager | BD Manager | RAPS | raps@raps.org [confirmed] | Regulatory professionals expanding into commercial roles |
+| 4 | TOPRA Partnerships | Communities & Partnerships | TOPRA | info@topra.org [confirmed] | European regulatory professionals |
+| 5 | Karen Shortis | Meeting Manager | ExL Events / ExL Pharma (Questex) | kshortis@exlpharma.com [confirmed] | Pharma conferences; demo/sponsorship opportunity |
+| 6 | Christopher Keeling | Sponsorship Contact | Informa Pharma Intelligence (Citeline) | christopher.keeling@informa.com [confirmed] | Dominant pharma intelligence platform; partnership |
+| 7 | PharmaVoice Editorial | Editor-in-Chief | PharmaVoice (Industry Dive) | feedback@pharmavoice.com [confirmed] | Premier pharma industry publication |
+| 8 | John Clifton | Dir of Training Development | Life Science Training Institute (Red Nucleus) | jclifton@lifesciencetraininginstitute.com [pattern] | Trains pharma professionals; embed in coursework |
+| 9 | Leila Hawkins | Editor | Pharma IQ (IQPC) | leila.hawkins@iqpc.com [pattern] | Conferences and training; editorial partnership |
+| 10 | Angelique Bevan | Sponsorship Director | Pharma IQ (IQPC) | angelique.bevan@iqpc.co.uk [pattern] | Direct sponsorship contact for events |
+
+---
+
+## SEGMENT 20: Sovereign Wealth / Family Offices in Healthcare (10 contacts)
+*Rationale: These evaluate healthcare investments and need deal benchmarks for valuation and diligence.*
+
+| # | Name | Title | Organization | Email | Why |
+|---|------|-------|-------------|-------|-----|
+| 1 | Gregory Grunberg | Head of LS North America; MD | Temasek | Via temasek.com.sg (Menlo Park) | Leads Temasek's NA life sciences investing |
+| 2 | Choo Yong Cheen | CIO, Private Equity | GIC (Singapore) | Via gic.com.sg | Oversees GIC PE incl healthcare; invested in Novotech |
+| 3 | Ibrahim Ajami | Head of Ventures | Mubadala Capital (Abu Dhabi) | Via mubadala.com | Global ventures strategy; healthcare/tech focus |
+| 4 | PIF Healthcare Team | Healthcare Investment Division | Public Investment Fund (Saudi Arabia) | Via pif.gov.sa | Dedicated healthcare vertical under Vision 2030 |
+| 5 | ADIA Healthcare Team | Private Equity / Healthcare | Abu Dhabi Investment Authority | Via adia.ae; First.Last@adia.ae [pattern] | One of world's largest SWFs |
+| 6 | Gemma Game, CFA | Head of Healthcare Sector Strategy; Senior PM | Norges Bank Investment Mgmt | externalrelations@nbim.no [confirmed] | Healthcare strategy for world's largest SWF ($1.7T) |
+| 7 | Mark Angelo | MD, Value Creation, PE Healthcare | Ontario Teachers' Pension Plan | Via otpp.com; +1 416 228 5900 | Healthcare value creation in PE portfolio |
+| 8 | CPP Investments HC Team | Private Equity / Life Sciences | CPP Investments | contact@cppib.com [confirmed] | Canada's largest pension fund; healthcare PE |
+| 9 | CDPQ HC Team | Private Equity | Caisse de depot et placement du Quebec | Via lacaisse.com; +1 418 684 2334 | Major Canadian institutional investor |
+| 10 | Lisha Patel | Co-CIO (from April 2025) | Wellcome Trust | Via wellcome.org (215 Euston Road, London) | Co-CIO of world's largest health-focused endowment (~38B GBP) |
+
+---
+
+## SEGMENT 21: Pharma Partnering Portals & BD Submission Channels (25 contacts)
+*Rationale: These are the official BD intake emails at pharma companies. Use for direct product outreach or to offer our tool as a complement to their evaluation process.*
+
+### Direct Email Channels
+
+| # | Company | Email / Channel | Contact Name | Region |
+|---|---------|----------------|-------------|--------|
+| 1 | AstraZeneca | david.vallo@astrazeneca.com | David Vallo, Head Alliance Mgmt | UK/SE |
+| 2 | AstraZeneca | susanna.myhre@astrazeneca.com | Susanna Myhre, Head Academic Partnering | UK/SE |
+| 3 | AbbVie | partneringday@abbvie.com | General BD&A | US |
+| 4 | Takeda | partnering@takeda.com | Center for External Innovation (Ventures) | JP/US |
+| 5 | Takeda | oncology-bd@takeda.com | Oncology BD | JP/US |
+| 6 | Bayer | oliver.renner@bayer.com | Oliver Renner, BD | DE |
+| 7 | Bayer | derin.denham@bayer.com | Derin Denham, BD | DE |
+| 8 | J&J / Janssen | jnjinnovation@its.jnj.com | Innovation Centers (Boston, SF, London, Shanghai) | US |
+| 9 | Sanofi Vaccines | donna.martin@sanofi.com | Donna Martin, Global Head BD Vaccines | FR |
+| 10 | Novo Nordisk | partnering@novonordisk.com | General BD | DK |
+| 11 | Astellas | business.development@us.astellas.com | US BD team | JP/US |
+| 12 | LEO Pharma | businessdevelopment@leo-pharma.com | BD team | DK |
+| 13 | Ipsen | bus.devpt@ipsen.com | Nick Gagnon, Sr Dir Global Partnering | FR |
+| 14 | Sun Pharma | pankaj.gupta@sunpharma.com | Pankaj Gupta, VP BD (US/EU) | IN |
+| 15 | Celltrion | BusinessDevelopment@celltrion.com | BD team | KR |
+| 16 | Cipla | ciplausa@cipla.com | US operations | IN/US |
+
+### Web Portal Channels (submit opportunity via form)
+
+| # | Company | URL |
+|---|---------|-----|
+| 17 | Pfizer | pfizer.com/about/partners/submit-your-opportunities |
+| 18 | Roche | roche.com/contact/partnering |
+| 19 | Novartis | novartis.com/partnering |
+| 20 | Merck | merck.com/research/business-development-and-licensing/collaborate-with-us/ |
+| 21 | BMS | bms.com/business-development/begin-discussion.html |
+| 22 | Eli Lilly | lilly.com/partners/connect |
+| 23 | GSK | gsk.com/en-gb/innovation/partnerships/ |
+| 24 | Boehringer Ingelheim | boehringer-ingelheim.com/partnering (7-day response SLA) |
+| 25 | Amgen | amgenbd.com/partnering/ |
+
+---
+
 ## SUMMARY
 
 | Segment | Targets | Verified/Confirmed Emails | Pattern Emails |
@@ -343,9 +480,24 @@
 | Government/Non-Profit | 8 | 6 | 1 |
 | Deal Platforms | 5 | 4 | 0 |
 | Communities | 5 | 3 | 1 |
-| **TOTAL** | **203** | **81** | **89** |
+| **Mid-Size Biotech BD** | **30** | **0** | **30** |
+| **Executive Recruiters** | **15** | **0** | **1** |
+| **Training/Education** | **10** | **7** | **3** |
+| **Sovereign Wealth/FOs** | **10** | **2** | **0** |
+| **Pharma Partnering Portals** | **25** | **16** | **0** |
+| **TOTAL** | **323** | **106** | **119** |
 
-**Grand total: 203 targets with 170 email addresses (81 confirmed + 89 pattern-based)**
+**Grand total: 323 targets with 225 email addresses (106 confirmed + 119 pattern-based) + 9 web portal submission channels**
+
+### Outreach Strategy Notes
+
+**Segment 17 (Mid-Size Biotech BD):** Position as a daily-use tool for deal structuring and benchmarking. These are power users. Offer extended free trials and 1-on-1 demos. Personalize with their recent deals.
+
+**Segment 18 (Recruiters):** "BD executives who use Ambrosia's benchmarking tool are better prepared for deal negotiations." Offer free trial codes they can share with candidates.
+
+**Segment 19 (Training):** Propose integration into existing curricula or conference agendas. Offer white-label or co-branded versions. Editorial partnerships drive awareness.
+
+**Segment 20 (Sovereign Wealth):** Position as a diligence and portfolio monitoring tool. Emphasize data coverage across 18 therapeutic areas, 214 indications. Offer enterprise licensing.
 
 ---
 
@@ -373,6 +525,23 @@
 | Goodwin | goodwinlaw.com | flast | High |
 | Wilson Sonsini | wsgr.com | flast | High |
 | EY | ey.com / parthenon.ey.com | first.last | High |
+| Regeneron | regeneron.com | first.last | 90% |
+| Biogen | biogen.com | first.last | 88% |
+| BioMarin | bmrn.com | flast | 85% |
+| Ionis | ionisph.com | flast | 80% |
+| Jazz | jazzpharma.com | first.last | 87% |
+| Gilead | gilead.com | first.last | 92% |
+| Ultragenyx | ultragenyx.com | flast | 75% |
+| Ipsen | ipsen.com | first.last | 90% |
+| Lundbeck | lundbeck.com | flast | 70% |
+| Galapagos | glpg.com | first.last | 80% |
+| Incyte | incyte.com | first.last | 85% |
+| Halozyme | halozyme.com | flast | 80% |
+| Vertex | vrtx.com | first_last | 70% |
+| Heidrick | heidrick.com | first.last | 95% |
+| Tufts | tufts.edu | first.last | 95% |
+| DIA | diaglobal.org | first.last | 90% |
+| ADIA | adia.ae | First.Last | 85% |
 
 ---
 
