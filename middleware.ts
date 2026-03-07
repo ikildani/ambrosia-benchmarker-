@@ -134,7 +134,7 @@ export async function middleware(request: NextRequest) {
     ? '' // API routes don't need CSP
     : [
         "default-src 'self'",
-        `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com https://vercel.live`,
+        `script-src 'self' 'nonce-${nonce}' https://va.vercel-scripts.com https://vercel.live`,
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
