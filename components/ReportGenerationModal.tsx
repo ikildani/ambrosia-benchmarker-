@@ -247,7 +247,7 @@ export default function ReportGenerationModal({
           });
         }
 
-        await delay(300);
+        await delay(p.format === 'excel' ? 100 : 300);
         if (abortRef.current) return;
         markComplete('analyzing');
 
@@ -327,7 +327,7 @@ export default function ReportGenerationModal({
         if (hiddenContainerRef.current) {
           hiddenContainerRef.current.innerHTML = html;
         }
-        await delay(200);
+        await delay(100);
         if (abortRef.current) return;
         markComplete('compiling');
 

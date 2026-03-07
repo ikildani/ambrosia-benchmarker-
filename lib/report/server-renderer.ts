@@ -5,8 +5,9 @@ import chromium from '@sparticuz/chromium';
  * Render an HTML string to a PDF buffer using headless Chromium.
  * Designed for Vercel serverless functions with @sparticuz/chromium.
  *
- * Uses 'networkidle2' (≤2 active connections for 500ms) to balance speed
- * with reliable font loading from Google Fonts CDN.
+ * Fonts are embedded as base64 WOFF2 in the HTML, so no network requests
+ * are needed — 'domcontentloaded' is sufficient and avoids the 500ms
+ * networkidle2 wait.
  */
 export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
   const browser = await puppeteer.launch({
@@ -19,11 +20,11 @@ export async function renderPDFBuffer(html: string): Promise<Uint8Array> {
     const page = await browser.newPage();
 
     await page.setContent(html, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: 15000,
     });
 
-    // Wait for Inter font to finish loading (with timeout fallback)
+    // Wait for embedded Inter font to decode (with timeout fallback)
     await page.evaluateHandle('document.fonts.ready')
       .then(h => h.dispose())
       .catch(() => {});
