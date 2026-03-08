@@ -530,14 +530,14 @@ export default function Header({
               {isAuthenticated ? (
                 <>
                   {/* User Info Card */}
-                  <div className="my-4 px-4 py-3 bg-slate-50 rounded-2xl">
+                  <div className="my-4 px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div className="flex items-center gap-3">
                       <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getAvatarGradient(avatarGradientId).from} ${getAvatarGradient(avatarGradientId).to} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
                         {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{userName || 'User'}</p>
-                        <p className="text-sm text-slate-500 truncate">{userEmail || 'user@example.com'}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white truncate">{userName || 'User'}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{userEmail || 'user@example.com'}</p>
                       </div>
                     </div>
                   </div>

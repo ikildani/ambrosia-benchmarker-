@@ -865,7 +865,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   };
 
   return (
-    <div aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden">
+    <div role="region" aria-live="polite" aria-label="Deal analysis results" className="card-elevated overflow-hidden">
       {/* Header */}
       <ResultsHeader
         labels={labels}
@@ -922,7 +922,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       {/* Email Gate Modal for Free PDF */}
       {showEmailGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowEmailGate(false)} />
+          <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowEmailGate(false)} />
           <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-xs sm:max-w-sm w-full p-4 sm:p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Download Your PDF Report</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Enter your email to receive the PDF and get weekly deal insights.</p>
@@ -945,7 +945,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 {emailSubmitting ? 'Processing...' : 'Get PDF Report'}
               </button>
             </form>
-            <button onClick={() => setShowEmailGate(false)} className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <button onClick={() => setShowEmailGate(false)} aria-label="Close dialog" className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -954,7 +954,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
       <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
         {/* Deal Structure Recommendation */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-soft flex-shrink-0">
               <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -962,11 +962,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </svg>
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="font-bold text-navy-800 mb-1 text-sm sm:text-base">Recommended Deal Structure</h4>
-              <p className="text-base sm:text-lg font-semibold text-teal-700">
+              <h4 className="font-bold text-navy-800 dark:text-white mb-1 text-sm sm:text-base">Recommended Deal Structure</h4>
+              <p className="text-base sm:text-lg font-semibold text-teal-700 dark:text-teal-400">
                 {dealRecommendation.upfrontPercent}% Upfront / {dealRecommendation.milestonePercent}% Milestones
               </p>
-              <p className="text-xs sm:text-sm text-neutral-600 mt-1">{dealRecommendation.rationale}</p>
+              <p className="text-xs sm:text-sm text-neutral-600 dark:text-slate-400 mt-1">{dealRecommendation.rationale}</p>
             </div>
           </div>
         </div>
@@ -1019,9 +1019,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   </span>
                   {/* Tooltip with context */}
                   {mod.context && (
-                    <div className="invisible group-hover:visible sm:group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
+                    <div className="invisible group-hover:visible sm:group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
                       {mod.context}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800" />
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800 dark:border-t-slate-700" />
                     </div>
                   )}
                 </div>
