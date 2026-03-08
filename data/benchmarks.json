@@ -4534,6 +4534,61 @@
         "multiplier": 1.18,
         "label": "Long QT Syndrome",
         "context": "Rare channelopathy; gene therapy potential; beta-blockers inadequate; ICD dependency in severe cases"
+      },
+      "deepVeinThrombosis": {
+        "multiplier": 1.05,
+        "label": "Deep Vein Thrombosis (DVT)",
+        "context": "DOACs standard of care; rivaroxaban/apixaban dominant; factor XI inhibitors next wave; large patient volume"
+      },
+      "pulmonaryEmbolism": {
+        "multiplier": 1.1,
+        "label": "Pulmonary Embolism (PE)",
+        "context": "Acute PE mortality risk; catheter-directed therapy devices competing; anticoagulation mainstay"
+      },
+      "hypertrophicCardiomyopathy": {
+        "multiplier": 1.25,
+        "label": "Hypertrophic Cardiomyopathy (HCM)",
+        "context": "Mavacamten (Camzyos) first-in-class approval; aficamten (Cytokinetics) Phase 3; myosin inhibitor class validated"
+      },
+      "dilatedCardiomyopathy": {
+        "multiplier": 1.2,
+        "label": "Dilated Cardiomyopathy (DCM)",
+        "context": "Gene therapy for genetic DCM; LMNA, TTN subtypes; limited targeted therapies; high unmet need"
+      },
+      "transthyretinCardiomyopathy": {
+        "multiplier": 1.3,
+        "label": "Transthyretin Cardiomyopathy (ATTR-CM)",
+        "context": "Tafamidis $4B+ blockbuster; Alnylam patisiran/vutrisiran validated; gene silencing + stabilizers active"
+      },
+      "supraventricularTachycardia": {
+        "multiplier": 0.95,
+        "label": "Supraventricular Tachycardia (SVT)",
+        "context": "Ablation procedures effective; adenosine/beta-blockers standard; limited pharma innovation"
+      },
+      "hyperlipidemiaFamilial": {
+        "multiplier": 1.15,
+        "label": "Familial Hyperlipidemia",
+        "context": "PCSK9 mAbs validated; inclisiran siRNA approved; evinacumab (Evkeeza) for HoFH; orphan + specialty pricing"
+      },
+      "lipoproteinA": {
+        "multiplier": 1.22,
+        "label": "Lipoprotein(a) Elevated",
+        "context": "Novartis pelacarsen Phase 3; Amgen olpasiran Phase 3; no approved Lp(a)-lowering therapy; CV risk reduction"
+      },
+      "heartFailureHfpef": {
+        "multiplier": 1.18,
+        "label": "Heart Failure (HFpEF)",
+        "context": "SGLT2 inhibitors validated (EMPEROR-Preserved, DELIVER); GLP-1 crossover; 50% of HF patients; large unmet need"
+      },
+      "mitralRegurgitation": {
+        "multiplier": 1.12,
+        "label": "Mitral Regurgitation",
+        "context": "MitraClip device dominance; pharmacologic approaches limited; structural heart innovation"
+      },
+      "aorticAneurysm": {
+        "multiplier": 1.1,
+        "label": "Aortic Aneurysm",
+        "context": "Surgical/endovascular repair standard; no approved medical therapy to slow growth; TGF-β, MMP targets explored"
       }
     },
     "infectiousDisease": {
@@ -4626,6 +4681,61 @@
         "multiplier": 1.15,
         "label": "Lyme Disease",
         "context": "Valneva/Pfizer VLA15 OspA vaccine Phase 3; 476K US cases/year; post-treatment Lyme disease unmet need"
+      },
+      "malaria": {
+        "multiplier": 1.15,
+        "label": "Malaria",
+        "context": "RTS,S (Mosquirix) and R21/Matrix-M vaccines; 600K+ deaths/year; WHO priority; artemisinin resistance emerging"
+      },
+      "dengue": {
+        "multiplier": 1.1,
+        "label": "Dengue",
+        "context": "Qdenga (Takeda) live-attenuated vaccine; 4 serotypes complicate development; 400M infections/year globally"
+      },
+      "candidaInvasive": {
+        "multiplier": 1.22,
+        "label": "Invasive Candidiasis",
+        "context": "Rezafungin (Cidara) approved; Candida auris WHO priority; rising azole resistance; ICU mortality 30-40%"
+      },
+      "aspergillosisInvasive": {
+        "multiplier": 1.2,
+        "label": "Invasive Aspergillosis",
+        "context": "Olorofim (F2G) novel mechanism; voriconazole resistance growing; immunocompromised population expanding"
+      },
+      "meningococcal": {
+        "multiplier": 1.08,
+        "label": "Meningococcal Disease",
+        "context": "Pentavalent (ABCWY) vaccines in development; Pfizer, Sanofi active; adolescent/college market"
+      },
+      "pneumococcal": {
+        "multiplier": 1.05,
+        "label": "Pneumococcal Disease",
+        "context": "PCV20 (Prevnar 20) dominant; next-gen higher-valent vaccines; $7B+ market; serotype replacement challenge"
+      },
+      "chikungunya": {
+        "multiplier": 1.12,
+        "label": "Chikungunya",
+        "context": "Ixchiq (Valneva) first approved vaccine 2023; geographic spread with climate change; chronic arthralgia burden"
+      },
+      "respiratorySyncytialVirusPediatric": {
+        "multiplier": 1.18,
+        "label": "RSV (Pediatric)",
+        "context": "Nirsevimab (Beyfortus) mAb for infants; maternal vaccination validated; high hospitalization burden"
+      },
+      "hmpv": {
+        "multiplier": 1.08,
+        "label": "Human Metapneumovirus (hMPV)",
+        "context": "No approved vaccine or antiviral; similar burden to RSV in elderly; Moderna mRNA vaccine in development"
+      },
+      "gonorrhea": {
+        "multiplier": 1.15,
+        "label": "Gonorrhea (Drug-Resistant)",
+        "context": "WHO urgent AMR priority; zoliflodacin first new class in decades; 82M new cases/year; rising resistance"
+      },
+      "syphilis": {
+        "multiplier": 1.05,
+        "label": "Syphilis",
+        "context": "Penicillin shortage concern; congenital syphilis rising; Bicillin supply constraints; modest pharma interest"
       }
     },
     "ophthalmology": {
@@ -4708,6 +4818,56 @@
         "multiplier": 1.25,
         "label": "Achromatopsia / Color Vision",
         "context": "CNGB3/CNGA3 gene therapy in trials (MeiraGTx, AGTC); ultra-rare; cone photoreceptor restoration"
+      },
+      "stargardtDisease": {
+        "multiplier": 1.28,
+        "label": "Stargardt Disease (ABCA4)",
+        "context": "ABCA4 gene too large for AAV; dual-vector and lentiviral approaches; complement + visual cycle modulators"
+      },
+      "xLinkedRetinoschisis": {
+        "multiplier": 1.22,
+        "label": "X-Linked Retinoschisis",
+        "context": "RS1 gene therapy in trials (AGTC, Atsena); small patient population; orphan designation; AAV delivery"
+      },
+      "leberCongenitalAmaurosis": {
+        "multiplier": 1.35,
+        "label": "Leber Congenital Amaurosis (LCA)",
+        "context": "Luxturna (RPE65) gene therapy paradigm; $850K/eye; multiple genetic subtypes; Spark/Roche validation"
+      },
+      "choroideremia": {
+        "multiplier": 1.25,
+        "label": "Choroideremia",
+        "context": "REP1 gene therapy (Biogen) Phase 3 data mixed; ultra-rare X-linked; gene therapy well-suited"
+      },
+      "uveitisNonInfectious": {
+        "multiplier": 1.15,
+        "label": "Uveitis (Non-Infectious)",
+        "context": "Humira approved; Ozurdex intravitreal; steroid-sparing biologics emerging; chronic relapsing course"
+      },
+      "fuchsDystrophy": {
+        "multiplier": 1.2,
+        "label": "Fuchs' Endothelial Dystrophy",
+        "context": "TCF4 repeat expansion target; gene therapy/ASO approaches; DSAEK/DMEK surgical standard; corneal transplant shortage"
+      },
+      "cornealNeovascularization": {
+        "multiplier": 1.08,
+        "label": "Corneal Neovascularization",
+        "context": "Anti-VEGF topical approaches; off-label bevacizumab common; limited approved therapies; moderate market"
+      },
+      "meibomianGlandDysfunction": {
+        "multiplier": 0.95,
+        "label": "Meibomian Gland Dysfunction",
+        "context": "LipiFlow devices; azithromycin topical; overlap with dry eye market; device-pharma competition"
+      },
+      "allergicConjunctivitis": {
+        "multiplier": 0.9,
+        "label": "Allergic Conjunctivitis",
+        "context": "OTC antihistamine drops dominant; Lastacaft, Pataday available; large but low-value market; generic competition"
+      },
+      "proliferativeDiabeticRetinopathy": {
+        "multiplier": 1.15,
+        "label": "Proliferative Diabetic Retinopathy",
+        "context": "Anti-VEGF + PRP laser standard; aflibercept/ranibizumab; growing with diabetes epidemic; vision-threatening"
       }
     },
     "womensHealth": {
@@ -4800,6 +4960,56 @@
         "multiplier": 1.25,
         "label": "Ovarian Cancer Early Detection",
         "context": "No FDA-approved screening; liquid biopsy emerging (Grail, Exact Sciences); CA-125 inadequate"
+      },
+      "polycysticOvarySyndrome": {
+        "multiplier": 1.2,
+        "label": "PCOS (Metabolic/Reproductive)",
+        "context": "No FDA-approved PCOS-specific therapy; metabolic + reproductive overlap; ovasitol, letrozole off-label"
+      },
+      "prematureOvarianInsufficiency": {
+        "multiplier": 1.18,
+        "label": "Premature Ovarian Insufficiency (POI)",
+        "context": "HRT standard; no therapies to restore ovarian function; fertility preservation gap; 1% of women <40"
+      },
+      "vulvovaginalAtrophy": {
+        "multiplier": 1.05,
+        "label": "Vulvovaginal Atrophy",
+        "context": "Topical estrogen standard; laser/RF devices competing; intravaginal DHEA (Intrarosa); GSM overlap"
+      },
+      "preterm": {
+        "multiplier": 1.2,
+        "label": "Preterm Birth Prevention",
+        "context": "Makena withdrawn; progesterone efficacy debated; cervical cerclage; 15M preterm births/year globally"
+      },
+      "postpartumHemorrhage": {
+        "multiplier": 1.15,
+        "label": "Postpartum Hemorrhage",
+        "context": "Oxytocin/misoprostol standard; tranexamic acid (WOMAN trial) validated; heat-stable carbetocin emerging"
+      },
+      "ovarian": {
+        "multiplier": 1.12,
+        "label": "Ovarian Cancer",
+        "context": "PARP inhibitors (olaparib, niraparib) standard; BRCA-selected populations; maintenance therapy paradigm"
+      },
+      "uterineCorpus": {
+        "multiplier": 1.1,
+        "label": "Uterine Corpus Cancer",
+        "context": "Endometrial cancer rising with obesity; dostarlimab + chemo (RUBY trial); dMMR/MSI-H biomarker selection"
+      },
+      "endometrialHyperplasia": {
+        "multiplier": 1.05,
+        "label": "Endometrial Hyperplasia",
+        "context": "Progestin therapy standard; LNG-IUD (Mirena); cancer progression risk monitoring; modest pharma interest"
+      },
+      "menorrhagia": {
+        "multiplier": 1.08,
+        "label": "Menorrhagia (Heavy Menstrual Bleeding)",
+        "context": "Hormonal IUDs, tranexamic acid standard; oral GnRH antagonists emerging; quality-of-life impact"
+      },
+      "dysmenorrhea": {
+        "multiplier": 0.95,
+        "label": "Dysmenorrhea (Painful Periods)",
+        "context": "NSAIDs, oral contraceptives dominant; limited innovation; large patient base but low per-patient spend"
       }
     },
     "rareDisease": {
@@ -4882,6 +5092,91 @@
         "multiplier": 1.15,
         "label": "Rare Oncology Subtypes",
         "context": "Ultra-rare tumor types; basket trial designs; accelerated approval eligible; limited competition"
+      },
+      "mucopolysaccharidosis": {
+        "multiplier": 1.28,
+        "label": "Mucopolysaccharidosis (MPS I/II/III)",
+        "context": "ERT (laronidase, idursulfase) and HSCT standard; gene therapy trials active (REGENXBIO, Ultragenyx); high unmet in MPS III"
+      },
+      "niemannPickC": {
+        "multiplier": 1.22,
+        "label": "Niemann-Pick Disease Type C",
+        "context": "Miglustat (Zavesca) only approved therapy; arimoclomol failed; cyclodextrin approaches; ultra-rare neurodegeneration"
+      },
+      "neuronalCeroidLipofuscinosis": {
+        "multiplier": 1.3,
+        "label": "Batten Disease (NCL)",
+        "context": "Brineura (cerliponase alfa) for CLN2; gene therapy for other subtypes; devastating pediatric neurodegeneration"
+      },
+      "fragileX": {
+        "multiplier": 1.15,
+        "label": "Fragile X Syndrome",
+        "context": "No approved disease-modifying therapy; mGluR5 antagonists failed; FMRP restoration approaches emerging; ~100K US patients"
+      },
+      "tuberousSclerosis": {
+        "multiplier": 1.12,
+        "label": "Tuberous Sclerosis Complex",
+        "context": "Everolimus (mTOR) approved for SEGAs and renal; epilepsy burden high; ganaxolone for TSC seizures; ~50K US patients"
+      },
+      "dravetSyndrome": {
+        "multiplier": 1.25,
+        "label": "Dravet Syndrome",
+        "context": "Epidiolex, fenfluramine (Fintepla) approved; SCN1A-targeted ASOs in development; severe pediatric epilepsy"
+      },
+      "praderWilli": {
+        "multiplier": 1.18,
+        "label": "Prader-Willi Syndrome",
+        "context": "Growth hormone standard; DCCR (diazoxide choline) in trials; uncontrolled hyperphagia; ~20K US patients"
+      },
+      "marfanSyndrome": {
+        "multiplier": 0.95,
+        "label": "Marfan Syndrome",
+        "context": "Beta-blockers and losartan standard; TGF-beta targeting explored; surgical aorta management; ~200K globally"
+      },
+      "ehlersDanlos": {
+        "multiplier": 0.92,
+        "label": "Ehlers-Danlos Syndrome",
+        "context": "No approved disease-modifying therapy; supportive care only; collagen cross-linking approaches explored; heterogeneous"
+      },
+      "wilsonDisease": {
+        "multiplier": 1.1,
+        "label": "Wilson Disease",
+        "context": "Penicillamine, trientine, zinc standard; bis-choline tetrathiomolybdate (Decupris) approved EU; gene therapy in trials"
+      },
+      "alpha1Antitrypsin": {
+        "multiplier": 1.15,
+        "label": "Alpha-1 Antitrypsin Deficiency",
+        "context": "IV augmentation therapy standard (Prolastin, Zemaira); RNA-based approaches (fazirsiran); liver-directed gene therapy"
+      },
+      "cystinosis": {
+        "multiplier": 1.12,
+        "label": "Cystinosis",
+        "context": "Cysteamine (Cystagon/Procysbi) standard; stem cell transplant explored; gene therapy approaches; ultra-rare (<2K US)"
+      },
+      "methylmalonicAcidemia": {
+        "multiplier": 1.2,
+        "label": "Methylmalonic Acidemia",
+        "context": "Dietary management and carnitine; mRNA therapy (Moderna) and gene therapy in trials; liver transplant for severe"
+      },
+      "propionicAcidemia": {
+        "multiplier": 1.18,
+        "label": "Propionic Acidemia",
+        "context": "Dietary restriction and carnitine standard; mRNA and gene therapy approaches in development; ultra-rare"
+      },
+      "ornithineTranscarbamylaseDeficiency": {
+        "multiplier": 1.15,
+        "label": "OTC Deficiency",
+        "context": "Nitrogen scavengers (Ravicti, Buphenyl) standard; gene therapy (DTX401) in trials; most common urea cycle disorder"
+      },
+      "xlh": {
+        "multiplier": 1.1,
+        "label": "X-Linked Hypophosphatemia (XLH)",
+        "context": "Burosumab (Crysvita) approved; anti-FGF23 validated; phosphate/calcitriol legacy; Ultragenyx; ~12K US patients"
+      },
+      "hereditaryAngioedema": {
+        "multiplier": 1.15,
+        "label": "Hereditary Angioedema",
+        "context": "Takhzyro (lanadelumab), Orladeyo (berotralstat) prophylaxis; C1-INH replacement; BioCryst/Takeda; growing market"
       }
     },
     "hematology": {
@@ -4969,6 +5264,86 @@
         "multiplier": 1.08,
         "label": "Polycythemia Vera",
         "context": "Hydroxyurea, ruxolitinib standard; ropeginterferon alfa approved; limited novel pipeline"
+      },
+      "chronicMyeloidLeukemia": {
+        "multiplier": 1.05,
+        "label": "Chronic Myeloid Leukemia (CML)",
+        "context": "TKI dominance (imatinib, dasatinib, bosutinib, ponatinib); asciminib (STAMP inhibitor) approved; high response rates"
+      },
+      "hairyCellLeukemia": {
+        "multiplier": 1.0,
+        "label": "Hairy Cell Leukemia",
+        "context": "Cladribine highly effective; moxetumomab pasudotox (Lumoxiti) withdrawn; vemurafenib for BRAF V600E; rare indolent"
+      },
+      "marginalZoneLymphoma": {
+        "multiplier": 1.08,
+        "label": "Marginal Zone Lymphoma",
+        "context": "Rituximab-based standard; zanubrutinib approved; indolent course; heterogeneous subtypes (MALT, splenic, nodal)"
+      },
+      "burkittLymphoma": {
+        "multiplier": 1.15,
+        "label": "Burkitt Lymphoma",
+        "context": "Intensive chemoimmunotherapy curative in many; MYC-driven aggressive biology; pediatric vs adult differences"
+      },
+      "primaryCnsLymphoma": {
+        "multiplier": 1.22,
+        "label": "Primary CNS Lymphoma",
+        "context": "HD-MTX based regimens standard; BTK inhibitors (ibrutinib) showing CNS penetration; rare with high unmet need"
+      },
+      "peripheralTCellLymphoma": {
+        "multiplier": 1.2,
+        "label": "Peripheral T-Cell Lymphoma (PTCL)",
+        "context": "Brentuximab vedotin + CHP frontline; romidepsin, belinostat in relapsed; high unmet need; poor prognosis"
+      },
+      "cutaneousTCellLymphoma": {
+        "multiplier": 1.12,
+        "label": "Cutaneous T-Cell Lymphoma (CTCL)",
+        "context": "Mogamulizumab (anti-CCR4) approved; brentuximab vedotin; skin-directed therapies for early stage"
+      },
+      "richtersTransformation": {
+        "multiplier": 1.28,
+        "label": "Richter's Transformation",
+        "context": "CLL transformation to aggressive lymphoma; pirtobrutinib, bispecifics explored; very poor prognosis; high unmet need"
+      },
+      "bpdcn": {
+        "multiplier": 1.25,
+        "label": "BPDCN (Blastic Plasmacytoid DC Neoplasm)",
+        "context": "Tagraxofusp (Elzonris) first approval; ultra-rare aggressive malignancy; venetoclax combinations explored"
+      },
+      "mastocytosis": {
+        "multiplier": 1.18,
+        "label": "Systemic Mastocytosis",
+        "context": "Avapritinib (Ayvakit) approved for advanced SM; midostaurin; KIT D816V mutation-driven; Blueprint Medicines"
+      },
+      "myeloproliferativeNeoplasm": {
+        "multiplier": 1.1,
+        "label": "Myeloproliferative Neoplasm (Other)",
+        "context": "JAK2/CALR/MPL mutations; JAK inhibitors (ruxolitinib, fedratinib); BET inhibitors and combinations emerging"
+      },
+      "thalassemiaTransfusionDependent": {
+        "multiplier": 1.3,
+        "label": "Thalassemia (Transfusion-Dependent)",
+        "context": "Luspatercept (Reblozyl) reduces transfusion burden; gene therapy (Casgevy, Zynteglo) potentially curative"
+      },
+      "vonWillebrand": {
+        "multiplier": 0.95,
+        "label": "Von Willebrand Disease",
+        "context": "DDAVP and VWF concentrates standard; limited novel pipeline; most common inherited bleeding disorder"
+      },
+      "thrombocytopeniaChemotherapy": {
+        "multiplier": 0.9,
+        "label": "Chemotherapy-Induced Thrombocytopenia",
+        "context": "Platelet transfusions standard; romiplostim/eltrombopag off-label; avatrombopag approved for CLD; supportive care"
+      },
+      "hemolyticAnemia": {
+        "multiplier": 1.12,
+        "label": "Autoimmune Hemolytic Anemia",
+        "context": "Steroids and rituximab standard; complement inhibitors explored; sutimlimab approved for cold agglutinin disease"
+      },
+      "paroxysomalNocturnalHemoglobinuria": {
+        "multiplier": 1.28,
+        "label": "PNH (Paroxysmal Nocturnal Hemoglobinuria)",
+        "context": "Eculizumab/ravulizumab (complement C5); iptacopan (factor B) oral approved; danicopan; Alexion/AstraZeneca dominance"
       }
     },
     "dermatology": {
@@ -5041,6 +5416,86 @@
         "multiplier": 0.9,
         "label": "Contact Dermatitis / Eczema",
         "context": "Topical corticosteroids dominant; limited novel pipeline; large population but low price point; generic pressure"
+      },
+      "morphea": {
+        "multiplier": 1.1,
+        "label": "Morphea / Localized Scleroderma",
+        "context": "Topical tacrolimus, UVA1 phototherapy; methotrexate for severe; limited systemic options; fibrotic skin disease"
+      },
+      "lichenPlanus": {
+        "multiplier": 1.05,
+        "label": "Lichen Planus",
+        "context": "Topical corticosteroids first-line; calcineurin inhibitors; oral retinoids for erosive; immune-mediated; limited pipeline"
+      },
+      "seborrheicDermatitis": {
+        "multiplier": 0.88,
+        "label": "Seborrheic Dermatitis",
+        "context": "Antifungal shampoos, topical steroids standard; roflumilast foam approved; large population; moderate deal activity"
+      },
+      "melasma": {
+        "multiplier": 0.92,
+        "label": "Melasma",
+        "context": "Hydroquinone, triple combo creams standard; tranexamic acid oral; limited novel pipeline; quality-of-life impact"
+      },
+      "palmoplantarPustulosis": {
+        "multiplier": 1.15,
+        "label": "Palmoplantar Pustulosis",
+        "context": "Distinct from plaque psoriasis; limited IL-17/IL-23 efficacy; high disability; spesolimab explored; unmet need"
+      },
+      "nailPsoriasis": {
+        "multiplier": 1.05,
+        "label": "Nail Psoriasis",
+        "context": "Biologics (IL-17, IL-23) show nail improvement; functional impairment; often refractory to topicals; growing recognition"
+      },
+      "scalpPsoriasis": {
+        "multiplier": 1.0,
+        "label": "Scalp Psoriasis",
+        "context": "Topical steroids and vitamin D analogs first-line; biologics for moderate-severe; formulation challenges; common subtype"
+      },
+      "chronicHandEczema": {
+        "multiplier": 1.12,
+        "label": "Chronic Hand Eczema",
+        "context": "Alitretinoin (not US); delgocitinib topical JAK in trials; significant occupational impact; limited approved options"
+      },
+      "bullousPemphigoid": {
+        "multiplier": 1.22,
+        "label": "Bullous Pemphigoid",
+        "context": "Steroids and immunosuppressants standard; anti-FcRn (efgartigimod) and anti-IgE in trials; autoimmune blistering; elderly"
+      },
+      "epidermolysis": {
+        "multiplier": 1.35,
+        "label": "Epidermolysis Bullosa",
+        "context": "Vyjuvek (beremagene geperpavec) first gene therapy approved 2023; wound care dominant; Krystal Biotech; high unmet need"
+      },
+      "ichthyosis": {
+        "multiplier": 1.15,
+        "label": "Ichthyosis",
+        "context": "Emollients and keratolytics standard; gene therapy approaches for severe forms; heterogeneous genetic basis; rare"
+      },
+      "hyperhidrosis": {
+        "multiplier": 0.95,
+        "label": "Hyperhidrosis",
+        "context": "Aluminum chloride, glycopyrronium wipes (Qbrexza); oxybutynin off-label; botox injections; moderate market"
+      },
+      "keloid": {
+        "multiplier": 1.08,
+        "label": "Keloid / Hypertrophic Scarring",
+        "context": "Corticosteroid injections, silicone sheets standard; anti-TGF-beta, anti-connective tissue growth factor approaches"
+      },
+      "basalCellCarcinoma": {
+        "multiplier": 1.1,
+        "label": "Basal Cell Carcinoma",
+        "context": "Hedgehog inhibitors (vismodegib, sonidegib) for advanced; cemiplimab for locally advanced; surgery standard; common"
+      },
+      "squamousCellSkin": {
+        "multiplier": 1.12,
+        "label": "Cutaneous Squamous Cell Carcinoma",
+        "context": "Cemiplimab (Libtayo) approved for advanced cSCC; surgery first-line; checkpoint immunotherapy validated"
+      },
+      "cutaneousMelanoma": {
+        "multiplier": 1.15,
+        "label": "Cutaneous Melanoma",
+        "context": "Checkpoint inhibitors (nivo, pembro) and BRAF/MEK combos standard; adjuvant and neoadjuvant paradigms evolving"
       }
     },
     "gastroenterology": {
@@ -5128,6 +5583,86 @@
         "multiplier": 1.1,
         "label": "Pouchitis",
         "context": "Post-IPAA complication; antibiotics standard; vedolizumab studied; niche but growing recognition; limited pipeline"
+      },
+      "microscopicColitis": {
+        "multiplier": 1.08,
+        "label": "Microscopic Colitis",
+        "context": "Budesonide first-line; biologics (vedolizumab) off-label for refractory; growing diagnosis; collagenous and lymphocytic subtypes"
+      },
+      "diverticulitis": {
+        "multiplier": 0.88,
+        "label": "Diverticulitis",
+        "context": "Antibiotics and surgery standard; mesalamine explored for prevention; large population; limited pharma pipeline"
+      },
+      "gastroparesis": {
+        "multiplier": 1.12,
+        "label": "Gastroparesis",
+        "context": "Metoclopramide only approved; GLP-1 impact on motility; neurostimulator devices; high unmet need"
+      },
+      "achalasia": {
+        "multiplier": 1.1,
+        "label": "Achalasia",
+        "context": "Heller myotomy, POEM procedure standard; botulinum toxin temporizing; no disease-modifying drugs; rare motility disorder"
+      },
+      "barrettsEsophagus": {
+        "multiplier": 1.05,
+        "label": "Barrett's Esophagus",
+        "context": "PPI and surveillance standard; radiofrequency ablation for dysplasia; chemoprevention approaches explored"
+      },
+      "pancreaticInsufficiency": {
+        "multiplier": 0.95,
+        "label": "Exocrine Pancreatic Insufficiency",
+        "context": "Pancreatic enzyme replacement (Creon, Zenpep) standard; well-served market; supportive care; moderate deal activity"
+      },
+      "autoimmunePancreatitis": {
+        "multiplier": 1.12,
+        "label": "Autoimmune Pancreatitis",
+        "context": "Steroids first-line; rituximab for refractory; IgG4-related disease overlap; limited dedicated pipeline; rare"
+      },
+      "nonAlcoholicSteatohepatitis": {
+        "multiplier": 1.4,
+        "label": "NASH / MASH",
+        "context": "Rezdiffra (resmetirom) first approval 2024; FGF21, GLP-1 combinations; Madrigal; $40B+ market potential"
+      },
+      "hepaticEncephalopathy": {
+        "multiplier": 1.08,
+        "label": "Hepatic Encephalopathy",
+        "context": "Lactulose and rifaximin standard; AST-120 (adsorbent) explored; ammonia-lowering approaches; liver cirrhosis complication"
+      },
+      "irritableBowelGeneral": {
+        "multiplier": 0.85,
+        "label": "IBS (General / Mixed)",
+        "context": "Antispasmodics, fiber, behavioral therapy standard; large population but payer resistance; gut-brain axis approaches"
+      },
+      "functionalDyspepsia": {
+        "multiplier": 0.9,
+        "label": "Functional Dyspepsia",
+        "context": "PPIs, TCAs, prokinetics standard; acotiamide approved in Japan; brain-gut interaction disorder; moderate market"
+      },
+      "smallIntestinalBacterialOvergrowth": {
+        "multiplier": 0.92,
+        "label": "SIBO",
+        "context": "Rifaximin off-label standard; diagnosis standardization lacking; microbiome modulation approaches; growing recognition"
+      },
+      "radiationProctitis": {
+        "multiplier": 1.0,
+        "label": "Radiation Proctitis / Enteritis",
+        "context": "Supportive care (sucralfate, argon plasma coagulation); hyperbaric oxygen explored; cancer survivorship focus; limited pipeline"
+      },
+      "perianalFistula": {
+        "multiplier": 1.18,
+        "label": "Perianal Fistula (CD)",
+        "context": "Anti-TNF (infliximab) and surgical drainage standard; darvadstrocel (Alofisel) stem cell approved EU; high morbidity"
+      },
+      "intestinalFailure": {
+        "multiplier": 1.2,
+        "label": "Intestinal Failure",
+        "context": "TPN standard; teduglutide (GLP-2 analog) reduces TPN dependence; intestinal transplant last resort; high-cost care"
+      },
+      "colorectalPolyps": {
+        "multiplier": 0.95,
+        "label": "Colorectal Polyps / Chemoprevention",
+        "context": "Colonoscopic polypectomy standard; aspirin/celecoxib data mixed; Lynch syndrome chemoprevention focus; prevention paradigm"
       }
     }
   },

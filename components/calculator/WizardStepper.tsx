@@ -7,12 +7,18 @@ export interface WizardStep {
   shortLabel: string;
 }
 
+export interface SelectionChip {
+  label: string;
+  value: string;
+}
+
 interface WizardStepperProps {
   steps: WizardStep[];
   currentStep: number;
   onStepChange: (index: number) => void;
   onCalculate: () => void;
   isCalculating: boolean;
+  selectionSummary?: SelectionChip[];
   children: React.ReactNode;
 }
 
@@ -24,6 +30,7 @@ function WizardStepperInner({
   onStepChange,
   onCalculate,
   isCalculating,
+  selectionSummary,
   children,
 }: WizardStepperProps) {
   const [direction, setDirection] = useState(0);
@@ -51,17 +58,17 @@ function WizardStepperInner({
         {steps.map((step, i) => {
           const isCompleted = i < currentStep;
           const isCurrent = i === currentStep;
-          const isClickable = isCompleted;
+          const isClickable = !isCurrent;
 
           return (
             <React.Fragment key={step.id}>
               <button
                 type="button"
                 onClick={() => isClickable && handleStepChange(i)}
-                disabled={!isClickable && !isCurrent}
+                disabled={isCurrent}
                 aria-current={isCurrent ? 'step' : undefined}
                 className={`relative flex flex-col items-center gap-1.5 flex-shrink-0 transition-all duration-200 ${
-                  isClickable ? 'cursor-pointer hover:scale-105' : isCurrent ? 'cursor-default' : 'cursor-default opacity-50'
+                  isCurrent ? 'cursor-default' : 'cursor-pointer hover:scale-105'
                 }`}
               >
                 <div className={`relative w-8 h-8 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
@@ -69,7 +76,7 @@ function WizardStepperInner({
                     ? 'bg-teal-500 text-white'
                     : isCurrent
                     ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md shadow-teal-500/30'
-                    : 'bg-neutral-200 dark:bg-slate-700 text-neutral-500 dark:text-slate-400'
+                    : 'bg-neutral-200 dark:bg-slate-700 text-neutral-600 dark:text-slate-300'
                 }`}>
                   {/* Active step ring indicator */}
                   {isCurrent && (
@@ -98,14 +105,14 @@ function WizardStepperInner({
                 <span className={`hidden sm:block text-xs font-medium transition-colors duration-200 ${
                   isCurrent ? 'text-teal-600 dark:text-teal-400' :
                   isCompleted ? 'text-teal-600 dark:text-teal-400' :
-                  'text-neutral-400 dark:text-slate-500'
+                  'text-neutral-500 dark:text-slate-400'
                 }`}>
                   {step.label}
                 </span>
                 <span className={`sm:hidden text-xs font-medium transition-colors duration-200 ${
                   isCurrent ? 'text-teal-600 dark:text-teal-400' :
                   isCompleted ? 'text-teal-600 dark:text-teal-400' :
-                  'text-neutral-400 dark:text-slate-500'
+                  'text-neutral-500 dark:text-slate-400'
                 }`}>
                   {step.shortLabel}
                 </span>
@@ -129,6 +136,21 @@ function WizardStepperInner({
           );
         })}
       </nav>
+
+      {/* Selection summary chips — shows what user picked on step 1 */}
+      {selectionSummary && selectionSummary.length > 0 && currentStep > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-4 px-1">
+          {selectionSummary.map((chip) => (
+            <span
+              key={chip.label}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-slate-800 text-xs max-w-[200px] sm:max-w-none"
+            >
+              <span className="text-neutral-400 dark:text-slate-500 flex-shrink-0">{chip.label}</span>
+              <span className="font-medium text-neutral-700 dark:text-slate-300 truncate">{chip.value}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Step content with AnimatePresence spring transition */}
       <div ref={contentRef} className="relative min-h-[200px]">

@@ -108,7 +108,6 @@ import {
   territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
-import { STEP_ACCENTS } from '@/lib/areaAccents';
 import OptionCardGroup from './OptionCardGroup';
 import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -510,14 +509,11 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onEndoscopicEndpointChange,
   column,
 }: AdvancedOptionsSectionProps) {
-  const accent = STEP_ACCENTS[therapeuticArea];
-
   if (column === 'competitive') {
     return (
       <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white dark:bg-slate-800 rounded-xl' : ''}>
-        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
-          Competitive Landscape
+        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+          Market Position
         </h3>
         <div className="space-y-4">
           <OptionCardGroup
@@ -564,9 +560,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   if (column === 'deal-scope') {
     return (
       <div>
-        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className={`w-6 h-6 rounded-full ${accent.bg30} ${accent.text30} text-xs flex items-center justify-center transition-colors duration-300`}>4</span>
-          Deal Scope
+        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+          Deal Structure
         </h3>
         <div className="space-y-4">
           <OptionCardGroup
@@ -631,9 +626,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
       <>
         {/* Competitive Landscape Section */}
         <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white dark:bg-slate-800 rounded-xl' : ''}>
-          <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full ${accent.bg50} text-white text-xs flex items-center justify-center transition-colors duration-300`}>3</span>
-            Competitive Landscape
+          <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+            Market Position
           </h3>
           <div className="space-y-4">
             <OptionCardGroup
@@ -666,9 +660,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
 
         {/* Deal Scope Section */}
         <div>
-          <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full ${accent.bg30} ${accent.text30} text-xs flex items-center justify-center transition-colors duration-300`}>4</span>
-            Deal Scope
+          <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+            Deal Structure
           </h3>
           <div className="space-y-4">
             <OptionCardGroup
@@ -734,9 +727,8 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
     <>
       {/* Target Profile Section */}
       <div>
-        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-          <span className={`w-6 h-6 rounded-full ${accent.bg70} text-white text-xs flex items-center justify-center transition-colors duration-300`}>2</span>
-          Target Profile
+        <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+          Clinical Profile
         </h3>
         <div className="space-y-4">
           {therapeuticArea === 'neurology' ? (

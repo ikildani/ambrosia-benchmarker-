@@ -39,7 +39,6 @@ import {
 } from '@/lib/calculations';
 import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
 import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, getIndicationImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
-import { STEP_ACCENTS } from '@/lib/areaAccents';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -149,9 +148,8 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
 
   return (
     <div className={onboardingStep === 'big-three' ? 'onboarding-spotlight p-4 -m-4 bg-white rounded-xl' : ''}>
-      <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4 flex items-center gap-2">
-        <span className={`w-6 h-6 rounded-full ${STEP_ACCENTS[therapeuticArea].bg} text-white text-xs flex items-center justify-center transition-colors duration-300`}>1</span>
-        Asset Details
+      <h3 className="text-lg font-semibold text-navy-800 dark:text-white mb-4">
+        Your Asset
       </h3>
       <div className="space-y-4">
         <OptionCardGroup

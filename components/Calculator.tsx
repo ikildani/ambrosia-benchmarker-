@@ -54,7 +54,18 @@ import type {
   BiologicExperience,
   EndoscopicEndpoint,
 } from '@/lib/calculations';
-import { calculateDealTerms } from '@/lib/calculations';
+import {
+  calculateDealTerms, phaseOptions, dealTypeOptions,
+  modalityOptions, neurologyModalityOptions, immunologyModalityOptions,
+  metabolicModalityOptions, cardiovascularModalityOptions, infectiousDiseaseModalityOptions,
+  ophthalmologyModalityOptions, womensHealthModalityOptions, rareDiseaseModalityOptions,
+  hematologyModalityOptions, dermatologyModalityOptions, gastroenterologyModalityOptions,
+  indicationOptions, neurologyIndicationOptions, immunologyIndicationOptions,
+  metabolicIndicationOptions, cardiovascularIndicationOptions, infectiousDiseaseIndicationOptions,
+  ophthalmologyIndicationOptions, womensHealthIndicationOptions, rareDiseaseIndicationOptions,
+  hematologyIndicationOptions, dermatologyIndicationOptions, gastroenterologyIndicationOptions,
+} from '@/lib/calculations';
+import type { GroupedOption } from './calculator/SearchableCombobox';
 import { BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
 import dynamic from 'next/dynamic';
@@ -77,15 +88,15 @@ import { useCalculation, buildCalculationInput } from './calculator/useCalculati
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 
 const FULL_STEPS: WizardStep[] = [
-  { id: 'asset', label: 'Asset Details', shortLabel: 'Asset' },
-  { id: 'target', label: 'Target Profile', shortLabel: 'Profile' },
-  { id: 'competitive', label: 'Competitive', shortLabel: 'Compete' },
-  { id: 'deal', label: 'Deal Scope', shortLabel: 'Deal' },
+  { id: 'asset', label: 'Your Asset', shortLabel: 'Asset' },
+  { id: 'target', label: 'Clinical Profile', shortLabel: 'Profile' },
+  { id: 'competitive', label: 'Market Position', shortLabel: 'Market' },
+  { id: 'deal', label: 'Deal Structure', shortLabel: 'Deal' },
 ];
 
 const QUICK_STEPS: WizardStep[] = [
-  { id: 'asset', label: 'Asset Details', shortLabel: 'Asset' },
-  { id: 'competitive-deal', label: 'Competitive & Deal', shortLabel: 'Compete' },
+  { id: 'asset', label: 'Your Asset', shortLabel: 'Asset' },
+  { id: 'competitive-deal', label: 'Market & Deal', shortLabel: 'Market' },
 ];
 
 interface CalculatorProps {
@@ -142,6 +153,47 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const previewResult = useMemo(() => {
     return calculateDealTerms(buildCalculationInput(state));
   }, [state]);
+
+  // Selection summary chips for wizard context
+  const selectionSummary = useMemo(() => {
+    const phaseLabel = phaseOptions.find(o => o.value === state.phase)?.label || state.phase;
+    const shortPhase = phaseLabel.replace(/\s*\(.*\)/, '');
+    const dealLabel = dealTypeOptions.find(o => o.value === state.dealType)?.label || state.dealType;
+
+    // Resolve modality label from TA-specific grouped options
+    const modalityMap: Record<TherapeuticArea, GroupedOption[]> = {
+      oncology: modalityOptions, neurology: neurologyModalityOptions, immunology: immunologyModalityOptions,
+      metabolic: metabolicModalityOptions, cardiovascular: cardiovascularModalityOptions,
+      infectiousDisease: infectiousDiseaseModalityOptions, ophthalmology: ophthalmologyModalityOptions,
+      womensHealth: womensHealthModalityOptions, rareDisease: rareDiseaseModalityOptions,
+      hematology: hematologyModalityOptions, dermatology: dermatologyModalityOptions,
+      gastroenterology: gastroenterologyModalityOptions,
+    };
+    const indicationMap: Record<TherapeuticArea, GroupedOption[]> = {
+      oncology: indicationOptions, neurology: neurologyIndicationOptions, immunology: immunologyIndicationOptions,
+      metabolic: metabolicIndicationOptions, cardiovascular: cardiovascularIndicationOptions,
+      infectiousDisease: infectiousDiseaseIndicationOptions, ophthalmology: ophthalmologyIndicationOptions,
+      womensHealth: womensHealthIndicationOptions, rareDisease: rareDiseaseIndicationOptions,
+      hematology: hematologyIndicationOptions, dermatology: dermatologyIndicationOptions,
+      gastroenterology: gastroenterologyIndicationOptions,
+    };
+    const findLabel = (groups: GroupedOption[], val: string) => {
+      for (const g of groups) {
+        const found = g.options.find(o => o.value === val);
+        if (found) return found.label;
+      }
+      return val;
+    };
+    const modalityLabel = findLabel(modalityMap[state.therapeuticArea] || modalityOptions, state.modality);
+    const indicationLabel = findLabel(indicationMap[state.therapeuticArea] || indicationOptions, state.indication);
+
+    return [
+      { label: 'Phase', value: shortPhase },
+      { label: 'Deal', value: dealLabel },
+      { label: 'Modality', value: modalityLabel },
+      { label: 'Indication', value: indicationLabel },
+    ];
+  }, [state.phase, state.dealType, state.modality, state.indication, state.therapeuticArea]);
 
   // Smart validation: detect contradictory inputs
   const validationWarnings = useMemo(() => {
@@ -434,6 +486,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               onStepChange={actions.setWizardStep}
               onCalculate={() => calc.handleCalculate(state)}
               isCalculating={calc.isCalculating}
+              selectionSummary={selectionSummary}
             >
               {(() => {
                 const stepId = activeSteps[state.wizardStep]?.id;

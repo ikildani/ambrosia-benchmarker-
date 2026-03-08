@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { formatCurrency } from '@/lib/calculations';
 
@@ -30,6 +30,49 @@ function AnimatedCurrency({ value, className }: { value: string; className?: str
   );
 }
 
+function DeltaBadge({ currentMedian }: { currentMedian: number }) {
+  const prevRef = useRef(currentMedian);
+  const [delta, setDelta] = useState<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const prev = prevRef.current;
+    if (prev !== currentMedian && prev > 0) {
+      const diff = currentMedian - prev;
+      // Only show delta if it's meaningful (>1% change)
+      if (Math.abs(diff / prev) > 0.01) {
+        setDelta(diff);
+        const timer = setTimeout(() => setDelta(null), 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+    prevRef.current = currentMedian;
+  }, [currentMedian]);
+
+  if (prefersReducedMotion || delta === null) return null;
+
+  const isPositive = delta > 0;
+  const formatted = formatCurrency(Math.abs(delta));
+
+  return (
+    <AnimatePresence>
+      <motion.span
+        initial={{ opacity: 0, x: -8, scale: 0.8 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        exit={{ opacity: 0, x: 8, scale: 0.8 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        className={`inline-flex items-center gap-0.5 ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums ${
+          isPositive
+            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+        }`}
+      >
+        {isPositive ? '+' : '-'}{formatted}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
 const LiveDealPreview = React.memo(function LiveDealPreview({
   totalDealValue,
   upfront,
@@ -48,8 +91,9 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
             <div className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-slate-500 mb-1">
               Estimated Deal Value
             </div>
-            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums">
+            <div className="text-xl font-bold text-navy-800 dark:text-white tabular-nums flex items-center">
               <AnimatedCurrency value={totalRange} />
+              <DeltaBadge currentMedian={totalDealValue.median} />
             </div>
             <div className="text-xs text-neutral-500 dark:text-slate-400 mt-1 tabular-nums">
               Upfront: <AnimatedCurrency value={upfrontMedian} className="font-semibold text-teal-600 dark:text-teal-400" />
@@ -65,8 +109,9 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
             <div className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-slate-500">
               Est. Deal Value
             </div>
-            <div className="text-base font-bold text-navy-800 dark:text-white tabular-nums">
+            <div className="text-base font-bold text-navy-800 dark:text-white tabular-nums flex items-center">
               <AnimatedCurrency value={totalRange} />
+              <DeltaBadge currentMedian={totalDealValue.median} />
             </div>
           </div>
           <div className="text-right">
