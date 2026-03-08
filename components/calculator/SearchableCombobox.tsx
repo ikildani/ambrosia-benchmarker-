@@ -85,7 +85,7 @@ function SearchableComboboxInner<T extends string>({
     if (isOpen && !isMobile && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      setFlipUp(spaceBelow < 320 && rect.top > spaceBelow);
+      setFlipUp(spaceBelow < 420 && rect.top > spaceBelow);
     }
   }, [isOpen, isMobile]);
 
@@ -398,7 +398,7 @@ function SearchableComboboxInner<T extends string>({
               </div>
             </div>
             {/* Options */}
-            <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="max-h-72 overflow-y-auto">
+            <div ref={listRef} role="listbox" aria-labelledby={`${id}-label`} className="max-h-96 overflow-y-auto">
               {filteredGroups.length > 0 ? renderOptions() : (
                 <div className="px-4 py-6 text-center text-sm text-neutral-400 dark:text-slate-500">
                   No matches found

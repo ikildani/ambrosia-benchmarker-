@@ -170,7 +170,7 @@ export type RareDiseaseIndication =
   | 'marfanSyndrome' | 'ehlersDanlos' | 'wilsonDisease'
   | 'alpha1Antitrypsin' | 'cystinosis' | 'methylmalonicAcidemia'
   | 'propionicAcidemia' | 'ornithineTranscarbamylaseDeficiency' | 'xlh'
-  | 'hereditaryAngioedema';
+  | 'hereditaryAngioedema' | 'pkan';
 
 export type HematologyIndication =
   | 'dlbcl' | 'follicularLymphoma' | 'mantleCellLymphoma' | 'cll' | 'myeloma'
@@ -558,7 +558,7 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
     'marfanSyndrome', 'ehlersDanlos', 'wilsonDisease',
     'alpha1Antitrypsin', 'cystinosis', 'methylmalonicAcidemia',
     'propionicAcidemia', 'ornithineTranscarbamylaseDeficiency', 'xlh',
-    'hereditaryAngioedema'
+    'hereditaryAngioedema', 'pkan'
   ];
   if ((rareDiseaseIndications as string[]).includes(indication)) return 'rareDisease';
   const hematologyIndications: HematologyIndication[] = [
@@ -2822,6 +2822,7 @@ export const rareDiseaseIndicationOptions = [
     { value: 'dravetSyndrome', label: 'Dravet Syndrome' },
     { value: 'praderWilli', label: 'Prader-Willi Syndrome' },
     { value: 'angelman', label: 'Angelman Syndrome' },
+    { value: 'pkan', label: 'PKAN (Pantothenate Kinase-Associated Neurodegeneration)' },
   ]},
   { group: 'Genetic / Metabolic', options: [
     { value: 'cysticFibrosis', label: 'Cystic Fibrosis' },
