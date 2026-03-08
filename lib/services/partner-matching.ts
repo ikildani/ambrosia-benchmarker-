@@ -200,6 +200,14 @@ const THERAPEUTIC_AREA_INDICATIONS: Record<string, string[]> = {
     'diabetic_retinopathy', 'uveitis', 'dry_eye', 'inherited_retinal'],
   'womensHealth': ['womens_health', 'endometriosis', 'uterine_fibroids', 'fertility',
     'menopause', 'preeclampsia', 'pcos', 'contraception', 'postpartum'],
+  'rare_disease': ['rare_disease', 'genetic_disorders', 'orphan', 'enzyme_deficiency',
+    'lysosomal_storage', 'neuromuscular'],
+  'hematology': ['hematology', 'blood_disorders', 'lymphoma', 'leukemia', 'myeloma',
+    'hemophilia', 'sickle_cell'],
+  'dermatology': ['dermatology', 'skin', 'psoriasis', 'atopic_dermatitis', 'eczema',
+    'alopecia', 'vitiligo'],
+  'gastroenterology': ['gastroenterology', 'gi', 'ibd', 'crohns', 'ulcerative_colitis',
+    'celiac', 'liver'],
 };
 
 const TA_LABELS: Record<string, string> = {
@@ -211,6 +219,10 @@ const TA_LABELS: Record<string, string> = {
   'infectiousDisease': 'Infectious Disease',
   'ophthalmology': 'Ophthalmology',
   'womensHealth': 'Women\'s Health',
+  'rare_disease': 'Rare Disease',
+  'hematology': 'Hematology',
+  'dermatology': 'Dermatology',
+  'gastroenterology': 'Gastroenterology',
 };
 
 // Phase ranking for comparison
@@ -240,6 +252,10 @@ const TA_PRIORITY_KEYWORDS: Record<string, string[]> = {
   infectiousDisease: ['infectious', 'anti-infective', 'antiviral', 'antibiotic', 'antimicrobial', 'vaccine', 'pandemic', 'amr ', 'resistance'],
   ophthalmology: ['ophthalmology', 'ophthalmic', 'retinal', 'ocular', 'eye disease', 'macular', 'glaucoma', 'anti-vegf', 'vision'],
   womensHealth: ['women\'s health', 'gynecology', 'reproductive', 'fertility', 'endometriosis', 'uterine', 'menopause', 'contracepti', 'obstetric'],
+  rare_disease: ['rare disease', 'orphan drug', 'gene therapy', 'enzyme replacement', 'genetic', 'ultra-rare', 'rare pediatric'],
+  hematology: ['hematology', 'blood cancer', 'lymphoma', 'leukemia', 'myeloma', 'car-t', 'cell therapy', 'hemophilia', 'sickle cell'],
+  dermatology: ['dermatology', 'skin', 'psoriasis', 'atopic dermatitis', 'eczema', 'il-17', 'il-13', 'jak inhibitor', 'topical'],
+  gastroenterology: ['gastroenterology', 'gi', 'ibd', 'crohn', 'ulcerative colitis', 'tl1a', 'il-23', 'integrin', 'microbiome'],
 };
 
 /** Keyword families for modality matching */
@@ -1044,6 +1060,8 @@ function formatIndicationCategory(category: string): string {
     'respiratory': 'Respiratory',
     'dermatology': 'Dermatology',
     'ophthalmology': 'Ophthalmology',
+    'hematology': 'Hematology',
+    'gastroenterology': 'Gastroenterology',
   };
   return labels[category] || category;
 }
@@ -1662,6 +1680,10 @@ export const TA_CLIFF_KEYWORDS: Record<string, string[]> = {
   neurology: ['neuro', 'cns', 'multiple sclerosis', 'sma', 'alzheimer', 'parkinson', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'bipolar', 'adhd', 'pain', 'neuropath', 'als', 'huntington', 'dementia'],
   immunology: ['autoimmune', 'il-', 'tnf', 'jak', 'immunology', 'lupus', 'psoriasis', 'crohn', 'colitis', 'rheumatoid', 'atopic', 'dermatitis', 'ibd', 'inflammatory'],
   metabolic: ['metabolic', 'obesity', 'diabetes', 'glp-1', 'gip', 'sglt2', 'weight', 't2d', 'nash', 'mash', 'nafld', 'cardiovascular', 'lipid', 'cholesterol', 'hypertension'],
+  rare_disease: ['rare disease', 'orphan', 'gene therapy', 'enzyme replacement', 'genetic', 'lysosomal', 'neuromuscular', 'sma', 'duchenne', 'fabry', 'gaucher', 'pompe', 'hemophilia'],
+  hematology: ['hematology', 'blood', 'hemophilia', 'sickle cell', 'thalassemia', 'anticoagulant', 'thrombocytopenia', 'myelofibrosis', 'polycythemia', 'lymphoma', 'leukemia', 'myeloma'],
+  dermatology: ['dermatology', 'skin', 'psoriasis', 'atopic dermatitis', 'eczema', 'alopecia', 'vitiligo', 'il-17', 'il-13', 'acne', 'rosacea'],
+  gastroenterology: ['gastroenterology', 'gi', 'ibd', 'crohn', 'colitis', 'celiac', 'liver', 'hepatitis', 'nafld', 'gerd', 'irritable bowel', 'il-23', 'tl1a', 'integrin'],
 };
 
 // NOTE: 'hematology' is NOT in the oncology list because hematology drugs

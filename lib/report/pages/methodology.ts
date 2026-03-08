@@ -43,7 +43,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
               <strong>Parameters:</strong> ${modifierNames.length + 5} input variables across asset profile, competitive dynamics, and deal structure factors.
             </p>
             <p style="margin-bottom: 7px;">
-              <strong>Coverage:</strong> 8 therapeutic areas — Oncology (solid tumor + hematology), Neurology (CNS), Immunology/Autoimmune, Metabolic/Obesity, Cardiovascular, Infectious Disease, Ophthalmology, and Women&rsquo;s Health.
+              <strong>Coverage:</strong> 12 therapeutic areas — Oncology (solid tumor + hematology), Neurology (CNS), Immunology/Autoimmune, Metabolic/Obesity, Cardiovascular, Infectious Disease, Ophthalmology, Women&rsquo;s Health, Rare Disease, Dermatology, Pulmonology, and Gastroenterology.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Data Sources:</strong> SEC EDGAR filings, ClinicalTrials.gov, company press releases, analyst reports, and proprietary deal databases.

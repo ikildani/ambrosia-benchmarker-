@@ -206,6 +206,88 @@ export const whRegulatoryDescriptions: Record<string, string> = {
   pregnancyComplexity: 'Teratogenicity studies required',
 };
 
+// --- Target Profile descriptions (rare disease) ---
+export const orphanDesignationDescriptions: Record<string, string> = {
+  both_orphan: 'FDA + EMA orphan, maximum incentives',
+  fda_orphan: 'US orphan exclusivity, tax credits',
+  ema_orphan: 'EU orphan market exclusivity',
+  none: 'No orphan designation',
+};
+
+export const patientPopulationSizeDescriptions: Record<string, string> = {
+  ultraRare_sub1k: 'Highest per-patient value, tiny market',
+  rare_1k_10k: 'Classic rare disease, premium pricing',
+  rare_10k_50k: 'Broader rare, balanced market size',
+  broader_50k_200k: 'Larger population, competitive dynamics',
+};
+
+export const geneticBasisDescriptions: Record<string, string> = {
+  monogenic_validated: 'Clear target, gene therapy eligible',
+  polygenic: 'Multiple genes, complex biology',
+  unknown_genetic: 'Genetic suspected, not confirmed',
+  non_genetic: 'No genetic driver identified',
+};
+
+// --- Target Profile descriptions (hematology) ---
+export const hemeLineageDescriptions: Record<string, string> = {
+  lymphoid: 'B/T-cell malignancies, CAR-T eligible',
+  myeloid: 'AML/MDS, transplant-driven',
+  mixed_lineage: 'Complex biology, limited options',
+  non_malignant: 'ITP/TTP, chronic management',
+};
+
+export const transplantEligibilityDescriptions: Record<string, string> = {
+  transplant_eligible: 'Fit patients, curative intent',
+  transplant_ineligible: 'Unfit patients, highest unmet need',
+  post_transplant: 'Relapsed post-transplant, refractory',
+};
+
+export const mrdStatusDescriptions: Record<string, string> = {
+  mrd_endpoint: 'Deepest response, accelerated path',
+  standard_response: 'CR/PR criteria, established',
+  survival_endpoint: 'OS/PFS, gold standard but slower',
+};
+
+// --- Target Profile descriptions (dermatology) ---
+export const skinSeverityDescriptions: Record<string, string> = {
+  mild: 'Large population, topical-first',
+  moderate: 'Systemic candidates, growing market',
+  severe: 'Highest unmet need, biologic-eligible',
+  refractory_derm: 'Failed multiple lines, premium pricing',
+};
+
+export const chronicityProfileDescriptions: Record<string, string> = {
+  chronic_relapsing: 'Flare cycles, maintenance value',
+  chronic_continuous: 'Persistent disease, ongoing therapy',
+  acute_flares: 'Episodic treatment, smaller per-patient',
+};
+
+export const topicalVsSystemicDescriptions: Record<string, string> = {
+  topical_only: 'Patient-friendly, limited efficacy',
+  systemic_only: 'Stronger efficacy, safety monitoring',
+  topical_and_systemic: 'Flexible dosing, broadest market',
+};
+
+// --- Target Profile descriptions (gastroenterology) ---
+export const giSegmentDescriptions: Record<string, string> = {
+  upper_gi: 'EoE/GERD, endoscopic endpoints',
+  small_bowel: "Crohn's-dominant, imaging-driven",
+  colonic: 'UC, endoscopic remission endpoints',
+  pancolonic: 'Extensive disease, highest severity',
+};
+
+export const biologicExperienceDescriptions: Record<string, string> = {
+  biologic_naive: 'Treatment-naive, highest response rates',
+  one_prior_biologic: 'Second-line biologic, standard',
+  multi_biologic_exposed: 'Refractory, highest unmet need',
+};
+
+export const endoscopicEndpointDescriptions: Record<string, string> = {
+  endoscopic_remission: 'Gold standard, regulatory preferred',
+  endoscopic_improvement: 'Less stringent, faster signal',
+  clinical_only: 'Symptom-based, easiest to achieve',
+};
+
 // --- Biomarker Status descriptions ---
 export const biomarkerDescriptions: Record<string, string> = {
   selected: 'Enriched population, higher response rates',
@@ -267,6 +349,22 @@ export const sectionHelp: Record<string, string> = {
   ocularDelivery: 'Implant/sustained-release delivery reduces injection burden, commanding 25% premium. Intravitreal injection is the baseline.',
   treatmentDurability: 'One-time gene therapy cures command 35%+ premium. Extended-duration (quarterly) adds 15% vs. monthly injections.',
   visionImpact: 'Vision-threatening conditions (wet AMD, inherited retinal dystrophies) justify premium pricing (+20%). Symptom relief is baseline.',
+  // Rare Disease
+  orphanDesignation: 'Dual FDA + EMA orphan designation maximizes incentives — 7-year US exclusivity, 10-year EU exclusivity, and tax credits add 25%+ to deal value.',
+  patientPopulationSize: 'Ultra-rare populations (<1,000) command the highest per-patient pricing but limit total market. Broader rare (50K+) balances volume with premium pricing.',
+  geneticBasis: 'Monogenic diseases with validated targets enable precision therapies and gene therapy, commanding 30% premiums. Unknown genetic basis reduces target confidence.',
+  // Hematology
+  hemeLineage: 'Lymphoid malignancies have the richest competitive landscape (CAR-T, bispecifics). Myeloid is transplant-driven. Non-malignant is chronic management.',
+  transplantEligibility: 'Transplant-ineligible patients represent the highest unmet need. Post-transplant relapse is the most refractory setting.',
+  mrdStatus: 'MRD-based endpoints enable accelerated approval and deeper response assessment, adding 20% premium. Survival endpoints are gold standard but extend trial timelines.',
+  // Dermatology
+  skinSeverity: 'Severe/refractory patients justify biologic and systemic pricing (+25%). Mild disease is topical-first with lower per-patient value.',
+  chronicityProfile: 'Chronic continuous disease supports maintenance therapy revenue. Acute flares drive episodic use with lower per-patient value.',
+  topicalVsSystemic: 'Systemic therapies command higher pricing. Topical + systemic combinations offer the broadest market positioning.',
+  // Gastroenterology
+  giSegment: 'Colonic/pancolonic disease (UC) has established endoscopic endpoints. Upper GI (EoE) is an emerging high-value niche.',
+  biologicExperience: 'Biologic-naive patients show highest response rates. Multi-biologic-exposed represents the greatest unmet need and premium pricing potential.',
+  endoscopicEndpoint: 'Endoscopic remission is the regulatory gold standard in IBD, commanding 20% premium. Clinical-only endpoints are easier but less differentiated.',
   // Women's Health
   whTargetPopulation: 'Reproductive-age women represent the largest addressable population. Pregnancy-related conditions carry regulatory complexity but high unmet need.',
   whUnmetNeed: 'No-approved-therapy indications command 25%+ premium. Inadequate options add 10%. Well-served markets are baseline.',

@@ -11,8 +11,12 @@ import {
   infectiousDiseaseIndicationOptions,
   ophthalmologyIndicationOptions,
   womensHealthIndicationOptions,
+  rareDiseaseIndicationOptions,
+  hematologyIndicationOptions,
+  dermatologyIndicationOptions,
+  gastroenterologyIndicationOptions,
 } from '@/lib/calculations';
-import { Microscope, Brain, ShieldCheck, HeartPulse, Check, Heart, Bug, Eye, Baby } from 'lucide-react';
+import { Microscope, Brain, ShieldCheck, HeartPulse, Check, Heart, Bug, Eye, Baby, Dna, Droplets, Sparkles, Stethoscope } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 // Compute indication counts per area
@@ -32,6 +36,10 @@ const INDICATION_COUNTS: Record<TherapeuticArea, { total: number; groups: number
   infectiousDisease: countIndications(infectiousDiseaseIndicationOptions),
   ophthalmology: countIndications(ophthalmologyIndicationOptions),
   womensHealth: countIndications(womensHealthIndicationOptions),
+  rareDisease: countIndications(rareDiseaseIndicationOptions),
+  hematology: countIndications(hematologyIndicationOptions),
+  dermatology: countIndications(dermatologyIndicationOptions),
+  gastroenterology: countIndications(gastroenterologyIndicationOptions),
 };
 
 interface AreaMeta {
@@ -116,6 +124,42 @@ const AREA_META: Record<TherapeuticArea, AreaMeta> = {
     iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
     iconBgSelectedClass: 'bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400',
     hoverBorderClass: 'hover:border-pink-300 dark:hover:border-pink-600',
+  },
+  rareDisease: {
+    icon: Dna,
+    description: 'Orphan drugs, gene therapy & enzyme replacement',
+    accentClass: 'border-violet-500 text-violet-700 dark:text-violet-400',
+    accentBgClass: 'bg-violet-50 dark:bg-violet-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400',
+    hoverBorderClass: 'hover:border-violet-300 dark:hover:border-violet-600',
+  },
+  hematology: {
+    icon: Droplets,
+    description: 'Lymphoma, leukemia, myeloma & blood disorders',
+    accentClass: 'border-red-500 text-red-700 dark:text-red-400',
+    accentBgClass: 'bg-red-50 dark:bg-red-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400',
+    hoverBorderClass: 'hover:border-red-300 dark:hover:border-red-600',
+  },
+  dermatology: {
+    icon: Sparkles,
+    description: 'Atopic dermatitis, psoriasis & skin conditions',
+    accentClass: 'border-fuchsia-500 text-fuchsia-700 dark:text-fuchsia-400',
+    accentBgClass: 'bg-fuchsia-50 dark:bg-fuchsia-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-600 dark:text-fuchsia-400',
+    hoverBorderClass: 'hover:border-fuchsia-300 dark:hover:border-fuchsia-600',
+  },
+  gastroenterology: {
+    icon: Stethoscope,
+    description: "Crohn's, UC, IBD & GI disorders",
+    accentClass: 'border-lime-500 text-lime-700 dark:text-lime-400',
+    accentBgClass: 'bg-lime-50 dark:bg-lime-900/20',
+    iconBgClass: 'bg-neutral-100 dark:bg-slate-700 text-neutral-400 dark:text-slate-500',
+    iconBgSelectedClass: 'bg-lime-100 dark:bg-lime-900/40 text-lime-600 dark:text-lime-400',
+    hoverBorderClass: 'hover:border-lime-300 dark:hover:border-lime-600',
   },
 };
 

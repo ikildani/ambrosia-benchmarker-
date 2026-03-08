@@ -8,7 +8,7 @@ const breadcrumbSchema = generateBreadcrumbSchema([
 
 export const metadata: Metadata = {
   title: 'Biopharma Company Profiles — Competitive Intelligence & Deal History',
-  description: 'Explore 120+ biotech and pharma company profiles — deal history, active pipelines, licensing appetite, clinical trial activity, and competitive benchmarks across all 8 therapeutic areas.',
+  description: 'Explore 120+ biotech and pharma company profiles — deal history, active pipelines, licensing appetite, clinical trial activity, and competitive benchmarks across all 12 therapeutic areas.',
   keywords: [
     'biotech company profiles',
     'pharma competitive intelligence',

@@ -766,6 +766,21 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
     case 'gynecology':
     case 'obstetric':
       return 'womensHealth';
+    case 'rare_disease':
+    case 'rare':
+    case 'orphan':
+      return 'rareDisease';
+    case 'hematology':
+    case 'heme_onc':
+    case 'blood':
+      return 'hematology';
+    case 'dermatology':
+    case 'skin':
+      return 'dermatology';
+    case 'gastroenterology':
+    case 'gi':
+    case 'ibd':
+      return 'gastroenterology';
     default:
       return 'other';
   }

@@ -1622,7 +1622,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
               return `${monthNames[parseInt(m, 10) - 1]} ${y}`;
             })()}
-            {' '}&middot;{' '}350+ curated deals across 8 therapeutic areas{' '}&middot;{' '}Refreshed daily via SEC EDGAR
+            {' '}&middot;{' '}350+ curated deals across 12 therapeutic areas{' '}&middot;{' '}Refreshed daily via SEC EDGAR
           </p>
         </div>
 

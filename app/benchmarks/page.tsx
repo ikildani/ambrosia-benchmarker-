@@ -23,12 +23,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026',
     description:
-      'Comprehensive licensing deal benchmarks across 8 therapeutic areas and all major modalities.',
+      'Comprehensive licensing deal benchmarks across 12 therapeutic areas and all major modalities.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/benchmarks',
     images: [
       {
-        url: '/api/og?title=Biopharma%20Deal%20Benchmarks%202026&subtitle=8%20Therapeutic%20Areas%20%E2%80%A2%20600%2B%20Deals',
+        url: '/api/og?title=Biopharma%20Deal%20Benchmarks%202026&subtitle=12%20Therapeutic%20Areas%20%E2%80%A2%20600%2B%20Deals',
         width: 1200,
         height: 630,
         alt: 'Biopharma Deal Benchmarks 2026',
@@ -106,7 +106,7 @@ export default function BenchmarksIndex() {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Biopharma Deal Benchmarks 2026',
-    description: 'Comprehensive licensing deal benchmarks across 8 therapeutic areas and all major modalities.',
+    description: 'Comprehensive licensing deal benchmarks across 12 therapeutic areas and all major modalities.',
     numberOfItems: pages.length,
     itemListElement: pages.slice(0, 30).map((page, index) => ({
       '@type': 'ListItem',

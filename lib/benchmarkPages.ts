@@ -1052,6 +1052,723 @@ function buildOralPeptidePage(): BenchmarkPageData {
   };
 }
 
+// ── Rare Disease pages ────────────────────────────────────────────────────────
+
+function buildRareDiseaseOverviewPage(): BenchmarkPageData {
+  const sma = calculateDealTerms(makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'geneTherapyRare' as Modality,
+    indication: 'spinalMuscularAtrophy' as Indication,
+    phase: 'phase2',
+    regulatoryDesignations: { breakthrough: true, fastTrack: true, orphan: true, prime: false },
+  }));
+  const fabry = calculateDealTerms(makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'enzymeReplacement' as Modality,
+    indication: 'fabryDisease' as Indication,
+    phase: 'phase2',
+    regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: true, prime: false },
+  }));
+  const dmd = calculateDealTerms(makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'geneTherapyRare' as Modality,
+    indication: 'duchenneMD' as Indication,
+    phase: 'phase1',
+    regulatoryDesignations: { breakthrough: false, fastTrack: true, orphan: true, prime: false },
+  }));
+  return {
+    slug: 'rare-disease-licensing-benchmarks',
+    title: 'Rare Disease Licensing Deal Benchmarks 2026 | Orphan Drug Deal Terms',
+    metaDescription: `Rare disease licensing deals average ${formatCurrency(sma.terms.totalDealValue.median)} total value at Phase 2 with orphan drug designation. Benchmark upfronts, milestones, and royalties across gene therapy, ERT, and substrate reduction.`,
+    h1: 'Rare Disease Licensing Deal Benchmarks 2026',
+    heroStats: [
+      {
+        label: 'Gene Therapy (Phase 2)',
+        value: formatCurrency(sma.terms.totalDealValue.median),
+        subtext: 'SMA gene therapy',
+      },
+      {
+        label: 'ERT (Phase 2)',
+        value: formatCurrency(fabry.terms.totalDealValue.median),
+        subtext: 'Fabry disease ERT',
+      },
+      {
+        label: 'Gene Therapy (Phase 1)',
+        value: formatCurrency(dmd.terms.totalDealValue.median),
+        subtext: 'DMD gene therapy',
+      },
+      {
+        label: 'Orphan Royalties',
+        value: `${sma.tieredRoyalties.base.low}%-${sma.tieredRoyalties.base.high}%`,
+        subtext: 'Base tier range',
+      },
+    ],
+    contextParagraphs: [
+      `Rare disease licensing has become one of the most attractive segments in biopharma deal-making, driven by orphan drug exclusivity, accelerated regulatory pathways, and premium pricing. Phase 2 gene therapy deals for rare diseases carry a median total deal value of ${formatCurrency(sma.terms.totalDealValue.median)}, while enzyme replacement therapy deals reach ${formatCurrency(fabry.terms.totalDealValue.median)}. Orphan drug designation provides 7 years of market exclusivity in the US and 10 years in the EU, underpinning strong deal economics.`,
+      `Deal structures in rare disease reflect the unique commercial dynamics of small patient populations and high per-patient revenue. Development milestones average ${formatCurrency(sma.terms.devMilestones.median)} for gene therapy approaches, with regulatory milestones of ${formatCurrency(sma.terms.regMilestones.median)} rewarding the accelerated approval pathways frequently available to orphan drugs. Commercial milestones of ${formatCurrency(sma.terms.commMilestones.median)} are structured around patient penetration rather than traditional revenue thresholds.`,
+      `Royalty rates for rare disease licensing range from ${sma.tieredRoyalties.base.low}% to ${sma.tieredRoyalties.base.high}% at the base tier, reflecting the premium pricing power ($200K-$3M+ per patient annually for ERTs and gene therapies) and limited generic/biosimilar competition during the orphan exclusivity period. Assets with breakthrough therapy designation command additional premiums of 15-25% in deal terms.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'rareDisease', phase: 'phase2' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for rare disease licensing?',
+        answer: `Phase 2 rare disease gene therapy deals average ${formatCurrency(sma.terms.upfront.median)} upfront with ${formatCurrency(sma.terms.totalDealValue.median)} total deal value. Orphan drug designation and breakthrough therapy status significantly enhance deal premiums, with designated assets commanding 15-25% higher total deal values.`,
+      },
+      {
+        question: 'How does orphan drug status affect deal valuations?',
+        answer: 'Orphan drug designation provides 7 years of US market exclusivity and tax credits for clinical development costs. These protections significantly de-risk the commercial proposition, enabling premium pricing ($200K-$3M+ per patient) and reducing competitive pressure, both of which drive higher deal valuations.',
+      },
+      {
+        question: 'Which rare disease modalities command the highest deal values?',
+        answer: `Gene therapy approaches lead in total deal value (${formatCurrency(sma.terms.totalDealValue.median)} at Phase 2) due to curative potential and one-time treatment economics. Enzyme replacement therapies (${formatCurrency(fabry.terms.totalDealValue.median)}) provide recurring revenue models, while substrate reduction therapies offer oral convenience advantages.`,
+      },
+      {
+        question: 'What royalty rates are standard for rare disease licensing?',
+        answer: `Base royalty rates of ${sma.tieredRoyalties.base.low}%-${sma.tieredRoyalties.base.high}% for rare disease deals are at the higher end of biopharma ranges, reflecting premium pricing power and limited competition. Tiered royalties can escalate to ${sma.tieredRoyalties.highTier.high}% at peak sales.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'gene-therapy-rare-disease-deal-benchmarks', title: 'Gene Therapy Rare Disease Deals' },
+      { slug: 'enzyme-replacement-therapy-deal-benchmarks', title: 'ERT Deal Benchmarks' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
+function buildGeneTherapyRareDiseasePage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'geneTherapyRare' as Modality,
+    indication: 'spinalMuscularAtrophy' as Indication,
+    phase: 'phase1',
+    regulatoryDesignations: { breakthrough: true, fastTrack: true, orphan: true, prime: false },
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'gene-therapy-rare-disease-deal-benchmarks',
+    title: 'Gene Therapy Rare Disease Deal Benchmarks 2026 | AAV & Gene Editing Terms',
+    metaDescription: `Gene therapy rare disease deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfronts, milestones, and royalties for orphan gene therapy licensing.`,
+    h1: 'Gene Therapy Rare Disease Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Gene therapy for rare diseases represents the highest-value intersection of modality and therapeutic area in biopharma licensing. Phase 1 gene therapy deals for orphan indications carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The curative one-time treatment model, combined with orphan drug exclusivity and premium pricing ($1M-$3.5M per patient), creates compelling deal economics even at early clinical stages.`,
+      `Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, reflecting the extensive de-risking required around vector tropism, transgene expression durability, and immunogenicity management. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward the accelerated approval pathways (surrogate endpoints, smaller trial sizes) available to orphan gene therapies. Commercial milestones reach ${formatCurrency(r.terms.commMilestones.median)}.`,
+      `Royalty rates for rare disease gene therapy licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier. The unique economics of one-time curative treatments at $1M+ price points mean that commercial milestones are often structured around patient counts and treatment center expansion rather than traditional revenue thresholds. Zolgensma ($2.1M per treatment) and Hemgenix ($3.5M per treatment) set the pricing precedent.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'rareDisease', phase: 'phase1', modality: 'geneTherapyRare' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for rare disease gene therapy?',
+        answer: `Phase 1 rare disease gene therapy deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects early-stage clinical risk balanced against transformative curative potential.`,
+      },
+      {
+        question: 'How does orphan drug designation affect gene therapy deal terms?',
+        answer: 'Orphan drug designation provides 7 years US market exclusivity, FDA fee waivers, and 25% tax credit on clinical trial costs. For gene therapies specifically, the limited competition window combined with $1M-$3.5M per-patient pricing creates a highly favorable commercial profile that drives premium deal valuations.',
+      },
+      {
+        question: 'What are the key risks in rare disease gene therapy deals?',
+        answer: 'Primary risks include durability of transgene expression (especially for AAV-based approaches), immunogenicity limiting re-dosing potential, manufacturing scalability of viral vectors, and payer access challenges at $1M+ price points. These risks are reflected in the milestone-weighted deal structures.',
+      },
+      {
+        question: 'How do AAV gene therapy deals compare to gene editing deals in rare disease?',
+        answer: 'AAV gene therapy deals benefit from clinical validation (Zolgensma, Hemgenix approvals) but face re-dosing limitations. Gene editing platforms (CRISPR, base editing) offer potentially permanent cures but are earlier stage. Both command similar total deal values, though gene editing platforms may attract higher upfronts due to multi-indication potential.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'rare-disease-licensing-benchmarks', title: 'Rare Disease Overview' },
+      { slug: 'enzyme-replacement-therapy-deal-benchmarks', title: 'ERT Deal Benchmarks' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals (Oncology)' },
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildEnzymeReplacementTherapyPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'enzymeReplacement' as Modality,
+    indication: 'fabryDisease' as Indication,
+    phase: 'phase2',
+    regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: true, prime: false },
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'enzyme-replacement-therapy-deal-benchmarks',
+    title: 'Enzyme Replacement Therapy (ERT) Deal Benchmarks 2026 | Lysosomal Storage',
+    metaDescription: `ERT licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for enzyme replacement therapies targeting Fabry, Gaucher, and Pompe disease.`,
+    h1: 'Enzyme Replacement Therapy Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Enzyme replacement therapies remain the backbone of lysosomal storage disorder treatment, generating $8B+ annually across Fabry, Gaucher, Pompe, and MPS indications. Phase 2 ERT deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The recurring revenue model (lifelong treatment at $200K-$500K per patient annually) and orphan drug protections drive strong licensing economics.`,
+      `ERT deal structures reflect the predictable revenue model of chronic therapy. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, with regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)}. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split balances clinical risk with the established commercial precedent in the enzyme replacement space.`,
+      `Royalty rates for ERT licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%, reflecting the high per-patient revenue and limited biosimilar competition. Next-generation ERTs with improved half-life, tissue penetration, or oral bioavailability command premium terms. The competitive threat from gene therapy approaches is increasingly factored into ERT deal valuations, with licensees seeking assets that offer differentiated patient convenience or efficacy advantages.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'rareDisease', phase: 'phase2', modality: 'enzymeReplacement' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for ERT licensing?',
+        answer: `Phase 2 ERT deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The recurring revenue model ($200K-$500K per patient annually for life) provides predictable commercial economics that support strong deal valuations.`,
+      },
+      {
+        question: 'How do ERT deals compare to gene therapy deals in rare disease?',
+        answer: 'ERT deals typically feature lower total deal values than gene therapy but offer more predictable revenue streams. Gene therapies command higher upfronts due to curative one-time treatment potential, while ERTs generate recurring revenue over decades. Many licensees now seek both modalities for complementary portfolio positioning.',
+      },
+      {
+        question: 'What drives premium valuations for ERT assets?',
+        answer: 'Key premium drivers include improved enzyme stability or half-life, novel formulations enabling subcutaneous or oral delivery, expanded tissue penetration (e.g., CNS-penetrant ERTs for neuropathic variants), and activity in underserved patient populations. Next-generation ERTs with demonstrated superiority over first-generation products command 20-30% premiums.',
+      },
+      {
+        question: 'What is the biosimilar risk for ERT deals?',
+        answer: `ERT biosimilar risk is moderate but growing. Complex manufacturing and limited patient populations have slowed biosimilar entry compared to oncology biologics. However, Fabry and Gaucher ERTs face increasing biosimilar competition, which is reflected in royalty term negotiations and lifecycle management provisions.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'rare-disease-licensing-benchmarks', title: 'Rare Disease Overview' },
+      { slug: 'gene-therapy-rare-disease-deal-benchmarks', title: 'Gene Therapy Rare Disease Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'modality',
+  };
+}
+
+// ── Hematology pages ──────────────────────────────────────────────────────────
+
+function buildHematologyOverviewPage(): BenchmarkPageData {
+  const dlbcl = calculateDealTerms(makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'carT_heme' as Modality,
+    indication: 'dlbcl' as Indication,
+    phase: 'phase1',
+  }));
+  const aml = calculateDealTerms(makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'bispecificHeme' as Modality,
+    indication: 'aml' as Indication,
+    phase: 'phase2',
+  }));
+  const mf = calculateDealTerms(makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'smallMolecule' as Modality,
+    indication: 'myelofibrosis' as Indication,
+    phase: 'phase2',
+  }));
+  return {
+    slug: 'hematology-deal-benchmarks',
+    title: 'Hematology Licensing Deal Benchmarks 2026 | Blood Cancer & Benign Hematology',
+    metaDescription: `Comprehensive 2026 hematology licensing benchmarks. CAR-T, bispecific antibody, and small molecule deal terms across lymphoma, leukemia, and myeloproliferative neoplasms.`,
+    h1: 'Hematology Licensing Deal Benchmarks 2026',
+    heroStats: [
+      {
+        label: 'CAR-T DLBCL (Phase 1)',
+        value: formatCurrency(dlbcl.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'Bispecific AML (Phase 2)',
+        value: formatCurrency(aml.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'SM Myelofibrosis (Phase 2)',
+        value: formatCurrency(mf.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'CAR-T Royalties',
+        value: `${dlbcl.tieredRoyalties.base.low}%-${dlbcl.tieredRoyalties.base.high}%`,
+        subtext: 'Base tier range',
+      },
+    ],
+    contextParagraphs: [
+      `Hematology continues to be one of the most active licensing areas in biopharma, driven by transformative cell therapy and bispecific antibody platforms. CAR-T cell therapy deals for DLBCL at Phase 1 carry median total deal values of ${formatCurrency(dlbcl.terms.totalDealValue.median)}, while bispecific antibody approaches to AML reach ${formatCurrency(aml.terms.totalDealValue.median)} at Phase 2. The field benefits from well-defined response endpoints (CR, MRD negativity) and accelerated approval pathways.`,
+      `The hematology deal landscape spans malignant and benign conditions. Lymphoma and myeloma remain the highest-volume deal areas, but emerging targets in AML, MDS, and myeloproliferative neoplasms are attracting growing attention. Small molecule deals for myelofibrosis average ${formatCurrency(mf.terms.totalDealValue.median)}, buoyed by the commercial success of JAK inhibitors and the expanding pipeline of novel targets (BET inhibitors, MDM2 inhibitors, menin inhibitors).`,
+      `Royalty rates across hematology licensing range from ${dlbcl.tieredRoyalties.base.low}% to ${dlbcl.tieredRoyalties.base.high}% at the base tier. CAR-T and bispecific antibody deals command the highest total deal values due to transformative response rates in relapsed/refractory settings, while small molecule approaches benefit from oral convenience and broader treatment line applicability.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'hematology', phase: 'phase2' },
+    faqs: [
+      {
+        question: 'What are the highest-value hematology deal modalities in 2026?',
+        answer: `CAR-T cell therapies lead in total deal value at ${formatCurrency(dlbcl.terms.totalDealValue.median)} for Phase 1 DLBCL programs, followed by bispecific antibodies at ${formatCurrency(aml.terms.totalDealValue.median)} (Phase 2 AML). Small molecule programs targeting myeloproliferative neoplasms average ${formatCurrency(mf.terms.totalDealValue.median)}.`,
+      },
+      {
+        question: 'How do hematology deals compare to solid tumor oncology deals?',
+        answer: 'Hematology deals generally command comparable or slightly higher total deal values than solid tumor deals at equivalent stages, driven by higher response rates, clearer clinical endpoints (MRD negativity, CR), and established accelerated approval pathways. CAR-T deals in hematology benefit from validated clinical proof of concept with 6 approved products.',
+      },
+      {
+        question: 'Which hematology indications are most actively licensed?',
+        answer: 'DLBCL, multiple myeloma, and AML lead in deal volume. DLBCL and myeloma benefit from validated targets (CD19, BCMA) and approved cell therapies. AML is attracting growing interest with novel targets (menin, CD47, FLT3) and bispecific approaches showing promising early data.',
+      },
+      {
+        question: 'What trends are shaping hematology licensing in 2026?',
+        answer: 'Key trends include next-generation CAR-T with improved persistence and safety, bispecific antibodies competing with CAR-T in earlier lines of therapy, novel small molecule targets (menin inhibitors for NPM1-mutated AML), and allogeneic cell therapy platforms aiming for off-the-shelf convenience.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'car-t-hematology-deal-benchmarks', title: 'CAR-T Hematology Deals' },
+      { slug: 'bispecific-antibody-hematology-benchmarks', title: 'Bispecific Hematology Deals' },
+      { slug: 'car-t-deal-benchmarks', title: 'CAR-T Deal Benchmarks (Oncology)' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
+function buildCARTHematologyPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'carT_heme' as Modality,
+    indication: 'dlbcl' as Indication,
+    phase: 'phase1',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'car-t-hematology-deal-benchmarks',
+    title: 'CAR-T Hematology Licensing Deal Benchmarks 2026 | Cell Therapy Terms',
+    metaDescription: `CAR-T hematology deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfronts, milestones, and royalties for hematologic CAR-T cell therapy licensing.`,
+    h1: 'CAR-T Hematology Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `CAR-T cell therapy in hematologic malignancies remains the most clinically validated application of engineered cell therapy, with six approved products generating $5B+ in combined annual revenue. Phase 1 CAR-T hematology deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The validated clinical paradigm and established manufacturing infrastructure support deal premiums even at early clinical stages.`,
+      `Milestone structures in hematology CAR-T deals reflect the established clinical pathway. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, with key gates at Phase 1 dose selection, pivotal trial initiation, and BLA filing. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward successful market entry and indication expansion.`,
+      `Royalty rates for hematology CAR-T deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%, reflecting the unique manufacturing economics of autologous cell therapy. Allogeneic and in-vivo CAR-T approaches that address scalability limitations can command higher total deal values. Next-generation targets beyond CD19 and BCMA (GPRC5D, CD70, CD22) are driving the next wave of licensing activity.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'hematology', phase: 'phase1', modality: 'carT_heme' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for hematology CAR-T licensing?',
+        answer: `Phase 1 hematology CAR-T deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split is standard for early-stage cell therapy assets.`,
+      },
+      {
+        question: 'How do autologous vs. allogeneic CAR-T deal terms differ?',
+        answer: 'Autologous CAR-T deals benefit from clinical validation but face scalability constraints. Allogeneic (off-the-shelf) CAR-T platforms can command 15-25% higher total deal values due to broader commercial scalability, despite earlier clinical development. In-vivo CAR-T approaches represent the next frontier with potentially transformative manufacturing economics.',
+      },
+      {
+        question: 'Which CAR-T targets are most actively licensed in hematology?',
+        answer: 'CD19 (lymphoma, ALL) and BCMA (myeloma) remain the most validated targets with approved products. Emerging targets include GPRC5D (myeloma), FcRH5 (myeloma), CD70 (AML), and CD22 (ALL). Dual-target constructs (CD19/CD22, BCMA/GPRC5D) are attracting premium deal terms.',
+      },
+      {
+        question: 'What manufacturing factors affect CAR-T deal valuations?',
+        answer: `Manufacturing platform maturity significantly impacts deal terms. Established GMP manufacturing with short vein-to-vein time commands premium valuations. Novel manufacturing approaches (point-of-care, automated systems) can increase total deal values by 10-20% due to improved commercial scalability.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'hematology-deal-benchmarks', title: 'Hematology Deal Overview' },
+      { slug: 'bispecific-antibody-hematology-benchmarks', title: 'Bispecific Hematology Deals' },
+      { slug: 'car-t-deal-benchmarks', title: 'CAR-T Deals (Oncology)' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildBispecificHematologyPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'bispecificHeme' as Modality,
+    indication: 'dlbcl' as Indication,
+    phase: 'phase2',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'bispecific-antibody-hematology-benchmarks',
+    title: 'Bispecific Antibody Hematology Deal Benchmarks 2026 | T-cell Engager Terms',
+    metaDescription: `Bispecific antibody hematology deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for hematologic bispecific antibody licensing.`,
+    h1: 'Bispecific Antibody Hematology Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Bispecific antibodies have emerged as a major competitive force in hematologic oncology, challenging CAR-T cell therapy with off-the-shelf convenience and lower manufacturing complexity. Phase 2 bispecific hematology deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. Approved agents like glofitamab, epcoritamab, and teclistamab have validated the bispecific approach across lymphoma and myeloma.`,
+      `Deal structures for hematology bispecifics reflect the rapid clinical development timelines and accelerated approval pathways. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, regulatory milestones contribute ${formatCurrency(r.terms.regMilestones.median)}, and commercial milestones reach ${formatCurrency(r.terms.commMilestones.median)}. The overall ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects moderate clinical risk at Phase 2.`,
+      `Royalty rates for hematology bispecific deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%, with escalation to ${r.tieredRoyalties.highTier.high}% on peak sales. Key differentiation factors include subcutaneous versus intravenous formulation, step-up dosing requirements, cytokine release syndrome profile, and activity in CAR-T-refractory patients. Fixed-duration therapy bispecifics command premium terms over continuous treatment approaches.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'hematology', phase: 'phase2', modality: 'bispecificHeme' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for hematology bispecific antibodies?',
+        answer: `Phase 2 hematology bispecific deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The off-the-shelf advantage over CAR-T therapy supports strong commercial projections and competitive deal economics.`,
+      },
+      {
+        question: 'How do bispecific deals compare to CAR-T deals in hematology?',
+        answer: 'Bispecific antibody deals typically feature lower total deal values than CAR-T programs at equivalent stages, reflecting the less transformative response rates but superior convenience and scalability. However, bispecifics with demonstrated activity in CAR-T-refractory patients can rival CAR-T deal valuations.',
+      },
+      {
+        question: 'Which bispecific targets are most valued in hematology?',
+        answer: 'CD20xCD3 bispecifics lead in lymphoma (glofitamab, epcoritamab), while BCMAxCD3 approaches target myeloma (teclistamab). Emerging targets include CD123xCD3 for AML, GPRC5DxCD3 for myeloma, and novel T-cell engager formats with reduced CRS risk.',
+      },
+      {
+        question: 'What drives premium valuations for hematology bispecifics?',
+        answer: `Premium drivers include subcutaneous formulation (vs. IV), fixed-duration treatment protocols, favorable CRS profiles, activity in earlier lines of therapy, and demonstrated efficacy post-CAR-T. Bispecifics with these attributes can command 15-30% higher total deal values.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'hematology-deal-benchmarks', title: 'Hematology Deal Overview' },
+      { slug: 'car-t-hematology-deal-benchmarks', title: 'CAR-T Hematology Deals' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Deals (Oncology)' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+// ── Dermatology pages ─────────────────────────────────────────────────────────
+
+function buildDermatologyOverviewPage(): BenchmarkPageData {
+  const ad = calculateDealTerms(makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'il13Inhibitor' as Modality,
+    indication: 'atopicDermatitis' as Indication,
+    phase: 'phase2',
+  }));
+  const pso = calculateDealTerms(makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'il17Inhibitor' as Modality,
+    indication: 'psoriasis' as Indication,
+    phase: 'phase2',
+  }));
+  const jak = calculateDealTerms(makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'jakInhibitorDerm' as Modality,
+    indication: 'alopeciaAreata' as Indication,
+    phase: 'phase2',
+  }));
+  return {
+    slug: 'dermatology-licensing-benchmarks',
+    title: 'Dermatology Licensing Deal Benchmarks 2026 | Immunodermatology Deal Terms',
+    metaDescription: `Comprehensive 2026 dermatology licensing benchmarks. IL-17, IL-13, JAK inhibitor, and topical biologic deal terms across atopic dermatitis, psoriasis, and emerging indications.`,
+    h1: 'Dermatology Licensing Deal Benchmarks 2026',
+    heroStats: [
+      {
+        label: 'IL-13 AD (Phase 2)',
+        value: formatCurrency(ad.terms.totalDealValue.median),
+        subtext: 'Atopic dermatitis',
+      },
+      {
+        label: 'IL-17 Psoriasis (Phase 2)',
+        value: formatCurrency(pso.terms.totalDealValue.median),
+        subtext: 'Plaque psoriasis',
+      },
+      {
+        label: 'JAK Inhibitor (Phase 2)',
+        value: formatCurrency(jak.terms.totalDealValue.median),
+        subtext: 'Alopecia areata',
+      },
+      {
+        label: 'Derm Royalties',
+        value: `${ad.tieredRoyalties.base.low}%-${ad.tieredRoyalties.base.high}%`,
+        subtext: 'Base tier range',
+      },
+    ],
+    contextParagraphs: [
+      `Dermatology has become one of the fastest-growing therapeutic areas in biopharma licensing, driven by the success of biologics in immunodermatology. The dupilumab franchise ($13B+ annual revenue) validated the IL-4/IL-13 pathway, while IL-17 and IL-23 inhibitors have transformed psoriasis management. Phase 2 IL-13 inhibitor deals for atopic dermatitis carry a median total deal value of ${formatCurrency(ad.terms.totalDealValue.median)}, with IL-17 psoriasis deals at ${formatCurrency(pso.terms.totalDealValue.median)}.`,
+      `Deal structures in dermatology reflect the large addressable populations (31M+ US AD patients, 7.5M psoriasis patients) and chronic treatment models that generate predictable recurring revenue. JAK inhibitor deals for emerging indications like alopecia areata and vitiligo average ${formatCurrency(jak.terms.totalDealValue.median)}, driven by the oral convenience advantage and broad inflammatory pathway coverage.`,
+      `Royalty rates across dermatology licensing range from ${ad.tieredRoyalties.base.low}% to ${ad.tieredRoyalties.base.high}% at the base tier. Key deal drivers include efficacy superiority versus dupilumab, subcutaneous versus intravenous administration, dosing frequency advantages, and expansion potential across multiple inflammatory skin conditions. Topical biologics represent an emerging frontier with the potential to disrupt the systemics-dominated market.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'dermatology', phase: 'phase2' },
+    faqs: [
+      {
+        question: 'What are the highest-value dermatology deal modalities in 2026?',
+        answer: `IL-13 and IL-4Ralpha inhibitors lead in deal value for atopic dermatitis (${formatCurrency(ad.terms.totalDealValue.median)} at Phase 2), followed by IL-17 inhibitors for psoriasis (${formatCurrency(pso.terms.totalDealValue.median)}). JAK inhibitors attract strong interest for emerging indications at ${formatCurrency(jak.terms.totalDealValue.median)}.`,
+      },
+      {
+        question: 'How do dermatology deal terms compare to oncology?',
+        answer: 'Dermatology deals tend to feature lower total deal values than oncology but offer more predictable commercial profiles due to large, well-defined patient populations and chronic treatment models. The recurring revenue model and lower clinical development risk (clear endpoints like EASI, PASI) make dermatology deals attractive on a risk-adjusted basis.',
+      },
+      {
+        question: 'Which dermatology indications are most actively licensed?',
+        answer: 'Atopic dermatitis and plaque psoriasis lead in deal volume, followed by alopecia areata, vitiligo, hidradenitis suppurativa, and prurigo nodularis. The expansion of approved biologics into adjacencies (e.g., COPD, EoE for dupilumab) is driving increased interest in multi-indication licensing deals.',
+      },
+      {
+        question: 'What trends are shaping dermatology licensing in 2026?',
+        answer: 'Key trends include the race for next-generation oral JAK inhibitors with improved safety profiles, topical biologic platforms targeting local inflammation, OX40/OX40L pathway inhibitors for AD, and biosimilar competition pressuring first-generation biologics. The growing focus on under-served conditions (hidradenitis, vitiligo) is creating new high-value deal opportunities.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'il17-inhibitor-deal-benchmarks', title: 'IL-17 Inhibitor Deals' },
+      { slug: 'jak-inhibitor-dermatology-benchmarks', title: 'JAK Inhibitor Derm Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'overview',
+  };
+}
+
+function buildIL17InhibitorPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'il17Inhibitor' as Modality,
+    indication: 'psoriasis' as Indication,
+    phase: 'phase2',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'il17-inhibitor-deal-benchmarks',
+    title: 'IL-17 Inhibitor Licensing Deal Benchmarks 2026 | Psoriasis Deal Terms',
+    metaDescription: `IL-17 inhibitor licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for IL-17 pathway deals.`,
+    h1: 'IL-17 Inhibitor Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `IL-17 inhibitors have become the gold standard for plaque psoriasis treatment, with secukinumab, ixekizumab, and bimekizumab generating $10B+ in combined annual revenue. Phase 2 IL-17 inhibitor deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The validated pathway, large addressable population (7.5M US psoriasis patients), and expanding indication potential (psoriatic arthritis, axial spondyloarthritis, hidradenitis suppurativa) sustain robust deal activity.`,
+      `Milestone structures for IL-17 inhibitor deals allocate ${formatCurrency(r.terms.devMilestones.median)} to development milestones, ${formatCurrency(r.terms.regMilestones.median)} to regulatory milestones, and ${formatCurrency(r.terms.commMilestones.median)} to commercial milestones. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects the well-defined clinical development pathway with PASI 75/90/100 as established primary endpoints.`,
+      `Royalty rates for IL-17 inhibitor licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier. Differentiation factors include IL-17A versus IL-17A/F versus IL-17C selectivity, dosing frequency, immunogenicity profile, and potential for combination with other pathways. Next-generation IL-17 inhibitors with oral bioavailability or improved convenience (fewer injections, auto-injector delivery) command the highest premiums.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'dermatology', phase: 'phase2', modality: 'il17Inhibitor' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for IL-17 inhibitor licensing?',
+        answer: `Phase 2 IL-17 inhibitor deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The validated pathway and established commercial precedent ($10B+ market) provide a strong foundation for deal negotiations.`,
+      },
+      {
+        question: 'How do IL-17A vs. IL-17F inhibitor deals differ?',
+        answer: 'Dual IL-17A/F inhibitors (like bimekizumab) have demonstrated superior PASI responses compared to IL-17A-only inhibitors, commanding 10-15% higher deal premiums. IL-17C inhibitors represent a differentiated approach targeting keratinocyte-driven inflammation with potentially superior safety profiles.',
+      },
+      {
+        question: 'What is the biosimilar impact on IL-17 inhibitor deals?',
+        answer: 'Secukinumab biosimilars are expected from 2025-2027, creating pricing pressure on first-generation IL-17 inhibitors. However, next-generation IL-17 inhibitors with differentiated mechanisms, improved convenience, or expanded indication packages maintain premium deal terms. Biosimilar risk is factored into royalty term negotiations.',
+      },
+      {
+        question: 'Which indications beyond psoriasis drive IL-17 deal value?',
+        answer: 'Key expansion indications include psoriatic arthritis, axial spondyloarthritis, hidradenitis suppurativa, and non-infectious uveitis. Multi-indication IL-17 programs can command 20-30% higher total deal values versus psoriasis-only programs due to the expanded commercial opportunity.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'dermatology-licensing-benchmarks', title: 'Dermatology Deal Overview' },
+      { slug: 'jak-inhibitor-dermatology-benchmarks', title: 'JAK Inhibitor Derm Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildJAKInhibitorDermPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'jakInhibitorDerm' as Modality,
+    indication: 'atopicDermatitis' as Indication,
+    phase: 'phase2',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'jak-inhibitor-dermatology-benchmarks',
+    title: 'JAK Inhibitor Dermatology Deal Benchmarks 2026 | Oral Immunodermatology Terms',
+    metaDescription: `JAK inhibitor dermatology deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for JAK inhibitors in atopic dermatitis, alopecia areata, and vitiligo.`,
+    h1: 'JAK Inhibitor Dermatology Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `JAK inhibitors have expanded from rheumatology into dermatology, with baricitinib (AD), upadacitinib (AD), abrocitinib (AD), and ritlecitinib (alopecia areata) establishing the oral immunodermatology class. Phase 2 JAK inhibitor deals in dermatology carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The oral convenience advantage over injectable biologics drives strong patient preference and payer interest.`,
+      `Deal structures reflect the balance between the proven anti-inflammatory mechanism and the ongoing safety scrutiny from FDA boxed warnings on JAK inhibitors. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, with gating criteria often tied to long-term safety data in addition to efficacy endpoints. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward successful market entry.`,
+      `Royalty rates for dermatology JAK inhibitor deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%. Next-generation selective JAK1 or TYK2 inhibitors with improved cardiovascular and thromboembolic safety profiles command premium terms. Topical JAK inhibitors (ruxolitinib cream for AD, vitiligo) represent a differentiated approach that avoids systemic exposure concerns while maintaining JAK pathway efficacy.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'dermatology', phase: 'phase2', modality: 'jakInhibitorDerm' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for dermatology JAK inhibitors?',
+        answer: `Phase 2 dermatology JAK inhibitor deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. Selective JAK1 inhibitors with clean safety profiles command the highest deal premiums in the class.`,
+      },
+      {
+        question: 'How do JAK safety concerns affect deal valuations?',
+        answer: 'FDA boxed warnings on JAK inhibitors (MACE, VTE, malignancy, infections) have moderated deal premiums compared to pre-2022 levels. However, next-generation selective inhibitors (JAK1-only, TYK2) with improved safety data are recovering deal value. Long-term safety data is now a critical milestone gate in JAK inhibitor deals.',
+      },
+      {
+        question: 'How do topical vs. oral JAK inhibitor deals compare?',
+        answer: 'Topical JAK inhibitors command similar total deal values to oral formulations despite lower per-patient revenue, because they avoid systemic safety concerns and can access broader patient populations. Ruxolitinib cream for AD and vitiligo has demonstrated the commercial viability of the topical approach.',
+      },
+      {
+        question: 'Which dermatology indications are most targeted by JAK inhibitor deals?',
+        answer: 'Atopic dermatitis leads in deal volume, followed by alopecia areata, vitiligo, hidradenitis suppurativa, and prurigo nodularis. The oral convenience and broad anti-inflammatory mechanism of JAK inhibitors make them attractive across multiple inflammatory dermatoses.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'dermatology-licensing-benchmarks', title: 'Dermatology Deal Overview' },
+      { slug: 'il17-inhibitor-deal-benchmarks', title: 'IL-17 Inhibitor Deals' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+// ── Gastroenterology pages ────────────────────────────────────────────────────
+
+function buildGastroenterologyOverviewPage(): BenchmarkPageData {
+  const crohns = calculateDealTerms(makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'antiTl1a' as Modality,
+    indication: 'crohnsDisease' as Indication,
+    phase: 'phase2',
+  }));
+  const uc = calculateDealTerms(makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'il23GI' as Modality,
+    indication: 'ulcerativeColitis' as Indication,
+    phase: 'phase2',
+  }));
+  const eoe = calculateDealTerms(makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'mab' as Modality,
+    indication: 'eosinophilicEsophagitis' as Indication,
+    phase: 'phase2',
+  }));
+  return {
+    slug: 'gastroenterology-deal-benchmarks',
+    title: 'Gastroenterology Licensing Deal Benchmarks 2026 | IBD & GI Deal Terms',
+    metaDescription: `Comprehensive 2026 gastroenterology licensing benchmarks. Anti-TL1A, IL-23, and S1P modulator deal terms across Crohn's disease, ulcerative colitis, and emerging GI indications.`,
+    h1: 'Gastroenterology Licensing Deal Benchmarks 2026',
+    heroStats: [
+      {
+        label: "Anti-TL1A Crohn's (Phase 2)",
+        value: formatCurrency(crohns.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'IL-23 UC (Phase 2)',
+        value: formatCurrency(uc.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'mAb EoE (Phase 2)',
+        value: formatCurrency(eoe.terms.totalDealValue.median),
+        subtext: 'Total deal value',
+      },
+      {
+        label: 'GI Royalties',
+        value: `${crohns.tieredRoyalties.base.low}%-${crohns.tieredRoyalties.base.high}%`,
+        subtext: 'Base tier range',
+      },
+    ],
+    contextParagraphs: [
+      `Gastroenterology has emerged as one of the most dynamic licensing areas in biopharma, fueled by the validation of novel targets like TL1A and the continued expansion of IL-23 and integrin pathways. The Merck/Prometheus Biosciences acquisition at $10.8B for anti-TL1A set a transformative valuation benchmark for the GI space. Phase 2 anti-TL1A deals for Crohn's disease carry a median total deal value of ${formatCurrency(crohns.terms.totalDealValue.median)}, while IL-23 approaches to UC reach ${formatCurrency(uc.terms.totalDealValue.median)}.`,
+      `GI deal structures reflect the chronic nature of IBD treatment (lifelong therapy), large patient populations (3M+ US IBD patients), and well-defined clinical endpoints (endoscopic remission, clinical remission). The growing focus on combination approaches (IL-23 + TL1A, biologics + JAK inhibitors) is driving platform deal interest. EoE deals average ${formatCurrency(eoe.terms.totalDealValue.median)} as dupixent validated the eosinophilic pathway.`,
+      `Royalty rates across GI licensing range from ${crohns.tieredRoyalties.base.low}% to ${crohns.tieredRoyalties.base.high}% at the base tier. Key valuation drivers include differentiation versus adalimumab and vedolizumab, oral versus injectable formulation, mucosal healing rates, and potential for steroid-free remission. The biosimilar erosion of adalimumab (Humira) has created opportunity for next-generation targeted therapies with superior efficacy profiles.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'gastroenterology', phase: 'phase2' },
+    faqs: [
+      {
+        question: 'What are the highest-value GI deal modalities in 2026?',
+        answer: `Anti-TL1A antibodies lead in deal value at ${formatCurrency(crohns.terms.totalDealValue.median)} for Phase 2 Crohn's programs, validated by the $10.8B Merck/Prometheus acquisition. IL-23 inhibitors for UC reach ${formatCurrency(uc.terms.totalDealValue.median)}, while gut-selective approaches with improved safety profiles are attracting growing interest.`,
+      },
+      {
+        question: 'How do GI deal terms compare to other immunology TAs?',
+        answer: 'GI deal terms are increasingly competitive with broader immunology (rheumatology, dermatology) due to large chronic patient populations and growing standard-of-care gaps. The validated clinical endpoints (endoscopic remission) and chronic treatment model support strong deal economics.',
+      },
+      {
+        question: 'Which GI indications are most actively licensed?',
+        answer: "Crohn's disease and ulcerative colitis dominate deal volume, followed by EoE, celiac disease, and IBS. Emerging indications like pouchitis and short bowel syndrome offer niche opportunities with limited competition and orphan-like commercial profiles.",
+      },
+      {
+        question: 'What trends are shaping GI licensing in 2026?',
+        answer: 'Key trends include the TL1A pathway validation driving a wave of follow-on licensing, oral integrin modulators competing with injectable therapies, combination biologic approaches for refractory IBD, precision medicine strategies based on gut microbiome profiling, and expansion into eosinophilic GI disorders.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'anti-tl1a-deal-benchmarks', title: 'Anti-TL1A Deal Benchmarks' },
+      { slug: 'il23-gi-deal-benchmarks', title: 'IL-23 GI Deal Benchmarks' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'overview',
+  };
+}
+
+function buildAntiTL1APage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'antiTl1a' as Modality,
+    indication: 'crohnsDisease' as Indication,
+    phase: 'phase2',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'anti-tl1a-deal-benchmarks',
+    title: 'Anti-TL1A Licensing Deal Benchmarks 2026 | IBD Novel Target Deal Terms',
+    metaDescription: `Anti-TL1A licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for TL1A-targeting therapies in Crohn's disease and ulcerative colitis.`,
+    h1: 'Anti-TL1A Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `TL1A (TNF-like ligand 1A) has become the most sought-after novel target in gastroenterology following Merck's $10.8B acquisition of Prometheus Biosciences in 2023. Phase 2 anti-TL1A deals for Crohn's disease carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The dual mechanism — anti-inflammatory and anti-fibrotic activity — addresses a critical unmet need in IBD, as fibrosis drives surgical morbidity in Crohn's disease.`,
+      `Deal structures for anti-TL1A assets reflect the transformative pipeline interest. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, with key gates tied to endoscopic remission data and fibrosis endpoints. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward market entry in what is projected to become a $5-10B target class by 2030.`,
+      `Royalty rates for anti-TL1A licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%, with tiered escalation to ${r.tieredRoyalties.highTier.high}%. Differentiation factors include biomarker-guided patient selection (TL1A genetic risk variants), combination potential with IL-23 inhibitors, and oral versus injectable formulation. The competitive landscape has expanded rapidly, with Roche/Genentech, Pfizer, AbbVie, and Sanofi all pursuing TL1A programs.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'gastroenterology', phase: 'phase2', modality: 'antiTl1a' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for anti-TL1A licensing?',
+        answer: `Phase 2 anti-TL1A deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The $10.8B Merck/Prometheus acquisition has set a high-water mark that influences all subsequent TL1A deal negotiations.`,
+      },
+      {
+        question: 'Why is TL1A considered a breakthrough target in GI?',
+        answer: 'TL1A uniquely combines anti-inflammatory and anti-fibrotic activity, addressing the root cause of surgical morbidity in Crohn\'s disease. The genetics-guided patient selection approach (TL1A risk variants in ~50% of IBD patients) enables precision medicine strategies with higher response rates. Phase 2 data from tulisokibart showed unprecedented endoscopic remission rates.',
+      },
+      {
+        question: 'How does the anti-TL1A competitive landscape affect deal terms?',
+        answer: 'The rapid expansion of TL1A programs (10+ in clinical development) has increased competitive pressure but also validated the target, supporting deal premiums. First-movers with clinical data command the highest valuations, while differentiated approaches (bispecific TL1A/IL-23, oral TL1A inhibitors) can maintain premium terms.',
+      },
+      {
+        question: 'What combination strategies drive TL1A deal value?',
+        answer: 'TL1A + IL-23 inhibitor combinations represent the most anticipated approach, potentially addressing biologic-refractory IBD. Preclinical data suggests synergistic anti-inflammatory and anti-fibrotic effects. Assets with demonstrated combination compatibility command 15-25% premium in total deal value.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'gastroenterology-deal-benchmarks', title: 'Gastroenterology Deal Overview' },
+      { slug: 'il23-gi-deal-benchmarks', title: 'IL-23 GI Deal Benchmarks' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildIL23GIPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'il23GI' as Modality,
+    indication: 'ulcerativeColitis' as Indication,
+    phase: 'phase2',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'il23-gi-deal-benchmarks',
+    title: 'IL-23 GI Licensing Deal Benchmarks 2026 | IBD Biologic Deal Terms',
+    metaDescription: `IL-23 inhibitor GI deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for IL-23 targeting therapies in ulcerative colitis and Crohn's disease.`,
+    h1: 'IL-23 GI Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `IL-23 inhibitors have become the fastest-growing biologic class in gastroenterology, with risankizumab and guselkumab generating combined revenue approaching $10B. Phase 2 IL-23 GI deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments of ${formatCurrency(r.terms.upfront.median)}. The class benefits from superior efficacy over TNF inhibitors, favorable safety profiles, and convenient dosing intervals (subcutaneous, every 4-8 weeks).`,
+      `Deal structures for IL-23 GI programs allocate ${formatCurrency(r.terms.devMilestones.median)} to development milestones, ${formatCurrency(r.terms.regMilestones.median)} to regulatory milestones, and ${formatCurrency(r.terms.commMilestones.median)} to commercial milestones. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects the de-risked clinical pathway with established endpoints and a clear regulatory precedent from approved IL-23 inhibitors.`,
+      `Royalty rates for IL-23 GI licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, escalating to ${r.tieredRoyalties.highTier.high}%. Differentiation factors include p19-selective versus dual p19/p40 targeting, subcutaneous versus IV induction, mucosal healing rates in biologic-refractory patients, and combination potential with TL1A or integrin pathway agents. Assets with first-line positioning data command the highest premiums.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'gastroenterology', phase: 'phase2', modality: 'il23GI' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for IL-23 GI licensing?',
+        answer: `Phase 2 IL-23 GI deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The validated pathway (risankizumab, guselkumab approvals) and established $10B+ market provide a strong deal economics foundation.`,
+      },
+      {
+        question: 'How do IL-23 GI deals compare to IL-23 dermatology deals?',
+        answer: 'IL-23 GI deals command comparable or slightly higher total deal values than dermatology-focused IL-23 programs due to the larger IBD patient population (3M+ in the US) and growing first-line treatment positioning. However, dermatology IL-23 deals benefit from faster clinical development timelines.',
+      },
+      {
+        question: 'What drives premium IL-23 GI deal valuations?',
+        answer: 'Key premium factors include superior endoscopic remission rates in biologic-experienced patients, rapid onset of clinical response, subcutaneous formulation (vs. IV-only competitors), and favorable positioning versus both anti-TNF and anti-integrin agents. Head-to-head superiority data versus vedolizumab or ustekinumab is a major valuation accelerator.',
+      },
+      {
+        question: 'How are IL-23 combination strategies valued?',
+        answer: 'IL-23 + TL1A and IL-23 + JAK inhibitor combinations are the most anticipated strategies for refractory IBD. Clinical data supporting combination use can increase total deal values by 20-30%. Bispecific antibodies targeting both IL-23 and another pathway (TL1A, TNF) represent the next frontier in combination approach deal-making.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'gastroenterology-deal-benchmarks', title: 'Gastroenterology Deal Overview' },
+      { slug: 'anti-tl1a-deal-benchmarks', title: 'Anti-TL1A Deal Benchmarks' },
+      { slug: 'il17-inhibitor-deal-benchmarks', title: 'IL-17 Inhibitor Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
 // ── Build full list ───────────────────────────────────────────────────────────
 
 const BENCHMARK_PAGES: BenchmarkPageData[] = [
@@ -1075,6 +1792,22 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
   buildDualIncretinPage(),
   buildNashMashPage(),
   buildOralPeptidePage(),
+  // Rare Disease
+  buildRareDiseaseOverviewPage(),
+  buildGeneTherapyRareDiseasePage(),
+  buildEnzymeReplacementTherapyPage(),
+  // Hematology
+  buildHematologyOverviewPage(),
+  buildCARTHematologyPage(),
+  buildBispecificHematologyPage(),
+  // Dermatology
+  buildDermatologyOverviewPage(),
+  buildIL17InhibitorPage(),
+  buildJAKInhibitorDermPage(),
+  // Gastroenterology
+  buildGastroenterologyOverviewPage(),
+  buildAntiTL1APage(),
+  buildIL23GIPage(),
 ];
 
 // ── Public API ────────────────────────────────────────────────────────────────

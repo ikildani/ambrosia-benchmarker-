@@ -32,6 +32,18 @@ import type {
   WHTargetPopulation,
   WHUnmetNeed,
   WHRegulatory,
+  OrphanDesignation,
+  PatientPopulationSize,
+  GeneticBasis,
+  HemeLineage,
+  TransplantEligibility,
+  MRDStatus,
+  SkinSeverity,
+  ChronicityProfile,
+  TopicalVsSystemic,
+  GISegment,
+  BiologicExperience,
+  EndoscopicEndpoint,
 } from '@/lib/calculations';
 import {
   territoryOptions,
@@ -65,6 +77,18 @@ import {
   whTargetPopulationOptions,
   whUnmetNeedOptions,
   whRegulatoryOptions,
+  orphanDesignationOptions,
+  patientPopulationSizeOptions,
+  geneticBasisOptions,
+  hemeLineageOptions,
+  transplantEligibilityOptions,
+  mrdStatusOptions,
+  skinSeverityOptions,
+  chronicityProfileOptions,
+  topicalVsSystemicOptions,
+  giSegmentOptions,
+  biologicExperienceOptions,
+  endoscopicEndpointOptions,
 } from '@/lib/calculations';
 import {
   competitivePositionDescriptions, dataQualityDescriptions, combinationPotentialDescriptions,
@@ -77,6 +101,10 @@ import {
   resistanceProfileDescriptions, infectionChronicityDescriptions, publicHealthPriorityDescriptions,
   ocularDeliveryDescriptions, treatmentDurabilityDescriptions, visionImpactDescriptions,
   whTargetPopulationDescriptions, whUnmetNeedDescriptions, whRegulatoryDescriptions,
+  orphanDesignationDescriptions, patientPopulationSizeDescriptions, geneticBasisDescriptions,
+  hemeLineageDescriptions, transplantEligibilityDescriptions, mrdStatusDescriptions,
+  skinSeverityDescriptions, chronicityProfileDescriptions, topicalVsSystemicDescriptions,
+  giSegmentDescriptions, biologicExperienceDescriptions, endoscopicEndpointDescriptions,
   territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
@@ -219,6 +247,62 @@ whRegulatoryOptions.forEach(opt => {
   whRegulatoryBadges[opt.value] = getMultiplierImpactBadge('whRegulatory', opt.value);
 });
 
+// Target Profile badges — rare disease
+const orphanDesignationBadges: Record<string, ImpactBadge> = {};
+orphanDesignationOptions.forEach(opt => {
+  orphanDesignationBadges[opt.value] = getMultiplierImpactBadge('orphanDesignation', opt.value);
+});
+const patientPopulationSizeBadges: Record<string, ImpactBadge> = {};
+patientPopulationSizeOptions.forEach(opt => {
+  patientPopulationSizeBadges[opt.value] = getMultiplierImpactBadge('patientPopulationSize', opt.value);
+});
+const geneticBasisBadges: Record<string, ImpactBadge> = {};
+geneticBasisOptions.forEach(opt => {
+  geneticBasisBadges[opt.value] = getMultiplierImpactBadge('geneticBasis', opt.value);
+});
+
+// Target Profile badges — hematology
+const hemeLineageBadges: Record<string, ImpactBadge> = {};
+hemeLineageOptions.forEach(opt => {
+  hemeLineageBadges[opt.value] = getMultiplierImpactBadge('hemeLineage', opt.value);
+});
+const transplantEligibilityBadges: Record<string, ImpactBadge> = {};
+transplantEligibilityOptions.forEach(opt => {
+  transplantEligibilityBadges[opt.value] = getMultiplierImpactBadge('transplantEligibility', opt.value);
+});
+const mrdStatusBadges: Record<string, ImpactBadge> = {};
+mrdStatusOptions.forEach(opt => {
+  mrdStatusBadges[opt.value] = getMultiplierImpactBadge('mrdStatus', opt.value);
+});
+
+// Target Profile badges — dermatology
+const skinSeverityBadges: Record<string, ImpactBadge> = {};
+skinSeverityOptions.forEach(opt => {
+  skinSeverityBadges[opt.value] = getMultiplierImpactBadge('skinSeverity', opt.value);
+});
+const chronicityProfileBadges: Record<string, ImpactBadge> = {};
+chronicityProfileOptions.forEach(opt => {
+  chronicityProfileBadges[opt.value] = getMultiplierImpactBadge('chronicityProfile', opt.value);
+});
+const topicalVsSystemicBadges: Record<string, ImpactBadge> = {};
+topicalVsSystemicOptions.forEach(opt => {
+  topicalVsSystemicBadges[opt.value] = getMultiplierImpactBadge('topicalVsSystemic', opt.value);
+});
+
+// Target Profile badges — gastroenterology
+const giSegmentBadges: Record<string, ImpactBadge> = {};
+giSegmentOptions.forEach(opt => {
+  giSegmentBadges[opt.value] = getMultiplierImpactBadge('giSegment', opt.value);
+});
+const biologicExperienceBadges: Record<string, ImpactBadge> = {};
+biologicExperienceOptions.forEach(opt => {
+  biologicExperienceBadges[opt.value] = getMultiplierImpactBadge('biologicExperience', opt.value);
+});
+const endoscopicEndpointBadges: Record<string, ImpactBadge> = {};
+endoscopicEndpointOptions.forEach(opt => {
+  endoscopicEndpointBadges[opt.value] = getMultiplierImpactBadge('endoscopicEndpoint', opt.value);
+});
+
 // Deal Scope badges
 const territoryBadges: Record<string, ImpactBadge> = {};
 territoryOptions.forEach(opt => {
@@ -304,6 +388,34 @@ interface AdvancedOptionsSectionProps {
   onWhTargetPopulationChange: (value: WHTargetPopulation) => void;
   onWhUnmetNeedChange: (value: WHUnmetNeed) => void;
   onWhRegulatoryChange: (value: WHRegulatory) => void;
+  // Rare Disease-specific
+  orphanDesignation: OrphanDesignation;
+  patientPopulationSize: PatientPopulationSize;
+  geneticBasis: GeneticBasis;
+  onOrphanDesignationChange: (value: OrphanDesignation) => void;
+  onPatientPopulationSizeChange: (value: PatientPopulationSize) => void;
+  onGeneticBasisChange: (value: GeneticBasis) => void;
+  // Hematology-specific
+  hemeLineage: HemeLineage;
+  transplantEligibility: TransplantEligibility;
+  mrdStatus: MRDStatus;
+  onHemeLineageChange: (value: HemeLineage) => void;
+  onTransplantEligibilityChange: (value: TransplantEligibility) => void;
+  onMrdStatusChange: (value: MRDStatus) => void;
+  // Dermatology-specific
+  skinSeverity: SkinSeverity;
+  chronicityProfile: ChronicityProfile;
+  topicalVsSystemic: TopicalVsSystemic;
+  onSkinSeverityChange: (value: SkinSeverity) => void;
+  onChronicityProfileChange: (value: ChronicityProfile) => void;
+  onTopicalVsSystemicChange: (value: TopicalVsSystemic) => void;
+  // Gastroenterology-specific
+  giSegment: GISegment;
+  biologicExperience: BiologicExperience;
+  endoscopicEndpoint: EndoscopicEndpoint;
+  onGiSegmentChange: (value: GISegment) => void;
+  onBiologicExperienceChange: (value: BiologicExperience) => void;
+  onEndoscopicEndpointChange: (value: EndoscopicEndpoint) => void;
 }
 
 const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
@@ -372,6 +484,30 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onWhTargetPopulationChange,
   onWhUnmetNeedChange,
   onWhRegulatoryChange,
+  orphanDesignation,
+  patientPopulationSize,
+  geneticBasis,
+  onOrphanDesignationChange,
+  onPatientPopulationSizeChange,
+  onGeneticBasisChange,
+  hemeLineage,
+  transplantEligibility,
+  mrdStatus,
+  onHemeLineageChange,
+  onTransplantEligibilityChange,
+  onMrdStatusChange,
+  skinSeverity,
+  chronicityProfile,
+  topicalVsSystemic,
+  onSkinSeverityChange,
+  onChronicityProfileChange,
+  onTopicalVsSystemicChange,
+  giSegment,
+  biologicExperience,
+  endoscopicEndpoint,
+  onGiSegmentChange,
+  onBiologicExperienceChange,
+  onEndoscopicEndpointChange,
   column,
 }: AdvancedOptionsSectionProps) {
   const accent = STEP_ACCENTS[therapeuticArea];
@@ -688,6 +824,54 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
               onChange={onWhTargetPopulationChange}
               columns={5}
             />
+          ) : therapeuticArea === 'rareDisease' ? (
+            <OptionCardGroup
+              id="orphan-designation-select"
+              label="Orphan Designation"
+              helpText={sectionHelp.orphanDesignation}
+              options={orphanDesignationOptions}
+              descriptions={orphanDesignationDescriptions}
+              impactBadges={orphanDesignationBadges}
+              value={orphanDesignation}
+              onChange={onOrphanDesignationChange}
+              columns={4}
+            />
+          ) : therapeuticArea === 'hematology' ? (
+            <OptionCardGroup
+              id="heme-lineage-select"
+              label="Heme Lineage"
+              helpText={sectionHelp.hemeLineage}
+              options={hemeLineageOptions}
+              descriptions={hemeLineageDescriptions}
+              impactBadges={hemeLineageBadges}
+              value={hemeLineage}
+              onChange={onHemeLineageChange}
+              columns={4}
+            />
+          ) : therapeuticArea === 'dermatology' ? (
+            <OptionCardGroup
+              id="skin-severity-select"
+              label="Skin Severity"
+              helpText={sectionHelp.skinSeverity}
+              options={skinSeverityOptions}
+              descriptions={skinSeverityDescriptions}
+              impactBadges={skinSeverityBadges}
+              value={skinSeverity}
+              onChange={onSkinSeverityChange}
+              columns={4}
+            />
+          ) : therapeuticArea === 'gastroenterology' ? (
+            <OptionCardGroup
+              id="gi-segment-select"
+              label="GI Segment"
+              helpText={sectionHelp.giSegment}
+              options={giSegmentOptions}
+              descriptions={giSegmentDescriptions}
+              impactBadges={giSegmentBadges}
+              value={giSegment}
+              onChange={onGiSegmentChange}
+              columns={4}
+            />
           ) : (
             <OptionCardGroup
               id="line-of-therapy-select"
@@ -932,6 +1116,114 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
                 value={whRegulatory}
                 onChange={onWhRegulatoryChange}
                 columns={5}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'rareDisease' && (
+            <>
+              <OptionCardGroup
+                id="patient-population-size-select"
+                label="Patient Population Size"
+                helpText={sectionHelp.patientPopulationSize}
+                options={patientPopulationSizeOptions}
+                descriptions={patientPopulationSizeDescriptions}
+                impactBadges={patientPopulationSizeBadges}
+                value={patientPopulationSize}
+                onChange={onPatientPopulationSizeChange}
+                columns={4}
+              />
+              <OptionCardGroup
+                id="genetic-basis-select"
+                label="Genetic Basis"
+                helpText={sectionHelp.geneticBasis}
+                options={geneticBasisOptions}
+                descriptions={geneticBasisDescriptions}
+                impactBadges={geneticBasisBadges}
+                value={geneticBasis}
+                onChange={onGeneticBasisChange}
+                columns={4}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'hematology' && (
+            <>
+              <OptionCardGroup
+                id="transplant-eligibility-select"
+                label="Transplant Eligibility"
+                helpText={sectionHelp.transplantEligibility}
+                options={transplantEligibilityOptions}
+                descriptions={transplantEligibilityDescriptions}
+                impactBadges={transplantEligibilityBadges}
+                value={transplantEligibility}
+                onChange={onTransplantEligibilityChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="mrd-status-select"
+                label="MRD Status"
+                helpText={sectionHelp.mrdStatus}
+                options={mrdStatusOptions}
+                descriptions={mrdStatusDescriptions}
+                impactBadges={mrdStatusBadges}
+                value={mrdStatus}
+                onChange={onMrdStatusChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'dermatology' && (
+            <>
+              <OptionCardGroup
+                id="chronicity-profile-select"
+                label="Chronicity Profile"
+                helpText={sectionHelp.chronicityProfile}
+                options={chronicityProfileOptions}
+                descriptions={chronicityProfileDescriptions}
+                impactBadges={chronicityProfileBadges}
+                value={chronicityProfile}
+                onChange={onChronicityProfileChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="topical-vs-systemic-select"
+                label="Topical vs Systemic"
+                helpText={sectionHelp.topicalVsSystemic}
+                options={topicalVsSystemicOptions}
+                descriptions={topicalVsSystemicDescriptions}
+                impactBadges={topicalVsSystemicBadges}
+                value={topicalVsSystemic}
+                onChange={onTopicalVsSystemicChange}
+                columns={3}
+              />
+            </>
+          )}
+
+          {therapeuticArea === 'gastroenterology' && (
+            <>
+              <OptionCardGroup
+                id="biologic-experience-select"
+                label="Biologic Experience"
+                helpText={sectionHelp.biologicExperience}
+                options={biologicExperienceOptions}
+                descriptions={biologicExperienceDescriptions}
+                impactBadges={biologicExperienceBadges}
+                value={biologicExperience}
+                onChange={onBiologicExperienceChange}
+                columns={3}
+              />
+              <OptionCardGroup
+                id="endoscopic-endpoint-select"
+                label="Endoscopic Endpoint"
+                helpText={sectionHelp.endoscopicEndpoint}
+                options={endoscopicEndpointOptions}
+                descriptions={endoscopicEndpointDescriptions}
+                impactBadges={endoscopicEndpointBadges}
+                value={endoscopicEndpoint}
+                onChange={onEndoscopicEndpointChange}
+                columns={3}
               />
             </>
           )}

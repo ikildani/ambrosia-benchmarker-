@@ -187,7 +187,7 @@ Each appears with a 0.5s stagger.
 
 [5-15s] STEP 1
 "Step one: Go to calculator.ambrosiaventures.co and click 'Try Calculator Free.'"
-**SCREEN:** Show the landing page hero section. The hero has a gradient background (from white via slate-50/50 to teal-50/30) with animated teal/cyan blurred circles in the background. The headline "Deal Terms Calculator" is in large bold text with "Calculator" in teal-to-cyan gradient. Below: the subheadline mentioning 600+ deals and 8 therapeutic areas. Two CTA buttons are visible: "Try Calculator Free" (teal-to-cyan gradient background, white text, shadow-glow) and "See How It Works" (white/outline). Four feature pills sit below the buttons showing "600+ Deals", "8 TAs", "120+ Profiles", "Bank-Grade Security" with small icons. Move cursor to "Try Calculator Free" and click. Use a yellow circle highlight or cursor emphasis effect on the button.
+**SCREEN:** Show the landing page hero section. The hero has a gradient background (from white via slate-50/50 to teal-50/30) with animated teal/cyan blurred circles in the background. The headline "Deal Terms Calculator" is in large bold text with "Calculator" in teal-to-cyan gradient. Below: the subheadline mentioning 600+ deals and 12 therapeutic areas. Two CTA buttons are visible: "Try Calculator Free" (teal-to-cyan gradient background, white text, shadow-glow) and "See How It Works" (white/outline). Four feature pills sit below the buttons showing "600+ Deals", "12 TAs", "120+ Profiles", "Bank-Grade Security" with small icons. Move cursor to "Try Calculator Free" and click. Use a yellow circle highlight or cursor emphasis effect on the button.
 
 [15-25s] STEP 2
 "Step two: Select your therapeutic area and modality. Let's say Oncology, ADC."

@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: "What therapeutic areas are covered?",
-    answer: `We cover 8 therapeutic areas: oncology, neurology/CNS, immunology/autoimmune, metabolic/obesity, rare disease, cardiovascular, infectious disease, and ophthalmology. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, GLP-1 analogs, and more.`
+    answer: `We cover 12 therapeutic areas: oncology, neurology/CNS, immunology/autoimmune, metabolic/obesity, rare disease, cardiovascular, infectious disease, ophthalmology, women's health, dermatology, pulmonology, and gastroenterology. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, GLP-1 analogs, and more.`
   },
   {
     question: "Is my data kept confidential?",

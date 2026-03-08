@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
-    description: 'Calculate upfront payments, milestones, and royalties with rNPV analysis and Monte Carlo simulation. 600+ real biopharma transactions, 8 therapeutic areas.',
+    description: 'Calculate upfront payments, milestones, and royalties with rNPV analysis and Monte Carlo simulation. 600+ real biopharma transactions, 12 therapeutic areas.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/calculator',
     images: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
-    description: 'rNPV analysis, Monte Carlo simulation, and AI deal intelligence from 600+ real transactions. 8 therapeutic areas.',
+    description: 'rNPV analysis, Monte Carlo simulation, and AI deal intelligence from 600+ real transactions. 12 therapeutic areas.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/calculator',

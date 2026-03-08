@@ -41,6 +41,18 @@ import type {
   WHTargetPopulation,
   WHUnmetNeed,
   WHRegulatory,
+  OrphanDesignation,
+  PatientPopulationSize,
+  GeneticBasis,
+  HemeLineage,
+  TransplantEligibility,
+  MRDStatus,
+  SkinSeverity,
+  ChronicityProfile,
+  TopicalVsSystemic,
+  GISegment,
+  BiologicExperience,
+  EndoscopicEndpoint,
 } from '@/lib/calculations';
 import { calculateDealTerms } from '@/lib/calculations';
 import { BENCHMARK_VERSION } from '@/lib/config/constants';
@@ -269,17 +281,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       if (urlIndication) patch.indication = urlIndication as Indication;
       actions.bulkSet(patch);
 
-      const input: CalculationInput = {
-        therapeuticArea: state.therapeuticArea,
-        phase: (urlPhase as Phase) || state.phase,
-        modality: (urlModality as Modality) || state.modality,
-        indication: (urlIndication as Indication) || state.indication,
-        territory: state.territory, biomarker: state.biomarker,
-        lineOfTherapy: state.lineOfTherapy, treatmentApproach: state.treatmentApproach,
-        combinationPotential: state.combinationPotential, competitivePosition: state.competitivePosition,
-        dataQuality: state.dataQuality, regulatoryDesignations: state.regulatoryDesignations,
+      const patchedState = {
+        ...state,
+        ...(urlPhase ? { phase: urlPhase as Phase } : {}),
+        ...(urlModality ? { modality: urlModality as Modality } : {}),
+        ...(urlIndication ? { indication: urlIndication as Indication } : {}),
       };
-      calc.setResult(calculateDealTerms(input));
+      calc.setResult(calculateDealTerms(buildCalculationInput(patchedState)));
       return;
     }
 
@@ -387,7 +395,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold font-display text-white truncate">
-                  {state.therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : state.therapeuticArea === 'neurology' ? 'Neurology / CNS' : state.therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : 'Oncology'} Deal Terms Calculator
+                  {state.therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : state.therapeuticArea === 'neurology' ? 'Neurology / CNS' : state.therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : state.therapeuticArea === 'rareDisease' ? 'Rare Disease' : state.therapeuticArea === 'hematology' ? 'Hematology' : state.therapeuticArea === 'dermatology' ? 'Dermatology' : state.therapeuticArea === 'gastroenterology' ? 'Gastroenterology / IBD' : 'Oncology'} Deal Terms Calculator
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
                   {BENCHMARK_VERSION.LABEL}
@@ -501,6 +509,34 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   onWhTargetPopulationChange: (newValue: WHTargetPopulation) => { trackParameterChange('whTargetPopulation', state.whTargetPopulation, newValue); actions.setWhTargetPopulation(newValue); },
                   onWhUnmetNeedChange: (newValue: WHUnmetNeed) => { trackParameterChange('whUnmetNeed', state.whUnmetNeed, newValue); actions.setWhUnmetNeed(newValue); },
                   onWhRegulatoryChange: (newValue: WHRegulatory) => { trackParameterChange('whRegulatory', state.whRegulatory, newValue); actions.setWhRegulatory(newValue); },
+                  // Rare Disease
+                  orphanDesignation: state.orphanDesignation,
+                  patientPopulationSize: state.patientPopulationSize,
+                  geneticBasis: state.geneticBasis,
+                  onOrphanDesignationChange: (newValue: OrphanDesignation) => { trackParameterChange('orphanDesignation', state.orphanDesignation, newValue); actions.setOrphanDesignation(newValue); },
+                  onPatientPopulationSizeChange: (newValue: PatientPopulationSize) => { trackParameterChange('patientPopulationSize', state.patientPopulationSize, newValue); actions.setPatientPopulationSize(newValue); },
+                  onGeneticBasisChange: (newValue: GeneticBasis) => { trackParameterChange('geneticBasis', state.geneticBasis, newValue); actions.setGeneticBasis(newValue); },
+                  // Hematology
+                  hemeLineage: state.hemeLineage,
+                  transplantEligibility: state.transplantEligibility,
+                  mrdStatus: state.mrdStatus,
+                  onHemeLineageChange: (newValue: HemeLineage) => { trackParameterChange('hemeLineage', state.hemeLineage, newValue); actions.setHemeLineage(newValue); },
+                  onTransplantEligibilityChange: (newValue: TransplantEligibility) => { trackParameterChange('transplantEligibility', state.transplantEligibility, newValue); actions.setTransplantEligibility(newValue); },
+                  onMrdStatusChange: (newValue: MRDStatus) => { trackParameterChange('mrdStatus', state.mrdStatus, newValue); actions.setMrdStatus(newValue); },
+                  // Dermatology
+                  skinSeverity: state.skinSeverity,
+                  chronicityProfile: state.chronicityProfile,
+                  topicalVsSystemic: state.topicalVsSystemic,
+                  onSkinSeverityChange: (newValue: SkinSeverity) => { trackParameterChange('skinSeverity', state.skinSeverity, newValue); actions.setSkinSeverity(newValue); },
+                  onChronicityProfileChange: (newValue: ChronicityProfile) => { trackParameterChange('chronicityProfile', state.chronicityProfile, newValue); actions.setChronicityProfile(newValue); },
+                  onTopicalVsSystemicChange: (newValue: TopicalVsSystemic) => { trackParameterChange('topicalVsSystemic', state.topicalVsSystemic, newValue); actions.setTopicalVsSystemic(newValue); },
+                  // Gastroenterology
+                  giSegment: state.giSegment,
+                  biologicExperience: state.biologicExperience,
+                  endoscopicEndpoint: state.endoscopicEndpoint,
+                  onGiSegmentChange: (newValue: GISegment) => { trackParameterChange('giSegment', state.giSegment, newValue); actions.setGiSegment(newValue); },
+                  onBiologicExperienceChange: (newValue: BiologicExperience) => { trackParameterChange('biologicExperience', state.biologicExperience, newValue); actions.setBiologicExperience(newValue); },
+                  onEndoscopicEndpointChange: (newValue: EndoscopicEndpoint) => { trackParameterChange('endoscopicEndpoint', state.endoscopicEndpoint, newValue); actions.setEndoscopicEndpoint(newValue); },
                 } as const;
 
                 // Determine which fields are visible on this step for filtering warnings

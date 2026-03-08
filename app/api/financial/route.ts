@@ -18,6 +18,10 @@ const VALID_THERAPEUTIC_AREAS = [
   'infectiousDisease',
   'ophthalmology',
   'womensHealth',
+  'rareDisease',
+  'hematology',
+  'dermatology',
+  'gastroenterology',
 ];
 
 /**

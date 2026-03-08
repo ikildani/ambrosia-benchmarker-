@@ -62,7 +62,7 @@ export interface CalibrationDeal {
  * - Deal value >= $50M total
  * - Publicly disclosed upfront and total deal value
  * - Signed between 2018-2025
- * - Covers all 8 therapeutic areas in the model
+ * - Covers all 12 therapeutic areas in the model
  * - Mix of early-stage (preclinical/Phase 1) and late-stage (Phase 2/3/approved)
  */
 export const CALIBRATION_DEALS: CalibrationDeal[] = [

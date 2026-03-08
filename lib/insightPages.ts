@@ -57,6 +57,55 @@ function buildInsights(): InsightPageData[] {
   // Preclinical
   const preclinical = calculateDealTerms(makeInput({ phase: 'preclinical' as Phase }));
 
+  // Rare Disease — orphan gene therapy
+  const rareGeneP2 = calculateDealTerms(makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'geneTherapyRare' as Modality,
+    phase: 'phase2' as Phase,
+    indication: 'spinalMuscularAtrophy' as Indication,
+    regulatoryDesignations: { breakthrough: true, fastTrack: true, orphan: true, prime: false },
+  }));
+  const rareErtP2 = calculateDealTerms(makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'enzymeReplacement' as Modality,
+    phase: 'phase2' as Phase,
+    indication: 'fabryDisease' as Indication,
+    regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: true, prime: false },
+  }));
+  const rareOrphanPremium = Math.round(
+    ((rareGeneP2.terms.totalDealValue.median - smP2.terms.totalDealValue.median) / smP2.terms.totalDealValue.median) * 100
+  );
+
+  // Hematology — CAR-T
+  const hemeCartP1 = calculateDealTerms(makeInput({
+    therapeuticArea: 'hematology',
+    modality: 'carT_heme' as Modality,
+    phase: 'phase1' as Phase,
+    indication: 'dlbcl' as Indication,
+  }));
+
+  // Dermatology — biosimilar impact (compare IL-13 vs small molecule)
+  const dermIl13P2 = calculateDealTerms(makeInput({
+    therapeuticArea: 'dermatology',
+    modality: 'il13Inhibitor' as Modality,
+    phase: 'phase2' as Phase,
+    indication: 'atopicDermatitis' as Indication,
+  }));
+
+  // Gastroenterology — anti-TL1A
+  const giTl1aP2 = calculateDealTerms(makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'antiTl1a' as Modality,
+    phase: 'phase2' as Phase,
+    indication: 'crohnsDisease' as Indication,
+  }));
+  const giIl23P2 = calculateDealTerms(makeInput({
+    therapeuticArea: 'gastroenterology',
+    modality: 'il23GI' as Modality,
+    phase: 'phase2' as Phase,
+    indication: 'ulcerativeColitis' as Indication,
+  }));
+
   const radioPremium = Math.round(
     ((radioP2.terms.upfront.median - smP2.terms.upfront.median) / smP2.terms.upfront.median) * 100
   );
@@ -130,6 +179,46 @@ function buildInsights(): InsightPageData[] {
       context: `Preclinical licensing deals demonstrate that innovative science commands value even before clinical validation. Platform technologies, novel mechanisms, and hot therapeutic areas drive competitive dynamics that push preclinical deal terms well above historical norms. Total deal values can reach ${formatCurrency(preclinical.terms.totalDealValue.median)}.`,
       source: 'Based on analysis of 600+ biopharma licensing deals from 2020-2026',
       calculatorPrefill: { phase: 'preclinical' },
+      relatedInsights: [],
+    },
+    {
+      slug: 'rare-disease-orphan-drug-premium-2026',
+      stat: `${rareOrphanPremium}%`,
+      title: 'Orphan-designated rare disease assets command this deal premium',
+      metaDescription: `Rare disease assets with orphan drug designation command a ${rareOrphanPremium}% premium in total deal value over standard small molecules, driven by market exclusivity and premium pricing power.`,
+      context: `Orphan drug designation transforms rare disease deal economics. Gene therapy deals for orphan indications reach ${formatCurrency(rareGeneP2.terms.totalDealValue.median)} total value at Phase 2, while ERTs average ${formatCurrency(rareErtP2.terms.totalDealValue.median)}. The 7-year US market exclusivity, accelerated regulatory pathways, and $200K-$3.5M per-patient pricing create a unique commercial profile that drives premium licensing terms across all modalities.`,
+      source: 'Based on analysis of 600+ biopharma licensing deals from 2020-2026',
+      calculatorPrefill: { phase: 'phase2', modality: 'geneTherapyRare' },
+      relatedInsights: [],
+    },
+    {
+      slug: 'hematology-car-t-deal-value-2026',
+      stat: formatCurrency(hemeCartP1.terms.totalDealValue.median),
+      title: 'Hematology CAR-T deals reach this total value at Phase 1',
+      metaDescription: `Hematology CAR-T cell therapy deals reach ${formatCurrency(hemeCartP1.terms.totalDealValue.median)} total deal value at Phase 1, reflecting validated clinical proof of concept in DLBCL, myeloma, and ALL.`,
+      context: `CAR-T cell therapy in hematologic malignancies commands premium deal terms even at Phase 1, with ${formatCurrency(hemeCartP1.terms.upfront.median)} median upfronts. Six approved CAR-T products generating $5B+ combined annual revenue have validated the modality. Next-generation targets (GPRC5D, CD70), allogeneic platforms, and in-vivo CAR-T approaches are driving the next wave of high-value licensing deals.`,
+      source: 'Based on analysis of 600+ biopharma licensing deals from 2020-2026',
+      calculatorPrefill: { phase: 'phase1', modality: 'carT_heme' },
+      relatedInsights: [],
+    },
+    {
+      slug: 'dermatology-biosimilar-impact-2026',
+      stat: formatCurrency(dermIl13P2.terms.totalDealValue.median),
+      title: 'Next-gen IL-13 dermatology assets command this deal value',
+      metaDescription: `Next-generation IL-13 inhibitors for atopic dermatitis reach ${formatCurrency(dermIl13P2.terms.totalDealValue.median)} total deal value at Phase 2, as biosimilar competition drives demand for differentiated dermatology assets.`,
+      context: `The approaching biosimilar competition for first-generation dermatology biologics (adalimumab biosimilars already launched, dupilumab patent cliff approaching) is reshaping the dermatology deal landscape. Next-generation IL-13 and IL-4Ra inhibitors with improved dosing convenience, better efficacy, or expanded indication packages are commanding premium deal terms. Phase 2 IL-13 deals for AD average ${formatCurrency(dermIl13P2.terms.totalDealValue.median)} total value, as licensees seek differentiated assets to defend against biosimilar erosion.`,
+      source: 'Based on analysis of 600+ biopharma licensing deals from 2020-2026',
+      calculatorPrefill: { phase: 'phase2', modality: 'il13Inhibitor' },
+      relatedInsights: [],
+    },
+    {
+      slug: 'gastroenterology-anti-tl1a-pipeline-2026',
+      stat: formatCurrency(giTl1aP2.terms.totalDealValue.median),
+      title: 'Anti-TL1A deals reach this value after Merck/Prometheus validation',
+      metaDescription: `Anti-TL1A licensing deals reach ${formatCurrency(giTl1aP2.terms.totalDealValue.median)} total deal value at Phase 2, following the $10.8B Merck/Prometheus Biosciences acquisition that validated TL1A as a breakthrough GI target.`,
+      context: `TL1A has become the hottest target in gastroenterology since Merck acquired Prometheus Biosciences for $10.8B. The dual anti-inflammatory and anti-fibrotic mechanism addresses critical unmet need in Crohn's disease. Phase 2 anti-TL1A deals average ${formatCurrency(giTl1aP2.terms.totalDealValue.median)} total value, while IL-23 GI deals reach ${formatCurrency(giIl23P2.terms.totalDealValue.median)}. The competitive landscape now includes 10+ clinical-stage TL1A programs from Roche, Pfizer, AbbVie, and Sanofi.`,
+      source: 'Based on analysis of 600+ biopharma licensing deals from 2020-2026',
+      calculatorPrefill: { phase: 'phase2', modality: 'antiTl1a' },
       relatedInsights: [],
     },
   ];

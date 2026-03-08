@@ -10,7 +10,7 @@ And after all that, they still walk into the room unsure if their terms are mark
 
 We built something different.
 
-Ambrosia Ventures analyzes 600+ real biopharma licensing transactions across 8 therapeutic areas. In under 30 seconds, you get:
+Ambrosia Ventures analyzes 600+ real biopharma licensing transactions across 12 therapeutic areas. In under 30 seconds, you get:
 
 - Upfront payment benchmarks (25th-75th percentile)
 - Milestone structures (development, regulatory, commercial)
@@ -86,7 +86,7 @@ Free to start: calculator.ambrosiaventures.co
 New on Ambrosia Ventures: Market Pulse
 
 Every week, we track:
-- Deal activity across 8 therapeutic areas
+- Deal activity across 12 therapeutic areas
 - Modality-level trends (which modalities are hot)
 - Benchmark shifts in upfronts, milestones, and royalties
 - Clinical trial intelligence that impacts deal valuations
@@ -154,7 +154,7 @@ For M&A Advisors:
 - Building client presentations with branded PDF/Excel exports
 - Modeling scenarios across modalities and phases
 
-8 therapeutic areas. 15+ modalities. 600+ real transactions.
+12 therapeutic areas. 15+ modalities. 600+ real transactions.
 
 Free to start: calculator.ambrosiaventures.co
 
@@ -209,7 +209,7 @@ Here's how:
 3. ClinicalTrials.gov integration — We cross-reference company pipelines with active trials
 4. Human validation — Edge cases get manual review
 
-The result: 600+ deals across 8 therapeutic areas, 15+ modalities, continuously updated.
+The result: 600+ deals across 12 therapeutic areas, 15+ modalities, continuously updated.
 
 No stale data. No paywalled databases. No $50K/year subscriptions.
 

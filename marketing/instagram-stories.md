@@ -278,10 +278,10 @@ Size: 1080x1080px. Icon should be ~40% of the circle diameter, centered. Use 3px
 **SCREEN:** Navy background. "Information Asymmetry" in large white bold text. Below: "= leaving money on the table" with a red-to-orange gradient on "money on the table."
 
 [25-40s] "We built a tool that gives you the same deal intelligence as big pharma BD teams."
-**SCREEN:** Quick screen recording montage (1-2 seconds each cut): (1) The 8 therapeutic area selector buttons in their colors, (2) The 4 result cards with gradient numbers, (3) The comparable deals table with data rows, (4) The Monte Carlo chart with teal histogram bars. Each clip cuts sharply on the beat.
+**SCREEN:** Quick screen recording montage (1-2 seconds each cut): (1) The 12 therapeutic area selector buttons in their colors, (2) The 4 result cards with gradient numbers, (3) The comparable deals table with data rows, (4) The Monte Carlo chart with teal histogram bars. Each clip cuts sharply on the beat.
 
-[40-50s] "600+ real deals. 8 therapeutic areas. Free to start."
-**SCREEN:** Three stat cards sliding in from the bottom, one after another: "600+" (teal), "8 TAs" (cyan), "Free" (white on teal gradient bg). Then the Ambrosia logo fades in above.
+[40-50s] "600+ real deals. 12 therapeutic areas. Free to start."
+**SCREEN:** Three stat cards sliding in from the bottom, one after another: "600+" (teal), "12 TAs" (cyan), "Free" (white on teal gradient bg). Then the Ambrosia logo fades in above.
 
 [50-60s] "Link in bio."
 **SCREEN:** Navy end card. Logo + URL + "Link in bio" in teal.

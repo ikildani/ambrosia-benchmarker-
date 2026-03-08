@@ -4,7 +4,7 @@ import { getBenchmarksSync } from '@/lib/benchmarks';
 const benchmarks = getBenchmarksSync();
 
 // Therapeutic area type
-export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth';
+export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'rareDisease' | 'hematology' | 'dermatology' | 'gastroenterology';
 
 // Phase types
 export type Phase = 'discovery' | 'preclinical' | 'phase1' | 'phase1_2' | 'phase2' | 'phase2_3' | 'phase3' | 'nda_filed' | 'approved';
@@ -35,7 +35,15 @@ export type Modality =
   // Ophthalmology-specific modalities
   | 'antiVegf' | 'geneTherapyOcular' | 'intravitreal' | 'topicalOphthalmic'
   // Women's Health-specific modalities
-  | 'gnrhAntagonist' | 'hormoneTherapy' | 'neuroactiveSteroid';
+  | 'gnrhAntagonist' | 'hormoneTherapy' | 'neuroactiveSteroid'
+  // Rare Disease-specific modalities
+  | 'enzymeReplacement' | 'substrateReduction' | 'geneTherapyRare'
+  // Hematology-specific modalities
+  | 'bispecificHeme' | 'btki'
+  // Dermatology-specific modalities
+  | 'il17Inhibitor' | 'il13Inhibitor' | 'jakInhibitorDerm' | 'topicalBiologic'
+  // Gastroenterology-specific modalities
+  | 'antiTl1a' | 'il23GI' | 'gutSelectiveIntegrin';
 
 // Indication types
 export type SolidTumorIndication =
@@ -131,7 +139,15 @@ export type WomensHealthIndication =
   | 'fertilityArt' | 'vulvodynia' | 'cervicalDysplasia'
   | 'contraceptionNovel' | 'breastCancerPrevention';
 
-export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication | CardiovascularIndication | InfectiousDiseaseIndication | OphthalmologyIndication | WomensHealthIndication;
+export type RareDiseaseIndication = 'spinalMuscularAtrophy' | 'duchenneMD' | 'cysticFibrosis' | 'fabryDisease' | 'gaucherDisease' | 'pompeDisease' | 'huntingtonDisease' | 'pku' | 'hemophiliaA' | 'hemophiliaB' | 'sickleCell' | 'betaThalassemia' | 'rareNeuro' | 'angelman';
+
+export type HematologyIndication = 'dlbcl' | 'follicularLymphoma' | 'mantleCellLymphoma' | 'cll' | 'myeloma' | 'aml' | 'mds' | 'all' | 'hodgkinLymphoma' | 'waldenstroms' | 'polycythemiaVera' | 'myelofibrosis' | 'itp' | 'ttp' | 'aplasticAnemia';
+
+export type DermatologyIndication = 'atopicDermatitis' | 'psoriasis' | 'psoriaticArthritis' | 'hidradenitisSuppurativa' | 'vitiligo' | 'alopeciaAreata' | 'chronicUrticaria' | 'prurigo' | 'contactDermatitis' | 'acne' | 'rosacea' | 'pemphigus';
+
+export type GastroenterologyIndication = 'crohnsDisease' | 'ulcerativeColitis' | 'eosinophilicEsophagitis' | 'celiacDisease' | 'ibsD' | 'ibsC' | 'refractoryGerd' | 'shortBowelSyndrome' | 'primaryBiliaryCholangitis' | 'cdi' | 'giGvhd' | 'pouchitis';
+
+export type Indication = SolidTumorIndication | HematologicIndication | NeurologyIndication | ImmunologyIndication | MetabolicIndication | CardiovascularIndication | InfectiousDiseaseIndication | OphthalmologyIndication | WomensHealthIndication | RareDiseaseIndication | HematologyIndication | DermatologyIndication | GastroenterologyIndication;
 
 // Territory types (15 options)
 export type Territory =
@@ -184,6 +200,26 @@ export type VisionImpact = 'visionThreatening' | 'visionImpairing' | 'symptomRel
 export type WHTargetPopulation = 'reproductiveAge' | 'perimenopause' | 'postmenopause' | 'pregnancy';
 export type WHUnmetNeed = 'noApprovedTherapy' | 'inadequateOptions' | 'wellServed';
 export type WHRegulatory = 'acceleratedPathway' | 'standardPathway' | 'pregnancyComplexity';
+
+// Rare Disease-specific types
+export type OrphanDesignation = 'fda_orphan' | 'ema_orphan' | 'both_orphan' | 'none';
+export type PatientPopulationSize = 'ultraRare_sub1k' | 'rare_1k_10k' | 'rare_10k_50k' | 'broader_50k_200k';
+export type GeneticBasis = 'monogenic_validated' | 'polygenic' | 'unknown_genetic' | 'non_genetic';
+
+// Hematology-specific types
+export type HemeLineage = 'lymphoid' | 'myeloid' | 'mixed_lineage' | 'non_malignant';
+export type TransplantEligibility = 'transplant_eligible' | 'transplant_ineligible' | 'post_transplant';
+export type MRDStatus = 'mrd_endpoint' | 'standard_response' | 'survival_endpoint';
+
+// Dermatology-specific types
+export type SkinSeverity = 'mild' | 'moderate' | 'severe' | 'refractory_derm';
+export type ChronicityProfile = 'chronic_relapsing' | 'chronic_continuous' | 'acute_flares';
+export type TopicalVsSystemic = 'topical_only' | 'systemic_only' | 'topical_and_systemic';
+
+// Gastroenterology-specific types
+export type GISegment = 'upper_gi' | 'small_bowel' | 'colonic' | 'pancolonic';
+export type BiologicExperience = 'biologic_naive' | 'one_prior_biologic' | 'multi_biologic_exposed';
+export type EndoscopicEndpoint = 'endoscopic_remission' | 'endoscopic_improvement' | 'clinical_only';
 
 export interface RegulatoryDesignations {
   breakthrough: boolean;
@@ -258,6 +294,22 @@ export interface CalculationInput {
   whTargetPopulation?: WHTargetPopulation;
   whUnmetNeed?: WHUnmetNeed;
   whRegulatory?: WHRegulatory;
+  // Rare Disease-specific optional fields
+  orphanDesignation?: OrphanDesignation;
+  patientPopulationSize?: PatientPopulationSize;
+  geneticBasis?: GeneticBasis;
+  // Hematology-specific optional fields
+  hemeLineage?: HemeLineage;
+  transplantEligibility?: TransplantEligibility;
+  mrdStatus?: MRDStatus;
+  // Dermatology-specific optional fields
+  skinSeverity?: SkinSeverity;
+  chronicityProfile?: ChronicityProfile;
+  topicalVsSystemic?: TopicalVsSystemic;
+  // Gastroenterology-specific optional fields
+  giSegment?: GISegment;
+  biologicExperience?: BiologicExperience;
+  endoscopicEndpoint?: EndoscopicEndpoint;
 }
 
 // Drill-down data for expanded metric views
@@ -324,7 +376,7 @@ export interface CalculationResult {
 }
 
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' {
+function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'rareDisease' | 'hematology' | 'dermatology' | 'gastroenterology' {
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
@@ -419,6 +471,14 @@ function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematolo
   if (infectiousDiseaseIndications.includes(indication as InfectiousDiseaseIndication)) return 'infectiousDisease';
   if (ophthalmologyIndications.includes(indication as OphthalmologyIndication)) return 'ophthalmology';
   if (womensHealthIndications.includes(indication as WomensHealthIndication)) return 'womensHealth';
+  const rareDiseaseIndications: RareDiseaseIndication[] = ['spinalMuscularAtrophy', 'duchenneMD', 'cysticFibrosis', 'fabryDisease', 'gaucherDisease', 'pompeDisease', 'huntingtonDisease', 'pku', 'hemophiliaA', 'hemophiliaB', 'sickleCell', 'betaThalassemia', 'rareNeuro', 'angelman'];
+  if ((rareDiseaseIndications as string[]).includes(indication)) return 'rareDisease';
+  const hematologyIndications: HematologyIndication[] = ['dlbcl', 'follicularLymphoma', 'mantleCellLymphoma', 'cll', 'myeloma', 'aml', 'mds', 'all', 'hodgkinLymphoma', 'waldenstroms', 'polycythemiaVera', 'myelofibrosis', 'itp', 'ttp', 'aplasticAnemia'];
+  if ((hematologyIndications as string[]).includes(indication)) return 'hematology';
+  const dermatologyIndications: DermatologyIndication[] = ['atopicDermatitis', 'psoriasis', 'psoriaticArthritis', 'hidradenitisSuppurativa', 'vitiligo', 'alopeciaAreata', 'chronicUrticaria', 'prurigo', 'contactDermatitis', 'acne', 'rosacea', 'pemphigus'];
+  if ((dermatologyIndications as string[]).includes(indication)) return 'dermatology';
+  const gastroenterologyIndications: GastroenterologyIndication[] = ['crohnsDisease', 'ulcerativeColitis', 'eosinophilicEsophagitis', 'celiacDisease', 'ibsD', 'ibsC', 'refractoryGerd', 'shortBowelSyndrome', 'primaryBiliaryCholangitis', 'cdi', 'giGvhd', 'pouchitis'];
+  if ((gastroenterologyIndications as string[]).includes(indication)) return 'gastroenterology';
   return 'hematologic';
 }
 
@@ -526,6 +586,47 @@ function getTherapeuticAreaRiskAdjustment(input: CalculationInput): number {
     else if (input.whRegulatory === 'acceleratedPathway') adj -= 4;
     if (input.whUnmetNeed === 'noApprovedTherapy') adj -= 5; // breakthrough potential
     else if (input.whUnmetNeed === 'wellServed') adj += 3;
+  } else if (ta === 'rareDisease') {
+    // Orphan designation premium
+    if (input.orphanDesignation === 'both_orphan') adj -= 5;
+    else if (input.orphanDesignation === 'fda_orphan' || input.orphanDesignation === 'ema_orphan') adj -= 3;
+    // Ultra-rare commands higher value but higher risk
+    if (input.patientPopulationSize === 'ultraRare_sub1k') adj += 8;
+    else if (input.patientPopulationSize === 'rare_1k_10k') adj += 4;
+    // Gene therapy one-time cures carry manufacturing/durability risk
+    if (input.modality === 'geneTherapyRare' || input.modality === 'geneTherapy') adj += 6;
+    // Validated genetic target de-risks
+    if (input.geneticBasis === 'monogenic_validated') adj -= 5;
+  } else if (ta === 'hematology') {
+    // CAR-T/bispecific complexity
+    if (input.modality === 'carT_heme' || input.modality === 'carT_solid') adj += 6;
+    if (input.modality === 'bispecificHeme' || input.modality === 'bispecific') adj += 3;
+    // MRD endpoints are newer, less validated
+    if (input.mrdStatus === 'mrd_endpoint') adj += 4;
+    // Transplant-ineligible = larger population, competitive
+    if (input.transplantEligibility === 'transplant_ineligible') adj -= 2;
+    // Myeloid malignancies harder to treat
+    if (input.hemeLineage === 'myeloid') adj += 5;
+  } else if (ta === 'dermatology') {
+    // Severe/refractory = higher unmet need
+    if (input.skinSeverity === 'severe' || input.skinSeverity === 'refractory_derm') adj -= 3;
+    // Chronic relapsing = sustained revenue
+    if (input.chronicityProfile === 'chronic_relapsing') adj -= 2;
+    // Topical-only = lower development cost/risk
+    if (input.topicalVsSystemic === 'topical_only') adj -= 4;
+    else if (input.topicalVsSystemic === 'systemic_only') adj += 3;
+    // JAK inhibitor safety concerns
+    if (input.modality === 'jakInhibitorDerm') adj += 4;
+  } else if (ta === 'gastroenterology') {
+    // Endoscopic remission endpoints = gold standard
+    if (input.endoscopicEndpoint === 'endoscopic_remission') adj -= 3;
+    // Biologic-experienced patients = harder to treat
+    if (input.biologicExperience === 'multi_biologic_exposed') adj += 5;
+    else if (input.biologicExperience === 'biologic_naive') adj -= 2;
+    // Novel mechanisms (anti-TL1A) = premium but risk
+    if (input.modality === 'antiTl1a') adj += 4;
+    // S1P modulators = oral convenience but safety monitoring
+    if (input.modality === 's1pModulator') adj += 2;
   }
 
   return adj;
@@ -537,6 +638,58 @@ function getNegotiationInsight(input: CalculationInput): string {
   const isNeurology = input.therapeuticArea === 'neurology';
   const isImmunology = input.therapeuticArea === 'immunology';
   const isMetabolic = input.therapeuticArea === 'metabolic';
+  const isRareDisease = input.therapeuticArea === 'rareDisease';
+  const isHematology = input.therapeuticArea === 'hematology';
+  const isDermatology = input.therapeuticArea === 'dermatology';
+  const isGastroenterology = input.therapeuticArea === 'gastroenterology';
+
+  // For rare disease, check TA-specific insights first
+  if (isRareDisease) {
+    const rdModalityInsights = (insights as Record<string, Record<string, string>>).rareDiseaseModality;
+    if (rdModalityInsights?.[input.modality]) {
+      return rdModalityInsights[input.modality];
+    }
+    const rdIndicationInsights = (insights as Record<string, Record<string, string>>).rareDiseaseIndication;
+    if (rdIndicationInsights?.[input.indication]) {
+      return rdIndicationInsights[input.indication];
+    }
+  }
+
+  // For hematology, check TA-specific insights first
+  if (isHematology) {
+    const hemeModalityInsights = (insights as Record<string, Record<string, string>>).hematologyModality;
+    if (hemeModalityInsights?.[input.modality]) {
+      return hemeModalityInsights[input.modality];
+    }
+    const hemeIndicationInsights = (insights as Record<string, Record<string, string>>).hematologyIndication;
+    if (hemeIndicationInsights?.[input.indication]) {
+      return hemeIndicationInsights[input.indication];
+    }
+  }
+
+  // For dermatology, check TA-specific insights first
+  if (isDermatology) {
+    const dermModalityInsights = (insights as Record<string, Record<string, string>>).dermatologyModality;
+    if (dermModalityInsights?.[input.modality]) {
+      return dermModalityInsights[input.modality];
+    }
+    const dermIndicationInsights = (insights as Record<string, Record<string, string>>).dermatologyIndication;
+    if (dermIndicationInsights?.[input.indication]) {
+      return dermIndicationInsights[input.indication];
+    }
+  }
+
+  // For gastroenterology, check TA-specific insights first
+  if (isGastroenterology) {
+    const giModalityInsights = (insights as Record<string, Record<string, string>>).gastroenterologyModality;
+    if (giModalityInsights?.[input.modality]) {
+      return giModalityInsights[input.modality];
+    }
+    const giIndicationInsights = (insights as Record<string, Record<string, string>>).gastroenterologyIndication;
+    if (giIndicationInsights?.[input.indication]) {
+      return giIndicationInsights[input.indication];
+    }
+  }
 
   // For metabolic, check metabolic-specific insights first
   if (isMetabolic) {
@@ -604,7 +757,7 @@ function getNegotiationInsight(input: CalculationInput): string {
 
   // Line of therapy insights (oncology only)
   const lotInsights = insights.lineOfTherapy as Record<string, string>;
-  if (!isNeurology && !isImmunology && !isMetabolic && lotInsights[input.lineOfTherapy]) {
+  if (!isNeurology && !isImmunology && !isMetabolic && !isRareDisease && !isHematology && !isDermatology && !isGastroenterology && lotInsights[input.lineOfTherapy]) {
     return lotInsights[input.lineOfTherapy];
   }
 
@@ -665,6 +818,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const isInfectiousDisease = input.therapeuticArea === 'infectiousDisease';
   const isOphthalmology = input.therapeuticArea === 'ophthalmology';
   const isWomensHealth = input.therapeuticArea === 'womensHealth';
+  const isRareDisease = input.therapeuticArea === 'rareDisease';
+  const isHematology = input.therapeuticArea === 'hematology';
+  const isDermatology = input.therapeuticArea === 'dermatology';
+  const isGastroenterology = input.therapeuticArea === 'gastroenterology';
 
   // Get phase baselines per therapeutic area
   const phaseBaselineMap: Record<string, any> = {
@@ -676,6 +833,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     infectiousDisease: benchmarks.infectiousDiseasePhaseBaselines,
     ophthalmology: benchmarks.ophthalmologyPhaseBaselines,
     womensHealth: benchmarks.womensHealthPhaseBaselines,
+    rareDisease: benchmarks.rareDiseasePhaseBaselines,
+    hematology: benchmarks.hematologyPhaseBaselines,
+    dermatology: benchmarks.dermatologyPhaseBaselines,
+    gastroenterology: benchmarks.gastroenterologyPhaseBaselines,
   };
   const phaseBaseline = (phaseBaselineMap[input.therapeuticArea] || benchmarks.phaseBaselines)[input.phase];
 
@@ -687,6 +848,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     infectiousDisease: benchmarks.infectiousDiseasePhaseConfig,
     ophthalmology: benchmarks.ophthalmologyPhaseConfig,
     womensHealth: benchmarks.womensHealthPhaseConfig,
+    rareDisease: benchmarks.rareDiseasePhaseConfig,
+    hematology: benchmarks.hematologyPhaseConfig,
+    dermatology: benchmarks.dermatologyPhaseConfig,
+    gastroenterology: benchmarks.gastroenterologyPhaseConfig,
   };
   const phaseConfig = phaseConfigMap[input.therapeuticArea] || benchmarks.phaseConfig;
 
@@ -1581,7 +1746,7 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     }
   }
 
-  // Generic fallback (should not reach here with all 8 TAs covered)
+  // Generic fallback (should not reach here with all 12 TAs covered)
   if (riskScore < 25) {
     return `De-risked ${phaseLabel} asset with strong competitive position justifies higher upfront.`;
   } else if (riskScore < 50) {
@@ -1809,6 +1974,10 @@ export const therapeuticAreaOptions = [
   { value: 'infectiousDisease', label: 'Infectious Disease' },
   { value: 'ophthalmology', label: 'Ophthalmology' },
   { value: 'womensHealth', label: "Women's Health" },
+  { value: 'rareDisease', label: 'Rare Disease' },
+  { value: 'hematology', label: 'Hematology' },
+  { value: 'dermatology', label: 'Dermatology' },
+  { value: 'gastroenterology', label: 'Gastroenterology / IBD' },
 ];
 
 // Neurology-specific indication options
@@ -2462,4 +2631,267 @@ export const whRegulatoryOptions = [
   { value: 'acceleratedPathway', label: 'Accelerated pathway' },
   { value: 'standardPathway', label: 'Standard pathway' },
   { value: 'pregnancyComplexity', label: 'Pregnancy complexity (REMS/safety)' },
+];
+
+// ── Rare Disease ──
+
+export const rareDiseaseIndicationOptions = [
+  { group: 'Neuromuscular', options: [
+    { value: 'spinalMuscularAtrophy', label: 'Spinal Muscular Atrophy (SMA)' },
+    { value: 'duchenneMD', label: 'Duchenne Muscular Dystrophy (DMD)' },
+    { value: 'rareNeuro', label: 'Rare Neurological (ALS, Rett, Other)' },
+  ]},
+  { group: 'Lysosomal Storage', options: [
+    { value: 'fabryDisease', label: 'Fabry Disease' },
+    { value: 'gaucherDisease', label: 'Gaucher Disease' },
+    { value: 'pompeDisease', label: 'Pompe Disease' },
+  ]},
+  { group: 'Genetic / Metabolic', options: [
+    { value: 'cysticFibrosis', label: 'Cystic Fibrosis' },
+    { value: 'pku', label: 'Phenylketonuria (PKU)' },
+    { value: 'huntingtonDisease', label: "Huntington's Disease" },
+    { value: 'angelman', label: 'Angelman Syndrome' },
+  ]},
+  { group: 'Hematologic Rare', options: [
+    { value: 'hemophiliaA', label: 'Hemophilia A' },
+    { value: 'hemophiliaB', label: 'Hemophilia B' },
+    { value: 'sickleCell', label: 'Sickle Cell Disease' },
+    { value: 'betaThalassemia', label: 'Beta-Thalassemia' },
+  ]},
+];
+
+export const rareDiseaseModalityOptions = [
+  { group: 'Gene & Cell Therapy', options: [
+    { value: 'geneTherapy', label: 'Gene Therapy (AAV)' },
+    { value: 'geneTherapyRare', label: 'Gene Therapy (Lentiviral/Other)' },
+    { value: 'cellTherapy', label: 'Cell Therapy (ex vivo)' },
+    { value: 'geneEditing', label: 'Gene Editing (CRISPR)' },
+  ]},
+  { group: 'Enzyme & Substrate', options: [
+    { value: 'enzymeReplacement', label: 'Enzyme Replacement Therapy' },
+    { value: 'substrateReduction', label: 'Substrate Reduction Therapy' },
+  ]},
+  { group: 'RNA Therapeutics', options: [
+    { value: 'aso', label: 'Antisense Oligonucleotide (ASO)' },
+    { value: 'rnai', label: 'siRNA' },
+    { value: 'mrna', label: 'mRNA Therapeutics' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'smallMolecule', label: 'Small Molecule' },
+    { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'peptide', label: 'Engineered Protein' },
+  ]},
+];
+
+export const orphanDesignationOptions = [
+  { value: 'both_orphan', label: 'FDA + EMA Orphan Designation' },
+  { value: 'fda_orphan', label: 'FDA Orphan Only' },
+  { value: 'ema_orphan', label: 'EMA Orphan Only' },
+  { value: 'none', label: 'No Orphan Designation' },
+];
+
+export const patientPopulationSizeOptions = [
+  { value: 'ultraRare_sub1k', label: 'Ultra-rare (<1,000 patients)' },
+  { value: 'rare_1k_10k', label: 'Rare (1,000–10,000 patients)' },
+  { value: 'rare_10k_50k', label: 'Rare (10,000–50,000 patients)' },
+  { value: 'broader_50k_200k', label: 'Broader rare (50,000–200,000 patients)' },
+];
+
+export const geneticBasisOptions = [
+  { value: 'monogenic_validated', label: 'Monogenic — validated target' },
+  { value: 'polygenic', label: 'Polygenic' },
+  { value: 'unknown_genetic', label: 'Unknown genetic basis' },
+  { value: 'non_genetic', label: 'Non-genetic' },
+];
+
+// ── Hematology ──
+
+export const hematologyIndicationOptions = [
+  { group: 'Lymphoid Malignancies', options: [
+    { value: 'dlbcl', label: 'Diffuse Large B-Cell Lymphoma (DLBCL)' },
+    { value: 'follicularLymphoma', label: 'Follicular Lymphoma' },
+    { value: 'mantleCellLymphoma', label: 'Mantle Cell Lymphoma' },
+    { value: 'cll', label: 'CLL / SLL' },
+    { value: 'hodgkinLymphoma', label: "Hodgkin's Lymphoma" },
+    { value: 'waldenstroms', label: "Waldenström's Macroglobulinemia" },
+  ]},
+  { group: 'Plasma Cell', options: [
+    { value: 'myeloma', label: 'Multiple Myeloma' },
+  ]},
+  { group: 'Myeloid Malignancies', options: [
+    { value: 'aml', label: 'Acute Myeloid Leukemia (AML)' },
+    { value: 'mds', label: 'Myelodysplastic Syndromes (MDS)' },
+    { value: 'all', label: 'Acute Lymphoblastic Leukemia (ALL)' },
+    { value: 'polycythemiaVera', label: 'Polycythemia Vera' },
+    { value: 'myelofibrosis', label: 'Myelofibrosis' },
+  ]},
+  { group: 'Non-Malignant', options: [
+    { value: 'itp', label: 'Immune Thrombocytopenia (ITP)' },
+    { value: 'ttp', label: 'Thrombotic Thrombocytopenic Purpura (TTP)' },
+    { value: 'aplasticAnemia', label: 'Aplastic Anemia' },
+  ]},
+];
+
+export const hematologyModalityOptions = [
+  { group: 'Cell Therapy', options: [
+    { value: 'carT_heme', label: 'CAR-T Cell Therapy' },
+    { value: 'cellTherapy', label: 'Cell Therapy (Other)' },
+  ]},
+  { group: 'Antibody-Based', options: [
+    { value: 'bispecificHeme', label: 'Bispecific Antibody' },
+    { value: 'bispecific', label: 'Bispecific (T-Cell Engager)' },
+    { value: 'adc', label: 'Antibody-Drug Conjugate (ADC)' },
+    { value: 'mab', label: 'Monoclonal Antibody' },
+  ]},
+  { group: 'Small Molecules', options: [
+    { value: 'btki', label: 'BTK Inhibitor' },
+    { value: 'smallMolecule', label: 'Small Molecule' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'geneTherapy', label: 'Gene Therapy' },
+    { value: 'aso', label: 'Antisense Oligonucleotide' },
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+];
+
+export const hemeLineageOptions = [
+  { value: 'lymphoid', label: 'Lymphoid' },
+  { value: 'myeloid', label: 'Myeloid' },
+  { value: 'mixed_lineage', label: 'Mixed lineage' },
+  { value: 'non_malignant', label: 'Non-malignant' },
+];
+
+export const transplantEligibilityOptions = [
+  { value: 'transplant_eligible', label: 'Transplant-eligible' },
+  { value: 'transplant_ineligible', label: 'Transplant-ineligible' },
+  { value: 'post_transplant', label: 'Post-transplant (relapsed)' },
+];
+
+export const mrdStatusOptions = [
+  { value: 'mrd_endpoint', label: 'MRD-based endpoint' },
+  { value: 'standard_response', label: 'Standard response criteria' },
+  { value: 'survival_endpoint', label: 'Survival endpoint (OS/PFS)' },
+];
+
+// ── Dermatology ──
+
+export const dermatologyIndicationOptions = [
+  { group: 'Inflammatory', options: [
+    { value: 'atopicDermatitis', label: 'Atopic Dermatitis' },
+    { value: 'psoriasis', label: 'Plaque Psoriasis' },
+    { value: 'psoriaticArthritis', label: 'Psoriatic Arthritis' },
+    { value: 'hidradenitisSuppurativa', label: 'Hidradenitis Suppurativa' },
+  ]},
+  { group: 'Autoimmune / Immune-Mediated', options: [
+    { value: 'vitiligo', label: 'Vitiligo' },
+    { value: 'alopeciaAreata', label: 'Alopecia Areata' },
+    { value: 'chronicUrticaria', label: 'Chronic Spontaneous Urticaria' },
+    { value: 'pemphigus', label: 'Pemphigus' },
+  ]},
+  { group: 'Chronic Pruritic', options: [
+    { value: 'prurigo', label: 'Prurigo Nodularis' },
+    { value: 'contactDermatitis', label: 'Contact Dermatitis / Eczema' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'acne', label: 'Severe Acne' },
+    { value: 'rosacea', label: 'Rosacea' },
+  ]},
+];
+
+export const dermatologyModalityOptions = [
+  { group: 'Biologics', options: [
+    { value: 'il17Inhibitor', label: 'IL-17 Inhibitor' },
+    { value: 'il13Inhibitor', label: 'IL-13 Inhibitor' },
+    { value: 'mab', label: 'Monoclonal Antibody (Other)' },
+    { value: 'topicalBiologic', label: 'Topical Biologic' },
+  ]},
+  { group: 'Small Molecules', options: [
+    { value: 'jakInhibitorDerm', label: 'JAK Inhibitor (Oral/Topical)' },
+    { value: 'smallMolecule', label: 'Small Molecule' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'peptide', label: 'Peptide' },
+    { value: 'geneTherapy', label: 'Gene Therapy' },
+  ]},
+];
+
+export const skinSeverityOptions = [
+  { value: 'mild', label: 'Mild' },
+  { value: 'moderate', label: 'Moderate' },
+  { value: 'severe', label: 'Severe' },
+  { value: 'refractory_derm', label: 'Refractory' },
+];
+
+export const chronicityProfileOptions = [
+  { value: 'chronic_relapsing', label: 'Chronic relapsing' },
+  { value: 'chronic_continuous', label: 'Chronic continuous' },
+  { value: 'acute_flares', label: 'Acute flares' },
+];
+
+export const topicalVsSystemicOptions = [
+  { value: 'topical_only', label: 'Topical only' },
+  { value: 'systemic_only', label: 'Systemic only' },
+  { value: 'topical_and_systemic', label: 'Topical + systemic' },
+];
+
+// ── Gastroenterology ──
+
+export const gastroenterologyIndicationOptions = [
+  { group: 'Inflammatory Bowel Disease', options: [
+    { value: 'crohnsDisease', label: "Crohn's Disease" },
+    { value: 'ulcerativeColitis', label: 'Ulcerative Colitis' },
+    { value: 'pouchitis', label: 'Pouchitis' },
+  ]},
+  { group: 'Eosinophilic / Immune', options: [
+    { value: 'eosinophilicEsophagitis', label: 'Eosinophilic Esophagitis (EoE)' },
+    { value: 'celiacDisease', label: 'Celiac Disease' },
+    { value: 'giGvhd', label: 'GI Graft-vs-Host Disease' },
+  ]},
+  { group: 'Functional / Motility', options: [
+    { value: 'ibsD', label: 'IBS-D (Diarrhea-Predominant)' },
+    { value: 'ibsC', label: 'IBS-C (Constipation-Predominant)' },
+    { value: 'refractoryGerd', label: 'Refractory GERD' },
+  ]},
+  { group: 'Hepatobiliary & Other', options: [
+    { value: 'primaryBiliaryCholangitis', label: 'Primary Biliary Cholangitis (PBC)' },
+    { value: 'shortBowelSyndrome', label: 'Short Bowel Syndrome' },
+    { value: 'cdi', label: 'Recurrent C. difficile' },
+  ]},
+];
+
+export const gastroenterologyModalityOptions = [
+  { group: 'Biologics', options: [
+    { value: 'antiTl1a', label: 'Anti-TL1A' },
+    { value: 'il23GI', label: 'IL-23 Inhibitor' },
+    { value: 'gutSelectiveIntegrin', label: 'Gut-Selective Integrin' },
+    { value: 'mab', label: 'Monoclonal Antibody (Other)' },
+  ]},
+  { group: 'Small Molecules', options: [
+    { value: 's1pModulator', label: 'S1P Receptor Modulator' },
+    { value: 'jakInhibitor', label: 'JAK Inhibitor' },
+    { value: 'smallMolecule', label: 'Small Molecule' },
+  ]},
+  { group: 'Other', options: [
+    { value: 'microbiomeBased', label: 'Microbiome-Based Therapy' },
+    { value: 'peptide', label: 'Peptide' },
+  ]},
+];
+
+export const giSegmentOptions = [
+  { value: 'upper_gi', label: 'Upper GI' },
+  { value: 'small_bowel', label: 'Small bowel' },
+  { value: 'colonic', label: 'Colonic' },
+  { value: 'pancolonic', label: 'Pancolonic' },
+];
+
+export const biologicExperienceOptions = [
+  { value: 'biologic_naive', label: 'Biologic-naïve' },
+  { value: 'one_prior_biologic', label: 'One prior biologic' },
+  { value: 'multi_biologic_exposed', label: 'Multi-biologic exposed' },
+];
+
+export const endoscopicEndpointOptions = [
+  { value: 'endoscopic_remission', label: 'Endoscopic remission' },
+  { value: 'endoscopic_improvement', label: 'Endoscopic improvement' },
+  { value: 'clinical_only', label: 'Clinical endpoints only' },
 ];

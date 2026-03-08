@@ -50,6 +50,26 @@ import {
   routeOfAdministrationOptions,
   comorbidityBreadthOptions,
   metabolicTreatmentApproachOptions,
+  rareDiseaseModalityOptions,
+  rareDiseaseIndicationOptions,
+  orphanDesignationOptions,
+  patientPopulationSizeOptions,
+  geneticBasisOptions,
+  hematologyModalityOptions,
+  hematologyIndicationOptions,
+  hemeLineageOptions,
+  transplantEligibilityOptions,
+  mrdStatusOptions,
+  dermatologyModalityOptions,
+  dermatologyIndicationOptions,
+  skinSeverityOptions,
+  chronicityProfileOptions,
+  topicalVsSystemicOptions,
+  gastroenterologyModalityOptions,
+  gastroenterologyIndicationOptions,
+  giSegmentOptions,
+  biologicExperienceOptions,
+  endoscopicEndpointOptions,
 } from './calculations';
 
 // Types for sensitivity analysis
@@ -122,6 +142,18 @@ const parameterLabels: Record<string, string> = {
   routeOfAdministration: 'Route of Administration',
   comorbidityBreadth: 'Comorbidity Breadth',
   metabolicTreatmentApproach: 'Treatment Approach',
+  orphanDesignation: 'Orphan Designation',
+  patientPopulationSize: 'Patient Population Size',
+  geneticBasis: 'Genetic Basis',
+  hemeLineage: 'Lineage',
+  transplantEligibility: 'Transplant Eligibility',
+  mrdStatus: 'MRD / Response Endpoint',
+  skinSeverity: 'Skin Severity',
+  chronicityProfile: 'Chronicity Profile',
+  topicalVsSystemic: 'Delivery Route',
+  giSegment: 'GI Segment',
+  biologicExperience: 'Biologic Experience',
+  endoscopicEndpoint: 'Endoscopic Endpoint',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -136,7 +168,11 @@ function getOptionsForParameter(
   parameterKey: keyof CalculationInput,
   isNeurology: boolean = false,
   isImmunology: boolean = false,
-  isMetabolic: boolean = false
+  isMetabolic: boolean = false,
+  isRareDisease: boolean = false,
+  isHematology: boolean = false,
+  isDermatology: boolean = false,
+  isGastroenterology: boolean = false
 ): Array<{ value: string; label: string }> {
   switch (parameterKey) {
     case 'phase':
@@ -146,9 +182,22 @@ function getOptionsForParameter(
     case 'competitivePosition':
       return competitivePositionOptions;
     case 'modality':
-      return flattenOptions(isMetabolic ? metabolicModalityOptions : isImmunology ? immunologyModalityOptions : isNeurology ? neurologyModalityOptions : modalityOptions);
+      return flattenOptions(
+        isGastroenterology ? gastroenterologyModalityOptions :
+        isDermatology ? dermatologyModalityOptions :
+        isHematology ? hematologyModalityOptions :
+        isRareDisease ? rareDiseaseModalityOptions :
+        isMetabolic ? metabolicModalityOptions :
+        isImmunology ? immunologyModalityOptions :
+        isNeurology ? neurologyModalityOptions :
+        modalityOptions
+      );
     case 'indication':
-      return isMetabolic ? flattenOptions(metabolicIndicationOptions) : [];
+      return isGastroenterology ? flattenOptions(gastroenterologyIndicationOptions) :
+        isDermatology ? flattenOptions(dermatologyIndicationOptions) :
+        isHematology ? flattenOptions(hematologyIndicationOptions) :
+        isRareDisease ? flattenOptions(rareDiseaseIndicationOptions) :
+        isMetabolic ? flattenOptions(metabolicIndicationOptions) : [];
     case 'dataQuality':
       return dataQualityOptions;
     case 'lineOfTherapy':
@@ -183,6 +232,34 @@ function getOptionsForParameter(
       return comorbidityBreadthOptions;
     case 'metabolicTreatmentApproach':
       return metabolicTreatmentApproachOptions;
+    // Rare Disease
+    case 'orphanDesignation':
+      return orphanDesignationOptions;
+    case 'patientPopulationSize':
+      return patientPopulationSizeOptions;
+    case 'geneticBasis':
+      return geneticBasisOptions;
+    // Hematology
+    case 'hemeLineage':
+      return hemeLineageOptions;
+    case 'transplantEligibility':
+      return transplantEligibilityOptions;
+    case 'mrdStatus':
+      return mrdStatusOptions;
+    // Dermatology
+    case 'skinSeverity':
+      return skinSeverityOptions;
+    case 'chronicityProfile':
+      return chronicityProfileOptions;
+    case 'topicalVsSystemic':
+      return topicalVsSystemicOptions;
+    // Gastroenterology
+    case 'giSegment':
+      return giSegmentOptions;
+    case 'biologicExperience':
+      return biologicExperienceOptions;
+    case 'endoscopicEndpoint':
+      return endoscopicEndpointOptions;
     default:
       return [];
   }
@@ -202,7 +279,11 @@ function computeParameterSensitivity(
   const isNeurology = baseInputs.therapeuticArea === 'neurology';
   const isImmunology = baseInputs.therapeuticArea === 'immunology';
   const isMetabolic = baseInputs.therapeuticArea === 'metabolic';
-  const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology, isMetabolic);
+  const isRareDisease = baseInputs.therapeuticArea === 'rareDisease';
+  const isHematology = baseInputs.therapeuticArea === 'hematology';
+  const isDermatology = baseInputs.therapeuticArea === 'dermatology';
+  const isGastroenterology = baseInputs.therapeuticArea === 'gastroenterology';
+  const options = getOptionsForParameter(parameterKey, isNeurology, isImmunology, isMetabolic, isRareDisease, isHematology, isDermatology, isGastroenterology);
   if (options.length === 0) return null;
 
   const rawValue = baseInputs[parameterKey];
@@ -749,6 +830,230 @@ function generateWomensHealthInsights(inputs: CalculationInput): NeurologyInsigh
   return insights;
 }
 
+// Generate rare disease-specific insights
+function generateRareDiseaseInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'rareDisease') return [];
+  const insights: NeurologyInsight[] = [];
+
+  // Orphan Designation & Regulatory Advantage
+  const orphanKey = inputs.orphanDesignation || 'none';
+  const orphanLevel: ImpactLevel = orphanKey === 'both_orphan' ? 'LOW'
+    : orphanKey === 'fda_orphan' || orphanKey === 'ema_orphan' ? 'MEDIUM' : 'VERY HIGH';
+  insights.push({
+    title: 'Orphan Designation & Regulatory Incentives',
+    description: orphanLevel === 'LOW'
+      ? 'Dual FDA + EMA orphan designation provides the strongest regulatory package: 7-year US market exclusivity, 10-year EU exclusivity, tax credits for clinical development, and waived PDUFA fees. Rare pediatric disease priority review vouchers (transferable, valued at $100M+) add further upside. Partners price in exclusivity certainty — expect 20-35% deal premiums versus non-orphan assets.'
+      : orphanLevel === 'MEDIUM'
+      ? 'Single-region orphan designation provides meaningful exclusivity and development incentives, but leaves a gap in the other major market. Partners will structure milestones around securing the second designation. FDA orphan grants (up to $600K/year) and EMA fee waivers reduce development costs.'
+      : 'No orphan designation significantly reduces deal attractiveness in rare disease. Without exclusivity protections, generic/biosimilar competition risk increases post-approval. Partners will discount valuations and require the licensor to pursue orphan designation pre-deal or build designation milestones into the structure.',
+    impactLevel: orphanLevel,
+    category: 'regulatory_pathway',
+  });
+
+  // Patient Population Size Impact
+  const popKey = inputs.patientPopulationSize || 'rare_10k_50k';
+  const popLevel: ImpactLevel = popKey === 'ultraRare_sub1k' ? 'VERY HIGH'
+    : popKey === 'rare_1k_10k' ? 'HIGH'
+    : popKey === 'rare_10k_50k' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'Patient Population & Pricing Dynamics',
+    description: popLevel === 'VERY HIGH'
+      ? 'Ultra-rare populations (<1,000 patients) command the highest per-patient pricing ($500K-$3M+/year for chronic, $1M-$3.5M one-time for gene therapies). Small trial sizes (N=20-50) accelerate development, but commercial infrastructure costs per patient are extreme. Partners value the near-monopoly dynamics but require confidence in diagnosis rates and patient identification.'
+      : popLevel === 'HIGH'
+      ? 'Rare populations (1K-10K patients) hit the sweet spot for orphan drug economics: high pricing ($200K-$800K/year), manageable trial sizes (N=50-200), and specialized commercial models. Gene therapy one-time pricing can reach $2M+. Partners structure deals with aggressive upfronts reflecting pricing certainty.'
+      : popLevel === 'MEDIUM'
+      ? 'Mid-range rare populations (10K-50K) offer meaningful commercial opportunity with moderate pricing ($100K-$400K/year). Larger trial requirements but established regulatory pathways. Competition from enzyme replacement and substrate reduction therapies is relevant. Standard rare disease deal structures apply.'
+      : 'Broader rare populations (50K-200K) approach specialty pharma dynamics with lower per-patient pricing ($50K-$200K/year). Larger trials needed but bigger commercial opportunity. Biosimilar risk for biologics. Partners benchmark against specialty drug economics rather than ultra-orphan premiums.',
+    impactLevel: popLevel,
+    category: 'unmet_need',
+  });
+
+  // Genetic Basis & Target Validation
+  const genKey = inputs.geneticBasis || 'unknown_genetic';
+  const genLevel: ImpactLevel = genKey === 'monogenic_validated' ? 'LOW'
+    : genKey === 'polygenic' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Genetic Basis & Target Validation',
+    description: genLevel === 'LOW'
+      ? 'Monogenic disease with a validated target provides the highest confidence in mechanism and enables precision therapies (gene therapy, gene editing, ASO). Clinical development risk is reduced — natural history data and genetic diagnosis provide clear patient selection. Partners pay premiums for genetically validated targets with companion diagnostic potential.'
+      : genLevel === 'MEDIUM'
+      ? 'Polygenic basis complicates target selection and patient stratification. Multiple pathways may need modulation. Clinical endpoints require more traditional designs without clear genetic biomarkers. Partners expect broader clinical packages and may discount valuations versus monogenic programs.'
+      : 'Unknown or non-genetic basis creates the highest target validation risk. Mechanism of action must be proven through clinical data rather than genetic rationale. Longer development timelines and larger trials needed. Partners heavily back-load milestones pending proof-of-concept data.',
+    impactLevel: genLevel,
+    category: 'biomarker_validation',
+  });
+
+  return insights;
+}
+
+// Generate hematology-specific insights
+function generateHematologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'hematology') return [];
+  const insights: NeurologyInsight[] = [];
+
+  // Lineage & Competitive Dynamics
+  const lineageKey = inputs.hemeLineage || 'lymphoid';
+  const lineageLevel: ImpactLevel = lineageKey === 'myeloid' ? 'VERY HIGH'
+    : lineageKey === 'lymphoid' ? 'HIGH'
+    : lineageKey === 'mixed_lineage' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'Lineage & Competitive Dynamics',
+    description: lineageLevel === 'VERY HIGH'
+      ? 'Myeloid malignancies (AML, MDS, myelofibrosis) remain the highest unmet need in hematology — 5-year survival rates for AML are still ~30%. Limited approved targeted therapies create premium deal opportunities. However, clinical development is challenging with heterogeneous disease biology. Partners value novel mechanisms (menin inhibitors, CD47, mutant-selective agents) that address molecular subtypes.'
+      : lineageLevel === 'HIGH'
+      ? 'Lymphoid malignancies have been transformed by BTK inhibitors, CAR-T, and bispecifics, creating an intensely competitive landscape. New entrants must demonstrate clear superiority: better durability, oral convenience, or activity in resistant populations (BTKi-refractory, post-CAR-T relapse). Partners benchmark aggressively against Calquence, Imbruvica, and approved CAR-T products.'
+      : lineageLevel === 'MEDIUM'
+      ? 'Mixed lineage targets offer broader applicability but face complex clinical development across multiple histologies. Partners may require separate pivotal studies per indication. Deal structures often include histology-specific milestones.'
+      : 'Non-malignant hematology (ITP, TTP, aplastic anemia) offers differentiated deal dynamics — smaller populations, less competitive, and strong unmet need. Complement inhibitors and TPO agonists set pricing benchmarks. Partners value the predictable commercial profiles.',
+    impactLevel: lineageLevel,
+    category: 'competitive_landscape',
+  });
+
+  // Transplant Eligibility & Treatment Sequencing
+  const txKey = inputs.transplantEligibility || 'transplant_eligible';
+  const txLevel: ImpactLevel = txKey === 'post_transplant' ? 'VERY HIGH'
+    : txKey === 'transplant_ineligible' ? 'HIGH' : 'MEDIUM';
+  insights.push({
+    title: 'Transplant Eligibility & Treatment Sequencing',
+    description: txLevel === 'VERY HIGH'
+      ? 'Post-transplant relapse represents the most refractory, highest-unmet-need population. CAR-T and bispecifics have shown transformative efficacy here (ZUMA-1, TRANSFORM). Partners pay premiums for assets with post-transplant activity data — this population validates potency against the toughest disease. Expect accelerated regulatory pathways and orphan-like pricing dynamics.'
+      : txLevel === 'HIGH'
+      ? 'Transplant-ineligible patients are the fastest-growing segment due to aging demographics. BTK inhibitors, venetoclax combinations, and bispecifics compete intensely here. Partners require differentiation on efficacy, duration, or safety versus established combinations. Time-limited treatment regimens command deal premiums.'
+      : 'Transplant-eligible patients receive intensive induction followed by consolidation/transplant. Novel agents targeting MRD negativity pre-transplant or reducing relapse post-transplant have clear value propositions. Partners structure milestones around transplant outcome data and MRD endpoints.',
+    impactLevel: txLevel,
+    category: 'line_of_therapy',
+  });
+
+  // MRD & Response Endpoint Strategy
+  const mrdKey = inputs.mrdStatus || 'standard_response';
+  const mrdLevel: ImpactLevel = mrdKey === 'mrd_endpoint' ? 'LOW'
+    : mrdKey === 'survival_endpoint' ? 'HIGH' : 'MEDIUM';
+  insights.push({
+    title: 'MRD & Response Endpoint Strategy',
+    description: mrdLevel === 'LOW'
+      ? 'MRD-based endpoints are increasingly accepted by FDA as surrogate endpoints for accelerated approval (CLL, ALL, myeloma). MRD negativity correlates with long-term outcomes and enables smaller, faster trials. Partners value MRD-driven programs for speed to market — expect premium deal terms reflecting the accelerated development timeline and growing regulatory acceptance.'
+      : mrdLevel === 'HIGH'
+      ? 'Overall survival endpoints provide the most definitive evidence but require large trials (N=500+) and long follow-up (3-5+ years). In rapidly evolving landscapes with crossover, OS is increasingly difficult to demonstrate. Partners accept OS risk but structure deals with larger back-loaded milestones and conditional commercial terms.'
+      : 'Standard response criteria (CR, ORR, DOR) are well-established but face increasing pressure from regulators and payers demanding deeper endpoints. Consider incorporating MRD as a key secondary endpoint to future-proof the asset. Partners value response rate data for initial deal structuring with MRD upgrades triggering milestone payments.',
+    impactLevel: mrdLevel,
+    category: 'trial_endpoint',
+  });
+
+  return insights;
+}
+
+// Generate dermatology-specific insights
+function generateDermatologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'dermatology') return [];
+  const insights: NeurologyInsight[] = [];
+
+  // Severity Scale & Market Positioning
+  const sevKey = inputs.skinSeverity || 'moderate';
+  const sevLevel: ImpactLevel = sevKey === 'refractory_derm' ? 'VERY HIGH'
+    : sevKey === 'severe' ? 'HIGH'
+    : sevKey === 'moderate' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'Severity Scale & Market Positioning',
+    description: sevLevel === 'VERY HIGH'
+      ? 'Refractory dermatology (failed multiple biologics/systemic agents) represents the highest unmet need. PASI 90/100 and EASI 75/90 response rates in this population command premium deal terms. JAK inhibitors carved this niche but face safety concerns (boxed warnings). Partners value novel mechanisms that achieve high clearance rates without JAK-associated risks. Orphan-adjacent pricing dynamics may apply for rare refractory subtypes.'
+      : sevLevel === 'HIGH'
+      ? 'Severe disease (PASI >20, EASI >21, BSA >10%) is the primary target for systemic biologics. IL-17, IL-23, and IL-13 inhibitors set the efficacy bar — PASI 90 rates of 60-80% are now standard. Partners benchmark new assets against Skyrizi, Tremfya, and Dupixent. Differentiation through speed of onset, durability, or oral formulation is essential for premium terms.'
+      : sevLevel === 'MEDIUM'
+      ? 'Moderate disease is the largest patient population but faces intense competition from topical therapies, phototherapy, and now topical JAK inhibitors. Systemic agents must demonstrate clear superiority over topical alternatives. Partners structure deals with commercial milestones tied to formulary access and market share versus established treatments.'
+      : 'Mild disease is managed primarily with topical therapies and represents the highest-volume but lowest-value-per-patient segment. Topical innovation (roflumilast cream, tapinarof) shows the path. Partners may seek OTC potential or dermocosmetic positioning. Deal values are modest relative to systemic programs.',
+    impactLevel: sevLevel,
+    category: 'unmet_need',
+  });
+
+  // Chronicity & Treatment Duration
+  const chronKey = inputs.chronicityProfile || 'chronic_relapsing';
+  const chronLevel: ImpactLevel = chronKey === 'chronic_continuous' ? 'LOW'
+    : chronKey === 'chronic_relapsing' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Chronicity & Treatment Duration Impact',
+    description: chronLevel === 'LOW'
+      ? 'Chronic continuous disease drives the most favorable commercial profile — long-term biologic use generates predictable recurring revenue. Dupixent ($11B+ annual sales) proved the model. Partners value the annuity-like revenue stream and structure deals with aggressive commercial milestones. Biosimilar timeline is the key risk — IL-17/IL-23 biosimilars arriving in the late 2020s will pressure pricing.'
+      : chronLevel === 'MEDIUM'
+      ? 'Chronic relapsing disease creates intermittent treatment patterns that complicate revenue forecasting. Patients cycle on and off therapy. Rapid onset of action and sustained remission after discontinuation are key differentiators. Partners may discount chronic treatment assumptions and value drugs that maintain remission during treatment-free intervals.'
+      : 'Acute flare management is a smaller market with episodic treatment. Short courses of systemic therapy or potent topicals dominate. Per-patient revenue is limited. Partners structure deals around acute treatment episodes rather than chronic use, resulting in lower total deal values but faster path to market.',
+    impactLevel: chronLevel,
+    category: 'treatment_durability',
+  });
+
+  // Delivery Route & Biosimilar Pressure
+  const delivKey = inputs.topicalVsSystemic || 'systemic_only';
+  const delivLevel: ImpactLevel = delivKey === 'topical_and_systemic' ? 'LOW'
+    : delivKey === 'topical_only' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Delivery Strategy & Biosimilar Pressure',
+    description: delivLevel === 'LOW'
+      ? 'Dual topical + systemic formulation strategy maximizes market coverage across severity spectrums. Topical formulation extends lifecycle and creates a differentiated profile versus biologic competitors. Partners value the optionality — topical launch for moderate disease followed by systemic for severe creates a staged commercial strategy with multiple revenue streams.'
+      : delivLevel === 'MEDIUM'
+      ? 'Topical-only positioning targets the largest patient volume but faces intense competition from generics, OTC products, and new topical innovations (JAK inhibitors, PDE4 inhibitors). Differentiation through novel formulation, mechanism, or patient experience is critical. Partners evaluate topical programs on volume potential and formulary positioning rather than per-patient pricing.'
+      : 'Systemic-only delivery competes directly against established biologics (Dupixent, Skyrizi, Tremfya, Cosentyx) and faces emerging biosimilar pressure. Adalimumab biosimilars have already reshaped psoriasis pricing. IL-17 and IL-23 biosimilars are approaching. Partners price in biosimilar erosion risk and require clear differentiation on efficacy, safety, or convenience to justify premium deal terms.',
+    impactLevel: delivLevel,
+    category: 'competitive_landscape',
+  });
+
+  return insights;
+}
+
+// Generate gastroenterology-specific insights
+function generateGastroenterologyInsights(inputs: CalculationInput): NeurologyInsight[] {
+  if (inputs.therapeuticArea !== 'gastroenterology') return [];
+  const insights: NeurologyInsight[] = [];
+
+  // GI Segment & Disease Biology
+  const segKey = inputs.giSegment || 'colonic';
+  const segLevel: ImpactLevel = segKey === 'pancolonic' ? 'VERY HIGH'
+    : segKey === 'small_bowel' ? 'HIGH'
+    : segKey === 'colonic' ? 'MEDIUM' : 'LOW';
+  insights.push({
+    title: 'GI Segment & Disease Biology',
+    description: segLevel === 'VERY HIGH'
+      ? 'Pancolonic disease represents the most severe IBD phenotype with highest surgical risk. Patients frequently fail multiple biologics. Anti-TL1A (tulisokibart) and dual-targeted approaches are emerging as the most promising mechanisms for this population. Partners pay premiums for assets with pan-intestinal activity data — efficacy across both ileal and colonic disease substantially broadens the addressable market.'
+      : segLevel === 'HIGH'
+      ? 'Small bowel involvement (ileal Crohn\'s) is particularly challenging — limited topical drug delivery, stricturing/penetrating complications, and high surgical rates. Anti-IL-23 agents (risankizumab, guselkumab) have shown strong ileal healing. Partners value small bowel efficacy data as a differentiator, especially mucosal and transmural healing endpoints.'
+      : segLevel === 'MEDIUM'
+      ? 'Colonic disease (UC, colonic Crohn\'s) is the most common IBD presentation and the most competitive therapeutic landscape. TNF inhibitors, vedolizumab, ustekinumab, JAK inhibitors, and S1P modulators all compete. Partners benchmark rigorously against Entyvio, Stelara, and Rinvoq. Differentiation through endoscopic outcomes, speed of response, or oral convenience is essential.'
+      : 'Upper GI targets (EoE, refractory GERD) represent smaller but growing markets with significant unmet need. Dupixent\'s EoE approval validated the biologic approach. Partners value first-mover advantage in under-served upper GI indications. Smaller trial sizes and faster enrollment support efficient development.',
+    impactLevel: segLevel,
+    category: 'unmet_need',
+  });
+
+  // Biologic Experience & Treatment Sequencing
+  const bioExpKey = inputs.biologicExperience || 'biologic_naive';
+  const bioExpLevel: ImpactLevel = bioExpKey === 'multi_biologic_exposed' ? 'VERY HIGH'
+    : bioExpKey === 'one_prior_biologic' ? 'HIGH' : 'MEDIUM';
+  insights.push({
+    title: 'Biologic Experience & Treatment Sequencing',
+    description: bioExpLevel === 'VERY HIGH'
+      ? 'Multi-biologic-exposed patients (failed 2+ biologics) represent the highest unmet need in IBD. Response rates drop with each subsequent line — novel mechanisms are essential. Anti-TL1A and gut-selective agents show promise in this refractory population. Partners pay significant premiums for bio-experienced efficacy data, as it validates the mechanism against the toughest patients and protects against line-of-therapy erosion.'
+      : bioExpLevel === 'HIGH'
+      ? 'One-prior-biologic patients are the key second-line population. IL-23 inhibitors have demonstrated strong efficacy post-TNF failure (SEQUENCE trial for risankizumab). Partners value head-to-head data versus established second-line options. Deal structures include milestones tied to second-line pivotal readouts and formulary positioning.'
+      : 'Biologic-naive patients represent the largest addressable population with highest response rates. First-line biologic positioning drives blockbuster potential — vedolizumab and adalimumab lead. Partners structure deals around first-line pivotal data with commercial milestones tied to market share capture. Competition is intense but market size is large enough for multiple winners.',
+    impactLevel: bioExpLevel,
+    category: 'line_of_therapy',
+  });
+
+  // Endoscopic Endpoint & Mechanism Strategy
+  const endoKey = inputs.endoscopicEndpoint || 'endoscopic_improvement';
+  const endoLevel: ImpactLevel = endoKey === 'endoscopic_remission' ? 'LOW'
+    : endoKey === 'endoscopic_improvement' ? 'MEDIUM' : 'HIGH';
+  insights.push({
+    title: 'Endoscopic Endpoint & Mechanism Strategy',
+    description: endoLevel === 'LOW'
+      ? 'Endoscopic remission (Mayo 0, SES-CD <3) is the gold standard endpoint increasingly demanded by FDA and EMA. IL-23 inhibitors and anti-TL1A have demonstrated high endoscopic remission rates, raising the bar for new entrants. Partners value endoscopic remission data as the strongest differentiator — it correlates with long-term outcomes, reduces surgical risk, and supports premium pricing. Histologic endpoints (Geboes, RHI) are emerging as the next frontier.'
+      : endoLevel === 'MEDIUM'
+      ? 'Endoscopic improvement (Mayo 0-1, 50% SES-CD reduction) is well-accepted and achievable by multiple mechanisms. Anti-TNFs and vedolizumab established this benchmark. Partners view endoscopic improvement as table stakes — differentiation requires either superior rates, faster onset, or additional mucosal healing endpoints. Consider adding histologic remission as a key secondary endpoint.'
+      : 'Clinical-only endpoints (CDAI, partial Mayo) are fastest to demonstrate but face increasing regulatory skepticism. FDA\'s 2023 IBD guidance emphasizes endoscopic co-primary endpoints. Partners will discount programs without endoscopic data and may require endoscopic endpoints as milestone triggers. Consider an adaptive trial design that incorporates endoscopy to de-risk the program.',
+    impactLevel: endoLevel,
+    category: 'trial_endpoint',
+  });
+
+  return insights;
+}
+
 // Main function to compute full sensitivity analysis
 export function computeSensitivityAnalysis(
   inputs: CalculationInput,
@@ -762,6 +1067,10 @@ export function computeSensitivityAnalysis(
   const isInfectiousDisease = ta === 'infectiousDisease';
   const isOphthalmology = ta === 'ophthalmology';
   const isWomensHealth = ta === 'womensHealth';
+  const isRareDisease = ta === 'rareDisease';
+  const isHematology = ta === 'hematology';
+  const isDermatology = ta === 'dermatology';
+  const isGastroenterology = ta === 'gastroenterology';
 
   // Determine the first area-specific parameter (treatment approach equivalent)
   const areaFirstParam: keyof CalculationInput =
@@ -772,6 +1081,10 @@ export function computeSensitivityAnalysis(
     isInfectiousDisease ? 'resistanceProfile' :
     isOphthalmology ? 'ocularDelivery' :
     isWomensHealth ? 'whTargetPopulation' :
+    isRareDisease ? 'orphanDesignation' :
+    isHematology ? 'hemeLineage' :
+    isDermatology ? 'skinSeverity' :
+    isGastroenterology ? 'giSegment' :
     'lineOfTherapy';
 
   const parametersToAnalyze: Array<keyof CalculationInput> = [
@@ -790,6 +1103,10 @@ export function computeSensitivityAnalysis(
     ...(isInfectiousDisease ? ['infectionChronicity' as keyof CalculationInput, 'publicHealthPriority' as keyof CalculationInput] : []),
     ...(isOphthalmology ? ['treatmentDurability' as keyof CalculationInput, 'visionImpact' as keyof CalculationInput] : []),
     ...(isWomensHealth ? ['whUnmetNeed' as keyof CalculationInput, 'whRegulatory' as keyof CalculationInput] : []),
+    ...(isRareDisease ? ['patientPopulationSize' as keyof CalculationInput, 'geneticBasis' as keyof CalculationInput] : []),
+    ...(isHematology ? ['transplantEligibility' as keyof CalculationInput, 'mrdStatus' as keyof CalculationInput] : []),
+    ...(isDermatology ? ['chronicityProfile' as keyof CalculationInput, 'topicalVsSystemic' as keyof CalculationInput] : []),
+    ...(isGastroenterology ? ['biologicExperience' as keyof CalculationInput, 'endoscopicEndpoint' as keyof CalculationInput] : []),
   ];
 
   const parameters: ParameterSensitivity[] = parametersToAnalyze
@@ -803,7 +1120,15 @@ export function computeSensitivityAnalysis(
   const topValueDriver = findTopValueDriver(parameters);
 
   // Generate therapeutic-area-specific insights
-  const neurologyInsights = isCardiovascular
+  const neurologyInsights = isRareDisease
+    ? generateRareDiseaseInsights(inputs)
+    : isHematology
+    ? generateHematologyInsights(inputs)
+    : isDermatology
+    ? generateDermatologyInsights(inputs)
+    : isGastroenterology
+    ? generateGastroenterologyInsights(inputs)
+    : isCardiovascular
     ? generateCardiovascularInsights(inputs)
     : isInfectiousDisease
     ? generateInfectiousDiseaseInsights(inputs)

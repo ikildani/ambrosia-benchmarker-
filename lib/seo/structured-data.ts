@@ -121,7 +121,7 @@ export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 8 therapeutic areas with data-driven benchmarks from 600+ real transactions.',
+    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from 600+ real transactions.',
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
@@ -201,7 +201,7 @@ export function generatePricingSchema() {
         name: 'Free',
         price: '0',
         priceCurrency: 'USD',
-        description: 'Core calculator with benchmarks across 8 therapeutic areas',
+        description: 'Core calculator with benchmarks across 12 therapeutic areas',
         availability: 'https://schema.org/InStock',
       },
       {

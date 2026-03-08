@@ -19,6 +19,10 @@ import {
   infectiousDiseaseModalityOptions,
   ophthalmologyModalityOptions,
   womensHealthModalityOptions,
+  rareDiseaseModalityOptions,
+  hematologyModalityOptions,
+  dermatologyModalityOptions,
+  gastroenterologyModalityOptions,
   indicationOptions,
   neurologyIndicationOptions,
   immunologyIndicationOptions,
@@ -27,6 +31,10 @@ import {
   infectiousDiseaseIndicationOptions,
   ophthalmologyIndicationOptions,
   womensHealthIndicationOptions,
+  rareDiseaseIndicationOptions,
+  hematologyIndicationOptions,
+  dermatologyIndicationOptions,
+  gastroenterologyIndicationOptions,
   biomarkerOptions,
 } from '@/lib/calculations';
 import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
@@ -80,6 +88,10 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     infectiousDisease: infectiousDiseaseModalityOptions,
     ophthalmology: ophthalmologyModalityOptions,
     womensHealth: womensHealthModalityOptions,
+    rareDisease: rareDiseaseModalityOptions,
+    hematology: hematologyModalityOptions,
+    dermatology: dermatologyModalityOptions,
+    gastroenterology: gastroenterologyModalityOptions,
   };
   const modalityOptionsList = modalityMap[therapeuticArea] || modalityOptions;
 
@@ -92,6 +104,10 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     infectiousDisease: infectiousDiseaseIndicationOptions,
     ophthalmology: ophthalmologyIndicationOptions,
     womensHealth: womensHealthIndicationOptions,
+    rareDisease: rareDiseaseIndicationOptions,
+    hematology: hematologyIndicationOptions,
+    dermatology: dermatologyIndicationOptions,
+    gastroenterology: gastroenterologyIndicationOptions,
   };
   const indicationOptionsList = indicationMap[therapeuticArea] || indicationOptions;
 

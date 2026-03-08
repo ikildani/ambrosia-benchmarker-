@@ -58,6 +58,10 @@ export interface Benchmarks {
   infectiousDiseasePhaseBaselines: PhaseBaselines;
   ophthalmologyPhaseBaselines: PhaseBaselines;
   womensHealthPhaseBaselines: PhaseBaselines;
+  rareDiseasePhaseBaselines: PhaseBaselines;
+  hematologyPhaseBaselines: PhaseBaselines;
+  dermatologyPhaseBaselines: PhaseBaselines;
+  gastroenterologyPhaseBaselines: PhaseBaselines;
 
   // Phase config per therapeutic area
   phaseConfig: PhaseConfig;
@@ -68,6 +72,10 @@ export interface Benchmarks {
   infectiousDiseasePhaseConfig: PhaseConfig;
   ophthalmologyPhaseConfig: PhaseConfig;
   womensHealthPhaseConfig: PhaseConfig;
+  rareDiseasePhaseConfig: PhaseConfig;
+  hematologyPhaseConfig: PhaseConfig;
+  dermatologyPhaseConfig: PhaseConfig;
+  gastroenterologyPhaseConfig: PhaseConfig;
 
   // Modalities & territories
   modalities: Record<string, MultiplierOption>;
@@ -84,6 +92,10 @@ export interface Benchmarks {
     infectiousDisease: Record<string, MultiplierOption>;
     ophthalmology: Record<string, MultiplierOption>;
     womensHealth: Record<string, MultiplierOption>;
+    rareDisease: Record<string, MultiplierOption>;
+    hematology: Record<string, MultiplierOption>;
+    dermatology: Record<string, MultiplierOption>;
+    gastroenterology: Record<string, MultiplierOption>;
   };
 
   // Multiplier config — all 19 categories
@@ -129,6 +141,22 @@ export interface Benchmarks {
     whTargetPopulation: MultiplierCategory;
     whUnmetNeed: MultiplierCategory;
     whRegulatory: MultiplierCategory;
+    // Rare Disease
+    orphanDesignation: MultiplierCategory;
+    patientPopulationSize: MultiplierCategory;
+    geneticBasis: MultiplierCategory;
+    // Hematology
+    hemeLineage: MultiplierCategory;
+    transplantEligibility: MultiplierCategory;
+    mrdStatus: MultiplierCategory;
+    // Dermatology
+    skinSeverity: MultiplierCategory;
+    chronicityProfile: MultiplierCategory;
+    topicalVsSystemic: MultiplierCategory;
+    // Gastroenterology
+    giSegment: MultiplierCategory;
+    biologicExperience: MultiplierCategory;
+    endoscopicEndpoint: MultiplierCategory;
   };
 
   // Interaction terms and special adjustments
@@ -173,7 +201,7 @@ interface CalibrationRow {
 }
 
 // Map therapeutic_area to the correct baselines key in Benchmarks
-type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines' | 'cardiovascularPhaseBaselines' | 'infectiousDiseasePhaseBaselines' | 'ophthalmologyPhaseBaselines' | 'womensHealthPhaseBaselines';
+type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines' | 'cardiovascularPhaseBaselines' | 'infectiousDiseasePhaseBaselines' | 'ophthalmologyPhaseBaselines' | 'womensHealthPhaseBaselines' | 'rareDiseasePhaseBaselines' | 'hematologyPhaseBaselines' | 'dermatologyPhaseBaselines' | 'gastroenterologyPhaseBaselines';
 const TA_BASELINES_KEY: Record<string, PhaseBaselinesKey> = {
   'oncology': 'phaseBaselines',
   'neurology': 'neurologyPhaseBaselines',
@@ -183,6 +211,10 @@ const TA_BASELINES_KEY: Record<string, PhaseBaselinesKey> = {
   'infectiousDisease': 'infectiousDiseasePhaseBaselines',
   'ophthalmology': 'ophthalmologyPhaseBaselines',
   'womensHealth': 'womensHealthPhaseBaselines',
+  'rareDisease': 'rareDiseasePhaseBaselines',
+  'hematology': 'hematologyPhaseBaselines',
+  'dermatology': 'dermatologyPhaseBaselines',
+  'gastroenterology': 'gastroenterologyPhaseBaselines',
 };
 
 /**

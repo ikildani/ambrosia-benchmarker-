@@ -37,6 +37,18 @@ import type {
   WHTargetPopulation,
   WHUnmetNeed,
   WHRegulatory,
+  OrphanDesignation,
+  PatientPopulationSize,
+  GeneticBasis,
+  HemeLineage,
+  TransplantEligibility,
+  MRDStatus,
+  SkinSeverity,
+  ChronicityProfile,
+  TopicalVsSystemic,
+  GISegment,
+  BiologicExperience,
+  EndoscopicEndpoint,
 } from '@/lib/calculations';
 import type { DealTemplate } from './types';
 
@@ -88,6 +100,22 @@ export interface CalculatorFormState {
   whTargetPopulation: WHTargetPopulation;
   whUnmetNeed: WHUnmetNeed;
   whRegulatory: WHRegulatory;
+  // Rare Disease-specific
+  orphanDesignation: OrphanDesignation;
+  patientPopulationSize: PatientPopulationSize;
+  geneticBasis: GeneticBasis;
+  // Hematology-specific
+  hemeLineage: HemeLineage;
+  transplantEligibility: TransplantEligibility;
+  mrdStatus: MRDStatus;
+  // Dermatology-specific
+  skinSeverity: SkinSeverity;
+  chronicityProfile: ChronicityProfile;
+  topicalVsSystemic: TopicalVsSystemic;
+  // Gastroenterology-specific
+  giSegment: GISegment;
+  biologicExperience: BiologicExperience;
+  endoscopicEndpoint: EndoscopicEndpoint;
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -133,6 +161,18 @@ export const INITIAL_STATE: CalculatorFormState = {
   whTargetPopulation: 'reproductiveAge',
   whUnmetNeed: 'inadequateOptions',
   whRegulatory: 'standardPathway',
+  orphanDesignation: 'none',
+  patientPopulationSize: 'rare_1k_10k',
+  geneticBasis: 'unknown_genetic',
+  hemeLineage: 'lymphoid',
+  transplantEligibility: 'transplant_eligible',
+  mrdStatus: 'standard_response',
+  skinSeverity: 'moderate',
+  chronicityProfile: 'chronic_relapsing',
+  topicalVsSystemic: 'systemic_only',
+  giSegment: 'colonic',
+  biologicExperience: 'biologic_naive',
+  endoscopicEndpoint: 'endoscopic_improvement',
   wizardStep: 0,
   quickMode: true,
   showTemplates: true,
@@ -225,6 +265,46 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
           whTargetPopulation: 'reproductiveAge',
           whUnmetNeed: 'inadequateOptions',
           whRegulatory: 'standardPathway',
+        };
+      }
+      if (action.area === 'rareDisease') {
+        return {
+          ...state, ...base,
+          indication: 'spinalMuscularAtrophy' as Indication,
+          modality: 'geneTherapy' as Modality,
+          orphanDesignation: 'both_orphan',
+          patientPopulationSize: 'rare_1k_10k',
+          geneticBasis: 'monogenic_validated',
+        };
+      }
+      if (action.area === 'hematology') {
+        return {
+          ...state, ...base,
+          indication: 'dlbcl' as Indication,
+          modality: 'carT_heme' as Modality,
+          hemeLineage: 'lymphoid',
+          transplantEligibility: 'transplant_eligible',
+          mrdStatus: 'standard_response',
+        };
+      }
+      if (action.area === 'dermatology') {
+        return {
+          ...state, ...base,
+          indication: 'atopicDermatitis' as Indication,
+          modality: 'mab' as Modality,
+          skinSeverity: 'moderate',
+          chronicityProfile: 'chronic_relapsing',
+          topicalVsSystemic: 'systemic_only',
+        };
+      }
+      if (action.area === 'gastroenterology') {
+        return {
+          ...state, ...base,
+          indication: 'ulcerativeColitis' as Indication,
+          modality: 'mab' as Modality,
+          giSegment: 'colonic',
+          biologicExperience: 'biologic_naive',
+          endoscopicEndpoint: 'endoscopic_improvement',
         };
       }
       // oncology
@@ -324,6 +404,18 @@ export interface CalculatorActions {
   setWhTargetPopulation: (v: WHTargetPopulation) => void;
   setWhUnmetNeed: (v: WHUnmetNeed) => void;
   setWhRegulatory: (v: WHRegulatory) => void;
+  setOrphanDesignation: (v: OrphanDesignation) => void;
+  setPatientPopulationSize: (v: PatientPopulationSize) => void;
+  setGeneticBasis: (v: GeneticBasis) => void;
+  setHemeLineage: (v: HemeLineage) => void;
+  setTransplantEligibility: (v: TransplantEligibility) => void;
+  setMrdStatus: (v: MRDStatus) => void;
+  setSkinSeverity: (v: SkinSeverity) => void;
+  setChronicityProfile: (v: ChronicityProfile) => void;
+  setTopicalVsSystemic: (v: TopicalVsSystemic) => void;
+  setGiSegment: (v: GISegment) => void;
+  setBiologicExperience: (v: BiologicExperience) => void;
+  setEndoscopicEndpoint: (v: EndoscopicEndpoint) => void;
   setWizardStep: (v: number) => void;
   setQuickMode: (v: boolean) => void;
   setShowTemplates: (v: boolean) => void;
@@ -379,6 +471,18 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     setWhTargetPopulation: (v) => dispatch({ type: 'SET_FIELD', field: 'whTargetPopulation', value: v }),
     setWhUnmetNeed: (v) => dispatch({ type: 'SET_FIELD', field: 'whUnmetNeed', value: v }),
     setWhRegulatory: (v) => dispatch({ type: 'SET_FIELD', field: 'whRegulatory', value: v }),
+    setOrphanDesignation: (v) => dispatch({ type: 'SET_FIELD', field: 'orphanDesignation', value: v }),
+    setPatientPopulationSize: (v) => dispatch({ type: 'SET_FIELD', field: 'patientPopulationSize', value: v }),
+    setGeneticBasis: (v) => dispatch({ type: 'SET_FIELD', field: 'geneticBasis', value: v }),
+    setHemeLineage: (v) => dispatch({ type: 'SET_FIELD', field: 'hemeLineage', value: v }),
+    setTransplantEligibility: (v) => dispatch({ type: 'SET_FIELD', field: 'transplantEligibility', value: v }),
+    setMrdStatus: (v) => dispatch({ type: 'SET_FIELD', field: 'mrdStatus', value: v }),
+    setSkinSeverity: (v) => dispatch({ type: 'SET_FIELD', field: 'skinSeverity', value: v }),
+    setChronicityProfile: (v) => dispatch({ type: 'SET_FIELD', field: 'chronicityProfile', value: v }),
+    setTopicalVsSystemic: (v) => dispatch({ type: 'SET_FIELD', field: 'topicalVsSystemic', value: v }),
+    setGiSegment: (v) => dispatch({ type: 'SET_FIELD', field: 'giSegment', value: v }),
+    setBiologicExperience: (v) => dispatch({ type: 'SET_FIELD', field: 'biologicExperience', value: v }),
+    setEndoscopicEndpoint: (v) => dispatch({ type: 'SET_FIELD', field: 'endoscopicEndpoint', value: v }),
     setWizardStep: (v) => dispatch({ type: 'SET_STEP', step: v }),
     setQuickMode: (v) => dispatch({ type: 'SET_FIELD', field: 'quickMode', value: v }),
     setShowTemplates: (v) => dispatch({ type: 'SET_FIELD', field: 'showTemplates', value: v }),

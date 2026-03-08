@@ -17,7 +17,7 @@ export const PRICING = {
 
 export const DEAL_STATS = {
   TOTAL_DEALS: '600+',
-  TOTAL_DEALS_DESCRIPTION: 'real biopharma licensing deals across 8 therapeutic areas including oncology, neurology, immunology, metabolic, cardiovascular, infectious disease, ophthalmology, and women\'s health',
+  TOTAL_DEALS_DESCRIPTION: 'real biopharma licensing deals across 12 therapeutic areas including oncology, neurology, immunology, metabolic, cardiovascular, infectious disease, ophthalmology, women\'s health, rare disease, dermatology, pulmonology, and gastroenterology',
   NEUROLOGY_DEALS: '88+',
   NEUROLOGY_DEALS_DESCRIPTION: 'neurology R&D partnerships',
   NEUROLOGY_TOTAL_VALUE: '$45.9B',

@@ -273,7 +273,7 @@ Step 7: End on landing page hero
 ```
 We just shipped something we're really proud of.
 
-Ambrosia Benchmarker now covers 600+ real biopharma licensing deals across 8 therapeutic areas — with AI-powered deal memos, rNPV modeling, Monte Carlo simulation, and company intelligence for 600+ pharma and biotech companies.
+Ambrosia Benchmarker now covers 600+ real biopharma licensing deals across 12 therapeutic areas — with AI-powered deal memos, rNPV modeling, Monte Carlo simulation, and company intelligence for 600+ pharma and biotech companies.
 
 What it does:
 → Instant deal benchmarks (upfront, milestones, royalties, total deal value)
@@ -318,7 +318,7 @@ No signup. No credit card. Just select your modality, phase, and indication.
 ```
 We built the Bloomberg Terminal for biopharma deal benchmarking.
 
-600+ real deals. 8 therapeutic areas. AI-powered analysis. Instant results.
+600+ real deals. 12 therapeutic areas. AI-powered analysis. Instant results.
 
 Free at calculator.ambrosiaventures.co
 

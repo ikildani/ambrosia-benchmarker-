@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Market Pulse — Weekly Biopharma Deal Intelligence',
-    description: 'Weekly biotech deal intelligence, benchmark shifts, and modality trends for BD professionals. 8 therapeutic areas tracked.',
+    description: 'Weekly biotech deal intelligence, benchmark shifts, and modality trends for BD professionals. 12 therapeutic areas tracked.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/pulse',
     images: [

@@ -76,6 +76,18 @@ function getTherapeuticAreaRiskGuidance(inputs: CalculationInput): string {
   if (ta === 'womensHealth') {
     return `For women's health, focus risks on: (1) pregnancy-related regulatory complexity (teratogenicity studies, REMS), (2) historically underfunded therapeutic area with emerging partner interest, (3) generic competition in mature categories (contraception, HRT), (4) unmet need assessment — how much of the market is truly underserved vs well-covered. Reference specific regulatory requirements and recent women's health deal precedents.`;
   }
+  if (ta === 'rareDisease') {
+    return `For rare disease, focus risks on: (1) small patient population and enrollment challenges, (2) gene therapy manufacturing scalability and durability of response, (3) orphan drug pricing sustainability and payer pushback, (4) natural history data gaps and endpoint selection, (5) regulatory pathway advantages (breakthrough, accelerated approval) vs post-marketing commitments.`;
+  }
+  if (ta === 'hematology') {
+    return `For hematology, focus risks on: (1) CAR-T/bispecific manufacturing complexity and COGS, (2) cytokine release syndrome and neurotoxicity management requirements, (3) MRD-based endpoint acceptance by regulators, (4) competitive intensity in relapsed/refractory settings (multiple CAR-T and bispecifics), (5) earlier-line expansion potential and combination strategies.`;
+  }
+  if (ta === 'dermatology') {
+    return `For dermatology, focus risks on: (1) IL-4/IL-13/IL-17/IL-31 competitive crowding in atopic dermatitis and psoriasis, (2) JAK inhibitor class-wide safety signals (black box warnings), (3) topical vs systemic administration preference and market segmentation, (4) differentiation on onset speed, durability, and skin clearance endpoints (EASI, PASI, IGA), (5) biosimilar risk for established biologics.`;
+  }
+  if (ta === 'gastroenterology') {
+    return `For gastroenterology, focus risks on: (1) anti-TL1A competition heating up (Merck, Roche, others), (2) endoscopic endpoint requirements and trial duration/cost, (3) biologic sequencing and positioning vs established TNF/IL-23/integrin therapies, (4) oral vs injectable preference in IBD (S1P modulators, JAK), (5) Crohn's vs UC market dynamics and indication expansion potential.`;
+  }
   return 'Focus on the most relevant clinical, regulatory, and commercial risks specific to this therapeutic area.';
 }
 

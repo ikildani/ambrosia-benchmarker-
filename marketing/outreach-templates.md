@@ -8,7 +8,7 @@ Hi [Name],
 
 I saw [Firm]'s work on [specific: "the 2026 valuation guide" / "the Gilead licensing advisory" / etc.]. We built something your team might find useful.
 
-**Ambrosia Ventures Deal Calculator** gives you instant benchmarks for biopharma licensing deal terms — upfront payments, milestone structures, royalty rates — powered by 600+ real transactions across 8 therapeutic areas.
+**Ambrosia Ventures Deal Calculator** gives you instant benchmarks for biopharma licensing deal terms — upfront payments, milestone structures, royalty rates — powered by 600+ real transactions across 12 therapeutic areas.
 
 What makes it different:
 - **rNPV engine** with Monte Carlo simulation (10,000 iterations)
@@ -64,7 +64,7 @@ When evaluating licensing terms for portfolio companies, having real benchmark d
 - Benchmark proposed deal terms against real market data
 - Run rNPV analysis with Monte Carlo simulation
 - Stress-test valuations with 28 scenario templates
-- Compare across 8 therapeutic areas and all major modalities
+- Compare across 12 therapeutic areas and all major modalities
 
 Free to try: https://calculator.ambrosiaventures.co/calculator
 
@@ -103,7 +103,7 @@ https://calculator.ambrosiaventures.co
 
 Hi [Name],
 
-I built a free tool that lets biopharma professionals instantly benchmark licensing deal terms — upfront payments, milestones, royalties — from 600+ real transactions across 8 therapeutic areas.
+I built a free tool that lets biopharma professionals instantly benchmark licensing deal terms — upfront payments, milestones, royalties — from 600+ real transactions across 12 therapeutic areas.
 
 **What makes it newsworthy:**
 - First free tool with rNPV + Monte Carlo simulation for deal benchmarking
@@ -129,7 +129,7 @@ Best,
 
 Hi [Name],
 
-I'm the founder of Ambrosia Ventures. We've built the first free biopharma deal benchmarking tool with rNPV analysis and Monte Carlo simulation, used by BD professionals across 8 therapeutic areas.
+I'm the founder of Ambrosia Ventures. We've built the first free biopharma deal benchmarking tool with rNPV analysis and Monte Carlo simulation, used by BD professionals across 12 therapeutic areas.
 
 I'd love to discuss:
 - **Speaking**: "Data-Driven Deal Benchmarking: What 600+ Transactions Tell Us About 2026 Deal Terms"

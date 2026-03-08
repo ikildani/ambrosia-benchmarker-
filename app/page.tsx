@@ -280,7 +280,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className={`text-sm sm:text-lg lg:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 leading-relaxed font-light transition-all duration-700 delay-300 px-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong> across 8 therapeutic areas.
+            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">600+ real deals</strong> across 12 therapeutic areas.
             <span className="hidden sm:inline"><br /></span>
             <span className="sm:hidden"> </span>
             rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.
@@ -329,7 +329,7 @@ export default function Home() {
           <div className={`flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {[
               { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '600+ deals analyzed' },
-              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '8 therapeutic areas' },
+              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '12 therapeutic areas' },
               { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', text: '120+ company profiles' },
               { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', text: 'Enterprise-grade security' },
             ].map((feature, idx) => (
@@ -474,7 +474,7 @@ export default function Home() {
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
                 title: 'Deal Benchmarking',
-                description: 'Instant benchmarks from 600+ real deals across 8 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
+                description: 'Instant benchmarks from 600+ real deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
                 gradient: 'from-teal-500 to-cyan-500',
               },
               {

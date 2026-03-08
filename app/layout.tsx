@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "Life Sciences Deal Calculator | Biopharma Licensing Benchmarks | Ambrosia Ventures",
     template: "%s | Ambrosia Ventures",
   },
-  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and AI-powered market intelligence for biopharma licensing deals across 8 therapeutic areas. 600+ real transactions, 120+ company profiles. Free to start.",
+  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and AI-powered market intelligence for biopharma licensing deals across 12 therapeutic areas. 600+ real transactions, 120+ company profiles. Free to start.",
   keywords: [
     "biotech deal calculator", "pharma licensing benchmarks", "biopharma deal terms",
     "rNPV analysis tool", "Monte Carlo simulation pharma", "deal benchmarking",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   category: "Life Sciences",
   openGraph: {
     title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
-    description: "rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. 600+ real transactions, 120+ company profiles, 8 therapeutic areas. Free to start.",
+    description: "rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. 600+ real transactions, 120+ company profiles, 12 therapeutic areas. Free to start.",
     type: "website",
     url: "https://calculator.ambrosiaventures.co",
     siteName: "Ambrosia Ventures",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
-    description: "rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. 600+ deals, 120+ companies, 8 TAs. Free to start.",
+    description: "rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. 600+ deals, 120+ companies, 12 TAs. Free to start.",
     images: ["/api/og"],
     creator: "@AmbrosiaVC",
     site: "@AmbrosiaVC",

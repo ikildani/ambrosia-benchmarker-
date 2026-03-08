@@ -32,6 +32,10 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     ...(s.therapeuticArea === 'infectiousDisease' ? { resistanceProfile: s.resistanceProfile, infectionChronicity: s.infectionChronicity, publicHealthPriority: s.publicHealthPriority } : {}),
     ...(s.therapeuticArea === 'ophthalmology' ? { ocularDelivery: s.ocularDelivery, treatmentDurability: s.treatmentDurability, visionImpact: s.visionImpact } : {}),
     ...(s.therapeuticArea === 'womensHealth' ? { whTargetPopulation: s.whTargetPopulation, whUnmetNeed: s.whUnmetNeed, whRegulatory: s.whRegulatory } : {}),
+    ...(s.therapeuticArea === 'rareDisease' ? { orphanDesignation: s.orphanDesignation, patientPopulationSize: s.patientPopulationSize, geneticBasis: s.geneticBasis } : {}),
+    ...(s.therapeuticArea === 'hematology' ? { hemeLineage: s.hemeLineage, transplantEligibility: s.transplantEligibility, mrdStatus: s.mrdStatus } : {}),
+    ...(s.therapeuticArea === 'dermatology' ? { skinSeverity: s.skinSeverity, chronicityProfile: s.chronicityProfile, topicalVsSystemic: s.topicalVsSystemic } : {}),
+    ...(s.therapeuticArea === 'gastroenterology' ? { giSegment: s.giSegment, biologicExperience: s.biologicExperience, endoscopicEndpoint: s.endoscopicEndpoint } : {}),
   };
 }
 
