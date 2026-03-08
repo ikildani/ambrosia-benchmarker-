@@ -16,22 +16,24 @@ import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
 import type { CalculationHistoryItem } from '@/lib/history';
 
 // Dynamic imports for heavy below-fold components
-const SensitivityAnalysis = dynamic(() => import('./sensitivity').then(m => ({ default: m.SensitivityAnalysis })), { ssr: false });
-const ChartSection = dynamic(() => import('./charts/ChartSection'), { ssr: false });
+import { ChartSkeleton, TableSkeleton, AnalysisPanelSkeleton } from './skeletons/SectionSkeleton';
+import PartnerMatchesSkeleton from './skeletons/PartnerMatchesSkeleton';
+const SensitivityAnalysis = dynamic(() => import('./sensitivity').then(m => ({ default: m.SensitivityAnalysis })), { ssr: false, loading: () => <TableSkeleton /> });
+const ChartSection = dynamic(() => import('./charts/ChartSection'), { ssr: false, loading: () => <ChartSkeleton /> });
 const ScenarioComparison = dynamic(() => import('./ScenarioComparison'), { ssr: false });
 const NegotiationPlaybookModal = dynamic(() => import('./NegotiationPlaybookModal'), { ssr: false });
-const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'), { ssr: false });
-const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false });
+const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'), { ssr: false, loading: () => <PartnerMatchesSkeleton /> });
+const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false, loading: () => <TableSkeleton /> });
 const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: false });
 const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
-const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false });
-const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligence'), { ssr: false });
-const RnpvAnalysis = dynamic(() => import('./results/RnpvAnalysis'), { ssr: false });
-const MonteCarloResults = dynamic(() => import('./results/MonteCarloResults'), { ssr: false });
-const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr: false });
-const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false });
-const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false });
-const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPanel'), { ssr: false });
+const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligence'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const RnpvAnalysis = dynamic(() => import('./results/RnpvAnalysis'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const MonteCarloResults = dynamic(() => import('./results/MonteCarloResults'), { ssr: false, loading: () => <ChartSkeleton /> });
+const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
