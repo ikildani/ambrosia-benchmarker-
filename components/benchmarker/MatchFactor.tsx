@@ -9,16 +9,16 @@ interface MatchFactorProps {
 
 export function MatchFactor({ factor }: MatchFactorProps) {
   return (
-    <div className="py-3 border-b border-gray-100 last:border-0">
+    <div className="py-3 border-b border-gray-100 dark:border-slate-700 last:border-0">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <CheckCircle2 className="w-4 h-4 mt-0.5 text-teal-500 flex-shrink-0" />
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-teal-500 dark:text-teal-400 flex-shrink-0" />
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-gray-900 text-sm">
+              <span className="font-medium text-gray-900 dark:text-white text-sm">
                 {factor.title}
               </span>
-              <span className="text-xs px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded font-medium">
+              <span className="text-xs px-1.5 py-0.5 bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 rounded font-medium">
                 +{factor.points} pts
               </span>
             </div>
@@ -30,8 +30,8 @@ export function MatchFactor({ factor }: MatchFactorProps) {
                     key={i}
                     className={`text-sm ${
                       line.highlight
-                        ? 'text-gray-800 font-medium'
-                        : 'text-gray-600'
+                        ? 'text-gray-800 dark:text-slate-200 font-medium'
+                        : 'text-gray-600 dark:text-slate-400'
                     }`}
                   >
                     {line.text}

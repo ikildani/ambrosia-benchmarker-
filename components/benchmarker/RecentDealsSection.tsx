@@ -43,36 +43,36 @@ export function RecentDealsSection({ deals, maxDeals = 3 }: RecentDealsSectionPr
                   {deal.asset_name}
                 </span>
                 {deal.modality && (
-                  <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                  <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs rounded">
                     {formatModality(deal.modality)}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-slate-400">
                 {deal.partner_name && (
                   <span className="truncate">{deal.partner_name}</span>
                 )}
                 {deal.relevance && (
                   <>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-gray-500">{deal.relevance}</span>
+                    <span className="text-gray-300 dark:text-slate-600">·</span>
+                    <span className="text-gray-500 dark:text-slate-400">{deal.relevance}</span>
                   </>
                 )}
               </div>
             </div>
             <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
               {deal.total_value_usd ? (
-                <div className="flex items-center gap-1 text-sm font-medium text-green-600">
+                <div className="flex items-center gap-1 text-sm font-medium text-green-600 dark:text-green-400">
                   {formatCurrency(deal.total_value_usd)}
-                  <span className="text-xs text-gray-400 font-normal">total</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">total</span>
                 </div>
               ) : deal.upfront_usd ? (
-                <div className="flex items-center gap-1 text-sm font-medium text-green-600">
+                <div className="flex items-center gap-1 text-sm font-medium text-green-600 dark:text-green-400">
                   {formatCurrency(deal.upfront_usd)}
-                  <span className="text-xs text-gray-400 font-normal">upfront</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">upfront</span>
                 </div>
               ) : null}
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
                 <Clock className="w-3 h-3" />
                 {formatDate(deal.announced_date)}
               </div>

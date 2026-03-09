@@ -19,10 +19,10 @@ export function ScoreProgressBar({
   };
 
   const getTextColor = (s: number) => {
-    if (s >= 80) return 'text-teal-700';
-    if (s >= 60) return 'text-blue-700';
-    if (s >= 40) return 'text-amber-700';
-    return 'text-gray-700';
+    if (s >= 80) return 'text-teal-700 dark:text-teal-400';
+    if (s >= 60) return 'text-blue-700 dark:text-blue-400';
+    if (s >= 40) return 'text-amber-700 dark:text-amber-400';
+    return 'text-gray-700 dark:text-slate-400';
   };
 
   const heightClass = {
@@ -35,7 +35,7 @@ export function ScoreProgressBar({
     <div className="mb-4">
       {showLabel && (
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          <span className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide">
             Match Score
           </span>
           <span className={`text-lg font-bold ${getTextColor(score)}`}>
@@ -43,7 +43,7 @@ export function ScoreProgressBar({
           </span>
         </div>
       )}
-      <div className={`${heightClass} bg-gray-200 rounded-full overflow-hidden`}>
+      <div className={`${heightClass} bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden`}>
         <div
           className={`h-full bg-gradient-to-r ${getScoreColor(score)} rounded-full transition-all duration-500 ease-out`}
           style={{ width: `${Math.min(100, Math.max(0, score))}%` }}

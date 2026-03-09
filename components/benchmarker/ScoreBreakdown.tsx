@@ -120,14 +120,14 @@ export function ScoreBreakdown({
   };
 
   return (
-    <div className="border-t border-gray-100 px-3 sm:px-4 py-4 sm:py-5 bg-gradient-to-b from-gray-50/50 to-white dark:from-slate-800/50 dark:to-slate-800 animate-fade-in">
+    <div className="border-t border-gray-100 dark:border-slate-700 px-3 sm:px-4 py-4 sm:py-5 bg-gradient-to-b from-gray-50/50 to-white dark:from-slate-800/50 dark:to-slate-800 animate-fade-in">
       {/* Score Progress Bar */}
       <ScoreProgressBar score={matchScore} />
 
       {/* Why They Match Section */}
       {detailedBreakdown && detailedBreakdown.factors.length > 0 && (
         <div className="mt-5">
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+          <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Why They Match
           </div>
           <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg divide-y divide-gray-100 dark:divide-slate-700">
@@ -143,7 +143,7 @@ export function ScoreBreakdown({
       {/* Watch Out Section */}
       {watchOuts && watchOuts.length > 0 && (
         <div className="mt-5">
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+          <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Watch Out For
           </div>
           <div className="space-y-2">
@@ -228,7 +228,7 @@ export function ScoreBreakdown({
           <button
             onClick={handleRegenerateStrategy}
             disabled={isRegeneratingStrategy}
-            className="w-full py-2.5 border border-teal-200 bg-teal-50 text-teal-700 font-medium rounded-lg hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-2.5 border border-teal-200 dark:border-teal-500/30 bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300 font-medium rounded-lg hover:bg-teal-100 dark:hover:bg-teal-500/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isRegeneratingStrategy ? (
               <>
@@ -243,8 +243,8 @@ export function ScoreBreakdown({
             )}
           </button>
           {strategyError && (
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700 flex items-center gap-2">
+            <div className="mt-2 p-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 {strategyError}
               </p>
