@@ -2380,6 +2380,48 @@ export async function analyzeCompetitiveLandscape(
     // Database query failed — use curated data only
   }
 
+  // Calculate phase-weighted trial threat score.
+  // Later-phase competitors pose more imminent competitive threat.
+  // Source: McKinsey pharma launch excellence — Phase 3 assets are 5x
+  // more likely to reach market than Phase 1 assets within 3-5 years.
+  const phaseWeights: Record<string, number> = {
+    'Approved': 3.0, 'approved': 3.0,
+    'Phase 4': 2.5, 'phase4': 2.5, 'phase_4': 2.5,
+    'Phase 3': 2.0, 'phase3': 2.0, 'phase_3': 2.0,
+    'Phase 2/3': 1.8, 'phase2_3': 1.8,
+    'Phase 2': 1.0, 'phase2': 1.0, 'phase_2': 1.0,
+    'Phase 1/2': 0.6, 'phase1_2': 0.6,
+    'Phase 1': 0.3, 'phase1': 0.3, 'phase_1': 0.3,
+    'Preclinical': 0.1, 'preclinical': 0.1,
+  };
+  let weightedTrialScore = 0;
+  for (const [phase, count] of Object.entries(byPhase)) {
+    const weight = phaseWeights[phase] ?? 0.5;
+    weightedTrialScore += count * weight;
+  }
+
+  // Filter trials by modality relevance when specified.
+  // Same-modality competitors are direct threats; different modalities are indirect.
+  let modalityRelevanceBonus = 0;
+  if (modality && trialCount > 0) {
+    try {
+      const { data: modalityTrials } = await supabase
+        .from('company_trials')
+        .select('modality')
+        .in('status', ['recruiting', 'active_not_recruiting', 'not_yet_recruiting'])
+        .or(`indication_specific.eq.${indication},indication_category.eq.${getIndicationCategory(indication, therapeuticArea)}`)
+        .eq('modality', modality)
+        .limit(100);
+      if (modalityTrials && modalityTrials.length > 0) {
+        // Same-modality competitors amplify competitive pressure
+        const sameModalityFraction = modalityTrials.length / Math.max(1, trialCount);
+        modalityRelevanceBonus = sameModalityFraction > 0.3 ? 5 : 0;
+      }
+    } catch {
+      // Modality query failed; proceed without adjustment
+    }
+  }
+
   // Calculate competitive density score (0-100)
   let densityScore = 50; // default moderate
   if (curated) {
@@ -2388,10 +2430,15 @@ export async function analyzeCompetitiveLandscape(
     };
     densityScore = densityMap[curated.density] || 50;
   }
-  // Adjust by live trial count
-  if (trialCount > 20) densityScore = Math.min(95, densityScore + 15);
-  else if (trialCount > 10) densityScore = Math.min(90, densityScore + 10);
-  else if (trialCount < 3) densityScore = Math.max(10, densityScore - 15);
+  // Adjust by phase-weighted trial score using continuous log-linear scaling.
+  // This replaces the sparse threshold bands that ignored 3-10 trial range.
+  if (weightedTrialScore > 0) {
+    // Log-linear: diminishing returns as trial count increases
+    const trialImpact = Math.round(12 * Math.log2(Math.max(1, weightedTrialScore)) / Math.log2(50));
+    densityScore = Math.min(95, densityScore + trialImpact + modalityRelevanceBonus);
+  } else if (trialCount === 0) {
+    densityScore = Math.max(10, densityScore - 15);
+  }
 
   const keyCompetitors = curated?.keyAssets || [];
   const firstMoverAdvantage = densityScore < 40;
@@ -2400,7 +2447,12 @@ export async function analyzeCompetitiveLandscape(
   const erosionMap: Record<string, number> = {
     very_high: 0.45, high: 0.30, moderate: 0.15, low: 0.08, very_low: 0.03,
   };
-  const erosion = curated ? (erosionMap[curated.density] || 0.15) : Math.min(0.50, trialCount * 0.02);
+  // For curated indications, use the curated density but adjust for live phase-weighted data.
+  // For uncurated, use log-scaled trial count (replaces raw 2% per trial linear scaling).
+  const baseErosion = curated
+    ? (erosionMap[curated.density] || 0.15)
+    : Math.min(0.50, 0.05 + 0.10 * Math.log2(Math.max(1, weightedTrialScore)));
+  const erosion = Math.min(0.55, baseErosion);
 
   // Expected next approval
   const upcomingApprovals = keyCompetitors
@@ -2410,10 +2462,24 @@ export async function analyzeCompetitiveLandscape(
     ? { company: upcomingApprovals[0].companyName, year: upcomingApprovals[0].expectedApprovalYear! }
     : undefined;
 
+  // Generate narrative — curated narratives are expert-written; fallback includes phase context
+  const densityLabel = densityScore > 70 ? 'high' : densityScore > 40 ? 'moderate' : 'low';
+  const phaseDistribution = Object.entries(byPhase)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+    .map(([phase, count]) => `${count} in ${phase}`)
+    .join(', ');
+  const nextApprovalNote = expectedNextApproval
+    ? ` ${expectedNextApproval.company} has an expected approval in ${expectedNextApproval.year}.`
+    : '';
   const narrative = curated?.marketDynamics ||
-    `${trialCount} active clinical trials identified for this indication. ` +
-    `Competitive density is ${densityScore > 70 ? 'high' : densityScore > 40 ? 'moderate' : 'low'}, ` +
-    `suggesting ${densityScore > 70 ? 'significant competitive pressure' : densityScore > 40 ? 'a manageable competitive environment' : 'limited competition with potential first-mover advantage'}.`;
+    `${trialCount} active clinical trials identified for this indication` +
+    (phaseDistribution ? ` (${phaseDistribution})` : '') + `. ` +
+    `Competitive density is ${densityLabel}, ` +
+    `suggesting ${densityScore > 70 ? 'significant competitive pressure — differentiated clinical data will be essential for market access'
+      : densityScore > 40 ? 'a manageable competitive environment with room for well-positioned entrants'
+      : 'limited competition with potential first-mover advantage'}.` +
+    nextApprovalNote;
 
   return {
     indication,

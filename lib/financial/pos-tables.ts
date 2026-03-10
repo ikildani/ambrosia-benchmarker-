@@ -883,40 +883,65 @@ export function getCumulativePoS(
   if (regulatoryDesignations.prime) regAdj *= REGULATORY_POS_UPLIFT.prime;
   regAdj = Math.min(regAdj, MAX_REGULATORY_UPLIFT);
 
-  // Ordered list of all phase transitions
-  const phases = [
-    { phase: 'Discovery \u2192 Preclinical', rate: baseRates.discoveryToPreclinical ?? 0.45 },
-    { phase: 'Preclinical \u2192 Phase 1', rate: baseRates.preclinicalToPhase1 },
-    { phase: 'Phase 1 \u2192 Phase 2', rate: baseRates.phase1ToPhase2 },
-    { phase: 'Phase 2 \u2192 Phase 3', rate: baseRates.phase2ToPhase3 },
-    { phase: 'Phase 3 \u2192 Approval', rate: baseRates.phase3ToApproval },
-    { phase: 'NDA Filed \u2192 Approval', rate: baseRates.ndaFiledToApproval ?? 0.90 },
-    { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
-  ];
+  // Build phase-specific transition chain based on current phase.
+  // Phase 1/2 and Phase 2/3 are adaptive/combined trials that use different
+  // transition rates than the standard sequential pathway. NDA Filed also
+  // has its own entry point.
+  let phases: { phase: string; rate: number }[];
 
-  // Determine which transitions remain based on current phase
-  const startIdx = PHASE_START_INDEX[currentPhase] ?? 0;
+  if (currentPhase === 'phase1_2') {
+    phases = [
+      { phase: 'Phase 1/2 \u2192 Phase 2', rate: baseRates.phase1_2ToPhase2 ?? 0.42 },
+      { phase: 'Phase 2 \u2192 Phase 3', rate: baseRates.phase2ToPhase3 },
+      { phase: 'Phase 3 \u2192 Approval', rate: baseRates.phase3ToApproval },
+      { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
+    ];
+  } else if (currentPhase === 'phase2_3') {
+    phases = [
+      { phase: 'Phase 2/3 \u2192 Phase 3', rate: baseRates.phase2_3ToPhase3 ?? 0.55 },
+      { phase: 'Phase 3 \u2192 Approval', rate: baseRates.phase3ToApproval },
+      { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
+    ];
+  } else if (currentPhase === 'nda_filed') {
+    phases = [
+      { phase: 'NDA Filed \u2192 Approval', rate: baseRates.ndaFiledToApproval ?? 0.90 },
+      { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
+    ];
+  } else {
+    const allPhases = [
+      { phase: 'Discovery \u2192 Preclinical', rate: baseRates.discoveryToPreclinical ?? 0.45 },
+      { phase: 'Preclinical \u2192 Phase 1', rate: baseRates.preclinicalToPhase1 },
+      { phase: 'Phase 1 \u2192 Phase 2', rate: baseRates.phase1ToPhase2 },
+      { phase: 'Phase 2 \u2192 Phase 3', rate: baseRates.phase2ToPhase3 },
+      { phase: 'Phase 3 \u2192 Approval', rate: baseRates.phase3ToApproval },
+      { phase: 'Approval \u2192 Launch', rate: baseRates.approvalToLaunch },
+    ];
+    const standardStartIdx: Record<string, number> = {
+      discovery: 0, preclinical: 1, phase1: 2, phase2: 3, phase3: 4, approved: 5,
+    };
+    const startIdx = standardStartIdx[currentPhase] ?? 0;
+    phases = allPhases.slice(startIdx);
+  }
 
   let cumulative = 1.0;
   const transitions: { phase: string; probability: number; cumulativeProb: number }[] = [];
 
-  for (let i = startIdx; i < phases.length; i++) {
+  for (let i = 0; i < phases.length; i++) {
+    const phaseName = phases[i].phase;
     let adjustedRate = phases[i].rate;
 
     // Apply modality and biomarker adjustments to clinical transitions only
     // (not approval->launch, which is primarily an administrative/commercial step)
-    if (i < phases.length - 1) {
+    const isApprovalToLaunch = phaseName.includes('Launch');
+    if (!isApprovalToLaunch) {
       adjustedRate *= modalityAdj * biomarkerAdj;
 
-      // Regulatory uplift is strongest at Phase 3->Approval and NDA Filed->Approval
-      // (direct impact on regulatory outcome) and has a partial effect on Phase 2->3
-      // (increased FDA interaction improves trial design and endpoint selection).
-      // Earlier phases receive no regulatory uplift.
-      if (i === 4 || i === 5) {
-        // Phase 3 -> Approval or NDA Filed -> Approval: full regulatory uplift
+      // Regulatory uplift: strongest at approval transitions, partial at Phase 2→3
+      const isApprovalTransition = phaseName.includes('Approval') && !phaseName.includes('Launch');
+      const isPhase2To3 = phaseName.includes('Phase 2') && phaseName.includes('Phase 3');
+      if (isApprovalTransition) {
         adjustedRate *= regAdj;
-      } else if (i === 3) {
-        // Phase 2 -> Phase 3: partial regulatory uplift (sqrt)
+      } else if (isPhase2To3) {
         adjustedRate *= Math.sqrt(regAdj);
       }
     }

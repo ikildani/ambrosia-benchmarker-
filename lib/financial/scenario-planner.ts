@@ -45,7 +45,7 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     adjustments: [
       { parameter: 'timeToMarket', operation: 'add', value: -1.5, rationale: '18-month acceleration from surrogate-based approval' },
       { parameter: 'peakSales', operation: 'multiply', value: 1.05, rationale: 'First-mover benefit from early market entry' },
-      { parameter: 'pos', operation: 'multiply', value: 1.15, rationale: 'Breakthrough/accelerated pathway improves approval likelihood' },
+      { parameter: 'pos', operation: 'multiply', value: 1.05, rationale: 'Accelerated pathway modestly improves approval likelihood (confirmatory trial still required)' },
     ],
   },
 
@@ -157,7 +157,7 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     id: 'cmc_failure',
     name: 'CMC / Manufacturing Failure',
     description: 'Critical manufacturing issue (sterility, potency, yield) requires process redesign and delays launch by 18 months.',
-    category: 'clinical',
+    category: 'regulatory',
     adjustments: [
       { parameter: 'timeToMarket', operation: 'add', value: 1.5, rationale: '18-month delay for manufacturing process redesign' },
       { parameter: 'peakSales', operation: 'multiply', value: 0.90, rationale: 'Supply constraints limit initial launch capacity' },
@@ -214,7 +214,7 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     description: 'FDA grants 6-month pediatric exclusivity, extending market protection and revenue tail.',
     category: 'regulatory',
     adjustments: [
-      { parameter: 'peakSales', operation: 'multiply', value: 1.08, rationale: '6-month LOE extension adds ~8% lifecycle revenue' },
+      { parameter: 'timeToMarket', operation: 'add', value: -0.5, rationale: '6-month LOE extension effectively extends peak revenue duration (modeled as earlier effective launch relative to LOE)' },
     ],
   },
   {
@@ -252,7 +252,7 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     id: 'class_effect_concern',
     name: 'Class-Effect Safety Concern',
     description: 'Regulatory agency raises class-wide safety concern affecting all drugs with similar mechanism.',
-    category: 'clinical',
+    category: 'regulatory',
     adjustments: [
       { parameter: 'peakSales', operation: 'multiply', value: 0.75, rationale: 'Class-wide REMS or label warning reduces prescribing confidence' },
       { parameter: 'pos', operation: 'multiply', value: 0.85, rationale: 'Heightened regulatory scrutiny on the class' },
@@ -447,11 +447,32 @@ export function getDefensiveAnalysis(
   const worstCase = results[0];
   const bestCase = results[results.length - 1];
 
-  // Defensive floor: P10 of scenario outcomes
-  const allAdjustedValues = results.map(r => r.adjustedRNPV);
-  allAdjustedValues.sort((a, b) => a - b);
-  const p10Index = Math.floor(allAdjustedValues.length * 0.10);
-  const defensiveFloor = allAdjustedValues[p10Index] || 0;
+  // Defensive floor: probability-weighted P10 of scenario outcomes.
+  // Downside scenarios (clinical failure, safety) are more likely than extreme
+  // upside scenarios. We weight by implied probability based on category.
+  const categoryWeights: Record<string, number> = {
+    clinical: 0.25,      // Clinical failures are the most common risk
+    regulatory: 0.20,    // Regulatory setbacks are frequent
+    competitive: 0.20,   // Competitive dynamics always present
+    commercial: 0.20,    // Commercial execution risk
+    pricing: 0.15,       // Pricing pressure less frequent but impactful
+  };
+  // Weight each scenario, sort by adjusted rNPV, find weighted P10
+  const weightedResults = results.map(r => ({
+    adjustedRNPV: r.adjustedRNPV,
+    weight: categoryWeights[r.scenario.category] || 0.20,
+  }));
+  weightedResults.sort((a, b) => a.adjustedRNPV - b.adjustedRNPV);
+  const totalWeight = weightedResults.reduce((s, r) => s + r.weight, 0);
+  let cumulativeWeight = 0;
+  let defensiveFloor = weightedResults[0]?.adjustedRNPV || 0;
+  for (const wr of weightedResults) {
+    cumulativeWeight += wr.weight / totalWeight;
+    if (cumulativeWeight >= 0.10) {
+      defensiveFloor = wr.adjustedRNPV;
+      break;
+    }
+  }
 
   // Walk-away threshold: phase-adjusted minimum acceptable deal value
   // Source: Industry practice — earlier-stage deals require lower absolute floor

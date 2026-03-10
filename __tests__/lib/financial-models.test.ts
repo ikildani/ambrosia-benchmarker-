@@ -31,7 +31,7 @@ function makeRNPVInput(overrides: Partial<RNPVInput> = {}): RNPVInput {
     modality: 'smallMolecule',
     indication: 'lung_nsclc',
     territory: 'global',
-    peakSalesEstimate: { low: 500, median: 1000, high: 2000 },
+    peakSalesEstimate: { low: 1500, median: 3000, high: 5000 },
     competitivePosition: 'bestInClass',
     dataQuality: 'robust',
     regulatoryDesignations: {

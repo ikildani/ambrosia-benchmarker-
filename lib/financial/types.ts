@@ -111,6 +111,12 @@ export interface RNPVInput {
   biomarkerStatus?: string;
 
   /**
+   * Company type of the asset owner — affects discount rate.
+   * One of: 'largePharma', 'midPharma', 'biotech', 'clinicalStageBiotech', 'academic'.
+   */
+  companyType?: string;
+
+  /**
    * Override for the weighted-average cost of capital.
    * If not provided, defaults to ~10-12% depending on phase and risk profile.
    * Early-stage assets typically use the higher end of the range.

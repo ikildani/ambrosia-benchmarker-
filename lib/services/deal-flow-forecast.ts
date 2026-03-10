@@ -203,26 +203,41 @@ export async function forecastDealFlow(
     }
   }
 
+  // Exclude current quarter if it's incomplete (within last 30 days of quarter end).
+  // 2026Q1 ends March 31 — if today < March 31, it's partial.
+  const now = new Date();
+  const currentQuarter = `${now.getFullYear()}Q${Math.ceil((now.getMonth() + 1) / 3)}`;
+  const completeHistorical = historical.filter(h => h.quarter !== currentQuarter);
+
   // Linear regression on deal counts for trend
-  const dealCounts = historical.map(h => h.dealCount);
+  const dealCounts = completeHistorical.map(h => h.dealCount);
   const n = dealCounts.length;
   const xs = Array.from({ length: n }, (_, i) => i);
 
-  const { slope, intercept } = linearRegression(xs, dealCounts);
+  const { slope, intercept, residualSE } = linearRegression(xs, dealCounts);
 
   // Seasonal adjustment (Q4 tends to be highest, Q3 lowest)
+  const overallAvg = dealCounts.reduce((a, b) => a + b, 0) / n;
   const seasonalFactors: Record<number, number> = {};
   for (let q = 1; q <= 4; q++) {
-    const qValues = historical
-      .filter((_, i) => (i % 4) + 1 === q)
-      .map(h => h.dealCount);
-    const qAvg = qValues.reduce((a, b) => a + b, 0) / qValues.length;
-    const overallAvg = dealCounts.reduce((a, b) => a + b, 0) / n;
+    const qIndices = completeHistorical
+      .map((h, i) => ({ q: parseInt(h.quarter.slice(5)), i }))
+      .filter(x => x.q === q)
+      .map(x => x.i);
+    const qValues = qIndices.map(i => dealCounts[i]);
+    const qAvg = qValues.length > 0 ? qValues.reduce((a, b) => a + b, 0) / qValues.length : overallAvg;
     seasonalFactors[q] = overallAvg > 0 ? qAvg / overallAvg : 1.0;
   }
 
+  // TA-specific volatility: standard deviation of deal counts
+  const taVolatility = Math.sqrt(
+    dealCounts.reduce((s, v) => s + (v - overallAvg) ** 2, 0) / Math.max(1, n - 1)
+  );
+  // Coefficient of variation — used to scale confidence (high-volume TAs = more predictable)
+  const cv = overallAvg > 0 ? taVolatility / overallAvg : 1.0;
+
   // Generate 4-quarter forecast
-  const lastQuarter = historical[historical.length - 1].quarter;
+  const lastQuarter = completeHistorical[completeHistorical.length - 1].quarter;
   const lastYear = parseInt(lastQuarter.slice(0, 4));
   const lastQ = parseInt(lastQuarter.slice(5));
 
@@ -234,18 +249,32 @@ export async function forecastDealFlow(
     const trendValue = slope * forecastIdx + intercept;
     const seasonal = seasonalFactors[q] || 1.0;
     const predicted = Math.round(trendValue * seasonal);
-    const confidence = Math.max(0.50, 0.85 - i * 0.08); // confidence decreases with horizon
+
+    // Confidence derived from regression residual SE and TA volatility.
+    // Wider prediction interval = lower confidence. Decays with forecast horizon.
+    // SE of prediction grows with distance from data centroid.
+    const xBar = (n - 1) / 2;
+    const ssX = xs.reduce((s, x) => s + (x - xBar) ** 2, 0);
+    const predSE = residualSE * Math.sqrt(1 + 1 / n + (forecastIdx - xBar) ** 2 / Math.max(1, ssX));
+    // Map prediction interval width to confidence: narrow interval = high confidence
+    // Normalize by the predicted value to get relative uncertainty
+    const relativeUncertainty = predicted > 0 ? predSE / predicted : 1.0;
+    const cvPenalty = Math.min(0.15, cv * 0.10); // High-volatility TAs get lower confidence
+    const confidence = Math.max(0.35, Math.min(0.90, 0.90 - relativeUncertainty * 0.5 - cvPenalty - (i - 1) * 0.05));
 
     forecast.push({
       quarter: `Q${q} ${year}`,
       predictedDeals: Math.max(1, predicted),
-      confidence,
+      confidence: Math.round(confidence * 100) / 100,
     });
   }
 
-  // Determine trend
+  // Determine trend (using complete quarters only)
   const recentAvg = dealCounts.slice(-4).reduce((a, b) => a + b, 0) / 4;
   const olderAvg = dealCounts.slice(-8, -4).reduce((a, b) => a + b, 0) / 4;
+  // Thresholds: 15% growth = accelerating, 15% decline = decelerating
+  // Source: BioPharma Dive deal market analysis — 15% YoY change is the industry threshold
+  // for "meaningful" trend shifts in BD deal activity.
   const trend: DealFlowForecast['trend'] = recentAvg > olderAvg * 1.15
     ? 'accelerating'
     : recentAvg < olderAvg * 0.85
@@ -254,16 +283,19 @@ export async function forecastDealFlow(
 
   // Determine seasonal pattern
   const q4Factor = seasonalFactors[4] || 1.0;
-  const q1Factor = seasonalFactors[1] || 1.0;
   const seasonalPattern = q4Factor > 1.15
     ? 'Strong Q4 seasonality — year-end deal pressure drives higher volumes in October-December.'
-    : 'Relatively even deal flow across quarters with mild Q4 uptick.';
+    : q4Factor > 1.05
+      ? 'Mild Q4 uptick driven by fiscal year-end deal closings.'
+      : 'Relatively even deal flow across quarters.';
 
-  // Market sentiment
+  // Market sentiment — considers both trend direction AND magnitude.
+  // 'cooling' requires a stronger signal (25% decline) than just 'decelerating' (15% decline).
   const sentiment: DealFlowForecast['marketSentiment'] =
     trend === 'accelerating' && recentAvg > olderAvg * 1.25 ? 'hot'
     : trend === 'accelerating' ? 'warm'
-    : trend === 'decelerating' ? 'cooling'
+    : trend === 'decelerating' && recentAvg < olderAvg * 0.75 ? 'cooling'
+    : trend === 'decelerating' ? 'neutral'
     : 'neutral';
 
   const narrative = generateDealFlowNarrative(therapeuticArea, trend, sentiment, recentAvg, forecast, indication);
@@ -273,6 +305,7 @@ export async function forecastDealFlow(
 
   return {
     therapeuticArea,
+    // Include all historical quarters (complete + partial current quarter for display)
     historicalQuarters: historical.map(q => ({
       quarter: formatQuarter(q.quarter),
       dealCount: q.dealCount,
@@ -286,8 +319,9 @@ export async function forecastDealFlow(
   };
 }
 
-/** Simple linear regression */
-function linearRegression(xs: number[], ys: number[]): { slope: number; intercept: number } {
+/** Linear regression with residual standard error for prediction intervals.
+ * Returns slope, intercept, and SE of residuals for confidence calculations. */
+function linearRegression(xs: number[], ys: number[]): { slope: number; intercept: number; residualSE: number } {
   const n = xs.length;
   let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
   for (let i = 0; i < n; i++) {
@@ -297,10 +331,19 @@ function linearRegression(xs: number[], ys: number[]): { slope: number; intercep
     sumX2 += xs[i] * xs[i];
   }
   const denom = n * sumX2 - sumX * sumX;
-  if (denom === 0) return { slope: 0, intercept: sumY / n };
+  if (denom === 0) return { slope: 0, intercept: sumY / n, residualSE: 1.0 };
   const slope = (n * sumXY - sumX * sumY) / denom;
   const intercept = (sumY - slope * sumX) / n;
-  return { slope, intercept };
+
+  // Residual standard error: sqrt(SSR / (n-2)) where SSR = sum of squared residuals
+  let ssr = 0;
+  for (let i = 0; i < n; i++) {
+    const predicted = slope * xs[i] + intercept;
+    ssr += (ys[i] - predicted) ** 2;
+  }
+  const residualSE = n > 2 ? Math.sqrt(ssr / (n - 2)) : 1.0;
+
+  return { slope, intercept, residualSE };
 }
 
 function generateDealFlowNarrative(

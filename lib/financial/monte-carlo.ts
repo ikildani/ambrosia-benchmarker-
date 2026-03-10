@@ -23,9 +23,6 @@ import type { MonteCarloInput, MonteCarloResult, RNPVInput } from './types';
 import {
   seedableRandom,
   sampleNormal,
-  sampleTriangular,
-  sampleBeta,
-  sampleLognormal,
   percentile,
   buildHistogram,
 } from './distributions';
@@ -49,12 +46,18 @@ const HISTOGRAM_BINS = 30;
 const DEFAULT_DISCOUNT_RATE = 0.11; // 11 % WACC — mid-range for biotech
 const DEFAULT_SEED = 42;
 
-/** Ordered list of clinical phases used for rNPV progression. */
+/** Ordered list of clinical phases used for rNPV progression.
+ * Includes combined/adaptive trial phases and NDA filed to match
+ * the full phase set supported by the rNPV engine. */
 const PHASE_ORDER = [
+  'discovery',
   'preclinical',
   'phase1',
+  'phase1_2',
   'phase2',
+  'phase2_3',
   'phase3',
+  'nda_filed',
   'approved',
 ] as const;
 
@@ -100,34 +103,6 @@ function lognormalParams(
   const mu = Math.log(Math.max(median, 1e-6));
   const sigma = Math.sqrt(Math.log(1 + cv * cv));
   return { mu, sigma };
-}
-
-/**
- * Derive Beta distribution parameters (alpha, beta) from a desired mean
- * probability and a variation fraction that controls spread.
- *
- * mean = alpha / (alpha + beta)
- * kappa = alpha + beta   (controls variance — higher = tighter)
- *
- * We map variation [0, 1] → kappa [500, 4] on a log scale so that
- * small variation fractions produce very tight distributions and large
- * ones produce wide, uncertain distributions.
- */
-function betaParams(
-  mean: number,
-  variationFraction: number,
-): { alpha: number; beta: number } {
-  const m = Math.max(0.001, Math.min(0.999, mean));
-
-  const clampedVar = Math.max(0.001, Math.min(1, variationFraction));
-  const kappa = Math.exp(
-    Math.log(500) + (Math.log(4) - Math.log(500)) * clampedVar,
-  );
-
-  return {
-    alpha: m * kappa,
-    beta: (1 - m) * kappa,
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -259,46 +234,61 @@ function computeIterationRNPV(
     discountedRevenue += annualRevenue * discountFactor;
   }
 
-  // --- 4. Development costs (simple present-value estimate) ------------
-  // We estimate remaining dev costs from remaining phases.  If the
-  // pos-tables export per-phase costs in the future we can use those;
-  // for now we use a heuristic based on phase and therapeutic area.
-  // The costs are spread evenly across remaining years and discounted.
-  const estimatedRemainingCosts = estimateRemainingDevCosts(
-    input.therapeuticArea,
-    startIdx,
-  );
+  // --- 4. Development costs (risk-adjusted per phase gate) -------------
+  // Each phase's cost is weighted by the probability of actually reaching
+  // that phase. This avoids overestimating costs for early-stage assets
+  // where most programs terminate before expensive late-stage trials.
+  // Source: Standard rNPV methodology (Stewart, Allison & Johnson, 2001)
+  const taCosts = PHASE_COSTS[input.therapeuticArea] ?? PHASE_COSTS['oncology'];
+  const taBaseRates = POS_BY_THERAPEUTIC_AREA[input.therapeuticArea] ?? POS_BY_THERAPEUTIC_AREA['oncology'];
+  const baseTransitionRates = [
+    taBaseRates.discoveryToPreclinical ?? 0.45,
+    taBaseRates.preclinicalToPhase1,
+    taBaseRates.phase1ToPhase2,
+    taBaseRates.phase1_2ToPhase2 ?? taBaseRates.phase1ToPhase2,
+    taBaseRates.phase2ToPhase3,
+    taBaseRates.phase2_3ToPhase3 ?? taBaseRates.phase2ToPhase3,
+    taBaseRates.phase3ToApproval,
+    taBaseRates.ndaFiledToApproval ?? 0.90,
+    taBaseRates.approvalToLaunch,
+  ];
+
   let discountedCosts = 0;
-  if (estimatedRemainingCosts > 0 && totalYearsToMarket > 0) {
-    const yearsRemaining = Math.max(1, Math.ceil(totalYearsToMarket));
-    const annualCost = estimatedRemainingCosts / yearsRemaining;
-    for (let yr = 1; yr <= yearsRemaining; yr++) {
-      discountedCosts += annualCost / Math.pow(1 + r, yr);
+  let yearAccum = 0;
+  let phasePoS = 1.0; // cumulative probability of reaching each phase
+  for (let i = startIdx; i < PHASE_ORDER.length; i++) {
+    const phaseKey = PHASE_ORDER[i];
+    const phaseCost = (taCosts as Record<string, number>)[phaseKey] ?? 0;
+    const phaseDur = (taDurations as Record<string, number>)[phaseKey] ?? 1.5;
+
+    if (phaseCost > 0 && phaseDur > 0) {
+      const annualCost = phaseCost / phaseDur;
+      for (let yr = 0; yr < Math.ceil(phaseDur); yr++) {
+        const costYear = yearAccum + yr + 1;
+        // Risk-adjust: only incur cost if we've reached this phase
+        discountedCosts += (annualCost * phasePoS) / Math.pow(1 + r, costYear);
+      }
+    }
+    yearAccum += phaseDur;
+
+    // Update cumulative PoS for next phase
+    if (i < baseTransitionRates.length) {
+      phasePoS *= Math.max(0.01, Math.min(0.95, baseTransitionRates[i]));
     }
   }
+  // Add regulatory cost
+  const regCost = (taCosts as Record<string, number>)['regulatory'] ?? 5;
+  if (regCost > 0) {
+    const regDur = (taDurations as Record<string, number>)['regulatory'] ?? 1.0;
+    discountedCosts += (regCost * phasePoS) / Math.pow(1 + r, yearAccum + regDur);
+  }
 
-  // --- 5. rNPV = PoS x discounted revenue - discounted costs -----------
+  // --- 5. rNPV = PoS x discounted revenue - risk-adjusted costs -------
   return cumulativePoS * discountedRevenue - discountedCosts;
 }
 
-/**
- * Remaining development costs ($M) from the current phase to approval,
- * sourced from the shared PHASE_COSTS table in pos-tables.ts.
- */
-function estimateRemainingDevCosts(
-  therapeuticArea: string,
-  startPhaseIdx: number,
-): number {
-  const costs = PHASE_COSTS[therapeuticArea] ?? PHASE_COSTS['oncology'];
-  let total = 0;
-  for (let i = startPhaseIdx; i < PHASE_ORDER.length; i++) {
-    const phaseKey = PHASE_ORDER[i];
-    total += (costs as Record<string, number>)[phaseKey] ?? 0;
-  }
-  // Add regulatory cost
-  total += (costs as Record<string, number>)['regulatory'] ?? 5;
-  return total;
-}
+// estimateRemainingDevCosts removed — costs are now risk-adjusted per phase gate
+// directly in computeIterationRNPV for more accurate modeling.
 
 /**
  * Pearson correlation coefficient between two equal-length arrays.
@@ -397,10 +387,7 @@ export function runMonteCarlo(
     rnpv.regulatoryDesignations,
   );
   const basePoS = posResult.cumulativePoS;
-  const { alpha: posAlpha, beta: posBeta } = betaParams(
-    basePoS,
-    input.posVariation ?? 0.20,
-  );
+  const posVariation = input.posVariation ?? 0.20;
 
   // 2. Peak sales: lognormal centred on the user-supplied median
   const basePeakSales = rnpv.peakSalesEstimate.median;
@@ -414,11 +401,8 @@ export function runMonteCarlo(
   const baseRate = rnpv.discountRate ?? DEFAULT_DISCOUNT_RATE;
   const rateStdDev = input.discountRateVariation ?? 0.02; // absolute pp
 
-  // 4. Time-to-market: triangular shift (years earlier / later)
+  // 4. Time-to-market: shift range (years earlier / later)
   const ttmShift = input.timeToMarketVariation ?? 1.0; // +/- years
-  const ttmMin = -ttmShift;
-  const ttmMode = 0;
-  const ttmMax = ttmShift;
 
   // 5. Pricing multiplier: normal centred on 1.0
   const pricingStdDev = input.pricingVariation ?? 0.15;

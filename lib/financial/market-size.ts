@@ -14,7 +14,7 @@ const TERRITORY_DATA: Record<string, { population: number; pricingIndexVsUS: num
   us_only: { population: 340_000_000, pricingIndexVsUS: 1.00 },
   europe: { population: 450_000_000, pricingIndexVsUS: 0.38 },
   china: { population: 1_405_000_000, pricingIndexVsUS: 0.12 },
-  japan: { population: 123_000_000, pricingIndexVsUS: 0.25 },
+  japan: { population: 123_000_000, pricingIndexVsUS: 0.45 },
   ex_us: { population: 7_860_000_000, pricingIndexVsUS: 0.22 },
   row: { population: 5_882_000_000, pricingIndexVsUS: 0.15 },
   us_eu: { population: 790_000_000, pricingIndexVsUS: 0.72 },

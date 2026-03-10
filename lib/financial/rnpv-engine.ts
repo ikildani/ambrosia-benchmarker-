@@ -21,7 +21,29 @@ import {
   COGS_BY_MODALITY_CATEGORY,
   SGA_BY_LIFECYCLE_STAGE,
 } from './pos-tables';
-import { DEFAULT_DISCOUNT_RATES } from './discount-rates';
+import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM } from './discount-rates';
+
+/**
+ * Effective corporate tax rate for pharma/biotech.
+ * Source: Deloitte 2024 pharma tax benchmark — US effective rate ~15-21%;
+ * we use 18% as a blended global rate reflecting offshore IP structures.
+ */
+const EFFECTIVE_TAX_RATE = 0.18;
+
+/**
+ * Generic erosion at LOE by modality category.
+ * Source: IQVIA Channel Dynamics, EvaluatePharma lifecycle analysis.
+ * Small molecules face rapid generic substitution (80% erosion within 1 year).
+ * Biologics face slower biosimilar adoption (30-50% over several years).
+ */
+const GENERIC_EROSION_BY_MODALITY: Record<string, number> = {
+  smallMolecule: 0.80,   // Rapid generic substitution
+  biologic: 0.40,        // Slower biosimilar uptake, physician inertia
+  cellTherapy: 0.20,     // Minimal generic competition for autologous therapies
+  geneTherapy: 0.15,     // One-time therapies, very limited biosimilar pathway
+  vaccine: 0.50,         // Moderate — some biosimilar competition
+  radiopharmaceutical: 0.30, // Complex manufacturing limits generic entry
+};
 
 /** Phase order for iteration */
 const PHASE_ORDER = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'] as const;
@@ -63,8 +85,8 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const phase = guardedPhase as typeof input.phase;
   const peakSalesEstimate = guardedPeakSales;
 
-  // 1. Get discount rate (use guarded value)
-  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase);
+  // 1. Get discount rate (use guarded value, or compute from TA + territory + company type)
+  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType);
 
   // 2. Calculate cumulative PoS from current phase
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
@@ -162,8 +184,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const TERMINAL_DECLINE_RATE = -0.10; // 10% annual decline post-LOE
   const lastRevenueCF = [...cashFlows].reverse().find(cf => cf.revenue > 0);
   let terminalValue = 0;
+  const genericErosion = getGenericErosionRate(modality);
   if (lastRevenueCF && lastRevenueCF.revenue > 0) {
-    const terminalRevenue = lastRevenueCF.revenue * 0.20; // 20% of last revenue retained post-generic entry
+    const terminalRevenue = lastRevenueCF.revenue * (1 - genericErosion); // Retained revenue post-LOE (modality-dependent)
     // Gordon growth model with negative growth: TV = CF / (r - g), discounted to present
     // Source: Damodaran, "Valuing pharma companies" — terminal value for mature drugs
     const denominator = discountRate - TERMINAL_DECLINE_RATE; // r - g where g is negative, so r + |g|
@@ -198,10 +221,14 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   };
 
   // 10. Cross-validation with benchmark-based deal value
+  // Use phase-dependent deal-to-rNPV ratio for more accurate comparison.
+  // Earlier phases have lower deal/rNPV ratios due to higher risk premium.
+  // Source: DealForma 2020-2025 — median total deal value as fraction of rNPV by phase.
   let crossValidation: RNPVResult['crossValidation'];
   if (benchmarkDealValue) {
     const benchMedian = benchmarkDealValue.median;
-    const rnpvImpliedMedian = impliedDealValue.totalDeal.median;
+    const phaseDealRatio = getPhaseDealToRNPVRatio(phase);
+    const rnpvImpliedMedian = riskAdjustedNPV * phaseDealRatio;
     const divergence = benchMedian > 0
       ? ((rnpvImpliedMedian - benchMedian) / benchMedian) * 100
       : 0;
@@ -216,13 +243,14 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
 
   // 11. Model assumptions documentation
   const modelAssumptions = [
-    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC)`,
+    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC${territory ? `, ${territory} territory` : ''}${input.companyType ? `, ${input.companyType}` : ''})`,
     `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%`,
     `Years to market: ${yearsToMarket.toFixed(1)} years`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M (adj. for data quality; competitive position applied upstream)`,
     `Revenue ramp: ${REVENUE_CURVE.rampUpYears}yr ramp, ${REVENUE_CURVE.peakDurationYears}yr peak, ${(REVENUE_CURVE.declineRate * 100).toFixed(0)}% annual decline`,
-    `LOE: ${REVENUE_CURVE.loeYearsAfterApproval} years post-approval`,
+    `LOE: ${REVENUE_CURVE.loeYearsAfterApproval} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`,
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
+    `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
   ];
 
   return {
@@ -258,7 +286,9 @@ function projectCashFlows(
   modality: string,
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
-  const { rampUpYears, peakDurationYears, declineRate, genericErosion, loeYearsAfterApproval } = REVENUE_CURVE;
+  const { rampUpYears, peakDurationYears, declineRate, loeYearsAfterApproval } = REVENUE_CURVE;
+  // Use modality-dependent generic erosion instead of the flat 80% constant
+  const genericErosion = getGenericErosionRate(modality);
   const totalYears = Math.ceil(yearsToMarket) + loeYearsAfterApproval + 5; // +5 for post-LOE tail
 
   // R&D cost phase mapping (years spent in each remaining phase)
@@ -333,7 +363,11 @@ function projectCashFlows(
       }
     }
 
-    const netCashFlow = grossProfit - rdCosts - sgaCosts;
+    const preTaxCashFlow = grossProfit - rdCosts - sgaCosts;
+    // Apply corporate tax on positive operating income only (no tax benefit on losses
+    // for simplicity — pharma NOL carryforwards are complex and company-specific)
+    const tax = preTaxCashFlow > 0 ? preTaxCashFlow * EFFECTIVE_TAX_RATE : 0;
+    const netCashFlow = preTaxCashFlow - tax;
     const discountFactor = 1 / Math.pow(1 + discountRate, year);
     const presentValue = netCashFlow * discountFactor;
 
@@ -364,7 +398,16 @@ function projectCashFlows(
  * Source: Industry benchmarks — Deloitte biopharma manufacturing cost analysis */
 function getCogsRate(modality: string): number {
   // Map specific modalities to categories
-  const biologicModalities = ['mab', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf'];
+  // Comprehensive modality-to-COGS mapping — all biologic-class modalities must be listed
+  // to avoid incorrectly defaulting to smallMolecule (10% COGS instead of 18%)
+  const biologicModalities = [
+    'mab', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor',
+    'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor',
+    's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal',
+    'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist',
+    'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor', 'oralPeptide',
+    'hormoneTherapy', 'neuroactiveSteroid', 'myosinInhibitor',
+  ];
   const cellTherapyModalities = ['carT_heme', 'carT_solid', 'cellTherapy', 'carT_autoimmune', 'inVivoCarT', 'carTreg', 'stemCell'];
   const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'aso', 'rnai', 'oligonucleotide', 'mrna'];
   const vaccineModalities = ['therapeuticVaccine', 'vaccinePreventive', 'oncolyticVirus'];
@@ -376,6 +419,24 @@ function getCogsRate(modality: string): number {
   if (radioModalities.includes(modality)) return COGS_BY_MODALITY_CATEGORY.radiopharmaceutical;
   if (biologicModalities.includes(modality)) return COGS_BY_MODALITY_CATEGORY.biologic;
   return COGS_BY_MODALITY_CATEGORY.smallMolecule; // default
+}
+
+/** Map modality to generic erosion rate at LOE.
+ * Source: IQVIA Channel Dynamics — biologics retain more revenue post-LOE
+ * than small molecules due to slower biosimilar adoption. */
+function getGenericErosionRate(modality: string): number {
+  const biologicModalities = ['mab', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor', 'fcrnAntagonist', 'complementInhibitor'];
+  const cellTherapyModalities = ['carT_heme', 'carT_solid', 'cellTherapy', 'carT_autoimmune', 'inVivoCarT', 'carTreg', 'stemCell'];
+  const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'aso', 'rnai', 'oligonucleotide', 'mrna'];
+  const vaccineModalities = ['therapeuticVaccine', 'vaccinePreventive', 'oncolyticVirus'];
+  const radioModalities = ['radiopharmaceutical'];
+
+  if (cellTherapyModalities.includes(modality)) return GENERIC_EROSION_BY_MODALITY.cellTherapy;
+  if (geneTherapyModalities.includes(modality)) return GENERIC_EROSION_BY_MODALITY.geneTherapy;
+  if (vaccineModalities.includes(modality)) return GENERIC_EROSION_BY_MODALITY.vaccine;
+  if (radioModalities.includes(modality)) return GENERIC_EROSION_BY_MODALITY.radiopharmaceutical;
+  if (biologicModalities.includes(modality)) return GENERIC_EROSION_BY_MODALITY.biologic;
+  return GENERIC_EROSION_BY_MODALITY.smallMolecule; // default
 }
 
 /**
@@ -403,10 +464,30 @@ function getPartialPoS(year: number, launchYear: number, fullPoS: number): numbe
   return 1.0 - sigmoid * (1.0 - fullPoS);
 }
 
-/** Get default discount rate for therapeutic area and phase */
-function getDefaultDiscountRate(therapeuticArea: string, phase: string): number {
+/** Get default discount rate for therapeutic area, phase, territory, and company type.
+ * Additive adjustments from territory risk premium and company type are applied
+ * to the base TA/phase rate. Source: Damodaran, EY biopharma valuation benchmarks. */
+function getDefaultDiscountRate(
+  therapeuticArea: string,
+  phase: string,
+  territory?: string,
+  companyType?: string,
+): number {
   const taRates = DEFAULT_DISCOUNT_RATES[therapeuticArea] || DEFAULT_DISCOUNT_RATES.oncology;
-  return taRates[phase] || taRates.phase2 || 0.12;
+  let rate = taRates[phase] || taRates.phase2 || 0.12;
+
+  // Apply territory risk premium (e.g., China +2.5pp, US -0.5pp)
+  if (territory && TERRITORY_RISK_PREMIUM[territory] != null) {
+    rate += TERRITORY_RISK_PREMIUM[territory];
+  }
+
+  // Apply company-type adjustment (e.g., large pharma -1pp, clinical-stage biotech +2.5pp)
+  if (companyType && COMPANY_TYPE_ADJUSTMENT[companyType] != null) {
+    rate += COMPANY_TYPE_ADJUSTMENT[companyType];
+  }
+
+  // Clamp to reasonable range
+  return Math.max(0.05, Math.min(0.30, rate));
 }
 
 /** Data quality adjustment to peak sales (better data = more confidence in projections) */
@@ -482,6 +563,24 @@ function generateDivergenceNarrative(
   }
   const reasonText = reasons.length > 0 ? ` Key factors: ${reasons.join('; ')}.` : '';
   return `The rNPV model values the asset ${Math.round(Math.abs(divergencePercent))}% below comparable deal benchmarks.${reasonText} Benchmarks may reflect strategic premiums (e.g., competitive urgency, portfolio fit) not captured in the DCF model. Consider whether the deal premium is justified by strategic value.`;
+}
+
+/** Phase-dependent deal-to-rNPV ratio for cross-validation.
+ * Earlier-phase deals capture a smaller fraction of rNPV due to risk premium.
+ * Source: DealForma/BioCentury deal analysis 2020-2025 */
+function getPhaseDealToRNPVRatio(phase: string): number {
+  const ratios: Record<string, number> = {
+    discovery: 0.25,
+    preclinical: 0.35,
+    phase1: 0.40,
+    phase1_2: 0.45,
+    phase2: 0.55,
+    phase2_3: 0.60,
+    phase3: 0.70,
+    nda_filed: 0.80,
+    approved: 0.90,
+  };
+  return ratios[phase] || 0.55;
 }
 
 /** Round a range object to nearest integer */

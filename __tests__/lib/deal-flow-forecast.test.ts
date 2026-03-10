@@ -64,11 +64,12 @@ describe('deal-flow-forecast', () => {
     it('should generate future quarters after the last historical quarter', async () => {
       const result = await forecastDealFlow('oncology');
 
-      // Last historical quarter is Q1 2026, so forecast should start at Q2 2026
-      expect(result.forecast[0].quarter).toBe('Q2 2026');
-      expect(result.forecast[1].quarter).toBe('Q3 2026');
-      expect(result.forecast[2].quarter).toBe('Q4 2026');
-      expect(result.forecast[3].quarter).toBe('Q1 2027');
+      // Last complete historical quarter is Q4 2025 (Q1 2026 is partial and excluded
+      // from regression), so forecast starts at Q1 2026
+      expect(result.forecast[0].quarter).toBe('Q1 2026');
+      expect(result.forecast[1].quarter).toBe('Q2 2026');
+      expect(result.forecast[2].quarter).toBe('Q3 2026');
+      expect(result.forecast[3].quarter).toBe('Q4 2026');
     });
 
     it('should have positive predicted deals for all forecast quarters', async () => {
