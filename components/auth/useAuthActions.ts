@@ -77,7 +77,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
 
       // Create user profile
       try {
-        await supabase.from('user_profiles').insert({
+        await supabase.from('user_profiles').upsert({
           id: data.user.id,
           email,
           company_name: company || null,
@@ -85,7 +85,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
           email_verified: false,
           attribution_source: new URLSearchParams(window.location.search).get('utm_source') || null,
           attribution_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || null,
-        });
+        }, { onConflict: 'id', ignoreDuplicates: true });
       } catch (profileErr) {
         console.error('Profile creation error:', profileErr);
       }

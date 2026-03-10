@@ -197,9 +197,22 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
         const status = subscription.status;
 
-        // Map Stripe status to our tier
+        // Map Stripe status to our tier — but preserve 'report' tier for non-active
+        // (report tier comes from one-time purchase, independent of subscription)
         const isActive = ['active', 'trialing'].includes(status);
-        const tier = isActive ? 'pro' : 'free';
+        let tier: 'pro' | 'report' | 'free' = isActive ? 'pro' : 'free';
+
+        if (!isActive) {
+          // Check if user has report tier from a one-time purchase — don't downgrade them
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('tier')
+            .eq('stripe_customer_id', customerId)
+            .single();
+          if (profile?.tier === 'report') {
+            tier = 'report';
+          }
+        }
 
         const { error } = await supabase
           .from('user_profiles')
@@ -213,7 +226,7 @@ export async function POST(request: NextRequest) {
         if (error) {
           console.error('Failed to update subscription status:', error);
         } else {
-          console.log('Subscription status updated:', customerId, status);
+          console.log('Subscription status updated:', customerId, status, '→ tier:', tier);
         }
         break;
       }
@@ -224,11 +237,18 @@ export async function POST(request: NextRequest) {
 
         const customerId = subscription.customer as string;
 
-        // Downgrade user to free tier
+        // Preserve 'report' tier if user purchased a one-time report
+        const { data: existingProfile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('stripe_customer_id', customerId)
+          .single();
+        const downgradeToTier = existingProfile?.tier === 'report' ? 'report' : 'free';
+
         const { error } = await supabase
           .from('user_profiles')
           .update({
-            tier: 'free',
+            tier: downgradeToTier,
             subscription_status: 'cancelled',
             updated_at: new Date().toISOString(),
           })

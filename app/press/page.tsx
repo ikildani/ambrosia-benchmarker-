@@ -64,7 +64,7 @@ export default function PressPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { stat: '600+', label: 'Deals Analyzed' },
-              { stat: '8', label: 'Therapeutic Areas' },
+              { stat: '12', label: 'Therapeutic Areas' },
               { stat: '15+', label: 'Modalities Covered' },
               { stat: '2018-Present', label: 'Data Coverage' },
             ].map((item, i) => (

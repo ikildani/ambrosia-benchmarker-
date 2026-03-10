@@ -44,6 +44,10 @@ export async function GET(
     if (report.user_id && verifiedUserId && report.user_id !== verifiedUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
+    // If report belongs to a user but requester is not authenticated, deny access
+    if (report.user_id && !verifiedUserId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
 
     return NextResponse.json({
       id: report.id,
