@@ -26,7 +26,6 @@ export interface AuthActionsState {
   setSuccess: (v: string) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   handleGoogleSignIn: () => Promise<void>;
-  handleLinkedInSignIn: () => Promise<void>;
   handleResendVerification: () => Promise<void>;
   clearMessages: () => void;
 }
@@ -309,25 +308,6 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
     }
   };
 
-  const handleLinkedInSignIn = async () => {
-    if (!supabase) return;
-
-    setIsLoading(true);
-    setError('');
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'linkedin_oidc',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError('Failed to sign in with LinkedIn. Please try again.');
-      setIsLoading(false);
-    }
-  };
-
   const handleResendVerification = async () => {
     if (!supabase) return;
 
@@ -356,7 +336,6 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
     setSuccess,
     handleSubmit,
     handleGoogleSignIn,
-    handleLinkedInSignIn,
     handleResendVerification,
     clearMessages,
   };
