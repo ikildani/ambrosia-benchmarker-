@@ -139,7 +139,6 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     category: 'commercial',
     adjustments: [
       { parameter: 'peakSales', operation: 'multiply', value: 1.40, rationale: '40% TAM expansion from second indication' },
-      { parameter: 'timeToMarket', operation: 'add', value: 0, rationale: 'Primary indication timeline unchanged' },
     ],
   },
   {
@@ -312,6 +311,11 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
 
 /**
  * Apply a scenario to an rNPV input and calculate the adjusted result.
+ *
+ * All adjustments are fed into the rNPV engine as first-class inputs so that
+ * revenue, costs, PoS, and discounting interact correctly. No post-hoc
+ * multipliers are applied to the aggregated rNPV number — that approach
+ * causes sign-flip bugs when costs are a significant fraction of NPV.
  */
 export function applyScenario(
   baseInput: RNPVInput,
@@ -322,7 +326,7 @@ export function applyScenario(
   const adjustedInput: RNPVInput = { ...baseInput };
   const adjustedPeakSales = { ...baseInput.peakSalesEstimate };
 
-  // Track effective PoS multiplier
+  // Accumulate PoS and time-to-market adjustments for the engine
   let posMultiplier = 1.0;
   let posOverride: number | null = null;
   let timeToMarketDelta = 0;
@@ -367,35 +371,28 @@ export function applyScenario(
 
   adjustedInput.peakSalesEstimate = adjustedPeakSales;
 
-  // Re-run rNPV with adjusted inputs
-  const adjustedResult = calculateRNPV(adjustedInput);
+  // Pass time-to-market adjustment into the engine (applied to yearsToMarket internally)
+  if (timeToMarketDelta !== 0) {
+    adjustedInput.timeToMarketAdjustment = timeToMarketDelta;
+  }
 
-  // Apply PoS adjustment (post-calculation since PoS is internal to the engine)
-  let adjustedRNPV = adjustedResult.riskAdjustedNPV;
+  // Pass PoS adjustment into the engine (applied to cumulativePoS internally,
+  // which correctly affects only revenue risk-weighting, not development costs)
   if (posOverride !== null) {
-    if (posOverride === 0) {
-      // Complete failure: use recalculated rNPV directly (zero revenue, costs only).
-      // Don't scale by PoS ratio — that would incorrectly zero out sunk costs,
-      // making failure look like $0 (or even positive when base rNPV is negative).
-      adjustedRNPV = adjustedResult.riskAdjustedNPV;
+    // For absolute PoS override, convert to multiplier relative to base
+    const originalPoS = baseResult.cumulativePoS;
+    if (originalPoS > 0) {
+      adjustedInput.posMultiplier = posOverride / originalPoS;
     } else {
-      // Partial override: scale by ratio of new PoS to original
-      const originalPoS = baseResult.cumulativePoS;
-      if (originalPoS > 0) {
-        adjustedRNPV *= posOverride / originalPoS;
-      } else {
-        adjustedRNPV = 0;
-      }
+      adjustedInput.posMultiplier = 0;
     }
   } else if (posMultiplier !== 1.0) {
-    adjustedRNPV *= posMultiplier;
+    adjustedInput.posMultiplier = posMultiplier;
   }
 
-  // Apply time-to-market delta (approximation: each year delay reduces NPV by ~discount rate)
-  if (timeToMarketDelta !== 0) {
-    const discountPerYear = 1 / (1 + (adjustedInput.discountRate || baseResult.discountRate));
-    adjustedRNPV *= Math.pow(discountPerYear, timeToMarketDelta);
-  }
+  // Re-run rNPV with all adjustments applied inside the engine
+  const adjustedResult = calculateRNPV(adjustedInput);
+  const adjustedRNPV = adjustedResult.riskAdjustedNPV;
 
   const impactDelta = adjustedRNPV - baseResult.riskAdjustedNPV;
   const impactPercent = baseResult.riskAdjustedNPV !== 0

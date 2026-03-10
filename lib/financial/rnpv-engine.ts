@@ -67,13 +67,19 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase);
 
   // 2. Calculate cumulative PoS from current phase
-  const { cumulativePoS, transitions } = getCumulativePoS(
+  const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
     phase,
     therapeuticArea,
     modality,
     input.biomarkerStatus || 'unselected',
     regulatoryDesignations,
   );
+
+  // Apply scenario PoS multiplier (e.g., 0.85 for reduced approval confidence)
+  // Clamp to [0, 1] to keep probability valid
+  const cumulativePoS = input.posMultiplier != null
+    ? Math.max(0, Math.min(1, rawCumulativePoS * input.posMultiplier))
+    : rawCumulativePoS;
 
   // 3. Calculate years to market from current phase
   const durations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
@@ -108,6 +114,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   }
   // Add regulatory review time
   yearsToMarket += durations.regulatory || 1.0;
+
+  // Apply scenario time-to-market adjustment (delays or accelerations)
+  if (input.timeToMarketAdjustment) {
+    yearsToMarket = Math.max(0, yearsToMarket + input.timeToMarketAdjustment);
+  }
 
   // 4. Data quality confidence adjustment to peak sales
   // Note: Competitive position adjustment is handled upstream in the market-size

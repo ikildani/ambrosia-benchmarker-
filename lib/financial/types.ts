@@ -123,6 +123,20 @@ export interface RNPVInput {
    * comparing the two methodologies and explaining any divergence.
    */
   benchmarkDealValue?: { low: number; median: number; high: number };
+
+  /**
+   * Additional years added to (or subtracted from) time-to-market.
+   * Used by scenario planning to model regulatory delays or accelerations.
+   * Positive = delay, negative = acceleration.
+   */
+  timeToMarketAdjustment?: number;
+
+  /**
+   * Multiplier applied to cumulative probability of success (0-2).
+   * Used by scenario planning to model increased/decreased approval confidence.
+   * E.g., 0.85 = 15% PoS reduction; 1.15 = 15% PoS increase.
+   */
+  posMultiplier?: number;
 }
 
 // ---------------------------------------------------------------------------
