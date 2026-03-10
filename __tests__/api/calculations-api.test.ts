@@ -324,11 +324,10 @@ describe('/api/calculations', () => {
         error: null,
       });
 
-      // Chain 0: delete calculation
+      // Chain 0: delete calculation — .delete().eq().eq().select()
       const deleteChain = createChain();
-      (deleteChain.eq as jest.Mock)
-        .mockReturnValueOnce(deleteChain) // first .eq('id', ...)
-        .mockResolvedValueOnce({ error: null }); // second .eq('user_id', ...)
+      (deleteChain.select as jest.Mock)
+        .mockResolvedValueOnce({ data: [{ id: 'calc-1' }], error: null });
 
       fromChains = [deleteChain];
 

@@ -268,16 +268,68 @@ export async function DELETE(request: NextRequest) {
       return apiError('Authentication required for deletion', 401);
     }
 
-    // Delete only if the calculation belongs to the authenticated user
-    const { error } = await supabase
+    // First try to delete by user_id (calculations created while logged in)
+    const { data: directDelete, error: directError } = await supabase
       .from('calculations')
       .delete()
       .eq('id', id)
-      .eq('user_id', authUser.id);
+      .eq('user_id', authUser.id)
+      .select('id');
 
-    if (error) {
-      console.error('Calculation delete error:', error);
+    if (directError) {
+      console.error('Calculation delete error:', directError);
       return apiError('Failed to delete calculation', 500);
+    }
+
+    // If no rows were deleted, the calculation may have been created anonymously
+    // before the user logged in. Verify ownership via linked session.
+    if (!directDelete || directDelete.length === 0) {
+      // Look up the calculation to check if it belongs to a session linked to this user
+      const { data: calc } = await supabase
+        .from('calculations')
+        .select('id, user_id, anonymous_id, session_id')
+        .eq('id', id)
+        .single();
+
+      if (!calc) {
+        return apiSuccess({}); // Already deleted or never existed
+      }
+
+      // Check if the anonymous calculation's session is linked to this user
+      let ownsCalculation = false;
+      if (calc.session_id) {
+        const { data: session } = await supabase
+          .from('sessions')
+          .select('user_id')
+          .eq('id', calc.session_id)
+          .single();
+        ownsCalculation = session?.user_id === authUser.id;
+      }
+
+      // Also check if user_id is null but anonymous_id matches a session owned by this user
+      if (!ownsCalculation && calc.anonymous_id) {
+        const { data: linkedSessions } = await supabase
+          .from('sessions')
+          .select('id')
+          .eq('anonymous_id', calc.anonymous_id)
+          .eq('user_id', authUser.id)
+          .limit(1);
+        ownsCalculation = (linkedSessions && linkedSessions.length > 0) || false;
+      }
+
+      if (!ownsCalculation) {
+        return apiError('Not authorized to delete this calculation', 403);
+      }
+
+      const { error: anonDeleteError } = await supabase
+        .from('calculations')
+        .delete()
+        .eq('id', id);
+
+      if (anonDeleteError) {
+        console.error('Anonymous calculation delete error:', anonDeleteError);
+        return apiError('Failed to delete calculation', 500);
+      }
     }
 
     return apiSuccess({});
