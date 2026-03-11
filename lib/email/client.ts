@@ -259,6 +259,57 @@ export async function sendReportEmail(
   }
 }
 
+export async function sendAdminSignupNotification(newUser: {
+  email: string;
+  name?: string;
+  company?: string;
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'ikildani@ambrosiaventures.co';
+  const timestamp = new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <div style="background: #0f172a; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+          <h2 style="color: #14b8a6; margin: 0; font-size: 18px;">New Signup on Deal Calculator</h2>
+        </div>
+        <div style="background: #fff; padding: 24px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 80px;">Email</td>
+              <td style="padding: 8px 0; font-weight: 600;">${newUser.email}</td>
+            </tr>
+            ${newUser.name ? `<tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Name</td>
+              <td style="padding: 8px 0;">${newUser.name}</td>
+            </tr>` : ''}
+            ${newUser.company ? `<tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Company</td>
+              <td style="padding: 8px 0;">${newUser.company}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Time</td>
+              <td style="padding: 8px 0;">${timestamp}</td>
+            </tr>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `New signup: ${newUser.name || newUser.email}${newUser.company ? ` (${newUser.company})` : ''}`,
+    html,
+  });
+}
+
 export async function sendUpgradeConfirmation(to: string, name: string) {
   const html = `
     <!DOCTYPE html>

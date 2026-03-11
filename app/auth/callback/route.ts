@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { sendAdminSignupNotification } from '@/lib/email/client';
 
 // User-friendly error messages
 const ERROR_MESSAGES: Record<string, string> = {
@@ -79,7 +80,27 @@ export async function GET(request: NextRequest) {
           console.error('[Auth Callback] Profile update error:', updateError);
         } else {
           console.log('[Auth Callback] Email verified for user:', user.email);
+
+          // Notify admin of new verified signup
+          sendAdminSignupNotification({
+            email: user.email || '',
+            name: user.user_metadata?.name || user.user_metadata?.full_name,
+            company: user.user_metadata?.company,
+          }).catch(err => console.error('[Auth Callback] Admin notification error:', err));
         }
+      }
+    }
+
+    // For OAuth sign-ins (Google), also notify admin on first login
+    if (!type && data.user) {
+      const user = data.user;
+      const isNewUser = user.created_at && (Date.now() - new Date(user.created_at).getTime() < 60000);
+      if (isNewUser) {
+        sendAdminSignupNotification({
+          email: user.email || '',
+          name: user.user_metadata?.name || user.user_metadata?.full_name,
+          company: user.user_metadata?.company,
+        }).catch(err => console.error('[Auth Callback] Admin notification error:', err));
       }
     }
 
