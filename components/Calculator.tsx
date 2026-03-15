@@ -494,6 +494,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 // Shared AdvancedOptionsSection props
                 const advancedProps = {
                   therapeuticArea: state.therapeuticArea,
+                  dealType: state.dealType,
                   territory: state.territory,
                   lineOfTherapy: state.lineOfTherapy,
                   treatmentApproach: state.treatmentApproach,

@@ -26,6 +26,7 @@ interface MetricCardProps {
   contextLine?: string;
   previousValue?: number;
   currentValue?: number;
+  warningText?: string;
 }
 
 const badgeColorClasses: Record<string, string> = {
@@ -81,7 +82,8 @@ function MetricCardInner({
   tooltipContent,
   contextLine,
   previousValue,
-  currentValue
+  currentValue,
+  warningText
 }: MetricCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -194,6 +196,14 @@ function MetricCardInner({
         </div>
         {contextLine && (
           <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{contextLine}</p>
+        )}
+        {warningText && (
+          <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span>{warningText}</span>
+          </div>
         )}
       </div>
 

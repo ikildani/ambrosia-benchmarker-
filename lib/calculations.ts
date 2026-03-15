@@ -1,4 +1,6 @@
 import { getBenchmarksSync } from '@/lib/benchmarks';
+import { validateCalculationOutput, type GuardrailWarning } from './output-guardrails';
+export type { GuardrailWarning } from './output-guardrails';
 
 // Live-calibrated benchmarks (merges static JSON with DB-driven calibrations)
 const benchmarks = getBenchmarksSync();
@@ -429,6 +431,9 @@ export interface CalculationResult {
   drillDown: DrillDownCollection;
   phase: Phase;
   milestoneExplanation?: string;
+
+  // Output guardrail warnings (auto-populated)
+  warnings?: GuardrailWarning[];
 
   // Financial modeling results (populated for pro/report tier)
   financialModel?: {
@@ -1607,7 +1612,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     tieredRoyalties
   );
 
-  return {
+  const calcResult: CalculationResult = {
     terms: {
       upfront: sanitizeRange(upfront),
       devMilestones: sanitizeRange(devMilestones),
@@ -1657,6 +1662,14 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       milestoneExplanation: generateWomensHealthMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {})
   };
+
+  // Run output guardrails and attach warnings
+  const guardrailWarnings = validateCalculationOutput(calcResult, input);
+  if (guardrailWarnings.length > 0) {
+    calcResult.warnings = guardrailWarnings;
+  }
+
+  return calcResult;
 }
 
 function phaseRangeLabel(phase: Phase): string {

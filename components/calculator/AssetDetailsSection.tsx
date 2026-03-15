@@ -39,6 +39,7 @@ import {
 } from '@/lib/calculations';
 import { phaseDescriptions, biomarkerDescriptions, sectionHelp } from '@/lib/optionDescriptions';
 import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, getIndicationImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { getAvailablePhases, getAvailableDealTypes, dealTypePhaseHints } from '@/lib/input-filters';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -110,13 +111,36 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   };
   const indicationOptionsList = indicationMap[therapeuticArea] || indicationOptions;
 
+  // Filter phases based on selected deal type
+  const filteredPhaseOptions = useMemo(
+    () => getAvailablePhases(dealType),
+    [dealType],
+  );
+
+  // Filter deal types based on selected phase
+  const filteredDealTypeOptions = useMemo(
+    () => getAvailableDealTypes(phase),
+    [phase],
+  );
+
+  // Build deal type descriptions with phase hints
+  const enrichedDealTypeDescriptions = useMemo(() => {
+    const descs: Record<string, string> = {};
+    for (const opt of filteredDealTypeOptions) {
+      const base = dealTypeDescriptions[opt.value] || '';
+      const hint = dealTypePhaseHints[opt.value as DealType];
+      descs[opt.value] = hint ? `${base} (${hint})` : base;
+    }
+    return descs;
+  }, [filteredDealTypeOptions]);
+
   const phaseImpactBadges = useMemo(() => {
     const badges: Record<string, ImpactBadge> = {};
-    phaseOptions.forEach(opt => {
+    filteredPhaseOptions.forEach(opt => {
       badges[opt.value] = getPhaseImpactBadge(opt.value, therapeuticArea);
     });
     return badges;
-  }, [therapeuticArea]);
+  }, [therapeuticArea, filteredPhaseOptions]);
 
   const biomarkerImpactBadges = useMemo(() => {
     const badges: Record<string, ImpactBadge> = {};
@@ -156,7 +180,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           id="phase-select"
           label="Development Phase"
           helpText={sectionHelp.phase}
-          options={phaseOptions}
+          options={filteredPhaseOptions}
           descriptions={phaseDescriptions}
           impactBadges={phaseImpactBadges}
           value={phase}
@@ -169,8 +193,8 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           id="deal-type-select"
           label="Deal Structure"
           helpText="The type of transaction structure affects upfront/milestone splits and royalty terms."
-          options={dealTypeOptions}
-          descriptions={dealTypeDescriptions}
+          options={filteredDealTypeOptions}
+          descriptions={enrichedDealTypeDescriptions}
           value={dealType}
           onChange={onDealTypeChange}
           highlighted={highlightedFields.has('dealType')}

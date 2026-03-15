@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useMemo, useEffect, createRef } from 're
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
-import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore } from '@/lib/calculations';
+import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore, type GuardrailWarning } from '@/lib/calculations';
 import type { PartnerForPDF } from '@/lib/report';
 const ReportGenerationModal = dynamic(() => import('./ReportGenerationModal'), { ssr: false });
 const ShareModal = dynamic(() => import('./ShareModal'), { ssr: false });
@@ -560,6 +560,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const isPro = tier === 'pro';
   const isReport = tier === 'report';
 
+  // Build per-field warning text from non-critical guardrail warnings
+  const fieldWarnings = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (result.warnings) {
+      for (const w of result.warnings) {
+        if (w.severity !== 'critical' && !map[w.field]) {
+          map[w.field] = w.message;
+        }
+      }
+    }
+    return map;
+  }, [result.warnings]);
+
   // Deal-type-aware labels — prevents licensing terminology from leaking into acquisitions, options, etc.
   const metricBadges = getMetricBadges(dealTypeLabels);
   const metricTooltips = getMetricTooltips(dealTypeLabels);
@@ -1069,6 +1082,25 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
+        {/* Guardrail Warnings Banner */}
+        {result.warnings && result.warnings.some((w: GuardrailWarning) => w.severity === 'critical') && (
+          <div className="mb-4 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-3">
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div className="text-sm">
+                <p className="font-medium text-amber-800 dark:text-amber-300">Output sanity check flagged potential issues</p>
+                <ul className="mt-1 space-y-0.5 text-amber-700 dark:text-amber-400 text-xs">
+                  {result.warnings.filter((w: GuardrailWarning) => w.severity === 'critical').map((w: GuardrailWarning, i: number) => (
+                    <li key={i}>{w.message}{w.suggestedAction ? ` ${w.suggestedAction}` : ''}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Deal Terms Grid */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
           {/* Upfront Payment */}
@@ -1097,6 +1129,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             contextLine={contextLines.upfront}
             previousValue={previousTerms?.upfront}
             currentValue={terms.upfront.median}
+            warningText={fieldWarnings['upfront']}
           />
 
           {/* Total Deal Value */}
@@ -1125,6 +1158,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             contextLine={contextLines.totalDealValue}
             previousValue={previousTerms?.totalDealValue}
             currentValue={terms.totalDealValue.median}
+            warningText={fieldWarnings['totalDealValue']}
           />
 
           {/* Development Milestones */}
@@ -1152,6 +1186,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             tooltipContent={metricTooltips.devMilestones}
             previousValue={previousTerms?.devMilestones}
             currentValue={terms.devMilestones.median}
+            warningText={fieldWarnings['devMilestones'] || fieldWarnings['milestones']}
           />
 
           {/* Regulatory Milestones */}
@@ -1179,6 +1214,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             tooltipContent={metricTooltips.regMilestones}
             previousValue={previousTerms?.regMilestones}
             currentValue={terms.regMilestones.median}
+            warningText={fieldWarnings['regMilestones']}
           />
 
           {/* Commercial Milestones */}
@@ -1206,6 +1242,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             tooltipContent={metricTooltips.commMilestones}
             previousValue={previousTerms?.commMilestones}
             currentValue={terms.commMilestones.median}
+            warningText={fieldWarnings['commMilestones']}
           />
 
           {/* Tiered Royalties */}
@@ -1271,6 +1308,14 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   <span className="font-bold text-neutral-900 dark:text-white">{tieredRoyalties.highTier.low}% - {tieredRoyalties.highTier.high}%</span>
                 </div>
               </div>
+              {fieldWarnings['royalties'] && (
+                <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                  <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span>{fieldWarnings['royalties']}</span>
+                </div>
+              )}
             </div>
 
             {/* Drill-down panel for royalties */}

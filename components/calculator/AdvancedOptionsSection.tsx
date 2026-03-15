@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type {
   TherapeuticArea,
+  DealType,
   Territory,
   LineOfTherapy,
   TreatmentApproach,
@@ -108,6 +109,7 @@ import {
   territoryDescriptions, sectionHelp,
 } from '@/lib/optionDescriptions';
 import { getMultiplierImpactBadge, getTerritoryImpactBadge, type ImpactBadge } from '@/lib/impactBadges';
+import { getAvailableTerritories } from '@/lib/input-filters';
 import OptionCardGroup from './OptionCardGroup';
 import InfoTooltip from './InfoTooltip';
 import type { OnboardingStep } from '../OnboardingModal';
@@ -310,6 +312,7 @@ territoryOptions.forEach(opt => {
 
 interface AdvancedOptionsSectionProps {
   therapeuticArea: TherapeuticArea;
+  dealType: DealType;
   territory: Territory;
   lineOfTherapy: LineOfTherapy;
   treatmentApproach: TreatmentApproach;
@@ -419,6 +422,7 @@ interface AdvancedOptionsSectionProps {
 
 const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   therapeuticArea,
+  dealType,
   territory,
   lineOfTherapy,
   treatmentApproach,
@@ -509,6 +513,20 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
   onEndoscopicEndpointChange,
   column,
 }: AdvancedOptionsSectionProps) {
+  // Filter territories based on deal type (acquisition/collaboration = global only)
+  const filteredTerritoryOptions = useMemo(
+    () => getAvailableTerritories(dealType),
+    [dealType],
+  );
+
+  const filteredTerritoryBadges = useMemo(() => {
+    const badges: Record<string, ImpactBadge> = {};
+    filteredTerritoryOptions.forEach(opt => {
+      badges[opt.value] = getTerritoryImpactBadge(opt.value);
+    });
+    return badges;
+  }, [filteredTerritoryOptions]);
+
   if (column === 'competitive') {
     return (
       <div className={onboardingStep === 'modifiers' ? 'onboarding-spotlight p-4 -m-4 bg-white dark:bg-slate-800 rounded-xl' : ''}>
@@ -568,9 +586,9 @@ const AdvancedOptionsSection = React.memo(function AdvancedOptionsSection({
             id="territory-select"
             label="Territory"
             helpText={sectionHelp.territory}
-            options={territoryOptions}
+            options={filteredTerritoryOptions}
             descriptions={territoryDescriptions}
-            impactBadges={territoryBadges}
+            impactBadges={filteredTerritoryBadges}
             value={territory}
             onChange={onTerritoryChange}
             highlighted={highlightedFields.has('territory')}

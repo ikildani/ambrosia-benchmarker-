@@ -50,6 +50,7 @@ import type {
   BiologicExperience,
   EndoscopicEndpoint,
 } from '@/lib/calculations';
+import { getFieldResets } from '@/lib/input-filters';
 import type { DealTemplate } from './types';
 
 // ── State shape ──────────────────────────────────────────────────────────────
@@ -193,8 +194,21 @@ type CalculatorAction =
 
 function reducer(state: CalculatorFormState, action: CalculatorAction): CalculatorFormState {
   switch (action.type) {
-    case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
+    case 'SET_FIELD': {
+      let next = { ...state, [action.field]: action.value };
+      // Auto-reset dependent fields when dealType or phase changes
+      if (action.field === 'dealType' || action.field === 'phase') {
+        const resets = getFieldResets(
+          action.field as 'dealType' | 'phase',
+          action.value as string,
+          { phase: next.phase, dealType: next.dealType, territory: next.territory },
+        );
+        if (resets) {
+          next = { ...next, ...resets };
+        }
+      }
+      return next;
+    }
 
     case 'SET_THERAPEUTIC_AREA': {
       const base: Partial<CalculatorFormState> = {

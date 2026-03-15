@@ -47,7 +47,7 @@ const TA_CONTEXT: Record<string, string> = {
  *
  * Data covers 2022-2026 quarterly deal counts and total values ($B).
  */
-const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number; totalValue: number }[]> = {
+export const HISTORICAL_DEAL_FLOW: Record<string, { quarter: string; dealCount: number; totalValue: number }[]> = {
   oncology: [
     { quarter: '2022Q1', dealCount: 18, totalValue: 12.5 },
     { quarter: '2022Q2', dealCount: 22, totalValue: 18.3 },
