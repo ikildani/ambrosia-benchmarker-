@@ -6,6 +6,7 @@ import { CalculationResult, formatCurrency } from '@/lib/calculations';
 import { SavedScenario } from '@/lib/scenarioComparison';
 import ScenarioCompareTable from './ScenarioCompareTable';
 import ScenarioAIRecommendation from './ScenarioAIRecommendation';
+import { captureClientError } from '@/lib/sentry-client';
 
 interface ScenarioComparisonProps {
   currentResult?: CalculationResult;
@@ -46,7 +47,7 @@ export default function ScenarioComparison({
         setScenarios(data.scenarios);
       }
     } catch (error) {
-      console.error('Error fetching scenarios:', error);
+      captureClientError(error, 'ScenarioComparison', { context: 'Failed to fetch saved scenarios' });
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export default function ScenarioComparison({
       setScenarios(scenarios.filter((s) => s.id !== id));
       setSelectedScenarios(selectedScenarios.filter((sid) => sid !== id));
     } catch (error) {
-      console.error('Error deleting scenario:', error);
+      captureClientError(error, 'ScenarioComparison', { context: 'Failed to delete scenario' });
     }
   };
 

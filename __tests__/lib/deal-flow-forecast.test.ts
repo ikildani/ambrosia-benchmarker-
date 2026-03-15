@@ -2,10 +2,13 @@
  * Unit Tests for Deal Flow Forecast Service
  *
  * These tests verify:
- * - All 8 therapeutic areas have 2026Q1 data
+ * - All 12 therapeutic areas have 2026Q1 data
  * - Forecast generates future quarters correctly
  * - Historical data is in chronological order
  * - Forecast output structure and reasonableness
+ * - Prediction intervals: low <= predicted <= high
+ * - Value forecasts are positive
+ * - dataQuality and forecastReliability fields are present
  */
 
 // Access the HISTORICAL_DEAL_FLOW constant indirectly via the exported forecastDealFlow function
@@ -20,6 +23,10 @@ const ALL_THERAPEUTIC_AREAS = [
   'infectiousDisease',
   'ophthalmology',
   'womensHealth',
+  'rareDisease',
+  'hematology',
+  'dermatology',
+  'gastroenterology',
 ];
 
 describe('deal-flow-forecast', () => {
@@ -40,7 +47,7 @@ describe('deal-flow-forecast', () => {
       }
     );
 
-    it('should have all 8 therapeutic areas with 2026Q1 data', async () => {
+    it('should have all 12 therapeutic areas with 2026Q1 data', async () => {
       for (const ta of ALL_THERAPEUTIC_AREAS) {
         const result = await forecastDealFlow(ta);
         const has2026Q1 = result.historicalQuarters.some(
@@ -101,6 +108,53 @@ describe('deal-flow-forecast', () => {
   });
 
   // ============================================================
+  // Prediction Intervals
+  // ============================================================
+  describe('prediction intervals', () => {
+    it.each(ALL_THERAPEUTIC_AREAS)(
+      'should have low <= predicted <= high for deal counts in %s',
+      async (therapeuticArea) => {
+        const result = await forecastDealFlow(therapeuticArea);
+
+        result.forecast.forEach((f) => {
+          expect(f.predictedDealsLow).toBeDefined();
+          expect(f.predictedDealsHigh).toBeDefined();
+          expect(f.predictedDealsLow!).toBeLessThanOrEqual(f.predictedDeals);
+          expect(f.predictedDealsHigh!).toBeGreaterThanOrEqual(f.predictedDeals);
+        });
+      }
+    );
+
+    it.each(ALL_THERAPEUTIC_AREAS)(
+      'should have positive value forecasts for %s',
+      async (therapeuticArea) => {
+        const result = await forecastDealFlow(therapeuticArea);
+
+        result.forecast.forEach((f) => {
+          expect(f.predictedValueM).toBeDefined();
+          expect(f.predictedValueM!).toBeGreaterThan(0);
+          expect(f.predictedValueMLow).toBeDefined();
+          expect(f.predictedValueMLow!).toBeGreaterThan(0);
+          expect(f.predictedValueMHigh).toBeDefined();
+          expect(f.predictedValueMHigh!).toBeGreaterThan(0);
+        });
+      }
+    );
+
+    it.each(ALL_THERAPEUTIC_AREAS)(
+      'should have low <= predicted <= high for deal values in %s',
+      async (therapeuticArea) => {
+        const result = await forecastDealFlow(therapeuticArea);
+
+        result.forecast.forEach((f) => {
+          expect(f.predictedValueMLow!).toBeLessThanOrEqual(f.predictedValueM!);
+          expect(f.predictedValueMHigh!).toBeGreaterThanOrEqual(f.predictedValueM!);
+        });
+      }
+    );
+  });
+
+  // ============================================================
   // Historical Data Order
   // ============================================================
   describe('historical data chronological order', () => {
@@ -139,6 +193,8 @@ describe('deal-flow-forecast', () => {
       expect(result.seasonalPattern).toBeDefined();
       expect(result.marketSentiment).toBeDefined();
       expect(result.narrative).toBeDefined();
+      expect(result.dataQuality).toBeDefined();
+      expect(result.forecastReliability).toBeDefined();
     });
 
     it('should have trend as one of the valid values', async () => {
@@ -177,6 +233,91 @@ describe('deal-flow-forecast', () => {
         expect(q.totalValue).toBeGreaterThan(0);
       });
     });
+
+    it('should have dataQuality as one of the valid values', async () => {
+      const result = await forecastDealFlow('oncology');
+
+      expect(['live', 'curated', 'proxy']).toContain(result.dataQuality);
+    });
+
+    it('should have a non-empty forecastReliability string', async () => {
+      const result = await forecastDealFlow('oncology');
+
+      expect(typeof result.forecastReliability).toBe('string');
+      expect(result.forecastReliability.length).toBeGreaterThan(0);
+    });
+
+    it('should have curated dataQuality when no supabase client is provided', async () => {
+      const result = await forecastDealFlow('oncology');
+
+      expect(result.dataQuality).toBe('curated');
+    });
+
+    it('should have proxy dataQuality for unknown therapeutic areas', async () => {
+      const result = await forecastDealFlow('unknownArea');
+
+      expect(result.dataQuality).toBe('proxy');
+    });
+  });
+
+  // ============================================================
+  // Value Forecasting
+  // ============================================================
+  describe('value forecasting', () => {
+    it('should include deal value forecasts in the narrative', async () => {
+      const result = await forecastDealFlow('oncology');
+
+      // Narrative should mention deal value
+      expect(result.narrative).toMatch(/\$[\d.]+[BM]/);
+    });
+
+    it.each(ALL_THERAPEUTIC_AREAS)(
+      'should produce valid value forecasts for %s',
+      async (therapeuticArea) => {
+        const result = await forecastDealFlow(therapeuticArea);
+
+        result.forecast.forEach((f) => {
+          expect(f.predictedValueM).toBeDefined();
+          expect(typeof f.predictedValueM).toBe('number');
+          expect(f.predictedValueM!).toBeGreaterThan(0);
+          expect(Number.isFinite(f.predictedValueM!)).toBe(true);
+        });
+      }
+    );
+  });
+
+  // ============================================================
+  // All 12 TAs Produce Valid Forecasts
+  // ============================================================
+  describe('comprehensive TA validation', () => {
+    it.each(ALL_THERAPEUTIC_AREAS)(
+      'should produce a complete, valid forecast for %s',
+      async (therapeuticArea) => {
+        const result = await forecastDealFlow(therapeuticArea);
+
+        // Structural completeness
+        expect(result.therapeuticArea).toBe(therapeuticArea);
+        expect(result.historicalQuarters.length).toBeGreaterThanOrEqual(16);
+        expect(result.forecast).toHaveLength(4);
+        expect(['accelerating', 'stable', 'decelerating']).toContain(result.trend);
+        expect(['hot', 'warm', 'neutral', 'cooling']).toContain(result.marketSentiment);
+        expect(result.narrative.length).toBeGreaterThan(50);
+        expect(['live', 'curated', 'proxy']).toContain(result.dataQuality);
+        expect(result.forecastReliability.length).toBeGreaterThan(0);
+
+        // Forecast reasonableness
+        result.forecast.forEach((f) => {
+          expect(f.predictedDeals).toBeGreaterThanOrEqual(1);
+          expect(f.confidence).toBeGreaterThanOrEqual(0.35);
+          expect(f.confidence).toBeLessThanOrEqual(1);
+          expect(f.predictedDealsLow!).toBeLessThanOrEqual(f.predictedDeals);
+          expect(f.predictedDealsHigh!).toBeGreaterThanOrEqual(f.predictedDeals);
+          expect(f.predictedValueM!).toBeGreaterThan(0);
+          expect(f.predictedValueMLow!).toBeLessThanOrEqual(f.predictedValueM!);
+          expect(f.predictedValueMHigh!).toBeGreaterThanOrEqual(f.predictedValueM!);
+        });
+      }
+    );
   });
 
   // ============================================================

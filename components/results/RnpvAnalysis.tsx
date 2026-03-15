@@ -155,10 +155,10 @@ export default function RnpvAnalysis({
                 <table className="w-full text-xs sm:text-sm" role="table" aria-label="Cash flow summary">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-600">
-                      <th className="text-left py-2 pr-3 font-medium text-neutral-500 dark:text-slate-400">Period</th>
-                      <th className="text-right py-2 px-2 font-medium text-neutral-500 dark:text-slate-400">Revenue</th>
-                      <th className="text-right py-2 px-2 font-medium text-neutral-500 dark:text-slate-400">Net CF</th>
-                      <th className="text-right py-2 pl-2 font-medium text-neutral-500 dark:text-slate-400">Risk-Adj PV</th>
+                      <th scope="col" className="text-left py-2 pr-3 font-medium text-neutral-500 dark:text-slate-400">Period</th>
+                      <th scope="col" className="text-right py-2 px-2 font-medium text-neutral-500 dark:text-slate-400">Revenue</th>
+                      <th scope="col" className="text-right py-2 px-2 font-medium text-neutral-500 dark:text-slate-400">Net CF</th>
+                      <th scope="col" className="text-right py-2 pl-2 font-medium text-neutral-500 dark:text-slate-400">Risk-Adj PV</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">

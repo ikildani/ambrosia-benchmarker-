@@ -130,6 +130,40 @@ const CORRELATION_MATRIX: number[][] = [
 ];
 
 /**
+ * Deal-type-specific correlation matrix overrides.
+ *
+ * Acquisitions: PoS-Time correlation near 0 (fixed M&A timeline, not
+ * contingent on clinical milestones). Lower PoS-Rate correlation
+ * (acquirer absorbs risk at closing).
+ *
+ * Options: Higher PoS-Time correlation (exercise decision depends on
+ * clinical data readouts, tightly coupling success probability with
+ * timeline). Stronger PoS-Rate link (option premium pricing sensitive
+ * to perceived risk).
+ *
+ * Sources: DealForma M&A vs licensing correlation analysis (2020-2025),
+ * BioCentury option deal structuring data.
+ */
+const DEAL_TYPE_CORRELATION_OVERRIDES: Record<string, number[][]> = {
+  acquisition: [
+    // PoS    Peak   Rate   Time   Price
+    [ 1.00,  0.30, -0.15, -0.05,  0.00],  // PoS — near-zero time link (fixed M&A timeline)
+    [ 0.30,  1.00,  0.00, -0.15,  0.20],  // Peak Sales — lower time sensitivity
+    [-0.15,  0.00,  1.00,  0.10,  0.00],  // Discount Rate — acquirer absorbs risk
+    [-0.05, -0.15,  0.10,  1.00,  0.00],  // Time to Market — largely fixed
+    [ 0.00,  0.20,  0.00,  0.00,  1.00],  // Pricing
+  ],
+  option: [
+    // PoS    Peak   Rate   Time   Price
+    [ 1.00,  0.45, -0.35, -0.45,  0.00],  // PoS — strong time link (exercise depends on data)
+    [ 0.45,  1.00,  0.00, -0.40,  0.25],  // Peak Sales — high time sensitivity
+    [-0.35,  0.00,  1.00,  0.30,  0.00],  // Discount Rate — option pricing is risk-sensitive
+    [-0.45, -0.40,  0.30,  1.00,  0.00],  // Time to Market — exercise window drives urgency
+    [ 0.00,  0.25,  0.00,  0.00,  1.00],  // Pricing
+  ],
+};
+
+/**
  * Cholesky decomposition of a symmetric positive-definite matrix.
  * Returns lower-triangular matrix L such that L * L^T = A.
  * Used to transform independent standard normal samples into correlated samples.
@@ -418,8 +452,12 @@ export function runMonteCarlo(
   const sampledTimeArr = new Float64Array(iterations);
   const sampledPriceArr = new Float64Array(iterations);
 
+  // Select deal-type-specific correlation matrix (falls back to default for licensing/codevelopment/collaboration)
+  const dealType = rnpv.dealType || 'licensing';
+  const correlationMatrix = DEAL_TYPE_CORRELATION_OVERRIDES[dealType] ?? CORRELATION_MATRIX;
+
   // Pre-compute Cholesky factor for correlated sampling
-  const choleskyL = choleskyDecompose(CORRELATION_MATRIX);
+  const choleskyL = choleskyDecompose(correlationMatrix);
 
   for (let i = 0; i < iterations; i++) {
     // Generate 5 independent standard normal samples

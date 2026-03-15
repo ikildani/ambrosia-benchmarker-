@@ -50,8 +50,8 @@ export default function EmptyState({
       {action && (
         <button
           onClick={action.onClick}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
-                     shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all hover:-translate-y-0.5
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
+                     shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15 hover:shadow-xl hover:shadow-teal-500/30 dark:hover:shadow-teal-400/20 transition-all hover:-translate-y-0.5
                      hover:from-teal-600 hover:to-cyan-600 text-sm"
         >
           {action.label}

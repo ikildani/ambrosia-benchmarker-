@@ -70,6 +70,8 @@ import {
   giSegmentOptions,
   biologicExperienceOptions,
   endoscopicEndpointOptions,
+  dealTypeOptions,
+  DealType,
 } from './calculations';
 
 // Types for sensitivity analysis
@@ -154,6 +156,7 @@ const parameterLabels: Record<string, string> = {
   giSegment: 'GI Segment',
   biologicExperience: 'Biologic Experience',
   endoscopicEndpoint: 'Endoscopic Endpoint',
+  dealType: 'Deal Structure',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -260,6 +263,8 @@ function getOptionsForParameter(
       return biologicExperienceOptions;
     case 'endoscopicEndpoint':
       return endoscopicEndpointOptions;
+    case 'dealType':
+      return dealTypeOptions;
     default:
       return [];
   }
@@ -287,8 +292,15 @@ function computeParameterSensitivity(
   if (options.length === 0) return null;
 
   const rawValue = baseInputs[parameterKey];
-  if (rawValue === undefined || rawValue === null) return null;
-  const currentValue = String(rawValue);
+  // dealType defaults to 'licensing' when not set
+  if (rawValue === undefined || rawValue === null) {
+    if (parameterKey === 'dealType') {
+      // Treat missing dealType as 'licensing' (the default)
+    } else {
+      return null;
+    }
+  }
+  const currentValue = parameterKey === 'dealType' && !rawValue ? 'licensing' : String(rawValue);
   const baseTotalValue = baseResult.terms.totalDealValue.median;
   const baseUpfront = baseResult.terms.upfront.median;
 
@@ -1087,13 +1099,18 @@ export function computeSensitivityAnalysis(
     isGastroenterology ? 'giSegment' :
     'lineOfTherapy';
 
+  const dealType = (inputs.dealType || 'licensing') as DealType;
+
   const parametersToAnalyze: Array<keyof CalculationInput> = [
     'phase',
     'territory',
     'competitivePosition',
     'modality',
     'dataQuality',
+    'dealType',
     areaFirstParam,
+    // For acquisitions, royalties are 0% so biomarker/combination sensitivity is less relevant
+    // but still included as they affect total deal value through milestone structure
     'biomarker',
     'combinationPotential',
     ...(isNeurology ? ['bbbPenetration' as keyof CalculationInput, 'diseaseProgression' as keyof CalculationInput, 'biomarkerValidation' as keyof CalculationInput] : []),

@@ -35,6 +35,7 @@ const phaseLabels: Record<string, string> = {
 export default function DealTable({ deals, sortBy, sortOrder, onSort, tier }: DealTableProps) {
   const SortHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
     <th
+      scope="col"
       onClick={() => onSort(field)}
       className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider cursor-pointer hover:text-navy-800 transition-colors"
     >
@@ -73,7 +74,7 @@ export default function DealTable({ deals, sortBy, sortOrder, onSort, tier }: De
             <tr>
               <SortHeader field="announced_date">Date</SortHeader>
               <SortHeader field="licensee_name">Licensee</SortHeader>
-              <th className="hidden sm:table-cell px-2 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+              <th scope="col" className="hidden sm:table-cell px-2 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                 Licensor / Asset
               </th>
               <SortHeader field="modality"><span className="hidden sm:inline">Modality</span><span className="sm:hidden">Mod.</span></SortHeader>

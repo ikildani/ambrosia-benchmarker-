@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { generatePricingSchema } from '@/lib/seo/structured-data';
+import { captureClientError } from '@/lib/sentry-client';
 
 interface PricingProps {
   currentTier: 'free' | 'pro' | 'report';
@@ -57,7 +58,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         setError('Unable to start checkout. Please try again.');
       }
     } catch (err) {
-      console.error('Checkout error:', err);
+      captureClientError(err, 'Pricing', { context: 'Checkout request failed' });
       setError('Connection error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -89,7 +90,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         setError('Unable to open billing portal. Please try again.');
       }
     } catch (err) {
-      console.error('Billing portal error:', err);
+      captureClientError(err, 'Pricing', { context: 'Billing portal request failed' });
       setError('Connection error. Please try again.');
     } finally {
       setIsManageLoading(false);

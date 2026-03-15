@@ -45,11 +45,11 @@ function DrillDownPanelInner({
             <table className="w-full text-sm min-w-0 sm:min-w-[320px]">
               <thead>
                 <tr className="bg-neutral-100 dark:bg-slate-700">
-                  <th className="text-left py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">Component</th>
-                  <th className="text-center py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
+                  <th scope="col" className="text-left py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">Component</th>
+                  <th scope="col" className="text-center py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
                     {isRoyalty ? 'Rate' : 'Share'}
                   </th>
-                  <th className="text-right py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
+                  <th scope="col" className="text-right py-2 px-3 font-medium text-neutral-600 dark:text-slate-300">
                     {isRoyalty ? 'Range' : 'Value'}
                   </th>
                 </tr>

@@ -11,6 +11,7 @@ import { runFinancialModel } from '@/lib/financial/run-financial-model';
 import epiData from '@/data/epidemiology.json';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
+import { captureClientError } from '@/lib/sentry-client';
 
 type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'success' | 'error';
 
@@ -204,10 +205,10 @@ export default function ReportGenerationModal({
               return (data.memo || data) as DealMemo;
             }
             const errorText = await response.text().catch(() => 'unknown');
-            console.error(`Deal memo API failed (${response.status}):`, errorText);
+            captureClientError(errorText, 'ReportGenerationModal', { context: 'Deal memo API response failed', statusCode: response.status });
             return null;
           }).catch((err) => {
-            console.error('Deal memo fetch error:', err);
+            captureClientError(err, 'ReportGenerationModal', { context: 'Deal memo fetch network error' });
             return null;
           });
         }
@@ -239,10 +240,10 @@ export default function ReportGenerationModal({
               return (data.playbook || null) as NegotiationPlaybook | null;
             }
             const errorText = await response.text().catch(() => 'unknown');
-            console.error(`Playbook API failed (${response.status}):`, errorText);
+            captureClientError(errorText, 'ReportGenerationModal', { context: 'Playbook API response failed', statusCode: response.status });
             return null;
           }).catch((err) => {
-            console.error('Playbook fetch error:', err);
+            captureClientError(err, 'ReportGenerationModal', { context: 'Playbook fetch network error' });
             return null;
           });
         }
@@ -389,7 +390,7 @@ export default function ReportGenerationModal({
             return;
           }
         } catch (err) {
-          console.error('PDF generation failed:', err);
+          captureClientError(err, 'ReportGenerationModal', { context: 'PDF generation failed' });
           setErrorMessage('Failed to build PDF. Please try again.');
           setCurrentStep('error');
           return;
@@ -401,7 +402,7 @@ export default function ReportGenerationModal({
         setCurrentStep('success');
         p.onDownloadComplete();
       } catch (err) {
-        console.error('Report generation failed:', err);
+        captureClientError(err, 'ReportGenerationModal', { context: 'Report generation pipeline failed' });
         if (!abortRef.current) {
           setErrorMessage('Something went wrong. Please try again.');
           setCurrentStep('error');
@@ -470,10 +471,10 @@ export default function ReportGenerationModal({
       if (res.ok) {
         setEmailSent(true);
       } else {
-        console.error('Email send failed:', await res.text());
+        captureClientError(await res.text(), 'ReportGenerationModal', { context: 'Email send API returned error' });
       }
     } catch (err) {
-      console.error('Email send error:', err);
+      captureClientError(err, 'ReportGenerationModal', { context: 'Email send network error' });
     } finally {
       setEmailSending(false);
     }

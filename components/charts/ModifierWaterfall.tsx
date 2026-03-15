@@ -113,7 +113,7 @@ function ModifierWaterfall({ modifiers, baseValue }: ModifierWaterfallProps) {
     <div className="w-full h-56 sm:h-80 mb-2" role="img" aria-label={chartDescription}>
       <table className="sr-only" aria-label="Deal value modifiers">
         <caption>Impact of each modifier on deal value</caption>
-        <thead><tr><th>Modifier</th><th>Impact</th></tr></thead>
+        <thead><tr><th scope="col">Modifier</th><th scope="col">Impact</th></tr></thead>
         <tbody>
           <tr><td>Base Value</td><td>{formatCurrency(baseValue)}</td></tr>
           {modifiers.map((mod, i) => (

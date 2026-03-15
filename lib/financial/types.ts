@@ -117,6 +117,13 @@ export interface RNPVInput {
   companyType?: string;
 
   /**
+   * Deal structure type — affects discount rate and implied upfront %.
+   * One of: 'licensing', 'acquisition', 'codevelopment', 'option', 'collaboration'.
+   * Defaults to 'licensing' if not provided.
+   */
+  dealType?: string;
+
+  /**
    * Override for the weighted-average cost of capital.
    * If not provided, defaults to ~10-12% depending on phase and risk profile.
    * Early-stage assets typically use the higher end of the range.
@@ -744,8 +751,18 @@ export interface DealFlowForecast {
   forecast: {
     /** Quarter label (e.g., 'Q3 2026') */
     quarter: string;
-    /** Predicted number of deals */
+    /** Predicted number of deals (point estimate) */
     predictedDeals: number;
+    /** Lower bound of ~95% prediction interval */
+    predictedDealsLow?: number;
+    /** Upper bound of ~95% prediction interval */
+    predictedDealsHigh?: number;
+    /** Predicted total deal value in $M (point estimate) */
+    predictedValueM?: number;
+    /** Lower bound of ~95% prediction interval for deal value ($M) */
+    predictedValueMLow?: number;
+    /** Upper bound of ~95% prediction interval for deal value ($M) */
+    predictedValueMHigh?: number;
     /** Model confidence in the prediction (0-1) */
     confidence: number;
   }[];
@@ -761,6 +778,12 @@ export interface DealFlowForecast {
 
   /** Human-readable narrative summarizing the forecast */
   narrative: string;
+
+  /** Data provenance flag indicating the source of forecast data */
+  dataQuality: 'live' | 'curated' | 'proxy';
+
+  /** Human-readable reliability assessment based on prediction interval width */
+  forecastReliability: string;
 }
 
 // ---------------------------------------------------------------------------

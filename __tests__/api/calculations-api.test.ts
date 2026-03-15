@@ -20,6 +20,8 @@ function createChain(overrides: Record<string, unknown> = {}) {
     delete: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
     gte: jest.fn().mockReturnThis(),
+    is: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
     single: jest.fn().mockResolvedValue({ data: null, error: null }),
@@ -31,6 +33,8 @@ function createChain(overrides: Record<string, unknown> = {}) {
   (chain.delete as jest.Mock).mockReturnValue(chain);
   (chain.eq as jest.Mock).mockReturnValue(chain);
   (chain.gte as jest.Mock).mockReturnValue(chain);
+  (chain.is as jest.Mock).mockReturnValue(chain);
+  (chain.in as jest.Mock).mockReturnValue(chain);
   (chain.order as jest.Mock).mockReturnValue(chain);
   (chain.limit as jest.Mock).mockReturnValue(chain);
   return chain;
@@ -231,17 +235,23 @@ describe('/api/calculations', () => {
         error: null,
       });
 
-      // Chain 0: from('calculations').select('*').order(...).limit(...).eq('user_id', ...)
-      // The final .eq() is the terminal call that gets awaited
+      // Chain 0: from('sessions') — find sessions owned by user
+      const sessionsChain = createChain();
+      (sessionsChain.eq as jest.Mock).mockResolvedValueOnce({
+        data: [],
+        error: null,
+      });
+
+      // Chain 1: from('calculations') — direct user_id match
       const fetchChain = createChain();
-      (fetchChain.eq as jest.Mock).mockResolvedValueOnce({
+      (fetchChain.limit as jest.Mock).mockResolvedValueOnce({
         data: [
-          { id: 'calc-1', modality: 'mab', development_phase: 'phase2' },
+          { id: 'calc-1', modality: 'mab', development_phase: 'phase2', created_at: '2026-03-14T00:00:00Z' },
         ],
         error: null,
       });
 
-      fromChains = [fetchChain];
+      fromChains = [sessionsChain, fetchChain];
 
       const request = new NextRequest('http://localhost/api/calculations?user_id=user-1');
 
@@ -251,6 +261,52 @@ describe('/api/calculations', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.calculations).toHaveLength(1);
+    });
+
+    it('should include pre-login calculations via session ownership', async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: 'user-1', email: 'test@example.com' } },
+        error: null,
+      });
+
+      // Chain 0: from('sessions') — find sessions owned by user
+      const sessionsChain = createChain();
+      (sessionsChain.eq as jest.Mock).mockResolvedValueOnce({
+        data: [{ id: 'session-abc' }],
+        error: null,
+      });
+
+      // Chain 1: from('calculations') — direct user_id match
+      const directChain = createChain();
+      (directChain.limit as jest.Mock).mockResolvedValueOnce({
+        data: [
+          { id: 'calc-1', modality: 'mab', development_phase: 'phase2', created_at: '2026-03-14T01:00:00Z' },
+        ],
+        error: null,
+      });
+
+      // Chain 2: from('calculations') — session-owned (pre-login)
+      const sessionCalcChain = createChain();
+      (sessionCalcChain.limit as jest.Mock).mockResolvedValueOnce({
+        data: [
+          { id: 'calc-pre', modality: 'small_molecule', development_phase: 'phase1', created_at: '2026-03-13T23:00:00Z' },
+        ],
+        error: null,
+      });
+
+      fromChains = [sessionsChain, directChain, sessionCalcChain];
+
+      const request = new NextRequest('http://localhost/api/calculations?user_id=user-1');
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.calculations).toHaveLength(2);
+      // Should be sorted by created_at descending
+      expect(data.calculations[0].id).toBe('calc-1');
+      expect(data.calculations[1].id).toBe('calc-pre');
     });
 
     it('should return 400 for anonymous_id without session_id', async () => {
@@ -269,15 +325,21 @@ describe('/api/calculations', () => {
         error: null,
       });
 
-      // Chain 0: from('calculations').select('*').order(...).limit(...).eq('user_id', ...)
-      // The final .eq() resolves with an error
+      // Chain 0: from('sessions') — find sessions owned by user
+      const sessionsChain = createChain();
+      (sessionsChain.eq as jest.Mock).mockResolvedValueOnce({
+        data: [],
+        error: null,
+      });
+
+      // Chain 1: from('calculations') — direct user_id match fails
       const fetchChain = createChain();
-      (fetchChain.eq as jest.Mock).mockResolvedValueOnce({
+      (fetchChain.limit as jest.Mock).mockResolvedValueOnce({
         data: null,
         error: { message: 'Database timeout' },
       });
 
-      fromChains = [fetchChain];
+      fromChains = [sessionsChain, fetchChain];
 
       const request = new NextRequest('http://localhost/api/calculations?user_id=user-1');
 

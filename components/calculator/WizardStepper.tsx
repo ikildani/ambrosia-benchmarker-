@@ -75,7 +75,7 @@ function WizardStepperInner({
                   isCompleted
                     ? 'bg-teal-500 text-white'
                     : isCurrent
-                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md shadow-teal-500/30'
+                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md shadow-teal-500/30 dark:shadow-teal-400/20'
                     : 'bg-neutral-200 dark:bg-slate-700 text-neutral-600 dark:text-slate-300'
                 }`}>
                   {/* Active step ring indicator */}
@@ -189,7 +189,7 @@ function WizardStepperInner({
             whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
             whileHover={prefersReducedMotion ? undefined : { y: -2 }}
             className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
-                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-colors duration-200
+                       shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15 hover:shadow-xl hover:shadow-teal-500/30 dark:hover:shadow-teal-400/20 transition-colors duration-200
                        hover:from-teal-600 hover:to-cyan-600
                        flex items-center justify-center gap-2"
           >
@@ -206,7 +206,7 @@ function WizardStepperInner({
             whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
             whileHover={prefersReducedMotion ? undefined : { y: -2 }}
             className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
-                       shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-colors duration-200
+                       shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15 hover:shadow-xl hover:shadow-teal-500/30 dark:hover:shadow-teal-400/20 transition-colors duration-200
                        hover:from-teal-600 hover:to-cyan-600
                        disabled:opacity-70 disabled:cursor-not-allowed
                        flex items-center justify-center gap-2.5 touch-feedback

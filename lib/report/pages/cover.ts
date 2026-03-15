@@ -8,6 +8,7 @@ import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
   const { result, inputs, riskScore } = data;
+  const dtl = result.dealTypeLabels;
   const taColors = getTAColors(inputs.therapeuticArea);
   const phase = getLabel(inputs.phase, phaseLabels);
   const modality = result.labels.modality || getLabel(inputs.modality, modalityLabels);
@@ -46,13 +47,13 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; position: relative;">
           <!-- Total Deal Value -->
           <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 18px 20px;">
-            <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
+            <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">${dtl.totalValueLabel || 'Total Deal Value'}</div>
             <div style="font-size: 30px; font-weight: 800; color: #5eead4; letter-spacing: -0.03em; line-height: 1;">${totalMedian}</div>
             <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px;">${totalLow} &ndash; ${totalHigh}</div>
           </div>
           <!-- Upfront -->
           <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 18px 20px;">
-            <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">Upfront Payment</div>
+            <div style="font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700; margin-bottom: 6px;">${dtl.upfrontLabel}</div>
             <div style="font-size: 30px; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1;">${upfrontMedian}</div>
             <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px;">${formatUsd(result.terms.upfront.low)} &ndash; ${formatUsd(result.terms.upfront.high)}</div>
           </div>

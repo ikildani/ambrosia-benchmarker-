@@ -177,30 +177,63 @@ export async function GET(request: NextRequest) {
       userId = authUser.id;
     }
 
+    // Find session IDs owned by this user (for pre-login calculations)
+    let ownedSessionIds: string[] = [];
+    if (userId) {
+      const { data: ownedSessions } = await supabase
+        .from('sessions')
+        .select('id')
+        .eq('user_id', userId);
+      ownedSessionIds = (ownedSessions || []).map((s) => s.id);
+    }
+
     // If count only is requested, return just the count
     if (countOnly && userId) {
       const now = new Date();
-      let query = supabase
+
+      // Count calculations with direct user_id match
+      let directQuery = supabase
         .from('calculations')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId);
 
-      // Filter to current month if requested
       if (monthOnly) {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        query = query.gte('created_at', startOfMonth.toISOString());
+        directQuery = directQuery.gte('created_at', startOfMonth.toISOString());
       }
 
-      const { count, error } = await query;
+      const { count: directCount, error: directError } = await directQuery;
 
-      if (error) {
-        console.error('Calculation count error:', error);
+      if (directError) {
+        console.error('Calculation count error:', directError);
         return apiError('Failed to count calculations', 500);
+      }
+
+      // Count session-owned calculations (user_id IS NULL but session belongs to user)
+      let sessionCount = 0;
+      if (ownedSessionIds.length > 0) {
+        let sessionQuery = supabase
+          .from('calculations')
+          .select('id', { count: 'exact', head: true })
+          .is('user_id', null)
+          .in('session_id', ownedSessionIds);
+
+        if (monthOnly) {
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          sessionQuery = sessionQuery.gte('created_at', startOfMonth.toISOString());
+        }
+
+        const { count: sCount, error: sError } = await sessionQuery;
+        if (sError) {
+          console.error('Session calculation count error:', sError);
+        } else {
+          sessionCount = sCount || 0;
+        }
       }
 
       const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       return apiSuccess({
-        count: count || 0,
+        count: (directCount || 0) + sessionCount,
         month: monthOnly ? currentMonth : undefined
       });
     }
@@ -225,26 +258,61 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    let query = supabase
-      .from('calculations')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
     if (userId) {
-      query = query.eq('user_id', userId);
+      // Fetch calculations with direct user_id match
+      const { data: directData, error: directError } = await supabase
+        .from('calculations')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (directError) {
+        console.error('Calculation fetch error:', directError);
+        return apiError('Failed to fetch calculations', 500);
+      }
+
+      // Also fetch session-owned calculations (user_id IS NULL but session belongs to user)
+      let sessionData: typeof directData = [];
+      if (ownedSessionIds.length > 0) {
+        const { data: sData, error: sError } = await supabase
+          .from('calculations')
+          .select('*')
+          .is('user_id', null)
+          .in('session_id', ownedSessionIds)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (sError) {
+          console.error('Session calculation fetch error:', sError);
+        } else {
+          sessionData = sData || [];
+        }
+      }
+
+      // Merge and sort by created_at descending, then apply limit
+      const merged = [...(directData || []), ...sessionData]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, limit);
+
+      return apiSuccess({ calculations: merged });
     } else if (anonymousId) {
-      query = query.eq('anonymous_id', anonymousId);
+      const { data, error } = await supabase
+        .from('calculations')
+        .select('*')
+        .eq('anonymous_id', anonymousId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Calculation fetch error:', error);
+        return apiError('Failed to fetch calculations', 500);
+      }
+
+      return apiSuccess({ calculations: data });
     }
 
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Calculation fetch error:', error);
-      return apiError('Failed to fetch calculations', 500);
-    }
-
-    return apiSuccess({ calculations: data });
+    return apiError('user_id or anonymous_id is required', 400);
   } catch (error) {
     captureApiError(error, 'calculations-get');
     return apiError('Internal server error', 500);

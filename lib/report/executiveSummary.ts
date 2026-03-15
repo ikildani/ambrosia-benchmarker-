@@ -38,6 +38,7 @@ export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string
 
   // Deal recommendation
   const rec = result.dealRecommendation;
+  const dtl = result.dealTypeLabels;
 
   // Royalty range
   const royaltyRange = `${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%`;
@@ -173,7 +174,7 @@ export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string
           <!-- Subtle background texture -->
           <div style="position: absolute; top: 0; right: 0; width: 200px; height: 100%; background: radial-gradient(circle at 80% 30%, rgba(13,148,136,0.08) 0%, transparent 60%);"></div>
           <div style="position: relative;">
-            <div style="font-size: 9px; font-weight: 200; color: ${COLORS.tealMid}; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 8px;">Total Deal Value</div>
+            <div style="font-size: 9px; font-weight: 200; color: ${COLORS.tealMid}; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 8px;">${dtl.totalValueLabel || 'Total Deal Value'}</div>
             <div style="font-size: 38px; font-weight: 800; color: ${COLORS.white}; line-height: 1; letter-spacing: -0.03em;">${formatUsd(terms.totalDealValue.median)}</div>
             <div style="font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 6px; letter-spacing: 0.01em;">Range: ${formatUsd(terms.totalDealValue.low)} &ndash; ${formatUsd(terms.totalDealValue.high)}</div>
           </div>
@@ -199,7 +200,7 @@ export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string
               letter-spacing: 0.03em;
               position: relative;
             ">
-              ${upfrontPct >= 15 ? `Upfront ${upfrontPct}%` : `${upfrontPct}%`}
+              ${upfrontPct >= 15 ? `${dtl.upfrontBadge || 'Upfront'} ${upfrontPct}%` : `${upfrontPct}%`}
             </div>
             <!-- Milestones segment -->
             <div style="
@@ -214,12 +215,12 @@ export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string
               letter-spacing: 0.03em;
               position: relative;
             ">
-              ${milestonePct >= 15 ? `Milestones ${milestonePct}%` : `${milestonePct}%`}
+              ${milestonePct >= 15 ? `${dtl.milestoneBadge || 'Milestones'} ${milestonePct}%` : `${milestonePct}%`}
             </div>
           </div>
           <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-            <span style="font-size: 8.5px; color: ${COLORS.gray400}; font-weight: 500;">${formatUsd(terms.upfront.median)} upfront</span>
-            <span style="font-size: 8.5px; color: ${COLORS.gray400}; font-weight: 500;">${formatUsd(terms.devMilestones.median + terms.regMilestones.median + terms.commMilestones.median)} milestones</span>
+            <span style="font-size: 8.5px; color: ${COLORS.gray400}; font-weight: 500;">${formatUsd(terms.upfront.median)} ${(dtl.upfrontBadge || 'upfront').toLowerCase()}</span>
+            <span style="font-size: 8.5px; color: ${COLORS.gray400}; font-weight: 500;">${formatUsd(terms.devMilestones.median + terms.regMilestones.median + terms.commMilestones.median)} ${(dtl.milestoneBadge || 'milestones').toLowerCase()}</span>
           </div>
         </div>
 
@@ -227,37 +228,37 @@ export function generateExecutiveSummaryHTML(data: ExecutiveSummaryData): string
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px;">
           ${metricCard(
             formatUsd(terms.upfront.median),
-            'Upfront Payment',
+            dtl.upfrontLabel,
             `${formatUsd(terms.upfront.low)} \u2013 ${formatUsd(terms.upfront.high)}`,
             COLORS.teal,
           )}
           ${metricCard(
             formatUsd(terms.devMilestones.median),
-            'Dev Milestones',
+            dtl.devMilestoneLabel,
             `${formatUsd(terms.devMilestones.low)} \u2013 ${formatUsd(terms.devMilestones.high)}`,
             COLORS.cyan,
           )}
           ${metricCard(
             formatUsd(terms.regMilestones.median),
-            'Reg Milestones',
+            dtl.regMilestoneLabel,
             `${formatUsd(terms.regMilestones.low)} \u2013 ${formatUsd(terms.regMilestones.high)}`,
             '#6366f1',
           )}
           ${metricCard(
             formatUsd(terms.commMilestones.median),
-            'Comm Milestones',
+            dtl.commMilestoneLabel,
             `${formatUsd(terms.commMilestones.low)} \u2013 ${formatUsd(terms.commMilestones.high)}`,
             COLORS.purple,
           )}
           ${metricCard(
             royaltyRange,
-            'Base Royalty Range',
-            'On net sales <$500M',
+            dtl.royaltyLabel || 'Base Royalty Range',
+            dtl.royaltyNote || 'On net sales <$500M',
             COLORS.amber,
           )}
           ${metricCard(
             `${rec.upfrontPercent}/${rec.milestonePercent}`,
-            'Upfront / Milestone Split',
+            dtl.recommendationPrefix || 'Upfront / Milestone Split',
             'Recommended allocation',
             COLORS.navy,
           )}

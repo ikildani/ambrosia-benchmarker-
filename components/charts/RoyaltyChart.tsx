@@ -60,7 +60,7 @@ function RoyaltyChart({ royalties }: RoyaltyChartProps) {
     <div className="w-full" role="img" aria-label={chartDescription}>
       <table className="sr-only" aria-label="Tiered royalty rates">
         <caption>Royalty rates by annual sales tier</caption>
-        <thead><tr><th>Tier</th><th>Sales Threshold</th><th>Low Rate</th><th>High Rate</th></tr></thead>
+        <thead><tr><th scope="col">Tier</th><th scope="col">Sales Threshold</th><th scope="col">Low Rate</th><th scope="col">High Rate</th></tr></thead>
         <tbody>
           <tr><td>Base</td><td>$0-$500M</td><td>{royalties.base.low}%</td><td>{royalties.base.high}%</td></tr>
           <tr><td>Mid</td><td>$500M-$1B</td><td>{royalties.midTier.low}%</td><td>{royalties.midTier.high}%</td></tr>

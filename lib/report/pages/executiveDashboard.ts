@@ -9,6 +9,7 @@ import type { PDFReportData, ReportMeta } from '../types';
 export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta): string {
   const { result, riskScore, sensitivityData } = data;
   const terms = result.terms;
+  const dtl = result.dealTypeLabels;
 
   const upfrontPct = terms.totalDealValue.median > 0
     ? (terms.upfront.median / terms.totalDealValue.median * 100).toFixed(0)
@@ -18,10 +19,10 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
   // Donut segments
   const donutHtml = renderDonut([
-    { label: 'Upfront', value: terms.upfront.median, color: COLORS.teal },
-    { label: 'Dev Milestones', value: terms.devMilestones.median, color: COLORS.cyan },
-    { label: 'Reg Milestones', value: terms.regMilestones.median, color: '#6366f1' },
-    { label: 'Comm Milestones', value: terms.commMilestones.median, color: '#8b5cf6' },
+    { label: dtl.upfrontLabel, value: terms.upfront.median, color: COLORS.teal },
+    { label: dtl.devMilestoneLabel, value: terms.devMilestones.median, color: COLORS.cyan },
+    { label: dtl.regMilestoneLabel, value: terms.regMilestones.median, color: '#6366f1' },
+    { label: dtl.commMilestoneLabel, value: terms.commMilestones.median, color: '#8b5cf6' },
   ], 200);
 
   const topDriver = sensitivityData?.topValueDriver;
@@ -36,14 +37,14 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px;">
         <!-- Total Deal Value — large hero card -->
         <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 22px; color: white;">
-          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">${dtl.totalValueLabel || 'Total Deal Value'}</div>
           <div style="font-size: 32px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em; line-height: 1;">${formatUsd(terms.totalDealValue.median)}</div>
           <div style="font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 5px;">${formatUsd(terms.totalDealValue.low)} &ndash; ${formatUsd(terms.totalDealValue.high)}</div>
         </div>
         <!-- Upfront Payment -->
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(terms.upfront.median)}</div>
-          <div class="kpi-label">Upfront Payment</div>
+          <div class="kpi-label">${dtl.upfrontLabel}</div>
           <div class="kpi-sub">${upfrontPct}% of total deal value</div>
         </div>
         <!-- Risk Gauge -->
@@ -56,9 +57,9 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
       <!-- Milestone Breakdown Row -->
       <div class="grid-4" style="margin-bottom: 18px;">
         ${[
-          { label: 'Dev Milestones', value: formatUsd(terms.devMilestones.median), color: COLORS.teal },
-          { label: 'Reg Milestones', value: formatUsd(terms.regMilestones.median), color: COLORS.cyan },
-          { label: 'Comm Milestones', value: formatUsd(terms.commMilestones.median), color: '#6366f1' },
+          { label: dtl.devMilestoneLabel, value: formatUsd(terms.devMilestones.median), color: COLORS.teal },
+          { label: dtl.regMilestoneLabel, value: formatUsd(terms.regMilestones.median), color: COLORS.cyan },
+          { label: dtl.commMilestoneLabel, value: formatUsd(terms.commMilestones.median), color: '#6366f1' },
           { label: 'Base Royalty', value: `${result.tieredRoyalties.base.low}%\u2013${result.tieredRoyalties.base.high}%`, color: '#8b5cf6' },
         ].map(item => `
           <div class="card-sm" style="text-align: center; border-top: 3px solid ${item.color};">
@@ -103,8 +104,8 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
               ${result.dealRecommendation.rationale}
             </div>
             <div style="margin-top: 6px; display: flex; gap: 8px;">
-              <span class="badge badge-teal">Upfront ${result.dealRecommendation.upfrontPercent}%</span>
-              <span class="badge badge-blue">Milestones ${result.dealRecommendation.milestonePercent}%</span>
+              <span class="badge badge-teal">${dtl.upfrontBadge || 'Upfront'} ${result.dealRecommendation.upfrontPercent}%</span>
+              <span class="badge badge-blue">${dtl.milestoneBadge || 'Milestones'} ${result.dealRecommendation.milestonePercent}%</span>
             </div>
           </div>
 

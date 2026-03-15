@@ -397,6 +397,23 @@ export interface DrillDownCollection {
   royalties: DrillDownData;
 }
 
+// Deal-type-specific labels for user-facing output.
+// Prevents cross-contamination of licensing terminology into acquisitions, options, etc.
+export interface DealTypeLabels {
+  upfrontLabel: string;
+  upfrontBadge: string;
+  upfrontTooltip: string;
+  totalValueLabel: string;
+  devMilestoneLabel: string;
+  regMilestoneLabel: string;
+  commMilestoneLabel: string;
+  milestoneBadge: string;
+  royaltyLabel: string;
+  royaltyNote: string; // e.g., "Post-Exercise Only" or "N/A — Full Ownership"
+  recommendationPrefix: string; // e.g., "~75% Cash / ~25% CVR"
+  dealTypeDisplay: string; // e.g., "Acquisition (M&A)"
+}
+
 export interface CalculationResult {
   terms: DealTerms;
   tieredRoyalties: TieredRoyalties;
@@ -408,6 +425,7 @@ export interface CalculationResult {
     modality: string;
     indication: string;
   };
+  dealTypeLabels: DealTypeLabels;
   drillDown: DrillDownCollection;
   phase: Phase;
   milestoneExplanation?: string;
@@ -431,8 +449,46 @@ export interface CalculationResult {
   };
 }
 
+// Map from user-facing TherapeuticArea to benchmarks.indications category key(s).
+// NOTE: 'hematologic' vs 'hematology' redundancy — both exist in benchmarks.json
+// with overlapping indications and DIFFERENT multipliers (e.g. dlbcl: 1.08 vs 1.20).
+// 'hematologic' is the legacy oncology sub-category; 'hematology' is the standalone TA.
+// Do NOT merge them without a full audit of downstream consumers (deals pipeline,
+// comparable-deals-extended, pos-tables, partner-matching, etc.).
+const therapeuticAreaToCategoryKeys: Record<TherapeuticArea, string[]> = {
+  oncology: ['solidTumor', 'hematologic'],
+  neurology: ['neurology'],
+  immunology: ['immunology'],
+  metabolic: ['metabolic'],
+  cardiovascular: ['cardiovascular'],
+  infectiousDisease: ['infectiousDisease'],
+  ophthalmology: ['ophthalmology'],
+  womensHealth: ['womensHealth'],
+  rareDisease: ['rareDisease'],
+  hematology: ['hematology'],
+  dermatology: ['dermatology'],
+  gastroenterology: ['gastroenterology'],
+};
+
 // Helper to get indication category
-function getIndicationCategory(indication: Indication): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'rareDisease' | 'hematology' | 'dermatology' | 'gastroenterology' {
+// When therapeuticArea is provided, checks that TA's categories FIRST so the user's
+// selection drives multiplier routing — avoids 5-15% valuation swings from priority-order
+// auto-detection when an indication appears in multiple TAs with different multipliers.
+function getIndicationCategory(indication: Indication, therapeuticArea?: TherapeuticArea): 'solidTumor' | 'hematologic' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'rareDisease' | 'hematology' | 'dermatology' | 'gastroenterology' {
+  // --- Priority routing: if the user selected a TA, check its categories first ---
+  if (therapeuticArea) {
+    const preferredCategories = therapeuticAreaToCategoryKeys[therapeuticArea];
+    if (preferredCategories) {
+      for (const cat of preferredCategories) {
+        const catData = benchmarks.indications[cat as keyof typeof benchmarks.indications];
+        if (catData && typeof catData === 'object' && (indication as string) in catData) {
+          return cat as ReturnType<typeof getIndicationCategory>;
+        }
+      }
+    }
+  }
+
+  // --- Fallback: auto-detect via priority-ordered lists (original behavior) ---
   const solidTumors: SolidTumorIndication[] = [
     'lung_nsclc', 'lung_sclc', 'breast_her2', 'breast_tnbc', 'breast_hr',
     'colorectal', 'pancreatic', 'melanoma', 'prostate', 'ovarian',
@@ -977,7 +1033,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData?.context });
 
   // Get indication multiplier
-  const category = getIndicationCategory(input.indication);
+  const category = getIndicationCategory(input.indication, input.therapeuticArea);
   const indicationsCategory = benchmarks.indications[category];
   const indicationData = indicationsCategory[input.indication];
   const indicationMultiplier = indicationData?.multiplier ?? 1.0;
@@ -1289,9 +1345,19 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   // Apply diminishing multiplier stacking with therapeutic-area-specific exponents
   // Neurology: combo dampening reduced (CNS drugs are inherently combination-limited by BBB)
-  // Neurology: indication exponent higher (indication choice matters more in neuro)
-  // Immunology: combo therapies very relevant; indication and disease severity matter highly
-  // Metabolic: route of admin and weight loss efficacy are the strongest differentiators
+  // TA-specific dampening exponents control how strongly each multiplier type affects
+  // the final deal value. Higher exponents = less dampening = stronger impact.
+  //
+  // Neurology (0.90): CNS combos are rare and each add-on represents a proportionally
+  //   larger opportunity; indication choice is critical (huge variability in CNS markets).
+  // Immunology (0.80-0.85): Combo therapies are standard-of-care, so less differentiating;
+  //   indication and disease severity drive most of the value variation.
+  // Metabolic (0.85): Route of administration and efficacy endpoints (weight loss %) are
+  //   the strongest differentiators; combo potential matters moderately.
+  // Oncology (0.75-0.80): Large deal volume means multipliers must be dampened more to
+  //   prevent extreme outliers; modality and phase drive value more than individual factors.
+  // Ophthalmology (0.85-0.90): Indication choice is highly impactful (wet AMD vs. dry eye);
+  //   combo potential matters for anti-VEGF + complement approaches.
   const comboExp = isNeurology ? 0.90 : isImmunology ? 0.80 : isMetabolic ? 0.85 : isCardiovascular ? 0.80 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.85 : isWomensHealth ? 0.80 : 0.75;
   const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.90 : isWomensHealth ? 0.85 : 0.80;
   const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.80 : isOphthalmology ? 0.85 : isWomensHealth ? 0.85 : 0.85;
@@ -1371,13 +1437,17 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
 
-  // Deal type upfront ratio overrides
+  // Deal type upfront ratio overrides — each deal structure has distinct economics:
+  // - Acquisition: 70-95% upfront (full control, premium for certainty)
+  // - Co-development: 15-30% upfront (shared risk/reward, lower initial commitment)
+  // - Option: 5-15% upfront (option premium only, bulk deferred to exercise)
+  // - Collaboration: 10-25% upfront (research funding, early-stage partnership)
   const dealTypeUpfrontOverrides: Record<DealType, { low: number; high: number } | null> = {
     licensing: null, // use phase-based ratios
-    acquisition: { low: 0.60, high: 0.85 }, // acquisitions are upfront-heavy
-    codevelopment: null, // use phase-based ratios (slightly reduced)
-    option: { low: 0.05, high: 0.12 }, // options have very low upfronts
-    collaboration: null, // use phase-based ratios
+    acquisition: { low: 0.70, high: 0.95 }, // acquisitions = mostly upfront cash
+    codevelopment: { low: 0.15, high: 0.30 }, // shared risk = lower upfront
+    option: { low: 0.05, high: 0.15 }, // option premium, exercise later
+    collaboration: { low: 0.10, high: 0.25 }, // research funding, early partnership
   };
 
   // Calculate upfront based on phase ratios with risk adjustment
@@ -1392,19 +1462,38 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const adjustedRatioHigh = upfrontRatios.low + (upfrontRatios.high - upfrontRatios.low) * (1 - riskFactor * 0.5);
   const adjustedRatioMedian = (adjustedRatioLow + adjustedRatioHigh) / 2;
 
+  // Asymmetric upfront range: low-end compressed (0.9×) because risk-averse licensees
+  // minimize cash outlay in bearish scenarios; high-end inflated (1.1×) because competitive
+  // auctions and late-stage assets command premium upfronts. This mirrors real negotiation
+  // dynamics where downside protection is priced differently from upside optionality.
   const upfront = {
     low: Math.round(totalDealValue.low * adjustedRatioLow * 0.9),
     median: Math.round(totalDealValue.median * adjustedRatioMedian),
     high: Math.round(totalDealValue.high * adjustedRatioHigh * 1.1)
   };
 
-  // Calculate milestone allocations
-  // Disease-modifying neurology assets use rebalanced milestones (more dev-weighted)
+  // Calculate milestone allocations — deal type determines allocation shape:
+  // - Acquisition: CVR-heavy (small dev/reg, mostly commercial earnouts)
+  // - Co-development: Dev-heavy (shared R&D investment drives milestone structure)
+  // - Option: Pre-exercise research milestones + post-exercise development
+  // - Collaboration: Research-heavy (target validation, lead identification)
+  // - Licensing: Standard phase-based (dev/reg/comm)
+  const dealTypeMilestoneOverrides: Record<DealType, { dev: number; reg: number; comm: number } | null> = {
+    licensing: null, // use phase-based defaults
+    acquisition: { dev: 0.05, reg: 0.15, comm: 0.80 }, // mostly CVR/earnout upside
+    codevelopment: { dev: 0.40, reg: 0.35, comm: 0.25 }, // dev-heavy shared economics
+    option: { dev: 0.40, reg: 0.30, comm: 0.30 }, // pre-exercise + post-exercise
+    collaboration: { dev: 0.50, reg: 0.30, comm: 0.20 }, // research-heavy
+  };
+
   const dmPhaseAdjust = benchmarks.neurologyDiseaseModifyingPhaseAdjustment;
   const useDMRebalance = isNeurology && input.treatmentApproach === 'diseaseModifying' && dmPhaseAdjust;
-  const milestoneAlloc = useDMRebalance
-    ? (dmPhaseAdjust.milestoneRebalance[input.phase] ?? phaseConfig.milestoneAllocations[input.phase])
-    : phaseConfig.milestoneAllocations[input.phase];
+
+  // Priority: deal type override > neurology DM rebalance > phase-based default
+  const milestoneAlloc = dealTypeMilestoneOverrides[dealType]
+    ?? (useDMRebalance
+      ? (dmPhaseAdjust.milestoneRebalance[input.phase] ?? phaseConfig.milestoneAllocations[input.phase])
+      : phaseConfig.milestoneAllocations[input.phase]);
   const totalMilestones = {
     low: totalDealValue.low - upfront.low,
     median: totalDealValue.median - upfront.median,
@@ -1429,26 +1518,40 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(totalMilestones.high * milestoneAlloc.comm)
   };
 
-  // Calculate tiered royalties — acquisitions have no royalties
+  // Calculate tiered royalties — adjusted per deal type:
+  // - Acquisition: 0% (full ownership, no ongoing royalties)
+  // - Co-development: 65% of standard (shared economics)
+  // - Option: 100% of standard (post-exercise, standard licensing terms)
+  // - Collaboration: 50% of standard (early-stage, shared IP)
+  // - Licensing: 100% (baseline)
   const baseRoyalty = phaseBaseline.royalty;
   const royaltyMultiplier = Math.pow(effectiveMultiplier, 0.3); // Dampened effect on royalties
   const isAcquisition = dealType === 'acquisition';
+  const dealTypeRoyaltyScalars: Record<DealType, number> = {
+    licensing: 1.0,
+    acquisition: 0,
+    codevelopment: 0.65,
+    option: 1.0,
+    collaboration: 0.50,
+  };
+  const royaltyScalar = dealTypeRoyaltyScalars[dealType];
 
-  const baseLow = isAcquisition ? 0 : Math.round(baseRoyalty.base * royaltyMultiplier * 10) / 10;
-  const baseHigh = isAcquisition ? 0 : Math.round(baseRoyalty.max * royaltyMultiplier * 10) / 10;
+  const baseLow = Math.round(baseRoyalty.base * royaltyMultiplier * royaltyScalar * 10) / 10;
+  const baseHigh = Math.round(baseRoyalty.max * royaltyMultiplier * royaltyScalar * 10) / 10;
 
+  const tierIncrement = royaltyScalar > 0 ? 2 : 0;
   const tieredRoyalties: TieredRoyalties = {
     base: {
       low: Math.min(baseLow, 25),
       high: Math.min(baseHigh, 30)
     },
     midTier: {
-      low: Math.min(baseLow + (isAcquisition ? 0 : 2), 28),
-      high: Math.min(baseHigh + (isAcquisition ? 0 : 2), 33)
+      low: Math.min(baseLow + tierIncrement, 28),
+      high: Math.min(baseHigh + tierIncrement, 33)
     },
     highTier: {
-      low: Math.min(baseLow + (isAcquisition ? 0 : 4), 30),
-      high: Math.min(baseHigh + (isAcquisition ? 0 : 4), 35)
+      low: Math.min(baseLow + tierIncrement * 2, 30),
+      high: Math.min(baseHigh + tierIncrement * 2, 35)
     }
   };
 
@@ -1459,6 +1562,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     milestonePercent: 100 - recommendedUpfrontPercent,
     rationale: generateRationale(input, riskScore)
   };
+
+  // Generate deal-type-specific labels to prevent cross-contamination
+  const dealTypeLabels = getDealTypeLabels(dealType, recommendedUpfrontPercent);
 
   // Get negotiation insight
   const negotiationInsight = getNegotiationInsight(input);
@@ -1502,6 +1608,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       modality: modalityData?.label ?? input.modality,
       indication: indicationData?.label ?? input.indication
     },
+    dealTypeLabels,
     drillDown,
     phase: input.phase,
     ...(isNeurology ? {
@@ -1725,25 +1832,25 @@ function generateDrillDownData(
       factors: factors.filter(f => f.impact !== 'neutral')
     },
     devMilestones: {
-      rangeExplanation: `Development milestones are paid upon achieving clinical trial objectives. Earlier-stage deals weight more toward development milestones.`,
+      rangeExplanation: getDrillDownExplanation('dev', input.dealType),
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral'),
       breakdown: devBreakdowns[input.phase] ?? devBreakdowns['phase2']!
     },
     regMilestones: {
-      rangeExplanation: `Regulatory milestones are contingent on approval by health authorities. FDA typically accounts for 50% of regulatory milestone value.`,
+      rangeExplanation: getDrillDownExplanation('reg', input.dealType),
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral'),
       breakdown: regBreakdown
     },
     commMilestones: {
-      rangeExplanation: `Commercial milestones are tied to net sales thresholds. Later-stage deals weight more toward commercial milestones.`,
+      rangeExplanation: getDrillDownExplanation('comm', input.dealType),
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral'),
       breakdown: commBreakdown
     },
     royalties: {
-      rangeExplanation: `Royalties are ongoing payments on net sales, typically tiered to increase with sales volume. Rates reflect modality, indication, and competitive factors.`,
+      rangeExplanation: getDrillDownExplanation('royalty', input.dealType),
       rangeWidthPercent: rangePercent,
       factors: factors.filter(f => f.impact !== 'neutral'),
       breakdown: royaltyBreakdown
@@ -1762,10 +1869,149 @@ function calculateBreakdownValue(
   };
 }
 
+/**
+ * Generate deal-type-specific labels for all user-facing output.
+ * Prevents cross-contamination of licensing terminology into acquisitions, options, etc.
+ */
+function getDealTypeLabels(dealType: DealType, upfrontPercent: number): DealTypeLabels {
+  switch (dealType) {
+    case 'acquisition':
+      return {
+        upfrontLabel: 'Acquisition Cash',
+        upfrontBadge: 'Cash Consideration',
+        upfrontTooltip: 'The upfront cash payment at deal closing. Acquisitions typically pay 70-95% of total value upfront.',
+        totalValueLabel: 'Acquisition Price',
+        devMilestoneLabel: 'CVRs (Clinical)',
+        regMilestoneLabel: 'CVRs (Regulatory)',
+        commMilestoneLabel: 'CVRs (Commercial)',
+        milestoneBadge: 'Earnout/CVR',
+        royaltyLabel: 'Ownership',
+        royaltyNote: 'N/A — Full ownership, no ongoing royalties',
+        recommendationPrefix: `~${upfrontPercent}% Cash / ~${100 - upfrontPercent}% CVR/Earnout`,
+        dealTypeDisplay: 'Acquisition (M&A)',
+      };
+    case 'codevelopment':
+      return {
+        upfrontLabel: 'Initial Payment',
+        upfrontBadge: 'Co-Dev Payment',
+        upfrontTooltip: 'The initial payment at partnership signing. Co-development deals typically have 15-30% upfront with shared development costs.',
+        totalValueLabel: 'Total Deal Value',
+        devMilestoneLabel: 'Shared Dev Costs',
+        regMilestoneLabel: 'Regulatory Milestones',
+        commMilestoneLabel: 'Profit Share Value',
+        milestoneBadge: 'Shared Economics',
+        royaltyLabel: 'Profit Share',
+        royaltyNote: 'Shared economics — profit split replaces traditional royalties',
+        recommendationPrefix: `~${upfrontPercent}% Upfront / ~${100 - upfrontPercent}% Shared Dev`,
+        dealTypeDisplay: 'Co-Development',
+      };
+    case 'option':
+      return {
+        upfrontLabel: 'Option Premium',
+        upfrontBadge: 'Option Fee',
+        upfrontTooltip: 'The option premium paid upfront for the right (not obligation) to license or acquire. Typically 5-15% of total deal value.',
+        totalValueLabel: 'Option Value (If Exercised)',
+        devMilestoneLabel: 'Pre-Exercise R&D',
+        regMilestoneLabel: 'Exercise Payment',
+        commMilestoneLabel: 'Post-Exercise Milestones',
+        milestoneBadge: 'If Exercised',
+        royaltyLabel: 'Royalties (Post-Exercise)',
+        royaltyNote: 'Royalties apply only after option exercise',
+        recommendationPrefix: `~${upfrontPercent}% Premium / ~${100 - upfrontPercent}% Deferred (Exercise + Milestones)`,
+        dealTypeDisplay: 'Option Agreement',
+      };
+    case 'collaboration':
+      return {
+        upfrontLabel: 'Research Funding',
+        upfrontBadge: 'Research Payment',
+        upfrontTooltip: 'Upfront research funding at collaboration signing. Typically 10-25% of total potential value.',
+        totalValueLabel: 'Total Value (If Licensed)',
+        devMilestoneLabel: 'Research Milestones',
+        regMilestoneLabel: 'Option to License',
+        commMilestoneLabel: 'Post-License Value',
+        milestoneBadge: 'If Licensed',
+        royaltyLabel: 'Royalties (If Licensed)',
+        royaltyNote: 'Royalties apply only if collaboration converts to license',
+        recommendationPrefix: `~${upfrontPercent}% Research Funding / ~${100 - upfrontPercent}% Deferred`,
+        dealTypeDisplay: 'Research Collaboration',
+      };
+    case 'licensing':
+    default:
+      return {
+        upfrontLabel: 'Upfront Payment',
+        upfrontBadge: 'Guaranteed',
+        upfrontTooltip: 'The guaranteed payment at deal signing, typically 10-35% of total deal value depending on development phase and risk profile.',
+        totalValueLabel: 'Total Deal Value',
+        devMilestoneLabel: 'Development Milestones',
+        regMilestoneLabel: 'Regulatory Milestones',
+        commMilestoneLabel: 'Commercial Milestones',
+        milestoneBadge: 'If Achieved',
+        royaltyLabel: 'Royalties (% of Net Sales)',
+        royaltyNote: 'Ongoing percentage of net sales paid to licensor',
+        recommendationPrefix: `${upfrontPercent}% Upfront / ${100 - upfrontPercent}% Milestones`,
+        dealTypeDisplay: 'Licensing',
+      };
+  }
+}
+
+/** Deal-type-aware drill-down explanations for milestone and royalty panels. */
+function getDrillDownExplanation(category: 'dev' | 'reg' | 'comm' | 'royalty', dealType?: DealType): string {
+  const dt = dealType || 'licensing';
+  const explanations: Record<DealType, Record<string, string>> = {
+    licensing: {
+      dev: 'Development milestones are paid upon achieving clinical trial objectives. Earlier-stage deals weight more toward development milestones.',
+      reg: 'Regulatory milestones are contingent on approval by health authorities. FDA typically accounts for 50% of regulatory milestone value.',
+      comm: 'Commercial milestones are tied to net sales thresholds. Later-stage deals weight more toward commercial milestones.',
+      royalty: 'Royalties are ongoing payments on net sales, typically tiered to increase with sales volume. Rates reflect modality, indication, and competitive factors.',
+    },
+    acquisition: {
+      dev: 'CVRs (Clinical) are contingent value rights tied to clinical milestones. In acquisitions, these are typically small relative to the upfront cash consideration.',
+      reg: 'CVRs (Regulatory) are earnout payments triggered by FDA/EMA approval. Typically 10-15% of remaining deal value in structured acquisitions.',
+      comm: 'CVRs (Commercial) are earnout payments tied to commercial performance thresholds (peak sales, revenue milestones). This is typically the largest CVR component.',
+      royalty: 'Acquisitions transfer full ownership — no ongoing royalties. The acquirer captures 100% of future net sales.',
+    },
+    codevelopment: {
+      dev: 'Shared development costs represent the partner\'s contribution to clinical trial expenses. Co-development deals typically allocate 40% of deferred value to shared R&D.',
+      reg: 'Regulatory milestones are shared between partners. Each party bears a portion of the regulatory submission and approval costs.',
+      comm: 'Profit share represents the economic split of commercial revenues. Unlike licensing royalties, co-development profit shares are negotiated as a percentage of operating profit.',
+      royalty: 'Co-development economics use a profit share model rather than traditional royalties. Rates are typically 50-65% of what a standard licensing royalty would be, reflecting shared risk and investment.',
+    },
+    option: {
+      dev: 'Pre-exercise R&D milestones fund development activities before the option decision. These payments are non-refundable regardless of whether the option is exercised.',
+      reg: 'The exercise payment is the key decision point — triggered when clinical data meets predefined criteria. This is typically the largest single milestone in an option deal.',
+      comm: 'Post-exercise milestones are contingent on the option being exercised. These follow standard licensing milestone structures and are only payable after the option holder commits.',
+      royalty: 'Royalties apply only after option exercise. Pre-exercise, the licensor retains full ownership. Post-exercise royalty rates follow standard licensing ranges.',
+    },
+    collaboration: {
+      dev: 'Research milestones fund target validation, lead identification, and IND-enabling studies. These are the primary value driver in early-stage research collaborations.',
+      reg: 'The option-to-license payment gives the partner the right to advance the program into clinical development. This is typically triggered by achieving predefined research objectives.',
+      comm: 'Post-license value represents potential downstream milestones and royalties if the collaboration converts to a full license. These payments are highly contingent on early research success.',
+      royalty: 'Royalties apply only if the collaboration converts to a license agreement. Research collaborations often include reduced royalty rates (50% of standard) reflecting the partner\'s early-stage investment.',
+    },
+  };
+  return explanations[dt]?.[category] ?? explanations.licensing[category];
+}
+
 function generateRationale(input: CalculationInput, riskScore: number): string {
   const phaseLabel = benchmarks.labels.phases[input.phase];
   const ta = input.therapeuticArea;
+  const dealType = input.dealType || 'licensing';
 
+  // Deal-type framing prefix — provides context before TA-specific rationale
+  const dealTypeFraming: Record<DealType, string> = {
+    licensing: '',
+    acquisition: 'Structured as an acquisition (M&A), the upfront cash consideration reflects a control premium with CVR/earnout upside. ',
+    codevelopment: 'As a co-development partnership, economics are shared — lower upfront commitment offset by shared development costs and profit-sharing. ',
+    option: 'Structured as an option agreement, the initial premium is modest with the majority of value deferred to exercise and post-exercise milestones. ',
+    collaboration: 'As a research collaboration, upfront research funding is modest with value contingent on achieving research objectives and potential license conversion. ',
+  };
+  const prefix = dealTypeFraming[dealType] || '';
+
+  return prefix + generateTARationale(ta, phaseLabel, riskScore);
+}
+
+/** TA-specific rationale text (called by generateRationale which prepends deal-type framing). */
+function generateTARationale(ta: string, phaseLabel: string, riskScore: number): string {
   if (ta === 'oncology') {
     if (riskScore < 25) {
       return `De-risked ${phaseLabel} oncology asset with strong clinical data and differentiated mechanism justifies premium upfront. Combination potential and line-of-therapy positioning drive aggressive commercial milestones in the $200B+ oncology market.`;

@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { syncUsageFromDatabase } from '@/lib/usage';
+import { captureClientError } from '@/lib/sentry-client';
 
 interface User {
   id: string;  // Unique user identifier (UUID)
@@ -211,7 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
         }).catch((error) => {
           clearTimeout(sessionTimeout);
-          console.error('[Auth] getSession failed:', error);
+          captureClientError(error, 'AuthContext', { context: 'Supabase getSession failed' });
           setIsLoading(false);
         });
 
@@ -271,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               tier: 'free',
               email_verified: true,
             }, { onConflict: 'id', ignoreDuplicates: true }).then(({ error }) => {
-              if (error) console.error('[Auth] Profile upsert error:', error);
+              if (error) captureClientError(error, 'AuthContext', { context: 'Profile upsert failed on sign-in' });
             });
           }
 
@@ -367,10 +368,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const { error } = await supabase.auth.signOut();
           if (error) {
-            console.error('[Auth] Supabase signOut error:', error);
+            captureClientError(error, 'AuthContext', { context: 'Supabase signOut failed' });
           }
         } catch (err) {
-          console.error('[Auth] SignOut exception:', err);
+          captureClientError(err, 'AuthContext', { context: 'Supabase signOut threw exception' });
         }
       }
     }

@@ -9,6 +9,7 @@ import type { PDFReportData, ReportMeta } from '../types';
 export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): string {
   const { result } = data;
   const terms = result.terms;
+  const dtl = result.dealTypeLabels;
 
   // Waterfall chart
   const baseValue = terms.totalDealValue.median / result.modifiers.reduce((acc, m) => acc * m.multiplier, 1);
@@ -17,11 +18,11 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
   // Range bars for each term
   const maxVal = terms.totalDealValue.high * 1.1;
   const termRanges = [
-    { label: 'Total Deal Value', ...terms.totalDealValue },
-    { label: 'Upfront Payment', ...terms.upfront },
-    { label: 'Dev Milestones', ...terms.devMilestones },
-    { label: 'Reg Milestones', ...terms.regMilestones },
-    { label: 'Comm Milestones', ...terms.commMilestones },
+    { label: dtl.totalValueLabel || 'Total Deal Value', ...terms.totalDealValue },
+    { label: dtl.upfrontLabel, ...terms.upfront },
+    { label: dtl.devMilestoneLabel, ...terms.devMilestones },
+    { label: dtl.regMilestoneLabel, ...terms.regMilestones },
+    { label: dtl.commMilestoneLabel, ...terms.commMilestones },
   ];
 
   return `

@@ -6,6 +6,7 @@ import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): string {
   const { inputs, result } = data;
+  const dtl = result.dealTypeLabels;
   const phase = getLabel(inputs.phase, phaseLabels);
   const milestones = getDefaultMilestones(inputs.phase, inputs.therapeuticArea);
   const timelineHtml = renderDealTimeline(inputs.phase, milestones);
@@ -37,10 +38,10 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
       <div class="section-title" style="margin-top: 16px;">MILESTONE PAYMENT SCHEDULE</div>
       <div class="grid-4" style="margin-top: 10px;">
         ${[
-          { label: 'Upfront Payment', data: result.terms.upfront, desc: 'Due at signing', color: COLORS.teal },
-          { label: 'Dev Milestones', data: devMilestones, desc: 'IND, Phase starts, readouts', color: COLORS.cyan },
-          { label: 'Reg Milestones', data: regMilestones, desc: 'NDA/BLA filing, approval', color: '#6366f1' },
-          { label: 'Comm Milestones', data: commMilestones, desc: 'Sales thresholds ($500M+)', color: '#8b5cf6' },
+          { label: dtl.upfrontLabel, data: result.terms.upfront, desc: dtl.upfrontTooltip || 'Due at signing', color: COLORS.teal },
+          { label: dtl.devMilestoneLabel, data: devMilestones, desc: 'IND, Phase starts, readouts', color: COLORS.cyan },
+          { label: dtl.regMilestoneLabel, data: regMilestones, desc: 'NDA/BLA filing, approval', color: '#6366f1' },
+          { label: dtl.commMilestoneLabel, data: commMilestones, desc: 'Sales thresholds ($500M+)', color: '#8b5cf6' },
         ].map(item => `
           <div class="card" style="border-top: 3px solid ${item.color};">
             <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 6px;">${item.label}</div>
@@ -54,7 +55,7 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
       <!-- Total Deal Value Hero -->
       <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 18px 22px; color: white; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 6px;">Total Deal Value</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 6px;">${dtl.totalValueLabel || 'Total Deal Value'}</div>
           <div style="font-size: 28px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em;">${formatUsd(result.terms.totalDealValue.median)}</div>
           <div style="font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 3px;">${formatUsd(result.terms.totalDealValue.low)} &ndash; ${formatUsd(result.terms.totalDealValue.high)}</div>
         </div>

@@ -168,7 +168,7 @@ export async function generateExcelReport(
   treatmentApproach?: string,
   sensitivityData?: SensitivityData
 ): Promise<void> {
-  const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels } = result;
+  const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, dealTypeLabels: dtl } = result;
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Ambrosia Ventures';
   wb.created = new Date();
@@ -216,14 +216,14 @@ export async function generateExcelReport(
   r++;
   addSectionHeader(ws1, r, 'RECOMMENDED STRUCTURE', 2);
   r++;
-  ws1.getCell(r, 1).value = 'Upfront Allocation';
+  ws1.getCell(r, 1).value = dtl.recommendationPrefix ? `${dtl.upfrontLabel} Allocation` : 'Upfront Allocation';
   ws1.getCell(r, 1).font = { bold: true, size: 10 };
   const upfrontCell = ws1.getCell(r, 2);
   upfrontCell.value = dealRecommendation.upfrontPercent / 100;
   upfrontCell.numFmt = '0%';
   upfrontCell.font = { bold: true, size: 12, color: { argb: TEAL } };
   r++;
-  ws1.getCell(r, 1).value = 'Milestone Allocation';
+  ws1.getCell(r, 1).value = dtl.milestoneBadge ? `${dtl.milestoneBadge} Allocation` : 'Milestone Allocation';
   ws1.getCell(r, 1).font = { bold: true, size: 10 };
   const milestoneCell = ws1.getCell(r, 2);
   milestoneCell.value = dealRecommendation.milestonePercent / 100;
@@ -261,11 +261,11 @@ export async function generateExcelReport(
   addTableHeaders(ws2, 3, ['Metric', 'Low', 'Median', 'High', 'Notes']);
 
   const termRows = [
-    { label: 'Upfront Payment', vals: terms.upfront, note: 'Guaranteed payment at signing' },
-    { label: 'Dev Milestones', vals: terms.devMilestones, note: 'Upon clinical milestones' },
-    { label: 'Reg Milestones', vals: terms.regMilestones, note: 'Upon FDA/EMA approval' },
-    { label: 'Comm Milestones', vals: terms.commMilestones, note: 'Upon sales thresholds' },
-    { label: 'Total Deal Value', vals: terms.totalDealValue, note: 'If all milestones achieved' },
+    { label: dtl.upfrontLabel, vals: terms.upfront, note: dtl.upfrontTooltip || 'Guaranteed payment at signing' },
+    { label: dtl.devMilestoneLabel, vals: terms.devMilestones, note: 'Upon clinical milestones' },
+    { label: dtl.regMilestoneLabel, vals: terms.regMilestones, note: 'Upon FDA/EMA approval' },
+    { label: dtl.commMilestoneLabel, vals: terms.commMilestones, note: 'Upon sales thresholds' },
+    { label: dtl.totalValueLabel || 'Total Deal Value', vals: terms.totalDealValue, note: 'If all milestones achieved' },
   ];
 
   termRows.forEach((t, i) => {
@@ -344,10 +344,10 @@ export async function generateExcelReport(
   rr++;
 
   const compositionComponents = [
-    { label: 'Upfront Payment', value: terms.upfront.median, colorKey: 'upfront' },
-    { label: 'Dev Milestones', value: terms.devMilestones.median, colorKey: 'dev' },
-    { label: 'Reg Milestones', value: terms.regMilestones.median, colorKey: 'reg' },
-    { label: 'Comm Milestones', value: terms.commMilestones.median, colorKey: 'comm' },
+    { label: dtl.upfrontLabel, value: terms.upfront.median, colorKey: 'upfront' },
+    { label: dtl.devMilestoneLabel, value: terms.devMilestones.median, colorKey: 'dev' },
+    { label: dtl.regMilestoneLabel, value: terms.regMilestones.median, colorKey: 'reg' },
+    { label: dtl.commMilestoneLabel, value: terms.commMilestones.median, colorKey: 'comm' },
   ];
   const totalMedian = terms.totalDealValue.median;
   const maxComponentValue = Math.max(...compositionComponents.map(c => c.value));
@@ -398,7 +398,7 @@ export async function generateExcelReport(
 
   // Total row for composition
   const totalFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: NAVY } };
-  ws2.getCell(rr, 1).value = 'Total Deal Value';
+  ws2.getCell(rr, 1).value = dtl.totalValueLabel || 'Total Deal Value';
   ws2.getCell(rr, 1).font = { bold: true, size: 10, color: { argb: WHITE } };
   ws2.getCell(rr, 1).fill = totalFill;
   ws2.getCell(rr, 1).border = thinBorder();

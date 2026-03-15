@@ -7,6 +7,7 @@ import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+import { captureClientError } from '@/lib/sentry-client';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -58,10 +59,10 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
       if (data.url) {
         window.location.href = data.url;
       } else if (data.error) {
-        console.error('Report checkout error:', data.error);
+        captureClientError(data.error, 'PaywallModal', { context: 'Report checkout API returned error' });
       }
     } catch {
-      console.error('Report checkout failed');
+      captureClientError(new Error('Report checkout failed'), 'PaywallModal', { context: 'Report checkout network error' });
     } finally {
       setIsReportLoading(false);
     }

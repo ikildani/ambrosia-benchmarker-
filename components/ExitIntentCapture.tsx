@@ -71,7 +71,7 @@ export default function ExitIntentCapture() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShow(false)} />
-      <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Weekly deal insights signup" tabIndex={-1} className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8">
+      <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Weekly deal insights signup" tabIndex={-1} className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl dark:shadow-slate-950/50 max-w-md w-full p-6 sm:p-8">
         <button onClick={() => setShow(false)} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
@@ -113,7 +113,7 @@ export default function ExitIntentCapture() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-xl hover:from-teal-700 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50"
+                className="w-full py-3 text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-xl hover:from-teal-700 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10 disabled:opacity-50"
               >
                 {submitting ? 'Subscribing...' : 'Subscribe — Free'}
               </button>

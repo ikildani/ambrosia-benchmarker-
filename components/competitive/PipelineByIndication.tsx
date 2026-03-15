@@ -128,18 +128,19 @@ export default function PipelineByIndication({ data, isPro }: PipelineByIndicati
         <table className="w-full border-separate border-spacing-0 text-sm">
           <thead>
             <tr>
-              <th className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3 pr-4 pl-1 whitespace-nowrap">
+              <th scope="col" className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3 pr-4 pl-1 whitespace-nowrap">
                 Indication
               </th>
               {phaseKeys.map((key) => (
                 <th
                   key={key}
+                  scope="col"
                   className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3 px-1 whitespace-nowrap"
                 >
                   {phaseLabels[key]}
                 </th>
               ))}
-              <th className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3 pl-3 whitespace-nowrap">
+              <th scope="col" className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3 pl-3 whitespace-nowrap">
                 Total
               </th>
             </tr>

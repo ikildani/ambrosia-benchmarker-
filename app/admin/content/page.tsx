@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Plus,
 } from 'lucide-react';
+import { captureClientError } from '@/lib/sentry-client';
 
 const statusConfig: Record<ContentStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'bg-amber-100 text-amber-700', icon: Clock },
@@ -41,7 +42,7 @@ export default function ContentListPage() {
         setPosts(data.posts || []);
       }
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      captureClientError(error, 'ContentListPage', { context: 'Failed to fetch blog posts' });
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export default function ContentListPage() {
         setPosts(posts.filter((p) => p.id !== id));
       }
     } catch (error) {
-      console.error('Error deleting post:', error);
+      captureClientError(error, 'ContentListPage', { context: 'Failed to delete blog post' });
     } finally {
       setDeleting(null);
     }
@@ -76,7 +77,7 @@ export default function ContentListPage() {
         setPosts(posts.map((p) => (p.id === id ? data.post : p)));
       }
     } catch (error) {
-      console.error('Error updating status:', error);
+      captureClientError(error, 'ContentListPage', { context: 'Failed to update post status' });
     }
   }
 
@@ -134,22 +135,22 @@ export default function ContentListPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Views
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>

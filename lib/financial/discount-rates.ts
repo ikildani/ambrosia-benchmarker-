@@ -118,6 +118,27 @@ export const COMPANY_TYPE_ADJUSTMENT: Record<string, number> = {
 };
 
 /**
+ * Deal-type-specific risk adjustments to base discount rate.
+ * Applied as additive adjustment (percentage points).
+ *
+ * Rationale:
+ * - Acquisitions provide guaranteed control, eliminating partnership execution risk
+ * - Co-development shares risk between partners, moderately reducing uncertainty
+ * - Options carry execution uncertainty (will the option be exercised?)
+ * - Collaborations are typically early-stage with high structural uncertainty
+ *
+ * Source: Internal calibration against DealForma 2020-2025 deal analysis;
+ * cross-referenced with EY biopharma transaction multiples by deal structure.
+ */
+export const DEAL_TYPE_RISK_ADJUSTMENT: Record<string, number> = {
+  licensing: 0.0,           // Baseline — standard risk profile
+  acquisition: -0.015,      // -1.5pp — guaranteed control, no partnership risk
+  codevelopment: -0.005,    // -0.5pp — shared risk reduces cost of capital
+  option: 0.01,             // +1.0pp — execution uncertainty (option exercise)
+  collaboration: 0.02,      // +2.0pp — early-stage, high structural uncertainty
+};
+
+/**
  * Territory-specific risk premium adjustments.
  * Markets with regulatory/pricing uncertainty carry higher rates.
  */

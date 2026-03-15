@@ -21,7 +21,7 @@ import {
   COGS_BY_MODALITY_CATEGORY,
   SGA_BY_LIFECYCLE_STAGE,
 } from './pos-tables';
-import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM } from './discount-rates';
+import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -82,11 +82,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     regulatoryDesignations,
     benchmarkDealValue,
   } = input;
+  const dealType = input.dealType || 'licensing';
   const phase = guardedPhase as typeof input.phase;
   const peakSalesEstimate = guardedPeakSales;
 
-  // 1. Get discount rate (use guarded value, or compute from TA + territory + company type)
-  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType);
+  // 1. Get discount rate (use guarded value, or compute from TA + territory + company type + deal type)
+  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
 
   // 2. Calculate cumulative PoS from current phase
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
@@ -205,8 +206,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const peakSalesYear = peakCF?.year || 0;
 
   // 9. Calculate implied deal terms
-  // Industry standard: upfront = 15-30% of rNPV depending on phase
-  const upfrontPercent = getUpfrontPercent(phase);
+  // Upfront % depends on both phase and deal type.
+  // Deal-type overrides (acquisition, option, etc.) take precedence over phase-based ratios.
+  const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
   const impliedDealValue = {
     upfront: {
       low: riskAdjustedNPV * upfrontPercent.low,
@@ -243,7 +245,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
 
   // 11. Model assumptions documentation
   const modelAssumptions = [
-    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC${territory ? `, ${territory} territory` : ''}${input.companyType ? `, ${input.companyType}` : ''})`,
+    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC${territory ? `, ${territory} territory` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType} deal structure` : ''})`,
     `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%`,
     `Years to market: ${yearsToMarket.toFixed(1)} years`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M (adj. for data quality; competitive position applied upstream)`,
@@ -464,14 +466,15 @@ function getPartialPoS(year: number, launchYear: number, fullPoS: number): numbe
   return 1.0 - sigmoid * (1.0 - fullPoS);
 }
 
-/** Get default discount rate for therapeutic area, phase, territory, and company type.
- * Additive adjustments from territory risk premium and company type are applied
+/** Get default discount rate for therapeutic area, phase, territory, company type, and deal type.
+ * Additive adjustments from territory risk premium, company type, and deal type are applied
  * to the base TA/phase rate. Source: Damodaran, EY biopharma valuation benchmarks. */
 function getDefaultDiscountRate(
   therapeuticArea: string,
   phase: string,
   territory?: string,
   companyType?: string,
+  dealType?: string,
 ): number {
   const taRates = DEFAULT_DISCOUNT_RATES[therapeuticArea] || DEFAULT_DISCOUNT_RATES.oncology;
   let rate = taRates[phase] || taRates.phase2 || 0.12;
@@ -484,6 +487,11 @@ function getDefaultDiscountRate(
   // Apply company-type adjustment (e.g., large pharma -1pp, clinical-stage biotech +2.5pp)
   if (companyType && COMPANY_TYPE_ADJUSTMENT[companyType] != null) {
     rate += COMPANY_TYPE_ADJUSTMENT[companyType];
+  }
+
+  // Apply deal-type risk adjustment (e.g., acquisition -1.5pp, collaboration +2pp)
+  if (dealType && DEAL_TYPE_RISK_ADJUSTMENT[dealType] != null) {
+    rate += DEAL_TYPE_RISK_ADJUSTMENT[dealType];
   }
 
   // Clamp to reasonable range
@@ -520,6 +528,25 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
     approved: { low: 0.35, median: 0.50, high: 0.65 },
   };
   return percents[phase] || percents.phase2;
+}
+
+/**
+ * Get deal-type-specific upfront % overrides.
+ * Returns null for 'licensing' (use phase-based ratios instead).
+ *
+ * These ratios mirror the dealTypeUpfrontOverrides in calculations.ts,
+ * adapted to the rNPV context where the median is interpolated.
+ *
+ * Source: DealForma/BioCentury 2020-2025 deal analysis by deal structure.
+ */
+function getDealTypeUpfrontPercent(dealType: string): { low: number; median: number; high: number } | null {
+  const overrides: Record<string, { low: number; median: number; high: number }> = {
+    acquisition: { low: 0.70, median: 0.825, high: 0.95 },    // Mostly upfront cash
+    codevelopment: { low: 0.15, median: 0.225, high: 0.30 },   // Shared risk = lower upfront
+    option: { low: 0.05, median: 0.10, high: 0.15 },           // Option premium, exercise later
+    collaboration: { low: 0.10, median: 0.175, high: 0.25 },   // Research funding, early partnership
+  };
+  return overrides[dealType] || null;
 }
 
 /** Generate narrative explaining divergence between benchmark and rNPV valuations */

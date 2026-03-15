@@ -101,7 +101,7 @@ const OverviewTab = React.memo(function OverviewTab({
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Run your first calculation to see analytics here</p>
             <button
               onClick={onNavigateToCalculator}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-medium rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-medium rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -133,7 +133,7 @@ const OverviewTab = React.memo(function OverviewTab({
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
               (tier === 'pro' || tier === 'report')
-                ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25'
+                ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15'
                 : 'bg-slate-100 dark:bg-slate-700'
             }`}>
               <svg className={`w-6 h-6 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

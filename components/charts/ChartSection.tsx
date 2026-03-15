@@ -2,7 +2,7 @@
 
 import { type JSX, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { DealTerms, TieredRoyalties } from '@/lib/calculations';
+import { DealTerms, TieredRoyalties, type DealTypeLabels } from '@/lib/calculations';
 import DealValueChart from './DealValueChart';
 import RoyaltyChart from './RoyaltyChart';
 import ModifierWaterfall from './ModifierWaterfall';
@@ -13,6 +13,7 @@ interface ChartSectionProps {
   modifiers: { name: string; multiplier: number }[];
   isPro: boolean;
   onUpgrade?: () => void;
+  dealTypeLabels?: DealTypeLabels;
 }
 
 type ChartTab = 'breakdown' | 'royalties' | 'modifiers';
@@ -23,6 +24,7 @@ export default function ChartSection({
   modifiers,
   isPro,
   onUpgrade,
+  dealTypeLabels,
 }: ChartSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<ChartTab>('breakdown');
@@ -127,7 +129,15 @@ export default function ChartSection({
                     <h4 className="text-sm font-semibold text-neutral-700 dark:text-slate-200 mb-3">
                       Deal Value Breakdown (Median Values)
                     </h4>
-                    <DealValueChart terms={terms} />
+                    <DealValueChart
+                      terms={terms}
+                      chartLabels={dealTypeLabels ? {
+                        upfront: dealTypeLabels.upfrontLabel,
+                        dev: dealTypeLabels.devMilestoneLabel,
+                        reg: dealTypeLabels.regMilestoneLabel,
+                        comm: dealTypeLabels.commMilestoneLabel,
+                      } : undefined}
+                    />
                     <p className="text-xs text-neutral-500 dark:text-slate-400 mt-3">
                       Hover over bars to see low, median, and high estimates
                     </p>

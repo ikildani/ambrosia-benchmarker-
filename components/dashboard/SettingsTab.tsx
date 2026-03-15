@@ -86,7 +86,7 @@ const SettingsTab = React.memo(function SettingsTab({
         <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl" />
 
         <div className="relative flex flex-col sm:flex-row items-center gap-6">
-          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-4xl font-bold shadow-xl shadow-teal-500/30`}>
+          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-4xl font-bold shadow-xl shadow-teal-500/30 dark:shadow-teal-400/20`}>
             {editName.charAt(0).toUpperCase()}
           </div>
           <div className="text-center sm:text-left flex-1">
@@ -261,8 +261,8 @@ const SettingsTab = React.memo(function SettingsTab({
         <button
           onClick={onSaveSettings}
           disabled={isSaving}
-          className="w-full mt-6 px-4 py-3.5 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl
-                   shadow-lg shadow-teal-500/20 hover:shadow-xl hover:from-teal-500 hover:to-cyan-400
+          className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl
+                   shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10 hover:shadow-xl hover:from-teal-500 hover:to-cyan-400
                    transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
@@ -299,7 +299,7 @@ const SettingsTab = React.memo(function SettingsTab({
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
                 (tier === 'pro' || tier === 'report')
-                  ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25'
+                  ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15'
                   : 'bg-slate-200 dark:bg-slate-600'
               }`}>
                 <svg className={`w-7 h-7 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,7 +314,7 @@ const SettingsTab = React.memo(function SettingsTab({
             {tier === 'free' && (
               <button
                 onClick={onUpgrade}
-                className="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20"
+                className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10"
               >
                 Upgrade Now
               </button>

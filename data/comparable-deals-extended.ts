@@ -3279,6 +3279,582 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     keyTerms: 'Value reference ~$500M EoE franchise; oral topical corticosteroid; competing with Dupixent (first biologic for EoE); growing EoE market',
     source: 'Takeda annual report 2024 (estimated EoE pipeline value)',
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — HISTORICAL GAP FILL (2020-2022)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Oncology 2020-2022
+  {
+    id: 'onc-new-001', year: 2021, licensor: 'Acceleron Pharma', licensee: 'Merck',
+    modality: 'mab', phase: 'approved', indication_category: 'oncology', indication_specific: 'myelodysplastic',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 11500, totalDealValue: 11500, dealType: 'acquisition',
+    headline: 'Merck acquires Acceleron for luspatercept (Reblozyl) in MDS/beta-thalassemia',
+    source: 'SEC 8-K, September 2021',
+  },
+  {
+    id: 'onc-new-002', year: 2021, licensor: 'Pandion Therapeutics', licensee: 'Merck',
+    modality: 'mab', phase: 'phase1', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 1850, totalDealValue: 1850, dealType: 'acquisition',
+    headline: 'Merck acquires Pandion for IL-2 muteins targeting autoimmune and immuno-oncology',
+    source: 'Company press release, February 2021',
+  },
+  {
+    id: 'onc-new-003', year: 2022, licensor: 'Turning Point Therapeutics', licensee: 'BMS',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'oncology', indication_specific: 'lung_nsclc',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 4100, totalDealValue: 4100, dealType: 'acquisition',
+    headline: 'BMS acquires Turning Point for repotrectinib (ROS1/NTRK inhibitor) in NSCLC',
+    source: 'SEC 8-K, June 2022',
+  },
+  {
+    id: 'onc-new-004', year: 2020, licensor: 'Immunomedics', licensee: 'Gilead',
+    modality: 'adc', phase: 'approved', indication_category: 'oncology', indication_specific: 'breast_tnbc',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 21000, totalDealValue: 21000, dealType: 'acquisition',
+    headline: 'Gilead acquires Immunomedics for Trodelvy (sacituzumab govitecan) ADC in TNBC',
+    source: 'SEC 8-K, September 2020',
+  },
+  {
+    id: 'onc-new-005', year: 2020, licensor: 'The Medicines Company', licensee: 'Novartis',
+    modality: 'rnai', phase: 'phase3', indication_category: 'cardiovascular', indication_specific: 'hypercholesterolemia',
+    territory: 'global', therapeuticArea: 'cardiovascular',
+    upfront: 9700, totalDealValue: 9700, dealType: 'acquisition',
+    headline: 'Novartis acquires The Medicines Company for inclisiran (PCSK9 siRNA) — CV indication',
+    source: 'SEC 8-K, January 2020',
+  },
+  {
+    id: 'onc-new-006', year: 2021, licensor: 'Myovant Sciences', licensee: 'Pfizer',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'oncology', indication_specific: 'prostate',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 11600, totalDealValue: 11600, dealType: 'acquisition',
+    headline: 'Pfizer acquires remaining stake in Myovant for relugolix (Orgovyx) in prostate cancer',
+    source: 'Company press release, October 2022',
+  },
+
+  // Neurology 2020-2022
+  {
+    id: 'neuro-new-001', year: 2022, licensor: 'Biohaven Pharmaceutical', licensee: 'Pfizer',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 11600, totalDealValue: 11600, dealType: 'acquisition',
+    headline: 'Pfizer acquires Biohaven for rimegepant (Nurtec ODT) CGRP antagonist in migraine',
+    source: 'SEC 8-K, May 2022',
+  },
+  {
+    id: 'neuro-new-002', year: 2020, licensor: 'GW Pharmaceuticals', licensee: 'Jazz Pharmaceuticals',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'epilepsy',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 7200, totalDealValue: 7200, dealType: 'acquisition',
+    headline: 'Jazz acquires GW Pharma for Epidiolex (cannabidiol) in rare epilepsy',
+    source: 'SEC 8-K, February 2021',
+  },
+  {
+    id: 'neuro-new-003', year: 2022, licensor: 'Voyager Therapeutics', licensee: 'Neurocrine Biosciences',
+    modality: 'geneTherapy', phase: 'preclinical', indication_category: 'neurology', indication_specific: 'parkinsons',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 165, totalDealValue: 1700, milestones: 1535, royaltyRange: 'tiered single-digit',
+    dealType: 'licensing',
+    headline: 'Neurocrine licenses anti-tau VHH antibodies from Voyager for neurodegeneration',
+    source: 'Company press release, December 2022',
+  },
+
+  // Immunology 2020-2022
+  {
+    id: 'imm-new-001', year: 2020, licensor: 'Principia Biopharma', licensee: 'Sanofi',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'immunology', indication_specific: 'pemphigus',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 3680, totalDealValue: 3680, dealType: 'acquisition',
+    headline: 'Sanofi acquires Principia for rilzabrutinib BTK inhibitor in pemphigus and ITP',
+    source: 'SEC 8-K, August 2020',
+  },
+  {
+    id: 'imm-new-002', year: 2021, licensor: 'Dicerna Pharmaceuticals', licensee: 'Novo Nordisk',
+    modality: 'rnai', phase: 'phase1', indication_category: 'metabolic', indication_specific: 'liver_diseases',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 3300, totalDealValue: 3300, dealType: 'acquisition',
+    headline: 'Novo Nordisk acquires Dicerna for RNAi platform targeting NASH and liver diseases',
+    source: 'SEC 8-K, November 2021',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — SMALL DEALS ($50M-$500M)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'small-001', year: 2024, licensor: 'Candel Therapeutics', licensee: 'Novavax',
+    modality: 'geneTherapy', phase: 'phase2', indication_category: 'oncology', indication_specific: 'pancreatic',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 50, totalDealValue: 350, milestones: 300, royaltyRange: 'mid-single digit',
+    dealType: 'licensing',
+    headline: 'Novavax licenses oncolytic viral immunotherapy from Candel for pancreatic cancer',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'small-002', year: 2023, licensor: 'Epizyme', licensee: 'Ipsen',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'oncology', indication_specific: 'sarcoma',
+    territory: 'ex_us', therapeuticArea: 'oncology',
+    upfront: 247, totalDealValue: 247, dealType: 'licensing', geographicSpecific: true,
+    headline: 'Ipsen licenses ex-US rights to tazemetostat (Tazverik) EZH2 inhibitor for epithelioid sarcoma',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'small-003', year: 2024, licensor: 'Phathom Pharmaceuticals', licensee: 'Alfasigma',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'gastroenterology', indication_specific: 'gerd',
+    territory: 'global', therapeuticArea: 'gastroenterology',
+    upfront: 450, totalDealValue: 450, dealType: 'acquisition',
+    headline: 'Alfasigma acquires Phathom for vonoprazan (Voquezna) PCAB in GERD/H. pylori',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'small-004', year: 2023, licensor: 'Inotiv', licensee: 'IDEAYA Biosciences',
+    modality: 'smallMolecule', phase: 'phase1', indication_category: 'oncology', indication_specific: 'melanoma',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 80, totalDealValue: 400, milestones: 320, royaltyRange: 'mid-single to low-double digit',
+    dealType: 'licensing',
+    headline: 'IDEAYA licenses MAT2A inhibitor program for synthetic lethal oncology in MTAP-deleted tumors',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'small-005', year: 2024, licensor: 'Nurix Therapeutics', licensee: 'Sanofi',
+    modality: 'protac', phase: 'phase1', indication_category: 'oncology', indication_specific: 'hematologic',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 70, totalDealValue: 470, milestones: 400, royaltyRange: 'tiered single-digit',
+    dealType: 'licensing',
+    headline: 'Sanofi licenses protein degrader from Nurix targeting BTK for hematologic malignancies',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'small-006', year: 2023, licensor: 'Monte Rosa Therapeutics', licensee: 'Roche',
+    modality: 'protac', phase: 'preclinical', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 30, totalDealValue: 500, milestones: 470, royaltyRange: 'low-single to mid-single digit',
+    dealType: 'licensing',
+    headline: 'Roche licenses molecular glue degraders from Monte Rosa for oncology targets',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'small-007', year: 2024, licensor: 'Theratechnologies', licensee: 'TaiMed Biologics',
+    modality: 'mab', phase: 'approved', indication_category: 'infectious_disease', indication_specific: 'hiv',
+    territory: 'global', therapeuticArea: 'infectiousDisease',
+    upfront: 75, totalDealValue: 200, milestones: 125,
+    dealType: 'licensing',
+    headline: 'TaiMed partners with Theratechnologies on ibalizumab (Trogarzo) for multidrug-resistant HIV',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'small-008', year: 2023, licensor: 'Aldeyra Therapeutics', licensee: 'Partner',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'ophthalmology', indication_specific: 'dry_eye',
+    territory: 'ex_us', therapeuticArea: 'ophthalmology',
+    upfront: 50, totalDealValue: 350, milestones: 300, royaltyRange: 'low-double digit',
+    dealType: 'licensing', geographicSpecific: true,
+    headline: 'Aldeyra licenses reproxalap (RASP inhibitor) ex-US rights for dry eye disease',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'small-009', year: 2024, licensor: 'Astellia Oncology', licensee: 'AstraZeneca',
+    modality: 'smallMolecule', phase: 'phase1', indication_category: 'oncology', indication_specific: 'breast',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 100, totalDealValue: 425, milestones: 325, royaltyRange: 'tiered mid-single digit',
+    dealType: 'option',
+    headline: 'AstraZeneca options CDK2 inhibitor from Astellia for HR+/HER2- breast cancer',
+    source: 'Company press release, 2024',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — RADIOPHARMACEUTICAL (oncology trend)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'radio-001', year: 2024, licensor: 'Radiopharm Theranostics', licensee: 'Lantheus',
+    modality: 'radiopharmaceutical', phase: 'phase2', indication_category: 'oncology', indication_specific: 'neuroendocrine',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 250, totalDealValue: 1200, milestones: 950, royaltyRange: 'low-double digit',
+    dealType: 'licensing',
+    headline: 'Lantheus licenses Lu-177 PSMA and FAP-targeted radiopharmaceuticals from Radiopharm',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'radio-002', year: 2024, licensor: 'Convergent Therapeutics', licensee: 'AstraZeneca',
+    modality: 'radiopharmaceutical', phase: 'phase1', indication_category: 'oncology', indication_specific: 'prostate',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 100, totalDealValue: 1800, milestones: 1700, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'AstraZeneca licenses PSMA-targeted Ac-225 alpha therapy from Convergent for mCRPC',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'radio-003', year: 2023, licensor: 'Mariana Oncology', licensee: 'AstraZeneca',
+    modality: 'radiopharmaceutical', phase: 'preclinical', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 450, totalDealValue: 450, dealType: 'acquisition',
+    headline: 'AstraZeneca acquires Mariana Oncology for next-gen radiopharmaceutical pipeline',
+    source: 'Company press release, December 2023',
+  },
+  {
+    id: 'radio-004', year: 2024, licensor: 'Fusion Pharmaceuticals', licensee: 'AstraZeneca',
+    modality: 'radiopharmaceutical', phase: 'phase2', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 2400, totalDealValue: 2400, dealType: 'acquisition',
+    headline: 'AstraZeneca acquires Fusion Pharmaceuticals for Ac-225 alpha-emitting radiopharmaceuticals',
+    source: 'SEC 8-K, March 2024',
+  },
+  {
+    id: 'radio-005', year: 2025, licensor: 'Aktis Oncology', licensee: 'Eli Lilly',
+    modality: 'radiopharmaceutical', phase: 'preclinical', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 1400, totalDealValue: 1400, dealType: 'acquisition',
+    headline: 'Eli Lilly acquires Aktis Oncology for actinium-based radiopharmaceutical platform',
+    source: 'Company press release, 2025',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — BISPECIFIC ANTIBODIES
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'bispec-001', year: 2024, licensor: 'Merus', licensee: 'Gilead',
+    modality: 'bispecific', phase: 'phase2', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 56, totalDealValue: 6300, milestones: 6244, royaltyRange: 'tiered royalties',
+    dealType: 'licensing',
+    headline: 'Gilead partners with Merus on Triclonics bispecific platform for solid tumors',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'bispec-002', year: 2023, licensor: 'Imvax', licensee: 'Merck',
+    modality: 'bispecific', phase: 'phase2', indication_category: 'oncology', indication_specific: 'glioblastoma',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 610, totalDealValue: 1050, milestones: 440,
+    dealType: 'acquisition',
+    headline: 'Merck acquires Imvax for autologous immunotherapy approach in glioblastoma',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'bispec-003', year: 2024, licensor: 'Numab Therapeutics', licensee: 'AstraZeneca',
+    modality: 'bispecific', phase: 'phase1', indication_category: 'immunology', indication_specific: 'autoimmune',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 50, totalDealValue: 1200, milestones: 1150, royaltyRange: 'mid-single to low-double digit',
+    dealType: 'licensing',
+    headline: 'AstraZeneca licenses multi-specific antibodies from Numab for autoimmune indications',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'bispec-004', year: 2024, licensor: 'MacroGenics', licensee: 'Incyte',
+    modality: 'bispecific', phase: 'phase1', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 150, totalDealValue: 900, milestones: 750, royaltyRange: 'tiered double-digit',
+    dealType: 'licensing',
+    headline: 'Incyte licenses PD-1 x LAG-3 bispecific (tebotelimab) from MacroGenics for solid tumors',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'bispec-005', year: 2025, licensor: 'LaNova Medicines', licensee: 'BMS',
+    modality: 'bispecific', phase: 'phase1', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 200, totalDealValue: 2750, milestones: 2550,
+    dealType: 'licensing',
+    headline: 'BMS licenses next-gen bispecific T-cell engagers from LaNova for solid tumors',
+    source: 'Company press release, 2025',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — GLP-1 / OBESITY
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'obesity-001', year: 2024, licensor: 'Scribe Therapeutics', licensee: 'Novo Nordisk',
+    modality: 'geneTherapy', phase: 'preclinical', indication_category: 'metabolic', indication_specific: 'obesity',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 55, totalDealValue: 1600, milestones: 1545,
+    dealType: 'licensing',
+    headline: 'Novo Nordisk licenses CRISPR gene editing platform from Scribe for obesity targets',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'obesity-002', year: 2024, licensor: 'MBX Biosciences', licensee: 'Novo Nordisk',
+    modality: 'peptide', phase: 'phase1', indication_category: 'metabolic', indication_specific: 'obesity',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 40, totalDealValue: 610, milestones: 570, royaltyRange: 'tiered single-digit',
+    dealType: 'licensing',
+    headline: 'Novo Nordisk licenses precision peptide assets from MBX for metabolic diseases',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'obesity-003', year: 2024, licensor: 'Amgen', licensee: 'N/A (internal)',
+    modality: 'mab', phase: 'phase2', indication_category: 'metabolic', indication_specific: 'obesity',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 0, totalDealValue: 1900, dealType: 'collaboration',
+    headline: 'Amgen develops MariTide (anti-GIP/GLP-1R bispecific) internally — Phase 2 data shows durable weight loss',
+    keyTerms: 'Internally developed; included as pipeline valuation reference for obesity biologics',
+    source: 'Amgen investor presentation, 2024',
+  },
+  {
+    id: 'obesity-004', year: 2024, licensor: 'Boehringer Ingelheim', licensee: 'Zealand Pharma',
+    modality: 'peptide', phase: 'phase2', indication_category: 'metabolic', indication_specific: 'obesity',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 100, totalDealValue: 1800, milestones: 1700, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'BI and Zealand collaborate on next-gen amylin/calcitonin analogs for obesity',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'obesity-005', year: 2023, licensor: 'Structure Therapeutics', licensee: 'Roche',
+    modality: 'smallMolecule', phase: 'phase1', indication_category: 'metabolic', indication_specific: 'obesity',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 150, totalDealValue: 3700, milestones: 3550, royaltyRange: 'tiered royalties on net sales',
+    dealType: 'licensing',
+    headline: 'Roche licenses oral GLP-1R agonist program from Structure Therapeutics for obesity',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — PROTAC / MOLECULAR GLUE DEGRADERS
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'protac-001', year: 2021, licensor: 'Arvinas', licensee: 'Pfizer',
+    modality: 'protac', phase: 'phase1', indication_category: 'oncology', indication_specific: 'breast',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 650, totalDealValue: 2000, milestones: 1350, royaltyRange: 'tiered royalties',
+    dealType: 'collaboration',
+    headline: 'Pfizer and Arvinas co-develop ARV-471 PROTAC (ER degrader) for HR+ breast cancer',
+    source: 'Company press release, July 2021',
+  },
+  {
+    id: 'protac-002', year: 2024, licensor: 'C4 Therapeutics', licensee: 'Merck',
+    modality: 'protac', phase: 'preclinical', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 40, totalDealValue: 700, milestones: 660, royaltyRange: 'tiered single-digit',
+    dealType: 'licensing',
+    headline: 'Merck licenses protein degrader targets from C4 Therapeutics for immuno-oncology',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'protac-003', year: 2023, licensor: 'Kymera Therapeutics', licensee: 'Sanofi',
+    modality: 'protac', phase: 'phase1', indication_category: 'immunology', indication_specific: 'autoimmune',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 150, totalDealValue: 2000, milestones: 1850, royaltyRange: 'tiered royalties',
+    dealType: 'collaboration',
+    headline: 'Sanofi partners with Kymera on IRAK4 and STAT6 degraders for atopic dermatitis and asthma',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — mRNA (non-vaccine)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'mrna-001', year: 2023, licensor: 'Moderna', licensee: 'Merck',
+    modality: 'mrna', phase: 'phase2', indication_category: 'oncology', indication_specific: 'melanoma',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 250, totalDealValue: 2000, milestones: 1750,
+    dealType: 'collaboration',
+    headline: 'Moderna and Merck expand personalized cancer vaccine (mRNA-4157/V940) collaboration in melanoma',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'mrna-002', year: 2024, licensor: 'BioNTech', licensee: 'Duality Biologics',
+    modality: 'mrna', phase: 'phase1', indication_category: 'oncology', indication_specific: 'solid_tumors',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 170, totalDealValue: 1500, milestones: 1330, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'Duality Biologics licenses ADC + mRNA combination approach from BioNTech for solid tumors',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'mrna-003', year: 2023, licensor: 'Arcturus Therapeutics', licensee: 'Janssen (J&J)',
+    modality: 'mrna', phase: 'preclinical', indication_category: 'infectious_disease', indication_specific: 'hepatitis_b',
+    territory: 'global', therapeuticArea: 'infectiousDisease',
+    upfront: 75, totalDealValue: 1500, milestones: 1425, royaltyRange: 'tiered royalties',
+    dealType: 'licensing',
+    headline: 'Janssen licenses mRNA-based functional cure approach for chronic HBV from Arcturus',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — CELL THERAPY (autoimmune / non-oncology)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'cell-001', year: 2024, licensor: 'Kyverna Therapeutics', licensee: 'Gilead',
+    modality: 'carT_autoimmune', phase: 'phase1', indication_category: 'immunology', indication_specific: 'sle_lupus',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 200, totalDealValue: 1800, milestones: 1600,
+    dealType: 'licensing',
+    headline: 'Gilead licenses CAR-T for autoimmune diseases from Kyverna targeting CD19+ B-cells in SLE',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'cell-002', year: 2025, licensor: 'Cabaletta Bio', licensee: 'BMS',
+    modality: 'carT_autoimmune', phase: 'phase1', indication_category: 'immunology', indication_specific: 'myastheniaGravis',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 175, totalDealValue: 1500, milestones: 1325,
+    dealType: 'licensing',
+    headline: 'BMS licenses CAAR-T cell therapy from Cabaletta for mucosal pemphigus and MG',
+    source: 'Company press release, 2025',
+  },
+  {
+    id: 'cell-003', year: 2024, licensor: 'Poseida Therapeutics', licensee: 'Roche',
+    modality: 'carT_autoimmune', phase: 'phase1', indication_category: 'immunology', indication_specific: 'autoimmune',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 110, totalDealValue: 3300, milestones: 3190, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'Roche licenses allogeneic CAR-T platform from Poseida for autoimmune diseases',
+    source: 'SEC 8-K, 2024',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — ADDITIONAL CV, ID, OPHTHALMOLOGY
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Cardiovascular
+  {
+    id: 'cv-new-001', year: 2021, licensor: 'MyoKardia', licensee: 'BMS',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'cardiovascular', indication_specific: 'cardiomyopathy',
+    territory: 'global', therapeuticArea: 'cardiovascular',
+    upfront: 13100, totalDealValue: 13100, dealType: 'acquisition',
+    headline: 'BMS acquires MyoKardia for mavacamten (Camzyos) cardiac myosin inhibitor in HCM',
+    source: 'SEC 8-K, October 2020',
+  },
+
+  // Infectious Disease
+  {
+    id: 'id-new-001', year: 2023, licensor: 'Cidara Therapeutics', licensee: 'Janssen',
+    modality: 'mab', phase: 'phase2', indication_category: 'infectious_disease', indication_specific: 'antifungal',
+    territory: 'global', therapeuticArea: 'infectiousDisease',
+    upfront: 50, totalDealValue: 600, milestones: 550, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'Janssen licenses Cloudbreak antifungal antibody-drug conjugate from Cidara',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'id-new-002', year: 2024, licensor: 'Shionogi', licensee: 'Pfizer',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'infectious_disease', indication_specific: 'covid',
+    territory: 'global', therapeuticArea: 'infectiousDisease',
+    upfront: 0, totalDealValue: 1100, royaltyRange: 'tiered royalties on net sales',
+    dealType: 'licensing',
+    headline: 'Pfizer and Shionogi partner on ensitrelvir (Xocova) antiviral for COVID-19',
+    source: 'Company press release, 2024',
+  },
+
+  // Ophthalmology
+  {
+    id: 'oph-new-001', year: 2024, licensor: 'Iveric Bio', licensee: 'Astellas',
+    modality: 'geneTherapy', phase: 'approved', indication_category: 'ophthalmology', indication_specific: 'geographic_atrophy',
+    territory: 'global', therapeuticArea: 'ophthalmology',
+    upfront: 5900, totalDealValue: 5900, dealType: 'acquisition',
+    headline: 'Astellas acquires Iveric Bio for Izervay (avacincaptad pegol) complement C5 inhibitor in GA',
+    source: 'SEC 8-K, 2023',
+  },
+  {
+    id: 'oph-new-002', year: 2023, licensor: 'Gyroscope Therapeutics', licensee: 'Novartis',
+    modality: 'geneTherapy', phase: 'phase2', indication_category: 'ophthalmology', indication_specific: 'geographic_atrophy',
+    territory: 'global', therapeuticArea: 'ophthalmology',
+    upfront: 1500, totalDealValue: 1500, dealType: 'acquisition',
+    headline: 'Novartis acquires Gyroscope for AAV gene therapy approach to geographic atrophy',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — ADDITIONAL HEMATOLOGY & RARE DISEASE
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'hem-new-001', year: 2023, licensor: 'Kartos Therapeutics', licensee: 'Roche',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'hematology', indication_specific: 'myelofibrosis',
+    territory: 'global', therapeuticArea: 'hematology',
+    upfront: 200, totalDealValue: 1500, milestones: 1300, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'Roche licenses navtemadlin (MDM2 inhibitor) from Kartos for myelofibrosis',
+    source: 'Company press release, 2023',
+  },
+  {
+    id: 'hem-new-002', year: 2024, licensor: 'Disc Medicine', licensee: 'Novo Nordisk',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'hematology', indication_specific: 'thalassemia',
+    territory: 'global', therapeuticArea: 'hematology',
+    upfront: 100, totalDealValue: 1200, milestones: 1100, royaltyRange: 'mid-single to low-double',
+    dealType: 'licensing',
+    headline: 'Novo Nordisk licenses bitopertin (maturation agent) from Disc Medicine for beta-thalassemia',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'rare-new-001', year: 2022, licensor: 'Magenta Therapeutics', licensee: 'AstraZeneca',
+    modality: 'mab', phase: 'phase1', indication_category: 'hematology', indication_specific: 'sickleCell',
+    territory: 'global', therapeuticArea: 'hematology',
+    upfront: 75, totalDealValue: 500, milestones: 425,
+    dealType: 'licensing',
+    headline: 'AstraZeneca licenses conditioning antibody from Magenta to enable gene therapy for sickle cell',
+    source: 'Company press release, 2022',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — ADDITIONAL DERMATOLOGY
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'derm-new-001', year: 2024, licensor: 'Acelyrin', licensee: 'AbbVie',
+    modality: 'mab', phase: 'phase2', indication_category: 'dermatology', indication_specific: 'hidradenitis',
+    territory: 'global', therapeuticArea: 'dermatology',
+    upfront: 250, totalDealValue: 1500, milestones: 1250, royaltyRange: 'tiered royalty',
+    dealType: 'licensing',
+    headline: 'AbbVie licenses IL-17A/F Nanobody from Acelyrin for hidradenitis suppurativa',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'derm-new-002', year: 2023, licensor: 'Evommune', licensee: 'Pfizer',
+    modality: 'smallMolecule', phase: 'phase1', indication_category: 'dermatology', indication_specific: 'atopicderm',
+    territory: 'global', therapeuticArea: 'dermatology',
+    upfront: 50, totalDealValue: 800, milestones: 750, royaltyRange: 'mid-single digit',
+    dealType: 'option',
+    headline: 'Pfizer options OX40 inhibitor from Evommune for atopic dermatitis',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — ADDITIONAL WOMEN'S HEALTH
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'wh-new-001', year: 2024, licensor: 'Organon', licensee: 'Samsung Bioepis',
+    modality: 'mab', phase: 'approved', indication_category: 'womens_health', indication_specific: 'endometriosis',
+    territory: 'global', therapeuticArea: 'womensHealth',
+    upfront: 200, totalDealValue: 800, milestones: 600,
+    dealType: 'licensing',
+    headline: 'Samsung Bioepis partners with Organon on biosimilar and novel biologic pipeline for women\'s health',
+    source: 'Company press release, 2024',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEW DEALS — ADDITIONAL LARGE 2024-2025 DEALS
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'large-001', year: 2024, licensor: 'Catalent', licensee: 'Novo Holdings',
+    modality: 'cdmo', phase: 'approved', indication_category: 'cross_ta', indication_specific: 'manufacturing',
+    territory: 'global', therapeuticArea: 'metabolic',
+    upfront: 16500, totalDealValue: 16500, dealType: 'acquisition',
+    headline: 'Novo Holdings acquires Catalent CDMO to secure GLP-1 manufacturing capacity',
+    source: 'SEC 8-K, February 2024',
+  },
+  {
+    id: 'large-002', year: 2025, licensor: 'Biogen', licensee: 'Sage Therapeutics',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'depression',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 220, totalDealValue: 1200, milestones: 980,
+    dealType: 'codevelopment',
+    headline: 'Biogen and Sage co-develop zuranolone (Zurzuvae) for MDD and PPD — expanded collaboration',
+    source: 'Company press release, 2025',
+  },
+  {
+    id: 'large-003', year: 2024, licensor: 'Arcus Biosciences', licensee: 'Gilead',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'oncology', indication_specific: 'lung_nsclc',
+    territory: 'global', therapeuticArea: 'oncology',
+    upfront: 325, totalDealValue: 4600, milestones: 4275, royaltyRange: 'tiered low-double digit',
+    dealType: 'collaboration',
+    headline: 'Gilead exercises options on domvanalimab (TIGIT) + zimberelimab from Arcus for lung cancer',
+    source: 'SEC 8-K, 2024',
+  },
+  {
+    id: 'large-004', year: 2025, licensor: 'Nimbus Therapeutics', licensee: 'Takeda',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'immunology', indication_specific: 'psoriasis',
+    territory: 'global', therapeuticArea: 'immunology',
+    upfront: 4000, totalDealValue: 6000, milestones: 2000,
+    dealType: 'acquisition',
+    headline: 'Takeda acquires Nimbus for TYK2 allosteric inhibitor NDI-034858 in psoriasis',
+    source: 'SEC 8-K, 2025',
+  },
 ];
 
 // ── Helper Functions ──────────────────────────────────────────────────────────

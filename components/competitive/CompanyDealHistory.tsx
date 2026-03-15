@@ -157,11 +157,11 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800">
-                <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Counterparty</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Modality</th>
-                <th className="px-4 py-3 text-center font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Phase</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Upfront</th>
+                <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Date</th>
+                <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Counterparty</th>
+                <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Modality</th>
+                <th scope="col" className="px-4 py-3 text-center font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Phase</th>
+                <th scope="col" className="px-4 py-3 text-right font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Upfront</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">

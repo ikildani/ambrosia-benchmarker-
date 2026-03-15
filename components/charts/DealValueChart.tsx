@@ -8,6 +8,13 @@ import { BAR_COLORS, CHART_COLORS } from '@/lib/chartTheme';
 
 interface DealValueChartProps {
   terms: DealTerms;
+  /** Deal-type-specific labels — prevents licensing terminology in non-licensing charts */
+  chartLabels?: {
+    upfront: string;
+    dev: string;
+    reg: string;
+    comm: string;
+  };
 }
 
 const formatCurrency = (value: number) => {
@@ -15,33 +22,39 @@ const formatCurrency = (value: number) => {
   return `$${value}M`;
 };
 
-function DealValueChart({ terms }: DealValueChartProps) {
+function DealValueChart({ terms, chartLabels }: DealValueChartProps) {
   const isMobile = useIsMobile();
+
+  // Abbreviate labels for mobile, use full labels on desktop
+  const upLabel = chartLabels?.upfront || 'Upfront';
+  const devLabel = chartLabels?.dev || (isMobile ? 'Dev MS' : 'Dev Milestones');
+  const regLabel = chartLabels?.reg || (isMobile ? 'Reg MS' : 'Reg Milestones');
+  const commLabel = chartLabels?.comm || (isMobile ? 'Comm MS' : 'Comm Milestones');
 
   const data = [
     {
-      name: isMobile ? 'Upfront' : 'Upfront',
+      name: isMobile && upLabel.length > 12 ? upLabel.slice(0, 10) + '…' : upLabel,
       low: terms.upfront.low,
       median: terms.upfront.median,
       high: terms.upfront.high,
       fill: BAR_COLORS[0],
     },
     {
-      name: isMobile ? 'Dev MS' : 'Dev Milestones',
+      name: isMobile && devLabel.length > 12 ? devLabel.slice(0, 10) + '…' : devLabel,
       low: terms.devMilestones.low,
       median: terms.devMilestones.median,
       high: terms.devMilestones.high,
       fill: BAR_COLORS[1],
     },
     {
-      name: isMobile ? 'Reg MS' : 'Reg Milestones',
+      name: isMobile && regLabel.length > 12 ? regLabel.slice(0, 10) + '…' : regLabel,
       low: terms.regMilestones.low,
       median: terms.regMilestones.median,
       high: terms.regMilestones.high,
       fill: BAR_COLORS[2],
     },
     {
-      name: isMobile ? 'Comm MS' : 'Comm Milestones',
+      name: isMobile && commLabel.length > 12 ? commLabel.slice(0, 10) + '…' : commLabel,
       low: terms.commMilestones.low,
       median: terms.commMilestones.median,
       high: terms.commMilestones.high,

@@ -8,7 +8,7 @@
       "Publicly announced deal terms (SEC filings, press releases)",
       "Industry benchmark reports",
       "2022-2026 mega-deal analysis across 12 therapeutic areas",
-      "350+ curated licensing, co-development, and acquisition deals",
+      "280+ curated licensing, co-development, and acquisition deals",
       "70+ indication-level competitive landscape analyses",
       "SEC EDGAR 8-K filings (automated daily ingestion)",
       "ClinicalTrials.gov pipeline tracking"
@@ -19,7 +19,7 @@
       {
         "date": "2026-03-05",
         "version": "5.2",
-        "summary": "Worldclass Data Expansion: 350+ Curated Deals Across All 12 TAs",
+        "summary": "Data Quality Overhaul: 280+ Verified Deals, Structured Fields, Cross-TA Matching",
         "changes": [
           "Expanded curated deal database to 350+ real, verified deals across all 12 therapeutic areas",
           "Added 35+ cardiovascular deals including ATTR, Factor XI, PCSK9, and heart failure licensing",

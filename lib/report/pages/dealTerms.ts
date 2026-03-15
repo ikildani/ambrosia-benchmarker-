@@ -9,13 +9,14 @@ export function renderDealTermsPage(data: PDFReportData, meta: ReportMeta): stri
   const { result } = data;
   const drillDown = result.drillDown;
   const royalties = result.tieredRoyalties;
+  const dtl = result.dealTypeLabels;
 
   // Term cards
   const termCards = [
-    { key: 'upfront', label: 'Upfront Payment', terms: result.terms.upfront, dd: drillDown.upfront },
-    { key: 'devMilestones', label: 'Development Milestones', terms: result.terms.devMilestones, dd: drillDown.devMilestones },
-    { key: 'regMilestones', label: 'Regulatory Milestones', terms: result.terms.regMilestones, dd: drillDown.regMilestones },
-    { key: 'commMilestones', label: 'Commercial Milestones', terms: result.terms.commMilestones, dd: drillDown.commMilestones },
+    { key: 'upfront', label: dtl.upfrontLabel, terms: result.terms.upfront, dd: drillDown.upfront },
+    { key: 'devMilestones', label: dtl.devMilestoneLabel, terms: result.terms.devMilestones, dd: drillDown.devMilestones },
+    { key: 'regMilestones', label: dtl.regMilestoneLabel, terms: result.terms.regMilestones, dd: drillDown.regMilestones },
+    { key: 'commMilestones', label: dtl.commMilestoneLabel, terms: result.terms.commMilestones, dd: drillDown.commMilestones },
   ];
 
   const royaltyStepHtml = renderRoyaltyStep(royalties, 260, 140);

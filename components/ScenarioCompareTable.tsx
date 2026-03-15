@@ -94,11 +94,11 @@ export default function ScenarioCompareTable({
         <table className="w-full min-w-[400px] sm:min-w-[600px]">
           <thead className="bg-neutral-50 dark:bg-neutral-800">
             <tr>
-              <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase w-24 sm:w-32">
+              <th scope="col" className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase w-24 sm:w-32">
                 Metric
               </th>
               {scenarios.map((s, idx) => (
-                <th key={s.id} className="px-3 sm:px-4 py-3 text-right min-w-[110px] sm:min-w-[150px]">
+                <th key={s.id} scope="col" className="px-3 sm:px-4 py-3 text-right min-w-[110px] sm:min-w-[150px]">
                   <div className="flex items-center justify-end gap-2">
                     <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 truncate max-w-[120px]">
                       {s.name}
@@ -141,7 +141,7 @@ export default function ScenarioCompareTable({
                 </th>
               ))}
               {canAddMore && (
-                <th className="px-3 sm:px-4 py-3 text-center min-w-[80px] sm:min-w-[100px]">
+                <th scope="col" className="px-3 sm:px-4 py-3 text-center min-w-[80px] sm:min-w-[100px]">
                   <button
                     onClick={onAddScenario}
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
