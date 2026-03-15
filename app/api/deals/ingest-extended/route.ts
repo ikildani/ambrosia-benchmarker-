@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         royalty_low_pct: royalty.low,
         royalty_high_pct: royalty.high,
         announced_date: announcedDate,
-        source_type: 'curated_extended',
+        source_type: 'manual',
         terms_disclosed: deal.upfront > 0 || (deal.milestones ?? 0) > 0,
         confidence_score: 90,
         verified: true,
