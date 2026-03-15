@@ -510,7 +510,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 // Shared AdvancedOptionsSection props
                 const advancedProps = {
                   therapeuticArea: state.therapeuticArea,
-                  dealType: state.dealType,
+                  dealType: (state.dealType || 'licensing') as DealType,
                   territory: state.territory,
                   lineOfTherapy: state.lineOfTherapy,
                   treatmentApproach: state.treatmentApproach,
@@ -629,10 +629,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = (
                       <AssetDetailsSection
                         therapeuticArea={state.therapeuticArea}
-                        phase={state.phase}
-                        dealType={state.dealType}
-                        modality={state.modality}
-                        indication={state.indication}
+                        phase={(state.phase || '') as Phase}
+                        dealType={(state.dealType || '') as DealType}
+                        modality={(state.modality || '') as Modality}
+                        indication={(state.indication || '') as Indication}
                         biomarker={state.biomarker}
                         highlightedFields={state.highlightedFields}
                         quickMode={false}

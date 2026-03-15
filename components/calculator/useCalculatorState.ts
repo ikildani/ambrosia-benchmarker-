@@ -56,12 +56,12 @@ import type { DealTemplate } from './types';
 // ── State shape ──────────────────────────────────────────────────────────────
 
 export interface CalculatorFormState {
-  // Core form fields
+  // Core form fields — empty string means "not yet selected" (fresh calculation)
   therapeuticArea: TherapeuticArea;
-  phase: Phase;
-  dealType: DealType;
-  modality: Modality;
-  indication: Indication;
+  phase: Phase | '';
+  dealType: DealType | '';
+  modality: Modality | '';
+  indication: Indication | '';
   territory: Territory;
   biomarker: BiomarkerStatus;
   lineOfTherapy: LineOfTherapy;
@@ -125,11 +125,11 @@ export interface CalculatorFormState {
 }
 
 export const INITIAL_STATE: CalculatorFormState = {
-  therapeuticArea: 'oncology',
-  phase: 'phase2',
-  dealType: 'licensing',
-  modality: 'smallMolecule',
-  indication: 'lung_nsclc',
+  therapeuticArea: 'oncology', // TA must be set for form rendering; user picks from selector
+  phase: '',          // Not yet selected — user must choose
+  dealType: '',       // Not yet selected — user must choose
+  modality: '',       // Not yet selected — user must choose
+  indication: '',     // Not yet selected — user must choose
   territory: 'global',
   biomarker: 'unselected',
   lineOfTherapy: '2L',

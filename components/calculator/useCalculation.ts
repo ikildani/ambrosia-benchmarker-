@@ -4,19 +4,29 @@ import {
   CalculationInput,
   CalculationResult,
   calculateDealTerms,
+  type Phase,
+  type DealType,
+  type Modality,
+  type Indication,
 } from '@/lib/calculations';
 import { incrementUsage, getUsage } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
 
-/** Build a CalculationInput from the full form state. */
+/** Check if required fields are filled (not empty string) before calculating. */
+export function isReadyToCalculate(s: CalculatorFormState): boolean {
+  return s.phase !== '' && s.dealType !== '' && s.modality !== '' && s.indication !== '';
+}
+
+/** Build a CalculationInput from the full form state.
+ *  Casts fields with safe fallbacks — isReadyToCalculate should be checked first. */
 export function buildCalculationInput(s: CalculatorFormState): CalculationInput {
   return {
     therapeuticArea: s.therapeuticArea,
-    phase: s.phase,
-    dealType: s.dealType,
-    modality: s.modality,
-    indication: s.indication,
+    phase: (s.phase || 'phase2') as Phase,
+    dealType: (s.dealType || 'licensing') as DealType,
+    modality: (s.modality || 'smallMolecule') as Modality,
+    indication: (s.indication || 'lung_nsclc') as Indication,
     territory: s.territory,
     biomarker: s.biomarker,
     lineOfTherapy: s.lineOfTherapy,
@@ -78,6 +88,12 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const calculationCountRef = useRef(0);
 
   const handleCalculate = useCallback((state: CalculatorFormState) => {
+    // Require all primary fields to be selected
+    if (!isReadyToCalculate(state)) {
+      toast.error('Please select all required fields (phase, deal type, modality, and indication) before calculating.');
+      return;
+    }
+
     // Gate 4th+ calculation behind account creation for anonymous users
     if (!isAuthenticated && getUsage().count >= 3) {
       openAuthModal('signup');
@@ -103,12 +119,12 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           // Track calculation event
           trackCalculation(
             {
-              modality: state.modality,
-              development_phase: state.phase,
-              indication_category: state.indication.split('_')[0],
-              indication_specific: state.indication,
+              modality: state.modality || 'smallMolecule',
+              development_phase: state.phase || 'phase2',
+              indication_category: (state.indication || 'lung_nsclc').split('_')[0],
+              indication_specific: state.indication || 'lung_nsclc',
               territory_scope: state.territory,
-              deal_type: state.dealType,
+              deal_type: state.dealType || 'licensing',
             },
             {
               upfront_low: calculatedResult.terms.upfront.low,
@@ -168,9 +184,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           addToHistory({
             inputs: {
               therapeuticArea: state.therapeuticArea,
-              phase: state.phase,
-              modality: state.modality,
-              indication: state.indication,
+              phase: state.phase || 'phase2',
+              modality: state.modality || 'smallMolecule',
+              indication: state.indication || 'lung_nsclc',
               territory: state.territory,
               biomarker: state.biomarker,
               lineOfTherapy: state.lineOfTherapy,
@@ -178,7 +194,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
               combinationPotential: state.combinationPotential,
               competitivePosition: state.competitivePosition,
               dataQuality: state.dataQuality,
-              dealType: state.dealType,
+              dealType: state.dealType || 'licensing',
               regulatoryDesignations: state.regulatoryDesignations,
             },
             results: {
@@ -227,9 +243,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       // Merge new inputs with current state
       const mergedInputs: CalculationInput = {
         therapeuticArea: (newInputs.therapeuticArea ?? state.therapeuticArea),
-        phase: (newInputs.phase ?? state.phase),
-        modality: (newInputs.modality ?? state.modality),
-        indication: (newInputs.indication ?? state.indication),
+        phase: (newInputs.phase ?? (state.phase || 'phase2')) as Phase,
+        modality: (newInputs.modality ?? (state.modality || 'smallMolecule')) as Modality,
+        indication: (newInputs.indication ?? (state.indication || 'lung_nsclc')) as Indication,
         territory: (newInputs.territory ?? state.territory),
         biomarker: (newInputs.biomarker ?? state.biomarker),
         lineOfTherapy: (newInputs.lineOfTherapy ?? state.lineOfTherapy),

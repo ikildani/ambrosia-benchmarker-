@@ -91,7 +91,7 @@ export function getAvailableTerritories(dealType?: DealType): typeof territoryOp
 export function getFieldResets(
   changedField: 'dealType' | 'phase',
   newValue: string,
-  currentState: { phase: Phase; dealType: DealType; territory: Territory },
+  currentState: { phase: Phase | string; dealType: DealType | string; territory: Territory },
 ): Partial<{ phase: Phase; dealType: DealType; territory: Territory }> | null {
   const resets: Partial<{ phase: Phase; dealType: DealType; territory: Territory }> = {};
   let hasResets = false;
@@ -101,9 +101,9 @@ export function getFieldResets(
     // Check if current phase is still valid
     const availablePhases = getAvailablePhases(newDealType);
     const phaseValues = new Set(availablePhases.map(o => o.value));
-    if (!phaseValues.has(currentState.phase)) {
+    if (!currentState.phase || !phaseValues.has(currentState.phase as Phase)) {
       // Pick the nearest valid phase — prefer the closest one in the ordered list
-      resets.phase = findNearestPhase(currentState.phase, availablePhases);
+      resets.phase = findNearestPhase((currentState.phase || 'phase2') as Phase, availablePhases);
       hasResets = true;
     }
     // Check if current territory is still valid
