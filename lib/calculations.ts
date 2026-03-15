@@ -1415,24 +1415,64 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   //   - Phase 2 acquisition: $500M-3B (de-risked, command premium)
   //   - Phase 3 acquisition: $2B-15B+ (near-approval, full control premium)
   //   - Approved: $5B-50B+ (revenue-generating, strategic premium)
+  // Phase-adjusted multipliers for each non-licensing deal type.
+  // Licensing baselines represent "total potential value if all milestones are achieved."
+  // Non-licensing structures must discount this based on the inherent economics:
+  //
+  // ACQUISITION: Early = heavy discount (buying risk), late = control premium
+  //   Real-world: Preclinical $30-150M, Phase 2 $500M-3B, Phase 3 $2-15B+
+  //
+  // OPTION: The option VALUE increases with de-risking (more data = higher exercise value)
+  //   Real-world: Preclinical option fee $5-30M, Phase 2 $50-200M total option value
+  //   Options are always worth less than licensing (you're buying optionality, not commitment)
+  //
+  // CO-DEVELOPMENT: Shared economics = discount, but less steep than options
+  //   Partners share costs AND upside, so total value is closer to licensing
+  //
+  // COLLABORATION: Research-stage, highly contingent on early data
+  //   Real-world: Preclinical collab $20-100M total, Phase 2 $200-800M
   const phaseAcquisitionMultipliers: Partial<Record<Phase, number>> = {
-    discovery: 0.30,    // Discovery = very speculative, acquirers pay ~30% of licensing potential
-    preclinical: 0.45,  // Preclinical = high risk, ~45% of licensing potential
-    phase1: 0.60,       // Phase 1 = some clinical signal, ~60%
-    phase1_2: 0.70,     // Phase 1/2 = early efficacy, ~70%
-    phase2: 0.90,       // Phase 2 = proof-of-concept, near licensing value
-    phase2_3: 1.10,     // Phase 2/3 = significant de-risking, control premium starts
-    phase3: 1.35,       // Phase 3 = near-approval, full control premium
-    nda_filed: 1.50,    // NDA filed = minimal risk, strong premium
-    approved: 1.65,     // Approved = revenue asset, strategic premium
+    discovery: 0.30,    preclinical: 0.45,  phase1: 0.60,
+    phase1_2: 0.70,     phase2: 0.90,       phase2_3: 1.10,
+    phase3: 1.35,       nda_filed: 1.50,    approved: 1.65,
+  };
+
+  const phaseOptionMultipliers: Partial<Record<Phase, number>> = {
+    discovery: 0.35,    // Very small option premium for discovery
+    preclinical: 0.45,  // Preclinical option: ~$25-75M total value typical
+    phase1: 0.55,       // Phase 1: some data, option value grows
+    phase1_2: 0.65,     // Phase 1/2: early efficacy signal
+    phase2: 0.75,       // Phase 2: PoC established, option approaches licensing
+    phase2_3: 0.85,     // Phase 2/3: significant de-risking
+    phase3: 0.90,       // Phase 3: near-licensing value (rarely optioned at this stage)
+  };
+
+  const phaseCodevMultipliers: Partial<Record<Phase, number>> = {
+    discovery: 0.55,    // Discovery co-dev: shared research costs
+    preclinical: 0.65,  // Preclinical: shared IND-enabling costs
+    phase1: 0.75,       // Phase 1: shared clinical costs
+    phase1_2: 0.80,     // Phase 1/2: growing shared investment
+    phase2: 0.85,       // Phase 2: near licensing value (shared risk = modest discount)
+    phase2_3: 0.90,     // Phase 2/3: approaching full value
+    phase3: 0.92,       // Phase 3: near-parity with licensing
+    nda_filed: 0.95,    // NDA: minimal discount
+    approved: 0.95,     // Approved: minimal discount (shared commercialization)
+  };
+
+  const phaseCollabMultipliers: Partial<Record<Phase, number>> = {
+    discovery: 0.30,    // Discovery collab: mostly research funding
+    preclinical: 0.40,  // Preclinical: early-stage, highly contingent
+    phase1: 0.50,       // Phase 1: some clinical promise
+    phase1_2: 0.55,     // Phase 1/2: moderate conviction
+    phase2: 0.65,       // Phase 2: rarely structured as "collaboration" at this stage
   };
 
   const dealTypeMultipliers: Record<DealType, number> = {
     licensing: 1.0,
     acquisition: phaseAcquisitionMultipliers[input.phase] ?? 0.90,
-    codevelopment: 0.90,
-    option: 0.75,
-    collaboration: 0.65,
+    codevelopment: phaseCodevMultipliers[input.phase] ?? 0.85,
+    option: phaseOptionMultipliers[input.phase] ?? 0.75,
+    collaboration: phaseCollabMultipliers[input.phase] ?? 0.50,
   };
   const dealTypeMultiplier = dealTypeMultipliers[dealType];
   if (dealType !== 'licensing') {
