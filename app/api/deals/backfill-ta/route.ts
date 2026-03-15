@@ -228,12 +228,17 @@ async function searchSECForTA(
   const hits = data.hits?.hits || [];
 
   return hits.map((hit: Record<string, any>) => {
-    // Construct the proper document URL using cik + accession + file_name
-    // This matches the working pattern in sec-edgar.ts:455
-    const cik = hit._source?.cik;
-    const accession = hit._source?.accession_number || '';
+    // The SEC full-text search API returns:
+    // - _id: "accession:filename" (e.g., "0001193125-21-068558:d135857dex991.htm")
+    // - _source.ciks: ["0001660334"] (array)
+    // - _source.adsh: "0001193125-21-068558" (accession with dashes)
+    // Construct proper document URL from these fields.
+    const docId = hit._id || '';
+    const parts = docId.split(':');
+    const accession = parts[0] || hit._source?.adsh || '';
+    const fileName = parts[1] || '';
+    const cik = (hit._source?.ciks?.[0] || '').replace(/^0+/, '');
     const accessionFormatted = accession.replace(/-/g, '');
-    const fileName = hit._source?.file_name || '';
 
     const url = cik && accessionFormatted && fileName
       ? `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionFormatted}/${fileName}`
@@ -241,7 +246,7 @@ async function searchSECForTA(
 
     return {
       accession,
-      company: hit._source?.display_names?.[0] || hit._source?.entity_name || '',
+      company: hit._source?.display_names?.[0] || '',
       date: hit._source?.file_date || '',
       url,
     };
