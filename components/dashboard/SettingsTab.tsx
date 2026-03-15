@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { type CalculationHistoryItem } from '@/lib/history';
 import { PRICING } from '@/lib/config/constants';
+import { captureClientError } from '@/lib/sentry-client';
 import AppearanceSettings from './AppearanceSettings';
 
 interface AvatarGradient {
@@ -73,6 +75,43 @@ const SettingsTab = React.memo(function SettingsTab({
   onDeleteAccount,
   onUpgrade,
 }: SettingsTabProps) {
+  // Email preferences state
+  const [weeklyDigest, setWeeklyDigest] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = localStorage.getItem('email_pref_weekly_digest');
+    return saved !== null ? saved === 'true' : true; // default on
+  });
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
+  const handleToggleWeeklyDigest = useCallback(async (enabled: boolean) => {
+    setWeeklyDigest(enabled);
+    localStorage.setItem('email_pref_weekly_digest', String(enabled));
+    setSavingPrefs(true);
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          await fetch('/api/user/profile', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ weekly_digest: enabled }),
+          });
+        }
+      }
+      toast.success(enabled ? 'Weekly digest enabled' : 'Weekly digest disabled');
+    } catch (err) {
+      captureClientError(err, 'SettingsTab', { context: 'Failed to save email preferences' });
+      toast.error('Failed to save preference');
+    } finally {
+      setSavingPrefs(false);
+    }
+  }, []);
+
   return (
     <div className="max-w-3xl space-y-6">
       {/* Profile Header Card */}
@@ -323,7 +362,7 @@ const SettingsTab = React.memo(function SettingsTab({
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           {((tier === 'pro' || tier === 'report')
-            ? ['Unlimited calculations', 'PDF report generation', 'Full history access', 'Priority support', 'Advanced analytics', 'API access coming soon']
+            ? ['Unlimited calculations', 'PDF report generation', 'Full history access', 'Priority support', 'Advanced analytics']
             : ['2 calculations per month', 'Basic deal estimates', 'Calculation history']
           ).map((feature, idx) => (
             <div key={idx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
@@ -333,6 +372,49 @@ const SettingsTab = React.memo(function SettingsTab({
               {feature}
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Email Preferences */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+            <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Email Preferences</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-slate-900 dark:text-white">Weekly Market Digest</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Deal activity, benchmark shifts, and market trends</p>
+              </div>
+            </div>
+            <button
+              onClick={() => handleToggleWeeklyDigest(!weeklyDigest)}
+              disabled={savingPrefs}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                weeklyDigest ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'
+              } ${savingPrefs ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+              role="switch"
+              aria-checked={weeklyDigest}
+              aria-label="Toggle weekly market digest emails"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                  weeklyDigest ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 

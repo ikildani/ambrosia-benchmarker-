@@ -9,6 +9,7 @@ import type { PartnerForPDF } from '@/lib/report';
 const ReportGenerationModal = dynamic(() => import('./ReportGenerationModal'), { ssr: false });
 const ShareModal = dynamic(() => import('./ShareModal'), { ssr: false });
 import { useTracking } from './TrackingProvider';
+import { captureClientError } from '@/lib/sentry-client';
 import { PRICING } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import { staticBenchmarks as benchmarks } from '@/lib/benchmarks';
@@ -669,7 +670,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       const fm = runFinancialModel(fullInputs, result, epiData.indications);
       setFinancialModel(fm);
     } catch (err) {
-      console.error('[FinancialModel] Pipeline error:', err);
+      captureClientError(err, 'Results', { context: 'FinancialModel pipeline error' });
     }
   }, [fullInputs, result]);
 

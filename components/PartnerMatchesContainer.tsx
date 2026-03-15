@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PartnerMatches } from './benchmarker/PartnerMatches';
 import { useTracking } from './TrackingProvider';
 import { useAuth } from '@/contexts/AuthContext';
+import { captureClientError } from '@/lib/sentry-client';
 
 export interface PartnerMatchForPDF {
   company_name: string;
@@ -65,6 +66,8 @@ export default function PartnerMatchesContainer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [calculationId, setCalculationId] = useState<string | undefined>();
+  const [filterDealType, setFilterDealType] = useState<string>('all');
+  const [filterTerritory, setFilterTerritory] = useState<string>('all');
 
   const fetchMatches = useCallback(async () => {
     setLoading(true);
@@ -119,7 +122,7 @@ export default function PartnerMatchesContainer({
         })));
       }
     } catch (err) {
-      console.error('Partner matching error:', err);
+      captureClientError(err, 'PartnerMatchesContainer', { context: 'Partner matching error' });
       setError('Unable to find partner matches. Please try again.');
     }
 
@@ -171,6 +174,24 @@ export default function PartnerMatchesContainer({
     );
   }
 
+  // Filter matches client-side based on user filter selections
+  const filteredMatches = matches.filter((m: any) => {
+    if (filterDealType !== 'all') {
+      const reasons = (m.match_reasons || []).map((r: any) => r.reason?.toLowerCase() || '');
+      const reasonsText = reasons.join(' ');
+      if (filterDealType === 'licensing' && !reasonsText.includes('licens')) return false;
+      if (filterDealType === 'acquisition' && !reasonsText.includes('acqui')) return false;
+      if (filterDealType === 'collaboration' && !reasonsText.includes('collab') && !reasonsText.includes('co-develop')) return false;
+    }
+    if (filterTerritory !== 'all' && m.hq_country) {
+      if (filterTerritory === 'us' && m.hq_country !== 'US' && m.hq_country !== 'United States') return false;
+      if (filterTerritory === 'eu' && !['Germany', 'France', 'UK', 'United Kingdom', 'Switzerland', 'Denmark', 'Netherlands', 'Sweden', 'Belgium', 'Italy', 'Spain', 'Ireland', 'Austria', 'Finland', 'Norway'].includes(m.hq_country)) return false;
+      if (filterTerritory === 'japan' && m.hq_country !== 'Japan' && m.hq_country !== 'JP') return false;
+      if (filterTerritory === 'asia' && !['Japan', 'JP', 'China', 'CN', 'South Korea', 'KR', 'India', 'IN', 'Taiwan', 'TW', 'Singapore', 'SG'].includes(m.hq_country)) return false;
+    }
+    return true;
+  });
+
   // Build user asset context for outreach generation
   const userAsset = {
     modality: mapModality(modality),
@@ -181,22 +202,66 @@ export default function PartnerMatchesContainer({
   };
 
   return (
-    <PartnerMatches
-      calculationId={calculationId}
-      sessionId={sessionId}
-      anonymousId={anonymousId}
-      userId={userId}
-      userEmail={user?.email}
-      matches={matches}
-      totalMatches={totalMatches}
-      matchesShown={matchesShown}
-      userTier={serverTier}
-      upgradeCta={upgradeCta}
-      advisoryCta={advisoryCta}
-      onUpgradeClick={onUpgrade}
-      userAsset={userAsset}
-      therapeuticArea={therapeuticArea}
-    />
+    <div>
+      {/* Partner Filter Controls */}
+      <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-6 mb-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filter:</span>
+          <select
+            value={filterDealType}
+            onChange={(e) => setFilterDealType(e.target.value)}
+            className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+            aria-label="Filter by deal type preference"
+          >
+            <option value="all">All deal types</option>
+            <option value="licensing">Licensing</option>
+            <option value="acquisition">Acquisition</option>
+            <option value="collaboration">Collaboration</option>
+          </select>
+          <select
+            value={filterTerritory}
+            onChange={(e) => setFilterTerritory(e.target.value)}
+            className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+            aria-label="Filter by partner territory"
+          >
+            <option value="all">All territories</option>
+            <option value="us">US-based</option>
+            <option value="eu">Europe</option>
+            <option value="japan">Japan</option>
+            <option value="asia">Asia-Pacific</option>
+          </select>
+          {(filterDealType !== 'all' || filterTerritory !== 'all') && (
+            <button
+              onClick={() => { setFilterDealType('all'); setFilterTerritory('all'); }}
+              className="text-xs text-teal-600 dark:text-teal-400 hover:underline"
+            >
+              Clear filters
+            </button>
+          )}
+          {(filterDealType !== 'all' || filterTerritory !== 'all') && (
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              {filteredMatches.length} of {matches.length} partners
+            </span>
+          )}
+        </div>
+      </div>
+      <PartnerMatches
+        calculationId={calculationId}
+        sessionId={sessionId}
+        anonymousId={anonymousId}
+        userId={userId}
+        userEmail={user?.email}
+        matches={filteredMatches}
+        totalMatches={totalMatches}
+        matchesShown={filteredMatches.length}
+        userTier={serverTier}
+        upgradeCta={upgradeCta}
+        advisoryCta={advisoryCta}
+        onUpgradeClick={onUpgrade}
+        userAsset={userAsset}
+        therapeuticArea={therapeuticArea}
+      />
+    </div>
   );
 }
 

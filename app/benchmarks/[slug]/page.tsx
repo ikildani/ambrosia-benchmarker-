@@ -372,8 +372,8 @@ export default async function BenchmarkPage({ params }: PageProps) {
               <Link href="/glossary" className="hover:text-white transition-colors">
                 Glossary
               </Link>
-              <Link href="/blog" className="hover:text-white transition-colors">
-                Blog
+              <Link href="/press" className="hover:text-white transition-colors">
+                Press
               </Link>
             </div>
           </div>

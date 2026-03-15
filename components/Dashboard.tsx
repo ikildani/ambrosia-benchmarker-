@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, startTransition } from 'react';
 import { toast } from 'sonner';
 import { clearHistory, getHistoryItemWithDefaults, type CalculationHistoryItem } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
+import { captureClientError } from '@/lib/sentry-client';
 import HistoryDetailModal from './HistoryDetailModal';
 import WatchlistPanel from './watchlist/WatchlistPanel';
 import DashboardNav from './dashboard/DashboardNav';
@@ -214,7 +215,7 @@ export default function Dashboard({
       await deleteHistoryItem(id);
       toast.success('Analysis deleted');
     } catch (error) {
-      console.error('Failed to delete history item:', error);
+      captureClientError(error, 'Dashboard', { context: 'Failed to delete history item' });
       toast.error('Failed to delete. Please try again.');
     }
   };
@@ -291,13 +292,13 @@ export default function Dashboard({
               }),
             });
             if (!res.ok) {
-              console.warn('Profile API save failed:', res.status);
+              captureClientError(new Error(`Profile API save failed: ${res.status}`), 'Dashboard', { context: 'Profile API save' });
             }
           }
         }
       } catch (apiErr) {
         // Non-blocking: localStorage save succeeded, DB sync failed silently
-        console.warn('Profile DB sync failed:', apiErr);
+        captureClientError(apiErr, 'Dashboard', { context: 'Profile DB sync failed' });
       }
 
       toast.success('Settings saved successfully');
@@ -308,7 +309,36 @@ export default function Dashboard({
     }
   };
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
+    try {
+      // Try server-side GDPR export first (includes all database records)
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          const res = await fetch('/api/user/data-export', {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `deal-calculator-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Data exported successfully');
+            return;
+          }
+        }
+      }
+    } catch {
+      // Fall through to local export
+    }
+
+    // Fallback: export local data
     const exportData = {
       user: {
         name: editName,
@@ -330,13 +360,36 @@ export default function Dashboard({
     a.download = `deal-calculator-export-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('Data exported successfully');
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
+    try {
+      // Try server-side GDPR deletion first
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          const res = await fetch('/api/user/delete-data', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (!res.ok) {
+            captureClientError(new Error(`Delete data API failed: ${res.status}`), 'Dashboard', { context: 'GDPR delete' });
+          }
+        }
+      }
+    } catch (err) {
+      captureClientError(err, 'Dashboard', { context: 'GDPR delete request failed' });
+    }
+
+    // Always clear local data regardless of API result
     clearHistory();
     localStorage.removeItem('user_data');
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_tier');
+    toast.success('All your data has been deleted');
     onSignOut();
   };
 

@@ -26,6 +26,23 @@ const OverviewTab = React.memo(function OverviewTab({
   onHistoryClick,
   formatCurrency,
 }: OverviewTabProps) {
+  // Compute last calculation date
+  const lastCalculationDate = history.length > 0
+    ? formatDate(history[0].timestamp)
+    : null;
+
+  // Compute most-used therapeutic area
+  const topTherapeuticArea = React.useMemo(() => {
+    if (history.length === 0) return '-';
+    const counts: Record<string, number> = {};
+    history.forEach(h => {
+      const ta = h.inputs.therapeuticArea || 'other';
+      counts[ta] = (counts[ta] || 0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const top = sorted[0]?.[0] || '-';
+    return top.charAt(0).toUpperCase() + top.slice(1);
+  }, [history]);
   return (
     <div className="space-y-6">
       {/* Deal Insights - Full Width */}
@@ -43,7 +60,7 @@ const OverviewTab = React.memo(function OverviewTab({
         </div>
 
         {history.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
             <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-lg sm:rounded-xl border border-teal-200/50">
               <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,6 +104,30 @@ const OverviewTab = React.memo(function OverviewTab({
               </div>
               <p className="text-sm sm:text-lg lg:text-xl font-bold text-indigo-700 truncate">
                 {topModality}
+              </p>
+            </div>
+
+            <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg sm:rounded-xl border border-amber-200/50">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span className="text-xs font-medium text-amber-700 truncate">Top TA</span>
+              </div>
+              <p className="text-sm sm:text-lg lg:text-xl font-bold text-amber-700 truncate">
+                {topTherapeuticArea}
+              </p>
+            </div>
+
+            <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg sm:rounded-xl border border-emerald-200/50">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-xs font-medium text-emerald-700 truncate">Last Analysis</span>
+              </div>
+              <p className="text-sm sm:text-lg lg:text-xl font-bold text-emerald-700 truncate">
+                {lastCalculationDate || 'None yet'}
               </p>
             </div>
           </div>

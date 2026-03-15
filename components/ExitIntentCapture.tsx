@@ -91,12 +91,12 @@ export default function ExitIntentCapture() {
             <div className="text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center mx-auto mb-3 shadow-glow">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Get Weekly Deal Insights</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Get Your First Deal Report Free</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Join 200+ BD professionals getting the latest biopharma deal benchmarks and trends.
+                Benchmark your asset in 60 seconds. Subscribe and get a free PDF deal report with comparable transactions, royalty benchmarks, and negotiation insights.
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -115,9 +115,9 @@ export default function ExitIntentCapture() {
                 disabled={submitting}
                 className="w-full py-3 text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-xl hover:from-teal-700 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10 disabled:opacity-50"
               >
-                {submitting ? 'Subscribing...' : 'Subscribe — Free'}
+                {submitting ? 'Subscribing...' : 'Calculate Now — Free Report Included'}
               </button>
-              <p className="text-xs text-slate-500 dark:text-slate-400 text-center">No spam, unsubscribe anytime.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-center">No spam, unsubscribe anytime. 350+ deals benchmarked.</p>
             </form>
           </>
         )}

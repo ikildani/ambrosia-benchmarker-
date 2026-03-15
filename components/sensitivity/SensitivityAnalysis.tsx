@@ -5,6 +5,7 @@ import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useSensitivityAnalysis } from '@/lib/hooks/useSensitivityAnalysis';
 import { getTopParameters, NeurologyInsight } from '@/lib/sensitivity';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { captureClientError } from '@/lib/sentry-client';
 import KeyInsightBox from './KeyInsightBox';
 import ParameterSelector from './ParameterSelector';
 
@@ -76,7 +77,7 @@ export default function SensitivityAnalysis({
         setPendingChanges(prev => ({ ...prev, [paramKey]: value }));
       }
     } catch (error) {
-      console.error('Error in handleSelect:', error);
+      captureClientError(error, 'SensitivityAnalysis', { context: 'Error in handleSelect' });
     }
   };
 

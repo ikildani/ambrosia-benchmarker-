@@ -777,6 +777,7 @@ export default function Home() {
                 { label: 'Website', href: 'https://www.ambrosiaventures.co', external: true },
                 { label: 'Contact', href: 'mailto:info@ambrosiaventures.co', external: false },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ambrosia-ventures', external: true },
+                { label: 'Glossary', href: '/glossary', external: false },
                 { label: 'Terms', href: '/terms', external: false },
                 { label: 'Privacy', href: '/privacy', external: false },
               ].map((link, idx) => (

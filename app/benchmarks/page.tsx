@@ -268,7 +268,7 @@ export default function BenchmarksIndex() {
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <Link href="/calculator" className="hover:text-white transition-colors">Calculator</Link>
               <Link href="/glossary" className="hover:text-white transition-colors">Glossary</Link>
-              <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+              <Link href="/press" className="hover:text-white transition-colors">Press</Link>
             </div>
           </div>
         </footer>

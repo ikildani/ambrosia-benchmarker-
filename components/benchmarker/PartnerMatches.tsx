@@ -141,6 +141,7 @@ interface UserAsset {
 
 // Reuse the server-side TA keyword list for consistent filtering
 import { TA_CLIFF_KEYWORDS } from '@/lib/services/partner-matching';
+import { captureClientError } from '@/lib/sentry-client';
 
 function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
   if (!therapeuticArea || !TA_CLIFF_KEYWORDS[therapeuticArea]) return [];
@@ -206,7 +207,7 @@ export function PartnerMatches({
           match_score: match.match_score,
         },
       }),
-    }).catch(console.error);
+    }).catch((err) => captureClientError(err, 'PartnerMatches', { context: 'Event tracking' }));
 
     if (match.profile_locked) {
       onUpgradeClick();
@@ -238,7 +239,7 @@ export function PartnerMatches({
         setPartnerDetails(data);
       }
     } catch (error) {
-      console.error('Failed to fetch partner details:', error);
+      captureClientError(error, 'PartnerMatches', { context: 'Failed to fetch partner details' });
     }
 
     setLoadingDetails(false);
@@ -259,7 +260,7 @@ export function PartnerMatches({
           total_matches: totalMatches,
         },
       }),
-    }).catch(console.error);
+    }).catch((err) => captureClientError(err, 'PartnerMatches', { context: 'Event tracking' }));
 
     onUpgradeClick();
   }, [userId, sessionId, anonymousId, calculationId, matchesShown, totalMatches, onUpgradeClick]);
@@ -278,7 +279,7 @@ export function PartnerMatches({
           company_context: expandedPartner,
         },
       }),
-    }).catch(console.error);
+    }).catch((err) => captureClientError(err, 'PartnerMatches', { context: 'Event tracking' }));
   }, [userId, sessionId, anonymousId, calculationId, expandedPartner]);
 
   return (

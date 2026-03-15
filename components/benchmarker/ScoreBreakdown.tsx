@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { captureClientError } from '@/lib/sentry-client';
 import { Mail, User, RefreshCw, Loader2, AlertTriangle, Pill } from 'lucide-react';
 import { ScoreProgressBar } from './ScoreProgressBar';
 import { MatchFactor } from './MatchFactor';
@@ -99,7 +100,7 @@ export function ScoreBreakdown({
         setStrategyError(data.error || 'Failed to generate strategy. Please try again.');
       }
     } catch (error) {
-      console.error('Failed to regenerate strategy:', error);
+      captureClientError(error, 'ScoreBreakdown', { context: 'Failed to regenerate strategy' });
       setStrategyError('Network error. Please check your connection and try again.');
     } finally {
       setIsRegeneratingStrategy(false);

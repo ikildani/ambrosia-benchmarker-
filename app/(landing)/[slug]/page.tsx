@@ -290,8 +290,8 @@ export default async function LandingPageRoute({ params }: PageProps) {
               <Link href="/calculator" className="hover:text-white transition-colors">
                 Calculator
               </Link>
-              <Link href="/blog" className="hover:text-white transition-colors">
-                Blog
+              <Link href="/glossary" className="hover:text-white transition-colors">
+                Glossary
               </Link>
             </div>
           </div>

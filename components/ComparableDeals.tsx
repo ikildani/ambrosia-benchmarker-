@@ -24,6 +24,7 @@ type RecencyFilter = 'all' | '24mo' | '12mo';
 
 export default function ComparableDeals({ inputs, tier, onBuyReport }: ComparableDealsProps) {
   const [deals, setDeals] = useState<ComparableDealForUI[]>([]);
+  const [totalAvailable, setTotalAvailable] = useState(0);
   const [loading, setLoading] = useState(true);
   const [recencyFilter, setRecencyFilter] = useState<RecencyFilter>('all');
 
@@ -37,8 +38,11 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
     });
     fetch(`/api/deals/comparable?${params}`)
       .then(res => res.json())
-      .then(data => setDeals(data.deals || []))
-      .catch(() => setDeals([]))
+      .then(data => {
+        setDeals(data.deals || []);
+        setTotalAvailable(data.totalAvailable || (data.deals || []).length);
+      })
+      .catch(() => { setDeals([]); setTotalAvailable(0); })
       .finally(() => setLoading(false));
   }, [inputs.therapeuticArea, inputs.modality, inputs.indication, inputs.phase]);
 
@@ -52,8 +56,10 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
     if (recencyFilter === '24mo') return deal.year >= currentYear - 2;
     return true;
   });
+  // Server-side enforcement: free users only receive FREE_DEAL_LIMIT deals from the API.
+  // Client-side slice is a safety net for defense-in-depth.
   const visibleDeals = hasFullAccess ? filteredDeals : filteredDeals.slice(0, FREE_DEAL_LIMIT);
-  const hiddenCount = hasFullAccess ? 0 : Math.max(0, filteredDeals.length - FREE_DEAL_LIMIT);
+  const hiddenCount = hasFullAccess ? 0 : Math.max(0, totalAvailable - FREE_DEAL_LIMIT);
 
   return (
     <div className="mt-6">

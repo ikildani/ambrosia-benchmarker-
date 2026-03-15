@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import { toast } from 'sonner';
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { syncUsageFromDatabase } from '@/lib/usage';
@@ -111,6 +112,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
+  const previousTierRef = useRef<'free' | 'pro' | 'report'>('free');
+
+  // Show "Welcome to Pro" toast once per upgrade
+  useEffect(() => {
+    const prev = previousTierRef.current;
+    previousTierRef.current = tier;
+
+    if (prev === 'free' && (tier === 'pro' || tier === 'report')) {
+      // Only show once per session
+      if (typeof window !== 'undefined' && !sessionStorage.getItem('pro_welcome_shown')) {
+        sessionStorage.setItem('pro_welcome_shown', 'true');
+        toast.success('Welcome to Pro! All features are now unlocked.');
+      }
+    }
+  }, [tier]);
 
   // Initialize from localStorage and listen to Supabase auth state
   useEffect(() => {

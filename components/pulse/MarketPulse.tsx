@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { captureClientError } from '@/lib/sentry-client';
 import WeeklyHighlights from './WeeklyHighlights';
 import DealActivityFeed from './DealActivityFeed';
 import ModalityHeatMap from './ModalityHeatMap';
@@ -59,7 +60,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
           setHistorySnapshots(historyData.snapshots || []);
         }
       } catch (err) {
-        console.error('Pulse fetch error:', err);
+        captureClientError(err, 'MarketPulse', { context: 'Pulse fetch error' });
         setError('Failed to load market data');
       } finally {
         setLoading(false);

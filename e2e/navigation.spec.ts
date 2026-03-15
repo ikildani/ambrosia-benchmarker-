@@ -20,8 +20,9 @@ test.describe('Navigation', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('blog page loads', async ({ page }) => {
+  test('blog page redirects to home', async ({ page }) => {
     await page.goto('/blog');
+    await expect(page).toHaveURL('/');
     await expect(page.locator('h1')).toBeVisible();
   });
 

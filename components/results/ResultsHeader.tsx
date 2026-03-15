@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import BenchmarkInfo from '../BenchmarkInfo';
 import WatchButton from '../WatchButton';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
 
 const DEAL_STATS_TOTAL = DEAL_STATS.TOTAL_DEALS;
 
@@ -115,7 +115,10 @@ function ResultsHeaderInner({
             <BenchmarkInfo />
           </div>
           <p className="mt-2 text-xs text-white/60">
-            Benchmarks based on {DEAL_STATS_TOTAL} publicly disclosed licensing deals from SEC filings and press releases &middot; Updated weekly
+            Benchmarks: {BENCHMARK_VERSION.LABEL} | Data through March 2026
+          </p>
+          <p className="mt-0.5 text-xs text-white/40">
+            Based on {DEAL_STATS_TOTAL} publicly disclosed licensing deals from SEC filings and press releases
           </p>
         </div>
 

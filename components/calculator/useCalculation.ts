@@ -67,6 +67,7 @@ export interface UseCalculationReturn {
   result: CalculationResult | null;
   isCalculating: boolean;
   saveError: string | null;
+  calculationError: string | null;
   setSaveError: (v: string | null) => void;
   setResult: (v: CalculationResult | null) => void;
   handleCalculate: (state: CalculatorFormState) => void;
@@ -84,6 +85,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
   const calculatingRef = useRef(false);
   const calculationCountRef = useRef(0);
 
@@ -106,6 +108,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     calculatingRef.current = true;
     setIsCalculating(true);
     setSaveError(null);
+    setCalculationError(null);
 
     requestAnimationFrame(() => {
       setTimeout(async () => {
@@ -226,6 +229,8 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           }, 100);
         } catch (error) {
           console.error('Calculation error:', error);
+          setCalculationError('Calculation failed. Please check your inputs and try again.');
+          toast.error('Calculation failed. Please try again.');
         } finally {
           setIsCalculating(false);
           calculatingRef.current = false;
@@ -318,6 +323,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     result,
     isCalculating,
     saveError,
+    calculationError,
     setSaveError,
     setResult,
     handleCalculate,

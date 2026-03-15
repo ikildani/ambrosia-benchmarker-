@@ -358,7 +358,7 @@ export default function GlossaryPage() {
             <div className="flex items-center gap-6 text-sm text-slate-400">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <Link href="/calculator" className="hover:text-white transition-colors">Calculator</Link>
-              <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+              <Link href="/benchmarks" className="hover:text-white transition-colors">Benchmarks</Link>
             </div>
           </div>
         </footer>
