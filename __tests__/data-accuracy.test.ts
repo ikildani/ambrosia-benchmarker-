@@ -249,10 +249,20 @@ describe('Deal Type Impact', () => {
     });
   });
 
-  it('acquisition > licensing (acquisition premium)', () => {
-    expect(results.acquisition.terms.totalDealValue.median).toBeGreaterThan(
-      results.licensing.terms.totalDealValue.median
-    );
+  it('Phase 2 acquisition total value is within 60-110% of licensing (phase-adjusted, not always premium)', () => {
+    // Acquisition multiplier is phase-adjusted: early-stage = discount (buying risk),
+    // late-stage = premium (control). Phase 2 acquisition ≈ 0.90x of licensing.
+    const ratio = results.acquisition.terms.totalDealValue.median / results.licensing.terms.totalDealValue.median;
+    expect(ratio).toBeGreaterThan(0.60);
+    expect(ratio).toBeLessThan(1.10);
+  });
+
+  it('acquisition upfront % should be much higher than licensing (70%+ vs 15-35%)', () => {
+    const acqUpfrontRatio = results.acquisition.terms.upfront.median / results.acquisition.terms.totalDealValue.median;
+    const licUpfrontRatio = results.licensing.terms.upfront.median / results.licensing.terms.totalDealValue.median;
+    expect(acqUpfrontRatio).toBeGreaterThan(0.60); // Acquisitions: 70%+ upfront
+    expect(licUpfrontRatio).toBeLessThan(0.40);    // Licensing: <40% upfront
+    expect(acqUpfrontRatio).toBeGreaterThan(licUpfrontRatio); // Acq always higher upfront %
   });
 
   it('licensing > codevelopment > option > collaboration (value ordering)', () => {

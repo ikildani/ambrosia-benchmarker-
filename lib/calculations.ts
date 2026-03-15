@@ -1397,10 +1397,34 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const rangeWidth = phaseConfig.rangeWidths[input.phase];
   const dealType = input.dealType || 'licensing';
 
-  // Deal type value multiplier
+  // Deal type value multiplier — phase-adjusted for acquisitions.
+  //
+  // Key insight: licensing baselines represent "total potential value if all milestones
+  // are achieved" (includes optionality value). But acquisitions pay CASH for risk-adjusted
+  // present value. Early-phase assets get a significant discount (high risk = lower cash
+  // price); late-phase assets get a premium (de-risked = control premium on top of NPV).
+  //
+  // Real-world calibration:
+  //   - Preclinical acquisition: $30-150M (not $400M+ licensing baseline)
+  //   - Phase 1 acquisition: $100-500M
+  //   - Phase 2 acquisition: $500M-3B (de-risked, command premium)
+  //   - Phase 3 acquisition: $2B-15B+ (near-approval, full control premium)
+  //   - Approved: $5B-50B+ (revenue-generating, strategic premium)
+  const phaseAcquisitionMultipliers: Partial<Record<Phase, number>> = {
+    discovery: 0.30,    // Discovery = very speculative, acquirers pay ~30% of licensing potential
+    preclinical: 0.45,  // Preclinical = high risk, ~45% of licensing potential
+    phase1: 0.60,       // Phase 1 = some clinical signal, ~60%
+    phase1_2: 0.70,     // Phase 1/2 = early efficacy, ~70%
+    phase2: 0.90,       // Phase 2 = proof-of-concept, near licensing value
+    phase2_3: 1.10,     // Phase 2/3 = significant de-risking, control premium starts
+    phase3: 1.35,       // Phase 3 = near-approval, full control premium
+    nda_filed: 1.50,    // NDA filed = minimal risk, strong premium
+    approved: 1.65,     // Approved = revenue asset, strategic premium
+  };
+
   const dealTypeMultipliers: Record<DealType, number> = {
     licensing: 1.0,
-    acquisition: 1.35,
+    acquisition: phaseAcquisitionMultipliers[input.phase] ?? 0.90,
     codevelopment: 0.90,
     option: 0.75,
     collaboration: 0.65,
