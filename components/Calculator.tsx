@@ -278,6 +278,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         sessionStorage.removeItem('wizard_progress');
         sessionStorage.removeItem('has_auto_calculated');
         calc.setResult(null);
+        // Reset form to fresh state — no pre-selected TA, show templates
+        actions.reset();
         // Clean up the URL parameter without triggering navigation
         const url = new URL(window.location.href);
         url.searchParams.delete('new');
@@ -359,12 +361,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       return;
     }
 
-    // Auto-calculate for first-time visitors with default values
-    if (!sessionStorage.getItem('has_auto_calculated')) {
-      sessionStorage.setItem('has_auto_calculated', 'true');
-      calc.setResult(calculateDealTerms(buildCalculationInput(state)));
-      actions.setShowTemplates(false);
-    }
+    // First-time visitors see templates/TA selection — no auto-calculation.
+    // Users must select their therapeutic area and inputs before seeing results.
+    // Auto-calculation only happens when restoring from session storage (line 289+)
+    // or when applying a template (handleApplyTemplate).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
