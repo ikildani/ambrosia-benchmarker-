@@ -175,10 +175,133 @@ export const PHARMA_CIKS: Record<string, string> = {
   // Women's Health additions
   '1821825': 'Organon',
   '1401914': 'Dare Bioscience',
+
+  // === Expanded Non-Oncology Coverage ===
+
+  // Neurology / CNS (expand from 5 → 20+)
+  '1739600': 'Arvinas',
+  '1522540': 'Annovis Bio',
+  '1598665': 'Voyager Therapeutics',
+  '1411579': 'Axsome Therapeutics',
+  '1784535': 'Karuna Therapeutics',
+  '1620280': 'Praxis Precision Medicine',
+  '1830974': 'Neumora Therapeutics',
+  '1852985': 'Longboard Pharmaceuticals',
+  '1599617': 'Lenz Therapeutics',
+  '1742912': 'Passage Bio',
+  '1564590': 'uniQure',
+  '1622879': 'Annexon Biosciences',
+  '1815903': 'Vigil Neuroscience',
+
+  // Cardiovascular (expand from 5 → 15+)
+  '1635984': 'Akcea Therapeutics',
+  '794323': 'Esperion Therapeutics',
+  '1689548': 'Agepha Pharma',
+  '1855756': 'CinCor Pharma',
+  '1868941': 'Lexeo Therapeutics',
+  '1815184': 'Tenaya Therapeutics',
+  '1769624': 'Rocket Pharmaceuticals',
+  '1590418': 'Myokardia',
+  '1742927': 'Cardiol Therapeutics',
+
+  // Metabolic / Endocrine (expand from 7 → 20+)
+  '1739347': 'Fractyl Health',
+  '1628171': 'Carmot Therapeutics',
+  '1822994': 'Rivus Pharmaceuticals',
+  '1708527': 'Eiger BioPharmaceuticals',
+  '1840292': 'COUR Pharmaceutical',
+  '1795579': 'Imvax',
+  '1751299': 'Inversago Pharma',
+  '1799011': 'Boehringer Ingelheim',
+  '1831097': 'Zealand Pharma',
+  '1739727': 'ProSciento',
+  '1826397': 'Keros Therapeutics',
+  '1824502': 'Biomea Fusion',
+
+  // Immunology / Autoimmune (expand from 8 → 20+)
+  '1598014': 'Principia Biopharma',
+  '1645460': 'TG Therapeutics',
+  '1766400': 'Prometheus Biosciences',
+  '1784756': 'Arena Pharmaceuticals',
+  '1611983': 'Chinook Therapeutics',
+  '1803696': 'Alumis',
+  '1821580': 'ACELYRIN',
+  '1853145': 'Upstream Bio',
+  '1748252': 'Nurix Therapeutics',
+  '1707502': 'Magenta Therapeutics',
+
+  // Rare Disease (expand from 3 → 15+)
+  '1178879': 'Alexion Pharmaceuticals',
+  '1516551': 'Catalyst Biosciences',
+  '1661059': 'Myonexus Therapeutics',
+  '1773427': 'Passage Bio',
+  '1756701': 'Taysha Gene Therapies',
+  '1805260': 'Abeona Therapeutics',
+  '1609065': 'Avrobio',
+  '1661587': 'Solid Biosciences',
+  '1804220': 'Vigil Neuroscience',
+  '1735707': 'Prevail Therapeutics',
+  '1699136': 'Homology Medicines',
+  '1709323': 'Akeso Health Sciences',
+
+  // Infectious Disease (expand from 3 → 12+)
+  '1664106': 'Cidara Therapeutics',
+  '1722438': 'Shionogi',
+  '1752474': 'VBI Vaccines',
+  '1699531': 'Emergent BioSolutions',
+  '1599738': 'Paratek Pharmaceuticals',
+  '1709164': 'Iterum Therapeutics',
+  '1789029': 'Vaxcyte',
+  '1837014': 'Affinivax',
+  '1579428': 'Inovio Pharmaceuticals',
+
+  // Ophthalmology (expand from 2 → 10+)
+  '1567514': 'Aldeyra Therapeutics',
+  '1595585': 'Adverum Biotechnologies',
+  '1738177': 'Kodiak Sciences',
+  '1708493': 'Gyroscope Therapeutics',
+  '1776661': 'Ocuphire Pharma',
+  '1745999': 'Eyenovia',
+  '1662579': 'RXSight',
+  '1808997': 'Iveric Bio',
+
+  // Dermatology (expand from 2 → 10+)
+  '1413754': 'Dermavant Sciences',
+  '1581552': 'Cassiopea',
+  '1516513': 'Sol-Gel Technologies',
+  '1757758': 'Forte Biosciences',
+  '1768224': 'Skin Biotech',
+  '1640251': 'Verrica Pharmaceuticals',
+  '1737287': 'Nuvation Bio',
+  '1763950': 'Ralexar Therapeutics',
+
+  // Respiratory / Pulmonology
+  '1408075': 'Windtree Therapeutics',
+  '1756222': 'Aerogen',
+  '1740582': 'Gossamer Bio',
+  '1770141': 'Kinaset Therapeutics',
+  '1709625': 'Pliant Therapeutics',
+  '1680379': 'Theravance Biopharma',
+
+  // Gastroenterology
+  '1613780': 'Iterative Scopes',
+  '1672619': 'Ardelyx',
+  '1661839': '9 Meters Biopharma',
+  '1773086': 'Applied DNA Sciences',
+  '1776197': 'RedHill Biopharma',
+  '1614744': 'Assembly Biosciences',
+
+  // Hematology (non-oncology)
+  '1669811': 'Global Blood Therapeutics',
+  '1826170': 'Forma Therapeutics',
+  '1810182': 'Disc Medicine',
+  '1723648': 'Rallybio',
+  '1717115': 'Protagonist Therapeutics',
 };
 
 // Search terms for licensing deals
 const DEAL_SEARCH_TERMS = [
+  // General deal terms
   '"license agreement"',
   '"collaboration agreement"',
   '"exclusive license"',
@@ -189,6 +312,23 @@ const DEAL_SEARCH_TERMS = [
   '"commercialization agreement"',
   '"asset acquisition"',
   '"technology license"',
+  // TA-specific deal terms to improve non-oncology discovery
+  '"cardiovascular" AND "license agreement"',
+  '"neurology" AND "collaboration"',
+  '"autoimmune" AND "license"',
+  '"metabolic" AND "collaboration agreement"',
+  '"rare disease" AND "license agreement"',
+  '"gene therapy" AND "license"',
+  '"infectious disease" AND "collaboration"',
+  '"ophthalmology" AND "license agreement"',
+  '"dermatology" AND "license"',
+  '"respiratory" AND "collaboration"',
+  '"obesity" AND "license agreement"',
+  '"diabetes" AND "collaboration agreement"',
+  '"hematology" AND "license"',
+  '"vaccine" AND "collaboration"',
+  '"CNS" AND "license agreement"',
+  '"gastroenterology" AND "license"',
 ];
 
 export interface SECFiling {

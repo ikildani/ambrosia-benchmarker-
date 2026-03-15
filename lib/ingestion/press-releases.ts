@@ -88,6 +88,88 @@ const FEED_SOURCES: FeedSource[] = [
     type: 'rss',
     dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'merger', 'agreement'],
   },
+
+  // === Tier 4: Additional Industry Publications & Press Wires ===
+  {
+    name: 'STAT_News',
+    url: 'https://www.statnews.com/feed/',
+    type: 'rss',
+    dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'upfront', 'milestone', 'billion', 'million', 'buyout'],
+  },
+  {
+    name: 'Business_Wire_LifeSciences',
+    url: 'https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtSWg==',
+    type: 'rss',
+    dealKeywords: ['license agreement', 'collaboration agreement', 'exclusive license', 'acquisition', 'deal', 'partnership', 'co-develop', 'option agreement', 'milestone', 'royalt'],
+  },
+  {
+    name: 'Reuters_Healthcare',
+    url: 'https://www.reuters.com/arc/outboundfeeds/v3/all/healthcare-pharmaceuticals/?outputType=xml',
+    type: 'rss',
+    dealKeywords: ['deal', 'license', 'collaboration', 'acquisition', 'acquire', 'merger', 'agreement', 'upfront', 'milestone', 'billion', 'million', 'buyout', 'takeover'],
+  },
+  {
+    name: 'Labiotech_EU',
+    url: 'https://www.labiotech.eu/feed/',
+    type: 'rss',
+    dealKeywords: ['deal', 'license', 'collaboration', 'partnership', 'acquisition', 'acquire', 'merger', 'agreement', 'upfront', 'milestone', 'billion', 'million'],
+  },
+
+  // === Tier 5: TA-Specific GlobeNewswire Feeds (diversify away from oncology) ===
+  {
+    name: 'GlobeNewswire_Cardiology',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5001-Cardiology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['cardiovascular', 'cardiac', 'heart', 'cardiomyopathy', 'hypertension', 'thrombosis', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_Neurology',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5006-Neurology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['neurology', 'cns', 'alzheimer', 'parkinson', 'epilepsy', 'migraine', 'neurodegenerat', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_Immunology',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5004-Immunology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['autoimmune', 'immunology', 'rheumatoid', 'lupus', 'psoriasis', 'inflammatory', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_InfectiousDisease',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5005-Infectious%20Disease/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['infectious', 'antibiotic', 'antiviral', 'vaccine', 'hiv', 'hepatitis', 'rsv', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_RareDisease',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5009-Rare%20Disease/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['rare disease', 'orphan', 'gene therapy', 'enzyme replacement', 'cystic fibrosis', 'sma', 'muscular dystrophy', 'license', 'collaboration', 'deal', 'agreement'],
+  },
+  {
+    name: 'GlobeNewswire_Metabolic',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5003-Endocrinology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['metabolic', 'diabetes', 'obesity', 'nash', 'mash', 'glp-1', 'insulin', 'dyslipidemia', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_Ophthalmology',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5007-Ophthalmology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['ophthalmology', 'retinal', 'macular', 'glaucoma', 'ocular', 'eye', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_Dermatology',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5002-Dermatology/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['dermatology', 'psoriasis', 'eczema', 'acne', 'skin', 'atopic', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
+  {
+    name: 'GlobeNewswire_Respiratory',
+    url: 'https://www.globenewswire.com/RssFeed/subjectcode/25-Licensing%20Agreements/industry/5008-Respiratory/feedTitle/GlobeNewswire',
+    type: 'rss',
+    dealKeywords: ['respiratory', 'asthma', 'copd', 'pulmonary', 'cough', 'ipf', 'license', 'collaboration', 'deal', 'agreement', 'milestone'],
+  },
 ];
 
 export interface RSSItem {

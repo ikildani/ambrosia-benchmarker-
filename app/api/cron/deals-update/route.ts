@@ -8,19 +8,138 @@ import { runOpenFDAIngestion } from '@/lib/ingestion/openfda';
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
 
-// Therapeutic area mapping from indication_category
+// Therapeutic area mapping from indication_category — comprehensive to avoid oncology catch-all
 const THERAPEUTIC_AREA_MAP: Record<string, string> = {
+  // Oncology (only true oncology categories)
   solid_tumor: 'oncology',
+  solid_tumors: 'oncology',
   hematological: 'oncology',
+  hematologic: 'oncology',
+  heme_onc: 'oncology',
+  head_and_neck_cancer: 'oncology',
+  leukemia: 'oncology',
+  lymphoma: 'oncology',
+  multiple_myeloma: 'oncology',
+  lung_cancer: 'oncology',
+  breast_cancer: 'oncology',
+  prostate_cancer: 'oncology',
+  colorectal_cancer: 'oncology',
+  pancreatic_cancer: 'oncology',
+  liver_cancer: 'oncology',
+  renal_cell_carcinoma: 'oncology',
+  melanoma: 'oncology',
+  glioblastoma: 'oncology',
+  bladder_cancer: 'oncology',
+  ovarian_cancer: 'oncology',
+
+  // Neurology
   cns: 'neurology',
+  alzheimers: 'neurology',
+  parkinsons: 'neurology',
+  epilepsy: 'neurology',
+  migraine: 'neurology',
+  neuropathy: 'neurology',
+  als: 'neurology',
+  ms: 'neurology',
+  multiple_sclerosis: 'neurology',
+  huntingtons: 'neurology',
+  schizophrenia: 'neurology',
+  depression: 'neurology',
+
+  // Immunology / Autoimmune
   autoimmune: 'immunology',
-  cardiovascular: 'cardiovascular',
-  infectious: 'infectious',
+  lupus: 'immunology',
+  rheumatoid: 'immunology',
+  crohns: 'immunology',
+  ulcerative_colitis: 'immunology',
+  psoriatic_arthritis: 'immunology',
+  atopic_dermatitis: 'immunology',
+  ankylosing_spondylitis: 'immunology',
+
+  // Metabolic
   metabolic: 'metabolic',
-  rare_disease: 'rare_disease',
-  respiratory: 'respiratory',
-  dermatology: 'dermatology',
+  obesity: 'metabolic',
+  nashMash: 'metabolic',
+  nash: 'metabolic',
+  mash: 'metabolic',
+  diabetes: 'metabolic',
+  dyslipidemia: 'metabolic',
+  type2_diabetes: 'metabolic',
+  gout: 'metabolic',
+
+  // Cardiovascular
+  cardiovascular: 'cardiovascular',
+  cardiomyopathy: 'cardiovascular',
+  heart_failure: 'cardiovascular',
+  hypertension: 'cardiovascular',
+  thrombosis: 'cardiovascular',
+  atrial_fibrillation: 'cardiovascular',
+  atherosclerosis: 'cardiovascular',
+  pulmonary_hypertension: 'cardiovascular',
+
+  // Infectious Disease
+  infectious: 'infectiousDisease',
+  infectious_disease: 'infectiousDisease',
+  influenza: 'infectiousDisease',
+  hiv: 'infectiousDisease',
+  hepatitis: 'infectiousDisease',
+  covid: 'infectiousDisease',
+  rsv: 'infectiousDisease',
+  antibiotic: 'infectiousDisease',
+  antiviral: 'infectiousDisease',
+
+  // Rare Disease
+  rare_disease: 'rareDisease',
+  rare: 'rareDisease',
+  orphan: 'rareDisease',
+  muscular_dystrophy: 'rareDisease',
+  cystic_fibrosis: 'rareDisease',
+  sickle_cell: 'rareDisease',
+  sma: 'rareDisease',
+  lysosomal: 'rareDisease',
+
+  // Ophthalmology
   ophthalmology: 'ophthalmology',
+  retinal: 'ophthalmology',
+  macular_degeneration: 'ophthalmology',
+  glaucoma: 'ophthalmology',
+  dry_eye: 'ophthalmology',
+
+  // Women's Health
+  reproductive: 'womensHealth',
+  gynecology: 'womensHealth',
+  obstetric: 'womensHealth',
+  breastCancer: 'womensHealth',
+  fertility: 'womensHealth',
+  endometriosis: 'womensHealth',
+
+  // Hematology (non-oncology)
+  hematology: 'hematology',
+  hemophilia: 'hematology',
+  anemia: 'hematology',
+  thalassemia: 'hematology',
+  blood: 'hematology',
+
+  // Dermatology
+  dermatology: 'dermatology',
+  skin: 'dermatology',
+  psoriasis: 'dermatology',
+  eczema: 'dermatology',
+  acne: 'dermatology',
+  vitiligo: 'dermatology',
+  alopecia: 'dermatology',
+
+  // Respiratory
+  respiratory: 'respiratory',
+  asthma: 'respiratory',
+  copd: 'respiratory',
+  ipf: 'respiratory',
+
+  // Gastroenterology
+  gastroenterology: 'gastroenterology',
+  gi: 'gastroenterology',
+  ibd: 'gastroenterology',
+  celiac: 'gastroenterology',
 };
 
 export async function GET(request: NextRequest) {
@@ -115,7 +234,7 @@ export async function GET(request: NextRequest) {
       .from('deals')
       .select('*', { count: 'exact', head: true });
 
-    const allAreas = ['oncology', 'neurology', 'immunology', 'cardiovascular', 'infectious', 'metabolic', 'rare_disease', 'respiratory', 'dermatology', 'ophthalmology', 'other'];
+    const allAreas = ['oncology', 'neurology', 'immunology', 'cardiovascular', 'infectiousDisease', 'metabolic', 'rareDisease', 'respiratory', 'dermatology', 'ophthalmology', 'hematology', 'gastroenterology', 'womensHealth', 'other'];
     const counts: Record<string, number | null> = { total: totalDeals };
 
     for (const area of allAreas) {
