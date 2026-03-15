@@ -1367,12 +1367,23 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.90 : isWomensHealth ? 0.85 : 0.80;
   const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.80 : isOphthalmology ? 0.85 : isWomensHealth ? 0.85 : 0.85;
 
+  // For acquisitions, combo potential is already priced into the control premium — dampen by 50%
+  const dealType = input.dealType || 'licensing';
+  const adjustedComboMultiplier = dealType === 'acquisition'
+    ? 1 + (comboMultiplier - 1) * 0.5  // e.g., 1.20 becomes 1.10
+    : comboMultiplier;
+
+  // For acquisitions, LoT positioning is already priced into the asset value — dampen by 50%
+  const adjustedLotMultiplier = dealType === 'acquisition'
+    ? 1 + (lotMultiplier - 1) * 0.5  // e.g., 1.25 becomes 1.125
+    : lotMultiplier;
+
   const effectiveMultiplier =
     safeMultiplier(Math.pow(modalityMultiplier, 1.0)) *
     safeMultiplier(Math.pow(indicationMultiplier, indicationExp)) *
     safeMultiplier(Math.pow(biomarkerMultiplier, 0.9)) *
-    safeMultiplier(Math.pow(lotMultiplier, lotExp)) *
-    safeMultiplier(Math.pow(comboMultiplier, comboExp)) *
+    safeMultiplier(Math.pow(adjustedLotMultiplier, lotExp)) *
+    safeMultiplier(Math.pow(adjustedComboMultiplier, comboExp)) *
     safeMultiplier(Math.pow(territoryMultiplier, 1.0)) *
     safeMultiplier(Math.pow(competitiveMultiplier, 0.7)) *
     safeMultiplier(Math.pow(dataQualityMultiplier, 0.5)) *
@@ -1400,7 +1411,6 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
   const rangeWidth = phaseConfig.rangeWidths[input.phase];
-  const dealType = input.dealType || 'licensing';
 
   // Deal type value multiplier — phase-adjusted for acquisitions.
   //

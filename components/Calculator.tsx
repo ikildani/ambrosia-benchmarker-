@@ -268,8 +268,24 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   }, []);
 
   // Restore wizard progress from sessionStorage (if no prefill or URL params)
+  // If ?new=true is present, clear saved state to start fresh
   useEffect(() => {
     if (hadPrefillRef.current) return;
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('new') === 'true') {
+        sessionStorage.removeItem('wizard_progress');
+        sessionStorage.removeItem('has_auto_calculated');
+        calc.setResult(null);
+        // Clean up the URL parameter without triggering navigation
+        const url = new URL(window.location.href);
+        url.searchParams.delete('new');
+        window.history.replaceState({}, '', url.pathname + url.search);
+        return;
+      }
+    }
+
     const saved = sessionStorage.getItem('wizard_progress');
     if (!saved) return;
     try {

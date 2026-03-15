@@ -42,7 +42,7 @@ export default function DashboardPage() {
   }
 
   const handleNavigateToCalculator = () => {
-    router.push('/calculator');
+    router.push('/calculator?new=true');
   };
 
   const handleUpgrade = () => {
