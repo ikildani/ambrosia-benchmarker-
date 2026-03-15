@@ -210,7 +210,7 @@ async function searchSECForTA(
     enddt: formatDate(endDate),
     forms: '8-K,8-K/A,6-K',
     from: '0',
-    size: '100',
+    size: '20',
   });
 
   const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
@@ -253,8 +253,12 @@ async function searchSECForTA(
   });
 }
 
+// Time budget: stop processing 30s before Vercel timeout to return results
+const MAX_RUNTIME_MS = 260_000; // 260s of a 300s limit
+
 // POST /api/deals/backfill-ta?ta=neurology,cardiovascular,metabolic
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
   const authHeader = request.headers.get('authorization');
   const adminKey = process.env.ADMIN_API_KEY;
 
@@ -310,6 +314,10 @@ export async function POST(request: NextRequest) {
 
     for (const term of config.terms) {
       if (taResult.inserted >= needed) break;
+      if (Date.now() - startTime > MAX_RUNTIME_MS) {
+        console.log(`[backfill] ${ta}: Time budget exceeded, stopping`);
+        break;
+      }
 
       try {
         const filings = await searchSECForTA(term);
@@ -317,6 +325,7 @@ export async function POST(request: NextRequest) {
 
         for (const filing of filings) {
           if (taResult.inserted >= needed) break;
+          if (Date.now() - startTime > MAX_RUNTIME_MS) break;
           if (!filing.url || seenUrls.has(filing.url)) continue;
           seenUrls.add(filing.url);
 
