@@ -1432,7 +1432,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   // COLLABORATION: Research-stage, highly contingent on early data
   //   Real-world: Preclinical collab $20-100M total, Phase 2 $200-800M
   const phaseAcquisitionMultipliers: Partial<Record<Phase, number>> = {
-    discovery: 0.30,    preclinical: 0.45,  phase1: 0.60,
+    discovery: 0.30,    preclinical: 0.60,  phase1: 0.60,
     phase1_2: 0.70,     phase2: 0.90,       phase2_3: 1.10,
     phase3: 1.35,       nda_filed: 1.50,    approved: 1.65,
   };
