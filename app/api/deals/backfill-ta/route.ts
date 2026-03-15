@@ -1,16 +1,26 @@
+/**
+ * API Route: SEC EDGAR Backfill by Therapeutic Area
+ * Searches SEC full-text search for TA-specific deal filings,
+ * then uses the production-grade extraction pipeline from sec-edgar.ts.
+ *
+ * POST /api/deals/backfill-ta?ta=neurology,cardiovascular,metabolic
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
-import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
-import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
-import type { ExtractedDeal } from '@/lib/ingestion/sec-edgar';
+import {
+  fetchFilingContent,
+  extractDealFromFiling,
+  findOrCreateCompany,
+  deriveTherapeuticArea,
+} from '@/lib/ingestion/sec-edgar';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 // TA-specific search queries for SEC EDGAR full-text search
-// These are designed to find deals in underrepresented therapeutic areas
 const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> = {
   neurology: {
     terms: [
@@ -25,7 +35,7 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"schizophrenia" "collaboration"',
       '"depression" "license agreement"',
     ],
-    minDeals: 300,
+    minDeals: 500,
   },
   immunology: {
     terms: [
@@ -39,7 +49,7 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"Crohn" "license agreement"',
       '"ulcerative colitis" "license"',
     ],
-    minDeals: 300,
+    minDeals: 500,
   },
   metabolic: {
     terms: [
@@ -51,8 +61,10 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"dyslipidemia" "license"',
       '"insulin" "license agreement"',
       '"type 2 diabetes" "collaboration"',
+      '"PCSK9" "license"',
+      '"SGLT2" "agreement"',
     ],
-    minDeals: 300,
+    minDeals: 400,
   },
   cardiovascular: {
     terms: [
@@ -64,8 +76,10 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"atrial fibrillation" "collaboration"',
       '"atherosclerosis" "license"',
       '"pulmonary hypertension" "agreement"',
+      '"anticoagulant" "license"',
+      '"ATTR" "agreement"',
     ],
-    minDeals: 300,
+    minDeals: 400,
   },
   infectiousDisease: {
     terms: [
@@ -77,8 +91,10 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"hepatitis" "collaboration"',
       '"antimicrobial" "license"',
       '"RSV" "license agreement"',
+      '"COVID" "license agreement"',
+      '"influenza" "collaboration"',
     ],
-    minDeals: 250,
+    minDeals: 350,
   },
   rareDisease: {
     terms: [
@@ -90,8 +106,10 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"muscular dystrophy" "collaboration"',
       '"sickle cell" "license agreement"',
       '"spinal muscular atrophy" "agreement"',
+      '"hemophilia" "license"',
+      '"Fabry" "agreement"',
     ],
-    minDeals: 250,
+    minDeals: 350,
   },
   ophthalmology: {
     terms: [
@@ -101,8 +119,9 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"glaucoma" "agreement"',
       '"ocular" "license agreement"',
       '"dry eye" "collaboration"',
+      '"diabetic retinopathy" "license"',
     ],
-    minDeals: 200,
+    minDeals: 250,
   },
   dermatology: {
     terms: [
@@ -110,11 +129,12 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"psoriasis" "collaboration"',
       '"eczema" "license"',
       '"acne" "agreement"',
-      '"skin" "license agreement" "pharma"',
+      '"atopic dermatitis" "license agreement"',
       '"vitiligo" "collaboration"',
       '"alopecia" "license"',
+      '"hidradenitis" "agreement"',
     ],
-    minDeals: 200,
+    minDeals: 250,
   },
   hematology: {
     terms: [
@@ -124,19 +144,12 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"thalassemia" "agreement"',
       '"anemia" "license agreement"',
       '"coagulation" "collaboration"',
+      '"leukemia" "license agreement"',
+      '"lymphoma" "collaboration"',
+      '"myeloma" "license"',
+      '"myelofibrosis" "agreement"',
     ],
-    minDeals: 200,
-  },
-  respiratory: {
-    terms: [
-      '"respiratory" "license agreement"',
-      '"asthma" "collaboration"',
-      '"COPD" "license"',
-      '"pulmonary fibrosis" "agreement"',
-      '"cystic fibrosis" "collaboration"',
-      '"inhaled" "license agreement"',
-    ],
-    minDeals: 200,
+    minDeals: 300,
   },
   gastroenterology: {
     terms: [
@@ -144,28 +157,45 @@ const TA_SEARCH_CONFIGS: Record<string, { terms: string[]; minDeals: number }> =
       '"inflammatory bowel" "collaboration"',
       '"Crohn" "license"',
       '"celiac" "agreement"',
-      '"GI" "license agreement" "pharma"',
+      '"NASH" "license agreement"',
+      '"liver fibrosis" "collaboration"',
+      '"ulcerative colitis" "agreement"',
+      '"eosinophilic esophagitis" "license"',
     ],
-    minDeals: 200,
+    minDeals: 250,
   },
   womensHealth: {
     terms: [
-      '"women" "health" "license agreement"',
-      '"endometriosis" "collaboration"',
+      '"endometriosis" "license agreement"',
+      '"uterine fibroids" "collaboration"',
       '"fertility" "license"',
       '"contraceptive" "agreement"',
       '"reproductive" "license agreement"',
+      '"menopause" "collaboration"',
+      '"ovarian" "license agreement"',
+      '"breast cancer" "collaboration"',
     ],
-    minDeals: 150,
+    minDeals: 200,
   },
 };
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 
+interface SECSearchResult {
+  accession: string;
+  company: string;
+  date: string;
+  url: string;
+}
+
+/**
+ * Search SEC EDGAR full-text search API for TA-specific deal terms.
+ * Constructs proper document URLs using cik + accession + file_name.
+ */
 async function searchSECForTA(
   term: string,
-  daysBack: number = 365 * 3 // 3 years of history
-): Promise<Array<{ accession: string; company: string; date: string; url: string; description: string }>> {
+  daysBack: number = 365 * 7
+): Promise<SECSearchResult[]> {
   const endDate = new Date();
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - daysBack);
@@ -180,7 +210,7 @@ async function searchSECForTA(
     enddt: formatDate(endDate),
     forms: '8-K,8-K/A,6-K',
     from: '0',
-    size: '40',
+    size: '100',
   });
 
   const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
@@ -197,61 +227,25 @@ async function searchSECForTA(
   const data = await response.json();
   const hits = data.hits?.hits || [];
 
-  return hits.map((hit: Record<string, any>) => ({
-    accession: hit._id || '',
-    company: hit._source?.display_names?.[0] || hit._source?.entity_name || '',
-    date: hit._source?.file_date || '',
-    url: hit._source?.file_url
-      ? `https://www.sec.gov${hit._source.file_url}`
-      : '',
-    description: hit._source?.display_description || '',
-  }));
-}
+  return hits.map((hit: Record<string, any>) => {
+    // Construct the proper document URL using cik + accession + file_name
+    // This matches the working pattern in sec-edgar.ts:455
+    const cik = hit._source?.cik;
+    const accession = hit._source?.accession_number || '';
+    const accessionFormatted = accession.replace(/-/g, '');
+    const fileName = hit._source?.file_name || '';
 
-async function extractDealFromFiling(
-  content: string,
-  company: string,
-  anthropicApiKey: string
-): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+    const url = cik && accessionFormatted && fileName
+      ? `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionFormatted}/${fileName}`
+      : '';
 
-  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from SEC filings. Extract structured deal data with high precision. Be conservative — only extract explicitly stated information. Use null for undisclosed fields.
-
-MODALITY VALUES: small_molecule, antibody, adc, bispecific, car_t, cell_therapy, gene_therapy, mrna, radiopharm, peptide, oligonucleotide, vaccine, other
-INDICATION CATEGORIES: solid_tumor, hematological, autoimmune, cns, cardiovascular, infectious, metabolic, rare_disease, respiratory, dermatology, ophthalmology, hematology, reproductive, other
-PHASE VALUES: discovery, preclinical, phase_1, phase_2, phase_3, approved, unknown
-DEAL TYPE VALUES: license, option, collaboration, acquisition, co_development, co_promotion, other`;
-
-  const userPrompt = `Extract the biopharma deal from this filing by ${company}. Return ONLY valid JSON.
-
-If NOT a biopharma deal, return: {"is_deal": false}
-
-If it IS a deal, return a JSON object with: licensor, licensee, asset_name, modality, indication_category, indication_specific, target, mechanism_of_action, phase_at_signing, territory, deal_type, upfront_usd, milestones_total_usd, milestones_development_usd, milestones_regulatory_usd, milestones_commercial_usd, royalty_low_pct, royalty_high_pct, total_deal_value_usd, confidence_score (0-100), extraction_notes.
-
-Filing text (truncated):
-${content.substring(0, 12000)}`;
-
-  try {
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: userPrompt }],
-      system: systemPrompt,
-    });
-
-    const textContent = response.content[0];
-    if (textContent.type !== 'text') return null;
-
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (parsed.is_deal === false) return null;
-
-    return parsed as ExtractedDeal;
-  } catch {
-    return null;
-  }
+    return {
+      accession,
+      company: hit._source?.display_names?.[0] || hit._source?.entity_name || '',
+      date: hit._source?.file_date || '',
+      url,
+    };
+  });
 }
 
 // POST /api/deals/backfill-ta?ta=neurology,cardiovascular,metabolic
@@ -281,17 +275,18 @@ export async function POST(request: NextRequest) {
   const supabase = createServiceClient();
 
   // Parse requested TAs (or do all underrepresented)
-  const url = new URL(request.url);
-  const requestedTAs = url.searchParams.get('ta')?.split(',') || Object.keys(TA_SEARCH_CONFIGS);
+  const reqUrl = new URL(request.url);
+  const requestedTAs = reqUrl.searchParams.get('ta')?.split(',') || Object.keys(TA_SEARCH_CONFIGS);
 
-  const results: Record<string, { searched: number; extracted: number; inserted: number; errors: string[] }> = {};
+  const results: Record<string, { searched: number; fetched: number; extracted: number; inserted: number; errors: string[] }> = {};
+  const seenUrls = new Set<string>();
 
   for (const ta of requestedTAs) {
     const config = TA_SEARCH_CONFIGS[ta];
     if (!config) continue;
 
     console.log(`[backfill] Starting ${ta} backfill...`);
-    const taResult = { searched: 0, extracted: 0, inserted: 0, errors: [] as string[] };
+    const taResult = { searched: 0, fetched: 0, extracted: 0, inserted: 0, errors: [] as string[] };
 
     // Check current count for this TA
     const { count: currentCount } = await supabase
@@ -317,6 +312,8 @@ export async function POST(request: NextRequest) {
 
         for (const filing of filings) {
           if (taResult.inserted >= needed) break;
+          if (!filing.url || seenUrls.has(filing.url)) continue;
+          seenUrls.add(filing.url);
 
           // Check if already processed
           const { data: existing } = await supabase
@@ -328,36 +325,24 @@ export async function POST(request: NextRequest) {
 
           if (existing) continue;
 
-          // Fetch filing content
-          if (!filing.url) continue;
           try {
-            const response = await fetchWithTimeout(filing.url, {
-              timeoutMs: 15_000,
-              headers: {
-                'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
-                'Accept': 'text/html',
-              },
-            });
+            // Use the production-grade fetchFilingContent from sec-edgar.ts
+            // This properly handles HTML entity decoding and content extraction
+            const content = await fetchFilingContent(filing.url);
+            taResult.fetched++;
 
-            if (!response.ok) continue;
+            if (content.length < 500) {
+              console.log(`[backfill] ${ta}: Skipping ${filing.url} — content too short (${content.length} chars)`);
+              continue;
+            }
 
-            const html = await response.text();
-            const text = html
-              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-              .replace(/<[^>]+>/g, ' ')
-              .replace(/&nbsp;/g, ' ')
-              .replace(/\s+/g, ' ')
-              .trim();
+            // Use the production-grade extractDealFromFiling from sec-edgar.ts
+            // This has the comprehensive 50+ line prompt with proper field definitions
+            const deal = await extractDealFromFiling(content, anthropicApiKey);
 
-            if (text.length < 200) continue;
-
-            const deal = await extractDealFromFiling(text, filing.company, anthropicApiKey);
-
-            if (deal && deal.confidence_score >= 70 && deal.licensor && deal.licensee) {
+            if (deal && deal.confidence_score >= 75 && deal.licensor && deal.licensee) {
               taResult.extracted++;
 
-              const { findOrCreateCompany, deriveTherapeuticArea } = await import('@/lib/ingestion/sec-edgar');
               const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
               const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
               const derivedTA = deriveTherapeuticArea(deal.indication_category);
@@ -371,6 +356,7 @@ export async function POST(request: NextRequest) {
                 licensee_name: deal.licensee,
                 licensee_id: licenseeId,
                 asset_name: deal.asset_name,
+                asset_description: deal.extraction_notes,
                 modality: deal.modality,
                 indication_category: deal.indication_category,
                 indication_specific: deal.indication_specific,
@@ -396,6 +382,18 @@ export async function POST(request: NextRequest) {
                 extraction_model: 'claude-sonnet-4-20250514',
                 extraction_timestamp: new Date().toISOString(),
                 therapeutic_area: finalTA,
+                milestone_details: deal.milestone_details,
+                research_funding_usd: deal.research_funding_usd,
+                profit_share_pct: deal.profit_share_pct,
+                cost_share_ratio: deal.cost_share_ratio,
+                opt_in_rights: deal.opt_in_rights,
+                opt_in_stage: deal.opt_in_stage,
+                regulatory_designations: deal.regulatory_designations,
+                term_years: deal.term_years,
+                sublicense_rights: deal.sublicense_rights,
+                rights_retained: deal.rights_retained,
+                indications_licensed: deal.indications_licensed,
+                includes_diagnostics: deal.includes_diagnostics,
               });
 
               if (insertError) {
@@ -404,13 +402,14 @@ export async function POST(request: NextRequest) {
                 }
               } else {
                 taResult.inserted++;
-                console.log(`[backfill] ${ta}: ${deal.licensor} → ${deal.licensee} (${deal.indication_specific || deal.indication_category})`);
+                console.log(`[backfill] ${ta}: ${deal.licensor} → ${deal.licensee} (${deal.indication_specific || deal.indication_category}) [conf: ${deal.confidence_score}]`);
               }
             }
 
-            // Rate limiting
+            // Rate limiting — respect SEC servers
             await new Promise(r => setTimeout(r, 1500));
-          } catch {
+          } catch (err) {
+            taResult.errors.push(`Filing ${filing.url}: ${err}`);
             continue;
           }
         }
@@ -424,7 +423,7 @@ export async function POST(request: NextRequest) {
     }
 
     results[ta] = taResult;
-    console.log(`[backfill] ${ta}: searched ${taResult.searched}, extracted ${taResult.extracted}, inserted ${taResult.inserted}`);
+    console.log(`[backfill] ${ta}: searched ${taResult.searched}, fetched ${taResult.fetched}, extracted ${taResult.extracted}, inserted ${taResult.inserted}`);
   }
 
   // Log
