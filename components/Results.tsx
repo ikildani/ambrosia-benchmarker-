@@ -614,7 +614,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     try {
       const sensitivities = computeTornadoSensitivities(fullInputs, result);
       return sensitivities.length > 0 ? sensitivities : null;
-    } catch {
+    } catch (err) {
+      console.error('[TornadoSensitivity] Failed to compute:', err);
       return null;
     }
   }, [fullInputs, result]);
