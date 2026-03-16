@@ -156,13 +156,8 @@ export async function checkRateLimit(
     }
   }
 
-  // Not configured — only reachable in development (production throws at module load)
-  if (!IS_PRODUCTION) {
-    return checkInMemoryDev(identifier, endpoint, config);
-  }
-
-  // Should never reach here (production without Upstash throws above), but guard anyway
-  throw new Error('[RateLimit] Upstash Redis not configured in production');
+  // Not configured — use in-memory fallback (dev or production without Upstash)
+  return checkInMemoryDev(identifier, endpoint, config);
 }
 
 export function getRateLimitHeaders(result: RateLimitResult): Record<string, string> {

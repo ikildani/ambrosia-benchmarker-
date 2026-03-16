@@ -16,20 +16,21 @@ export const PRICING = {
 } as const;
 
 export const DEAL_STATS = {
-  TOTAL_DEALS: '600+',
-  TOTAL_DEALS_DESCRIPTION: 'real biopharma licensing deals across 12 therapeutic areas including oncology, neurology, immunology, metabolic, cardiovascular, infectious disease, ophthalmology, women\'s health, rare disease, dermatology, pulmonology, and gastroenterology',
-  NEUROLOGY_DEALS: '88+',
+  TOTAL_DEALS: '2,600+',
+  TOTAL_COMPANIES: '850+',
+  TOTAL_DEALS_DESCRIPTION: 'real biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, press releases, and regulatory databases',
+  NEUROLOGY_DEALS: '150+',
   NEUROLOGY_DEALS_DESCRIPTION: 'neurology R&D partnerships',
   NEUROLOGY_TOTAL_VALUE: '$45.9B',
-  NEUROLOGY_TIMEFRAME: '2024-2026',
-  IMMUNOLOGY_DEALS: '48+',
+  NEUROLOGY_TIMEFRAME: '2017-2026',
+  IMMUNOLOGY_DEALS: '113+',
   IMMUNOLOGY_DEALS_DESCRIPTION: 'immunology/autoimmune R&D partnerships',
   IMMUNOLOGY_TOTAL_VALUE: '$13B+',
-  IMMUNOLOGY_TIMEFRAME: '2019-2026',
-  METABOLIC_DEALS: '35+',
+  IMMUNOLOGY_TIMEFRAME: '2017-2026',
+  METABOLIC_DEALS: '79+',
   METABOLIC_DEALS_DESCRIPTION: 'metabolic/obesity R&D partnerships',
   METABOLIC_TOTAL_VALUE: '$25B+',
-  METABOLIC_TIMEFRAME: '2022-2026',
+  METABOLIC_TIMEFRAME: '2017-2026',
 } as const;
 
 export const BENCHMARK_VERSION = {
