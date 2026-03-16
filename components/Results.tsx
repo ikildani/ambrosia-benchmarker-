@@ -1471,13 +1471,25 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Tornado Sensitivity Chart (dollar-impact) */}
-        {hasFullAccess && tornadoSensitivities && financialModel && (
-          <FinancialErrorBoundary fallbackTitle="Tornado Chart unavailable">
-            <TornadoChart
-              baseValue={financialModel.rnpv.riskAdjustedNPV}
-              sensitivities={tornadoSensitivities}
-            />
-          </FinancialErrorBoundary>
+        {hasFullAccess && financialModel && (
+          tornadoSensitivities && tornadoSensitivities.length > 0 ? (
+            <FinancialErrorBoundary fallbackTitle="Tornado Chart unavailable">
+              <TornadoChart
+                baseValue={financialModel.rnpv.riskAdjustedNPV}
+                sensitivities={tornadoSensitivities}
+              />
+            </FinancialErrorBoundary>
+          ) : financialModel.rnpv.riskAdjustedNPV <= 0 ? (
+            <div className="mt-6 sm:mt-8 border border-neutral-200 dark:border-slate-600 rounded-xl overflow-hidden bg-white dark:bg-slate-800 shadow-sm">
+              <div className="px-4 py-3 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
+                <h3 className="text-sm font-semibold text-neutral-800 dark:text-slate-200">Sensitivity Impact (Tornado Chart)</h3>
+              </div>
+              <div className="p-4 text-center text-xs text-neutral-500 dark:text-slate-400">
+                <p>Tornado sensitivity analysis is not available for this combination.</p>
+                <p className="mt-1">The risk-adjusted NPV is negative (${financialModel.rnpv.riskAdjustedNPV.toFixed(0)}M), indicating development costs exceed probability-weighted revenue at this stage.</p>
+              </div>
+            </div>
+          ) : null
         )}
 
         {/* Comparable Deals */}

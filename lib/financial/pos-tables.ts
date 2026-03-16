@@ -877,10 +877,10 @@ export function getCumulativePoS(
 
   // Calculate cumulative regulatory uplift, capped at MAX_REGULATORY_UPLIFT
   let regAdj = 1.0;
-  if (regulatoryDesignations.breakthrough) regAdj *= REGULATORY_POS_UPLIFT.breakthrough;
-  if (regulatoryDesignations.fastTrack) regAdj *= REGULATORY_POS_UPLIFT.fastTrack;
-  if (regulatoryDesignations.orphan) regAdj *= REGULATORY_POS_UPLIFT.orphan;
-  if (regulatoryDesignations.prime) regAdj *= REGULATORY_POS_UPLIFT.prime;
+  if (regulatoryDesignations?.breakthrough) regAdj *= REGULATORY_POS_UPLIFT.breakthrough;
+  if (regulatoryDesignations?.fastTrack) regAdj *= REGULATORY_POS_UPLIFT.fastTrack;
+  if (regulatoryDesignations?.orphan) regAdj *= REGULATORY_POS_UPLIFT.orphan;
+  if (regulatoryDesignations?.prime) regAdj *= REGULATORY_POS_UPLIFT.prime;
   regAdj = Math.min(regAdj, MAX_REGULATORY_UPLIFT);
 
   // Build phase-specific transition chain based on current phase.
