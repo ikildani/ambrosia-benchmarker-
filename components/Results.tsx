@@ -1118,8 +1118,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
-        {/* Deal Summary Strip -- compact single-row overview */}
-        <div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
+        {/* Deal Summary Strip -- compact single-row overview (Pro/Report only) */}
+        {hasFullAccess && <div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
           <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-slate-600">
             {[
               { label: dtl?.upfrontLabel || 'Upfront', value: formatCurrency(terms.upfront.median) },
@@ -1135,10 +1135,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
-        {/* Scenario Bridge Summary */}
-        {financialModel?.defensiveAnalysis && (
+        {/* Scenario Bridge Summary (Pro/Report only) */}
+        {hasFullAccess && financialModel?.defensiveAnalysis && (
           <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono">
             <span className="px-2 py-1 rounded bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600">
               Base <span className="font-bold">{formatCurrency(financialModel.rnpv.riskAdjustedNPV)}</span>
@@ -1378,8 +1378,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         </div>
 
-        {/* Inline Comparable Deals (top 3, compact) */}
-        {fullInputs && (() => {
+        {/* Inline Comparable Deals (top 3, compact — Pro/Report only) */}
+        {hasFullAccess && fullInputs && (() => {
           const topDeals = findComparableDeals(
             { therapeuticArea: fullInputs.therapeuticArea, modality: fullInputs.modality, indication: fullInputs.indication, phase: fullInputs.phase, dealType: fullInputs.dealType },
             3
