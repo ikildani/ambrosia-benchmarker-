@@ -426,7 +426,7 @@ ${content}`;
 export async function runPressReleaseIngestion(
   supabase: import('@supabase/supabase-js').SupabaseClient,
   anthropicApiKey: string,
-  options?: { maxArticlesPerSource?: number }
+  options?: { maxArticlesPerSource?: number; timeBudgetMs?: number }
 ): Promise<{
   sources_checked: number;
   articles_found: number;
@@ -436,15 +436,21 @@ export async function runPressReleaseIngestion(
   errors: string[];
 }> {
   const maxPerSource = options?.maxArticlesPerSource || 10;
+  const timeBudget = options?.timeBudgetMs || 250_000; // 250s default (safe for 300s Vercel limit)
+  const startTime = Date.now();
   const errors: string[] = [];
   let articlesFound = 0;
   let potentialDeals = 0;
   let dealsExtracted = 0;
   let dealsInserted = 0;
 
-  console.log(`[press-releases] Starting ingestion from ${FEED_SOURCES.length} sources...`);
+  console.log(`[press-releases] Starting ingestion from ${FEED_SOURCES.length} sources (budget: ${timeBudget}ms)...`);
 
   for (const source of FEED_SOURCES) {
+    if (Date.now() - startTime > timeBudget) {
+      console.log(`[press-releases] Time budget exceeded after ${FEED_SOURCES.indexOf(source)} sources, stopping`);
+      break;
+    }
     try {
       console.log(`[press-releases] Fetching ${source.name}...`);
       const items = await fetchRSSFeed(source);
@@ -459,6 +465,7 @@ export async function runPressReleaseIngestion(
       console.log(`[press-releases] ${source.name}: ${items.length} items, ${dealItems.length} potential deals`);
 
       for (const item of dealItems) {
+        if (Date.now() - startTime > timeBudget) break;
         try {
           // Check if we've already processed this article
           const guid = item.guid || item.link;
