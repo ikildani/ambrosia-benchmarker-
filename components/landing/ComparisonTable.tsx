@@ -8,7 +8,7 @@ const comparisonRows = [
   { feature: 'Comparable deals', manual: 'Hours of manual search', ambrosia: 'Instant AI-powered matching' },
   { feature: 'Financial modeling', manual: 'Custom Excel DCF models', ambrosia: 'rNPV + Monte Carlo (10K iterations)' },
   { feature: 'Cost per analysis', manual: '$5,000-$25,000 consultant', ambrosia: 'Free to start' },
-  { feature: 'Partner matching', manual: 'Relationship-based only', ambrosia: 'AI-matched across 120+ companies' },
+  { feature: 'Partner matching', manual: 'Relationship-based only', ambrosia: 'AI-matched across 850+ companies' },
   { feature: 'Company intelligence', manual: 'Scattered databases', ambrosia: 'Deep profiles, pipeline, patent cliffs' },
   { feature: 'Sensitivity analysis', manual: 'Build custom Excel models', ambrosia: 'One-click scenario modeling' },
   { feature: 'Board-ready reports', manual: 'Days of formatting', ambrosia: 'Instant PDF & Excel export' },

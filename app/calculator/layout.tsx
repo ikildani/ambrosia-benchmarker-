@@ -10,7 +10,7 @@ const breadcrumbSchema = generateBreadcrumbSchema([
 
 export const metadata: Metadata = {
   title: 'Deal Terms Calculator — Biotech & Pharma Licensing Benchmarks',
-  description: 'Calculate upfront payments, milestone structures, and royalty rates for biopharma licensing deals. rNPV analysis, Monte Carlo simulation, sensitivity analysis, and AI deal memos across oncology, neurology, immunology, metabolic, cardiovascular, and more. Powered by 600+ real transactions.',
+  description: 'Calculate upfront payments, milestone structures, and royalty rates for biopharma licensing deals. rNPV analysis, Monte Carlo simulation, sensitivity analysis, and AI deal memos across oncology, neurology, immunology, metabolic, cardiovascular, and more. Powered by 2,600+ real transactions.',
   keywords: [
     'biotech deal calculator', 'pharma licensing calculator', 'drug deal valuation tool',
     'upfront payment benchmarks', 'milestone payment calculator', 'royalty rate estimator',
@@ -25,22 +25,22 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
-    description: 'Calculate upfront payments, milestones, and royalties with rNPV analysis and Monte Carlo simulation. 600+ real biopharma transactions, 12 therapeutic areas.',
+    description: 'Calculate upfront payments, milestones, and royalties with rNPV analysis and Monte Carlo simulation. 2,600+ real biopharma transactions, 12 therapeutic areas.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/calculator',
     images: [
       {
-        url: '/api/og?title=Deal%20Terms%20Calculator&subtitle=rNPV%20%C2%B7%20Monte%20Carlo%20%C2%B7%20600%2B%20Real%20Transactions',
+        url: '/api/og?title=Deal%20Terms%20Calculator&subtitle=rNPV%20%C2%B7%20Monte%20Carlo%20%C2%B7%202%2C600%2B%20Real%20Transactions',
         width: 1200,
         height: 630,
-        alt: 'Ambrosia Ventures Deal Calculator — rNPV, Monte Carlo, and benchmarks from 600+ real biopharma deals',
+        alt: 'Ambrosia Ventures Deal Calculator — rNPV, Monte Carlo, and benchmarks from 2,600+ real biopharma deals',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
-    description: 'rNPV analysis, Monte Carlo simulation, and AI deal intelligence from 600+ real transactions. 12 therapeutic areas.',
+    description: 'rNPV analysis, Monte Carlo simulation, and AI deal intelligence from 2,600+ real transactions. 12 therapeutic areas.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/calculator',

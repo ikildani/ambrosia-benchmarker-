@@ -121,7 +121,7 @@ export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from 600+ real transactions.',
+    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from 2,600+ real transactions.',
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
@@ -256,7 +256,7 @@ export function generateHowToSchema() {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
     name: 'How to Benchmark a Biopharma Licensing Deal',
-    description: 'Use the Ambrosia Ventures Deal Calculator to get instant benchmarks for upfront payments, milestones, and royalties based on 600+ real biopharma transactions.',
+    description: 'Use the Ambrosia Ventures Deal Calculator to get instant benchmarks for upfront payments, milestones, and royalties based on 2,600+ real biopharma transactions.',
     totalTime: 'PT2M',
     tool: [
       { '@type': 'HowToTool', name: 'Ambrosia Ventures Deal Calculator' },
@@ -280,7 +280,7 @@ export function generateHowToSchema() {
         '@type': 'HowToStep',
         position: 3,
         name: 'Get instant benchmarks',
-        text: 'View data-driven ranges for upfront payments, milestone structures, royalty rates, total deal value, and risk-adjusted metrics — all powered by 600+ real transactions.',
+        text: 'View data-driven ranges for upfront payments, milestone structures, royalty rates, total deal value, and risk-adjusted metrics — all powered by 2,600+ real transactions.',
         url: `${BASE_URL}/calculator`,
       },
       {
@@ -330,7 +330,7 @@ export function generateDatasetSchema(): DatasetSchema {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Biotech & Pharma Licensing Deal Database',
-    description: 'Comprehensive database of 600+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, immunology, and other therapeutic areas.',
+    description: 'Comprehensive database of 2,600+ biotech and pharmaceutical licensing transactions including upfront payments, milestone structures, royalty rates, and deal terms across oncology, neurology, immunology, and other therapeutic areas.',
     url: `${BASE_URL}/pulse`,
     keywords: [
       'biotech deals',

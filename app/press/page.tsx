@@ -47,7 +47,7 @@ export default function PressPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
               Ambrosia Ventures provides data-driven deal intelligence for the life sciences industry. Our platform
-              analyzes 600+ publicly disclosed biopharma licensing transactions to help biotechnology companies
+              analyzes 2,600+ publicly disclosed biopharma licensing transactions to help biotechnology companies
               benchmark deal terms and identify optimal partners.
             </p>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -63,7 +63,7 @@ export default function PressPage() {
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Key Facts</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { stat: '600+', label: 'Deals Analyzed' },
+              { stat: '2,600+', label: 'Deals Analyzed' },
               { stat: '12', label: 'Therapeutic Areas' },
               { stat: '15+', label: 'Modalities Covered' },
               { stat: '2018-Present', label: 'Data Coverage' },
