@@ -255,19 +255,20 @@ export async function GET(request: NextRequest) {
     completed_at: new Date().toISOString(),
   });
 
-  // Also reclassify any 'other' deals using indication_category mapping
+  // Reclassify 'other' deals using comprehensive indication_category mapping
   const taMap: Record<string, string[]> = {
-    cardiovascular: ['cardiovascular', 'cardiac', 'heart_failure', 'hypertension', 'thrombosis', 'cardiomyopathy'],
-    neurology: ['cns', 'alzheimers', 'parkinsons', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'neurodegeneration'],
-    immunology: ['autoimmune', 'rheumatoid_arthritis', 'lupus', 'inflammatory_bowel', 'psoriasis', 'atopic_dermatitis'],
-    metabolic: ['metabolic', 'diabetes', 'obesity', 'nash', 'dyslipidemia', 'type_2_diabetes'],
-    infectiousDisease: ['infectious', 'hiv', 'hepatitis', 'rsv', 'influenza', 'covid_19', 'antiviral', 'vaccine'],
-    rareDisease: ['rare_disease', 'orphan', 'gene_therapy', 'sma', 'duchenne', 'hemophilia', 'cystic_fibrosis'],
-    hematology: ['hematology', 'leukemia', 'lymphoma', 'myeloma', 'myelofibrosis', 'anemia', 'sickle_cell'],
-    ophthalmology: ['ophthalmology', 'retinal', 'glaucoma', 'macular', 'ocular', 'dry_eye'],
-    dermatology: ['dermatology', 'eczema', 'acne', 'vitiligo', 'alopecia'],
-    gastroenterology: ['gastroenterology', 'celiac', 'ibs', 'ibd', 'nash', 'liver_fibrosis'],
-    womensHealth: ['reproductive', 'endometriosis', 'uterine', 'fertility', 'menopause', 'gynecology'],
+    oncology: ['solid_tumor', 'solid_tumors', 'hematological', 'hematologic', 'heme_onc', 'lung_cancer', 'breast_cancer', 'prostate_cancer', 'colorectal_cancer', 'pancreatic_cancer', 'liver_cancer', 'melanoma', 'glioblastoma', 'bladder_cancer', 'renal_cell_carcinoma', 'head_and_neck_cancer'],
+    cardiovascular: ['cardiovascular', 'cardiac', 'heart_failure', 'hypertension', 'thrombosis', 'cardiomyopathy', 'atrial_fibrillation', 'atherosclerosis', 'pulmonary_hypertension', 'coronary', 'arrhythmia', 'attr_cardiomyopathy', 'pah'],
+    neurology: ['cns', 'alzheimers', 'parkinsons', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'neurodegeneration', 'multiple_sclerosis', 'als', 'huntingtons', 'neuropathic_pain', 'bipolar', 'adhd', 'insomnia', 'stroke', 'spasticity', 'parkinsons_disease', 'alzheimers_disease'],
+    immunology: ['autoimmune', 'rheumatoid_arthritis', 'lupus', 'inflammatory_bowel', 'psoriasis', 'atopic_dermatitis', 'psoriatic_arthritis', 'ankylosing_spondylitis', 'vasculitis', 'myasthenia_gravis', 'ibd', 'crohns', 'ulcerative_colitis', 'iga_nephropathy', 'gvhd', 'multiple_sclerosis'],
+    metabolic: ['metabolic', 'diabetes', 'obesity', 'nash', 'mash', 'dyslipidemia', 'type_2_diabetes', 'type_1_diabetes', 'gout', 'fatty_liver', 'hypercholesterolemia', 'hypertriglyceridemia', 'pcsk9', 'sglt2', 'glp1'],
+    infectiousDisease: ['infectious', 'hiv', 'hepatitis', 'hbv', 'hcv', 'rsv', 'influenza', 'covid_19', 'covid', 'antiviral', 'antibiotic', 'antimicrobial', 'vaccine', 'fungal', 'tuberculosis', 'malaria', 'bacterial'],
+    rareDisease: ['rare_disease', 'orphan', 'gene_therapy', 'sma', 'duchenne', 'dmd', 'hemophilia', 'cystic_fibrosis', 'fabry', 'gaucher', 'pompe', 'hunter', 'sickle_cell', 'thalassemia', 'attr_amyloidosis', 'pnh', 'hae', 'angelman', 'dravet', 'friedreich', 'achondroplasia', 'wilson_disease'],
+    hematology: ['hematology', 'leukemia', 'lymphoma', 'myeloma', 'multiple_myeloma', 'myelofibrosis', 'anemia', 'sickle_cell_disease', 'thrombocytopenia', 'coagulation', 'hemophilia_a', 'hemophilia_b', 'aml', 'cll', 'all', 'dlbcl', 'mds', 'polycythemia_vera', 'itp'],
+    ophthalmology: ['ophthalmology', 'retinal', 'glaucoma', 'macular', 'wet_amd', 'dry_amd', 'ocular', 'dry_eye', 'diabetic_retinopathy', 'uveitis', 'geographic_atrophy', 'inherited_retinal'],
+    dermatology: ['dermatology', 'eczema', 'acne', 'vitiligo', 'alopecia', 'alopecia_areata', 'hidradenitis', 'rosacea', 'prurigo', 'molluscum', 'actinic_keratosis', 'hyperhidrosis', 'skin_fibrosis'],
+    gastroenterology: ['gastroenterology', 'celiac', 'ibs', 'ibd', 'nash', 'liver_fibrosis', 'gerd', 'eosinophilic_esophagitis', 'c_difficile', 'pancreatitis', 'primary_biliary_cholangitis', 'short_bowel'],
+    womensHealth: ['reproductive', 'endometriosis', 'uterine', 'uterine_fibroids', 'fertility', 'menopause', 'gynecology', 'pcos', 'preeclampsia', 'postpartum', 'contraception', 'ovarian_cancer', 'cervical_cancer', 'breast_cancer'],
   };
 
   for (const [ta, categories] of Object.entries(taMap)) {
@@ -277,6 +278,30 @@ export async function GET(request: NextRequest) {
         .update({ therapeutic_area: ta })
         .eq('therapeutic_area', 'other')
         .eq('indication_category', cat);
+    }
+  }
+
+  // Recalculate company deal stats for companies with new deals
+  if (result.inserted > 0) {
+    try {
+      const { data: recentDeals } = await supabase
+        .from('deals')
+        .select('licensor_id, licensee_id')
+        .order('created_at', { ascending: false })
+        .limit(result.inserted * 2);
+
+      const companyIds = new Set<string>();
+      for (const deal of recentDeals || []) {
+        if (deal.licensor_id) companyIds.add(deal.licensor_id);
+        if (deal.licensee_id) companyIds.add(deal.licensee_id);
+      }
+
+      for (const companyId of companyIds) {
+        try { await supabase.rpc('update_company_deal_stats', { p_company_id: companyId }); } catch {}
+      }
+      console.log(`[cron-backfill] Updated stats for ${companyIds.size} companies`);
+    } catch {
+      console.error('[cron-backfill] Company stats update failed (non-fatal)');
     }
   }
 

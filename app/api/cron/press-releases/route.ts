@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
+import { logCronRun, reclassifyOtherDeals } from '@/lib/cron-utils';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -48,6 +49,19 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
+
+    // Post-processing: reclassify 'other' deals and log
+    if (result.deals_inserted > 0) {
+      const reclassified = await reclassifyOtherDeals(supabase);
+      if (reclassified > 0) console.log(`Reclassified ${reclassified} 'other' deals`);
+    }
+
+    await logCronRun(supabase, 'press_releases_cron', {
+      fetched: result.articles_found,
+      processed: result.potential_deals,
+      inserted: result.deals_inserted,
+      errors: result.errors,
+    });
 
     console.log(`Press release ingestion complete in ${(durationMs / 1000).toFixed(1)}s: ${result.deals_inserted} deals inserted from ${result.sources_checked} sources`);
 

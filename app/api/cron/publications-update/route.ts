@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPubMedIngestion } from '@/lib/ingestion/pubmed';
 import { runBioRxivIngestion } from '@/lib/ingestion/biorxiv';
+import { logCronRun } from '@/lib/cron-utils';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,13 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('Publications update complete.');
+
+    // Log to ingestion audit trail
+    await logCronRun(supabase, 'publications_update', {
+      fetched: (pubmedResult.articles_found || 0) + (biorxivResult.preprints_found || 0),
+      inserted: (pubmedResult.articles_inserted || 0) + (biorxivResult.preprints_inserted || 0),
+      errors: [...pubmedResult.errors, ...biorxivResult.errors],
+    });
 
     return NextResponse.json({
       success: true,
