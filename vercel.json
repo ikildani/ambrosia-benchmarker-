@@ -65,6 +65,10 @@
     {
       "path": "/api/cron/press-releases",
       "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/deal-backfill",
+      "schedule": "0 0,6,12,18 * * *"
     }
   ]
 }
