@@ -168,6 +168,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const startTime = Date.now();
+    const TIME_BUDGET = 250_000; // 250s safe margin for 300s Vercel limit
     const supabase = createServiceClient();
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -180,26 +182,30 @@ export async function GET(request: NextRequest) {
     console.log('Step 1: SEC EDGAR ingestion...');
     const edgarResult = await runDailyIngestion(supabase, anthropicApiKey, 7);
 
-    // Step 1b: Run press release ingestion (5 RSS sources)
+    // Step 1b: Run press release ingestion (time-budgeted)
     console.log('Step 1b: Press release ingestion...');
     let pressResult = { deals_inserted: 0, errors: [] as string[] };
+    const pressTimeBudget = Math.max(60_000, TIME_BUDGET - (Date.now() - startTime) - 30_000);
     try {
       pressResult = await runPressReleaseIngestion(supabase, anthropicApiKey, {
-        maxArticlesPerSource: 15, // Increased from 5 for better daily coverage
+        maxArticlesPerSource: 10,
+        timeBudgetMs: pressTimeBudget,
       });
       console.log(`Press releases: ${pressResult.deals_inserted} deals inserted`);
     } catch (error) {
       console.error('Press release ingestion error (non-fatal):', error);
     }
 
-    // Step 1c: Run OpenFDA approvals ingestion (last 14 days)
+    // Step 1c: Run OpenFDA approvals ingestion (last 14 days) — fast, no AI
     console.log('Step 1c: OpenFDA approvals ingestion...');
     let fdaResult = { inserted: 0, errors: [] as string[] };
-    try {
-      fdaResult = await runOpenFDAIngestion(supabase, { daysBack: 14 });
-      console.log(`OpenFDA: ${fdaResult.inserted} approvals inserted`);
-    } catch (error) {
-      console.error('OpenFDA ingestion error (non-fatal):', error);
+    if (Date.now() - startTime < TIME_BUDGET) {
+      try {
+        fdaResult = await runOpenFDAIngestion(supabase, { daysBack: 14 });
+        console.log(`OpenFDA: ${fdaResult.inserted} approvals inserted`);
+      } catch (error) {
+        console.error('OpenFDA ingestion error (non-fatal):', error);
+      }
     }
 
     // Step 2: Backfill therapeutic_area on all deals with expanded mapping
