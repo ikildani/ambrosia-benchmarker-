@@ -141,11 +141,12 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
         </div>
 
         {/* Chart */}
-        <div className="p-3 sm:p-4">
-          <ResponsiveContainer width="100%" height={chartData.length * 56 + 32}>
+        <div className="p-3 sm:p-4" style={{ overflowX: 'auto' }}>
             <BarChart
               data={chartData}
               layout="vertical"
+              width={700}
+              height={chartData.length * 56 + 32}
               margin={{ top: 8, right: 100, left: 8, bottom: 8 }}
               barGap={0}
               barCategoryGap="20%"
@@ -189,7 +190,6 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
                 ))}
               </Bar>
             </BarChart>
-          </ResponsiveContainer>
 
           {/* Legend */}
           <div className="flex items-center justify-center gap-4 mt-2 text-xs text-neutral-500 dark:text-slate-400">
