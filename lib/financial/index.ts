@@ -11,6 +11,7 @@ export { runMonteCarlo } from './monte-carlo';
 export { estimateMarketSize, getEpidemiologyData, formatPatientFunnel } from './market-size';
 export { calculateFXSensitivity, getPricingPressureNarrative } from './fx-sensitivity';
 export { applyScenario, runAllScenarios, getDefensiveAnalysis, SCENARIO_TEMPLATES } from './scenario-planner';
+export { buildScenarioBridge } from './scenario-bridge';
 export { DEFAULT_DISCOUNT_RATES } from './discount-rates';
 
 // PoS tables & helpers
@@ -48,3 +49,5 @@ export type {
   DealFlowForecast,
   AcquisitionLikelihood,
 } from './types';
+
+export type { ScenarioBridge, ScenarioBridgeAdjustment } from './scenario-bridge';

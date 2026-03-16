@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
-import { findPartnerMatches, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
+import { findPartnerMatches, getDealHistoryCrossReference, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
@@ -252,12 +252,28 @@ export async function POST(request: NextRequest) {
       user_tier: userTier,
     });
 
+    // Deal history cross-reference for paid users (top 5 partners)
+    let dealHistoryCrossRef: Awaited<ReturnType<typeof getDealHistoryCrossReference>> | null = null;
+    if (hasPaidAccess && matchesToShow.length > 0) {
+      try {
+        dealHistoryCrossRef = await getDealHistoryCrossReference(
+          supabase,
+          matchesToShow.slice(0, 5),
+          matchInput,
+          3
+        );
+      } catch (err) {
+        console.error('Deal history cross-reference error (non-fatal):', err);
+      }
+    }
+
     // Build response
     const response: Record<string, unknown> = {
       success: true,
       total_matches: result.total_matches,
       matches_shown: matchLimit,
       matches: responseMatches,
+      deal_history: dealHistoryCrossRef || undefined,
       user_tier: userTier,
       generated_at: result.generated_at,
     };

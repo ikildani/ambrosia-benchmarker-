@@ -50,7 +50,12 @@ import DealMemoSection from './results/DealMemoSection';
 import ResultsDisclaimer from './results/ResultsDisclaimer';
 import { runFinancialModel, type FinancialModelResult } from '@/lib/financial/run-financial-model';
 import type { CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
+import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity';
+import { findComparableDeals } from '@/lib/comparableDeals';
 import epiData from '@/data/epidemiology.json';
+
+// Dynamic import for TornadoChart (Recharts-heavy, below the fold)
+const TornadoChart = dynamic(() => import('./TornadoChart'), { ssr: false, loading: () => <ChartSkeleton /> });
 
 interface ResultsProps {
   result: CalculationResult;
@@ -603,6 +608,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [financialModel, setFinancialModel] = useState<FinancialModelResult | null>(null);
   const [serverData, setServerData] = useState<{ competitiveLandscape?: CompetitiveLandscape; dealFlowForecast?: DealFlowForecast }>({});
 
+  // Tornado sensitivity (memoized, computed alongside financial model)
+  const tornadoSensitivities = useMemo(() => {
+    if (!fullInputs || !result) return null;
+    try {
+      const sensitivities = computeTornadoSensitivities(fullInputs, result);
+      return sensitivities.length > 0 ? sensitivities : null;
+    } catch {
+      return null;
+    }
+  }, [fullInputs, result]);
+
   // Track previous result values for sensitivity analysis delta badges
   const isFirstRenderRef = useRef(true);
   const [previousTerms, setPreviousTerms] = useState<{
@@ -1102,6 +1118,42 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
+        {/* Deal Summary Strip -- compact single-row overview */}
+        <div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
+          <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-slate-600">
+            {[
+              { label: dtl?.upfrontLabel || 'Upfront', value: formatCurrency(terms.upfront.median) },
+              { label: 'Milestones', value: formatCurrency(terms.devMilestones.median + terms.regMilestones.median + terms.commMilestones.median) },
+              { label: 'Royalty', value: `${tieredRoyalties.base.low}-${tieredRoyalties.highTier.high}%` },
+              { label: dtl?.totalValueLabel || 'Total', value: formatCurrency(terms.totalDealValue.median) },
+              ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV) }] : []),
+              ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%` }] : []),
+            ].map((item, idx) => (
+              <div key={idx} className="flex-1 min-w-[80px] px-2 sm:px-3 py-2 text-center">
+                <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">{item.label}</p>
+                <p className="font-mono text-sm sm:text-base font-bold text-neutral-900 dark:text-white leading-tight mt-0.5">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Scenario Bridge Summary */}
+        {financialModel?.defensiveAnalysis && (
+          <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono">
+            <span className="px-2 py-1 rounded bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600">
+              Base <span className="font-bold">{formatCurrency(financialModel.rnpv.riskAdjustedNPV)}</span>
+            </span>
+            <span className="px-2 py-1 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+              Bear <span className="font-bold">{formatCurrency(financialModel.defensiveAnalysis.worstCase.adjustedRNPV)}</span>
+              <span className="ml-1 opacity-75">({financialModel.defensiveAnalysis.worstCase.impactPercent > 0 ? '+' : ''}{financialModel.defensiveAnalysis.worstCase.impactPercent.toFixed(0)}%)</span>
+            </span>
+            <span className="px-2 py-1 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              Bull <span className="font-bold">{formatCurrency(financialModel.defensiveAnalysis.bestCase.adjustedRNPV)}</span>
+              <span className="ml-1 opacity-75">(+{financialModel.defensiveAnalysis.bestCase.impactPercent.toFixed(0)}%)</span>
+            </span>
+          </div>
+        )}
+
         {/* Deal Terms Grid */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
           {/* Upfront Payment */}
@@ -1326,6 +1378,40 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         </div>
 
+        {/* Inline Comparable Deals (top 3, compact) */}
+        {fullInputs && (() => {
+          const topDeals = findComparableDeals(
+            { therapeuticArea: fullInputs.therapeuticArea, modality: fullInputs.modality, indication: fullInputs.indication, phase: fullInputs.phase, dealType: fullInputs.dealType },
+            3
+          );
+          if (topDeals.length === 0) return null;
+          return (
+            <div className="mt-3 sm:mt-4 rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800">
+              <div className="px-3 py-2 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
+                <p className="text-xs font-semibold text-neutral-600 dark:text-slate-300 uppercase tracking-wider">Top Comparable Deals</p>
+              </div>
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-neutral-100 dark:border-slate-700 text-neutral-500 dark:text-slate-400">
+                    <th className="text-left px-3 py-1.5 font-medium">Parties</th>
+                    <th className="text-right px-3 py-1.5 font-medium font-mono">Value</th>
+                    <th className="text-right px-3 py-1.5 font-medium font-mono">Year</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
+                  {topDeals.map((d) => (
+                    <tr key={d.id} className="hover:bg-neutral-50 dark:hover:bg-slate-700/50">
+                      <td className="px-3 py-1.5 text-neutral-800 dark:text-slate-200 truncate max-w-[200px]">{d.parties}</td>
+                      <td className="px-3 py-1.5 text-right font-mono font-semibold text-neutral-900 dark:text-white">{d.totalValue}</td>
+                      <td className="px-3 py-1.5 text-right font-mono text-neutral-600 dark:text-slate-400">{d.year}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
+
         {/* Interactive Charts Section */}
         <ChartSection
           terms={terms}
@@ -1379,6 +1465,16 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               tier={tier}
               onUpgrade={onUpgrade}
               onBuyReport={onBuyReport}
+            />
+          </FinancialErrorBoundary>
+        )}
+
+        {/* Tornado Sensitivity Chart (dollar-impact) */}
+        {hasFullAccess && tornadoSensitivities && financialModel && (
+          <FinancialErrorBoundary fallbackTitle="Tornado Chart unavailable">
+            <TornadoChart
+              baseValue={financialModel.rnpv.riskAdjustedNPV}
+              sensitivities={tornadoSensitivities}
             />
           </FinancialErrorBoundary>
         )}

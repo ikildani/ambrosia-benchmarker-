@@ -12,6 +12,7 @@ import {
   PatentCliff,
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
+import { getRecencyWeight } from '@/lib/comparableDeals';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -558,7 +559,13 @@ export async function findPartnerMatches(
         match.detailed_breakdown = buildDetailedBreakdown(company, input, breakdown, companyDeals);
         match.watch_outs = calculateWatchOuts(company, input, companyDeals);
         match.strategic_context = buildStrategicContext(company, input.therapeutic_area);
-        match.relevant_deals = companyDeals.slice(0, 5).map((deal) => ({
+        // Sort deals by recency-weighted relevance (recent deals ranked higher)
+        const sortedDeals = [...companyDeals].sort((a, b) => {
+          const yearA = new Date(a.announced_date).getFullYear();
+          const yearB = new Date(b.announced_date).getFullYear();
+          return getRecencyWeight(yearB) - getRecencyWeight(yearA);
+        });
+        match.relevant_deals = sortedDeals.slice(0, 5).map((deal) => ({
           id: deal.id,
           asset_name: deal.asset_name || 'Undisclosed',
           partner_name: deal.licensor_name || deal.licensee_name || 'Unknown',
@@ -1653,6 +1660,179 @@ export async function fetchCompanyDeals(
     deal_type: deal.deal_type,
     relevance: generateDealRelevance(deal),
   }));
+}
+
+// ============================================================================
+// DEAL HISTORY CROSS-REFERENCE
+// ============================================================================
+
+/** Summary of a company's recent deal history for negotiation anchoring */
+export interface DealHistorySummary {
+  company_name: string;
+  company_id: string;
+  recent_deals: {
+    partner: string;
+    upfront_usd: number | null;
+    total_value_usd: number | null;
+    year: number;
+    modality: string | null;
+    indication: string | null;
+    deal_type: string | null;
+  }[];
+  median_upfront_usd: number | null;
+  median_total_value_usd: number | null;
+  preferred_deal_structure: 'licensing' | 'acquisition' | 'mixed';
+  deal_history_summary: string;
+  negotiation_anchor: string;
+}
+
+/**
+ * Cross-reference partner matches with their actual deal history from the
+ * deals database and EXTENDED_COMPARABLE_DEALS. Provides negotiation anchoring
+ * based on each partner's historical deal behavior.
+ */
+export async function getDealHistoryCrossReference(
+  supabase: SupabaseClient,
+  matches: PartnerMatch[],
+  input: MatchInput,
+  maxDealsPerPartner: number = 3
+): Promise<DealHistorySummary[]> {
+  const { EXTENDED_COMPARABLE_DEALS } = await import('@/data/comparable-deals-extended');
+  const { COMPARABLE_DEALS } = await import('@/lib/comparableDeals');
+
+  const results: DealHistorySummary[] = [];
+
+  for (const match of matches) {
+    // 1. Query real deals from DB
+    const { data: dbDeals } = await supabase
+      .from('deals')
+      .select(
+        'licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, indication_category, indication_specific, deal_type'
+      )
+      .or(`licensor_id.eq.${match.company_id},licensee_id.eq.${match.company_id}`)
+      .order('announced_date', { ascending: false })
+      .limit(maxDealsPerPartner * 2);
+
+    // 2. Check static comparable deals for fallback enrichment
+    const companyNameLower = match.company_name.toLowerCase();
+    const staticDeals = [
+      ...EXTENDED_COMPARABLE_DEALS
+        .filter((d: { licensor: string; licensee: string }) => d.licensor.toLowerCase() === companyNameLower || d.licensee.toLowerCase() === companyNameLower)
+        .map((d: { licensor: string; licensee: string; upfront?: number; totalDealValue?: number; year: number; modality: string; indication_specific: string; indication_category: string; dealType: string }) => ({
+          partner: d.licensor.toLowerCase() === companyNameLower ? d.licensee : d.licensor,
+          upfront_usd: d.upfront ? d.upfront * 1_000_000 : null,
+          total_value_usd: d.totalDealValue ? d.totalDealValue * 1_000_000 : null,
+          year: d.year,
+          modality: d.modality,
+          indication: d.indication_specific || d.indication_category,
+          deal_type: d.dealType,
+        })),
+      ...COMPARABLE_DEALS
+        .filter(d => d.licensor.toLowerCase() === companyNameLower || d.licensee.toLowerCase() === companyNameLower)
+        .map(d => ({
+          partner: d.licensor.toLowerCase() === companyNameLower ? d.licensee : d.licensor,
+          upfront_usd: d.upfrontM ? d.upfrontM * 1_000_000 : null,
+          total_value_usd: d.totalValueM ? d.totalValueM * 1_000_000 : null,
+          year: d.year,
+          modality: d.modalities?.[0] || null,
+          indication: d.indications?.[0] || null,
+          deal_type: d.dealType || null,
+        })),
+    ];
+
+    // 3. Merge and deduplicate by partner+year
+    const seen = new Set<string>();
+    const allDeals: DealHistorySummary['recent_deals'] = [];
+
+    for (const deal of (dbDeals || [])) {
+      const partner = deal.licensor_name || deal.licensee_name || 'Unknown';
+      const year = new Date(deal.announced_date).getFullYear();
+      const key = `${partner.toLowerCase()}|${year}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      allDeals.push({
+        partner,
+        upfront_usd: deal.upfront_usd,
+        total_value_usd: deal.total_deal_value_usd,
+        year,
+        modality: deal.modality,
+        indication: deal.indication_specific || deal.indication_category,
+        deal_type: deal.deal_type,
+      });
+    }
+
+    for (const deal of staticDeals) {
+      const key = `${deal.partner.toLowerCase()}|${deal.year}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      allDeals.push(deal);
+    }
+
+    // Sort by recency weight (2024-2026 deals weighted 2x, prioritized first)
+    allDeals.sort((a, b) => {
+      const weightDiff = getRecencyWeight(b.year) - getRecencyWeight(a.year);
+      return weightDiff !== 0 ? weightDiff : b.year - a.year;
+    });
+    const recentDeals = allDeals.slice(0, maxDealsPerPartner);
+
+    if (recentDeals.length === 0) continue;
+
+    // 4. Compute statistics
+    const upfronts = recentDeals.map(d => d.upfront_usd).filter((v): v is number => v !== null && v > 0);
+    const totals = recentDeals.map(d => d.total_value_usd).filter((v): v is number => v !== null && v > 0);
+    const dealTypes = recentDeals.map(d => d.deal_type).filter((v): v is string => v !== null);
+
+    const median = (arr: number[]) => {
+      if (arr.length === 0) return null;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    };
+
+    const medianUpfront = median(upfronts);
+    const medianTotal = median(totals);
+
+    const licenseCount = dealTypes.filter(t => t === 'licensing' || t === 'license' || t === 'collaboration' || t === 'codevelopment' || t === 'option').length;
+    const acquisitionCount = dealTypes.filter(t => t === 'acquisition').length;
+    const preferredStructure: DealHistorySummary['preferred_deal_structure'] =
+      acquisitionCount > licenseCount ? 'acquisition' :
+      licenseCount > acquisitionCount ? 'licensing' : 'mixed';
+
+    // 5. Build human-readable summary
+    const dealDescriptions = recentDeals.map((d, i) => {
+      const upfrontStr = d.upfront_usd ? formatCurrency(d.upfront_usd) + ' upfront' : formatCurrency(d.total_value_usd || 0) + ' total';
+      return `(${i + 1}) ${upfrontStr} ${d.year}`;
+    });
+    const modTA = input.therapeutic_area ? ` in ${TA_LABELS[input.therapeutic_area] || input.therapeutic_area}` : '';
+    const dealHistorySummaryText = `${match.company_name}'s last ${recentDeals.length} deals${modTA}: ${dealDescriptions.join(', ')}`;
+
+    // 6. Build negotiation anchor
+    let negotiationAnchor: string;
+    if (upfronts.length >= 2) {
+      const minUp = Math.min(...upfronts);
+      const maxUp = Math.max(...upfronts);
+      negotiationAnchor = `Based on ${match.company_name}'s recent deals, expect ${formatCurrency(minUp)}-${formatCurrency(maxUp)} upfront for a similar asset`;
+    } else if (medianUpfront) {
+      negotiationAnchor = `${match.company_name}'s recent upfront benchmark: ${formatCurrency(medianUpfront)}`;
+    } else if (medianTotal) {
+      negotiationAnchor = `${match.company_name}'s recent deal size benchmark: ${formatCurrency(medianTotal)} total value`;
+    } else {
+      negotiationAnchor = `Limited disclosed financial data for ${match.company_name}'s recent deals`;
+    }
+
+    results.push({
+      company_name: match.company_name,
+      company_id: match.company_id,
+      recent_deals: recentDeals,
+      median_upfront_usd: medianUpfront,
+      median_total_value_usd: medianTotal,
+      preferred_deal_structure: preferredStructure,
+      deal_history_summary: dealHistorySummaryText,
+      negotiation_anchor: negotiationAnchor,
+    });
+  }
+
+  return results;
 }
 
 // ============================================================================

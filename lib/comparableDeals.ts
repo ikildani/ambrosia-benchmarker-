@@ -167,10 +167,348 @@ export interface ComparableDealForUI {
   year: number;
   phase?: string;
   relevanceReasons: string[];
+  scoreBreakdown?: HedocnicScoreBreakdown;
+  patent_cliff_context?: string;
 }
 
-// Find comparable deals scored by relevance to current inputs (for web UI)
+// Score breakdown for hedonic regression model
+export interface HedocnicScoreBreakdown {
+  phase: number;
+  modality: number;
+  therapeuticArea: number;
+  indication: number;
+  territory: number;
+  dealType: number;
+  recencyWeight: number;
+  rawScore: number;
+  weightedScore: number;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RECENCY WEIGHTING — shared across all deal matching
+// ═══════════════════════════════════════════════════════════════════════
+
+/** Get recency weight for a deal based on its year */
+export function getRecencyWeight(year: number): number {
+  if (year >= 2024) return 2.0;
+  if (year >= 2022) return 1.5;
+  if (year >= 2020) return 1.0;
+  return 0.5; // 2017-2019
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PATENT CLIFF DATA & ENRICHMENT
+// ═══════════════════════════════════════════════════════════════════════
+
+export const MAJOR_PATENT_CLIFFS: Record<string, { drug: string; loeYear: number; peakSalesB: number }[]> = {
+  'AbbVie': [{ drug: 'Humira', loeYear: 2023, peakSalesB: 21.2 }, { drug: 'Imbruvica', loeYear: 2032, peakSalesB: 5.4 }],
+  'Merck': [{ drug: 'Keytruda', loeYear: 2028, peakSalesB: 25.0 }],
+  'Bristol-Myers Squibb': [{ drug: 'Opdivo', loeYear: 2028, peakSalesB: 9.0 }, { drug: 'Eliquis', loeYear: 2026, peakSalesB: 12.2 }],
+  'BMS': [{ drug: 'Opdivo', loeYear: 2028, peakSalesB: 9.0 }, { drug: 'Eliquis', loeYear: 2026, peakSalesB: 12.2 }],
+  'Pfizer': [{ drug: 'Ibrance', loeYear: 2027, peakSalesB: 5.1 }],
+  'Roche': [{ drug: 'Ocrevus', loeYear: 2033, peakSalesB: 7.5 }],
+  'Johnson & Johnson': [{ drug: 'Stelara', loeYear: 2025, peakSalesB: 10.9 }],
+  'J&J': [{ drug: 'Stelara', loeYear: 2025, peakSalesB: 10.9 }],
+  'AstraZeneca': [{ drug: 'Tagrisso', loeYear: 2032, peakSalesB: 5.8 }],
+  'Novartis': [{ drug: 'Entresto', loeYear: 2026, peakSalesB: 6.0 }],
+  'Eli Lilly': [{ drug: 'Trulicity', loeYear: 2027, peakSalesB: 7.4 }, { drug: 'Verzenio', loeYear: 2032, peakSalesB: 4.2 }],
+  'Amgen': [{ drug: 'Enbrel', loeYear: 2023, peakSalesB: 5.0 }],
+  'Sanofi': [{ drug: 'Dupixent', loeYear: 2031, peakSalesB: 13.0 }],
+  'Gilead': [{ drug: 'Biktarvy', loeYear: 2033, peakSalesB: 12.1 }],
+  'GSK': [{ drug: 'Shingrix', loeYear: 2034, peakSalesB: 4.8 }, { drug: 'Dovato', loeYear: 2029, peakSalesB: 3.2 }],
+  'Biogen': [{ drug: 'Tysabri', loeYear: 2026, peakSalesB: 2.1 }],
+  'Regeneron': [{ drug: 'Eylea', loeYear: 2027, peakSalesB: 6.1 }],
+  'Vertex': [{ drug: 'Trikafta', loeYear: 2037, peakSalesB: 9.0 }],
+  'Takeda': [{ drug: 'Entyvio', loeYear: 2026, peakSalesB: 5.5 }],
+  'Bayer': [{ drug: 'Xarelto', loeYear: 2024, peakSalesB: 6.3 }, { drug: 'Eylea', loeYear: 2027, peakSalesB: 4.0 }],
+  'Novo Nordisk': [{ drug: 'Ozempic', loeYear: 2032, peakSalesB: 18.0 }],
+  'Astellas Pharma': [{ drug: 'Xtandi', loeYear: 2027, peakSalesB: 5.5 }],
+};
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+/** Enrich comparable deals with patent cliff context for licensees */
+export function enrichDealsWithPatentCliff(deals: ComparableDealForUI[], allDeals: ComparableDeal[]): ComparableDealForUI[] {
+  return deals.map(uiDeal => {
+    // Find the original deal to get the licensee name
+    const original = allDeals.find(d =>
+      `${d.licensor} / ${d.licensee}` === uiDeal.parties && d.year === uiDeal.year
+    );
+    if (!original) return uiDeal;
+
+    const licensee = original.licensee;
+    const cliffs = MAJOR_PATENT_CLIFFS[licensee];
+    if (!cliffs) return uiDeal;
+
+    // Find cliffs within 5 years
+    const urgentCliffs = cliffs.filter(c => c.loeYear >= CURRENT_YEAR && c.loeYear <= CURRENT_YEAR + 5);
+    if (urgentCliffs.length === 0) return uiDeal;
+
+    // Pick the cliff with highest peak sales (most urgency)
+    const mostUrgent = urgentCliffs.sort((a, b) => b.peakSalesB - a.peakSalesB)[0];
+
+    return {
+      ...uiDeal,
+      patent_cliff_context: `Strategic urgency: ${licensee}'s $${mostUrgent.peakSalesB}B ${mostUrgent.drug} faces LOE in ${mostUrgent.loeYear}`,
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODALITY CLASS MAP — for "same class" matching in hedonic regression
+// ═══════════════════════════════════════════════════════════════════════
+
+const MODALITY_CLASS: Record<string, string> = {
+  mab: 'antibody_derived',
+  bispecific: 'antibody_derived',
+  adc: 'antibody_derived',
+  antibody: 'antibody_derived',
+  carT_heme: 'cell_therapy',
+  inVivoCarT: 'cell_therapy',
+  car_t: 'cell_therapy',
+  cell_therapy: 'cell_therapy',
+  geneTherapy: 'gene_therapy',
+  geneTherapyRare: 'gene_therapy',
+  aso: 'oligonucleotide',
+  rnai: 'oligonucleotide',
+  oligonucleotide: 'oligonucleotide',
+  smallMolecule: 'small_molecule',
+  peptide: 'small_molecule',
+  glp1Agonist: 'incretin',
+  dualIncretin: 'incretin',
+  tripleIncretin: 'incretin',
+  amylinAnalog: 'incretin',
+  jakInhibitor: 'kinase_inhibitor',
+  jakInhibitorDerm: 'kinase_inhibitor',
+  tl1aInhibitor: 'immune_modulator',
+  s1pModulator: 'immune_modulator',
+  fcrnAntagonist: 'immune_modulator',
+  complementInhibitor: 'immune_modulator',
+  dualAntagonist: 'immune_modulator',
+  oralIntegrin: 'immune_modulator',
+  bbbPlatform: 'cns_platform',
+  psychedelic: 'cns_platform',
+  radiopharmaceutical: 'radiopharmaceutical',
+  vaccine: 'vaccine',
+  mrna: 'mrna',
+  antiActivin: 'biologic',
+};
+
+// TA adjacency map for related-TA scoring
+const TA_ADJACENCY: Record<string, string[]> = {
+  immunology: ['gastroenterology', 'dermatology', 'rareDisease'],
+  gastroenterology: ['immunology'],
+  dermatology: ['immunology'],
+  oncology: ['hematology'],
+  hematology: ['oncology', 'rareDisease'],
+  neurology: ['rareDisease'],
+  metabolic: ['cardiovascular'],
+  cardiovascular: ['metabolic'],
+  rareDisease: ['hematology', 'neurology', 'immunology'],
+};
+
+// Phase rank for distance scoring
+const PHASE_RANK: Record<string, number> = {
+  preclinical: 0,
+  phase1: 1,
+  'phase1/2': 1.5,
+  phase2: 2,
+  'phase2/3': 2.5,
+  phase3: 3,
+  approved: 4,
+};
+
+function getPhaseRank(phase: string | undefined): number | null {
+  if (!phase) return null;
+  const normalized = phase.toLowerCase().replace(/\s+/g, '');
+  return PHASE_RANK[normalized] ?? null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HEDONIC REGRESSION SCORING
+// ═══════════════════════════════════════════════════════════════════════
+
+export interface HedonicScoringInput {
+  therapeuticArea: string;
+  modality: string;
+  indication: string;
+  phase?: string;
+  dealType?: string;
+  territory?: string;
+}
+
+/**
+ * Hedonic regression-based comparable deal scoring.
+ * Models deal relevance as f(phase, modality, TA, indication, territory, year, deal_type)
+ * with Mahalanobis-like distance weighting and recency multiplier.
+ */
+export function scoreComparableDealsHedonic(
+  inputs: HedonicScoringInput,
+  maxDeals: number = 10
+): { deal: ComparableDeal; score: HedocnicScoreBreakdown; reasons: string[]; id: string }[] {
+  // First, filter outlier deals (>3 std dev from median value for the TA)
+  const taDeals = ALL_DEALS.filter(d =>
+    d.therapeuticArea === inputs.therapeuticArea ||
+    d.therapeuticArea === 'both' ||
+    d.secondaryTAs?.includes(inputs.therapeuticArea)
+  );
+  const values = taDeals
+    .map(d => d.totalValueM)
+    .filter((v): v is number => v != null && v > 0)
+    .sort((a, b) => a - b);
+
+  let outlierThreshold = Infinity;
+  if (values.length >= 5) {
+    const median = values[Math.floor(values.length / 2)];
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const stdDev = Math.sqrt(values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length);
+    outlierThreshold = median + 3 * stdDev;
+  }
+
+  const scored = ALL_DEALS.map((deal, idx) => {
+    // Filter outlier deals
+    if (deal.totalValueM && deal.totalValueM > outlierThreshold) {
+      return null;
+    }
+
+    const reasons: string[] = [];
+
+    // --- Phase match ---
+    let phaseScore = 0;
+    const inputRank = getPhaseRank(inputs.phase);
+    const dealRank = getPhaseRank(deal.phase);
+    if (inputRank !== null && dealRank !== null) {
+      const dist = Math.abs(inputRank - dealRank);
+      if (dist === 0) { phaseScore = 10; reasons.push('Exact phase match'); }
+      else if (dist <= 1) { phaseScore = 6; reasons.push('Adjacent phase'); }
+      else { phaseScore = 2; reasons.push('Distant phase'); }
+    }
+
+    // --- Modality match ---
+    let modalityScore = 0;
+    const dealModalities = deal.modalities || [];
+    if (inputs.modality && dealModalities.includes(inputs.modality)) {
+      modalityScore = 10;
+      reasons.push('Exact modality match');
+    } else if (inputs.modality && dealModalities.length > 0) {
+      const inputClass = MODALITY_CLASS[inputs.modality];
+      const dealClasses = dealModalities.map(m => MODALITY_CLASS[m]).filter(Boolean);
+      if (inputClass && dealClasses.includes(inputClass)) {
+        modalityScore = 6;
+        reasons.push('Same modality class');
+      } else if (inputClass) {
+        // Only give partial credit if we recognize the input modality
+        modalityScore = 2;
+        reasons.push('Different modality');
+      }
+    }
+
+    // --- TA match ---
+    let taScore = 0;
+    if (deal.therapeuticArea === inputs.therapeuticArea || deal.therapeuticArea === 'both') {
+      taScore = 8;
+      reasons.push('Same therapeutic area');
+    } else if (deal.secondaryTAs?.includes(inputs.therapeuticArea)) {
+      taScore = 4;
+      reasons.push('Related therapeutic area (secondary)');
+    } else if (TA_ADJACENCY[inputs.therapeuticArea]?.includes(deal.therapeuticArea)) {
+      taScore = 4;
+      reasons.push('Related therapeutic area');
+    } else {
+      taScore = 1;
+    }
+
+    // --- Indication match ---
+    let indicationScore = 0;
+    const dealIndications = deal.indications || [];
+    if (inputs.indication && dealIndications.includes(inputs.indication)) {
+      indicationScore = 10;
+      reasons.push('Exact indication match');
+    } else if (inputs.indication && taScore >= 8 && dealIndications.length > 0) {
+      // Same TA means same subgroup
+      indicationScore = 2;
+      reasons.push('Same TA indication subgroup');
+    }
+
+    // --- Territory match ---
+    let territoryScore = 0;
+    if (inputs.territory && deal.territory) {
+      if (deal.territory === inputs.territory) {
+        territoryScore = 4;
+        reasons.push('Exact territory match');
+      } else if (
+        (deal.territory === 'global' || inputs.territory === 'global') ||
+        (deal.territory?.includes('us') && inputs.territory?.includes('us'))
+      ) {
+        territoryScore = 2;
+        reasons.push('Overlapping territory');
+      }
+    }
+
+    // --- Deal type match ---
+    let dealTypeScore = 0;
+    if (inputs.dealType && deal.dealType === inputs.dealType) {
+      dealTypeScore = 3;
+      reasons.push('Same deal structure');
+    }
+
+    // --- Recency weight (multiplicative) ---
+    const recencyWeight = getRecencyWeight(deal.year);
+
+    // Raw score = sum of dimension scores
+    const rawScore = phaseScore + modalityScore + taScore + indicationScore + territoryScore + dealTypeScore;
+    const weightedScore = rawScore * recencyWeight;
+
+    if (rawScore < 4) return null; // Filter irrelevant deals (need at least one strong dimension match)
+
+    return {
+      deal,
+      score: {
+        phase: phaseScore,
+        modality: modalityScore,
+        therapeuticArea: taScore,
+        indication: indicationScore,
+        territory: territoryScore,
+        dealType: dealTypeScore,
+        recencyWeight,
+        rawScore,
+        weightedScore,
+      } as HedocnicScoreBreakdown,
+      reasons,
+      id: `deal-${idx}`,
+    };
+  }).filter((s): s is NonNullable<typeof s> => s !== null);
+
+  // Sort by weighted score descending
+  scored.sort((a, b) => b.score.weightedScore - a.score.weightedScore);
+
+  return scored.slice(0, maxDeals);
+}
+
+// Find comparable deals using hedonic regression scoring (for web UI)
 export function findComparableDeals(
+  inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType?: string; territory?: string },
+  maxDeals: number = 5
+): ComparableDealForUI[] {
+  const hedonic = scoreComparableDealsHedonic(inputs, maxDeals);
+
+  const uiDeals = hedonic.map(s => ({
+    id: s.id,
+    parties: `${s.deal.licensor} / ${s.deal.licensee}`,
+    totalValue: s.deal.value,
+    year: s.deal.year,
+    phase: s.deal.phase,
+    relevanceReasons: s.reasons,
+    scoreBreakdown: s.score,
+  }));
+
+  // Enrich with patent cliff context
+  const allDeals = ALL_DEALS;
+  return enrichDealsWithPatentCliff(uiDeals, allDeals);
+}
+
+/** @deprecated Use findComparableDeals() which now uses hedonic regression scoring */
+export function findComparableDealsLegacy(
   inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType?: string },
   maxDeals: number = 5
 ): ComparableDealForUI[] {
@@ -231,7 +569,9 @@ export function getRelevantDeals(
     else if (deal.secondaryTAs?.includes(therapeuticArea)) score += 1;
     if (modality && deal.modalities?.includes(modality)) score += 3;
     if (indication && deal.indications?.includes(indication)) score += 3;
-    return { deal, score };
+    // Apply recency weighting multiplicatively
+    const weightedScore = score * getRecencyWeight(deal.year);
+    return { deal, score: weightedScore };
   });
 
   return scored

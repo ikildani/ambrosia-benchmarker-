@@ -387,6 +387,20 @@ export interface MonteCarloResult {
     /** Human-readable label for charts (e.g., 'Peak Sales ($M)') */
     label: string;
   }[];
+
+  /**
+   * Scenario-weighted breakdown showing P50 rNPV and weight for each
+   * macro scenario (bear/base/bull). Only present when scenario weighting
+   * is enabled (default).
+   *
+   * Creates a multimodal distribution that better reflects pharma reality:
+   * the drug either works (bull/base) or it doesn't (bear).
+   */
+  scenario_breakdown?: {
+    bear: { p50: number; weight: number };
+    base: { p50: number; weight: number };
+    bull: { p50: number; weight: number };
+  };
 }
 
 // ---------------------------------------------------------------------------

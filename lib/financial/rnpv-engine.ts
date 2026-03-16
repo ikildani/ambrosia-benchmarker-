@@ -30,6 +30,121 @@ import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM
  */
 const EFFECTIVE_TAX_RATE = 0.18;
 
+// ---------------------------------------------------------------------------
+// Indication-Specific PoS Modifiers
+// ---------------------------------------------------------------------------
+// Beyond base TA rates and modality adjustments, specific indication
+// characteristics further modify the probability of success. These
+// modifiers capture biomarker validation status, regulatory precedent,
+// competitive density, modality-specific risks, and disease-modifying
+// vs symptomatic treatment effects.
+//
+// Modifiers stack multiplicatively but are capped at ±40% of base PoS
+// to prevent unrealistic extremes.
+//
+// Sources: BIO/Informa 2021, FDA CDER approval statistics, Nature Reviews
+// Drug Discovery modality analyses, Wong Siah & Lo (2019).
+// ---------------------------------------------------------------------------
+
+/**
+ * PoS modifier lookup. Each key maps to per-transition multipliers.
+ * A multiplier of 1.20 means +20% to that transition's probability.
+ */
+const POS_MODIFIERS: Record<string, Partial<Record<string, number>>> = {
+  // Biomarker validation: validated biomarker increases PoS
+  biomarker_validated: { phase2ToPhase3: 1.20, phase3ToApproval: 1.15 },
+  biomarker_unvalidated: { phase2ToPhase3: 0.85, phase3ToApproval: 0.80 },
+
+  // Regulatory precedent
+  has_approved_predecessor: { phase3ToApproval: 1.25 }, // Same target has approved drug
+  first_in_class_target: { phase2ToPhase3: 0.80, phase3ToApproval: 0.75 },
+
+  // Competition density
+  crowded_indication: { phase2ToPhase3: 0.90, phase3ToApproval: 0.85 }, // >5 competitors in same phase
+  unmet_need_high: { phase2ToPhase3: 1.10, phase3ToApproval: 1.15 },
+
+  // Modality-specific risks
+  gene_therapy: { phase1ToPhase2: 1.10, phase2ToPhase3: 0.85 }, // Manufacturing risk
+  car_t: { phase1ToPhase2: 1.15, phase2ToPhase3: 0.90 },
+
+  // Disease-modifying vs symptomatic (especially relevant for neurology)
+  disease_modifying: { phase2ToPhase3: 0.75, phase3ToApproval: 0.65 },
+  symptomatic: { phase2ToPhase3: 1.10, phase3ToApproval: 1.05 },
+};
+
+/** Maximum total PoS modifier deviation from base (±40%) */
+const MAX_POS_MODIFIER_DEVIATION = 0.40;
+
+/**
+ * Derive applicable PoS modifier keys from RNPVInput properties.
+ * Maps user-facing input fields to the modifier lookup keys.
+ */
+function deriveModifierKeys(input: RNPVInput): string[] {
+  const keys: string[] = [];
+
+  // Biomarker status
+  if (input.biomarkerStatus === 'selected') {
+    keys.push('biomarker_validated');
+  } else if (input.biomarkerStatus === 'unselected') {
+    keys.push('biomarker_unvalidated');
+  }
+
+  // Competitive position → crowded or unmet need
+  if (input.competitivePosition === 'crowded' || input.competitivePosition === 'behind') {
+    keys.push('crowded_indication');
+  }
+  if (input.competitivePosition === 'firstInClass') {
+    keys.push('first_in_class_target');
+    keys.push('unmet_need_high');
+  }
+
+  // Modality-specific
+  const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'geneTherapyRare'];
+  const carTModalities = ['carT_heme', 'carT_solid', 'carT_autoimmune', 'inVivoCarT', 'carTreg'];
+  if (geneTherapyModalities.includes(input.modality)) {
+    keys.push('gene_therapy');
+  }
+  if (carTModalities.includes(input.modality)) {
+    keys.push('car_t');
+  }
+
+  // Has approved predecessor — if competitive position shows existing approvals
+  if (input.competitivePosition === 'bestInClass' || input.competitivePosition === 'behind') {
+    keys.push('has_approved_predecessor');
+  }
+
+  return keys;
+}
+
+/**
+ * Calculate the combined PoS modifier for a specific phase transition.
+ *
+ * Stacks all applicable modifiers multiplicatively, then clamps the
+ * result to ±MAX_POS_MODIFIER_DEVIATION (±40%) of the unmodified value.
+ *
+ * @param transitionKey - Phase transition name (e.g., 'phase2ToPhase3')
+ * @param modifierKeys - Active modifier keys for this asset
+ * @returns Multiplicative adjustment factor (e.g., 1.15 = +15%)
+ */
+function getCombinedPosModifier(
+  transitionKey: string,
+  modifierKeys: string[],
+): number {
+  let combined = 1.0;
+
+  for (const key of modifierKeys) {
+    const modifiers = POS_MODIFIERS[key];
+    if (modifiers && modifiers[transitionKey] != null) {
+      combined *= modifiers[transitionKey]!;
+    }
+  }
+
+  // Clamp to ±40% deviation from base
+  const minMultiplier = 1.0 - MAX_POS_MODIFIER_DEVIATION;
+  const maxMultiplier = 1.0 + MAX_POS_MODIFIER_DEVIATION;
+  return Math.max(minMultiplier, Math.min(maxMultiplier, combined));
+}
+
 /**
  * Generic erosion at LOE by modality category.
  * Source: IQVIA Channel Dynamics, EvaluatePharma lifecycle analysis.
@@ -98,11 +213,35 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     regulatoryDesignations,
   );
 
+  // 2b. Apply indication-specific PoS modifiers
+  // These adjust the cumulative PoS based on biomarker validation,
+  // competitive density, modality-specific risks, and disease characteristics.
+  // Modifiers stack multiplicatively but cap at ±40% of base PoS.
+  const modifierKeys = deriveModifierKeys(input);
+  let indicationModifier = 1.0;
+  // Apply the combined modifier for the most impactful transition
+  // (approximation: use the geometric mean of all applicable transition modifiers)
+  const transitionKeys = ['phase1ToPhase2', 'phase2ToPhase3', 'phase3ToApproval'];
+  let modifierProduct = 1.0;
+  let modifierCount = 0;
+  for (const tk of transitionKeys) {
+    const mod = getCombinedPosModifier(tk, modifierKeys);
+    if (mod !== 1.0) {
+      modifierProduct *= mod;
+      modifierCount++;
+    }
+  }
+  if (modifierCount > 0) {
+    indicationModifier = Math.pow(modifierProduct, 1.0 / transitionKeys.length);
+  }
+
+  const modifiedPoS = Math.max(0, Math.min(1, rawCumulativePoS * indicationModifier));
+
   // Apply scenario PoS multiplier (e.g., 0.85 for reduced approval confidence)
   // Clamp to [0, 1] to keep probability valid
   const cumulativePoS = input.posMultiplier != null
-    ? Math.max(0, Math.min(1, rawCumulativePoS * input.posMultiplier))
-    : rawCumulativePoS;
+    ? Math.max(0, Math.min(1, modifiedPoS * input.posMultiplier))
+    : modifiedPoS;
 
   // 3. Calculate years to market from current phase
   const durations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
@@ -244,9 +383,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   }
 
   // 11. Model assumptions documentation
+  const posModifierNote = modifierKeys.length > 0
+    ? ` (indication-adjusted: ${modifierKeys.join(', ')} → ${indicationModifier >= 1 ? '+' : ''}${((indicationModifier - 1) * 100).toFixed(1)}%)`
+    : '';
   const modelAssumptions = [
     `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC${territory ? `, ${territory} territory` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType} deal structure` : ''})`,
-    `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%`,
+    `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote}`,
     `Years to market: ${yearsToMarket.toFixed(1)} years`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M (adj. for data quality; competitive position applied upstream)`,
     `Revenue ramp: ${REVENUE_CURVE.rampUpYears}yr ramp, ${REVENUE_CURVE.peakDurationYears}yr peak, ${(REVENUE_CURVE.declineRate * 100).toFixed(0)}% annual decline`,
