@@ -73,6 +73,10 @@
     {
       "path": "/api/cron/perplexity-discovery",
       "schedule": "0 2,10,18 * * *"
+    },
+    {
+      "path": "/api/cron/embed-deals",
+      "schedule": "0 4,12,20 * * *"
     }
   ]
 }
