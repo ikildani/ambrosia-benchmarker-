@@ -65,17 +65,18 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
 
-  // Determine which TAs to process this run (cycle based on last run)
+  // Determine which TAs to process this run (cycle based on last run's notes field)
   const { data: lastRun } = await supabase
     .from('data_ingestion_log')
-    .select('parameters')
+    .select('notes')
     .eq('source', 'perplexity_discovery')
-    .order('completed_at', { ascending: false })
+    .not('notes', 'is', null)
+    .order('id', { ascending: false })
     .limit(1)
     .single();
 
-  const lastIndex = (lastRun?.parameters as Record<string, number>)?.rotationIndex || 0;
-  const currentIndex = (lastIndex + 1) % TA_ROTATION.length;
+  const lastIndex = lastRun?.notes ? parseInt(lastRun.notes, 10) : -1;
+  const currentIndex = (isNaN(lastIndex) ? 0 : (lastIndex + 1)) % TA_ROTATION.length;
   const currentTAs = TA_ROTATION[currentIndex];
 
   console.log(`[perplexity] Run ${currentIndex}/${TA_ROTATION.length}: ${currentTAs.join(', ')}`);
@@ -93,17 +94,19 @@ export async function GET(request: NextRequest) {
     console.log(`[perplexity] Post-processing: ${reclassified} reclassified, ${statsUpdated} company stats updated`);
   }
 
-  // Log
-  await logCronRun(supabase, 'perplexity_discovery', {
-    fetched: result.queries_run,
-    processed: result.deals_discovered,
-    inserted: result.deals_inserted,
-    errors: result.errors,
-    parameters: {
-      rotationIndex: currentIndex,
-      therapeuticAreas: currentTAs,
-      byTA: result.by_ta,
-    },
+  // Log with cursor in notes field for rotation tracking
+  await supabase.from('data_ingestion_log').insert({
+    source: 'perplexity_discovery',
+    run_type: 'cron',
+    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta },
+    records_fetched: result.queries_run,
+    records_processed: result.deals_discovered,
+    records_inserted: result.deals_inserted,
+    records_failed: result.errors.length,
+    errors: result.errors.slice(0, 50),
+    status: 'completed',
+    completed_at: new Date().toISOString(),
+    notes: String(currentIndex), // Cursor for rotation tracking
   });
 
   console.log(`[perplexity] Done: ${result.deals_discovered} discovered, ${result.deals_inserted} inserted`);
