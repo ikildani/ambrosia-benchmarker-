@@ -5,7 +5,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 const faqs = [
   {
     question: "How does the calculator work?",
-    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. Pro users also get risk-adjusted NPV (rNPV) analysis with Monte Carlo simulation (10,000 iterations), AI-generated deal memos, negotiation playbooks, and partner matching. You get a data-driven starting point for any deal conversation in seconds.`
+    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. Pro users also get risk-adjusted NPV (rNPV) analysis with Monte Carlo simulation (10,000 iterations), institutional deal memos, negotiation playbooks, and partner matching. You get a data-driven starting point for any deal conversation in seconds.`
   },
   {
     question: "What data sources power the benchmarks?",

@@ -234,7 +234,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
             <ul className="space-y-2.5 mb-6">
               {[
-                'AI-powered deal memo',
+                'Institutional deal memo',
                 'All card drill-downs',
                 'Full comparable deals (15+)',
                 'Complete sensitivity analysis',

@@ -12,7 +12,7 @@ const useCases = [
     ),
     bullets: [
       'Know your asset\'s market value with rNPV analysis and Monte Carlo simulation',
-      'Present data-backed terms with AI-generated deal memos and negotiation playbooks',
+      'Present data-backed terms with institutional deal memos and negotiation playbooks',
       'Run sensitivity analysis and model scenario ranges before entering the room',
     ],
   },

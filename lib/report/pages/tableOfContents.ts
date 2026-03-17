@@ -37,7 +37,7 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
         This report provides a comprehensive deal valuation analysis for
         <strong style="color: ${COLORS.navy};">${indication}</strong>,
         including quantitative benchmarks, sensitivity modeling, comparable transactions,
-        partner intelligence, and AI-generated strategic insights. Each section is designed
+        partner intelligence, and strategic insights. Each section is designed
         to support data-driven licensing negotiations.
       </p>
 

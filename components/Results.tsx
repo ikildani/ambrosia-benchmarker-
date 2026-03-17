@@ -1640,7 +1640,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 </svg>
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <h4 className="text-lg font-bold text-white mb-1">AI-Powered Negotiation Playbook</h4>
+                <h4 className="text-lg font-bold text-white mb-1">Negotiation Playbook</h4>
                 <p className="text-neutral-300 text-sm">
                   Get strategic talking points tailored to your asset profile and market position
                 </p>

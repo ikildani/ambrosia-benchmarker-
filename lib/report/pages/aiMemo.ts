@@ -17,8 +17,8 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
           <span class="ai-badge">AI-GENERATED</span>
         </div>
         <div class="card" style="text-align: center; padding: 40px;">
-          <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">AI analysis not yet generated for this report.</div>
-          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to generate an AI-powered negotiation playbook and deal memo.</div>
+          <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">Deal analysis not yet generated for this report.</div>
+          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to generate a negotiation playbook and deal memo.</div>
         </div>
         ${pageFooter(meta.reportId)}
       </div>

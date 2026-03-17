@@ -164,7 +164,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
               </div>
               <ul className="space-y-2 mb-5 text-sm">
                 {[
-                  'AI-powered deal memo',
+                  'Institutional deal memo',
                   'Full comparable deals',
                   'Complete sensitivity analysis',
                   'Negotiation playbook',

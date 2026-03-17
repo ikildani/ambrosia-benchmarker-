@@ -49,8 +49,8 @@ export function generateReportHTML(data: PDFReportData): string {
   toc('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers');
   toc('Comparable Deals', 'Recent transactions and market benchmarks');
   toc('Partner Matches', 'Top-ranked potential licensing partners');
-  toc('AI Deal Memo', 'AI-generated strategic narrative and playbook');
-  if (hasPlaybook) toc('Negotiation Strategy', 'AI-powered negotiation playbook and tactics');
+  toc('Deal Memo', 'Strategic narrative and deal structure analysis');
+  if (hasPlaybook) toc('Negotiation Strategy', 'Data-driven negotiation playbook and tactics');
   toc('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation');
   toc('Deal Timeline', 'Gantt-style milestone schedule from signing to launch');
   toc('Therapeutic Intelligence', 'Indication-specific market context and trends');

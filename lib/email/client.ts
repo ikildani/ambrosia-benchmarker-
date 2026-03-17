@@ -215,7 +215,7 @@ export async function sendReportEmail(
           </div>
 
           <p style="font-size: 14px; color: #64748b;">
-            This report includes deal benchmarking, sensitivity analysis, comparable deals, partner matching, and AI-generated strategic insights.
+            This report includes deal benchmarking, sensitivity analysis, comparable deals, partner matching, and strategic insights.
           </p>
 
           <div style="text-align: center; margin: 24px 0;">

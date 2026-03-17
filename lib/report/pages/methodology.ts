@@ -83,7 +83,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           Actual deal terms are influenced by numerous factors not captured in this model, including but not limited to: proprietary clinical data, management quality, IP landscape, regulatory interactions, manufacturing complexity, market dynamics, and negotiation dynamics. Users should engage qualified financial and legal advisors before making any deal-related decisions.
         </p>
         <p>
-          AI-generated content (strategic analysis, negotiation playbook) is produced by large language models and may contain inaccuracies. All AI-generated sections are clearly labeled. This report is confidential and intended solely for the use of the addressee.
+          Strategic analysis and negotiation playbook sections are algorithmically generated and may contain inaccuracies. This report is confidential and intended solely for the use of the addressee.
         </p>
       </div>
 

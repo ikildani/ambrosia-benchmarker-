@@ -16,8 +16,8 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
         <div class="section-title-lg">AI Negotiation Strategy</div>
 
         <div class="callout" style="margin-top: 24px;">
-          <strong>Not Available:</strong> The AI Negotiation Playbook was not generated for this analysis.
-          Visit calculator.ambrosiaventures.co to generate an AI-powered negotiation strategy tailored to your deal parameters.
+          <strong>Not Available:</strong> The Negotiation Playbook was not generated for this analysis.
+          Visit calculator.ambrosiaventures.co to generate a negotiation strategy tailored to your deal parameters.
         </div>
 
         ${pageFooter(meta.reportId)}
@@ -83,7 +83,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
       <div class="section-title-lg">AI Negotiation Strategy</div>
 
       <p style="font-size: 11px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 18px;">
-        AI-generated strategy based on comparable deal structures and market dynamics.
+        Strategy generated based on comparable deal structures and market dynamics.
       </p>
 
       ${sectionCards}

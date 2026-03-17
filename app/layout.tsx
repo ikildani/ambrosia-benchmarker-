@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "Life Sciences Deal Calculator | Biopharma Licensing Benchmarks | Ambrosia Ventures",
     template: "%s | Ambrosia Ventures",
   },
-  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and AI-powered market intelligence for biopharma licensing deals across 12 therapeutic areas. 2,600+ real transactions, 850+ company profiles. Free to start.",
+  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and real-time market intelligence for biopharma licensing deals across 12 therapeutic areas. 2,600+ real transactions, 850+ company profiles. Free to start.",
   keywords: [
     "biotech deal calculator", "pharma licensing benchmarks", "biopharma deal terms",
     "rNPV analysis tool", "Monte Carlo simulation pharma", "deal benchmarking",

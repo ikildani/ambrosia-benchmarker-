@@ -287,7 +287,7 @@ export function generateHowToSchema() {
         '@type': 'HowToStep',
         position: 4,
         name: 'Run advanced analysis (Pro)',
-        text: 'Access rNPV modeling, Monte Carlo simulation (10,000 iterations), scenario planning, comparable deals, and AI-powered negotiation playbooks.',
+        text: 'Access rNPV modeling, Monte Carlo simulation (10,000 iterations), scenario planning, comparable deals, and data-driven negotiation playbooks.',
         url: `${BASE_URL}/calculator`,
       },
     ],

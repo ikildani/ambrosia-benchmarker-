@@ -32,7 +32,7 @@ function DealMemoSectionInner({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
+                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">Deal Memo</h3>
                   <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
                 </div>
               </div>
@@ -139,7 +139,7 @@ function DealMemoSectionInner({
             {!dealMemo && !memoLoading && !memoError && (
               <div className="text-center py-8">
                 <p className="text-sm text-neutral-500 dark:text-slate-400">
-                  Click &quot;Generate Memo&quot; to create an AI-powered deal analysis for your asset profile.
+                  Click &quot;Generate Memo&quot; to create a comprehensive deal analysis for your asset profile.
                 </p>
               </div>
             )}
@@ -157,7 +157,7 @@ function DealMemoSectionInner({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">AI Deal Memo</h3>
+                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-200">Deal Memo</h3>
                   <p className="text-xs text-purple-600 dark:text-purple-400">Board-ready analysis by Ambrosia AI</p>
                 </div>
               </div>
@@ -182,9 +182,9 @@ function DealMemoSectionInner({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h4 className="text-lg font-semibold text-neutral-800 dark:text-white mb-1">AI Deal Memo</h4>
+              <h4 className="text-lg font-semibold text-neutral-800 dark:text-white mb-1">Deal Memo</h4>
               <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 max-w-xs">
-                Get an AI-generated deal analysis with executive summary, risk factors, and negotiation priorities.
+                Get an deal analysis with executive summary, risk factors, and negotiation priorities.
               </p>
               <button
                 onClick={() => onBuyReport?.()}
