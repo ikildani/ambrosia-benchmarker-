@@ -37,47 +37,85 @@ interface PerplexityDeal {
   confidence: number;
 }
 
-// TA-specific discovery queries — Perplexity searches the entire web for these
+// Comprehensive discovery queries organized by TA and deal type
+// Each TA has 4-6 queries targeting different deal types, time periods, and angles
 const TA_DISCOVERY_QUERIES: Record<string, string[]> = {
   neurology: [
     'List all biopharma licensing deals and collaborations announced in 2025-2026 for neurology, CNS, Alzheimer\'s, Parkinson\'s, epilepsy, migraine, and schizophrenia. Include company names, drug names, deal values, and deal types.',
-    'Recent neurology drug licensing agreements and acquisitions 2024-2025 with financial terms disclosed, including upfront payments and milestone values',
+    'Recent neurology drug acquisitions and M&A 2023-2025 with acquisition prices, including AbbVie, Biogen, BMS, Lilly, Roche neuroscience deals',
+    'Biopharma option agreements and co-development deals for CNS and neurology drugs 2022-2025, where one company has option to license or co-develop',
+    'Chinese biotech licensing deals with Western pharma for neurology and CNS drugs 2023-2025, including ex-China rights deals',
+    'Neurology drug deals announced at JP Morgan Healthcare Conference and ASCO 2024 2025 2026 with financial terms',
   ],
   immunology: [
-    'List all biopharma licensing deals announced in 2024-2026 for autoimmune diseases, rheumatoid arthritis, lupus, inflammatory bowel disease, psoriasis, and atopic dermatitis. Include company names, asset names, deal values.',
-    'Recent immunology drug partnerships and collaboration agreements 2024-2025 with disclosed financial terms',
+    'List all biopharma licensing deals announced in 2024-2026 for autoimmune diseases, rheumatoid arthritis, lupus, IBD, psoriasis, and atopic dermatitis with financial terms.',
+    'Recent autoimmune drug acquisitions and M&A 2023-2025 including TL1A, IL-17, IL-23, JAK inhibitor deals with deal values',
+    'Biopharma co-development and option agreements for immunology and autoimmune drugs 2022-2025 with opt-in rights and cost-sharing',
+    'CAR-T cell therapy deals for autoimmune diseases 2024-2025 2026, including in vivo CAR-T and allogeneic approaches',
   ],
   cardiovascular: [
-    'List all biopharma licensing deals and acquisitions announced in 2024-2026 for cardiovascular disease, heart failure, hypertension, ATTR cardiomyopathy, and pulmonary hypertension. Include financial terms.',
-    'Recent cardiovascular drug licensing agreements 2024-2025 with upfront payments and milestone values disclosed',
+    'List biopharma licensing deals 2024-2026 for cardiovascular, heart failure, ATTR cardiomyopathy, PAH, hypertension with financial terms.',
+    'Cardiovascular drug acquisitions and M&A 2022-2025 including MyoKardia, Acceleron, CinCor, BridgeBio with deal values',
+    'siRNA and antisense deals for cardiovascular targets 2022-2025 including PCSK9, Lp(a), angiotensinogen, Factor XI',
+    'Option and co-development agreements for cardiovascular drugs 2022-2025 with disclosed economics',
   ],
   metabolic: [
-    'List all biopharma deals announced in 2024-2026 for obesity, GLP-1, diabetes, NASH/MASH, and metabolic diseases. Include company names, drug names, deal values, and deal types.',
-    'Recent obesity and diabetes drug licensing deals and acquisitions 2024-2025 with disclosed financial terms',
+    'List all obesity and GLP-1 drug licensing deals 2023-2026 with company names and financial terms including Novo Nordisk, Lilly, Roche, Amgen, AstraZeneca, Viking, Structure',
+    'NASH MASH liver disease drug deals and acquisitions 2022-2025 with deal values and milestones',
+    'Diabetes drug co-development and option agreements 2022-2025 including T1D cell therapy, SGLT2, and insulin deals',
+    'Chinese biotech out-licensing deals for obesity and metabolic drugs to Western pharma 2023-2025',
   ],
   infectiousDisease: [
-    'List all biopharma licensing deals announced in 2024-2026 for infectious diseases, HIV, hepatitis B, RSV, influenza, antibiotics, and vaccines. Include financial terms.',
-    'Recent antiviral and vaccine licensing agreements and collaborations 2024-2025 with deal values',
+    'List biopharma licensing deals 2024-2026 for HIV, hepatitis B, RSV, flu vaccines, antibiotics with financial terms.',
+    'mRNA vaccine partnerships and licensing deals 2022-2025 for influenza, RSV, and pandemic preparedness',
+    'Hepatitis B cure program licensing deals 2022-2025 including siRNA, antisense, capsid inhibitor approaches',
+    'Antibiotic and antifungal drug deals 2022-2025 including BARDA-funded programs and pull incentive deals',
   ],
   rareDisease: [
-    'List all biopharma deals announced in 2024-2026 for rare diseases, gene therapy, SMA, Duchenne, hemophilia, and orphan drugs. Include company names, asset names, deal values.',
-    'Recent gene therapy and rare disease licensing agreements 2024-2025 with upfront payments disclosed',
+    'List gene therapy licensing deals and acquisitions 2023-2026 for rare diseases with financial terms including SMA, DMD, hemophilia, Fabry',
+    'Rare disease drug acquisitions and M&A 2022-2025 including Alexion, Shire, Sarepta, BioMarin, Ultragenyx',
+    'AAV gene therapy platform deals and collaborations 2022-2025 with upfront payments and milestones',
+    'Rare disease option agreements and co-development deals 2022-2025 with opt-in provisions',
+    'CRISPR and gene editing deals for rare diseases 2023-2025 including base editing, prime editing',
   ],
   hematology: [
-    'List all biopharma licensing deals announced in 2024-2026 for hematology, leukemia, lymphoma, multiple myeloma, sickle cell disease, and hemophilia. Include financial terms.',
-    'Recent CAR-T cell therapy and hematology drug deals 2024-2025 with deal values and company names',
+    'List CAR-T cell therapy and bispecific antibody deals for blood cancers 2023-2026 including lymphoma, myeloma, leukemia',
+    'Sickle cell disease and hemophilia gene therapy deals 2022-2025 with financial terms',
+    'Hematology drug acquisitions 2022-2025 including MorphoSys, Seagen, Forma, Sierra Oncology with deal values',
+    'Myelofibrosis and MDS drug licensing deals 2022-2025 with upfront payments and milestones',
   ],
   ophthalmology: [
-    'List all biopharma licensing deals announced in 2024-2026 for ophthalmology, macular degeneration, glaucoma, dry eye, and retinal diseases. Include financial terms.',
+    'List ophthalmology drug deals 2023-2026 for AMD, glaucoma, dry eye, diabetic retinopathy with financial terms.',
+    'Gene therapy and cell therapy deals for eye diseases 2022-2025 including retinal diseases',
+    'Ophthalmology drug acquisitions 2022-2025 including Iveric Bio, Aerie, Oyster Point with deal values',
   ],
   dermatology: [
-    'List all biopharma licensing deals announced in 2024-2026 for dermatology, atopic dermatitis, psoriasis, vitiligo, and alopecia. Include financial terms and deal types.',
+    'List dermatology drug deals 2023-2026 for atopic dermatitis, psoriasis, vitiligo, alopecia, hidradenitis with financial terms.',
+    'Dermatology acquisitions and M&A 2022-2025 including Dermavant, Concert, Dice, Kymab with deal values',
+    'IL-13, IL-31, IL-17, OX40L antibody deals for skin diseases 2022-2025 with deal structures',
   ],
   gastroenterology: [
-    'List all biopharma licensing deals announced in 2024-2026 for gastroenterology, IBD, Crohn\'s disease, ulcerative colitis, NASH, celiac disease, and eosinophilic esophagitis. Include financial terms.',
+    'List gastroenterology drug deals 2023-2026 for IBD, Crohn\'s, ulcerative colitis, NASH, celiac, EoE with financial terms.',
+    'TL1A antibody and integrin inhibitor deals for IBD 2022-2025 including Prometheus, Morphic, Roivant',
+    'NASH/MASH drug deals and acquisitions 2022-2025 including CymaBay, Madrigal, Intercept with values',
   ],
   womensHealth: [
-    'List all biopharma licensing deals announced in 2024-2026 for women\'s health, endometriosis, uterine fibroids, menopause, fertility, and contraception. Include financial terms.',
+    'List women\'s health drug deals 2022-2026 for endometriosis, uterine fibroids, menopause, fertility with financial terms.',
+    'Breast cancer and ovarian cancer drug deals 2023-2025 including ADC, PARP inhibitor, and CDK4/6 licensing agreements',
+    'GnRH antagonist and NK3 receptor antagonist deals for women\'s health 2020-2025 with deal values',
+  ],
+  // Cross-TA queries for deal types that are underrepresented
+  _option_deals: [
+    'Biopharma option agreements 2023-2025 where company paid option fee for right to license drug, including opt-in fees and exercise payments across all therapeutic areas',
+    'Pharma evaluation and option deals 2022-2025 with option periods, opt-in rights, and exercise fees for non-oncology drugs',
+  ],
+  _codev_deals: [
+    'Biopharma co-development agreements 2023-2025 with 50/50 cost-sharing, profit-sharing, or co-promotion rights across all therapeutic areas',
+    'Joint development and co-commercialization pharma deals 2022-2025 with shared costs and territory splits',
+  ],
+  _china_deals: [
+    'Chinese biotech companies licensing drugs to Western pharma 2023-2025 with upfront payments and milestones, ex-China rights deals',
+    'China-to-West pharma licensing deals 2024-2025 across all therapeutic areas with financial terms disclosed',
   ],
 };
 
