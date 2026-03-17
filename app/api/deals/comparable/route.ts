@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findComparableDealsWithDB } from '@/lib/comparableDeals.server';
+import { findSimilarDeals } from '@/lib/embeddings';
 import { captureApiError } from '@/lib/sentry-api';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { createServerClient } from '@/lib/supabase/server';
@@ -57,22 +58,67 @@ export async function GET(request: NextRequest) {
     const modality = params.get('modality') || '';
     const indication = params.get('indication') || '';
     const phase = params.get('phase') || undefined;
+    const dealType = params.get('dealType') || undefined;
 
     // Verify tier server-side to prevent free users from accessing all deals via API
     const tier = await getUserTier();
     const hasFullAccess = tier === 'pro' || tier === 'report';
 
-    // Fetch all matching deals to get total count
-    const allDeals = await findComparableDealsWithDB(
+    // Fetch keyword-scored deals (existing approach)
+    const keywordDeals = await findComparableDealsWithDB(
       { therapeuticArea, modality, indication, phase },
-      hasFullAccess ? 10 : 15 // Fetch enough to show total count for free users
+      hasFullAccess ? 15 : 15
     );
+
+    // Try semantic matching via Perplexity embeddings (silent enhancement)
+    let semanticDeals: typeof keywordDeals = [];
+    const perplexityKey = process.env.PERPLEXITY_API_KEY;
+    if (perplexityKey && hasFullAccess) {
+      try {
+        const supabase = createServiceClient();
+        const dbResults = await findSimilarDeals(supabase, perplexityKey, {
+          therapeuticArea,
+          indication,
+          modality,
+          phase,
+          territory: params.get('territory') || undefined,
+          dealType,
+        }, 10);
+
+        // Convert DB semantic results to UI format
+        semanticDeals = dbResults.map((d, idx) => ({
+          id: `sem-${idx}`,
+          parties: `${d.licensor_name} / ${d.licensee_name}`,
+          totalValue: d.total_deal_value_usd
+            ? (d.total_deal_value_usd >= 1_000_000_000
+              ? `$${(d.total_deal_value_usd / 1_000_000_000).toFixed(1)}B`
+              : `$${Math.round(d.total_deal_value_usd / 1_000_000)}M`)
+            : 'Undisclosed',
+          year: d.announced_date ? new Date(d.announced_date).getFullYear() : new Date().getFullYear(),
+          phase: undefined,
+          relevanceReasons: [`${Math.round(d.similarity * 100)}% match`],
+        }));
+      } catch {
+        // Silent fallback — semantic matching is an enhancement, not required
+      }
+    }
+
+    // Merge: semantic results first (higher quality), then keyword results, dedup by parties+year
+    const seen = new Set<string>();
+    const merged = [...semanticDeals, ...keywordDeals].filter(deal => {
+      const key = `${deal.parties.toLowerCase()}|${deal.year}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const allDeals = merged.slice(0, hasFullAccess ? 15 : 15);
 
     // Limit response for free users - server-side enforcement
     const deals = hasFullAccess ? allDeals : allDeals.slice(0, FREE_DEAL_LIMIT);
     const totalAvailable = allDeals.length;
 
-    return NextResponse.json({ deals, totalAvailable });
+    return NextResponse.json({ deals, totalAvailable, semantic: semanticDeals.length > 0 });
   } catch (error) {
     captureApiError(error, 'deals-comparable');
     return NextResponse.json(
