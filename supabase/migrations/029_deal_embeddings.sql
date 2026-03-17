@@ -2,13 +2,12 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Add embedding column to deals table
--- 3,416 dimensions from Perplexity pplx-embed-v1-4b model
-ALTER TABLE deals ADD COLUMN IF NOT EXISTS embedding vector(3416);
+-- 2,560 dimensions from Perplexity pplx-embed-v1-4b model (base64_int8 encoding)
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS embedding vector(2560);
 
 -- Semantic deal search function
--- Used by the calculator to find comparable deals by meaning, not just keywords
 CREATE OR REPLACE FUNCTION match_deals(
-  query_embedding vector(3416),
+  query_embedding vector(2560),
   match_count int DEFAULT 10,
   match_threshold float DEFAULT 0.3,
   filter_ta text DEFAULT NULL
@@ -39,24 +38,11 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    d.id,
-    d.licensor_name,
-    d.licensee_name,
-    d.asset_name,
-    d.asset_description,
-    d.deal_type,
-    d.therapeutic_area,
-    d.modality,
-    d.indication_specific,
-    d.phase_at_signing,
-    d.territory,
-    d.upfront_usd,
-    d.milestones_total_usd,
-    d.total_deal_value_usd,
-    d.royalty_low_pct,
-    d.royalty_high_pct,
-    d.announced_date,
-    d.confidence_score,
+    d.id, d.licensor_name, d.licensee_name, d.asset_name, d.asset_description,
+    d.deal_type, d.therapeutic_area, d.modality, d.indication_specific,
+    d.phase_at_signing, d.territory, d.upfront_usd, d.milestones_total_usd,
+    d.total_deal_value_usd, d.royalty_low_pct, d.royalty_high_pct,
+    d.announced_date, d.confidence_score,
     1 - (d.embedding <=> query_embedding) AS similarity
   FROM deals d
   WHERE d.embedding IS NOT NULL

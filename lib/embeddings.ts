@@ -13,7 +13,24 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 const PERPLEXITY_EMBED_API = 'https://api.perplexity.ai/v1/embeddings';
 const EMBED_MODEL = 'pplx-embed-v1-4b';
-const BATCH_SIZE = 5; // Perplexity allows array input
+const EMBED_DIMS = 2560; // int8 encoding gives 2560 dimensions
+const BATCH_SIZE = 5;
+
+/**
+ * Decode base64-encoded int8 embedding from Perplexity into float array.
+ */
+function decodeBase64Int8(b64: string): number[] {
+  // Decode base64 to binary
+  const binary = Buffer.from(b64, 'base64');
+  // Convert int8 bytes to float array (normalize to [-1, 1] range)
+  const result: number[] = [];
+  for (let i = 0; i < binary.length; i++) {
+    // Read as signed int8
+    const val = binary[i] > 127 ? binary[i] - 256 : binary[i];
+    result.push(val / 127.0); // Normalize to [-1, 1]
+  }
+  return result;
+}
 
 /**
  * Generate embedding for a single text using Perplexity.
@@ -33,6 +50,7 @@ export async function generateEmbedding(
     body: JSON.stringify({
       input: [text],
       model: EMBED_MODEL,
+      encoding_format: 'base64_int8',
     }),
   });
 
@@ -41,7 +59,9 @@ export async function generateEmbedding(
   }
 
   const data = await response.json();
-  return data.data?.[0]?.embedding || [];
+  const raw = data.data?.[0]?.embedding;
+  if (!raw) return [];
+  return decodeBase64Int8(raw);
 }
 
 /**
@@ -62,6 +82,7 @@ export async function generateEmbeddings(
     body: JSON.stringify({
       input: texts,
       model: EMBED_MODEL,
+      encoding_format: 'base64_int8',
     }),
   });
 
@@ -70,7 +91,7 @@ export async function generateEmbeddings(
   }
 
   const data = await response.json();
-  return (data.data || []).map((d: { embedding: number[] }) => d.embedding);
+  return (data.data || []).map((d: { embedding: string }) => decodeBase64Int8(d.embedding));
 }
 
 /**
@@ -149,10 +170,12 @@ export async function embedUnprocessedDeals(
       const embeddings = await generateEmbeddings(texts, perplexityApiKey);
 
       for (let j = 0; j < batch.length; j++) {
-        if (embeddings[j] && embeddings[j].length === 3416) {
+        if (embeddings[j] && embeddings[j].length === EMBED_DIMS) {
+          // pgvector expects format: [0.1, 0.2, ...]
+          const vecStr = `[${embeddings[j].join(',')}]`;
           const { error } = await supabase
             .from('deals')
-            .update({ embedding: JSON.stringify(embeddings[j]) })
+            .update({ embedding: vecStr })
             .eq('id', batch[j].id);
 
           if (!error) {
@@ -218,8 +241,9 @@ export async function findSimilarDeals(
   if (embedding.length !== 3416) return [];
 
   // Search using pgvector
+  const vecStr = `[${embedding.join(',')}]`;
   const { data, error } = await supabase.rpc('match_deals', {
-    query_embedding: JSON.stringify(embedding),
+    query_embedding: vecStr,
     match_count: matchCount,
     match_threshold: 0.25,
     filter_ta: inputs.therapeuticArea || null,
