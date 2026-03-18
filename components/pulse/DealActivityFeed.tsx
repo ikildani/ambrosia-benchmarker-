@@ -98,7 +98,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-teal-50 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300">
+                    <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
                       {formatModality(deal.modality)}
                     </span>
                     <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${phaseColors[deal.phase_at_signing] || 'bg-slate-100 text-slate-600'}`}>
@@ -118,7 +118,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-sm font-bold text-teal-600 dark:text-teal-400">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">
                     {isPro ? formatUsd(deal.upfront_usd) : (
                       <span className="text-slate-300 dark:text-slate-600 blur-sm select-none">$XXM</span>
                     )}

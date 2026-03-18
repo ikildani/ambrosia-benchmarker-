@@ -51,13 +51,13 @@ export default function WatchButton({ itemType, itemValue, companyId, size = 'sm
         disabled={loading}
         className={`inline-flex items-center transition-all ${sizeClasses} ${
           watched
-            ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-500/30'
-            : 'bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-500/20 dark:hover:text-teal-400'
+            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+            : 'bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400'
         } ${loading ? 'opacity-50' : ''}`}
         title={watched ? 'Stop watching' : `Watch this ${itemType}`}
       >
         {toggling ? (
-          <div className={`${size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} rounded-full border-2 border-teal-300 border-t-teal-600 animate-spin`} />
+          <div className={`${size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} rounded-full border-2 border-blue-300 border-t-blue-600 animate-spin`} />
         ) : (
           <svg className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} fill={watched ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
