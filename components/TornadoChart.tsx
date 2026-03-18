@@ -119,7 +119,18 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
       .sort((a, b) => b.totalSpread - a.totalSpread);
   }, [sensitivities, baseValue]);
 
-  if (chartData.length === 0) return null;
+  if (chartData.length === 0) {
+    return (
+      <div className="mt-6 sm:mt-8">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-6 bg-slate-50 dark:bg-slate-800/50 text-center">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Sensitivity analysis requires a positive risk-adjusted NPV baseline.
+            Adjust asset parameters (later phase, larger market, or higher probability of success) to generate the tornado chart.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Compute max extent for symmetric axis
   const maxExtent = Math.max(

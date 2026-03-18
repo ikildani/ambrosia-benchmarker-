@@ -71,32 +71,46 @@ interface ScenarioConfig {
   timelineShift: number;
 }
 
-const SCENARIO_CONFIGS: ScenarioConfig[] = [
-  {
-    name: 'bear',
-    weight: 0.20,
-    posShiftFraction: -0.20,
-    peakSalesMultiplier: -0.30,
-    discountRateShift: 0.02,
-    timelineShift: 1.5,
-  },
-  {
-    name: 'base',
-    weight: 0.50,
-    posShiftFraction: 0,
-    peakSalesMultiplier: 0,
-    discountRateShift: 0,
-    timelineShift: 0,
-  },
-  {
-    name: 'bull',
-    weight: 0.30,
-    posShiftFraction: 0.15,
-    peakSalesMultiplier: 0.40,
-    discountRateShift: -0.01,
-    timelineShift: -0.5,
-  },
-];
+// Phase-calibrated scenario weights: late-stage assets have tighter distributions
+function getScenarioConfigs(phase?: string): ScenarioConfig[] {
+  // Late-stage: more certainty → heavier base weight, less extreme tails
+  const isLateStage = phase && ['phase3', 'nda_filed', 'approved'].includes(phase);
+  const isEarlyStage = phase && ['preclinical', 'phase1', 'discovery'].includes(phase);
+
+  const bearWeight = isLateStage ? 0.15 : isEarlyStage ? 0.25 : 0.20;
+  const bullWeight = isLateStage ? 0.25 : isEarlyStage ? 0.35 : 0.30;
+  const baseWeight = 1 - bearWeight - bullWeight;
+
+  return [
+    {
+      name: 'bear',
+      weight: bearWeight,
+      posShiftFraction: isEarlyStage ? -0.25 : -0.15,
+      peakSalesMultiplier: isEarlyStage ? -0.40 : -0.25,
+      discountRateShift: 0.02,
+      timelineShift: isLateStage ? 0.5 : 1.5,
+    },
+    {
+      name: 'base',
+      weight: baseWeight,
+      posShiftFraction: 0,
+      peakSalesMultiplier: 0,
+      discountRateShift: 0,
+      timelineShift: 0,
+    },
+    {
+      name: 'bull',
+      weight: bullWeight,
+      posShiftFraction: isEarlyStage ? 0.20 : 0.10,
+      peakSalesMultiplier: isEarlyStage ? 0.50 : 0.30,
+      discountRateShift: -0.01,
+      timelineShift: isLateStage ? -0.25 : -0.5,
+    },
+  ];
+}
+
+// Default configs for backwards compatibility
+const SCENARIO_CONFIGS = getScenarioConfigs();
 
 /**
  * Select a scenario using weighted random sampling.
@@ -528,12 +542,14 @@ export function runMonteCarlo(
   // Pre-compute Cholesky factor for correlated sampling
   const choleskyL = choleskyDecompose(correlationMatrix);
 
+  // Use phase-calibrated scenario configs for more realistic distributions
+  const phaseConfigs = getScenarioConfigs(guardedInput.phase);
+
   for (let i = 0; i < iterations; i++) {
     // --- Scenario weighting: sample which macro scenario applies ---
-    // This creates a multimodal distribution (realistic for pharma:
-    // either the drug works or it doesn't)
+    // Phase-calibrated: late-stage assets have tighter distributions
     const scenarioIdx = sampleScenario(rng);
-    const scenario = SCENARIO_CONFIGS[scenarioIdx];
+    const scenario = phaseConfigs[scenarioIdx];
     scenarioAssignment[i] = scenarioIdx;
 
     // Scenario-adjusted base parameters
@@ -705,9 +721,9 @@ export function runMonteCarlo(
   });
 
   const scenario_breakdown = {
-    bear: { p50: scenarioP50s[0], weight: SCENARIO_CONFIGS[0].weight },
-    base: { p50: scenarioP50s[1], weight: SCENARIO_CONFIGS[1].weight },
-    bull: { p50: scenarioP50s[2], weight: SCENARIO_CONFIGS[2].weight },
+    bear: { p50: scenarioP50s[0], weight: phaseConfigs[0].weight },
+    base: { p50: scenarioP50s[1], weight: phaseConfigs[1].weight },
+    bull: { p50: scenarioP50s[2], weight: phaseConfigs[2].weight },
   };
 
   // ----- Assemble result ------------------------------------------------

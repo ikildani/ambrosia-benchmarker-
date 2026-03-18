@@ -569,7 +569,7 @@ function getCogsRate(modality: string): number {
  * Source: IQVIA Channel Dynamics — biologics retain more revenue post-LOE
  * than small molecules due to slower biosimilar adoption. */
 function getGenericErosionRate(modality: string): number {
-  const biologicModalities = ['mab', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor', 'fcrnAntagonist', 'complementInhibitor'];
+  const biologicModalities = ['mab', 'antibody', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor'];
   const cellTherapyModalities = ['carT_heme', 'carT_solid', 'cellTherapy', 'carT_autoimmune', 'inVivoCarT', 'carTreg', 'stemCell'];
   const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'aso', 'rnai', 'oligonucleotide', 'mrna'];
   const vaccineModalities = ['therapeuticVaccine', 'vaccinePreventive', 'oncolyticVirus'];
@@ -665,8 +665,11 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
   const percents: Record<string, { low: number; median: number; high: number }> = {
     preclinical: { low: 0.03, median: 0.05, high: 0.08 },
     phase1: { low: 0.05, median: 0.10, high: 0.15 },
+    phase1_2: { low: 0.07, median: 0.13, high: 0.18 },
     phase2: { low: 0.10, median: 0.18, high: 0.25 },
+    phase2_3: { low: 0.15, median: 0.24, high: 0.32 },
     phase3: { low: 0.20, median: 0.30, high: 0.40 },
+    nda_filed: { low: 0.28, median: 0.40, high: 0.52 },
     approved: { low: 0.35, median: 0.50, high: 0.65 },
   };
   return percents[phase] || percents.phase2;

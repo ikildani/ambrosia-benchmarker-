@@ -17,8 +17,11 @@ import type { RNPVInput } from './types';
 const PEAK_SALES_MULTIPLIER: Record<string, { low: number; median: number; high: number }> = {
   preclinical: { low: 6, median: 12, high: 20 },
   phase1: { low: 4, median: 8, high: 14 },
+  phase1_2: { low: 3, median: 6.5, high: 11 },
   phase2: { low: 2.5, median: 5, high: 9 },
+  phase2_3: { low: 2, median: 4, high: 7 },
   phase3: { low: 1.5, median: 3, high: 5 },
+  nda_filed: { low: 1.2, median: 2, high: 3.5 },
   approved: { low: 1.0, median: 1.5, high: 2.5 },
 };
 
@@ -73,7 +76,10 @@ export function computeTornadoSensitivities(
   const baseResult = calculateRNPV(baseInput);
   const baseValue = baseResult.riskAdjustedNPV; // $M
 
-  if (baseValue <= 0) return [];
+  // For negative/zero rNPV, still generate sensitivities using absolute value
+  // This allows users to see which factors most impact their asset's value
+  const effectiveBase = baseValue <= 0 ? Math.max(Math.abs(baseValue), 1) : baseValue;
+  const isNegativeBase = baseValue <= 0;
 
   const sensitivities: TornadoSensitivity[] = [];
 

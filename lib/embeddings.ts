@@ -238,7 +238,7 @@ export async function findSimilarDeals(
 
   // Generate embedding for user's query
   const embedding = await generateEmbedding(queryText, perplexityApiKey);
-  if (embedding.length !== 3416) return [];
+  if (embedding.length !== EMBED_DIMS) return [];
 
   // Search using pgvector
   const vecStr = `[${embedding.join(',')}]`;
