@@ -4,45 +4,44 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 const faqs = [
   {
-    question: "How does the calculator work?",
-    answer: `Enter your asset's key details — modality, development phase, indication, and territory — and our calculator analyzes ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals to generate benchmark ranges for upfront payments, milestones, and royalty rates. Pro users also get risk-adjusted NPV (rNPV) analysis with Monte Carlo simulation (10,000 iterations), institutional deal memos, negotiation playbooks, and partner matching. You get a data-driven starting point for any deal conversation in seconds.`
+    question: "How does the Deal Terms Calculator work?",
+    answer: `Enter your asset's details — modality, development phase, indication, and deal type — and our engine analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions to generate benchmark ranges for upfront payments, milestones, royalties, and total deal value. Pro subscribers also get risk-adjusted NPV (rNPV) with Monte Carlo simulation, AI-generated deal memos, negotiation playbooks, partner matching, and branded exports. Results are generated in under 30 seconds.`
   },
   {
     question: "What data sources power the benchmarks?",
-    answer: "Every benchmark is grounded in real transaction data drawn from SEC filings (10-K, 10-Q, 8-K), public deal announcements, and verified industry sources. Our dataset is continuously updated as new deals are disclosed, so you're always working with the most current market intelligence available."
+    answer: "Every benchmark is derived from real transaction data sourced from SEC filings (10-K, 10-Q, 8-K), public deal announcements, press releases, and verified industry databases. Our dataset covers licensing, acquisitions, collaborations, option agreements, and co-development deals from 2017 to present. Data is continuously refreshed as new transactions are disclosed — including weekly automated scraping of SEC EDGAR 8-K filings."
   },
   {
     question: "How accurate are the deal estimates?",
-    answer: "The ranges we surface represent the 25th–75th percentile of where comparable deals actually transacted — this is deal intelligence, not a prediction. Final terms will always depend on asset differentiation, competitive dynamics, and negotiation leverage. Think of our estimates as a strategic starting point grounded in market reality."
+    answer: "The ranges represent the 25th–75th percentile of where comparable deals actually transacted. This is market intelligence grounded in real data, not a prediction. Final terms depend on asset differentiation, competitive dynamics, data strength, and negotiation leverage. Our estimates give you a data-driven starting point that would take an analyst 2-3 weeks to assemble manually."
   },
   {
-    question: "What therapeutic areas are covered?",
-    answer: `We cover 12 therapeutic areas: oncology, neurology/CNS, immunology/autoimmune, metabolic/obesity, rare disease, cardiovascular, infectious disease, ophthalmology, women's health, dermatology, pulmonology, and gastroenterology. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from ADCs and CAR-T to anti-TL1A and FcRn antagonists, with indications covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, myasthenia gravis, GLP-1 analogs, and more.`
+    question: "What therapeutic areas and modalities are covered?",
+    answer: `We cover all major life sciences sectors including oncology, neurology/CNS, immunology/autoimmune, metabolic/obesity, rare disease, cardiovascular, infectious disease, ophthalmology, women's health, dermatology, hematology, and gastroenterology. Our ${DEAL_STATS.TOTAL_DEALS} deal database spans modalities from antibody-drug conjugates (ADCs) and CAR-T to bispecifics, RNAi, gene therapy, small molecules, GLP-1 analogs, and more — covering solid tumors, hematologic malignancies, Alzheimer's, Parkinson's, lupus, IBD, and hundreds of other indications.`
+  },
+  {
+    question: "What's included in the Pro plan?",
+    answer: "Pro ($99/month) unlocks the complete platform: rNPV analysis with 10,000-iteration Monte Carlo simulation, Market Pulse intelligence dashboard, unlimited AI deal memos and negotiation playbooks, scenario comparison tools, watchlist with market alerts, 120+ company profiles with pipeline tracking and patent cliff timelines, AI-powered partner matching with outreach email generation, branded PDF and Excel exports, and priority support. Free users get unlimited calculations with headline metrics and 3 comparable deals."
   },
   {
     question: "Is my data kept confidential?",
-    answer: "Yes. All API endpoints are authenticated and rate-limited. Your inputs and asset details remain completely private. We are fully GDPR-compliant — you can export or delete all your data at any time from your dashboard settings. Payments are processed securely through Stripe."
-  },
-  {
-    question: "What's the difference between Free and Pro?",
-    answer: "The free tier gives you unlimited calculations with headline metrics, 3 comparable deals, and top sensitivity parameters. Pro ($99/mo) unlocks the full platform — rNPV analysis with Monte Carlo simulation, Market Pulse intelligence dashboard, unlimited AI deal memos, negotiation playbooks, scenario comparison, watchlist with market alerts, 120+ company profiles with pipeline tracking and patent cliff timelines, AI partner matching, outreach email generation, branded PDF and Excel exports, and priority support. Individual Deal Reports ($149 each) are also available for one-time analysis."
+    answer: "Absolutely. All API endpoints are authenticated and rate-limited. Your inputs and asset details are never shared, stored beyond your session, or used to train any models. We are fully GDPR-compliant — you can export or delete all your data at any time from your dashboard. Payments are processed securely through Stripe with no card data touching our servers."
   },
   {
     question: "How often is the data updated?",
-    answer: "Continuously. Our dataset is refreshed as new deals are publicly disclosed through SEC filings and deal announcements. You're always benchmarking against the most current market data available."
+    answer: "Continuously. Our automated pipeline scrapes SEC EDGAR filings weekly, and we manually verify and add major transactions as they're announced. Clinical trial data is synced from ClinicalTrials.gov, and FDA regulatory events are tracked in real-time. You're always benchmarking against the most current market data available."
   },
   {
-    question: "Can I share my results with my team?",
-    answer: "Yes. Pro users can export branded PDF and Excel reports, generate shareable links with configurable expiration, and compare saved scenarios across team members. We just ask that you don't redistribute the underlying benchmark data externally."
+    question: "Can I export and share results?",
+    answer: "Pro users can export institutional-quality branded PDF reports and Excel workbooks, generate shareable links with configurable expiration, and compare saved scenarios. Reports include full methodology, comparable deals, sensitivity analysis, and executive summaries — ready for board presentations, investor meetings, or deal team discussions."
   },
   {
-    question: "Is this available for academic or research use?",
-    answer: "Yes. The free tier is available to academic researchers and students. For institutional access or bulk research needs, reach out to us at info@ambrosiaventures.co."
+    question: "Who built this?",
+    answer: "The Deal Terms Calculator is built by Ambrosia Ventures, a life sciences strategy and M&A advisory firm. Our deal experience across biotech licensing, M&A, partnerships, and fundraising is embedded in every calculation. We built the tool we wished existed when advising on real transactions."
   },
 ];
 
 export default function FAQSection() {
-  // JSON-LD for FAQ schema
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -58,7 +57,6 @@ export default function FAQSection() {
 
   return (
     <section id="faq" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-slate-50 dark:bg-slate-800/50">
-      {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

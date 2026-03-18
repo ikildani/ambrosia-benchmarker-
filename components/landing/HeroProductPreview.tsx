@@ -3,24 +3,31 @@ import React from 'react';
 const HeroProductPreview = React.memo(function HeroProductPreview() {
   return (
     <div className="hidden lg:block relative" aria-hidden="true">
-      {/* Subtle glow */}
-      <div className="absolute -inset-4 bg-gradient-to-br from-slate-500/8 via-blue-500/5 to-slate-400/3 dark:from-blue-600/10 dark:via-slate-600/5 dark:to-blue-500/3 rounded-3xl blur-2xl" />
+      {/* Ambient glow */}
+      <div className="absolute -inset-8 bg-gradient-to-br from-teal-500/8 via-blue-500/5 to-purple-500/4 rounded-3xl blur-3xl" />
 
       <div
-        className="relative motion-safe:animate-float"
-        style={{ transform: 'perspective(1000px) rotateY(-5deg) rotateX(2deg)' }}
+        className="relative"
+        style={{ transform: 'perspective(1200px) rotateY(-4deg) rotateX(2deg)' }}
       >
-        <div className="w-[380px] xl:w-[420px] bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xl shadow-black/20 overflow-hidden">
+        <div className="w-[400px] xl:w-[440px] rounded-2xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+            border: '1px solid rgba(100,116,139,0.2)',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(100,116,139,0.1)',
+          }}
+        >
           {/* Browser chrome */}
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 px-4 py-3" style={{ background: 'rgba(15,23,42,0.8)', borderBottom: '1px solid rgba(100,116,139,0.15)' }}>
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-              <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#f87171' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#fbbf24' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#34d399' }} />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                <svg className="w-2.5 h-2.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-medium"
+                style={{ background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(100,116,139,0.15)', color: '#94a3b8' }}>
+                <svg className="w-2.5 h-2.5" style={{ color: '#34d399' }} fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
                 calculator.ambrosiaventures.co
@@ -29,61 +36,65 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
           </div>
 
           {/* Content */}
-          <div className="p-4 space-y-3">
-            {/* Tags */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full uppercase tracking-wider">Live</span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">Phase 2</span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">ADC</span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">Breast (TNBC)</span>
+          <div className="p-5 space-y-4">
+            {/* Status bar */}
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                style={{ background: 'rgba(52,211,153,0.1)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Analysis Complete
+              </span>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded" style={{ background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}>Phase 2</span>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded" style={{ background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}>Oncology</span>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded" style={{ background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}>ADC</span>
             </div>
 
-            {/* Primary metrics — large, readable */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-600/50">
-                <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Upfront</div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white">$85M</div>
-                <div className="text-[9px] text-slate-400 dark:text-slate-500">$47M — $612M range</div>
+            {/* Primary metrics */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl p-4" style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(100,116,139,0.1)' }}>
+                <div className="text-[9px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: '#475569' }}>Upfront Payment</div>
+                <div className="text-2xl font-bold" style={{ color: '#f0f4f8', fontFamily: 'var(--font-mono, monospace)' }}>$85M</div>
+                <div className="text-[9px] mt-1" style={{ color: '#475569' }}>$47M — $612M range</div>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-600/50">
-                <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Value</div>
-                <div className="text-xl font-bold text-slate-900 dark:text-white">$450M</div>
-                <div className="text-[9px] text-slate-400 dark:text-slate-500">$280M — $1.2B range</div>
+              <div className="rounded-xl p-4" style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(0,201,167,0.15)' }}>
+                <div className="text-[9px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: '#475569' }}>Total Deal Value</div>
+                <div className="text-2xl font-bold" style={{ color: '#00c9a7', fontFamily: 'var(--font-mono, monospace)' }}>$450M</div>
+                <div className="text-[9px] mt-1" style={{ color: '#475569' }}>$280M — $1.2B range</div>
               </div>
             </div>
 
-            {/* Secondary metrics — compact row */}
+            {/* Secondary metrics */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
-                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Milestones</div>
-                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">$120M</div>
+              <div className="text-center rounded-lg p-3" style={{ background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(100,116,139,0.08)' }}>
+                <div className="text-[8px] font-semibold uppercase tracking-[0.1em]" style={{ color: '#475569' }}>Milestones</div>
+                <div className="text-sm font-bold mt-1" style={{ color: '#f0f4f8', fontFamily: 'var(--font-mono, monospace)' }}>$120M</div>
               </div>
-              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
-                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Royalties</div>
-                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">8-12%</div>
+              <div className="text-center rounded-lg p-3" style={{ background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(100,116,139,0.08)' }}>
+                <div className="text-[8px] font-semibold uppercase tracking-[0.1em]" style={{ color: '#475569' }}>Royalties</div>
+                <div className="text-sm font-bold mt-1" style={{ color: '#f0f4f8', fontFamily: 'var(--font-mono, monospace)' }}>8–12%</div>
               </div>
-              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
-                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">rNPV</div>
-                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">$312M</div>
-              </div>
-            </div>
-
-            {/* Deal structure bar */}
-            <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-2.5 border border-slate-100 dark:border-slate-600/30">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Deal Structure</span>
-                <span className="text-[9px] font-medium text-slate-500 dark:text-slate-400">25% Upfront / 75% Milestones</span>
-              </div>
-              <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden flex">
-                <div className="h-full bg-slate-700 dark:bg-blue-400 rounded-l-full" style={{ width: '25%' }} />
-                <div className="h-full bg-slate-400 dark:bg-blue-600 rounded-r-full" style={{ width: '75%' }} />
+              <div className="text-center rounded-lg p-3" style={{ background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(100,116,139,0.08)' }}>
+                <div className="text-[8px] font-semibold uppercase tracking-[0.1em]" style={{ color: '#475569' }}>rNPV</div>
+                <div className="text-sm font-bold mt-1" style={{ color: '#60a5fa', fontFamily: 'var(--font-mono, monospace)' }}>$312M</div>
               </div>
             </div>
 
-            {/* Comparable deals mini-preview */}
-            <div className="text-[9px] text-slate-400 dark:text-slate-500 flex items-center justify-between pt-1">
-              <span>Based on 47 comparable ADC deals</span>
-              <span className="text-blue-600 dark:text-blue-400 font-medium">View all →</span>
+            {/* Deal structure */}
+            <div className="rounded-lg p-3" style={{ background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(100,116,139,0.08)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.1em]" style={{ color: '#475569' }}>Deal Structure</span>
+                <span className="text-[9px] font-medium" style={{ color: '#94a3b8', fontFamily: 'var(--font-mono, monospace)' }}>25% Upfront / 75% Milestones</span>
+              </div>
+              <div className="h-2 rounded-full overflow-hidden flex" style={{ background: 'rgba(100,116,139,0.1)' }}>
+                <div className="h-full rounded-l-full" style={{ width: '25%', background: 'linear-gradient(90deg, #00c9a7, #00e4bf)' }} />
+                <div className="h-full rounded-r-full" style={{ width: '75%', background: 'linear-gradient(90deg, #60a5fa, #9499d1)' }} />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[9px]" style={{ color: '#334155' }}>Based on 47 comparable ADC deals</span>
+              <span className="text-[9px] font-medium" style={{ color: '#5fd4e3' }}>View comps →</span>
             </div>
           </div>
         </div>
