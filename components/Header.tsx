@@ -10,7 +10,7 @@ const AVATAR_GRADIENTS = [
   { id: 'ocean', from: 'from-cyan-500', to: 'to-blue-600', label: 'Ocean' },
   { id: 'aurora', from: 'from-violet-500', to: 'to-fuchsia-500', label: 'Aurora' },
   { id: 'sunset', from: 'from-orange-400', to: 'to-rose-500', label: 'Sunset' },
-  { id: 'forest', from: 'from-emerald-500', to: 'to-teal-600', label: 'Forest' },
+  { id: 'forest', from: 'from-emerald-500', to: 'to-emerald-600', label: 'Forest' },
   { id: 'midnight', from: 'from-indigo-600', to: 'to-purple-700', label: 'Midnight' },
   { id: 'slate', from: 'from-slate-500', to: 'to-zinc-600', label: 'Slate' },
 ];
@@ -235,12 +235,12 @@ export default function Header({
                   href={item.href}
                   className={`relative text-sm font-medium transition-colors group ${
                     item.isActive
-                      ? 'text-teal-600 dark:text-teal-400'
-                      : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
+                      ? 'text-slate-900 dark:text-white font-semibold'
+                      : 'text-neutral-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {item.label}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-teal-500 transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-slate-900 dark:bg-white transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </a>
               ) : (
                 <Link
@@ -248,12 +248,12 @@ export default function Header({
                   href={item.href}
                   className={`relative text-sm font-medium transition-colors flex items-center gap-1.5 group ${
                     item.isActive
-                      ? 'text-teal-600 dark:text-teal-400'
-                      : 'text-neutral-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
+                      ? 'text-slate-900 dark:text-white font-semibold'
+                      : 'text-neutral-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {item.label}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-teal-500 transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-slate-900 dark:bg-white transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </Link>
               )
             ))}
@@ -317,8 +317,8 @@ export default function Header({
                           isDashboardPage ? 'bg-slate-50 dark:bg-slate-700' : ''
                         }`}
                       >
-                        <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 dark:bg-white/20 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-slate-900 dark:text-white font-semibold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                           </svg>
                         </div>
@@ -357,8 +357,8 @@ export default function Header({
                               isPulsePage ? 'bg-slate-50 dark:bg-slate-700' : ''
                             }`}
                           >
-                            <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center">
-                              <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-900 dark:bg-white/20 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-slate-900 dark:text-white font-semibold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                               </svg>
                             </div>
@@ -415,14 +415,14 @@ export default function Header({
               <>
                 <button
                   onClick={onSignInClick}
-                  className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={onSignUpClick}
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
-                           bg-gradient-to-r from-teal-600 to-cyan-500 text-white hover:from-teal-700 hover:to-cyan-600 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
+                           bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
                 >
                   <span>Get Started</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,12 +495,12 @@ export default function Header({
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
-                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400'
+                        ? 'bg-slate-100 dark:bg-slate-900 dark:bg-white/20 text-slate-900 dark:text-white font-semibold'
                         : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      item.isActive ? 'bg-teal-100 dark:bg-teal-500/30' : 'bg-slate-100 dark:bg-slate-800'
+                      item.isActive ? 'bg-slate-200 dark:bg-slate-900 dark:bg-white/30' : 'bg-slate-100 dark:bg-slate-800'
                     }`}>
                       {iconMap[item.label] || iconMap.About}
                     </div>
@@ -513,12 +513,12 @@ export default function Header({
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-4 px-4 py-4 rounded-2xl font-medium transition-colors touch-feedback ${
                       item.isActive
-                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400'
+                        ? 'bg-slate-100 dark:bg-slate-900 dark:bg-white/20 text-slate-900 dark:text-white font-semibold'
                         : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      item.isActive ? 'bg-teal-100 dark:bg-teal-500/30' : 'bg-slate-100 dark:bg-slate-800'
+                      item.isActive ? 'bg-slate-200 dark:bg-slate-900 dark:bg-white/30' : 'bg-slate-100 dark:bg-slate-800'
                     }`}>
                       {iconMap[item.label] || iconMap.About}
                     </div>
@@ -579,7 +579,7 @@ export default function Header({
                       setMobileMenuOpen(false);
                       onSignUpClick?.();
                     }}
-                    className="flex items-center justify-center gap-2 mx-4 py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold transition-all shadow-lg shadow-teal-500/25 touch-feedback active:scale-[0.98]"
+                    className="flex items-center justify-center gap-2 mx-4 py-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold transition-all shadow-lg shadow-slate-900/15 touch-feedback active:scale-[0.98]"
                   >
                     <span className="text-base">Get Started Free</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

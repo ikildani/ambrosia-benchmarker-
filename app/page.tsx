@@ -57,7 +57,7 @@ function LiveDemoSection() {
     return calculateDealTerms(input);
   }, [demoPhase, demoModality, demoIndication]);
 
-  const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all cursor-pointer appearance-none";
+  const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none";
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
@@ -108,22 +108,22 @@ function LiveDemoSection() {
               label: 'Upfront Payment',
               value: `${formatCurrency(result.terms.upfront.low)} - ${formatCurrency(result.terms.upfront.high)}`,
               median: formatCurrency(result.terms.upfront.median),
-              gradient: 'from-teal-500 to-cyan-500',
+              gradient: 'from-slate-800 to-slate-900',
             },
             {
               label: 'Total Deal Value',
               value: `${formatCurrency(result.terms.totalDealValue.low)} - ${formatCurrency(result.terms.totalDealValue.high)}`,
               median: formatCurrency(result.terms.totalDealValue.median),
-              gradient: 'from-cyan-500 to-teal-500',
+              gradient: 'from-slate-700 to-slate-900',
             },
             {
               label: 'Royalty Rate',
               value: `${result.tieredRoyalties.base.low}% - ${result.tieredRoyalties.base.high}%`,
               median: `${((result.tieredRoyalties.base.low + result.tieredRoyalties.base.high) / 2).toFixed(1)}%`,
-              gradient: 'from-teal-400 to-cyan-400',
+              gradient: 'from-slate-600 to-slate-800',
             },
           ].map((card, idx) => (
-            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-300 hover:-translate-y-1">
+            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg hover:border-slate-200 dark:hover:border-blue-600/50 transition-all duration-300 hover:-translate-y-1">
               <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{card.label}</div>
               <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
                 {card.value}
@@ -137,8 +137,8 @@ function LiveDemoSection() {
         <div className="text-center">
           <Link
             href={`/calculator?phase=${demoPhase}&modality=${demoModality}&indication=${demoIndication}`}
-            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl
-                     shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
+            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-8 py-4 rounded-xl
+                     shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
           >
             <span>Get Full Analysis with Milestones & Partner Matching</span>
             <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,12 +225,12 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-teal-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 xl:pt-48 pb-16 sm:pb-20 lg:pb-24 xl:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
+      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-slate-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 xl:pt-48 pb-16 sm:pb-20 lg:pb-24 xl:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
         {/* Premium Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.12),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.15),rgba(0,0,0,0))]" />
-          <div className="absolute top-20 right-[10%] w-72 h-72 bg-teal-200/30 dark:bg-teal-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 left-[5%] w-96 h-96 bg-cyan-100/40 dark:bg-cyan-500/15 rounded-full blur-3xl" />
+          <div className="absolute top-20 right-[10%] w-72 h-72 bg-slate-200/30 dark:bg-slate-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 left-[5%] w-96 h-96 bg-slate-100/40 dark:bg-slate-500/15 rounded-full blur-3xl" />
           <div className="absolute top-1/2 right-[20%] w-64 h-64 bg-navy-100/20 dark:bg-navy-500/20 rounded-full blur-3xl" />
           <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, #1a1e42 1px, transparent 0)`,
@@ -243,7 +243,7 @@ export default function Home() {
           {/* Icon */}
           <div className="mb-8 sm:mb-10 lg:mb-12 animate-fade-in">
             <div className="relative inline-flex">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-30 scale-125" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-30 scale-125" />
               <div className="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-700/50">
                 <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14" viewBox="0 0 48 48" fill="none">
                   <path d="M14 8C14 8 18 12 24 12C30 12 34 8 34 8" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
@@ -273,7 +273,7 @@ export default function Home() {
           <h1 className={`text-3xl sm:text-5xl lg:text-7xl font-bold font-display mb-5 sm:mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="text-slate-900 dark:text-white">Deal Terms</span>
             <br />
-            <span className="bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-400 dark:from-teal-400 dark:via-cyan-400 dark:to-teal-300 bg-clip-text text-transparent drop-shadow-sm">
+            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 dark:from-blue-400 dark:via-blue-300 dark:to-blue-400 bg-clip-text text-transparent drop-shadow-sm">
               Calculator
             </span>
           </h1>
@@ -290,21 +290,21 @@ export default function Home() {
           <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Link
               href="/calculator"
-              className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                       shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
+              className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
+                       shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
             >
               <span className="relative z-10">Try Calculator Free</span>
               <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-700 to-slate-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
 
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
                 className="group inline-flex items-center justify-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-teal-300 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-slate-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
               >
                 <span>My Dashboard</span>
                 <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,7 +315,7 @@ export default function Home() {
               <a
                 href="#how-it-works"
                 className="group inline-flex items-center justify-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-teal-300 dark:hover:border-teal-500 hover:text-teal-700 dark:hover:text-teal-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-slate-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
               >
                 <span>See How It Works</span>
                 <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,10 +336,10 @@ export default function Home() {
               <div
                 key={idx}
                 className="group flex items-center gap-1.5 sm:gap-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700 rounded-full px-3 sm:px-5 py-2 sm:py-3
-                         hover:bg-white dark:hover:bg-slate-800 hover:border-teal-200 dark:hover:border-teal-500 hover:shadow-lg hover:shadow-teal-500/5 dark:hover:shadow-teal-500/10 transition-all duration-300"
+                         hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-blue-600 hover:shadow-lg hover:shadow-slate-500/5 dark:hover:shadow-slate-500/10 transition-all duration-300"
               >
-                <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-teal-50 dark:bg-teal-500/20 group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30 transition-colors flex-shrink-0">
-                  <svg className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-50 dark:bg-slate-500/20 group-hover:bg-slate-100 dark:group-hover:bg-slate-500/30 transition-colors flex-shrink-0">
+                  <svg className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={feature.icon} />
                   </svg>
                 </div>
@@ -373,11 +373,11 @@ export default function Home() {
       <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-6">
-              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-6">
+              <svg className="w-4 h-4 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Simple Process</span>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-400">Simple Process</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               How It Works
@@ -411,15 +411,15 @@ export default function Home() {
               <div key={idx} className="relative group">
                 {/* Connector line */}
                 {idx < 2 && (
-                  <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-teal-200 dark:from-teal-500/30 to-transparent" />
+                  <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-slate-200 dark:from-blue-600/15 to-transparent" />
                 )}
-                <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-slate-200 dark:hover:border-blue-600/50 transition-all duration-500 hover:-translate-y-2">
                   <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-soft flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-soft flex-shrink-0">
                       {item.step}
                     </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-50 dark:bg-teal-500/20 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30 transition-colors flex-shrink-0">
-                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 dark:bg-slate-500/20 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:bg-slate-100 dark:group-hover:bg-slate-500/30 transition-colors flex-shrink-0">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                       </svg>
                     </div>
@@ -439,8 +439,8 @@ export default function Home() {
           <div className="text-center mt-8 sm:mt-10 lg:mt-12">
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl
-                       shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl
+                       shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
             >
               <span>Start Your Analysis</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,11 +455,11 @@ export default function Home() {
       <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-neutral-50 dark:bg-slate-800/50 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-4 py-1.5 mb-6">
-              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-6">
+              <svg className="w-4 h-4 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Why Use This Tool</span>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-400">Why Use This Tool</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               Built for Life Sciences Professionals
@@ -475,49 +475,49 @@ export default function Home() {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
                 title: 'Deal Benchmarking',
                 description: 'Instant benchmarks from 2,600+ real deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
-                gradient: 'from-teal-500 to-cyan-500',
+                gradient: 'from-slate-800 to-slate-900',
               },
               {
                 icon: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',
                 title: 'Financial Modeling',
                 description: 'Risk-adjusted NPV (rNPV) analysis and Monte Carlo simulation with 10,000 iterations. Model probability-weighted deal outcomes and scenario ranges.',
-                gradient: 'from-cyan-500 to-blue-500',
+                gradient: 'from-blue-600 to-blue-800',
               },
               {
                 icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
                 title: 'Market Pulse',
                 description: 'Weekly market intelligence with benchmark sparklines, deal flow trends, competitive landscape analysis, and market size & epidemiology data.',
-                gradient: 'from-teal-400 to-cyan-400',
+                gradient: 'from-slate-600 to-slate-800',
               },
               {
                 icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
                 title: 'Company Intelligence',
                 description: 'Deep profiles on 850+ pharma and biotech companies with deal history, pipeline tracking, patent cliff timelines, and intelligent partner matching.',
-                gradient: 'from-cyan-500 to-teal-500',
+                gradient: 'from-slate-700 to-slate-900',
               },
               {
                 icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
                 title: 'Deal Toolkit',
                 description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 16-page branded PDF reports.',
-                gradient: 'from-teal-500 to-emerald-500',
+                gradient: 'from-slate-700 to-slate-900',
               },
               {
                 icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
                 title: 'Enterprise-Grade Platform',
                 description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and weekly SEC EDGAR data ingestion.',
-                gradient: 'from-emerald-400 to-teal-400',
+                gradient: 'from-slate-500 to-slate-700',
               },
             ].map((feature, idx) => (
               <div
                 key={idx}
-                className="group bg-white dark:bg-slate-800 p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-500 hover:-translate-y-2"
+                className="group bg-white dark:bg-slate-800 p-5 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-slate-200 dark:hover:border-blue-600/50 transition-all duration-500 hover:-translate-y-2"
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${feature.gradient} rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5 lg:mb-6 shadow-soft group-hover:scale-110 group-hover:shadow-glow transition-all duration-300`}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                   </svg>
                 </div>
-                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-navy-800 dark:text-white mb-2 sm:mb-3 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-navy-800 dark:text-white mb-2 sm:mb-3 group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors">
                   {feature.title}
                 </h3>
                 <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed">
@@ -539,11 +539,11 @@ export default function Home() {
       <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
         <div className="max-w-5xl xl:max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-10">
-            <div className="inline-flex items-center gap-2 bg-cyan-50 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30 rounded-full px-4 py-1.5 mb-4">
-              <svg className="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-blue-900/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-4">
+              <svg className="w-4 h-4 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">AI Partner Matching</span>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-400">AI Partner Matching</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3">
               Find Your Ideal Licensing Partner
@@ -565,11 +565,11 @@ export default function Home() {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700" />
-                  <span className="text-lg font-bold text-teal-600">{partner.score}%</span>
+                  <span className="text-lg font-bold text-blue-700 dark:text-blue-400">{partner.score}%</span>
                 </div>
                 <div className="font-semibold text-sm text-slate-800 dark:text-white mb-1">{partner.name}</div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">{partner.focus}</div>
-                <div className="text-xs text-teal-600 dark:text-teal-400 mt-1">{partner.deals}</div>
+                <div className="text-xs text-blue-700 dark:text-blue-400 dark:text-blue-400 mt-1">{partner.deals}</div>
               </div>
             ))}
           </div>
@@ -577,7 +577,7 @@ export default function Home() {
           <div className="text-center">
             <Link
               href="/calculator"
-              className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-500 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
+              className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-slate-900/15 hover:shadow-2xl hover:shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
             >
               <span>See Your Partner Matches</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -628,9 +628,9 @@ export default function Home() {
             </div>
 
             {/* Market Pulse */}
-            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-teal-200 dark:hover:border-teal-500/50 transition-all duration-500 hover:-translate-y-1">
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-slate-200 dark:hover:border-blue-600/50 transition-all duration-500 hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-soft">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-white shadow-soft">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
@@ -642,15 +642,15 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Benchmark trends', 'Deal flow charts', 'Competitive landscape', 'Market sizing'].map((tag) => (
-                  <span key={tag} className="text-xs px-2.5 py-1 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-full">{tag}</span>
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-slate-50 dark:bg-slate-500/10 text-blue-700 dark:text-blue-400 dark:text-blue-400 rounded-full">{tag}</span>
                 ))}
               </div>
             </div>
 
             {/* Company Intelligence */}
-            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-cyan-200 dark:hover:border-cyan-500/50 transition-all duration-500 hover:-translate-y-1">
+            <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-slate-300 dark:hover:border-blue-600/50 transition-all duration-500 hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white shadow-soft">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-soft">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
@@ -662,7 +662,7 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Deal history', 'Pipeline tracker', 'Patent cliffs', 'Strategic fit scores'].map((tag) => (
-                  <span key={tag} className="text-xs px-2.5 py-1 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-full">{tag}</span>
+                  <span key={tag} className="text-xs px-2.5 py-1 bg-slate-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 rounded-full">{tag}</span>
                 ))}
               </div>
             </div>
@@ -670,7 +670,7 @@ export default function Home() {
             {/* AI Deal Tools */}
             <div className="group bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-slate-700 shadow-soft hover:shadow-soft-lg hover:border-emerald-200 dark:hover:border-emerald-500/50 transition-all duration-500 hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-soft">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center text-white shadow-soft">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
@@ -745,7 +745,7 @@ export default function Home() {
               <span
                 key={idx}
                 className="px-3 sm:px-5 py-2 sm:py-2.5 bg-neutral-50 dark:bg-slate-800 rounded-lg sm:rounded-xl text-navy-700 dark:text-slate-300 text-xs sm:text-sm font-medium border border-neutral-200 dark:border-slate-700
-                         hover:bg-teal-50 dark:hover:bg-teal-500/20 hover:border-teal-200 dark:hover:border-teal-500/50 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-300 cursor-default"
+                         hover:bg-slate-50 dark:hover:bg-slate-500/20 hover:border-slate-200 dark:hover:border-blue-600/50 hover:text-blue-800 dark:hover:text-blue-400 transition-all duration-300 cursor-default"
               >
                 {service}
               </span>
@@ -787,19 +787,19 @@ export default function Home() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-teal-400 transition-colors duration-300 relative group"
+                    className="hover:text-blue-400 transition-colors duration-300 relative group"
                   >
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300" />
                   </a>
                 ) : (
                   <Link
                     key={idx}
                     href={link.href}
-                    className="hover:text-teal-400 transition-colors duration-300 relative group"
+                    className="hover:text-blue-400 transition-colors duration-300 relative group"
                   >
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-400 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300" />
                   </Link>
                 )
               ))}
@@ -829,9 +829,9 @@ export default function Home() {
                 <p className="text-xs text-neutral-400 leading-relaxed">
                   <strong className="text-neutral-300">Consult Professionals:</strong> Before making any business decisions,
                   consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
-                  <Link href="/terms" className="text-teal-400 hover:text-teal-300 ml-1 underline">Terms</Link>
+                  <Link href="/terms" className="text-blue-400 hover:text-blue-300 ml-1 underline">Terms</Link>
                   {' '}&bull;{' '}
-                  <Link href="/privacy" className="text-teal-400 hover:text-teal-300 underline">Privacy</Link>
+                  <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline">Privacy</Link>
                 </p>
               </div>
             </div>
