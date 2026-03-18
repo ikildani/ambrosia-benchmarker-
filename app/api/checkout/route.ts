@@ -125,20 +125,29 @@ export async function POST(request: NextRequest) {
 
     // Promo code handling (subscription only)
     if (promoCode) {
-      let promoId = promoCode;
-      if (!promoCode.startsWith('promo_')) {
-        const normalizedCode = promoCode.trim().toUpperCase();
-        const promoCodes = await stripe.promotionCodes.list({
-          code: normalizedCode,
-          active: true,
-          limit: 1,
-        });
-        if (promoCodes.data.length === 0) {
-          return apiError('Invalid or expired promo code. Please try again without the code.', 400);
+      const normalizedCode = promoCode.trim().toUpperCase();
+
+      // AMBROSIA code: 7-day free trial instead of coupon discount
+      if (normalizedCode === 'AMBROSIA') {
+        sessionOptions.subscription_data = {
+          ...sessionOptions.subscription_data,
+          trial_period_days: 7,
+        };
+      } else {
+        let promoId = promoCode;
+        if (!promoCode.startsWith('promo_')) {
+          const promoCodes = await stripe.promotionCodes.list({
+            code: normalizedCode,
+            active: true,
+            limit: 1,
+          });
+          if (promoCodes.data.length === 0) {
+            return apiError('Invalid or expired promo code. Please try again without the code.', 400);
+          }
+          promoId = promoCodes.data[0].id;
         }
-        promoId = promoCodes.data[0].id;
+        sessionOptions.discounts = [{ promotion_code: promoId }];
       }
-      sessionOptions.discounts = [{ promotion_code: promoId }];
     } else {
       sessionOptions.allow_promotion_codes = true;
     }

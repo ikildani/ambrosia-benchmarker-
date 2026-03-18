@@ -30,6 +30,20 @@ export async function POST(request: NextRequest) {
     const normalizedCode = code.trim().toUpperCase();
     const stripe = new Stripe(stripeSecretKey);
 
+    // AMBROSIA code: 7-day free trial (handled directly, not via Stripe promo)
+    if (normalizedCode === 'AMBROSIA') {
+      return apiSuccess({
+        valid: true,
+        promoId: 'AMBROSIA',
+        discount: {
+          percentOff: 100,
+          amountOff: null,
+          duration: 'once',
+          name: '7-Day Pro Trial',
+        },
+      });
+    }
+
     // Look up active promotion codes matching this code string
     const promoCodes = await stripe.promotionCodes.list({
       code: normalizedCode,

@@ -108,24 +108,21 @@ function LiveDemoSection() {
               label: 'Upfront Payment',
               value: `${formatCurrency(result.terms.upfront.low)} - ${formatCurrency(result.terms.upfront.high)}`,
               median: formatCurrency(result.terms.upfront.median),
-              gradient: 'from-slate-800 to-slate-900',
             },
             {
               label: 'Total Deal Value',
               value: `${formatCurrency(result.terms.totalDealValue.low)} - ${formatCurrency(result.terms.totalDealValue.high)}`,
               median: formatCurrency(result.terms.totalDealValue.median),
-              gradient: 'from-slate-700 to-slate-900',
             },
             {
               label: 'Royalty Rate',
               value: `${result.tieredRoyalties.base.low}% - ${result.tieredRoyalties.base.high}%`,
               median: `${((result.tieredRoyalties.base.low + result.tieredRoyalties.base.high) / 2).toFixed(1)}%`,
-              gradient: 'from-slate-600 to-slate-800',
             },
           ].map((card, idx) => (
-            <div key={idx} className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg hover:border-slate-200 dark:hover:border-blue-600/50 transition-all duration-300 hover:-translate-y-1">
+            <div key={idx} className="group bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-600 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 hover:-translate-y-1">
               <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{card.label}</div>
-              <div className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">
                 {card.value}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400">Median: {card.median}</div>
@@ -368,6 +365,68 @@ export default function Home() {
 
       {/* Live Demo Section */}
       <LiveDemoSection />
+
+      {/* Data Coverage Section — data-forward visualization */}
+      <section className="py-8 sm:py-10 px-4 xl:px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">3,000+ verified transactions across 12 therapeutic areas</p>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-700 dark:bg-blue-400" />SEC 8-K Filings</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />Press Releases</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />Regulatory</span>
+            </div>
+          </div>
+          {/* Horizontal bar chart — deal distribution by TA */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
+            {[
+              { ta: 'Oncology', deals: 1791, pct: 58 },
+              { ta: 'Neurology', deals: 250, pct: 14 },
+              { ta: 'Immunology', deals: 238, pct: 13 },
+              { ta: 'Rare Disease', deals: 145, pct: 8 },
+              { ta: 'Cardiovascular', deals: 138, pct: 7.5 },
+              { ta: 'Metabolic', deals: 129, pct: 7 },
+              { ta: 'Infectious Disease', deals: 107, pct: 6 },
+              { ta: 'Ophthalmology', deals: 62, pct: 3.4 },
+              { ta: 'Dermatology', deals: 52, pct: 2.8 },
+              { ta: 'Women\'s Health', deals: 52, pct: 2.8 },
+              { ta: 'Gastroenterology', deals: 49, pct: 2.7 },
+              { ta: 'Hematology', deals: 49, pct: 2.7 },
+            ].map(item => (
+              <div key={item.ta} className="flex flex-col">
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate">{item.ta}</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-2 tabular-nums">{item.deals.toLocaleString()}</span>
+                </div>
+                <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000"
+                    style={{ width: `${Math.max(item.pct, 3)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Summary stats row */}
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
+            {[
+              { label: 'Verified Deals', value: '3,000+' },
+              { label: 'Companies', value: '960+' },
+              { label: 'Deal Types', value: '5' },
+              { label: 'Updated', value: 'Daily' },
+              { label: 'Sources', value: '10+' },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <div className="text-lg font-bold text-slate-900 dark:text-white">{s.value}</div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
