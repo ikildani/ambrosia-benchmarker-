@@ -32,6 +32,24 @@ export async function POST(request: NextRequest) {
 
     // AMBROSIA code: 7-day free trial (handled directly, not via Stripe promo)
     if (normalizedCode === 'AMBROSIA') {
+      // Check if this email has already used the code via Stripe
+      const emailFromBody = body.email?.trim().toLowerCase();
+      if (emailFromBody) {
+        const customers = await stripe.customers.list({ email: emailFromBody, limit: 1 });
+        if (customers.data.length > 0) {
+          const subs = await stripe.subscriptions.list({
+            customer: customers.data[0].id,
+            limit: 10,
+          });
+          const hadTrial = subs.data.some(
+            s => s.metadata?.promo_code === 'AMBROSIA' || s.trial_end !== null
+          );
+          if (hadTrial) {
+            return apiSuccess({ valid: false, message: 'This promo code has already been used on your account.' });
+          }
+        }
+      }
+
       return apiSuccess({
         valid: true,
         promoId: 'AMBROSIA',

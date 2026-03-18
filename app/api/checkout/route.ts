@@ -127,8 +127,42 @@ export async function POST(request: NextRequest) {
     if (promoCode) {
       const normalizedCode = promoCode.trim().toUpperCase();
 
-      // AMBROSIA code: 7-day free trial instead of coupon discount
+      // AMBROSIA code: 7-day free trial — one use per user
       if (normalizedCode === 'AMBROSIA') {
+        // Check if this user/email has already used the AMBROSIA code
+        const supabase = createServiceClient();
+        const checkEmail = customerEmail?.toLowerCase();
+        let alreadyUsed = false;
+
+        if (userId) {
+          const { data: existing } = await supabase
+            .from('sessions')
+            .select('id')
+            .eq('user_id', userId)
+            .like('metadata->>promo_code', 'AMBROSIA')
+            .limit(1);
+          if (existing && existing.length > 0) alreadyUsed = true;
+        }
+
+        // Also check Stripe for any previous trials on this email
+        if (!alreadyUsed && checkEmail) {
+          const customers = await stripe.customers.list({ email: checkEmail, limit: 1 });
+          if (customers.data.length > 0) {
+            const subs = await stripe.subscriptions.list({
+              customer: customers.data[0].id,
+              limit: 10,
+            });
+            const hadTrial = subs.data.some(
+              s => s.metadata?.promo_code === 'AMBROSIA' || s.trial_end !== null
+            );
+            if (hadTrial) alreadyUsed = true;
+          }
+        }
+
+        if (alreadyUsed) {
+          return apiError('This promo code has already been used on your account.', 400);
+        }
+
         sessionOptions.subscription_data = {
           ...sessionOptions.subscription_data,
           trial_period_days: 7,
