@@ -1,24 +1,14 @@
 import React from 'react';
 
-const metrics = [
-  { label: 'Upfront Payment', value: '$85M', color: 'from-slate-700 to-slate-600', bgLight: 'bg-slate-50', bgDark: 'dark:bg-slate-500/10', textLight: 'text-slate-700', textDark: 'dark:text-blue-400' },
-  { label: 'Total Deal Value', value: '$450M', color: 'from-cyan-500 to-cyan-400', bgLight: 'bg-cyan-50', bgDark: 'dark:bg-cyan-500/10', textLight: 'text-cyan-600', textDark: 'dark:text-cyan-400' },
-  { label: 'Dev Milestones', value: '$120M', color: 'from-emerald-500 to-emerald-400', bgLight: 'bg-emerald-50', bgDark: 'dark:bg-emerald-500/10', textLight: 'text-emerald-600', textDark: 'dark:text-emerald-400' },
-  { label: 'Royalties', value: '8-12%', color: 'from-purple-500 to-purple-400', bgLight: 'bg-purple-50', bgDark: 'dark:bg-purple-500/10', textLight: 'text-purple-600', textDark: 'dark:text-purple-400' },
-];
-
 const HeroProductPreview = React.memo(function HeroProductPreview() {
   return (
     <div className="hidden lg:block relative" aria-hidden="true">
-      {/* Glow effect behind the browser window */}
-      <div className="absolute -inset-4 bg-gradient-to-br from-slate-500/10 via-blue-500/8 to-slate-400/5 dark:from-blue-500/10 dark:via-slate-500/5 dark:to-blue-400/5 rounded-3xl blur-2xl" />
+      {/* Subtle glow */}
+      <div className="absolute -inset-4 bg-gradient-to-br from-slate-500/8 via-blue-500/5 to-slate-400/3 dark:from-blue-600/10 dark:via-slate-600/5 dark:to-blue-500/3 rounded-3xl blur-2xl" />
 
-      {/* Floating browser mockup with perspective tilt */}
       <div
         className="relative motion-safe:animate-float"
-        style={{
-          transform: 'perspective(1000px) rotateY(-5deg) rotateX(2deg)',
-        }}
+        style={{ transform: 'perspective(1000px) rotateY(-5deg) rotateX(2deg)' }}
       >
         <div className="w-[380px] xl:w-[420px] bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xl shadow-black/20 overflow-hidden">
           {/* Browser chrome */}
@@ -38,52 +28,62 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
             </div>
           </div>
 
-          {/* Content area */}
-          <div className="p-4">
-            {/* Analysis header */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-slate-600 rounded-full px-3 py-1">
-                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full" />
-                <span className="text-[10px] font-semibold text-slate-700 dark:text-blue-400">Analysis Complete</span>
+          {/* Content */}
+          <div className="p-4 space-y-3">
+            {/* Tags */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full uppercase tracking-wider">Live</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">Phase 2</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">ADC</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">Breast (TNBC)</span>
+            </div>
+
+            {/* Primary metrics — large, readable */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-600/50">
+                <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Upfront</div>
+                <div className="text-xl font-bold text-slate-900 dark:text-white">$85M</div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500">$47M — $612M range</div>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">Phase 2</span>
-                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">Oncology</span>
-                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">ADC</span>
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-600/50">
+                <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Value</div>
+                <div className="text-xl font-bold text-slate-900 dark:text-white">$450M</div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500">$280M — $1.2B range</div>
               </div>
             </div>
 
-            {/* 2x2 metric cards grid */}
-            <div className="grid grid-cols-2 gap-2.5 mb-3">
-              {metrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className={`${metric.bgLight} ${metric.bgDark} rounded-lg p-3 border border-slate-100 dark:border-slate-700/50`}
-                >
-                  <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                    {metric.label}
-                  </div>
-                  <div className={`text-lg font-bold bg-gradient-to-r ${metric.color} bg-clip-text text-transparent`}>
-                    {metric.value}
-                  </div>
-                </div>
-              ))}
+            {/* Secondary metrics — compact row */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
+                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Milestones</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">$120M</div>
+              </div>
+              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
+                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Royalties</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">8-12%</div>
+              </div>
+              <div className="text-center p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-600/30">
+                <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">rNPV</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">$312M</div>
+              </div>
             </div>
 
             {/* Deal structure bar */}
-            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 border border-slate-100 dark:border-slate-700/50">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Deal Structure
-                </span>
-                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                  25% Upfront / 75% Milestones
-                </span>
+            <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-2.5 border border-slate-100 dark:border-slate-600/30">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Deal Structure</span>
+                <span className="text-[9px] font-medium text-slate-500 dark:text-slate-400">25% Upfront / 75% Milestones</span>
               </div>
-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="h-full bg-gradient-to-r from-slate-700 to-slate-600 rounded-l-full" style={{ width: '25%' }} />
-                <div className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-r-full" style={{ width: '75%' }} />
+              <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden flex">
+                <div className="h-full bg-slate-700 dark:bg-blue-400 rounded-l-full" style={{ width: '25%' }} />
+                <div className="h-full bg-slate-400 dark:bg-blue-600 rounded-r-full" style={{ width: '75%' }} />
               </div>
+            </div>
+
+            {/* Comparable deals mini-preview */}
+            <div className="text-[9px] text-slate-400 dark:text-slate-500 flex items-center justify-between pt-1">
+              <span>Based on 47 comparable ADC deals</span>
+              <span className="text-blue-600 dark:text-blue-400 font-medium">View all →</span>
             </div>
           </div>
         </div>
