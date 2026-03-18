@@ -1,7 +1,7 @@
 import React from 'react';
 
 const metrics = [
-  { label: 'Upfront Payment', value: '$85M', color: 'from-teal-500 to-teal-400', bgLight: 'bg-teal-50', bgDark: 'dark:bg-teal-500/10', textLight: 'text-teal-600', textDark: 'dark:text-teal-400' },
+  { label: 'Upfront Payment', value: '$85M', color: 'from-slate-700 to-slate-600', bgLight: 'bg-slate-50', bgDark: 'dark:bg-slate-500/10', textLight: 'text-slate-700', textDark: 'dark:text-blue-400' },
   { label: 'Total Deal Value', value: '$450M', color: 'from-cyan-500 to-cyan-400', bgLight: 'bg-cyan-50', bgDark: 'dark:bg-cyan-500/10', textLight: 'text-cyan-600', textDark: 'dark:text-cyan-400' },
   { label: 'Dev Milestones', value: '$120M', color: 'from-emerald-500 to-emerald-400', bgLight: 'bg-emerald-50', bgDark: 'dark:bg-emerald-500/10', textLight: 'text-emerald-600', textDark: 'dark:text-emerald-400' },
   { label: 'Royalties', value: '8-12%', color: 'from-purple-500 to-purple-400', bgLight: 'bg-purple-50', bgDark: 'dark:bg-purple-500/10', textLight: 'text-purple-600', textDark: 'dark:text-purple-400' },
@@ -11,7 +11,7 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
   return (
     <div className="hidden lg:block relative" aria-hidden="true">
       {/* Glow effect behind the browser window */}
-      <div className="absolute -inset-4 bg-gradient-to-br from-teal-500/20 via-cyan-500/15 to-teal-400/10 dark:from-teal-500/15 dark:via-cyan-500/10 dark:to-teal-400/5 rounded-3xl blur-2xl" />
+      <div className="absolute -inset-4 bg-gradient-to-br from-slate-500/10 via-blue-500/8 to-slate-400/5 dark:from-blue-500/10 dark:via-slate-500/5 dark:to-blue-400/5 rounded-3xl blur-2xl" />
 
       {/* Floating browser mockup with perspective tilt */}
       <div
@@ -42,9 +42,9 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
           <div className="p-4">
             {/* Analysis header */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1.5 bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 rounded-full px-3 py-1">
-                <div className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
-                <span className="text-[10px] font-semibold text-teal-700 dark:text-teal-400">Analysis Complete</span>
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-slate-600 rounded-full px-3 py-1">
+                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full" />
+                <span className="text-[10px] font-semibold text-slate-700 dark:text-blue-400">Analysis Complete</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                 <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 dark:text-slate-400">Phase 2</span>
@@ -81,7 +81,7 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
                 </span>
               </div>
               <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-l-full" style={{ width: '25%' }} />
+                <div className="h-full bg-gradient-to-r from-slate-700 to-slate-600 rounded-l-full" style={{ width: '25%' }} />
                 <div className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-r-full" style={{ width: '75%' }} />
               </div>
             </div>

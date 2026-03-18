@@ -60,10 +60,10 @@ function LiveDemoSection() {
   const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none";
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+    <section className="py-10 sm:py-12 lg:py-16 xl:py-18 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
       <div className="max-w-5xl xl:max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3">
             See Your Deal Terms Instantly
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -370,7 +370,7 @@ export default function Home() {
       <LiveDemoSection />
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
+      <section id="how-it-works" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-6">
@@ -379,7 +379,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-blue-800 dark:text-blue-400">Simple Process</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               How It Works
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -452,7 +452,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-neutral-50 dark:bg-slate-800/50 transition-colors duration-300">
+      <section className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-neutral-50 dark:bg-slate-800/50 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-500/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-6">
@@ -461,7 +461,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-blue-800 dark:text-blue-400">Why Use This Tool</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               Built for Life Sciences Professionals
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -536,7 +536,7 @@ export default function Home() {
       <ComparisonTable />
 
       {/* Partner Discovery Preview Section */}
-      <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+      <section className="py-10 sm:py-12 lg:py-16 xl:py-18 px-4 xl:px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
         <div className="max-w-5xl xl:max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-blue-900/20 border border-slate-200 dark:border-blue-600/30 rounded-full px-4 py-1.5 mb-4">
@@ -545,7 +545,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-blue-800 dark:text-blue-400">AI Partner Matching</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3">
               Find Your Ideal Licensing Partner
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -589,7 +589,7 @@ export default function Home() {
       </section>
 
       {/* Advanced Analytics Section */}
-      <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded-full px-4 py-1.5 mb-6">
@@ -598,7 +598,7 @@ export default function Home() {
               </svg>
               <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">Advanced Analytics</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
               Beyond Benchmarks
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -691,7 +691,7 @@ export default function Home() {
       </section>
 
       {/* Authority Section */}
-      <section className="py-12 sm:py-16 lg:py-20 xl:py-24 px-4 xl:px-6 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
+      <section className="py-10 sm:py-12 lg:py-16 xl:py-18 px-4 xl:px-6 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(14, 165, 165, 0.5) 1px, transparent 0)`,
@@ -727,12 +727,12 @@ export default function Home() {
       <FAQSection />
 
       {/* About Section */}
-      <section id="about" className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
+      <section id="about" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-4xl xl:max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-navy-50 dark:bg-navy-500/20 border border-navy-200 dark:border-navy-500/30 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-6">
             <span className="text-xs sm:text-sm font-medium text-navy-700 dark:text-navy-300">About Us</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-navy-800 dark:text-white mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-navy-800 dark:text-white mb-4 sm:mb-6">
             Ambrosia Ventures
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-neutral-600 dark:text-slate-400 mb-6 sm:mb-8 lg:mb-10 leading-relaxed px-2">
