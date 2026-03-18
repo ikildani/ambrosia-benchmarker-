@@ -137,7 +137,7 @@ function LiveDemoSection() {
         <div className="text-center">
           <Link
             href={`/calculator?phase=${demoPhase}&modality=${demoModality}&indication=${demoIndication}`}
-            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-8 py-4 rounded-xl
+            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-8 py-4 rounded-xl
                      shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
           >
             <span>Get Full Analysis with Milestones & Partner Matching</span>
@@ -290,7 +290,7 @@ export default function Home() {
           <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Link
               href="/calculator"
-              className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
+              className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
                        shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
             >
               <span className="relative z-10">Try Calculator Free</span>
@@ -439,7 +439,7 @@ export default function Home() {
           <div className="text-center mt-8 sm:mt-10 lg:mt-12">
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl
                        shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
             >
               <span>Start Your Analysis</span>

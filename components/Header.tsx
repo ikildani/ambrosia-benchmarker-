@@ -422,7 +422,7 @@ export default function Header({
                 <button
                   onClick={onSignUpClick}
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
-                           bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
+                           bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
                 >
                   <span>Get Started</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -579,7 +579,7 @@ export default function Header({
                       setMobileMenuOpen(false);
                       onSignUpClick?.();
                     }}
-                    className="flex items-center justify-center gap-2 mx-4 py-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold transition-all shadow-lg shadow-slate-900/15 touch-feedback active:scale-[0.98]"
+                    className="flex items-center justify-center gap-2 mx-4 py-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold transition-all shadow-lg shadow-slate-900/15 touch-feedback active:scale-[0.98]"
                   >
                     <span className="text-base">Get Started Free</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
