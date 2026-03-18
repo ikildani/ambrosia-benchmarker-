@@ -64,28 +64,25 @@ function ResultsDisclaimerInner() {
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-bold text-slate-700 mb-1.5">Important Disclaimer</h4>
+          <h4 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">About These Benchmarks</h4>
           <p className="text-xs text-slate-500 leading-relaxed mb-2">
-            <strong className="text-slate-600">For Informational Purposes Only:</strong> These estimates are generated
-            using publicly available deal data, industry benchmarks, and algorithmic models. They are intended solely
-            for educational and planning purposes.
+            <strong className="text-slate-600 dark:text-slate-400">Data-Driven Ranges:</strong> Benchmark ranges are calibrated against {DEAL_STATS.TOTAL_DEALS} verified
+            biopharma transactions and reflect the market distribution for comparable deals. Individual outcomes depend on
+            asset-specific factors, competitive dynamics, and negotiation leverage.
           </p>
           <p className="text-xs text-slate-500 leading-relaxed mb-2">
-            <strong className="text-slate-600">Not Professional Advice:</strong> This tool does not constitute financial,
-            legal, investment, or professional advice of any kind. Actual deal terms can vary significantly (often by
-            50% or more) based on asset-specific factors, competitive dynamics, market conditions, negotiation leverage,
-            and numerous other variables not captured by this model.
-          </p>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            <strong className="text-slate-600">Consult Professionals:</strong> Before making any business decisions,
-            consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
+            <strong className="text-slate-600 dark:text-slate-400">Professional Guidance:</strong> These benchmarks provide data-driven anchor points for deal strategy
+            and term sheet discussions. For definitive structuring, engage qualified financial and legal advisors who can
+            incorporate proprietary factors.
             <a href="/terms" className="text-teal-600 hover:text-teal-700 ml-1 underline">Terms</a>
             {' '}&bull;{' '}
             <a href="/privacy" className="text-teal-600 hover:text-teal-700 underline">Privacy</a>
+            {' '}&bull;{' '}
+            <a href="/methodology" className="text-teal-600 hover:text-teal-700 underline">Methodology</a>
           </p>
           <p className="text-xs text-slate-500 leading-relaxed mt-2">
-            <strong className="text-slate-600">Data Sources:</strong> Deal benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly
-            disclosed transactions. Data refreshed daily from SEC EDGAR 8-K filings, ClinicalTrials.gov, and FDA Orange Book.
+            <strong className="text-slate-600 dark:text-slate-400">Data Sources:</strong> Sourced from SEC regulatory filings, press releases, and 10+ databases.
+            Updated multiple times daily.
           </p>
         </div>
       </div>

@@ -10,7 +10,7 @@ const ReportGenerationModal = dynamic(() => import('./ReportGenerationModal'), {
 const ShareModal = dynamic(() => import('./ShareModal'), { ssr: false });
 import { useTracking } from './TrackingProvider';
 import { captureClientError } from '@/lib/sentry-client';
-import { PRICING } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import { staticBenchmarks as benchmarks } from '@/lib/benchmarks';
 import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
@@ -516,12 +516,11 @@ function MethodologySection() {
             customized ranges specific to your asset profile.
           </p>
 
-          <div className="p-3 bg-amber-50 dark:bg-amber-500/20 rounded-lg border border-amber-200 dark:border-amber-500/30">
-            <p className="text-xs text-amber-800 dark:text-amber-200">
-              <strong>Important:</strong> These are illustrative estimates for planning purposes only.
-              Actual deal terms vary significantly based on asset-specific factors, market conditions,
-              negotiation dynamics, and factors not captured in this model. This does not constitute
-              financial or legal advice.
+          <div className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-200 dark:border-slate-600/30">
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Benchmark ranges reflect the market distribution across {DEAL_STATS.TOTAL_DEALS} comparable transactions.
+              Individual deal outcomes depend on asset-specific factors, competitive dynamics, and negotiation leverage.{' '}
+              <a href="/methodology" className="text-teal-600 hover:text-teal-700 underline">Learn more about our methodology</a>
             </p>
           </div>
         </div>
