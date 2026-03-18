@@ -41,11 +41,11 @@ export default function CompanyBenchmarkComparison({ data, companyName, isPro = 
         <div>
           <div className="flex justify-between text-xs mb-1">
             <span className="font-medium text-slate-700 dark:text-slate-300 truncate">{companyName}</span>
-            <span className="text-teal-600 dark:text-teal-400 font-semibold">{formatUsd(company_avg_upfront)}</span>
+            <span className="text-slate-900 dark:text-white font-semibold">{formatUsd(company_avg_upfront)}</span>
           </div>
           <div className="h-6 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-lg transition-all duration-500"
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg transition-all duration-500"
               style={{ width: `${company_avg_upfront ? (company_avg_upfront / maxVal) * 100 : 0}%` }}
             />
           </div>

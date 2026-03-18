@@ -58,7 +58,7 @@ export async function GET(
       // Recent deals (last 12 months) — only real (non-synthetic) deals
       supabase
         .from('deals')
-        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area')
+        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })

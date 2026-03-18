@@ -63,7 +63,7 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       {/* Top accent */}
-      <div className="h-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-400" />
+      <div className="h-1 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700" />
 
       <div className="p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -76,7 +76,7 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
                 </span>
               )}
               {isTopRank && (
-                <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
+                <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
                   #{marketPosition!.deal_volume_rank} by Deal Volume
                 </span>
               )}
@@ -131,8 +131,8 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/10 dark:to-cyan-500/10 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">{company.deals_last_12mo || 0}</div>
+          <div className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-700/30 dark:to-blue-900/20 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{company.deals_last_12mo || 0}</div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Deals (12mo)</div>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 rounded-xl p-4 text-center">
@@ -153,7 +153,7 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
         {(company.modalities_active || []).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-4">
             {company.modalities_active.map((m) => (
-              <span key={m} className="px-2.5 py-1 text-xs font-medium rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-100 dark:border-teal-500/20">
+              <span key={m} className="px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-50 dark:bg-blue-900/15 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/30">
                 {formatModality(m)}
               </span>
             ))}

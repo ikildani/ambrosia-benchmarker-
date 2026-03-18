@@ -50,7 +50,7 @@ function MetricBar({
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             isCurrent
-              ? 'bg-gradient-to-r from-teal-400 to-cyan-500'
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600'
               : 'bg-slate-300 dark:bg-slate-600'
           }`}
           style={{ width: `${width}%` }}
@@ -181,7 +181,7 @@ const PeerComparison = React.memo(function PeerComparison({
               key={col.id}
               className={`relative rounded-xl border p-4 ${
                 col.isCurrent
-                  ? 'border-teal-200 dark:border-teal-500/30 bg-teal-50/50 dark:bg-teal-500/5'
+                  ? 'border-blue-200 dark:border-blue-700/30 bg-slate-50/50 dark:bg-slate-700/20'
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
               }`}
             >
@@ -198,15 +198,15 @@ const PeerComparison = React.memo(function PeerComparison({
               {/* Card header */}
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <div className={`text-sm font-semibold ${col.isCurrent ? 'text-teal-600 dark:text-teal-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                  <div className={`text-sm font-semibold ${col.isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                     {col.isCurrent ? col.name : (
-                      <Link href={`/companies/${col.id}`} className="hover:text-teal-500 dark:hover:text-teal-400 hover:underline transition-colors">
+                      <Link href={`/companies/${col.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors">
                         {col.name}
                       </Link>
                     )}
                   </div>
                   {col.isCurrent && (
-                    <div className="text-xs uppercase tracking-wide font-medium text-teal-500 dark:text-teal-400">Current</div>
+                    <div className="text-xs uppercase tracking-wide font-medium text-blue-600 dark:text-blue-400">Current</div>
                   )}
                 </div>
                 {!col.isCurrent && (
@@ -236,7 +236,7 @@ const PeerComparison = React.memo(function PeerComparison({
                         key={m}
                         className={`px-2 py-0.5 text-xs font-medium rounded ${
                           col.isCurrent
-                            ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300'
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                         }`}
                       >
@@ -289,7 +289,7 @@ const PeerComparison = React.memo(function PeerComparison({
             <div
               className={`text-sm font-semibold truncate px-1 ${
                 col.isCurrent
-                  ? 'text-teal-600 dark:text-teal-400'
+                  ? 'text-slate-900 dark:text-white'
                   : 'text-slate-700 dark:text-slate-300'
               }`}
             >
@@ -298,14 +298,14 @@ const PeerComparison = React.memo(function PeerComparison({
               ) : (
                 <Link
                   href={`/companies/${col.id}`}
-                  className="hover:text-teal-500 dark:hover:text-teal-400 hover:underline transition-colors cursor-pointer"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors cursor-pointer"
                 >
                   {col.name}
                 </Link>
               )}
             </div>
             {col.isCurrent && (
-              <div className="text-xs uppercase tracking-wide font-medium text-teal-500 dark:text-teal-400 mt-0.5">
+              <div className="text-xs uppercase tracking-wide font-medium text-blue-600 dark:text-blue-400 mt-0.5">
                 Current
               </div>
             )}
@@ -435,7 +435,7 @@ const PeerComparison = React.memo(function PeerComparison({
                     {companyStats.modalities.slice(0, 4).map((m) => (
                       <span
                         key={m}
-                        className="px-2 py-0.5 text-xs font-medium rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300"
+                        className="px-2 py-0.5 text-xs font-medium rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                       >
                         {formatModality(m)}
                       </span>

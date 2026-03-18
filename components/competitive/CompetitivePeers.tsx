@@ -89,7 +89,7 @@ function PeerCard({
       <div className="mb-3">
         <Link
           href={`/companies/${peer.id}`}
-          className="text-sm font-semibold text-slate-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+          className="text-sm font-semibold text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           {peer.name}
         </Link>
@@ -106,13 +106,13 @@ function PeerCard({
           <span className="text-xs uppercase tracking-wide font-medium text-slate-500 dark:text-slate-400">
             Overlap
           </span>
-          <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
+          <span className="text-xs font-bold text-slate-900 dark:text-white">
             {overlapPct}%
           </span>
         </div>
         <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
             style={{ width: `${overlapPct}%` }}
           />
         </div>
@@ -124,7 +124,7 @@ function PeerCard({
           {peer.shared_modalities.map((m) => (
             <span
               key={m}
-              className="px-2 py-0.5 text-xs font-medium rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300"
+              className="px-2 py-0.5 text-xs font-medium rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
             >
               {formatModality(m)}
             </span>

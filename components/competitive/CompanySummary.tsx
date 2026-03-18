@@ -39,7 +39,7 @@ export default function CompanySummary({ summary, marketPosition }: CompanySumma
   const hasBadges = hasRank || hasModality;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm border-l-4 border-l-teal-500">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm border-l-4 border-l-blue-600">
       <div className="p-6">
         <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
           {summary}
@@ -48,7 +48,7 @@ export default function CompanySummary({ summary, marketPosition }: CompanySumma
         {hasBadges && (
           <div className="flex flex-wrap gap-2 mt-5">
             {hasRank && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-900/15 text-blue-700 dark:text-blue-300">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="none"

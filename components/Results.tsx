@@ -1155,7 +1155,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Terms Grid */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7">
           {/* Upfront Payment */}
           <MetricCard
             title={dtl?.upfrontLabel || 'Upfront Payment'}

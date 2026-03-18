@@ -111,7 +111,7 @@ function MetricCardInner({
       initial={prefersReducedMotion ? false : 'hidden'}
       animate="visible"
       whileHover={prefersReducedMotion ? undefined : { y: -2, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className={`group metric-card p-4 sm:p-5 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg transition-colors duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
+      className={`group metric-card p-5 sm:p-6 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg transition-colors duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
@@ -129,7 +129,7 @@ function MetricCardInner({
                 {icon}
               </div>
             </div>
-            <p className="text-sm xl:text-base font-semibold text-neutral-700 dark:text-slate-200 truncate">
+            <p className="text-sm xl:text-base font-semibold text-neutral-700 dark:text-slate-200">
               {title}
               {tooltipContent && <InfoTooltip content={tooltipContent} />}
             </p>

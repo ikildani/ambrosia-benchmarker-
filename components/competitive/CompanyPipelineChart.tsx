@@ -12,8 +12,8 @@ const phaseLabels: Record<string, string> = {
 
 const phaseColors: Record<string, string> = {
   phase_1: 'from-blue-400 to-blue-500', phase_1_2: 'from-blue-400 to-cyan-500',
-  phase_2: 'from-cyan-400 to-teal-500', phase_2_3: 'from-teal-400 to-teal-500',
-  phase_3: 'from-teal-400 to-emerald-500', phase_4: 'from-emerald-400 to-green-500',
+  phase_2: 'from-blue-400 to-blue-500', phase_2_3: 'from-blue-500 to-blue-600',
+  phase_3: 'from-blue-400 to-emerald-500', phase_4: 'from-emerald-400 to-green-500',
   early_phase_1: 'from-indigo-400 to-blue-500',
 };
 

@@ -14,6 +14,10 @@ interface Deal {
   announced_date: string;
   indication_category?: string;
   therapeutic_area?: string;
+  deal_type?: string;
+  milestones_total_usd?: number | null;
+  royalty_low_pct?: number | null;
+  royalty_high_pct?: number | null;
 }
 
 interface CompanyDealHistoryProps {
@@ -95,7 +99,7 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
                 <select
                   value={modalityFilter}
                   onChange={(e) => setModalityFilter(e.target.value)}
-                  className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
                 >
                   <option value="all">All modalities</option>
                   {modalities.map(m => (
@@ -121,14 +125,14 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
         {deals.length > 0 && (
           <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-bold text-teal-600 dark:text-teal-400">{summaryStats.totalDeals}</span>
+              <span className="text-lg font-bold text-slate-900 dark:text-white">{summaryStats.totalDeals}</span>
               <span className="text-xs text-slate-500">deals</span>
             </div>
             {isPro && summaryStats.disclosedCount > 0 && (
               <>
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-600" />
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-bold text-teal-600 dark:text-teal-400">{formatUsd(summaryStats.totalUpfront)}</span>
+                  <span className="text-lg font-bold text-slate-900 dark:text-white">{formatUsd(summaryStats.totalUpfront)}</span>
                   <span className="text-xs text-slate-500">total upfront</span>
                 </div>
                 <div className="w-px h-4 bg-slate-200 dark:bg-slate-600" />
@@ -159,6 +163,7 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
               <tr className="bg-slate-50 dark:bg-slate-800">
                 <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Date</th>
                 <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Counterparty</th>
+                <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Type</th>
                 <th scope="col" className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Modality</th>
                 <th scope="col" className="px-4 py-3 text-center font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Phase</th>
                 <th scope="col" className="px-4 py-3 text-right font-medium text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wide">Upfront</th>
@@ -179,7 +184,12 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 text-xs font-semibold rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
+                    <span className="px-2 py-0.5 text-xs font-medium rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
+                      {(deal.deal_type || 'license').replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
                       {formatModality(deal.modality)}
                     </span>
                   </td>
@@ -188,7 +198,7 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">
                     {isPro ? (
-                      <span className="text-teal-600 dark:text-teal-400">{formatUsd(deal.upfront_usd)}</span>
+                      <span className="text-slate-900 dark:text-white">{formatUsd(deal.upfront_usd)}</span>
                     ) : (
                       <span className="text-slate-300 dark:text-slate-600 blur-sm select-none">$XXM</span>
                     )}

@@ -52,14 +52,14 @@ export default function DealFlowChart({ trend, isPro }: DealFlowChartProps) {
           <div className="space-y-1 text-sm">
             <p className="text-slate-600 dark:text-slate-300">
               Deals:{' '}
-              <span className="font-bold text-teal-600 dark:text-teal-400">
+              <span className="font-bold text-slate-900 dark:text-white">
                 {point.count}
               </span>
             </p>
             {isPro ? (
               <p className="text-slate-600 dark:text-slate-300">
                 Total Upfront:{' '}
-                <span className="font-bold text-teal-600 dark:text-teal-400">
+                <span className="font-bold text-slate-900 dark:text-white">
                   {formatUsd(point.total_upfront)}
                 </span>
               </p>
@@ -88,11 +88,11 @@ export default function DealFlowChart({ trend, isPro }: DealFlowChartProps) {
           </p>
         </div>
         {!isEmpty && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/20">
-            <span className="text-lg font-bold text-teal-600 dark:text-teal-400">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <span className="text-lg font-bold text-slate-900 dark:text-white">
               {totalDeals}
             </span>
-            <span className="text-xs text-teal-600 dark:text-teal-400 font-medium">
+            <span className="text-xs text-slate-900 dark:text-white font-medium">
               deals
             </span>
           </div>
@@ -139,7 +139,7 @@ export default function DealFlowChart({ trend, isPro }: DealFlowChartProps) {
                 >
                   <defs>
                     <linearGradient
-                      id="tealGradient"
+                      id="chartGradient"
                       x1="0"
                       y1="0"
                       x2="0"
@@ -187,7 +187,7 @@ export default function DealFlowChart({ trend, isPro }: DealFlowChartProps) {
                     dataKey="count"
                     stroke="#14b8a6"
                     strokeWidth={2.5}
-                    fill="url(#tealGradient)"
+                    fill="url(#chartGradient)"
                     dot={{
                       r: 3,
                       fill: '#14b8a6',

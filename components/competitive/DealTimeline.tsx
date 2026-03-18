@@ -383,7 +383,7 @@ const DealTimeline = React.memo(function DealTimeline({
               </div>
               <div className="mt-1 font-semibold">
                 {isPro ? (
-                  <span className="text-teal-300">
+                  <span className="text-blue-300">
                     {formatUsd(tooltip.deal.total_deal_value_usd)}
                   </span>
                 ) : (
@@ -442,7 +442,7 @@ const DealTimeline = React.memo(function DealTimeline({
                       {formatPhase(deal.phase_at_signing)}
                     </span>
                     {isPro ? (
-                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                      <span className="font-semibold text-slate-900 dark:text-white">
                         {formatUsd(deal.total_deal_value_usd)}
                       </span>
                     ) : (

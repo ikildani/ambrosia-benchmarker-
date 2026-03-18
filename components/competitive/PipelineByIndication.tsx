@@ -53,10 +53,10 @@ function formatIndication(key: string): string {
 function getCellIntensity(count: number, maxCount: number): string {
   if (count === 0) return 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400';
   const ratio = count / maxCount;
-  if (ratio <= 0.25) return 'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300';
-  if (ratio <= 0.5) return 'bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-200';
-  if (ratio <= 0.75) return 'bg-teal-200 dark:bg-teal-500/30 text-teal-900 dark:text-teal-100';
-  return 'bg-teal-400 dark:bg-teal-500/50 text-white dark:text-white font-bold';
+  if (ratio <= 0.25) return 'bg-slate-50 dark:bg-slate-700/30 text-blue-700 dark:text-blue-300';
+  if (ratio <= 0.5) return 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200';
+  if (ratio <= 0.75) return 'bg-blue-200 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100';
+  return 'bg-blue-500 dark:bg-blue-600/50 text-white dark:text-white font-bold';
 }
 
 function LockIcon() {

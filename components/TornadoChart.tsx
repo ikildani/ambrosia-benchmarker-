@@ -132,39 +132,38 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
     );
   }
 
-  // Compute max extent for symmetric axis
-  const maxExtent = Math.max(
-    ...chartData.map((d) => Math.max(Math.abs(d.downside), Math.abs(d.upside)))
-  );
-  const domainPadding = maxExtent * 0.35; // extra space for labels
+  // Compute actual data extents (not symmetric — use actual min/max)
+  const minDelta = Math.min(...chartData.map((d) => d.downside));
+  const maxDelta = Math.max(...chartData.map((d) => d.upside));
+  const domainMin = minDelta * 1.15; // 15% padding for labels
+  const domainMax = maxDelta * 1.15;
 
   return (
     <div className="mt-6 sm:mt-8">
       <div className="border border-neutral-200 dark:border-slate-600 rounded-xl overflow-hidden bg-white dark:bg-slate-800 shadow-sm">
         {/* Header */}
-        <div className="px-4 py-3 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
+        <div className="px-5 py-4 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
           <h3 className="text-sm font-semibold text-neutral-800 dark:text-slate-200">
             Sensitivity Impact (Tornado Chart)
           </h3>
-          <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-neutral-500 dark:text-slate-400 mt-1">
             Dollar impact on deal value when each factor is varied, base: <span className="font-mono font-semibold">${baseValue.toFixed(0)}M</span>
           </p>
         </div>
 
         {/* Chart */}
-        <div className="p-3 sm:p-4" style={{ overflowX: 'auto' }}>
+        <div className="p-4 sm:p-6">
+          <ResponsiveContainer width="100%" height={chartData.length * 60 + 40}>
             <BarChart
               data={chartData}
               layout="vertical"
-              width={700}
-              height={chartData.length * 56 + 32}
-              margin={{ top: 8, right: 100, left: 8, bottom: 8 }}
+              margin={{ top: 8, right: 20, left: 8, bottom: 8 }}
               barGap={0}
-              barCategoryGap="20%"
+              barCategoryGap="25%"
             >
               <XAxis
                 type="number"
-                domain={[-(maxExtent + domainPadding), maxExtent + domainPadding]}
+                domain={[domainMin, domainMax]}
                 tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}M`}
                 tick={{ fontSize: 10, fill: '#94a3b8', fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
                 axisLine={{ stroke: '#e2e8f0' }}
@@ -201,6 +200,7 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
                 ))}
               </Bar>
             </BarChart>
+          </ResponsiveContainer>
 
           {/* Legend */}
           <div className="flex items-center justify-center gap-4 mt-2 text-xs text-neutral-500 dark:text-slate-400">
