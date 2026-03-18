@@ -189,14 +189,14 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
               {/* Downside bars (red/amber, extend left) */}
               <Bar dataKey="downside" stackId="impact" barSize={24} radius={[4, 0, 0, 4]}>
                 {chartData.map((entry, idx) => (
-                  <Cell key={`down-${idx}`} fill={entry.downside < -maxExtent * 0.3 ? '#ef4444' : '#f59e0b'} fillOpacity={0.8} />
+                  <Cell key={`down-${idx}`} fill={entry.downside < -domainMax * 0.3 ? '#ef4444' : '#f59e0b'} fillOpacity={0.8} />
                 ))}
               </Bar>
 
               {/* Upside bars (teal/green, extend right) */}
               <Bar dataKey="upside" stackId="impact" barSize={24} radius={[0, 4, 4, 0]}>
                 {chartData.map((entry, idx) => (
-                  <Cell key={`up-${idx}`} fill={entry.upside > maxExtent * 0.3 ? '#10b981' : '#14b8a6'} fillOpacity={0.8} />
+                  <Cell key={`up-${idx}`} fill={entry.upside > domainMax * 0.3 ? '#10b981' : '#14b8a6'} fillOpacity={0.8} />
                 ))}
               </Bar>
             </BarChart>
