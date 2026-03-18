@@ -41,8 +41,8 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
           <p className="text-sm text-slate-500 dark:text-slate-400">Average upfront payment by modality over 12 weeks</p>
         </div>
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="w-14 h-14 rounded-full bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-900/15 flex items-center justify-center mb-4">
+            <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
             </svg>
           </div>
@@ -95,7 +95,7 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{formatModality(modality)}</span>
                 {isPro && data[data.length - 1]?.avg_upfront != null && (
-                  <span className="text-xs font-medium text-teal-600 dark:text-teal-400">
+                  <span className="text-xs font-medium text-slate-900 dark:text-white">
                     {formatUsdShort(data[data.length - 1].avg_upfront!)}
                   </span>
                 )}

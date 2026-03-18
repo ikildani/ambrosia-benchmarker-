@@ -20,6 +20,8 @@ export interface WatchlistActivity {
   detail: string;
   match_type: string;
   match_value: string;
+  company_id?: string;
+  deal_id?: string;
 }
 
 export function useWatchlist(userId: string | null) {

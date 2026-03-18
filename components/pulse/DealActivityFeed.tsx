@@ -70,7 +70,7 @@ const phaseColors: Record<string, string> = {
   preclinical: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
   phase_1: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
   phase_2: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
-  phase_3: 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300',
+  phase_3: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
   approved: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
 };
 
@@ -151,7 +151,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-[1px]">
             <button
               onClick={onUpgrade}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25 text-sm"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

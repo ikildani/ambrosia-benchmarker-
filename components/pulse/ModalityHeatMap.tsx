@@ -62,7 +62,7 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
                 </span>
                 <div className="flex-1 h-7 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden relative">
                   <div
-                    className="h-full bg-gradient-to-r from-teal-400 to-teal-500 dark:from-teal-500 dark:to-teal-400 rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-500 dark:to-blue-400 rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
                     style={{ width: `${barWidth}%` }}
                   >
                     {isPro ? (
@@ -101,10 +101,10 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>Less active</span>
           <div className="flex gap-1">
-            <div className="w-4 h-3 rounded-sm bg-teal-100 dark:bg-teal-500/10" />
-            <div className="w-4 h-3 rounded-sm bg-teal-200 dark:bg-teal-500/20" />
-            <div className="w-4 h-3 rounded-sm bg-teal-300 dark:bg-teal-500/30" />
-            <div className="w-4 h-3 rounded-sm bg-teal-400 dark:bg-teal-500/40" />
+            <div className="w-4 h-3 rounded-sm bg-blue-100 dark:bg-blue-900/10" />
+            <div className="w-4 h-3 rounded-sm bg-blue-200 dark:bg-blue-900/20" />
+            <div className="w-4 h-3 rounded-sm bg-blue-300 dark:bg-blue-900/30" />
+            <div className="w-4 h-3 rounded-sm bg-blue-400 dark:bg-blue-900/40" />
           </div>
           <span>More active</span>
         </div>

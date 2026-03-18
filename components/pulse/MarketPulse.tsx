@@ -74,7 +74,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
     return (
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
           <p className="text-slate-500 dark:text-slate-400 font-medium">Loading market intelligence...</p>
         </div>
       </div>
@@ -97,8 +97,8 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
   if (!snapshot) {
     return (
       <div className="text-center py-20">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-500/20 dark:to-cyan-500/20 flex items-center justify-center">
-          <svg className="w-10 h-10 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-slate-100 to-blue-100 dark:from-slate-700/30 dark:to-blue-900/20 flex items-center justify-center">
+          <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
@@ -107,7 +107,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
           Market intelligence snapshots are generated every Monday at 7 AM ET.
           Check back after the next update for deal activity, benchmark shifts, and modality trends.
         </p>
-        <div className="flex items-center justify-center gap-2 text-sm text-teal-600 dark:text-teal-400 font-medium">
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-900 dark:text-white font-medium">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -137,7 +137,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
         </div>
         <button
           onClick={() => window.location.reload()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -157,7 +157,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
             </div>
             <button
               onClick={onUpgrade}
-              className="shrink-0 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
+              className="shrink-0 px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15"
             >
               Upgrade to Pro
             </button>
