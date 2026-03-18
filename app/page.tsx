@@ -34,6 +34,95 @@ import {
 const flatModalities = modalityOptions.flatMap(g => g.options);
 const flatIndications = indicationOptions.flatMap(g => g.options);
 
+const TA_DISPLAY_NAMES: Record<string, string> = {
+  oncology: 'Oncology', neurology: 'Neurology', immunology: 'Immunology',
+  rareDisease: 'Rare Disease', cardiovascular: 'Cardiovascular', metabolic: 'Metabolic',
+  infectiousDisease: 'Infectious Disease', ophthalmology: 'Ophthalmology',
+  dermatology: 'Dermatology', womensHealth: "Women's Health",
+  gastroenterology: 'Gastroenterology', hematology: 'Hematology',
+};
+
+function DatabaseCoverageSection() {
+  const [stats, setStats] = useState<{ ta: string; deals: number }[]>([]);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/deals/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.byTA) {
+          const sorted = Object.entries(data.byTA as Record<string, number>)
+            .filter(([ta]) => ta !== 'other' && !ta.startsWith('_'))
+            .sort(([, a], [, b]) => (b as number) - (a as number))
+            .map(([ta, deals]) => ({ ta, deals: deals as number }));
+          setStats(sorted);
+          setTotal(sorted.reduce((sum, s) => sum + s.deals, 0));
+        }
+      })
+      .catch(() => {
+        // Fallback to static data if API unavailable
+        const fallback = [
+          { ta: 'oncology', deals: 1791 }, { ta: 'neurology', deals: 250 },
+          { ta: 'immunology', deals: 238 }, { ta: 'rareDisease', deals: 145 },
+          { ta: 'cardiovascular', deals: 138 }, { ta: 'metabolic', deals: 129 },
+          { ta: 'infectiousDisease', deals: 107 }, { ta: 'ophthalmology', deals: 62 },
+          { ta: 'dermatology', deals: 52 }, { ta: 'womensHealth', deals: 52 },
+          { ta: 'gastroenterology', deals: 49 }, { ta: 'hematology', deals: 49 },
+        ];
+        setStats(fallback);
+        setTotal(fallback.reduce((sum, s) => sum + s.deals, 0));
+      });
+  }, []);
+
+  if (stats.length === 0) return null;
+  const maxDeals = stats[0]?.deals || 1;
+
+  return (
+    <section className="py-8 sm:py-10 px-4 xl:px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{total.toLocaleString()} verified transactions across {stats.length} therapeutic areas</p>
+          </div>
+          <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
+            Updated daily from SEC filings, press releases & regulatory databases
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
+          {stats.map(item => (
+            <div key={item.ta} className="flex flex-col">
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate">{TA_DISPLAY_NAMES[item.ta] || item.ta}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-2 tabular-nums">{item.deals.toLocaleString()}</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000"
+                  style={{ width: `${Math.max((item.deals / maxDeals) * 100, 3)}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
+          {[
+            { label: 'Verified Deals', value: total.toLocaleString() },
+            { label: 'Deal Types', value: '5' },
+            { label: 'Sources', value: '10+' },
+            { label: 'Updated', value: 'Daily' },
+          ].map(s => (
+            <div key={s.label} className="text-center">
+              <div className="text-lg font-bold text-slate-900 dark:text-white">{s.value}</div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function LiveDemoSection() {
   const [demoPhase, setDemoPhase] = useState<Phase>('phase2');
   const [demoModality, setDemoModality] = useState<Modality>('adc');
@@ -57,7 +146,15 @@ function LiveDemoSection() {
     return calculateDealTerms(input);
   }, [demoPhase, demoModality, demoIndication]);
 
-  const selectClass = "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none";
+  const styledSelect = "w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10 shadow-sm hover:border-slate-300 dark:hover:border-slate-500";
+
+  const phasePills = [
+    { value: 'preclinical', label: 'Preclinical' },
+    { value: 'phase1', label: 'Phase 1' },
+    { value: 'phase2', label: 'Phase 2' },
+    { value: 'phase3', label: 'Phase 3' },
+    { value: 'approved', label: 'Approved' },
+  ];
 
   return (
     <section className="py-10 sm:py-12 lg:py-16 xl:py-18 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
@@ -67,21 +164,35 @@ function LiveDemoSection() {
             See Your Deal Terms Instantly
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Pick a phase, modality, and indication — get benchmark deal terms in real time
+            Select parameters below — benchmarks update in real time
           </p>
         </div>
 
-        {/* 3 Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl xl:max-w-4xl mx-auto mb-8">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Phase</label>
-            <select value={demoPhase} onChange={(e) => setDemoPhase(e.target.value as Phase)} className={selectClass}>
-              {phaseOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+        {/* Phase Selector — Pill buttons */}
+        <div className="max-w-3xl xl:max-w-4xl mx-auto mb-6">
+          <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 text-center">Development Phase</label>
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+            {phasePills.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setDemoPhase(p.value as Phase)}
+                className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
+                  demoPhase === p.value
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* Modality & Indication — Styled dropdowns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl xl:max-w-3xl mx-auto mb-8">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Modality</label>
-            <select value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={selectClass}>
+            <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Modality</label>
+            <select value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={styledSelect}>
               {modalityOptions.map(g => (
                 <optgroup key={g.group} label={g.group}>
                   {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -90,8 +201,8 @@ function LiveDemoSection() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Indication</label>
-            <select value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={selectClass}>
+            <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Indication</label>
+            <select value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={styledSelect}>
               {indicationOptions.map(g => (
                 <optgroup key={g.group} label={g.group}>
                   {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -366,67 +477,8 @@ export default function Home() {
       {/* Live Demo Section */}
       <LiveDemoSection />
 
-      {/* Data Coverage Section — data-forward visualization */}
-      <section className="py-8 sm:py-10 px-4 xl:px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">3,000+ verified transactions across 12 therapeutic areas</p>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-700 dark:bg-blue-400" />SEC 8-K Filings</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />Press Releases</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />Regulatory</span>
-            </div>
-          </div>
-          {/* Horizontal bar chart — deal distribution by TA */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
-            {[
-              { ta: 'Oncology', deals: 1791, pct: 58 },
-              { ta: 'Neurology', deals: 250, pct: 14 },
-              { ta: 'Immunology', deals: 238, pct: 13 },
-              { ta: 'Rare Disease', deals: 145, pct: 8 },
-              { ta: 'Cardiovascular', deals: 138, pct: 7.5 },
-              { ta: 'Metabolic', deals: 129, pct: 7 },
-              { ta: 'Infectious Disease', deals: 107, pct: 6 },
-              { ta: 'Ophthalmology', deals: 62, pct: 3.4 },
-              { ta: 'Dermatology', deals: 52, pct: 2.8 },
-              { ta: 'Women\'s Health', deals: 52, pct: 2.8 },
-              { ta: 'Gastroenterology', deals: 49, pct: 2.7 },
-              { ta: 'Hematology', deals: 49, pct: 2.7 },
-            ].map(item => (
-              <div key={item.ta} className="flex flex-col">
-                <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate">{item.ta}</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-2 tabular-nums">{item.deals.toLocaleString()}</span>
-                </div>
-                <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000"
-                    style={{ width: `${Math.max(item.pct, 3)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Summary stats row */}
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-            {[
-              { label: 'Verified Deals', value: '3,000+' },
-              { label: 'Companies', value: '960+' },
-              { label: 'Deal Types', value: '5' },
-              { label: 'Updated', value: 'Daily' },
-              { label: 'Sources', value: '10+' },
-            ].map(s => (
-              <div key={s.label} className="text-center">
-                <div className="text-lg font-bold text-slate-900 dark:text-white">{s.value}</div>
-                <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Data Coverage Section — dynamic, data-forward visualization */}
+      <DatabaseCoverageSection />
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
