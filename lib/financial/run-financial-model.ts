@@ -92,6 +92,67 @@ function buildRNPVInput(
       median: result.terms.totalDealValue.median,
       high: result.terms.totalDealValue.high,
     },
+    dealType: inputs.dealType,
+
+    // TA-specific modifiers — every user selection now moves the numbers
+    lineOfTherapy: inputs.lineOfTherapy,
+    combinationPotential: inputs.combinationPotential,
+    treatmentApproach: inputs.treatmentApproach,
+
+    // Neurology
+    bbbPenetration: inputs.bbbPenetration,
+    diseaseProgression: inputs.diseaseProgression,
+    biomarkerValidation: inputs.biomarkerValidation,
+
+    // Immunology
+    immuneResetPotential: inputs.immuneResetPotential,
+    targetSpecificity: inputs.targetSpecificity,
+    diseaseSeverity: inputs.diseaseSeverity,
+    treatmentGoal: inputs.treatmentGoal,
+
+    // Metabolic
+    weightLossEfficacy: inputs.weightLossEfficacy,
+    routeOfAdministration: inputs.routeOfAdministration,
+    mechanismDifferentiation: inputs.mechanismDifferentiation,
+    comorbidityBreadth: inputs.comorbidityBreadth,
+
+    // Cardiovascular
+    cvOutcomeBenefit: inputs.cvOutcomeBenefit,
+    cvTrialEndpoint: inputs.cvTrialEndpoint,
+    cvPopulationRisk: inputs.cvPopulationRisk,
+
+    // Infectious Disease
+    resistanceProfile: inputs.resistanceProfile,
+    infectionChronicity: inputs.infectionChronicity,
+    publicHealthPriority: inputs.publicHealthPriority,
+
+    // Ophthalmology
+    ocularDelivery: inputs.ocularDelivery,
+    treatmentDurability: inputs.treatmentDurability,
+    visionImpact: inputs.visionImpact,
+
+    // Women's Health
+    whUnmetNeed: inputs.whUnmetNeed,
+    whTargetPopulation: inputs.whTargetPopulation,
+
+    // Rare Disease
+    patientPopulationSize: inputs.patientPopulationSize,
+    geneticBasis: inputs.geneticBasis,
+
+    // Hematology
+    hemeLineage: inputs.hemeLineage,
+    transplantEligibility: inputs.transplantEligibility,
+    mrdStatus: inputs.mrdStatus,
+
+    // Dermatology
+    skinSeverity: inputs.skinSeverity,
+    chronicityProfile: inputs.chronicityProfile,
+    topicalVsSystemic: inputs.topicalVsSystemic,
+
+    // Gastroenterology
+    giSegment: inputs.giSegment,
+    biologicExperience: inputs.biologicExperience,
+    endoscopicEndpoint: inputs.endoscopicEndpoint,
   };
 }
 

@@ -70,6 +70,92 @@ const POS_MODIFIERS: Record<string, Partial<Record<string, number>>> = {
   // Disease-modifying vs symptomatic (especially relevant for neurology)
   disease_modifying: { phase2ToPhase3: 0.75, phase3ToApproval: 0.65 },
   symptomatic: { phase2ToPhase3: 1.10, phase3ToApproval: 1.05 },
+
+  // Line of therapy
+  firstLine: { phase2_3: 1.10, phase3_approval: 1.15 },
+  thirdLinePlus: { phase2_3: 0.85, phase3_approval: 0.80 },
+
+  // Combination potential
+  strongCombination: { phase2_3: 1.10, phase3_approval: 1.08 },
+  standaloneLimited: { phase2_3: 0.90, phase3_approval: 0.92 },
+
+  // Neurology BBB penetration
+  bbb_proven: { phase1_2: 1.15, phase2_3: 1.20 },
+  bbb_unproven: { phase1_2: 0.75, phase2_3: 0.70 },
+  bbb_promising: { phase1_2: 0.95, phase2_3: 0.90 },
+  rapid_progressive_disease: { phase2_3: 1.15, phase3_approval: 1.10 },
+  episodic_disease: { phase2_3: 0.90 },
+
+  // Immunology
+  curative_intent: { phase2_3: 0.80, phase3_approval: 0.85 },
+  chronic_treatment: { phase2_3: 1.10, phase3_approval: 1.10 },
+  narrow_target: { phase2_3: 1.10 },
+  broad_immunosuppression: { phase2_3: 0.85 },
+  severe_refractory_disease: { phase2_3: 1.15, phase3_approval: 1.10 },
+  mild_moderate_disease: { phase2_3: 0.90 },
+
+  // Metabolic
+  superior_wl_efficacy: { phase2_3: 1.20, phase3_approval: 1.15 },
+  modest_wl_efficacy: { phase2_3: 0.80, phase3_approval: 0.85 },
+  oral_route: { phase2_3: 1.15 },
+  implantable_route: { phase2_3: 0.85 },
+  cardiometabolic_benefit: { phase2_3: 1.10, phase3_approval: 1.10 },
+  novel_mechanism: { phase2_3: 0.90, phase3_approval: 0.85 },
+
+  // Cardiovascular
+  cv_mortality_reduction: { phase3_approval: 1.25 },
+  cv_symptom_improvement: { phase3_approval: 0.85 },
+  cv_mace_endpoint: { phase2_3: 0.90, phase3_approval: 1.15 },
+  cv_surrogate_endpoint: { phase2_3: 1.10, phase3_approval: 0.90 },
+  cv_high_risk_population: { phase2_3: 1.10 },
+  cv_primary_prevention: { phase2_3: 0.85 },
+
+  // Infectious Disease
+  id_novel_target: { phase2_3: 1.15, phase3_approval: 1.10 },
+  id_broad_spectrum: { phase2_3: 0.90 },
+  id_chronic_infection: { phase2_3: 0.90, phase3_approval: 0.95 },
+  id_acute_infection: { phase2_3: 1.10 },
+  id_who_urgent: { phase2_3: 1.15, phase3_approval: 1.20 },
+
+  // Ophthalmology
+  ophtho_one_time: { phase2_3: 1.20 },
+  ophtho_chronic_injection: { phase2_3: 0.90 },
+  ophtho_topical: { phase2_3: 1.10 },
+  ophtho_vision_threatening: { phase2_3: 1.15, phase3_approval: 1.10 },
+  ophtho_symptom_relief: { phase2_3: 0.90 },
+  ophtho_extended_durability: { phase2_3: 1.10 },
+
+  // Women's Health
+  wh_no_approved_therapy: { phase2_3: 1.20, phase3_approval: 1.15 },
+  wh_well_served: { phase2_3: 0.85 },
+  wh_pregnancy_complexity: { phase2_3: 0.80, phase3_approval: 0.85 },
+
+  // Rare Disease
+  rd_ultra_rare: { phase2_3: 1.25, phase3_approval: 1.20 },
+  rd_broader_rare: { phase2_3: 1.05 },
+  rd_monogenic: { phase2_3: 1.15, phase3_approval: 1.10 },
+  rd_unknown_genetic: { phase2_3: 0.80 },
+
+  // Hematology
+  heme_mrd_endpoint: { phase2_3: 1.15, phase3_approval: 1.10 },
+  heme_survival_endpoint: { phase2_3: 0.90, phase3_approval: 0.95 },
+  heme_transplant_eligible: { phase2_3: 1.10 },
+  heme_post_transplant: { phase2_3: 0.85 },
+
+  // Dermatology
+  derm_severe_refractory: { phase2_3: 1.10, phase3_approval: 1.05 },
+  derm_mild: { phase2_3: 0.90 },
+  derm_chronic_relapsing: { phase2_3: 1.05 },
+  derm_topical_only: { phase2_3: 1.10 },
+  derm_systemic: { phase2_3: 0.95 },
+
+  // Gastroenterology
+  gi_endoscopic_remission: { phase2_3: 1.15, phase3_approval: 1.10 },
+  gi_clinical_only: { phase2_3: 0.90 },
+  gi_biologic_naive: { phase2_3: 1.10 },
+  gi_multi_biologic_exposed: { phase2_3: 0.80 },
+  gi_upper_gi: { phase2_3: 0.95 },
+  gi_colonic: { phase2_3: 1.05 },
 };
 
 /** Maximum total PoS modifier deviation from base (±40%) */
@@ -112,6 +198,91 @@ function deriveModifierKeys(input: RNPVInput): string[] {
   if (input.competitivePosition === 'bestInClass' || input.competitivePosition === 'behind') {
     keys.push('has_approved_predecessor');
   }
+
+  // Line of therapy
+  if (input.lineOfTherapy === '1L') keys.push('firstLine');
+  if (input.lineOfTherapy === '3L+') keys.push('thirdLinePlus');
+
+  // Combination potential
+  if (input.combinationPotential === 'strong') keys.push('strongCombination');
+  if (input.combinationPotential === 'standalone') keys.push('standaloneLimited');
+
+  // Neurology
+  if (input.bbbPenetration === 'provenCNS') keys.push('bbb_proven');
+  if (input.bbbPenetration === 'promisingPreclinical') keys.push('bbb_promising');
+  if (input.bbbPenetration === 'unproven' || input.bbbPenetration === 'peripheralOnly') keys.push('bbb_unproven');
+  if (input.diseaseProgression === 'rapidProgressive') keys.push('rapid_progressive_disease');
+  if (input.diseaseProgression === 'episodic') keys.push('episodic_disease');
+
+  // Immunology
+  if (input.immuneResetPotential === 'curativeIntent') keys.push('curative_intent');
+  if (input.treatmentGoal === 'chronicTreatment' || input.immuneResetPotential === 'chronicTreatment') keys.push('chronic_treatment');
+  if (input.targetSpecificity === 'antigenSpecific') keys.push('narrow_target');
+  if (input.targetSpecificity === 'broadImmunosuppression') keys.push('broad_immunosuppression');
+  if (input.diseaseSeverity === 'severe' || input.diseaseSeverity === 'refractory') keys.push('severe_refractory_disease');
+  if (input.diseaseSeverity === 'mildModerate') keys.push('mild_moderate_disease');
+
+  // Metabolic
+  if (input.weightLossEfficacy === 'superiorEfficacy') keys.push('superior_wl_efficacy');
+  if (input.weightLossEfficacy === 'modestEfficacy') keys.push('modest_wl_efficacy');
+  if (input.routeOfAdministration === 'oral') keys.push('oral_route');
+  if (input.routeOfAdministration === 'implantable') keys.push('implantable_route');
+  if (input.comorbidityBreadth === 'cardiometabolicBenefit') keys.push('cardiometabolic_benefit');
+  if (input.mechanismDifferentiation === 'incretinBased') keys.push('novel_mechanism');
+
+  // Cardiovascular
+  if (input.cvOutcomeBenefit === 'mortalityReduction') keys.push('cv_mortality_reduction');
+  if (input.cvOutcomeBenefit === 'symptomImprovement') keys.push('cv_symptom_improvement');
+  if (input.cvTrialEndpoint === 'maceEndpoint') keys.push('cv_mace_endpoint');
+  if (input.cvTrialEndpoint === 'surrogateBiomarker') keys.push('cv_surrogate_endpoint');
+  if (input.cvPopulationRisk === 'highRisk') keys.push('cv_high_risk_population');
+  if (input.cvPopulationRisk === 'primaryPrevention') keys.push('cv_primary_prevention');
+
+  // Infectious Disease
+  if (input.resistanceProfile === 'novelTarget') keys.push('id_novel_target');
+  if (input.resistanceProfile === 'broadSpectrum') keys.push('id_broad_spectrum');
+  if (input.infectionChronicity === 'chronic' || input.infectionChronicity === 'latent') keys.push('id_chronic_infection');
+  if (input.infectionChronicity === 'acute') keys.push('id_acute_infection');
+  if (input.publicHealthPriority === 'whoUrgent' || input.publicHealthPriority === 'whoCritical') keys.push('id_who_urgent');
+
+  // Ophthalmology
+  if (input.treatmentDurability === 'oneTime') keys.push('ophtho_one_time');
+  if (input.treatmentDurability === 'chronicInjection') keys.push('ophtho_chronic_injection');
+  if (input.treatmentDurability === 'extendedDuration') keys.push('ophtho_extended_durability');
+  if (input.ocularDelivery === 'topical') keys.push('ophtho_topical');
+  if (input.visionImpact === 'visionThreatening') keys.push('ophtho_vision_threatening');
+  if (input.visionImpact === 'symptomRelief') keys.push('ophtho_symptom_relief');
+
+  // Women's Health
+  if (input.whUnmetNeed === 'noApprovedTherapy') keys.push('wh_no_approved_therapy');
+  if (input.whUnmetNeed === 'wellServed') keys.push('wh_well_served');
+
+  // Rare Disease
+  if (input.patientPopulationSize === 'ultraRare_sub1k') keys.push('rd_ultra_rare');
+  if (input.patientPopulationSize === 'broader_50k_200k') keys.push('rd_broader_rare');
+  if (input.geneticBasis === 'monogenic_validated') keys.push('rd_monogenic');
+  if (input.geneticBasis === 'unknown_genetic' || input.geneticBasis === 'non_genetic') keys.push('rd_unknown_genetic');
+
+  // Hematology
+  if (input.mrdStatus === 'mrd_endpoint') keys.push('heme_mrd_endpoint');
+  if (input.mrdStatus === 'survival_endpoint') keys.push('heme_survival_endpoint');
+  if (input.transplantEligibility === 'transplant_eligible') keys.push('heme_transplant_eligible');
+  if (input.transplantEligibility === 'post_transplant') keys.push('heme_post_transplant');
+
+  // Dermatology
+  if (input.skinSeverity === 'severe' || input.skinSeverity === 'refractory_derm') keys.push('derm_severe_refractory');
+  if (input.skinSeverity === 'mild') keys.push('derm_mild');
+  if (input.chronicityProfile === 'chronic_relapsing') keys.push('derm_chronic_relapsing');
+  if (input.topicalVsSystemic === 'topical_only') keys.push('derm_topical_only');
+  if (input.topicalVsSystemic === 'systemic_only') keys.push('derm_systemic');
+
+  // Gastroenterology
+  if (input.endoscopicEndpoint === 'endoscopic_remission') keys.push('gi_endoscopic_remission');
+  if (input.endoscopicEndpoint === 'clinical_only') keys.push('gi_clinical_only');
+  if (input.biologicExperience === 'biologic_naive') keys.push('gi_biologic_naive');
+  if (input.biologicExperience === 'multi_biologic_exposed') keys.push('gi_multi_biologic_exposed');
+  if (input.giSegment === 'upper_gi') keys.push('gi_upper_gi');
+  if (input.giSegment === 'colonic' || input.giSegment === 'pancolonic') keys.push('gi_colonic');
 
   return keys;
 }

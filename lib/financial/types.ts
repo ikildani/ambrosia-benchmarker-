@@ -150,6 +150,107 @@ export interface RNPVInput {
    * E.g., 0.85 = 15% PoS reduction; 1.15 = 15% PoS increase.
    */
   posMultiplier?: number;
+
+  // =========================================================================
+  // TA-Specific Modifiers — wired from CalculationInput to drive PoS/valuation
+  // =========================================================================
+
+  /** Line of therapy: 1L commands premium, 3L+ faces more competition */
+  lineOfTherapy?: string;
+
+  /** Combination potential: strong combo eligibility = higher value */
+  combinationPotential?: string;
+
+  /** Treatment approach: disease-modifying vs symptomatic */
+  treatmentApproach?: string;
+
+  // Neurology
+  /** Blood-brain barrier penetration status */
+  bbbPenetration?: string;
+  /** Disease progression rate */
+  diseaseProgression?: string;
+  /** Biomarker validation level */
+  biomarkerValidation?: string;
+
+  // Immunology
+  /** Potential for immune reset / curative approach */
+  immuneResetPotential?: string;
+  /** Target specificity: narrow vs broad */
+  targetSpecificity?: string;
+  /** Disease severity classification */
+  diseaseSeverity?: string;
+  /** Treatment goal: remission vs maintenance */
+  treatmentGoal?: string;
+
+  // Metabolic
+  /** Weight loss efficacy level */
+  weightLossEfficacy?: string;
+  /** Route of administration */
+  routeOfAdministration?: string;
+  /** Mechanism differentiation */
+  mechanismDifferentiation?: string;
+  /** Comorbidity breadth */
+  comorbidityBreadth?: string;
+
+  // Cardiovascular
+  /** Cardiovascular outcome benefit type */
+  cvOutcomeBenefit?: string;
+  /** Trial endpoint type */
+  cvTrialEndpoint?: string;
+  /** Population risk level */
+  cvPopulationRisk?: string;
+
+  // Infectious Disease
+  /** Resistance profile */
+  resistanceProfile?: string;
+  /** Infection chronicity */
+  infectionChronicity?: string;
+  /** Public health priority level */
+  publicHealthPriority?: string;
+
+  // Ophthalmology
+  /** Ocular delivery method */
+  ocularDelivery?: string;
+  /** Treatment durability */
+  treatmentDurability?: string;
+  /** Vision impact severity */
+  visionImpact?: string;
+
+  // Women's Health
+  /** Target population */
+  whTargetPopulation?: string;
+  /** Unmet need level */
+  whUnmetNeed?: string;
+
+  // Rare Disease
+  /** Patient population size */
+  patientPopulationSize?: string;
+  /** Genetic basis */
+  geneticBasis?: string;
+
+  // Hematology
+  /** Hematologic lineage */
+  hemeLineage?: string;
+  /** Transplant eligibility */
+  transplantEligibility?: string;
+  /** MRD endpoint status */
+  mrdStatus?: string;
+
+  // Dermatology
+  /** Skin severity */
+  skinSeverity?: string;
+  /** Chronicity profile */
+  chronicityProfile?: string;
+  /** Topical vs systemic */
+  topicalVsSystemic?: string;
+
+  // Gastroenterology
+  /** GI segment */
+  giSegment?: string;
+  /** Biologic experience */
+  biologicExperience?: string;
+  /** Endoscopic endpoint */
+  endoscopicEndpoint?: string;
 }
 
 // ---------------------------------------------------------------------------
