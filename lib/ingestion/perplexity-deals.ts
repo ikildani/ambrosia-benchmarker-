@@ -282,11 +282,14 @@ export async function runPerplexityDealDiscovery(
             const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
             const derivedTA = deriveTherapeuticArea(deal.indication) || ta;
 
-            // Normalize announced_date
+            // Normalize announced_date — never use placeholder dates
+            const today = new Date().toISOString().split('T')[0];
             let announcedDate = deal.announced_date;
-            if (announcedDate && announcedDate.length === 4) announcedDate += '-07-01';
+            if (announcedDate && announcedDate.length === 4) announcedDate += '-01-15'; // Year-only: use Jan 15
             if (announcedDate && announcedDate.length === 7) announcedDate += '-15';
-            if (!announcedDate) announcedDate = new Date().toISOString().split('T')[0];
+            if (!announcedDate) announcedDate = today;
+            // Clamp future dates to today
+            if (announcedDate > today) announcedDate = today;
 
             const { error: insertError } = await supabase.from('deals').upsert({
               licensor_name: deal.licensor,

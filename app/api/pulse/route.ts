@@ -85,9 +85,12 @@ export async function GET(request: NextRequest) {
 
       supabase
         .from('deals')
-        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category')
-        .gte('announced_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-        .order('announced_date', { ascending: false }),
+        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type')
+        .gte('announced_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+        .lte('announced_date', new Date().toISOString().split('T')[0])
+        .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')
+        .order('announced_date', { ascending: false })
+        .limit(25),
     ]);
 
     if (snapshotResult.error) {
