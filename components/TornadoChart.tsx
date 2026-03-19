@@ -173,7 +173,7 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
                 type="category"
                 dataKey="factor"
                 width={140}
-                tick={{ fontSize: 11, fill: '#64748b' }}
+                tick={{ fontSize: 11, fill: '#cbd5e1' }}
                 axisLine={false}
                 tickLine={false}
               />

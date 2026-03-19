@@ -20,11 +20,11 @@ export const CHART_COLORS = {
   positive: '#0EA5A5',
   negative: '#E6A800',
 
-  // Grid & axis
-  gridLine: '#E2E8F0',
-  axisLabel: '#6B7280',
-  axisLabelBold: '#374151',
-  axisLine: '#E2E8F0',
+  // Grid & axis (designed for dark backgrounds)
+  gridLine: '#334155',
+  axisLabel: '#94A3B8',
+  axisLabelBold: '#CBD5E1',
+  axisLine: '#334155',
 } as const;
 
 // Bar chart color sequence
