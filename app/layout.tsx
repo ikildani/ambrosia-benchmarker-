@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/lib/theme";
 import { GlobalJsonLd } from "./json-ld";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-sans" });
 const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap", variable: "--font-display", weight: ["500", "600", "700", "800"] });
@@ -100,6 +101,7 @@ export default function RootLayout({
           <Toaster richColors position="top-right" />
           <ProgressBarProvider />
           <Analytics />
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>
