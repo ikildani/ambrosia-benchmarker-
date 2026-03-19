@@ -62,7 +62,11 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
   }, []);
 
   const recentDeals = useMemo(() => {
-    return deals.filter(d => new Date(d.announced_date) >= twelveMonthsAgo);
+    return deals.filter(d => {
+      if (!d.announced_date) return true; // Include deals with no date
+      const dealDate = new Date(d.announced_date);
+      return !isNaN(dealDate.getTime()) && dealDate >= twelveMonthsAgo;
+    });
   }, [deals, twelveMonthsAgo]);
 
   const modalities = useMemo(() => {
@@ -182,10 +186,21 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {filteredDeals.map((deal) => (
                 <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                    {new Date(deal.announced_date) > new Date()
-                      ? 'Recent'
-                      : new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs">
+                    {(() => {
+                      const dealDate = new Date(deal.announced_date);
+                      const now = new Date();
+                      const daysDiff = Math.abs(Math.floor((now.getTime() - dealDate.getTime()) / (1000 * 60 * 60 * 24)));
+                      // If date is today or in the future, the pipeline stamped it — show year only
+                      if (dealDate > now || daysDiff < 2) {
+                        return dealDate.getFullYear().toString();
+                      }
+                      // If date falls on the 15th of a month with no day precision, show month + year only
+                      if (dealDate.getDate() === 15) {
+                        return dealDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                      }
+                      return dealDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-slate-900 dark:text-white truncate max-w-[200px]">

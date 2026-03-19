@@ -16,6 +16,7 @@ import DealTimeline from '@/components/competitive/DealTimeline';
 import PeerComparison from '@/components/competitive/PeerComparison';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { WatchlistProvider } from '@/contexts/WatchlistContext';
 import { useRouter } from 'next/navigation';
 
 export default function CompanyPageClient({ companyId }: { companyId: string }) {
@@ -62,6 +63,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
   const isPro = tier === 'pro';
 
   return (
+    <WatchlistProvider tier={tier}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <Header
         isAuthenticated={isAuthenticated}
@@ -187,5 +189,6 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
         onSuccess={(email, name) => signIn(email, name)}
       />
     </div>
+    </WatchlistProvider>
   );
 }
