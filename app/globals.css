@@ -137,18 +137,12 @@
 
   /* Metric cards for results */
   .metric-card {
-    @apply relative p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-soft
-           transition-all duration-300 overflow-hidden
-           hover:-translate-y-0.5;
-  }
-
-  .metric-card:hover {
-    box-shadow: 0 0 20px rgba(15, 23, 42, 0.08), 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+    @apply relative rounded-xl transition-all duration-300 overflow-hidden;
   }
 
   .metric-card::before {
     content: '';
-    @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-700 to-slate-500 dark:from-blue-400 dark:to-blue-600
+    @apply absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-teal-500/60 to-blue-500/60
            opacity-0 transition-opacity duration-300;
   }
 

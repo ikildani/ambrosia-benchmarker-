@@ -111,7 +111,7 @@ function MetricCardInner({
       initial={prefersReducedMotion ? false : 'hidden'}
       animate="visible"
       whileHover={prefersReducedMotion ? undefined : { y: -2, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className={`group metric-card p-5 sm:p-6 xl:p-8 border-neutral-200 dark:border-slate-600 hover:border-teal-200 dark:hover:border-teal-500/50 hover:shadow-soft-lg transition-colors duration-300 ${isExpanded ? 'ring-2 ring-teal-200 dark:ring-teal-500/50' : ''}`}
+      className={`group metric-card p-5 sm:p-6 xl:p-7 rounded-xl bg-white dark:bg-slate-800/80 border border-neutral-100 dark:border-slate-700/60 hover:border-teal-200/60 dark:hover:border-teal-500/30 hover:shadow-lg dark:hover:shadow-teal-500/5 transition-all duration-300 ${isExpanded ? 'ring-1 ring-teal-300/50 dark:ring-teal-500/30' : ''}`}
     >
       <div
         className={`${canExpand ? 'cursor-pointer' : ''}`}
@@ -122,20 +122,23 @@ function MetricCardInner({
         onClick={handleHeaderClick}
         onKeyDown={handleHeaderKeyDown}
       >
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-9 h-9 sm:w-10 sm:h-10 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-soft group-hover:shadow-glow transition-all duration-300`}>
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-sm`}>
               <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
                 {icon}
               </div>
             </div>
-            <p className="text-sm xl:text-base font-semibold text-neutral-700 dark:text-slate-200">
-              {title}
-              {tooltipContent && <InfoTooltip content={tooltipContent} />}
-            </p>
+            <div>
+              <p className="text-sm xl:text-[15px] font-semibold text-neutral-800 dark:text-slate-100 leading-tight">
+                {title}
+                {tooltipContent && <InfoTooltip content={tooltipContent} />}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
+          <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap uppercase tracking-wider ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
               {badge}
             </span>
             {canExpand && (
@@ -151,19 +154,23 @@ function MetricCardInner({
               </motion.svg>
             )}
             {!canExpand && !isPro && (
-              <div className="p-1 bg-navy-100 dark:bg-slate-600 rounded">
-                <svg className="w-3 h-3 text-navy-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-1 bg-neutral-100 dark:bg-slate-600 rounded">
+                <svg className="w-3 h-3 text-neutral-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
             )}
           </div>
         </div>
-        <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-neutral-900 dark:text-white mb-2 number-animate">
+
+        {/* Value */}
+        <p className="text-2xl sm:text-[28px] xl:text-[32px] font-bold text-neutral-900 dark:text-white mb-3 number-animate tracking-tight">
           {value}
         </p>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-neutral-500 dark:text-slate-400">
+
+        {/* Expected + change indicator */}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[13px] text-neutral-500 dark:text-slate-400">
             Expected: <span className={`font-bold ${expectedColor}`}>
               {currentValue !== undefined ? (
                 <AnimatedValue value={currentValue} duration={900 + idx * 100} />
@@ -186,7 +193,9 @@ function MetricCardInner({
             )}
           </p>
         </div>
-        <div className="progress-bar">
+
+        {/* Progress bar */}
+        <div className="h-2 bg-neutral-100 dark:bg-slate-700/50 rounded-full overflow-hidden">
           <motion.div
             className={`h-full ${progressColor} rounded-full`}
             initial={prefersReducedMotion ? { width: `${progressWidth}%` } : { width: '0%' }}
@@ -194,11 +203,13 @@ function MetricCardInner({
             transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 100, damping: 20, delay: idx * 0.05 + 0.2 }}
           />
         </div>
+
+        {/* Context line */}
         {contextLine && (
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{contextLine}</p>
+          <p className="mt-2.5 text-[12px] text-slate-500 dark:text-slate-400">{contextLine}</p>
         )}
         {warningText && (
-          <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+          <div className="mt-3 flex items-start gap-1.5 text-[12px] text-amber-600 dark:text-amber-400">
             <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
