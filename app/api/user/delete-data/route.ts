@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logAuditEvent, getAuditContext } from '@/lib/audit-log';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -21,6 +22,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
+
+    // Audit log: data deletion request
+    const auditCtx = getAuditContext(request);
+    await logAuditEvent(supabase, {
+      user_id: user.id,
+      user_email: user.email,
+      action: 'data_deletion_requested',
+      resource: 'user_account',
+      resource_id: user.id,
+      ...auditCtx,
+    });
 
     // Get counts before deletion for confirmation
     const [sessionsCount, calculationsCount, eventsCount] = await Promise.all([

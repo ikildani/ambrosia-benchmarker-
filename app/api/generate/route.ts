@@ -4,6 +4,7 @@ import { getContentGenerator } from '@/lib/ai/content-generator';
 import { GenerateContentRequest, generateSlug } from '@/types/content';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logAuditEvent, getAuditContext } from '@/lib/audit-log';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,19 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as GenerateContentRequest;
     const { job_type, target_keyword, parameters } = body;
+
+    // Audit: admin content generation
+    const supabaseForAudit = createServiceClient();
+    const auditCtx = getAuditContext(request);
+    await logAuditEvent(supabaseForAudit, {
+      user_id: user.id,
+      user_email: user.email,
+      action: 'admin_content_generation',
+      resource: 'content',
+      resource_id: target_keyword,
+      details: { job_type },
+      ...auditCtx,
+    });
 
     if (!job_type || !target_keyword) {
       return NextResponse.json(
