@@ -7,17 +7,29 @@ import type { User } from '@supabase/supabase-js';
  * Returns null if the user is not authenticated.
  */
 export async function getAuthenticatedUser(
-  _request: NextRequest
+  request: NextRequest
 ): Promise<User | null> {
   try {
+    // Method 1: Cookie-based session (primary — set by middleware)
     const supabase = await createServerClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!error && user) return user;
 
-    if (error || !user) return null;
-    return user;
+    // Method 2: Bearer token fallback (for client-side fetch calls)
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const { createClient } = await import('@supabase/supabase-js');
+      const directClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { global: { headers: { Authorization: `Bearer ${token}` } } }
+      );
+      const { data: { user: tokenUser }, error: tokenError } = await directClient.auth.getUser(token);
+      if (!tokenError && tokenUser) return tokenUser;
+    }
+
+    return null;
   } catch {
     return null;
   }
