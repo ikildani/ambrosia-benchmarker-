@@ -46,23 +46,38 @@ function formatModality(modality: string): string {
   return short[modality] || modality.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-const taColors: Record<string, string> = {
+const normalizeTA = (ta: string) => ta?.toLowerCase().replace(/[_\s]/g, '') || '';
+
+const taColorsMap: Record<string, string> = {
   oncology: 'bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
   neurology: 'bg-violet-50 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
   immunology: 'bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
   metabolic: 'bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
   cardiovascular: 'bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-300',
-  infectiousDisease: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+  infectiousdisease: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
   ophthalmology: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
-  womensHealth: 'bg-pink-50 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
+  womenshealth: 'bg-pink-50 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
+  raredisease: 'bg-purple-50 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
+  hematology: 'bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+  dermatology: 'bg-orange-50 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+  psychiatry: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
+  painmanagement: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
+  pulmonology: 'bg-teal-50 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300',
 };
 
+function getTAColor(ta: string): string {
+  return taColorsMap[normalizeTA(ta)] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
+}
+
 function formatTA(ta: string): string {
+  const normalized = normalizeTA(ta);
   const names: Record<string, string> = {
     oncology: 'Onc', neurology: 'Neuro', immunology: 'Immuno', metabolic: 'Metab',
-    cardiovascular: 'CV', infectiousDisease: 'ID', ophthalmology: 'Ophth', womensHealth: "Women's",
+    cardiovascular: 'CV', infectiousdisease: 'ID', ophthalmology: 'Ophth', womenshealth: "Women's",
+    raredisease: 'Rare', hematology: 'Heme', dermatology: 'Derm', psychiatry: 'Psych',
+    painmanagement: 'Pain', pulmonology: 'Pulm',
   };
-  return names[ta] || ta.charAt(0).toUpperCase() + ta.slice(1);
+  return names[normalized] || ta.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 const phaseColors: Record<string, string> = {
@@ -105,7 +120,7 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                       {formatPhase(deal.phase_at_signing)}
                     </span>
                     {deal.therapeutic_area && (
-                      <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${taColors[deal.therapeutic_area] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${getTAColor(deal.therapeutic_area)}`}>
                         {formatTA(deal.therapeutic_area)}
                       </span>
                     )}
@@ -124,7 +139,9 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                     )}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {new Date(deal.announced_date) > new Date()
+                      ? 'Recent'
+                      : new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
               </div>

@@ -20,13 +20,29 @@ function formatModality(modality: string): string {
 }
 
 export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsProps) {
-  const modalities = Object.entries(snapshot.modality_breakdown || {}).sort(
-    ([, a]: any, [, b]: any) => b.count - a.count
+  if (!snapshot) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm animate-pulse">
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-20 mb-3" />
+            <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-12" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const modalityBreakdown = snapshot.modality_breakdown || {};
+  const modalities = Object.entries(modalityBreakdown).sort(
+    ([, a]: any, [, b]: any) => (b?.count ?? 0) - (a?.count ?? 0)
   );
-  const hottestModality = modalities.length > 0 ? modalities[0] : null;
+  const hottestModality = modalities.length > 0 && modalities[0] ? modalities[0] : null;
 
   // Find biggest benchmark shift
-  const shifts = Object.entries(snapshot.benchmark_changes || {})
+  const benchmarkChanges = snapshot.benchmark_changes || {};
+  const shifts = Object.entries(benchmarkChanges)
+    .filter(([, pct]) => pct != null && typeof pct === 'number' && isFinite(pct as number))
     .map(([key, pct]) => ({ modality: key.replace('_upfront_change_pct', ''), pct: pct as number }))
     .sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct));
   const biggestShift = shifts.length > 0 ? shifts[0] : null;
@@ -60,7 +76,7 @@ export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsPr
     {
       label: 'Hottest Modality',
       value: hottestModality ? formatModality(hottestModality[0] as string) : 'N/A',
-      sub: hottestModality ? `${(hottestModality[1] as any).count} deals` : '',
+      sub: hottestModality ? `${(hottestModality[1] as any)?.count ?? 0} deals` : '',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />

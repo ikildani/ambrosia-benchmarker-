@@ -55,13 +55,23 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
   const [modalityFilter, setModalityFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'value'>('date');
 
+  const twelveMonthsAgo = useMemo(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1);
+    return d;
+  }, []);
+
+  const recentDeals = useMemo(() => {
+    return deals.filter(d => new Date(d.announced_date) >= twelveMonthsAgo);
+  }, [deals, twelveMonthsAgo]);
+
   const modalities = useMemo(() => {
-    const mods = new Set(deals.map(d => d.modality).filter(Boolean));
+    const mods = new Set(recentDeals.map(d => d.modality).filter(Boolean));
     return Array.from(mods).sort();
-  }, [deals]);
+  }, [recentDeals]);
 
   const filteredDeals = useMemo(() => {
-    let result = [...deals];
+    let result = [...recentDeals];
     if (modalityFilter !== 'all') {
       result = result.filter(d => d.modality === modalityFilter);
     }
@@ -71,17 +81,17 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
       result.sort((a, b) => new Date(b.announced_date).getTime() - new Date(a.announced_date).getTime());
     }
     return result;
-  }, [deals, modalityFilter, sortBy]);
+  }, [recentDeals, modalityFilter, sortBy]);
 
   const summaryStats = useMemo(() => {
-    const withUpfront = deals.filter(d => d.upfront_usd != null && d.upfront_usd > 0);
+    const withUpfront = recentDeals.filter(d => d.upfront_usd != null && d.upfront_usd > 0);
     const totalUpfront = withUpfront.reduce((sum, d) => sum + (d.upfront_usd || 0), 0);
     return {
-      totalDeals: deals.length,
+      totalDeals: recentDeals.length,
       disclosedCount: withUpfront.length,
       totalUpfront,
     };
-  }, [deals]);
+  }, [recentDeals]);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -173,7 +183,9 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
               {filteredDeals.map((deal) => (
                 <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                    {new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                    {new Date(deal.announced_date) > new Date()
+                      ? 'Recent'
+                      : new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-slate-900 dark:text-white truncate max-w-[200px]">

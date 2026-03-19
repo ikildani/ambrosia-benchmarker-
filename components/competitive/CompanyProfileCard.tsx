@@ -1,5 +1,7 @@
 'use client';
 
+import WatchButton from '@/components/WatchButton';
+
 interface CompanyProfileCardProps {
   company: {
     name: string;
@@ -70,6 +72,12 @@ export default function CompanyProfileCard({ company, isPro, marketPosition, dea
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1.5 flex-wrap">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{company.name}</h1>
+              <WatchButton
+                itemType="company"
+                itemValue={company.name}
+                size="md"
+                tier={isPro ? 'pro' : 'free'}
+              />
               {company.company_type && (
                 <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                   {typeLabels[company.company_type] || company.company_type}

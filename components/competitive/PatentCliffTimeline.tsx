@@ -34,7 +34,21 @@ export default function PatentCliffTimeline({ cliffs }: PatentCliffTimelineProps
     );
   }
 
-  const sorted = [...cliffs].sort((a, b) => a.year - b.year);
+  const currentYear = new Date().getFullYear();
+  const sorted = [...cliffs].filter(c => c.year >= currentYear).sort((a, b) => a.year - b.year);
+
+  if (sorted.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">Patent Cliff Timeline</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Revenue at risk from upcoming patent expirations</p>
+        <div className="flex flex-col items-center py-8 text-center">
+          <p className="text-sm text-slate-400">No upcoming patent cliffs found for this company.</p>
+        </div>
+      </div>
+    );
+  }
+
   const years = [...new Set(sorted.map(c => c.year))];
   const maxRevenue = Math.max(1, ...sorted.map(c => c.revenue_at_risk || 0));
 
@@ -79,16 +93,30 @@ export default function PatentCliffTimeline({ cliffs }: PatentCliffTimelineProps
                 {/* Drug names */}
                 <div className="mt-2 space-y-0.5 text-center">
                   {yearCliffs.slice(0, 3).map((c, idx) => (
-                    <div key={idx} className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[100px]">
+                    <div
+                      key={idx}
+                      className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[100px] cursor-default"
+                      title={`${c.drug_name || 'Undisclosed'}${c.revenue_at_risk ? ` — ${formatUsd(c.revenue_at_risk)} at risk` : ''}${c.therapeutic_area ? ` (${c.therapeutic_area})` : ''}`}
+                    >
                       {c.drug_name || 'Undisclosed'}
                     </div>
                   ))}
+                  {yearCliffs.length > 3 && (
+                    <div
+                      className="text-[10px] text-blue-500 dark:text-blue-400 font-medium cursor-default"
+                      title={yearCliffs.slice(3).map(c => c.drug_name || 'Undisclosed').join(', ')}
+                    >
+                      +{yearCliffs.length - 3} more
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-4 text-right">Data source: SEC filings, FDA Orange Book</p>
     </div>
   );
 }
