@@ -10,6 +10,42 @@ import TherapeuticAreaBreakdown from './TherapeuticAreaBreakdown';
 
 const BenchmarkSparklines = dynamic(() => import('./BenchmarkSparklines'), { ssr: false });
 
+interface ModalityEntry {
+  count: number;
+  avg_upfront: number;
+}
+
+interface TherapeuticAreaEntry {
+  count: number;
+  avg_upfront: number;
+}
+
+interface PulseSnapshot {
+  snapshot_date: string;
+  week_start: string;
+  total_deals: number;
+  new_deals_this_week: number;
+  avg_upfront: number;
+  median_upfront: number;
+  modality_breakdown: Record<string, ModalityEntry>;
+  therapeutic_area_breakdown: Record<string, TherapeuticAreaEntry>;
+  [key: string]: unknown;
+}
+
+interface PulseDeal {
+  id: string;
+  licensor_name: string;
+  licensee_name: string;
+  asset_name: string | null;
+  modality: string;
+  phase_at_signing: string;
+  upfront_usd: number | null;
+  total_deal_value_usd: number | null;
+  announced_date: string;
+  therapeutic_area: string | null;
+  [key: string]: unknown;
+}
+
 interface MarketPulseProps {
   isPro: boolean;
   userId?: string;
@@ -18,9 +54,9 @@ interface MarketPulseProps {
 }
 
 export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPulseProps) {
-  const [snapshot, setSnapshot] = useState<any>(null);
-  const [deals, setDeals] = useState<any[]>([]);
-  const [historySnapshots, setHistorySnapshots] = useState<any[]>([]);
+  const [snapshot, setSnapshot] = useState<PulseSnapshot | null>(null);
+  const [deals, setDeals] = useState<PulseDeal[]>([]);
+  const [historySnapshots, setHistorySnapshots] = useState<PulseSnapshot[]>([]);
   const [totalDeals, setTotalDeals] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -187,7 +223,13 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
 
       {/* Data Freshness */}
       <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        Data last updated March 2026 &middot; 350+ curated deals across 12 therapeutic areas &middot; Refreshed weekly
+        {snapshotDate ? `Data as of ${snapshotDate}` : 'Data last updated March 2026'}
+        {' '}&middot;{' '}
+        {totalDeals > 0 ? `${totalDeals.toLocaleString()}` : '350+'} curated deals across{' '}
+        {snapshot?.therapeutic_area_breakdown
+          ? Object.keys(snapshot.therapeutic_area_breakdown).length
+          : 12}{' '}
+        therapeutic areas &middot; Refreshed weekly
       </p>
     </div>
   );

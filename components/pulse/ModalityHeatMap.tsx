@@ -30,6 +30,9 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
     activeModalities.push(...Object.keys(modalityData).slice(0, 8));
   }
 
+  // Sort by deal count descending so the most active modalities appear first
+  activeModalities.sort((a, b) => (modalityData[b]?.count || 0) - (modalityData[a]?.count || 0));
+
   const maxCount = Math.max(1, ...Object.values(modalityData).map((d: any) => d.count || 0));
 
   const ariaLabel = activeModalities.length > 0
@@ -53,25 +56,29 @@ export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProp
         <div className="space-y-2">
           {activeModalities.map((modality) => {
             const data = modalityData[modality] || { count: 0 };
-            const barWidth = Math.max(8, (data.count / maxCount) * 100);
+            const barWidth = Math.max(4, (data.count / maxCount) * 100);
 
             return (
-              <div key={modality} className="flex items-center gap-3">
+              <div key={modality} className="group flex items-center gap-3">
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-300 w-20 shrink-0 truncate">
                   {formatModality(modality)}
                 </span>
                 <div className="flex-1 h-7 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden relative">
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-500 dark:to-blue-400 rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-500 dark:to-blue-400 rounded-lg transition-all duration-300 flex items-center justify-end pr-2 group-hover:from-blue-600 group-hover:to-blue-700 dark:group-hover:from-blue-400 dark:group-hover:to-blue-300"
                     style={{ width: `${barWidth}%` }}
                   >
                     {isPro ? (
                       <span className="text-xs font-bold text-white drop-shadow-sm">{data.count}</span>
                     ) : (
-                      <svg className="w-3 h-3 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
+                      <span className="text-xs font-bold text-white/0 group-hover:text-white/90 transition-colors duration-200 drop-shadow-sm">{data.count}</span>
                     )}
+                  </div>
+                  {/* Hover tooltip for exact count */}
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[calc(100%+6px)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                    <span className="px-2 py-1 bg-slate-900 dark:bg-slate-700 text-white text-xs font-medium rounded-md whitespace-nowrap shadow-lg">
+                      {data.count} deal{data.count !== 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
               </div>

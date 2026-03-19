@@ -24,7 +24,8 @@ export default function CompanyBenchmarkComparison({ data, companyName, isPro = 
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative">
-      <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Avg Upfront vs Market</h2>
+      <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">Avg Upfront vs Market</h2>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Company average compared to market benchmark</p>
       {!isPro && (
         <div className="absolute inset-0 top-12 flex items-center justify-center z-10">
           <div className="absolute inset-0 backdrop-blur-[3px] bg-white/40 dark:bg-slate-800/40 rounded-b-2xl" />
@@ -65,6 +66,32 @@ export default function CompanyBenchmarkComparison({ data, companyName, isPro = 
           </div>
         </div>
       </div>
+      {/* Delta indicator */}
+      {company_avg_upfront != null && market_avg_upfront != null && market_avg_upfront > 0 && (
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+          {(() => {
+            const delta = ((company_avg_upfront - market_avg_upfront) / market_avg_upfront) * 100;
+            const isAbove = delta > 0;
+            const isFlat = Math.abs(delta) < 1;
+            return (
+              <div className="flex items-center gap-2 text-xs">
+                {isFlat ? (
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">At market average</span>
+                ) : (
+                  <>
+                    <span className={`font-semibold ${isAbove ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                      {isAbove ? '+' : ''}{delta.toFixed(0)}%
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400">
+                      {isAbove ? 'above' : 'below'} market average
+                    </span>
+                  </>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 }

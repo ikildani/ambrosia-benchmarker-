@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function PulsePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin" /></div>}>
       <PulsePageInner />
     </Suspense>
   );
@@ -72,7 +72,7 @@ function PulsePageInner() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
+            <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin" />
           </div>
         ) : (
           <MarketPulse

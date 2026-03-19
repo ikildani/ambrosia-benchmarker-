@@ -8,7 +8,7 @@ const breadcrumbSchema = generateBreadcrumbSchema([
 
 export const metadata: Metadata = {
   title: 'Market Pulse — Weekly Biopharma Deal Intelligence',
-  description: 'Weekly biotech licensing intelligence — deal activity, therapeutic area trends, modality heatmaps, benchmark shifts, and clinical trial updates across oncology, neurology, immunology, and 5 more TAs. Know what moved before your next board meeting.',
+  description: 'Weekly biotech licensing intelligence — deal activity, therapeutic area trends, modality heatmaps, benchmark shifts, and clinical trial updates across oncology, neurology, immunology, and more. Know what moved before your next board meeting.',
   keywords: [
     'biopharma deal intelligence',
     'weekly biotech deal report',
