@@ -53,27 +53,27 @@ export default function AppearanceSettings() {
             onClick={() => setTheme(t.id)}
             className={`relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
               theme === t.id
-                ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/15'
                 : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 bg-slate-50 dark:bg-slate-700/50'
             }`}
           >
             {theme === t.id && (
               <div className="absolute top-2 right-2">
-                <svg className="w-4 h-4 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
             )}
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               theme === t.id
-                ? 'bg-teal-500 text-white'
+                ? 'bg-blue-500 text-white'
                 : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
             }`}>
               {t.icon}
             </div>
             <div className="text-center">
               <p className={`text-sm font-medium ${
-                theme === t.id ? 'text-teal-700 dark:text-teal-400' : 'text-slate-700 dark:text-slate-300'
+                theme === t.id ? 'text-blue-800 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'
               }`}>
                 {t.label}
               </p>

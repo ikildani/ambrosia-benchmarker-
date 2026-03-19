@@ -33,8 +33,8 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
   if (tier !== 'pro') {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center">
-          <svg className="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-600/15 to-cyan-500/20 flex items-center justify-center">
+          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </div>
@@ -44,7 +44,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
         </p>
         <button
           onClick={onUpgrade}
-          className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
+          className="px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15"
         >
           Upgrade to Pro
         </button>
@@ -55,7 +55,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-10 h-10 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
+        <div className="w-10 h-10 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
         <p className="text-slate-500 dark:text-slate-400 mb-4 text-sm">Something went wrong. Please try again.</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors"
+          className="px-4 py-2 text-sm font-medium text-slate-900 dark:text-white bg-blue-50 dark:bg-blue-900/15 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
         >
           Retry
         </button>
@@ -94,7 +94,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {items.length} item{items.length !== 1 ? 's' : ''} watched
             {recentActivityCount > 0 && (
-              <span className="ml-2 text-teal-600 dark:text-teal-400 font-medium">
+              <span className="ml-2 text-slate-900 dark:text-white font-medium">
                 {recentActivityCount} new event{recentActivityCount !== 1 ? 's' : ''} this week
               </span>
             )}
@@ -102,7 +102,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25 text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15 text-sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

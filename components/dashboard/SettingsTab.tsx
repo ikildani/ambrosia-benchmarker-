@@ -122,20 +122,20 @@ const SettingsTab = React.memo(function SettingsTab({
             backgroundSize: '24px 24px'
           }} />
         </div>
-        <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
 
         <div className="relative flex flex-col sm:flex-row items-center gap-6">
-          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-4xl font-bold shadow-xl shadow-teal-500/30 dark:shadow-teal-400/20`}>
+          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getAvatarGradient(selectedAvatar).from} ${getAvatarGradient(selectedAvatar).to} flex items-center justify-center text-4xl font-bold shadow-xl shadow-slate-900/15 dark:shadow-blue-400/15`}>
             {editName.charAt(0).toUpperCase()}
           </div>
           <div className="text-center sm:text-left flex-1">
             <h2 className="text-2xl font-bold">{editName}</h2>
             <p className="text-slate-400">{userEmail}</p>
-            {editCompany && <p className="text-teal-400 mt-1">{editCompany}</p>}
+            {editCompany && <p className="text-blue-400 mt-1">{editCompany}</p>}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                 (tier === 'pro' || tier === 'report')
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
+                  ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white'
                   : 'bg-slate-700 text-slate-300'
               }`}>
                 {tier === 'pro' ? 'Pro Member' : tier === 'report' ? 'Report' : 'Free Plan'}
@@ -203,7 +203,7 @@ const SettingsTab = React.memo(function SettingsTab({
               value={editName}
               onChange={(e) => onEditName(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             />
           </div>
           <div>
@@ -225,7 +225,7 @@ const SettingsTab = React.memo(function SettingsTab({
               onChange={(e) => onEditPhone(e.target.value)}
               placeholder="+1 (555) 000-0000"
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             />
           </div>
           <div>
@@ -236,7 +236,7 @@ const SettingsTab = React.memo(function SettingsTab({
               onChange={(e) => onEditLinkedIn(e.target.value)}
               placeholder="linkedin.com/in/yourprofile"
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             />
           </div>
         </div>
@@ -261,7 +261,7 @@ const SettingsTab = React.memo(function SettingsTab({
               onChange={(e) => onEditTitle(e.target.value)}
               placeholder="e.g., VP Business Development"
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             />
           </div>
           <div>
@@ -272,7 +272,7 @@ const SettingsTab = React.memo(function SettingsTab({
               onChange={(e) => onEditCompany(e.target.value)}
               placeholder="e.g., Biotech Inc."
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             />
           </div>
           <div className="sm:col-span-2">
@@ -281,7 +281,7 @@ const SettingsTab = React.memo(function SettingsTab({
               value={editRole}
               onChange={(e) => onEditRole(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                       focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
             >
               <option value="">Select your role...</option>
               <option value="bd_executive">Business Development Executive</option>
@@ -300,8 +300,8 @@ const SettingsTab = React.memo(function SettingsTab({
         <button
           onClick={onSaveSettings}
           disabled={isSaving}
-          className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl
-                   shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10 hover:shadow-xl hover:from-teal-500 hover:to-cyan-400
+          className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl
+                   shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10 hover:shadow-xl hover:from-slate-700 hover:to-slate-800
                    transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
@@ -333,12 +333,12 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
         </div>
-        <div className={`p-5 rounded-xl mb-4 ${(tier === 'pro' || tier === 'report') ? 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/20 dark:to-cyan-500/20 border border-teal-200 dark:border-teal-500/30' : 'bg-slate-50 dark:bg-slate-700'}`}>
+        <div className={`p-5 rounded-xl mb-4 ${(tier === 'pro' || tier === 'report') ? 'bg-gradient-to-br from-slate-50 to-blue-50 dark:from-blue-900/15 dark:to-blue-800/20 border border-blue-200 dark:border-blue-600/20' : 'bg-slate-50 dark:bg-slate-700'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
                 (tier === 'pro' || tier === 'report')
-                  ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15'
+                  ? 'bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10'
                   : 'bg-slate-200 dark:bg-slate-600'
               }`}>
                 <svg className={`w-7 h-7 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,7 +353,7 @@ const SettingsTab = React.memo(function SettingsTab({
             {tier === 'free' && (
               <button
                 onClick={onUpgrade}
-                className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10"
+                className="px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10"
               >
                 Upgrade Now
               </button>
@@ -366,7 +366,7 @@ const SettingsTab = React.memo(function SettingsTab({
             : ['2 calculations per month', 'Basic deal estimates', 'Calculation history']
           ).map((feature, idx) => (
             <div key={idx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {feature}
@@ -388,8 +388,8 @@ const SettingsTab = React.memo(function SettingsTab({
         <div className="space-y-4">
           <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                 </svg>
               </div>
@@ -401,8 +401,8 @@ const SettingsTab = React.memo(function SettingsTab({
             <button
               onClick={() => handleToggleWeeklyDigest(!weeklyDigest)}
               disabled={savingPrefs}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
-                weeklyDigest ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                weeklyDigest ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'
               } ${savingPrefs ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
               role="switch"
               aria-checked={weeklyDigest}

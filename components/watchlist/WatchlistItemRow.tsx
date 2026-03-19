@@ -8,7 +8,7 @@ interface WatchlistItemRowProps {
 }
 
 const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
-  modality: { label: 'Modality', color: 'text-teal-700 dark:text-teal-300', bg: 'bg-teal-50 dark:bg-teal-500/20' },
+  modality: { label: 'Modality', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20' },
   indication: { label: 'Indication', color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-500/20' },
   company: { label: 'Company', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/20' },
   therapeutic_area: { label: 'Area', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/20' },

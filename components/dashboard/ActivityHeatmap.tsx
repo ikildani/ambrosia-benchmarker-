@@ -56,9 +56,9 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
 
   const getColor = (count: number) => {
     if (count === 0) return 'bg-slate-100 dark:bg-slate-700';
-    if (count === 1) return 'bg-teal-200 dark:bg-teal-800';
-    if (count === 2) return 'bg-teal-400 dark:bg-teal-600';
-    return 'bg-teal-600 dark:bg-teal-400';
+    if (count === 1) return 'bg-blue-200 dark:bg-blue-800';
+    if (count === 2) return 'bg-blue-500 dark:bg-blue-700';
+    return 'bg-blue-700 dark:bg-blue-500';
   };
 
   const formatDate = (dateStr: string) => {
@@ -70,7 +70,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -96,7 +96,7 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
     <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -106,9 +106,9 @@ function ActivityHeatmapInner({ history }: ActivityHeatmapProps) {
         <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
           <span>Less</span>
           <div className="w-2.5 h-2.5 rounded-sm bg-slate-100 dark:bg-slate-700" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-200 dark:bg-teal-800" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-400 dark:bg-teal-600" />
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-600 dark:bg-teal-400" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-blue-200 dark:bg-blue-800" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-blue-500 dark:bg-blue-700" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-blue-700 dark:bg-blue-500" />
           <span>More</span>
         </div>
       </div>

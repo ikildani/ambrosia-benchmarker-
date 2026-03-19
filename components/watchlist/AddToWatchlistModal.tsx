@@ -164,13 +164,13 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
                   value={companyQuery}
                   onChange={(e) => setCompanyQuery(e.target.value)}
                   placeholder="Search companies (e.g. Pfizer, Novartis)..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/50 focus:border-blue-600"
                   autoFocus
                 />
               </div>
               {companyLoading && (
                 <div className="flex items-center justify-center py-6 text-slate-400 text-sm">
-                  <div className="w-4 h-4 rounded-full border-2 border-teal-300 border-t-teal-600 animate-spin mr-2" />
+                  <div className="w-4 h-4 rounded-full border-2 border-blue-300 border-t-blue-600 animate-spin mr-2" />
                   Searching...
                 </div>
               )}
@@ -187,12 +187,12 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
                     disabled={watched || isAddingThis}
                     className={`flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl text-left transition-all ${
                       watched
-                        ? 'bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-600/30'
                         : 'bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-medium truncate ${watched ? 'text-teal-700 dark:text-teal-300' : 'text-slate-900 dark:text-white'}`}>
+                      <p className={`text-sm font-medium truncate ${watched ? 'text-blue-700 dark:text-blue-300' : 'text-slate-900 dark:text-white'}`}>
                         {company.name}
                       </p>
                       <p className="text-xs text-slate-400 mt-0.5">
@@ -201,11 +201,11 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
                       </p>
                     </div>
                     {watched ? (
-                      <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : isAddingThis ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-teal-300 border-t-teal-600 animate-spin shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-blue-300 border-t-blue-600 animate-spin shrink-0" />
                     ) : (
                       <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -231,17 +231,17 @@ export default function AddToWatchlistModal({ onClose, onAdd, existingItems }: A
                     disabled={watched || isAdding}
                     className={`flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left ${
                       watched
-                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-600/30'
                         : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent'
                     }`}
                   >
                     <span className="truncate">{formatValue(value)}</span>
                     {watched ? (
-                      <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : isAdding ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-teal-300 border-t-teal-600 animate-spin shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-blue-300 border-t-blue-600 animate-spin shrink-0" />
                     ) : (
                       <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

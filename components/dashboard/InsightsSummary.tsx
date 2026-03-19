@@ -250,10 +250,10 @@ function InsightsSummaryInner({ history }: InsightsSummaryProps) {
   // True empty state: no history at all
   if (history.length === 0) {
     return (
-      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-[1px] rounded-2xl">
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-[1px] rounded-2xl">
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-3">
-            <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
             <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Smart Insights</h3>
@@ -267,10 +267,10 @@ function InsightsSummaryInner({ history }: InsightsSummaryProps) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-[1px] rounded-2xl">
+    <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-[1px] rounded-2xl">
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
           <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Smart Insights</h3>
@@ -278,7 +278,7 @@ function InsightsSummaryInner({ history }: InsightsSummaryProps) {
         <div className="space-y-3">
           {insights.map((insight, i) => (
             <div key={i} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-slate-900 dark:text-white flex-shrink-0 mt-0.5">
                 {insight.icon}
               </div>
               <p className="text-sm text-slate-700 dark:text-slate-300">{insight.text}</p>

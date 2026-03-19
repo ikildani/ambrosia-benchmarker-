@@ -48,7 +48,7 @@ const OverviewTab = React.memo(function OverviewTab({
       {/* Deal Insights - Full Width */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -61,14 +61,14 @@ const OverviewTab = React.memo(function OverviewTab({
 
         {history.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-            <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-lg sm:rounded-xl border border-teal-200/50">
+            <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-lg sm:rounded-xl border border-blue-200/50">
               <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
-                <span className="text-xs font-medium text-teal-700">Total Analyses</span>
+                <span className="text-xs font-medium text-blue-800">Total Analyses</span>
               </div>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-700">{history.length}</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-800">{history.length}</p>
             </div>
 
             <div className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 rounded-lg sm:rounded-xl border border-cyan-200/50">
@@ -142,7 +142,7 @@ const OverviewTab = React.memo(function OverviewTab({
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Run your first calculation to see analytics here</p>
             <button
               onClick={onNavigateToCalculator}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-medium rounded-xl hover:from-teal-500 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-medium rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -165,7 +165,7 @@ const OverviewTab = React.memo(function OverviewTab({
             {tier === 'free' && (
               <button
                 onClick={onUpgrade}
-                className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                className="text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors"
               >
                 Upgrade to Pro
               </button>
@@ -174,7 +174,7 @@ const OverviewTab = React.memo(function OverviewTab({
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
               (tier === 'pro' || tier === 'report')
-                ? 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15'
+                ? 'bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10'
                 : 'bg-slate-100 dark:bg-slate-700'
             }`}>
               <svg className={`w-6 h-6 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,10 +214,10 @@ const OverviewTab = React.memo(function OverviewTab({
                 aria-label={`View ${item.labels.phase} ${item.labels.modality} calculation from ${formatDate(item.timestamp)}`}
                 className="flex items-start gap-3 pb-4 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0
                            cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 -mx-2 px-2 py-2 rounded-lg transition-all duration-200
-                           focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 group"
+                           focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-slate-800 group"
               >
-                <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 dark:group-hover:bg-teal-500/30 transition-colors">
-                  <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 dark:group-hover:bg-blue-500/30 transition-colors">
+                  <svg className="w-4 h-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -245,7 +245,7 @@ const OverviewTab = React.memo(function OverviewTab({
             <p className="text-sm text-slate-500 dark:text-slate-400">No calculations yet</p>
             <button
               onClick={onNavigateToCalculator}
-              className="mt-3 text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300"
+              className="mt-3 text-sm font-medium text-slate-900 dark:text-white hover:text-blue-800 dark:hover:text-blue-300"
             >
               Start your first calculation
             </button>

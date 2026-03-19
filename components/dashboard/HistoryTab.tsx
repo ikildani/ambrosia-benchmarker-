@@ -58,7 +58,7 @@ const HistoryTab = React.memo(function HistoryTab({
                 placeholder="Search by phase, modality, indication..."
                 value={historySearch}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
@@ -70,7 +70,7 @@ const HistoryTab = React.memo(function HistoryTab({
                   onClick={() => onAreaFilterChange(value)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
                     historyAreaFilter === value
-                      ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+                      ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300'
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
                   }`}
                 >
@@ -83,7 +83,7 @@ const HistoryTab = React.memo(function HistoryTab({
             <select
               value={historySort}
               onChange={(e) => onSortChange(e.target.value as typeof historySort)}
-              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -115,11 +115,11 @@ const HistoryTab = React.memo(function HistoryTab({
                 role="button"
                 tabIndex={0}
                 aria-label={`View calculation details for ${item.labels.phase} ${item.labels.modality}`}
-                className="flex items-start justify-between gap-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 rounded-lg -m-2 p-2"
+                className="flex items-start justify-between gap-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-slate-800 rounded-lg -m-2 p-2"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/20 dark:to-cyan-500/20 flex items-center justify-center flex-shrink-0 group-hover:from-teal-100 group-hover:to-cyan-100 dark:group-hover:from-teal-500/30 dark:group-hover:to-cyan-500/30 transition-colors">
-                    <svg className="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 dark:from-blue-900/15 dark:to-blue-800/20 flex items-center justify-center flex-shrink-0 group-hover:from-blue-100 group-hover:to-blue-50 dark:group-hover:from-blue-800/20 dark:group-hover:to-blue-700/20 transition-colors">
+                    <svg className="w-6 h-6 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -132,7 +132,7 @@ const HistoryTab = React.memo(function HistoryTab({
                         </span>
                       )}
                       {item.hasPDF && (
-                        <span className="px-2 py-0.5 bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-medium rounded-full">
+                        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 text-xs font-medium rounded-full">
                           PDF
                         </span>
                       )}
@@ -152,7 +152,7 @@ const HistoryTab = React.memo(function HistoryTab({
                       {formatCurrency(item.results.upfrontMedian)}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Total Value</p>
-                    <p className="font-semibold text-teal-600 dark:text-teal-400">
+                    <p className="font-semibold text-slate-900 dark:text-white">
                       {formatCurrency(item.results.totalValueMedian)}
                     </p>
                   </div>
@@ -183,8 +183,8 @@ const HistoryTab = React.memo(function HistoryTab({
                 <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                   <button
                     onClick={(e) => { e.stopPropagation(); onRecalculate(item); }}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 dark:text-teal-400
-                               hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-900 dark:text-white
+                               hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

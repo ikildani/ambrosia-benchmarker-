@@ -74,13 +74,13 @@ const DashboardNav = React.memo(function DashboardNav({
             }`}
           >
             <svg className={`w-4 h-4 flex-shrink-0 transition-colors ${
-              activeTab === tab.id ? 'text-teal-600' : ''
+              activeTab === tab.id ? 'text-blue-700' : ''
             }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
             </svg>
             <span className="text-xs sm:text-sm">{tab.label}</span>
             {tab.id === 'watchlist' && watchlistNewCount > 0 && activeTab !== 'watchlist' && (
-              <span className="ml-1 w-5 h-5 flex items-center justify-center bg-teal-500 text-white text-[10px] font-bold rounded-full animate-pulse">
+              <span className="ml-1 w-5 h-5 flex items-center justify-center bg-blue-600 text-white text-[10px] font-bold rounded-full animate-pulse">
                 {watchlistNewCount > 9 ? '9+' : watchlistNewCount}
               </span>
             )}

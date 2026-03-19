@@ -29,7 +29,7 @@ export default function DashboardError({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-sm"
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-sm"
           >
             Try again
           </button>

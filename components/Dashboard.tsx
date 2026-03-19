@@ -17,7 +17,7 @@ const AVATAR_GRADIENTS = [
   { id: 'ocean', from: 'from-cyan-500', to: 'to-blue-600', label: 'Ocean' },
   { id: 'aurora', from: 'from-violet-500', to: 'to-fuchsia-500', label: 'Aurora' },
   { id: 'sunset', from: 'from-orange-400', to: 'to-rose-500', label: 'Sunset' },
-  { id: 'forest', from: 'from-emerald-500', to: 'to-teal-600', label: 'Forest' },
+  { id: 'forest', from: 'from-emerald-500', to: 'to-slate-700', label: 'Forest' },
   { id: 'midnight', from: 'from-indigo-600', to: 'to-purple-700', label: 'Midnight' },
   { id: 'slate', from: 'from-slate-500', to: 'to-zinc-600', label: 'Slate' },
 ];
@@ -435,7 +435,7 @@ export default function Dashboard({
   const topModality = getTopModality();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300 pt-16 sm:pt-20 lg:pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300 pt-16 sm:pt-20 lg:pt-24">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Banner - Mobile optimized */}
         <div className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 text-white relative overflow-hidden">
@@ -445,14 +445,14 @@ export default function Dashboard({
               backgroundSize: '24px 24px'
             }} />
           </div>
-          <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-teal-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-blue-500/20 rounded-full blur-3xl" />
 
           <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div className="text-center sm:text-left">
               <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
-                <span className="text-teal-400 text-sm font-medium">{getGreeting()}</span>
+                <span className="text-blue-400 text-sm font-medium">{getGreeting()}</span>
                 {(tier === 'pro' || tier === 'report') && (
-                  <span className="px-2 py-0.5 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-300 text-xs font-semibold rounded-full">{tier === 'report' ? 'Report' : 'Pro'} Member</span>
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600/15 to-cyan-500/20 border border-blue-600/20 text-blue-300 text-xs font-semibold rounded-full">{tier === 'report' ? 'Report' : 'Pro'} Member</span>
                 )}
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
@@ -463,8 +463,8 @@ export default function Dashboard({
             {/* Hide CTA on mobile - FAB handles this */}
             <button
               onClick={onNavigateToCalculator}
-              className="hidden sm:inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm sm:text-base font-semibold rounded-xl
-                       shadow-lg shadow-teal-500/25 dark:shadow-teal-400/15 hover:shadow-xl hover:shadow-teal-500/30 dark:hover:shadow-teal-400/20 transition-all hover:-translate-y-0.5 touch-feedback"
+              className="hidden sm:inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white text-sm sm:text-base font-semibold rounded-xl
+                       shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10 hover:shadow-xl hover:shadow-slate-900/15 dark:hover:shadow-blue-400/15 transition-all hover:-translate-y-0.5 touch-feedback"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -594,7 +594,7 @@ export default function Dashboard({
       {/* Floating Action Button - Mobile Only */}
       <button
         onClick={onNavigateToCalculator}
-        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-2xl shadow-lg shadow-teal-500/40 dark:shadow-teal-400/25 flex items-center justify-center z-50 fab-pulse touch-feedback safe-bottom"
+        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl shadow-lg shadow-slate-900/25 dark:shadow-blue-400/15 flex items-center justify-center z-50 fab-pulse touch-feedback safe-bottom"
         aria-label="New Calculation"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

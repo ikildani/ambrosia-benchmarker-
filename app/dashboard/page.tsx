@@ -20,9 +20,9 @@ export default function DashboardPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/20 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
           <p className="text-slate-600 font-medium">Loading dashboard...</p>
         </div>
       </div>
@@ -32,9 +32,9 @@ export default function DashboardPage() {
   // Don't render dashboard if not authenticated (will redirect)
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/20 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-teal-200 border-t-teal-500 animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
           <p className="text-slate-600 font-medium">Redirecting...</p>
         </div>
       </div>

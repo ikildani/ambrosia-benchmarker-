@@ -287,7 +287,7 @@ export async function runPerplexityDealDiscovery(
             let announcedDate = deal.announced_date;
             if (announcedDate && announcedDate.length === 4) announcedDate += '-06-15'; // Year-only: use mid-year estimate
             if (announcedDate && announcedDate.length === 7) announcedDate += '-15'; // Month-only: use 15th
-            if (!announcedDate) announcedDate = null; // Don't fake a date — leave null
+            if (!announcedDate) announcedDate = today; // Use today if no date available
             // Clamp future dates to today
             if (announcedDate && announcedDate > today) announcedDate = today;
 
