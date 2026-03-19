@@ -62,6 +62,28 @@ export async function GET(request: NextRequest) {
 
   const result = { processed: 0, urls_found: 0, terms_found: 0, dates_fixed: 0, companies_linked: 0, errors: [] as string[] };
 
+  // Pre-fetch company name→ID map to avoid N+1 queries
+  const companyNames = new Set<string>();
+  for (const deal of deals) {
+    if (!deal.licensor_id && deal.licensor_name) companyNames.add(deal.licensor_name);
+    if (!deal.licensee_id && deal.licensee_name) companyNames.add(deal.licensee_name);
+  }
+  const companyIdCache = new Map<string, string>();
+  if (companyNames.size > 0) {
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('id, name, name_variations')
+      .limit(1000);
+    for (const c of companies || []) {
+      companyIdCache.set(c.name.toLowerCase(), c.id);
+      if (c.name_variations) {
+        for (const v of c.name_variations) {
+          companyIdCache.set(v.toLowerCase(), c.id);
+        }
+      }
+    }
+  }
+
   for (const deal of deals) {
     if (Date.now() - startTime > MAX_RUNTIME_MS) break;
 
@@ -129,8 +151,17 @@ Text: ${text.substring(0, 3000)}`
         }
       }
 
-      if (!deal.licensor_id) { try { const id = await findOrCreateCompany(supabase, deal.licensor_name, false); if (id) { updates.licensor_id = id; result.companies_linked++; } } catch {} }
-      if (!deal.licensee_id) { try { const id = await findOrCreateCompany(supabase, deal.licensee_name, true); if (id) { updates.licensee_id = id; result.companies_linked++; } } catch {} }
+      // Company linkage — use cache first, then findOrCreateCompany as fallback
+      if (!deal.licensor_id && deal.licensor_name) {
+        const cached = companyIdCache.get(deal.licensor_name.toLowerCase());
+        if (cached) { updates.licensor_id = cached; result.companies_linked++; }
+        else { try { const id = await findOrCreateCompany(supabase, deal.licensor_name, false); if (id) { updates.licensor_id = id; companyIdCache.set(deal.licensor_name.toLowerCase(), id); result.companies_linked++; } } catch {} }
+      }
+      if (!deal.licensee_id && deal.licensee_name) {
+        const cached = companyIdCache.get(deal.licensee_name.toLowerCase());
+        if (cached) { updates.licensee_id = cached; result.companies_linked++; }
+        else { try { const id = await findOrCreateCompany(supabase, deal.licensee_name, true); if (id) { updates.licensee_id = id; companyIdCache.set(deal.licensee_name.toLowerCase(), id); result.companies_linked++; } } catch {} }
+      }
 
       if (Object.keys(updates).length > 0) {
         await supabase.from('deals').update(updates).eq('id', deal.id);

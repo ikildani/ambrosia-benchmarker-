@@ -2,15 +2,23 @@ import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Get shared calculation by token
+// GET - Get shared calculation by token (rate-limited to prevent brute-force)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
+    // Rate limit: 20 lookups per minute per IP (prevents token brute-forcing)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'share-lookup', { limit: 20, windowSeconds: 60 });
+    if (!rateLimitResult.success) {
+      return apiError('Too many requests', 429);
+    }
+
     const supabase = createServiceClient();
     const { token } = await params;
 

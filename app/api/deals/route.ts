@@ -27,29 +27,45 @@ export async function GET(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    // SECURITY: Prefer user_id (UUID, hard to guess) over email (easily spoofable)
-    const userId = request.headers.get('x-user-id');
-    const email = request.headers.get('x-user-email');
-    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
+    // SECURITY: Use server-side session auth first, then fall back to UUID header
     let userTier: 'free' | 'pro' | 'report' = 'free';
 
-    if (userId && UUID_REGEX.test(userId)) {
-      // Preferred: lookup by UUID (not guessable)
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('tier')
-        .eq('id', userId)
-        .single();
-      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
-    } else if (email) {
-      // Fallback: lookup by email (less secure, but needed for localStorage-auth users)
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('tier')
-        .eq('email', email)
-        .single();
-      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+    // Method 1: Server-side session (most secure — cannot be spoofed)
+    try {
+      const { createServerClient: createAuthClient } = await import('@/lib/supabase/server');
+      const authClient = await createAuthClient();
+      const { data: { user } } = await authClient.auth.getUser();
+      if (user?.id) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('id', user.id)
+          .single();
+        userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+
+        // Check email allowlist
+        if (userTier === 'free' && user.email) {
+          const { isProEmailClient } = await import('@/lib/config/authorized-emails.client');
+          if (isProEmailClient(user.email)) userTier = 'pro';
+        }
+      }
+    } catch {
+      // Session auth failed — fall back to UUID header
+    }
+
+    // Method 2: UUID header fallback (hard to guess, needed for non-session contexts)
+    if (userTier === 'free') {
+      const userId = request.headers.get('x-user-id');
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (userId && UUID_REGEX.test(userId)) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('id', userId)
+          .single();
+        userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+      }
+      // NOTE: x-user-email header no longer used for tier lookup (spoofable)
     }
 
     // Build query

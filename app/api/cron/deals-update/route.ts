@@ -374,8 +374,16 @@ export async function GET(request: NextRequest) {
 
     console.log(`Weekly deals update complete. ${countsSummary}`);
 
+    // Track overall health — flag if ALL sources failed
+    const totalInserted = (edgarResult.deals || 0) + (pressResult.deals_inserted || 0) + (fdaResult.inserted || 0);
+    const totalErrors = (edgarResult.errors?.length || 0) + (pressResult.errors?.length || 0) + (fdaResult.errors?.length || 0) + backfillErrors.length;
+    const hasPartialFailure = totalErrors > 0;
+
     return NextResponse.json({
       success: true,
+      health: hasPartialFailure ? 'partial_failure' : 'healthy',
+      totalInserted,
+      totalErrors,
       edgar: {
         processed: edgarResult.processed,
         deals: edgarResult.deals,
