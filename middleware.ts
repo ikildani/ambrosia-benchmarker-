@@ -128,16 +128,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // CSP — use 'unsafe-inline' because static/ISR pages don't support nonce injection
+  // === Enterprise Security Headers ===
+
+  // CSP — tightened for enterprise. unsafe-inline required for Next.js hydration.
   const cspHeader = isApiRoute
-    ? '' // API routes don't need CSP
+    ? ''
     : [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
+        "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live",
+        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live https://api.perplexity.ai https://api.semanticscholar.org",
         "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
         "frame-ancestors 'self'",
         "form-action 'self'",
@@ -154,7 +156,14 @@ export async function middleware(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
-  // Set CSP on the response
+  // Enterprise security headers on all responses
+  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff');
+  supabaseResponse.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block');
+  supabaseResponse.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self)');
+  supabaseResponse.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+
   if (cspHeader) {
     supabaseResponse.headers.set('Content-Security-Policy', cspHeader);
   }

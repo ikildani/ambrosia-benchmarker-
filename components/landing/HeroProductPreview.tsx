@@ -4,80 +4,79 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
   return (
     <div className="hidden lg:block relative" aria-hidden="true">
       {/* Ambient glow */}
-      <div className="absolute -inset-6 rounded-3xl blur-3xl opacity-40"
-        style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(0,201,167,0.08), transparent 60%)' }}
+      <div className="absolute -inset-8 rounded-3xl blur-3xl"
+        style={{ background: 'radial-gradient(ellipse at 40% 30%, rgba(0,201,167,0.12), transparent 65%)' }}
       />
 
       <div className="relative">
-        <div className="w-[400px] xl:w-[440px] rounded-2xl overflow-hidden"
+        <div className="w-[420px] xl:w-[460px] rounded-2xl overflow-hidden"
           style={{
-            background: '#0c1525',
-            boxShadow: '0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(100,116,139,0.08)',
+            background: 'linear-gradient(180deg, #0e1a2e 0%, #0a1220 100%)',
+            boxShadow: '0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(100,116,139,0.1), 0 0 60px rgba(0,201,167,0.04)',
           }}
         >
-          {/* Content */}
-          <div className="p-6 space-y-5">
+          <div className="p-7 space-y-6">
             {/* Status bar */}
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                style={{ background: 'rgba(52,211,153,0.08)', color: '#34d399' }}>
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(52,211,153,0.1)', color: '#34d399', border: '1px solid rgba(52,211,153,0.15)' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Analysis Complete
               </span>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded" style={{ color: '#64748b', background: 'rgba(100,116,139,0.08)' }}>Phase 2</span>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded" style={{ color: '#64748b', background: 'rgba(100,116,139,0.08)' }}>Oncology · ADC</span>
+              <span className="text-[10px] font-medium px-2.5 py-1 rounded-md" style={{ color: '#94a3b8', background: 'rgba(100,116,139,0.1)' }}>Phase 2</span>
+              <span className="text-[10px] font-medium px-2.5 py-1 rounded-md" style={{ color: '#94a3b8', background: 'rgba(100,116,139,0.1)' }}>Oncology · ADC</span>
             </div>
 
             {/* Primary metrics */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl p-4" style={{ background: 'rgba(15,23,42,0.6)' }}>
-                <div className="text-[9px] font-semibold uppercase tracking-[0.14em] mb-2.5" style={{ color: '#475569' }}>Upfront Payment</div>
-                <div style={{ fontFamily: 'var(--font-mono, ui-monospace, monospace)', fontSize: '26px', fontWeight: 700, color: '#f0f4f8', lineHeight: 1 }}>$85M</div>
-                <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(100,116,139,0.08)' }}>
+              <div className="rounded-xl p-5" style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(100,116,139,0.06)' }}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] mb-3" style={{ color: '#64748b' }}>Upfront Payment</div>
+                <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '28px', fontWeight: 700, color: '#e2e8f0', lineHeight: 1, letterSpacing: '-0.02em' }}>$85M</div>
+                <div className="mt-3 h-[6px] rounded-full overflow-hidden" style={{ background: 'rgba(100,116,139,0.1)' }}>
                   <div className="h-full rounded-full" style={{ width: '35%', background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' }} />
                 </div>
-                <div className="text-[9px] mt-2" style={{ color: '#334155' }}>$47M — $612M range</div>
+                <div className="text-[10px] mt-2.5" style={{ color: '#64748b', fontFamily: 'ui-monospace, monospace' }}>$47M — $612M range</div>
               </div>
-              <div className="rounded-xl p-4" style={{ background: 'rgba(15,23,42,0.6)' }}>
-                <div className="text-[9px] font-semibold uppercase tracking-[0.14em] mb-2.5" style={{ color: '#475569' }}>Total Deal Value</div>
-                <div style={{ fontFamily: 'var(--font-mono, ui-monospace, monospace)', fontSize: '26px', fontWeight: 700, color: '#00c9a7', lineHeight: 1 }}>$450M</div>
-                <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(100,116,139,0.08)' }}>
+              <div className="rounded-xl p-5" style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(0,201,167,0.08)' }}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] mb-3" style={{ color: '#64748b' }}>Total Deal Value</div>
+                <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '28px', fontWeight: 700, color: '#00c9a7', lineHeight: 1, letterSpacing: '-0.02em' }}>$450M</div>
+                <div className="mt-3 h-[6px] rounded-full overflow-hidden" style={{ background: 'rgba(100,116,139,0.1)' }}>
                   <div className="h-full rounded-full" style={{ width: '55%', background: 'linear-gradient(90deg, #00c9a7, #00e4bf)' }} />
                 </div>
-                <div className="text-[9px] mt-2" style={{ color: '#334155' }}>$280M — $1.2B range</div>
+                <div className="text-[10px] mt-2.5" style={{ color: '#64748b', fontFamily: 'ui-monospace, monospace' }}>$280M — $1.2B range</div>
               </div>
             </div>
 
             {/* Secondary metrics */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Milestones', value: '$120M', color: '#f0f4f8' },
-                { label: 'Royalties', value: '8–12%', color: '#f0f4f8' },
+                { label: 'Milestones', value: '$120M', color: '#e2e8f0' },
+                { label: 'Royalties', value: '8–12%', color: '#e2e8f0' },
                 { label: 'rNPV', value: '$312M', color: '#60a5fa' },
               ].map(m => (
-                <div key={m.label} className="text-center rounded-lg py-3" style={{ background: 'rgba(15,23,42,0.5)' }}>
-                  <div className="text-[8px] font-semibold uppercase tracking-[0.12em]" style={{ color: '#334155' }}>{m.label}</div>
-                  <div className="mt-1" style={{ fontFamily: 'var(--font-mono, ui-monospace, monospace)', fontSize: '15px', fontWeight: 700, color: m.color }}>{m.value}</div>
+                <div key={m.label} className="text-center rounded-lg py-3.5 px-2" style={{ background: 'rgba(15,23,42,0.4)', border: '1px solid rgba(100,116,139,0.05)' }}>
+                  <div className="text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#64748b' }}>{m.label}</div>
+                  <div className="mt-1.5" style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '16px', fontWeight: 700, color: m.color }}>{m.value}</div>
                 </div>
               ))}
             </div>
 
             {/* Deal structure */}
-            <div className="rounded-lg px-4 py-3" style={{ background: 'rgba(15,23,42,0.5)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: '#334155' }}>Deal Structure</span>
-                <span className="text-[9px]" style={{ color: '#475569', fontFamily: 'var(--font-mono, ui-monospace, monospace)' }}>25% Upfront / 75% Milestones</span>
+            <div className="rounded-lg px-5 py-4" style={{ background: 'rgba(15,23,42,0.4)', border: '1px solid rgba(100,116,139,0.05)' }}>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b' }}>Deal Structure</span>
+                <span className="text-[10px]" style={{ color: '#94a3b8', fontFamily: 'ui-monospace, monospace' }}>25% Upfront / 75% Milestones</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden flex" style={{ background: 'rgba(100,116,139,0.06)' }}>
+              <div className="h-[7px] rounded-full overflow-hidden flex gap-[2px]" style={{ background: 'rgba(100,116,139,0.06)' }}>
                 <div className="h-full rounded-l-full" style={{ width: '25%', background: '#00c9a7' }} />
                 <div className="h-full rounded-r-full" style={{ width: '75%', background: '#3b82f6' }} />
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between">
-              <span className="text-[9px]" style={{ color: '#1e293b' }}>Based on 47 comparable ADC deals</span>
-              <span className="text-[9px] font-medium" style={{ color: '#00c9a7' }}>View comps →</span>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px]" style={{ color: '#475569' }}>Based on 47 comparable ADC deals</span>
+              <span className="text-[10px] font-semibold" style={{ color: '#00c9a7' }}>View comps →</span>
             </div>
           </div>
         </div>
