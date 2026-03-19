@@ -1,11 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { getContentGenerator } from '@/lib/ai/content-generator';
 import { GenerateContentRequest, generateSlug } from '@/types/content';
 import { isAdminEmail } from '@/lib/config/authorized-emails';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 requests per hour (AI generation is expensive)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'generate', { limit: 10, windowSeconds: 3600 });
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: getRateLimitHeaders(rateLimitResult) });
+    }
     // Security: Require admin authentication
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {

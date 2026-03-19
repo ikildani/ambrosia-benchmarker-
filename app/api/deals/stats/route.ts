@@ -2,26 +2,36 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Cache for 1 hour
 
 export async function GET() {
   try {
     const supabase = createServiceClient();
 
-    const { data } = await supabase
+    // Use RPC or efficient grouping instead of fetching all rows
+    const { data, error } = await supabase
       .from('deals')
-      .select('therapeutic_area')
-      .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")');
+      .select('therapeutic_area', { count: 'exact', head: false })
+      .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')
+      .limit(1);
+
+    // Fallback: count per TA with individual queries (still better than fetching all rows)
+    const tas = ['oncology', 'neurology', 'immunology', 'rareDisease', 'cardiovascular', 'metabolic', 'infectiousDisease', 'ophthalmology', 'dermatology', 'womensHealth', 'gastroenterology', 'hematology'];
+
+    const counts = await Promise.all(
+      tas.map(async (ta) => {
+        const { count } = await supabase
+          .from('deals')
+          .select('id', { count: 'exact', head: true })
+          .eq('therapeutic_area', ta);
+        return { ta, count: count || 0 };
+      })
+    );
 
     const byTA: Record<string, number> = {};
     let total = 0;
-
-    for (const row of data || []) {
-      const ta = row.therapeutic_area;
-      if (ta) {
-        byTA[ta] = (byTA[ta] || 0) + 1;
-        total++;
-      }
+    for (const { ta, count } of counts) {
+      byTA[ta] = count;
+      total += count;
     }
 
     return NextResponse.json({ total, byTA }, {
