@@ -333,145 +333,82 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-white via-slate-50/50 to-slate-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 pt-24 sm:pt-28 lg:pt-40 xl:pt-48 pb-16 sm:pb-20 lg:pb-24 xl:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex items-center transition-colors duration-300">
-        {/* Premium Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.12),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.15),rgba(0,0,0,0))]" />
-          <div className="absolute top-20 right-[10%] w-72 h-72 bg-slate-200/30 dark:bg-slate-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 left-[5%] w-96 h-96 bg-slate-100/40 dark:bg-slate-500/15 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 right-[20%] w-64 h-64 bg-navy-100/20 dark:bg-navy-500/20 rounded-full blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #1a1e42 1px, transparent 0)`,
-            backgroundSize: '32px 32px'
-          }} />
+      <section className="relative bg-white dark:bg-slate-900 pt-24 sm:pt-32 lg:pt-40 xl:pt-44 pb-20 sm:pb-24 lg:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] flex items-center transition-colors duration-300">
+        {/* Clean background — single subtle gradient */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,165,165,0.08),transparent)]" />
         </div>
 
-        <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-12 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-16 xl:gap-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center lg:text-left lg:flex-1">
-          {/* Icon */}
-          <div className="mb-8 sm:mb-10 lg:mb-12 animate-fade-in">
-            <div className="relative inline-flex">
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-30 scale-125" />
-              <div className="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-700/50">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14" viewBox="0 0 48 48" fill="none">
-                  <path d="M14 8C14 8 18 12 24 12C30 12 34 8 34 8" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M14 16C14 16 18 20 24 20C30 20 34 16 34 16" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M14 24C14 24 18 28 24 28C30 28 34 24 34 24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M14 8V24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M34 8V24" stroke="url(#dnaGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-                  <rect x="16" y="32" width="4" height="8" rx="1" fill="url(#chartGradient)"/>
-                  <rect x="22" y="28" width="4" height="12" rx="1" fill="url(#chartGradient)"/>
-                  <rect x="28" y="30" width="4" height="10" rx="1" fill="url(#chartGradient)"/>
-                  <defs>
-                    <linearGradient id="dnaGradient" x1="14" y1="8" x2="34" y2="24" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#2dd4bf"/>
-                      <stop offset="1" stopColor="#06b6d4"/>
-                    </linearGradient>
-                    <linearGradient id="chartGradient" x1="16" y1="28" x2="32" y2="40" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#14b8a6"/>
-                      <stop offset="1" stopColor="#0891b2"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-          </div>
 
           {/* Headline */}
-          <h1 className={`text-3xl sm:text-5xl lg:text-7xl font-bold font-display mb-5 sm:mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <h1 className={`text-4xl sm:text-5xl lg:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="text-slate-900 dark:text-white">Deal Terms</span>
             <br />
-            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 dark:from-blue-400 dark:via-blue-300 dark:to-blue-400 bg-clip-text text-transparent drop-shadow-sm">
+            <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
               Calculator
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className={`text-sm sm:text-lg lg:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 leading-relaxed font-light transition-all duration-700 delay-300 px-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Instant benchmarks from <strong className="font-semibold text-slate-800 dark:text-white">2,600+ real deals</strong> across 12 therapeutic areas.
-            <span className="hidden sm:inline"><br /></span>
-            <span className="sm:hidden"> </span>
-            rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.
+          <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            Instant benchmarks from <span className="font-semibold text-slate-700 dark:text-slate-200">2,600+ real deals</span> across 12 therapeutic areas.
+            {' '}rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.
           </p>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Link
               href="/calculator"
-              className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                       shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
+              className="group relative inline-flex items-center justify-center gap-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold px-8 py-4 rounded-xl
+                       shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-[15px]"
             >
-              <span className="relative z-10">Try Calculator Free</span>
-              <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span>Run Benchmark</span>
+              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-700 to-slate-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
 
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="group inline-flex items-center justify-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-slate-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+                className="group inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium px-8 py-4 rounded-xl
+                         hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white transition-all duration-300 w-full sm:w-auto text-[15px]"
               >
                 <span>My Dashboard</span>
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
               </Link>
             ) : (
               <a
-                href="#how-it-works"
-                className="group inline-flex items-center justify-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl
-                         shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 hover:border-slate-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
+                href="#pricing"
+                className="group inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium px-8 py-4 rounded-xl
+                         hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white transition-all duration-300 w-full sm:w-auto text-[15px]"
               >
-                <span>See How It Works</span>
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
+                <span>View Pricing</span>
               </a>
             )}
           </div>
 
-          {/* Feature Pills */}
-          <div className={`flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 lg:gap-4 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            {[
-              { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: '2,600+ deals analyzed' },
-              { icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', text: '12 therapeutic areas' },
-              { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', text: '850+ company profiles' },
-              { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', text: 'Enterprise-grade security' },
-            ].map((feature, idx) => (
-              <div
-                key={idx}
-                className="group flex items-center gap-1.5 sm:gap-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700 rounded-full px-3 sm:px-5 py-2 sm:py-3
-                         hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-blue-600 hover:shadow-lg hover:shadow-slate-500/5 dark:hover:shadow-slate-500/10 transition-all duration-300"
-              >
-                <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-50 dark:bg-slate-500/20 group-hover:bg-slate-100 dark:group-hover:bg-slate-500/30 transition-colors flex-shrink-0">
-                  <svg className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={feature.icon} />
-                  </svg>
-                </div>
-                <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-white transition-colors whitespace-nowrap">{feature.text}</span>
-              </div>
-            ))}
+          {/* Proof points — minimal, inline */}
+          <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              2,600+ deals
+            </span>
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              12 therapeutic areas
+            </span>
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              850+ companies
+            </span>
           </div>
           </div>
 
-          {/* Product Preview Mockup */}
+          {/* Product Preview */}
           <HeroProductPreview />
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block">
-          <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
-            <span className="text-xs font-medium tracking-wider uppercase">Scroll</span>
-            <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-50 dark:from-slate-800 to-transparent" />
       </section>
 
       {/* Live Demo Section */}
