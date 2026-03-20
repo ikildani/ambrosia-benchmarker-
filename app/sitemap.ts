@@ -211,7 +211,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/guides/negotiate-pharma-royalty-rates`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guides/biotech-licensing-deal-structure`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guides/rnpv-biotech-valuation`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guides/pharma-ma-vs-licensing`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
   ];
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages];
+  // Report pages
+  const reportPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/reports`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/reports/deal-trends-2026`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+  ];
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages];
 }

@@ -33,6 +33,34 @@ const guides = [
     readTime: '12 min read',
     tags: ['Valuation', 'rNPV', 'Monte Carlo', 'Comparables'],
   },
+  {
+    slug: 'negotiate-pharma-royalty-rates',
+    title: 'How to Negotiate Pharma Licensing Royalty Rates',
+    description: 'Data-backed strategies for structuring and negotiating royalty rates in biopharma licensing deals, with benchmarks from 3,000+ transactions.',
+    readTime: '14 min read',
+    tags: ['Royalties', 'Negotiation', 'Benchmarks', 'Territory'],
+  },
+  {
+    slug: 'biotech-licensing-deal-structure',
+    title: 'Biotech Licensing Deal Structure: Upfront, Milestones & Royalties',
+    description: 'Comprehensive breakdown of the three pillars of biopharma licensing economics, with benchmark data and structuring strategies for each component.',
+    readTime: '15 min read',
+    tags: ['Deal Structure', 'Upfront', 'Milestones', 'Royalties'],
+  },
+  {
+    slug: 'rnpv-biotech-valuation',
+    title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation',
+    description: 'Master the industry-standard rNPV methodology for valuing biotech assets, from phase transition probabilities to Monte Carlo enhancement.',
+    readTime: '16 min read',
+    tags: ['rNPV', 'Valuation', 'Monte Carlo', 'PoS'],
+  },
+  {
+    slug: 'pharma-ma-vs-licensing',
+    title: 'Pharma M&A vs. Licensing: When to Acquire vs. License',
+    description: 'Strategic framework for choosing between M&A and licensing in biopharma, with case studies and decision criteria for BD professionals.',
+    readTime: '13 min read',
+    tags: ['M&A', 'Licensing', 'Strategy', 'Case Studies'],
+  },
 ];
 
 export default function GuidesPage() {
