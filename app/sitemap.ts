@@ -50,6 +50,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    {
+      url: `${baseUrl}/methodology`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/therapeutic-areas`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    // 12 TA-specific pages
+    ...['oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic', 'rareDisease',
+        'infectiousDisease', 'ophthalmology', 'dermatology', 'womensHealth', 'gastroenterology', 'hematology']
+      .map(ta => ({
+        url: `${baseUrl}/therapeutic-areas/${ta}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      })),
   ];
 
   // Dynamic pages
