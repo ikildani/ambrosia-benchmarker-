@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 import {
   getAllBenchmarkSlugs,
   getBenchmarkBySlug,
@@ -353,32 +354,8 @@ export default async function BenchmarkPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="py-8 px-4 bg-slate-900 border-t border-slate-800">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-400 text-sm">
-              &copy; {new Date().getFullYear()} Ambrosia Ventures
-            </p>
-            <div className="flex items-center gap-6 text-sm text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">
-                Home
-              </Link>
-              <Link href="/calculator" className="hover:text-white transition-colors">
-                Calculator
-              </Link>
-              <Link href="/benchmarks" className="hover:text-white transition-colors">
-                Benchmarks
-              </Link>
-              <Link href="/glossary" className="hover:text-white transition-colors">
-                Glossary
-              </Link>
-              <Link href="/press" className="hover:text-white transition-colors">
-                Press
-              </Link>
-            </div>
-          </div>
-        </footer>
       </main>
+      <SiteFooter />
     </>
   );
 }

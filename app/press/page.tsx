@@ -2,9 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export default function PressPage() {
   return (
+    <>
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40">
@@ -177,14 +179,8 @@ export default function PressPage() {
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-700 py-8 mt-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            &copy; {new Date().getFullYear()} Ambrosia Ventures. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </main>
+    <SiteFooter />
+    </>
   );
 }
