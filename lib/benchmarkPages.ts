@@ -2225,6 +2225,404 @@ function buildOncologyvsNeurologyComparisonPage(): BenchmarkPageData {
   };
 }
 
+// ── Modality Expansion Pages ────────────────────────────────────────────────
+
+function buildRNAiSiRNAPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'rnai' as Modality, phase: 'phase2', therapeuticArea: 'oncology', indication: 'liver_hcc' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'rnai-sirna-deal-benchmarks',
+    title: 'RNAi & siRNA Licensing Deal Benchmarks 2026 | RNA Interference Terms',
+    metaDescription: `RNAi/siRNA licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfront payments, milestones, and royalties for RNA interference therapeutics.`,
+    h1: 'RNAi & siRNA Licensing Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `RNA interference therapeutics have matured into a validated modality with multiple approved products and a deep clinical pipeline. Phase 2 RNAi/siRNA deals achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The Alnylam platform validation and GalNAc-conjugate delivery revolution have transformed RNAi from a struggling modality into a predictable, scalable drug development engine.`,
+      `Milestone allocations for RNAi deals are balanced across development (${formatCurrency(r.terms.devMilestones.median)}), regulatory (${formatCurrency(r.terms.regMilestones.median)}), and commercial (${formatCurrency(r.terms.commMilestones.median)}) categories. The overall deal structure follows an approximately ${r.dealRecommendation.upfrontPercent}% upfront / ${r.dealRecommendation.milestonePercent}% milestone split, reflecting the de-risked delivery platform and well-characterized pharmacology.`,
+      `Royalty rates for RNAi licensing transactions range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, escalating to ${r.tieredRoyalties.highTier.low}%-${r.tieredRoyalties.highTier.high}% on blockbuster sales. Key value drivers include the target gene, delivery technology (GalNAc vs. LNP), durability of knockdown, and potential for subcutaneous self-administration.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'rnai', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'What is the average upfront payment for an RNAi/siRNA licensing deal?',
+        answer: `Phase 2 RNAi/siRNA deals average ${formatCurrency(r.terms.upfront.median)} in upfront payments, ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. Premium upfronts go to assets with validated hepatic targets and GalNAc-conjugate delivery.`,
+      },
+      {
+        question: 'How do RNAi deal terms compare to antisense oligonucleotide (ASO) deals?',
+        answer: 'RNAi and ASO deals command broadly similar valuations, though RNAi assets with GalNAc delivery to the liver tend to attract a modest premium due to the subcutaneous dosing convenience and longer duration of knockdown. ASO platforms offer greater tissue distribution outside the liver.',
+      },
+      {
+        question: 'What factors drive RNAi deal premiums?',
+        answer: 'Key premium drivers include novel target validation, extrahepatic delivery capabilities (beyond GalNAc-liver targeting), potency and durability of gene silencing, clinical-stage data quality, and the platform\'s ability to rapidly advance follow-on programs. Differentiated delivery technologies command the highest premiums.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildPROTACDegraderPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'protac' as Modality, phase: 'phase1', therapeuticArea: 'oncology', indication: 'breast_erpos' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'protac-degrader-deal-benchmarks',
+    title: 'PROTAC & Targeted Protein Degrader Deal Benchmarks 2026 | TPD Licensing Terms',
+    metaDescription: `PROTAC/degrader licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfronts, milestones, and royalties for targeted protein degradation deals.`,
+    h1: 'PROTAC & Targeted Protein Degrader Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Targeted protein degradation has emerged as one of the most actively partnered modalities in oncology, with PROTAC and molecular glue deals commanding significant deal values even at Phase 1. PROTAC deals achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The ability to degrade previously undruggable targets drives strong pharma interest.`,
+      `Due to the early clinical stage, PROTAC deal structures are heavily weighted toward milestones. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, reflecting the extensive de-risking required around oral bioavailability, E3 ligase selectivity, and catalytic degradation efficiency. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward progress toward approval.`,
+      `Royalty rates for PROTAC deals start at ${r.tieredRoyalties.base.low}%-${r.tieredRoyalties.base.high}% base rates, with escalation reaching ${r.tieredRoyalties.highTier.high}% on peak sales. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects the platform potential to address multiple targets beyond the initial licensed asset.`,
+    ],
+    calculatorPrefill: { phase: 'phase1', modality: 'protac', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'What is the typical total deal value for a PROTAC licensing agreement?',
+        answer: `Phase 1 PROTAC deals have a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, ranging from ${formatCurrency(r.terms.totalDealValue.low)} to ${formatCurrency(r.terms.totalDealValue.high)}. Platform deals with multi-target potential can exceed these ranges substantially.`,
+      },
+      {
+        question: 'How are PROTAC deal milestones structured?',
+        answer: `PROTAC deals allocate approximately ${r.dealRecommendation.milestonePercent}% of total deal value to milestones. Development milestones (${formatCurrency(r.terms.devMilestones.median)}) dominate, followed by commercial milestones (${formatCurrency(r.terms.commMilestones.median)}) and regulatory milestones (${formatCurrency(r.terms.regMilestones.median)}).`,
+      },
+      {
+        question: 'What differentiates high-value PROTAC deals from standard ones?',
+        answer: 'Premium PROTAC deal terms are driven by target novelty (especially previously undruggable oncology targets), oral bioavailability data, catalytic mechanism of action confirmation, favorable safety profile versus inhibitors, and the breadth of the E3 ligase platform for future programs.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildMRNATherapeuticsPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'mrna' as Modality, phase: 'phase2', therapeuticArea: 'infectiousDisease', indication: 'influenza' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'mrna-therapeutics-deal-benchmarks',
+    title: 'mRNA Therapeutics Deal Benchmarks 2026 | mRNA Licensing Terms',
+    metaDescription: `mRNA therapeutics licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for mRNA platform deals.`,
+    h1: 'mRNA Therapeutics Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `mRNA therapeutics have evolved beyond pandemic vaccines into a versatile drug development platform spanning infectious disease, oncology, and rare diseases. Phase 2 mRNA deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The rapid design-to-clinic cycle and manufacturing scalability continue to attract major licensing interest.`,
+      `Milestone structures for mRNA deals balance development risk (${formatCurrency(r.terms.devMilestones.median)}) with commercial upside (${formatCurrency(r.terms.commMilestones.median)}). Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reflect the evolving regulatory landscape for mRNA products beyond emergency use authorizations.`,
+      `Royalty rates for mRNA licensing transactions range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with escalation to ${r.tieredRoyalties.highTier.high}% on peak sales. LNP formulation IP, self-amplifying RNA technology, and cold-chain-free stability data are key differentiators commanding premium terms.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'mrna', therapeuticArea: 'infectiousDisease' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for mRNA therapeutics licensing?',
+        answer: `Phase 2 mRNA deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The modality\'s rapid development timeline and manufacturing scalability support balanced upfront/milestone splits.`,
+      },
+      {
+        question: 'How do mRNA vaccine deals compare to mRNA therapeutic deals?',
+        answer: 'mRNA vaccine deals in infectious disease tend to have larger total deal values due to broader patient populations and proven commercial success. mRNA therapeutics (oncology, rare disease) command higher upfront percentages to compensate for the less validated therapeutic applications, but potentially offer higher per-patient pricing.',
+      },
+      {
+        question: 'What IP considerations affect mRNA deal valuations?',
+        answer: 'Key IP factors include LNP delivery patent coverage, modified nucleoside chemistry, self-amplifying RNA architecture, and manufacturing process patents. The post-COVID patent landscape remains complex, with multiple platform companies holding foundational IP that influences royalty stacking and freedom-to-operate.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'rnai-sirna-deal-benchmarks', title: 'RNAi & siRNA Deals' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'infectious-disease-deal-benchmarks', title: 'Infectious Disease Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildMonoclonalAntibodyPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'mab' as Modality, phase: 'phase2', therapeuticArea: 'immunology', indication: 'rheumatoidArthritis' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'antibody-deal-benchmarks',
+    title: 'Monoclonal Antibody (mAb) Licensing Deal Benchmarks 2026 | Antibody Terms',
+    metaDescription: `Monoclonal antibody licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for mAb deals.`,
+    h1: 'Monoclonal Antibody (mAb) Licensing Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Monoclonal antibodies remain the backbone of biologic drug development, representing the largest share of biopharma licensing activity by deal count. Phase 2 mAb deals in immunology achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The well-characterized development pathway and commercial predictability of mAbs provide deal certainty that newer modalities cannot yet match.`,
+      `Milestone structures for mAb deals allocate ${formatCurrency(r.terms.devMilestones.median)} to development, ${formatCurrency(r.terms.regMilestones.median)} to regulatory, and ${formatCurrency(r.terms.commMilestones.median)} to commercial milestones. The overall ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects the de-risked clinical pathway at Phase 2.`,
+      `Royalty rates for mAb licensing range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, escalating to ${r.tieredRoyalties.highTier.high}% on peak sales. Differentiated targets, best-in-class efficacy profiles, and subcutaneous formulations command premium royalty rates. Biosimilar exposure risk increasingly influences royalty term negotiations.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'mab', therapeuticArea: 'immunology' },
+    faqs: [
+      {
+        question: 'What is the average total deal value for a monoclonal antibody licensing deal?',
+        answer: `Phase 2 mAb deals in immunology have a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfronts averaging ${formatCurrency(r.terms.upfront.median)}. Oncology mAbs tend to command higher valuations due to premium pricing and less biosimilar pressure.`,
+      },
+      {
+        question: 'How do mAb deal terms differ by therapeutic area?',
+        answer: 'Immunology mAb deals tend to have larger commercial milestones due to broader patient populations, while oncology mAbs command higher upfronts and royalty rates driven by premium pricing. The modality\'s established development pathway means deal terms are more predictable than for novel modalities like ADCs or bispecifics.',
+      },
+      {
+        question: 'What royalty rates are standard for mAb licensing deals?',
+        answer: `Base royalty rates for mAb deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}%, with escalation tiers reaching ${r.tieredRoyalties.highTier.high}%. Rates depend on target novelty, competitive landscape, biosimilar exposure, and whether the antibody has a differentiated mechanism versus existing therapies.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+      { slug: 'autoimmune-biologics-deal-benchmarks', title: 'Autoimmune Biologics Deals' },
+      { slug: 'immunology-autoimmune-deal-benchmarks', title: 'Immunology Deal Overview' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildCellTherapyBeyondCARTPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'cellTherapy' as Modality, phase: 'phase1', therapeuticArea: 'oncology', indication: 'lung_nsclc' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'cell-therapy-deal-benchmarks',
+    title: 'Cell Therapy Deal Benchmarks 2026 (Beyond CAR-T) | TIL, NK & iPSC Terms',
+    metaDescription: `Non-CAR-T cell therapy deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfronts, milestones, and royalties for TIL, NK cell, and iPSC-derived therapies.`,
+    h1: 'Cell Therapy Deal Benchmarks (Beyond CAR-T)',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Cell therapies beyond CAR-T -- including tumor-infiltrating lymphocytes (TIL), natural killer (NK) cells, and iPSC-derived therapies -- are generating increasing licensing activity. Phase 1 non-CAR-T cell therapy deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The promise of off-the-shelf allogeneic products and solid tumor efficacy drives pharma interest.`,
+      `Development milestones dominate non-CAR-T cell therapy deals at ${formatCurrency(r.terms.devMilestones.median)}, reflecting the extensive clinical de-risking around manufacturing scalability, persistence, and GvHD management for allogeneic approaches. Commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward the path to broad market adoption.`,
+      `Royalty rates range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, escalating to ${r.tieredRoyalties.highTier.high}% on peak sales. Off-the-shelf allogeneic platforms with solid tumor activity and reduced manufacturing complexity attract the highest valuations and most favorable deal structures.`,
+    ],
+    calculatorPrefill: { phase: 'phase1', modality: 'cellTherapy', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for non-CAR-T cell therapies?',
+        answer: `Phase 1 non-CAR-T cell therapy deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The early clinical stage results in milestone-heavy structures (${r.dealRecommendation.milestonePercent}% milestones) to manage development risk.`,
+      },
+      {
+        question: 'How do TIL therapy deals compare to NK cell therapy deals?',
+        answer: 'TIL therapy deals benefit from clinical validation (FDA-approved Iovance product) and proven solid tumor efficacy, commanding higher upfronts. NK cell therapy deals, particularly iPSC-derived off-the-shelf approaches, attract higher total deal values due to scalable manufacturing and broader commercial potential but carry greater technical risk.',
+      },
+      {
+        question: 'What drives premiums in allogeneic cell therapy deals?',
+        answer: 'Off-the-shelf manufacturing capability, reduced GvHD risk, persistence without lymphodepletion, solid tumor penetration data, and cost-of-goods advantages over autologous approaches are the primary premium drivers. iPSC-derived platforms with engineered functionality command the highest valuations.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'car-t-deal-benchmarks', title: 'CAR-T Deal Benchmarks' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildPrecisionOncologyPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'smallMolecule' as Modality, phase: 'phase2', therapeuticArea: 'oncology', indication: 'lung_nsclc' as Indication, biomarker: 'selected' as 'selected' });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'precision-oncology-deal-benchmarks',
+    title: 'Precision Oncology & Biomarker-Driven Deal Benchmarks 2026',
+    metaDescription: `Biomarker-selected oncology deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for precision medicine deals.`,
+    h1: 'Precision Oncology & Biomarker-Driven Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Precision oncology deals with validated biomarker selection consistently command premium valuations over unselected approaches. Phase 2 biomarker-driven oncology deals achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. Companion diagnostic strategies, higher response rates, and accelerated regulatory pathways justify the premium.`,
+      `Milestone structures reflect the higher probability of success for biomarker-selected populations. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, while regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward the faster path to approval via enrichment trial designs. Commercial milestones reach ${formatCurrency(r.terms.commMilestones.median)}.`,
+      `Royalty rates for precision oncology deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% base, escalating to ${r.tieredRoyalties.highTier.high}%. The higher per-patient efficacy and premium pricing of biomarker-selected therapies support top-tier royalty rates. CDx development costs and IP considerations add complexity to deal negotiations.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'How much premium do biomarker-selected oncology deals command?',
+        answer: `Biomarker-selected oncology deals at Phase 2 command a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}. The biomarker selection premium typically ranges from 15-30% over unselected approaches at the same clinical stage, driven by higher response rates, cleaner clinical data, and faster regulatory timelines.`,
+      },
+      {
+        question: 'How does companion diagnostic (CDx) strategy affect deal terms?',
+        answer: 'Assets with a validated CDx strategy command higher upfront payments and more favorable milestone structures. The CDx development cost is typically borne by the licensee, but CDx IP ownership and exclusivity provisions are critical negotiation points that can significantly affect royalty rates and overall deal economics.',
+      },
+      {
+        question: 'What biomarkers drive the highest deal premiums in oncology?',
+        answer: 'Validated predictive biomarkers with FDA-approved CDx assays (e.g., HER2, PD-L1, EGFR mutations, BRCA1/2) command the highest premiums. Novel biomarkers with strong biological rationale but limited clinical validation can also drive premiums if the enrichment strategy shows clear patient selection benefit in early-stage data.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildObesityWeightLossPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'glp1Agonist' as Modality, phase: 'phase3', therapeuticArea: 'metabolic', indication: 'obesity' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'obesity-weight-loss-deal-benchmarks',
+    title: 'Obesity & Weight Loss Drug Deal Benchmarks 2026 | GLP-1 Licensing Terms',
+    metaDescription: `Obesity/weight loss drug deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 3. Benchmark upfronts, milestones, and royalties for GLP-1 agonist licensing.`,
+    h1: 'Obesity & Weight Loss Drug Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `The obesity therapeutics market is experiencing unprecedented licensing activity driven by the blockbuster success of GLP-1 receptor agonists. Phase 3 obesity/weight loss drug deals achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The $100B+ projected market size and proven patient demand create compelling deal economics for assets with differentiated profiles.`,
+      `Milestone structures reflect the massive commercial opportunity. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, while commercial milestones reach ${formatCurrency(r.terms.commMilestones.median)}, often structured around annual revenue thresholds reflecting the chronic treatment model. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward the increasingly streamlined approval pathway.`,
+      `Royalty rates for obesity drug deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% base, escalating to ${r.tieredRoyalties.highTier.high}% on peak sales. Oral GLP-1 formulations, muscle-sparing weight loss profiles, and convenient dosing schedules command the highest premiums. The Lilly/Novo competitive dynamic intensifies scrutiny of differentiation claims.`,
+    ],
+    calculatorPrefill: { phase: 'phase3', modality: 'glp1Agonist', therapeuticArea: 'metabolic' },
+    faqs: [
+      {
+        question: 'What are typical deal terms for obesity drug licensing in 2026?',
+        answer: `Phase 3 obesity drug deals average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The massive market opportunity drives premium valuations, particularly for assets with differentiated efficacy or convenience profiles versus semaglutide and tirzepatide.`,
+      },
+      {
+        question: 'How do oral GLP-1 deals compare to injectable GLP-1 deals?',
+        answer: 'Oral GLP-1 agonist deals command a 20-35% premium over injectable formulations at equivalent clinical stages, reflecting the patient preference advantage and potential to expand the addressable market beyond injection-tolerant patients. Manufacturing scalability for oral peptides remains a key value driver.',
+      },
+      {
+        question: 'What clinical endpoints matter most for obesity deal valuations?',
+        answer: 'Total body weight loss percentage at 52/68 weeks is the primary efficacy benchmark. Assets showing >15% TBWL, muscle mass preservation, cardiovascular risk reduction (MACE data), and metabolic comorbidity improvement (NASH resolution, HbA1c reduction) command the highest deal premiums.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'glp1-obesity-deal-benchmarks', title: 'GLP-1 Agonist Deals' },
+      { slug: 'dual-incretin-deal-benchmarks', title: 'Dual Incretin Deals' },
+      { slug: 'metabolic-deal-benchmarks-2026', title: 'Metabolic Deal Overview 2026' },
+      { slug: 'phase-3-deal-benchmarks', title: 'Phase 3 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildAutoimmuneBiologicsPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'mab' as Modality, phase: 'phase2', therapeuticArea: 'immunology', indication: 'sle_lupus' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'autoimmune-biologics-deal-benchmarks',
+    title: 'Autoimmune Biologics Deal Benchmarks 2026 | Immunology Licensing Terms',
+    metaDescription: `Autoimmune biologics licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for autoimmune biologic deals.`,
+    h1: 'Autoimmune Biologics Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Autoimmune biologics remain one of the most actively licensed categories in biopharma, driven by large patient populations and proven commercial models. Phase 2 autoimmune biologic deals achieve a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The chronic treatment paradigm and multi-indication expansion potential create highly valuable licensing opportunities.`,
+      `Milestone structures for autoimmune biologics balance development (${formatCurrency(r.terms.devMilestones.median)}), regulatory (${formatCurrency(r.terms.regMilestones.median)}), and commercial milestones (${formatCurrency(r.terms.commMilestones.median)}). The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone structure reflects the de-risked Phase 2 stage and the established regulatory pathway for autoimmune indications.`,
+      `Royalty rates range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% base, with escalation to ${r.tieredRoyalties.highTier.high}% on blockbuster sales. Differentiation versus anti-TNF biologics, novel mechanisms (anti-TL1A, anti-IL-23, BCMA-targeting), and subcutaneous formulations drive premium royalty tiers. Multi-indication potential across RA, lupus, and IBD significantly enhances total deal economics.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'mab', therapeuticArea: 'immunology' },
+    faqs: [
+      {
+        question: 'What is the average deal value for autoimmune biologic licensing?',
+        answer: `Phase 2 autoimmune biologic deals average ${formatCurrency(r.terms.totalDealValue.median)} total deal value with ${formatCurrency(r.terms.upfront.median)} upfront. Multi-indication potential across autoimmune conditions is the single biggest driver of premium valuations.`,
+      },
+      {
+        question: 'How does multi-indication potential affect autoimmune deal terms?',
+        answer: 'Biologics with validated mechanisms across multiple autoimmune indications (e.g., RA + lupus + IBD) command 25-50% higher total deal values versus single-indication assets. Licensors typically negotiate indication-specific milestone payments and may retain co-commercialization rights in select indications.',
+      },
+      {
+        question: 'What autoimmune targets are commanding the highest deal premiums in 2026?',
+        answer: 'Novel targets with demonstrated efficacy beyond existing anti-TNF and anti-IL-17 therapies command the highest premiums. Anti-TL1A antibodies for IBD, BCMA-targeting biologics for lupus, and dual-cytokine inhibitors represent the current premium tier, with total deal values 30-60% above established mechanism classes.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'antibody-deal-benchmarks', title: 'Monoclonal Antibody Deals' },
+      { slug: 'immunology-autoimmune-deal-benchmarks', title: 'Immunology Deal Overview' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildRareDiseaseGeneTherapy2026Page(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'rareDisease',
+    modality: 'geneTherapyRare' as Modality,
+    indication: 'duchenneMD' as Indication,
+    phase: 'phase1',
+    regulatoryDesignations: { breakthrough: true, fastTrack: true, orphan: true, prime: false },
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'rare-disease-gene-therapy-benchmarks-2026',
+    title: 'Rare Disease Gene Therapy Deal Benchmarks 2026 | Orphan Gene Therapy Terms',
+    metaDescription: `Rare disease gene therapy deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1 in 2026. Updated benchmarks for orphan gene therapy upfronts, milestones, and royalties.`,
+    h1: 'Rare Disease Gene Therapy Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `The rare disease gene therapy landscape in 2026 continues to attract landmark licensing deals as the modality matures beyond initial approvals. Phase 1 orphan gene therapy deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. Curative one-time treatments with $1M-$3.5M per-patient pricing sustain exceptional deal economics.`,
+      `Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, reflecting the ongoing challenges around vector manufacturing, transgene durability, and immunogenicity. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward the streamlined orphan drug approval pathways. Commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} are often tied to patient treatment counts rather than traditional revenue thresholds.`,
+      `Royalty rates for rare disease gene therapy range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% base, with escalation to ${r.tieredRoyalties.highTier.high}%. Next-generation AAV capsids, gene editing approaches (CRISPR, base editing), and in vivo delivery platforms represent the current wave of premium-commanding technologies. The Duchenne, SMA, and hemophilia franchises set pricing precedents that extend to newer indications.`,
+    ],
+    calculatorPrefill: { therapeuticArea: 'rareDisease', phase: 'phase1', modality: 'geneTherapyRare' },
+    faqs: [
+      {
+        question: 'How have rare disease gene therapy deal terms evolved in 2026?',
+        answer: `Phase 1 rare disease gene therapy deals in 2026 average ${formatCurrency(r.terms.upfront.median)} upfront with ${formatCurrency(r.terms.totalDealValue.median)} total deal value. Terms have matured as the industry gains more data on long-term durability, manufacturing scalability, and real-world pricing dynamics from approved products.`,
+      },
+      {
+        question: 'What orphan drug advantages drive gene therapy deal premiums?',
+        answer: 'Orphan drug designation provides 7 years US market exclusivity, FDA fee waivers, and 25% tax credits on clinical costs. Combined with smaller trial sizes (often 10-30 patients), accelerated approval pathways, and $1M+ per-patient pricing, these advantages create deal economics that far exceed the per-patient value of mass-market therapeutics.',
+      },
+      {
+        question: 'How do AAV gene therapy deals compare to CRISPR gene editing deals for rare disease?',
+        answer: 'AAV gene therapy deals benefit from regulatory precedent and approved products but face re-dosing limitations and pre-existing immunity concerns. CRISPR-based deals command growing premiums due to permanent genetic correction potential and multi-target platform value, though they remain earlier stage. Both modalities attract total deal values in the same range.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'gene-therapy-rare-disease-deal-benchmarks', title: 'Gene Therapy Rare Disease Deals' },
+      { slug: 'rare-disease-licensing-benchmarks', title: 'Rare Disease Overview' },
+      { slug: 'enzyme-replacement-therapy-deal-benchmarks', title: 'ERT Deal Benchmarks' },
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+function buildApprovedDrugLicensingPage(): BenchmarkPageData {
+  const input = makeInput({ modality: 'smallMolecule' as Modality, phase: 'approved' as Phase, therapeuticArea: 'oncology', indication: 'lung_nsclc' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'approved-drug-licensing-benchmarks',
+    title: 'Approved Drug Licensing & Out-Licensing Deal Benchmarks 2026',
+    metaDescription: `Approved drug licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value. Benchmark upfronts, milestones, and royalties for marketed product out-licensing deals.`,
+    h1: 'Approved Drug Licensing & Out-Licensing Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Licensing deals for approved drugs represent the most de-risked end of the biopharma deal spectrum, with total deal values reaching ${formatCurrency(r.terms.totalDealValue.median)} median. Upfront payments are substantial, ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}, reflecting the eliminated development risk and existing revenue stream. These deals are driven by geographic expansion, commercial optimization, and portfolio rationalization strategies.`,
+      `Milestone structures for approved drug deals shift heavily toward commercial milestones (${formatCurrency(r.terms.commMilestones.median)}), with development milestones (${formatCurrency(r.terms.devMilestones.median)}) focused on label expansions and supplemental indications. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} reward approvals in new territories or additional indications.`,
+      `Royalty rates for approved drug licensing typically range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with escalation to ${r.tieredRoyalties.highTier.high}% on peak sales. The ${r.dealRecommendation.upfrontPercent}/${r.dealRecommendation.milestonePercent} upfront/milestone split reflects the minimal remaining risk. Patent life remaining, competitive landscape dynamics, and generic/biosimilar exposure timelines are critical value determinants.`,
+    ],
+    calculatorPrefill: { phase: 'approved', modality: 'smallMolecule', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'What upfront payments are typical for approved drug licensing deals?',
+        answer: `Approved drug deals command median upfront payments of ${formatCurrency(r.terms.upfront.median)}, significantly higher than pre-approval deals. The range of ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)} depends on current revenue, patent runway, competitive threats, and the scope of territorial rights being licensed.`,
+      },
+      {
+        question: 'How do approved drug out-licensing deals differ from development-stage deals?',
+        answer: 'Approved drug deals feature much higher upfront-to-total ratios (often 30-50% upfront versus 10-20% for early-stage), commercially-weighted milestone structures, and lower royalty rates reflecting the reduced risk premium. Due diligence focuses on commercial performance, payer access, and competitive dynamics rather than clinical and regulatory risk.',
+      },
+      {
+        question: 'What drives geographic out-licensing deals for approved drugs?',
+        answer: 'Geographic out-licensing is driven by lack of local commercial infrastructure, regulatory complexity in specific markets (China, Japan), desire to monetize non-core territories, and the licensee\'s established KOL relationships and payer access in the target geography. Ex-US and Greater China deals represent the largest volume.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'phase-3-deal-benchmarks', title: 'Phase 3 Deal Benchmarks' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'antibody-deal-benchmarks', title: 'Monoclonal Antibody Deals' },
+    ],
+    category: 'modality',
+  };
+}
+
 // ── Build full list ───────────────────────────────────────────────────────────
 
 const BENCHMARK_PAGES: BenchmarkPageData[] = [
@@ -2280,6 +2678,17 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
   buildADCvsBispecificComparisonPage(),
   buildPhase1vsPhase2ComparisonPage(),
   buildOncologyvsNeurologyComparisonPage(),
+  // ── Modality Expansion Pages ──────────────────────────────────────────────
+  buildRNAiSiRNAPage(),
+  buildPROTACDegraderPage(),
+  buildMRNATherapeuticsPage(),
+  buildMonoclonalAntibodyPage(),
+  buildCellTherapyBeyondCARTPage(),
+  buildPrecisionOncologyPage(),
+  buildObesityWeightLossPage(),
+  buildAutoimmuneBiologicsPage(),
+  buildRareDiseaseGeneTherapy2026Page(),
+  buildApprovedDrugLicensingPage(),
 ];
 
 // ── Public API ────────────────────────────────────────────────────────────────

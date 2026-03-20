@@ -117,6 +117,15 @@ export default function GlossaryPage() {
                       <p className="mt-2 text-slate-600 leading-relaxed">
                         {term.definition}
                       </p>
+                      <Link
+                        href={`/calculator`}
+                        className="inline-flex items-center gap-1 mt-2 text-sm text-teal-600 font-medium hover:text-teal-700 transition-colors"
+                      >
+                        See in action
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </Link>
                       {term.relatedTerms.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           <span className="text-xs text-slate-400">Related:</span>
