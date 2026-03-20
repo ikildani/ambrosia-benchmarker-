@@ -75,16 +75,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CompanyPage({ params }: Props) {
   const { companyId } = await params;
   let companyName = 'Company';
+  let companySchema: Record<string, unknown> | null = null;
 
   if (UUID_REGEX.test(companyId)) {
     try {
       const supabase = createServiceClient();
       const { data: company } = await supabase
         .from('companies')
-        .select('name')
+        .select('name, company_type, deals_last_12mo')
         .eq('id', companyId)
         .single();
-      if (company?.name) companyName = company.name;
+      if (company?.name) {
+        companyName = company.name;
+        companySchema = {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: company.name,
+          url: `https://calculator.ambrosiaventures.co/companies/${companyId}`,
+          description: `${company.name} deal history, pipeline analysis, and licensing benchmarks. ${company.company_type || 'Life sciences'} company with ${company.deals_last_12mo || 0} recent deals.`,
+          industry: company.company_type || 'Biotechnology',
+        };
+      }
     } catch {}
   }
 
@@ -99,6 +110,9 @@ export default async function CompanyPage({ params }: Props) {
           { "@type": "ListItem", "position": 3, "name": companyName }
         ]
       })}} />
+      {companySchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(companySchema) }} />
+      )}
       <CompanyPageClient companyId={companyId} />
     </>
   );

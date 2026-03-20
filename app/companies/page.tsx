@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: 'Company Profiles — Biotech & Pharma Deal Intelligence',
     description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 600+ biotech and pharma companies.',
     url: 'https://calculator.ambrosiaventures.co/companies',
+    images: [{ url: '/api/og?title=Company%20Profiles&subtitle=600%2B%20Biotech%20%26%20Pharma%20Companies&type=landing' }],
   },
   twitter: {
     card: 'summary',

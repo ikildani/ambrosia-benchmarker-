@@ -178,6 +178,21 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
                 isPro={isPro}
               />
             )}
+
+            {/* Related Benchmarks */}
+            {data.company.top_modalities?.length > 0 && (
+              <div className="mt-8 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white mb-3">Related Benchmarks</h3>
+                <div className="flex flex-wrap gap-2">
+                  {data.company.top_modalities.slice(0, 5).map((mod: string) => (
+                    <Link key={mod} href={`/benchmarks/${mod.toLowerCase().replace(/\s+/g, '-')}-deal-benchmarks`}
+                      className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                      {mod} Benchmarks →
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : null}
       </div>
