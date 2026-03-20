@@ -1769,6 +1769,462 @@ function buildIL23GIPage(): BenchmarkPageData {
   };
 }
 
+// ── Immunology & Autoimmune ──────────────────────────────────────────────────
+
+function buildImmunologyAutoimmunePage(): BenchmarkPageData {
+  const input = makeInput({ therapeuticArea: 'immunology' as TherapeuticArea, modality: 'mab' as Modality, phase: 'phase2', indication: 'sle_lupus' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'immunology-autoimmune-deal-benchmarks',
+    title: 'Immunology & Autoimmune Deal Benchmarks 2026',
+    metaDescription: `Immunology licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark autoimmune deal terms for lupus, JAK inhibitors, and biologics.`,
+    h1: 'Immunology & Autoimmune Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `The immunology and autoimmune licensing market in 2026 is defined by fierce competition among biologics, JAK inhibitors, and next-generation targeted therapies. Phase 2 monoclonal antibody deals for autoimmune indications carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. SLE/lupus remains one of the most actively pursued indications given the large unmet medical need and limited approved biologics.`,
+      `Deal structures in autoimmune licensing reflect the breadth of indication expansion potential. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, while commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward multi-indication lifecycle strategies. The ability to demonstrate differentiation from entrenched TNF and IL-6 therapies is the single largest driver of premium valuations.`,
+      `Royalty rates for immunology deals settle between ${r.tieredRoyalties.base.low}% and ${r.tieredRoyalties.base.high}% at the base tier, with escalation to ${r.tieredRoyalties.highTier.high}% on blockbuster sales. Deals featuring novel mechanisms targeting B-cell depletion, T-regulatory cell modulation, or cytokine-specific pathways command the highest premiums relative to follow-on JAK or IL-targeting agents.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'mab', therapeuticArea: 'immunology' },
+    faqs: [
+      {
+        question: 'What are the key trends shaping immunology deal activity in 2026?',
+        answer: `Immunology deal activity is driven by the shift from broad immunosuppression to targeted pathway modulation. Deals for novel mechanisms such as anti-TYK2, anti-TSLP, and CAR-T for autoimmune disease are commanding premium terms. Phase 2 autoimmune assets average ${formatCurrency(r.terms.totalDealValue.median)} total deal value, with strong licensee demand for differentiated safety profiles.`,
+      },
+      {
+        question: 'How do JAK inhibitor deals compare to biologic deals in autoimmune indications?',
+        answer: `JAK inhibitor deals generally carry lower upfront payments than biologic deals due to safety label concerns (boxed warnings) and competitive density. However, next-generation selective JAK1 inhibitors with improved safety data are closing the gap. Biologic deals for autoimmune indications average ${formatCurrency(r.terms.upfront.median)} median upfront versus 15-25% lower for JAK inhibitors.`,
+      },
+      {
+        question: 'How large is the autoimmune disease deal market?',
+        answer: 'The global autoimmune therapeutics market exceeds $130 billion, making it one of the largest therapeutic categories for licensing activity. SLE/lupus, rheumatoid arthritis, psoriasis, and inflammatory bowel disease collectively drive the majority of deal volume. The continued emergence of novel targets (TYK2, CD19 CAR-T, TSLP) ensures a robust pipeline of dealmaking opportunities.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'dermatology-deal-benchmarks', title: 'Dermatology Deal Overview' },
+      { slug: 'gastroenterology-deal-benchmarks', title: 'Gastroenterology Deal Overview' },
+      { slug: 'il17-inhibitor-deal-benchmarks', title: 'IL-17 Inhibitor Deals' },
+      { slug: 'jak-inhibitor-derm-deal-benchmarks', title: 'JAK Inhibitor Deals' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Cardiovascular ──────────────────────────────────────────────────────────
+
+function buildCardiovascularPage(): BenchmarkPageData {
+  const input = makeInput({ therapeuticArea: 'cardiovascular' as TherapeuticArea, modality: 'smallMolecule' as Modality, phase: 'phase2', indication: 'heartFailureHfref' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'cardiovascular-deal-benchmarks',
+    title: 'Cardiovascular Deal Benchmarks 2026',
+    metaDescription: `Cardiovascular licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark CV deal terms for heart failure, PCSK9, and lipid therapies.`,
+    h1: 'Cardiovascular Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Cardiovascular licensing deals in 2026 are experiencing renewed activity driven by novel mechanisms in heart failure, PCSK9 follow-ons, and RNA-based therapies for lipid disorders. Phase 2 small molecule deals in the CV space carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. Heart failure with reduced ejection fraction (HFrEF) remains the most actively transacted indication.`,
+      `CV deal structures emphasize outcomes-driven milestones. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, often tied to MACE endpoints and regulatory advisory committee milestones. Regulatory milestones add ${formatCurrency(r.terms.regMilestones.median)}, while commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reflect the large addressable patient populations in cardiovascular disease.`,
+      `Royalty rates for cardiovascular deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier. The CV space is characterized by longer development timelines and larger outcome trials, which compress upfront-to-milestone ratios relative to oncology. However, the blockbuster potential of successfully differentiated CV assets supports escalation tiers reaching ${r.tieredRoyalties.highTier.high}%.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'smallMolecule', therapeuticArea: 'cardiovascular' },
+    faqs: [
+      {
+        question: 'How active is the cardiovascular deal market in 2026?',
+        answer: `The CV deal market has rebounded significantly, driven by novel targets such as cardiac myosin inhibitors, soluble guanylate cyclase stimulators, and RNA silencing therapies. Phase 2 CV deals average ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The success of recent approvals in HFpEF and hypertrophic cardiomyopathy has reignited licensee interest.`,
+      },
+      {
+        question: 'What deal structures are common for PCSK9 and lipid-lowering therapies?',
+        answer: `PCSK9 and lipid-lowering deals are structured with moderate upfronts (${formatCurrency(r.terms.upfront.median)} median) and substantial commercial milestones given the large patient populations. Next-generation PCSK9 approaches (oral small molecules, siRNA) command premiums over follow-on monoclonal antibodies. Annual dosing profiles and improved adherence data are key valuation accelerators.`,
+      },
+      {
+        question: 'What drives premium valuations in heart failure licensing deals?',
+        answer: 'Heart failure deal premiums are driven by demonstrated mortality or hospitalization reduction, novel mechanism of action, favorable safety profiles versus standard of care, and the ability to treat both HFrEF and HFpEF populations. Combination potential with SGLT2 inhibitors and entresto is increasingly valued in deal negotiations.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'metabolic-obesity-deal-benchmarks', title: 'Metabolic & Obesity Deal Overview' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'phase-3-deal-benchmarks', title: 'Phase 3 Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Infectious Disease ──────────────────────────────────────────────────────
+
+function buildInfectiousDiseasePage(): BenchmarkPageData {
+  const input = makeInput({ therapeuticArea: 'infectiousDisease' as TherapeuticArea, modality: 'smallMolecule' as Modality, phase: 'phase2', indication: 'hivAids' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'infectious-disease-deal-benchmarks',
+    title: 'Infectious Disease Deal Benchmarks 2026',
+    metaDescription: `Infectious disease licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark antiviral, antibiotic, and vaccine deal terms.`,
+    h1: 'Infectious Disease Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Infectious disease licensing in 2026 spans antivirals, novel antibiotics, and next-generation vaccines. Phase 2 small molecule deals in the infectious disease space carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments between ${formatCurrency(r.terms.upfront.low)} and ${formatCurrency(r.terms.upfront.high)}. HIV long-acting regimens, HBV functional cures, and broad-spectrum antivirals represent the highest-value deal categories.`,
+      `Deal structures in infectious disease are shaped by the unique dynamics of antimicrobial stewardship, pandemic preparedness funding, and government procurement contracts. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, with regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} often tied to expedited pathways such as QIDP designation. Commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reflect both commercial and public-health market opportunities.`,
+      `Royalty rates for infectious disease deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier. Novel antibiotic deals often carry lower base rates but include pull incentive and subscription model-linked commercial milestones. Antiviral deals, particularly in HIV and HBV, support higher royalty structures given the chronic treatment paradigm and large patient populations.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'smallMolecule', therapeuticArea: 'infectiousDisease' },
+    faqs: [
+      {
+        question: 'What drives deal activity in antiviral licensing?',
+        answer: `Antiviral deal activity is driven by long-acting HIV regimens, HBV functional cure programs, and broad-spectrum antiviral platforms. Phase 2 antiviral deals average ${formatCurrency(r.terms.totalDealValue.median)} total deal value. The convergence of gene editing and antiviral strategies (e.g., CRISPR-based HBV cure) is creating a new tier of premium deal opportunities.`,
+      },
+      {
+        question: 'How are antibiotic resistance partnerships structured?',
+        answer: 'Antibiotic resistance partnerships typically feature lower upfront payments but incorporate government-backed pull incentives and subscription-model revenue guarantees. The PASTEUR Act and CARB-X-style funding mechanisms shape deal economics, with total deal values increasingly supported by public-private partnership milestones rather than purely commercial sales projections.',
+      },
+      {
+        question: 'What are typical deal terms for vaccine licensing agreements?',
+        answer: 'Vaccine licensing deals are characterized by high commercial milestones relative to development milestones, reflecting the large population-based market opportunity. mRNA and self-amplifying RNA vaccine platforms command premium valuations due to manufacturing speed and pandemic preparedness positioning. Adjuvant technology partnerships are a growing deal category.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'rare-disease-deal-benchmarks', title: 'Rare Disease Deal Overview' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Ophthalmology ───────────────────────────────────────────────────────────
+
+function buildOphthalmologyPage(): BenchmarkPageData {
+  const input = makeInput({ therapeuticArea: 'ophthalmology' as TherapeuticArea, modality: 'geneTherapy' as Modality, phase: 'phase2', indication: 'retinitisPigmentosa' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'ophthalmology-deal-benchmarks',
+    title: 'Ophthalmology Deal Benchmarks 2026',
+    metaDescription: `Ophthalmology licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark gene therapy, anti-VEGF, and retinal deal terms.`,
+    h1: 'Ophthalmology Deal Benchmarks 2026',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Ophthalmology licensing in 2026 is driven by gene therapy for inherited retinal diseases, next-generation anti-VEGF biologics, and novel dry AMD therapies. Phase 2 gene therapy deals for retinal indications carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments ranging from ${formatCurrency(r.terms.upfront.low)} to ${formatCurrency(r.terms.upfront.high)}. The curative potential and orphan drug status of retinal gene therapies support premium deal structures.`,
+      `Gene therapy deals in ophthalmology feature heavily back-loaded milestone structures. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, reflecting the manufacturing scale-up and long-term durability challenges unique to ocular gene delivery. Regulatory milestones add ${formatCurrency(r.terms.regMilestones.median)}, while commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} reward the path to market in high-value rare disease populations.`,
+      `Royalty rates for ophthalmology deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with gene therapy programs supporting higher escalation tiers reaching ${r.tieredRoyalties.highTier.high}%. Anti-VEGF biosimilar competition in wet AMD is compressing royalties for follow-on biologics, while truly differentiated approaches (port delivery, gene therapy-delivered anti-VEGF) maintain premium terms.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'geneTherapy', therapeuticArea: 'ophthalmology' },
+    faqs: [
+      {
+        question: 'How are gene therapy deals structured in ophthalmology?',
+        answer: `Gene therapy deals for retinal diseases average ${formatCurrency(r.terms.totalDealValue.median)} total deal value at Phase 2, with ${formatCurrency(r.terms.upfront.median)} median upfronts. The one-time curative treatment model and orphan drug pricing support premium valuations, though manufacturing complexity and long-term durability data requirements shape milestone-heavy structures.`,
+      },
+      {
+        question: 'What deal trends are shaping wet AMD licensing?',
+        answer: 'Wet AMD licensing is being reshaped by biosimilar competition against ranibizumab and aflibercept, driving demand for differentiated next-generation anti-VEGF agents. Port delivery systems, bispecific anti-VEGF/ANG2 antibodies, and gene therapy-mediated anti-VEGF expression are commanding the highest deal premiums in the wet AMD space.',
+      },
+      {
+        question: 'What are typical deal terms for retinal disease licensing?',
+        answer: `Retinal disease licensing deals span a wide range depending on modality and indication rarity. Gene therapy for inherited retinal dystrophies commands the highest premiums with total deal values of ${formatCurrency(r.terms.totalDealValue.median)}, while small molecule and biologic approaches for more common conditions carry comparatively lower valuations but larger commercial milestone potential.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'rare-disease-deal-benchmarks', title: 'Rare Disease Deal Overview' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Parkinson's Disease ─────────────────────────────────────────────────────
+
+function buildParkinsonsPage(): BenchmarkPageData {
+  const input = makeInput({
+    therapeuticArea: 'neurology' as TherapeuticArea,
+    modality: 'smallMolecule' as Modality,
+    phase: 'phase2',
+    indication: 'parkinsons' as Indication,
+    treatmentApproach: 'diseaseModifying',
+    bbbPenetration: 'provenCNS',
+    diseaseProgression: 'moderateProgressive',
+    biomarkerValidation: 'exploratory',
+  });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'parkinsons-deal-benchmarks',
+    title: "Parkinson's Disease Licensing Deal Benchmarks",
+    metaDescription: `Parkinson's disease licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark PD deal terms, milestones, and royalties.`,
+    h1: "Parkinson's Disease Licensing Deal Benchmarks",
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Parkinson's disease licensing is experiencing heightened activity as disease-modifying candidates advance through Phase 2 clinical trials. Small molecule PD deals carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments between ${formatCurrency(r.terms.upfront.low)} and ${formatCurrency(r.terms.upfront.high)}. The shift from symptomatic dopaminergic treatments to disease-modifying alpha-synuclein and LRRK2-targeted therapies is reshaping deal economics.`,
+      `PD deal structures are characterized by substantial development milestones averaging ${formatCurrency(r.terms.devMilestones.median)}, reflecting the challenging clinical endpoints (MDS-UPDRS) and longer trial durations in neurodegenerative disease. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} round out the typical deal architecture.`,
+      `Royalty rates for Parkinson's deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with escalation to ${r.tieredRoyalties.highTier.high}%. Disease-modifying therapies with biomarker-supported evidence of slowing progression command significant premiums over symptomatic treatments. The competitive landscape between GLP-1 agonists repurposed for PD, alpha-synuclein antibodies, and gene therapies creates a dynamic deal environment.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'smallMolecule', therapeuticArea: 'neurology' },
+    faqs: [
+      {
+        question: "How are Parkinson's disease deal structures evolving?",
+        answer: `PD deal structures are shifting toward disease-modifying mechanisms with higher total deal values. Phase 2 disease-modifying PD assets command ${formatCurrency(r.terms.totalDealValue.median)} median total deal value versus substantially lower values for symptomatic-only programs. Biomarker endpoints (alpha-synuclein seeding assays, DAT-SPECT imaging) are increasingly used as milestone triggers.`,
+      },
+      {
+        question: 'What is the deal landscape for alpha-synuclein targeted therapies?',
+        answer: 'Alpha-synuclein therapeutics represent the largest category of PD licensing deals. Both active and passive immunotherapy approaches are actively transacted, with antisense oligonucleotides and small molecule aggregation inhibitors emerging as newer modalities. Clinical failures of first-generation alpha-synuclein antibodies have not dampened deal activity but have shifted valuations toward genetically validated patient subpopulations (GBA1, LRRK2 carriers).',
+      },
+      {
+        question: 'How competitive is the neurodegenerative disease deal space?',
+        answer: "The neurodegenerative deal space is highly competitive, with Alzheimer's and Parkinson's representing the two largest indication categories. PD deals benefit from a clearer biomarker framework than many other neurodegenerative indications, supporting more structured milestone agreements. Cross-indication potential (e.g., alpha-synuclein in Lewy body dementia) adds significant option value to PD-focused deals.",
+      },
+    ],
+    relatedPages: [
+      { slug: 'alzheimers-deal-benchmarks', title: "Alzheimer's Deal Benchmarks" },
+      { slug: 'neurology-cns-deal-benchmarks', title: 'Neurology & CNS Deal Overview' },
+      { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'indication',
+  };
+}
+
+// ── Checkpoint Inhibitor ────────────────────────────────────────────────────
+
+function buildCheckpointInhibitorPage(): BenchmarkPageData {
+  const input = makeInput({ therapeuticArea: 'oncology' as TherapeuticArea, modality: 'mab' as Modality, phase: 'phase2', indication: 'lung_nsclc' as Indication });
+  const r = calculateDealTerms(input);
+  return {
+    slug: 'checkpoint-inhibitor-deal-benchmarks',
+    title: 'Checkpoint Inhibitor (PD-1/PD-L1) Deal Benchmarks',
+    metaDescription: `Checkpoint inhibitor licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark PD-1/PD-L1 IO deal terms, milestones, and royalties.`,
+    h1: 'Checkpoint Inhibitor (PD-1/PD-L1) Deal Benchmarks',
+    heroStats: buildHeroStats(r),
+    contextParagraphs: [
+      `Checkpoint inhibitor licensing in 2026 is characterized by market maturation, biosimilar pressure on first-generation PD-1/PD-L1 agents, and sustained demand for differentiated IO-combination assets. Phase 2 monoclonal antibody deals in the IO space carry a median total deal value of ${formatCurrency(r.terms.totalDealValue.median)}, with upfront payments between ${formatCurrency(r.terms.upfront.low)} and ${formatCurrency(r.terms.upfront.high)}. Novel checkpoint targets (LAG-3, TIGIT, CD47) and bispecific IO constructs command premiums over follow-on PD-1 agents.`,
+      `IO deal structures are milestone-heavy with development milestones averaging ${formatCurrency(r.terms.devMilestones.median)}, reflecting the need for combination trial data in registrational settings. Regulatory milestones of ${formatCurrency(r.terms.regMilestones.median)} and commercial milestones of ${formatCurrency(r.terms.commMilestones.median)} complete the typical IO deal. The ${r.dealRecommendation.upfrontPercent}% upfront / ${r.dealRecommendation.milestonePercent}% milestone split reflects the clinical risk and competitive density of the IO landscape.`,
+      `Royalty rates for checkpoint inhibitor deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with tiered escalation to ${r.tieredRoyalties.highTier.high}%. Biosimilar competition for pembrolizumab and nivolumab is compressing royalties for undifferentiated PD-1 agents, while next-generation IO mechanisms and tumor-specific conditional activation platforms maintain premium royalty structures.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'mab', therapeuticArea: 'oncology' },
+    faqs: [
+      {
+        question: 'Is the checkpoint inhibitor deal market saturated?',
+        answer: `While the PD-1/PD-L1 space is mature, deal activity continues for differentiated assets. Undifferentiated follow-on PD-1 antibodies face compressed terms, but novel IO combinations, bispecific checkpoint constructs, and next-generation targets (LAG-3, TIGIT, CD47, NKG2A) maintain premium deal values averaging ${formatCurrency(r.terms.totalDealValue.median)} at Phase 2.`,
+      },
+      {
+        question: 'How are IO combination therapy licensing deals structured?',
+        answer: `IO combination deals are characterized by higher total deal values than monotherapy IO assets due to the broader indication potential. Combination-specific milestones are common, with separate triggers for each indication-specific registration trial. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, and cross-indication expansion milestones can add 20-40% to total deal value.`,
+      },
+      {
+        question: 'What is the biosimilar impact on checkpoint inhibitor deal valuations?',
+        answer: 'The impending LOE for pembrolizumab (2028) and nivolumab is reshaping IO deal economics. Biosimilar-referenced PD-1 agents face significant valuation discounts, while differentiated IO assets with novel mechanisms or superior safety profiles maintain premium terms. Licensors increasingly require superiority data versus PD-1 backbone therapy to justify premium deal terms.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'lung-nsclc-deal-benchmarks', title: 'NSCLC Deal Benchmarks' },
+    ],
+    category: 'modality',
+  };
+}
+
+// ── Comparison: ADC vs Bispecific ────────────────────────────────────────────
+
+function buildADCvsBispecificComparisonPage(): BenchmarkPageData {
+  const adcInput = makeInput({ modality: 'adc' as Modality, phase: 'phase2', indication: 'breast_tnbc' as Indication });
+  const bisInput = makeInput({ modality: 'bispecific' as Modality, phase: 'phase2', indication: 'lung_nsclc' as Indication });
+  const adc = calculateDealTerms(adcInput);
+  const bis = calculateDealTerms(bisInput);
+  return {
+    slug: 'adc-vs-bispecific-deal-comparison',
+    title: 'ADC vs. Bispecific Antibody Deal Terms Comparison',
+    metaDescription: `Compare ADC vs bispecific antibody deal terms: ADC median upfront ${formatCurrency(adc.terms.upfront.median)} vs bispecific ${formatCurrency(bis.terms.upfront.median)}. Side-by-side benchmarks.`,
+    h1: 'ADC vs. Bispecific Antibody Deal Terms Comparison',
+    heroStats: [
+      {
+        label: 'ADC Median Upfront',
+        value: formatCurrency(adc.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(adc.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'Bispecific Median Upfront',
+        value: formatCurrency(bis.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(bis.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'ADC Total Deal Value',
+        value: formatCurrency(adc.terms.totalDealValue.median),
+        subtext: `Royalty: ${adc.tieredRoyalties.base.low}%-${adc.tieredRoyalties.base.high}%`,
+      },
+      {
+        label: 'Bispecific Total Deal Value',
+        value: formatCurrency(bis.terms.totalDealValue.median),
+        subtext: `Royalty: ${bis.tieredRoyalties.base.low}%-${bis.tieredRoyalties.base.high}%`,
+      },
+    ],
+    contextParagraphs: [
+      `ADCs and bispecific antibodies represent the two most actively transacted advanced modalities in oncology licensing. At Phase 2, ADC deals carry a median total deal value of ${formatCurrency(adc.terms.totalDealValue.median)} versus ${formatCurrency(bis.terms.totalDealValue.median)} for bispecific antibodies. ADC upfront payments average ${formatCurrency(adc.terms.upfront.median)} compared to ${formatCurrency(bis.terms.upfront.median)} for bispecifics, reflecting differences in manufacturing complexity, platform maturity, and competitive dynamics.`,
+      `The milestone structures diverge based on modality-specific risk profiles. ADC development milestones average ${formatCurrency(adc.terms.devMilestones.median)} versus ${formatCurrency(bis.terms.devMilestones.median)} for bispecifics. ADC deals emphasize payload-linker optimization and therapeutic index milestones, while bispecific deals focus on mechanism-of-action validation and T-cell engagement safety data. Commercial milestones are comparable: ${formatCurrency(adc.terms.commMilestones.median)} for ADCs versus ${formatCurrency(bis.terms.commMilestones.median)} for bispecifics.`,
+      `Royalty rate structures differ modestly between the two modalities. ADC base royalties range from ${adc.tieredRoyalties.base.low}% to ${adc.tieredRoyalties.base.high}%, while bispecific base royalties range from ${bis.tieredRoyalties.base.low}% to ${bis.tieredRoyalties.base.high}%. The bispecific-ADC hybrid modality (bispecific antibody-drug conjugates) is emerging as a new premium category that commands terms exceeding either standalone modality.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'adc' },
+    faqs: [
+      {
+        question: 'Do ADC deals command a premium over bispecific antibody deals?',
+        answer: `At Phase 2, ADC deals average ${formatCurrency(adc.terms.totalDealValue.median)} total deal value versus ${formatCurrency(bis.terms.totalDealValue.median)} for bispecifics. The ADC premium reflects the established clinical validation (multiple approved ADCs), payload-driven differentiation potential, and broad target landscape. However, bispecific deals are closing the gap as the modality matures.`,
+      },
+      {
+        question: 'How do royalty rates differ between ADC and bispecific deals?',
+        answer: `ADC base royalties range from ${adc.tieredRoyalties.base.low}% to ${adc.tieredRoyalties.base.high}%, compared to ${bis.tieredRoyalties.base.low}% to ${bis.tieredRoyalties.base.high}% for bispecifics. ADC deals tend to include manufacturing cost-sharing provisions that effectively reduce the net royalty, while bispecific deals are more likely to include co-promotion rights that can substitute for higher royalties.`,
+      },
+      {
+        question: 'Which modality commands higher upfront payments?',
+        answer: `ADCs command ${formatCurrency(adc.terms.upfront.median)} median upfront versus ${formatCurrency(bis.terms.upfront.median)} for bispecifics at Phase 2. The upfront premium for ADCs is driven by the established manufacturing infrastructure, broader target validation, and the demonstrated blockbuster potential of approved ADCs like Enhertu and Padcev.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
+      { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Comparison: Phase 1 vs Phase 2 ──────────────────────────────────────────
+
+function buildPhase1vsPhase2ComparisonPage(): BenchmarkPageData {
+  const p1Input = makeInput({ phase: 'phase1' as Phase, modality: 'smallMolecule' as Modality, indication: 'lung_nsclc' as Indication });
+  const p2Input = makeInput({ phase: 'phase2' as Phase, modality: 'smallMolecule' as Modality, indication: 'lung_nsclc' as Indication });
+  const p1 = calculateDealTerms(p1Input);
+  const p2 = calculateDealTerms(p2Input);
+  return {
+    slug: 'phase-1-vs-phase-2-deal-comparison',
+    title: 'Phase 1 vs. Phase 2 Deal Valuation Comparison',
+    metaDescription: `Compare Phase 1 vs Phase 2 deal terms: Phase 1 upfront ${formatCurrency(p1.terms.upfront.median)} vs Phase 2 ${formatCurrency(p2.terms.upfront.median)}. Data-driven stage comparison.`,
+    h1: 'Phase 1 vs. Phase 2 Deal Valuation Comparison',
+    heroStats: [
+      {
+        label: 'Phase 1 Median Upfront',
+        value: formatCurrency(p1.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(p1.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'Phase 2 Median Upfront',
+        value: formatCurrency(p2.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(p2.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'Phase Transition Premium',
+        value: `${Math.round(((p2.terms.totalDealValue.median - p1.terms.totalDealValue.median) / p1.terms.totalDealValue.median) * 100)}%`,
+        subtext: 'Phase 2 premium over Phase 1',
+      },
+      {
+        label: 'Phase 1 Royalty Range',
+        value: `${p1.tieredRoyalties.base.low}%-${p1.tieredRoyalties.base.high}%`,
+        subtext: `vs Phase 2: ${p2.tieredRoyalties.base.low}%-${p2.tieredRoyalties.base.high}%`,
+      },
+    ],
+    contextParagraphs: [
+      `The Phase 1 to Phase 2 transition represents the most significant value inflection point in pharmaceutical licensing. Phase 2 small molecule deals carry a median total deal value of ${formatCurrency(p2.terms.totalDealValue.median)} compared to ${formatCurrency(p1.terms.totalDealValue.median)} at Phase 1, representing a ${Math.round(((p2.terms.totalDealValue.median - p1.terms.totalDealValue.median) / p1.terms.totalDealValue.median) * 100)}% premium for clinical proof-of-concept data. Upfront payments increase from ${formatCurrency(p1.terms.upfront.median)} to ${formatCurrency(p2.terms.upfront.median)}.`,
+      `The risk-adjusted deal structures differ significantly between phases. Phase 1 deals are heavily milestone-weighted with ${formatCurrency(p1.terms.devMilestones.median)} in development milestones, while Phase 2 deals shift toward higher upfronts and commercial milestones. Phase 1 development milestones often include proof-of-concept triggers that Phase 2 deals have already de-risked. Regulatory milestones increase from ${formatCurrency(p1.terms.regMilestones.median)} to ${formatCurrency(p2.terms.regMilestones.median)}.`,
+      `Royalty rates also reflect the de-risking premium. Phase 1 base royalties range from ${p1.tieredRoyalties.base.low}% to ${p1.tieredRoyalties.base.high}%, while Phase 2 assets command ${p2.tieredRoyalties.base.low}% to ${p2.tieredRoyalties.base.high}%. The optimal licensing window for most assets is immediately after Phase 2a proof-of-concept data, when the risk-value trade-off most favors the licensor.`,
+    ],
+    calculatorPrefill: { phase: 'phase1', modality: 'smallMolecule' },
+    faqs: [
+      {
+        question: 'What is the typical deal value premium from Phase 1 to Phase 2?',
+        answer: `Phase 2 deals command a ${Math.round(((p2.terms.totalDealValue.median - p1.terms.totalDealValue.median) / p1.terms.totalDealValue.median) * 100)}% premium over Phase 1 in total deal value (${formatCurrency(p2.terms.totalDealValue.median)} vs ${formatCurrency(p1.terms.totalDealValue.median)}). The upfront payment increase is even more pronounced: ${formatCurrency(p2.terms.upfront.median)} vs ${formatCurrency(p1.terms.upfront.median)}, reflecting the de-risking value of proof-of-concept clinical data.`,
+      },
+      {
+        question: 'How do risk-adjusted deal terms differ between Phase 1 and Phase 2?',
+        answer: `Phase 1 deals allocate a larger share to development milestones (${formatCurrency(p1.terms.devMilestones.median)}) relative to upfront payments, reflecting higher clinical risk. Phase 2 deals shift the value split toward upfront (${formatCurrency(p2.terms.upfront.median)}) and commercial milestones, reflecting the reduced probability of clinical failure after proof-of-concept data.`,
+      },
+      {
+        question: 'When is the optimal time to out-license a pharmaceutical asset?',
+        answer: 'The optimal licensing window depends on therapeutic area and modality, but the Phase 2a readout inflection point is generally the most favorable for licensors. At this stage, clinical proof-of-concept has been established, the asset carries a de-risking premium, and the licensee still captures substantial upside from Phase 3 and commercialization. Pre-Phase 2a licensing is appropriate when capital constraints or platform validation needs outweigh the value of additional de-risking.',
+      },
+    ],
+    relatedPages: [
+      { slug: 'preclinical-licensing-benchmarks', title: 'Preclinical Deal Benchmarks' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'phase-3-deal-benchmarks', title: 'Phase 3 Deal Benchmarks' },
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+    ],
+    category: 'overview',
+  };
+}
+
+// ── Comparison: Oncology vs Neurology ───────────────────────────────────────
+
+function buildOncologyvsNeurologyComparisonPage(): BenchmarkPageData {
+  const oncInput = makeInput({ therapeuticArea: 'oncology' as TherapeuticArea, modality: 'smallMolecule' as Modality, phase: 'phase2', indication: 'lung_nsclc' as Indication });
+  const neuroInput = makeInput({
+    therapeuticArea: 'neurology' as TherapeuticArea,
+    modality: 'smallMolecule' as Modality,
+    phase: 'phase2',
+    indication: 'alzheimers' as Indication,
+    treatmentApproach: 'diseaseModifying',
+    bbbPenetration: 'provenCNS',
+    diseaseProgression: 'slowProgressive',
+    biomarkerValidation: 'exploratory',
+  });
+  const onc = calculateDealTerms(oncInput);
+  const neuro = calculateDealTerms(neuroInput);
+  return {
+    slug: 'oncology-vs-neurology-deal-comparison',
+    title: 'Oncology vs. Neurology Licensing Deal Comparison',
+    metaDescription: `Compare oncology vs neurology deal terms: oncology upfront ${formatCurrency(onc.terms.upfront.median)} vs neurology ${formatCurrency(neuro.terms.upfront.median)}. TA-specific benchmarks.`,
+    h1: 'Oncology vs. Neurology Licensing Deal Comparison',
+    heroStats: [
+      {
+        label: 'Oncology Median Upfront',
+        value: formatCurrency(onc.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(onc.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'Neurology Median Upfront',
+        value: formatCurrency(neuro.terms.upfront.median),
+        subtext: `Total: ${formatCurrency(neuro.terms.totalDealValue.median)}`,
+      },
+      {
+        label: 'Oncology Royalty Range',
+        value: `${onc.tieredRoyalties.base.low}%-${onc.tieredRoyalties.base.high}%`,
+        subtext: `Tiered to ${onc.tieredRoyalties.highTier.high}%`,
+      },
+      {
+        label: 'Neurology Royalty Range',
+        value: `${neuro.tieredRoyalties.base.low}%-${neuro.tieredRoyalties.base.high}%`,
+        subtext: `Tiered to ${neuro.tieredRoyalties.highTier.high}%`,
+      },
+    ],
+    contextParagraphs: [
+      `Oncology and neurology represent the two highest-value therapeutic areas for pharmaceutical licensing, but with distinctly different deal economics. Phase 2 oncology small molecule deals carry a median total deal value of ${formatCurrency(onc.terms.totalDealValue.median)} versus ${formatCurrency(neuro.terms.totalDealValue.median)} for neurology disease-modifying assets. Oncology upfronts average ${formatCurrency(onc.terms.upfront.median)} compared to ${formatCurrency(neuro.terms.upfront.median)} for neurology.`,
+      `The deal volume disparity is significant: oncology accounts for approximately 40% of all biopharma licensing deals, compared to 12-15% for neurology. However, neurology deal values have been trending upward with the clinical validation of disease-modifying approaches in Alzheimer's and Parkinson's. Development milestones are ${formatCurrency(onc.terms.devMilestones.median)} for oncology versus ${formatCurrency(neuro.terms.devMilestones.median)} for neurology, reflecting the longer and more expensive clinical trial timelines in neurodegenerative disease.`,
+      `Royalty structures differ by therapeutic area. Oncology base royalties range from ${onc.tieredRoyalties.base.low}% to ${onc.tieredRoyalties.base.high}%, while neurology deals support ${neuro.tieredRoyalties.base.low}% to ${neuro.tieredRoyalties.base.high}% base rates. Neurology deals often include indication expansion milestones that bridge into psychiatry and pain, adding option value not typically available in oncology deals.`,
+    ],
+    calculatorPrefill: { phase: 'phase2', modality: 'smallMolecule' },
+    faqs: [
+      {
+        question: 'Do oncology deals command a premium over neurology deals?',
+        answer: `Oncology deals generally carry higher total deal values (${formatCurrency(onc.terms.totalDealValue.median)} vs ${formatCurrency(neuro.terms.totalDealValue.median)}) at Phase 2, driven by higher deal volume, faster development timelines, and more validated regulatory endpoints. However, neurology disease-modifying assets with strong biomarker data can match or exceed oncology valuations on a per-indication basis.`,
+      },
+      {
+        question: 'How does deal volume compare between oncology and neurology?',
+        answer: 'Oncology accounts for roughly 40% of all biopharma licensing transactions, making it the most active therapeutic area by a wide margin. Neurology represents approximately 12-15% of deal volume but is the fastest-growing TA for licensing activity, driven by Alzheimer\'s disease-modifying therapies, Parkinson\'s gene therapies, and next-generation psychiatric medications.',
+      },
+      {
+        question: 'How do royalty rate structures differ between oncology and neurology?',
+        answer: `Oncology base royalties range from ${onc.tieredRoyalties.base.low}% to ${onc.tieredRoyalties.base.high}%, compared to ${neuro.tieredRoyalties.base.low}% to ${neuro.tieredRoyalties.base.high}% for neurology. Oncology benefits from higher pricing power and more concentrated patient populations, while neurology deals often incorporate broader indication expansion rights that effectively increase the total economic value to the licensor.`,
+      },
+    ],
+    relatedPages: [
+      { slug: 'oncology-deal-benchmarks-2026', title: 'Oncology Deal Overview 2026' },
+      { slug: 'neurology-cns-deal-benchmarks', title: 'Neurology & CNS Deal Overview' },
+      { slug: 'phase-2-deal-benchmarks', title: 'Phase 2 Deal Benchmarks' },
+      { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },
+    ],
+    category: 'overview',
+  };
+}
+
 // ── Build full list ───────────────────────────────────────────────────────────
 
 const BENCHMARK_PAGES: BenchmarkPageData[] = [
@@ -1808,6 +2264,22 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
   buildGastroenterologyOverviewPage(),
   buildAntiTL1APage(),
   buildIL23GIPage(),
+  // Immunology & Autoimmune
+  buildImmunologyAutoimmunePage(),
+  // Cardiovascular
+  buildCardiovascularPage(),
+  // Infectious Disease
+  buildInfectiousDiseasePage(),
+  // Ophthalmology
+  buildOphthalmologyPage(),
+  // Parkinson's
+  buildParkinsonsPage(),
+  // Checkpoint Inhibitor
+  buildCheckpointInhibitorPage(),
+  // Comparison Pages
+  buildADCvsBispecificComparisonPage(),
+  buildPhase1vsPhase2ComparisonPage(),
+  buildOncologyvsNeurologyComparisonPage(),
 ];
 
 // ── Public API ────────────────────────────────────────────────────────────────
