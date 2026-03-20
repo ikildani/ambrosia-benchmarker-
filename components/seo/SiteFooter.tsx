@@ -17,6 +17,7 @@ const footerLinks = {
     { label: 'All Therapeutic Areas', href: '/therapeutic-areas' },
   ],
   Resources: [
+    { label: 'Guides', href: '/guides' },
     { label: 'Glossary', href: '/glossary' },
     { label: 'Insights', href: '/insights' },
     { label: 'Press & Media', href: '/press' },
