@@ -18,6 +18,7 @@ const footerLinks = {
   ],
   Resources: [
     { label: 'Guides', href: '/guides' },
+    { label: 'Reports', href: '/reports' },
     { label: 'Glossary', href: '/glossary' },
     { label: 'Insights', href: '/insights' },
     { label: 'Press & Media', href: '/press' },
