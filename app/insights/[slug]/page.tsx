@@ -69,6 +69,18 @@ export default async function InsightPage({
           { "@type": "ListItem", "position": 3, "name": insight.title }
         ]
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": `${insight.stat} — ${insight.title}`,
+        "description": insight.context,
+        "author": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://calculator.ambrosiaventures.co" },
+        "publisher": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://calculator.ambrosiaventures.co", "logo": { "@type": "ImageObject", "url": "https://calculator.ambrosiaventures.co/logo.png" } },
+        "mainEntityOfPage": `https://calculator.ambrosiaventures.co/insights/${slug}`,
+        "image": `https://calculator.ambrosiaventures.co/api/og?type=insight&stat=${encodeURIComponent(insight.stat)}&title=${encodeURIComponent(insight.title)}`,
+        "articleSection": "Biopharma Deal Intelligence",
+        "keywords": "biopharma deals, licensing benchmarks, deal intelligence",
+      })}} />
       <main className="min-h-screen bg-slate-950 text-white">
         {/* Big stat hero */}
       <section className="relative overflow-hidden py-24 sm:py-32">

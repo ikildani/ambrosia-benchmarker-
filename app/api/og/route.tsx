@@ -310,7 +310,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                600+
+                3,000+
               </div>
               <div style={{ fontSize: '16px', color: COLORS.slate }}>
                 Deals Analyzed
@@ -327,7 +327,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                8
+                12
               </div>
               <div style={{ fontSize: '16px', color: COLORS.slate }}>
                 Therapeutic Areas
@@ -344,7 +344,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                120+
+                850+
               </div>
               <div style={{ fontSize: '16px', color: COLORS.slate }}>
                 Company Profiles
