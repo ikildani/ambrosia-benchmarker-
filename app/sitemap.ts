@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { getAllInsightSlugs } from '@/lib/insightPages';
+import { getAllTermSlugs } from '@/lib/glossaryTerms';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
@@ -187,5 +188,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   });
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages];
+  // Individual glossary term pages
+  const termSlugs = getAllTermSlugs();
+  const glossaryTermPages: MetadataRoute.Sitemap = termSlugs.map((slug) => ({
+    url: `${baseUrl}/glossary/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages];
 }
