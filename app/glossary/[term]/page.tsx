@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllTermSlugs, getTermBySlug, getRelatedTermEntries } from '@/lib/glossaryTerms';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export function generateStaticParams() {
   return getAllTermSlugs().map((term) => ({ term }));
@@ -185,6 +186,7 @@ export default async function GlossaryTermPage({
           </div>
         </section>
       </main>
+      <SiteFooter />
     </>
   );
 }

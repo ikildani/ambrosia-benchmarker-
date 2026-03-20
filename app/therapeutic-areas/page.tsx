@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Therapeutic Area Deal Benchmarks — All 12 TAs | Ambrosia Ventures',
@@ -24,6 +25,7 @@ const TAS = [
 
 export default function TherapeuticAreasIndex() {
   return (
+    <>
     <main className="min-h-screen bg-white dark:bg-slate-900 py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
@@ -49,5 +51,7 @@ export default function TherapeuticAreasIndex() {
         </div>
       </div>
     </main>
+    <SiteFooter />
+    </>
   );
 }

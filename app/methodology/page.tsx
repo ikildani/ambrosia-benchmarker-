@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export default function MethodologyPage() {
   return (
+    <>
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-700 sticky top-0 z-40">
@@ -194,5 +196,7 @@ export default function MethodologyPage() {
         </div>
       </div>
     </main>
+    <SiteFooter />
+    </>
   );
 }

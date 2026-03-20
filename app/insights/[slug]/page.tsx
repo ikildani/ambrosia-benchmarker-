@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllInsightSlugs, getInsightBySlug } from '@/lib/insightPages';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export async function generateStaticParams() {
   return getAllInsightSlugs().map((slug) => ({ slug }));
@@ -173,6 +174,7 @@ export default async function InsightPage({
         </div>
       </section>
     </main>
+    <SiteFooter />
     </>
   );
 }

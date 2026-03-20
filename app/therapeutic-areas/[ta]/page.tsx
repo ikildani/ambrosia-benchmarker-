@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase/server';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 const TA_CONFIG: Record<string, { name: string; description: string; keywords: string[] }> = {
   oncology: { name: 'Oncology', description: 'Licensing deals, acquisitions, and collaborations in solid tumors and hematologic malignancies', keywords: ['oncology licensing deals', 'cancer drug deals', 'ADC deal terms', 'immuno-oncology partnerships'] },
@@ -78,6 +79,7 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
   const formatUsd = (n: number) => n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${Math.round(n / 1e6)}M`;
 
   return (
+    <>
     <main className="min-h-screen bg-white dark:bg-slate-900">
       {/* Hero */}
       <section className="py-16 sm:py-20 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
@@ -204,5 +206,7 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
         "variableMeasured": ["Upfront Payment", "Total Deal Value", "Milestones", "Royalty Rate"],
       })}} />
     </main>
+    <SiteFooter />
+    </>
   );
 }

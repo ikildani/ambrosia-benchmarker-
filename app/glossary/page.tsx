@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { BookOpen } from 'lucide-react';
 import { glossaryTerms, glossaryCategories } from '@/lib/glossaryTerms';
+import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Biotech Licensing Glossary | Deal Terms Explained | Ambrosia Ventures',
@@ -158,27 +159,14 @@ export default function GlossaryPage() {
             </p>
             <Link
               href="/calculator"
-              className="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all"
+              className="inline-flex items-center justify-center px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors"
             >
               Try the Calculator
             </Link>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="py-8 px-4 bg-slate-900 border-t border-slate-800">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <p className="text-slate-400 text-sm">
-              &copy; {new Date().getFullYear()} Ambrosia Ventures
-            </p>
-            <div className="flex items-center gap-6 text-sm text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <Link href="/calculator" className="hover:text-white transition-colors">Calculator</Link>
-              <Link href="/benchmarks" className="hover:text-white transition-colors">Benchmarks</Link>
-            </div>
-          </div>
-        </footer>
       </main>
+      <SiteFooter />
     </>
   );
 }
