@@ -17,6 +17,7 @@ const footerLinks = {
     { label: 'All Therapeutic Areas', href: '/therapeutic-areas' },
   ],
   Resources: [
+    { label: 'Blog', href: '/blog' },
     { label: 'Guides', href: '/guides' },
     { label: 'Reports', href: '/reports' },
     { label: 'Glossary', href: '/glossary' },
@@ -24,7 +25,7 @@ const footerLinks = {
     { label: 'Press & Media', href: '/press' },
   ],
   Company: [
-    { label: 'About', href: '/#about' },
+    { label: 'About', href: '/about' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
   ],

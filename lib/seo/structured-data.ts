@@ -295,6 +295,58 @@ export function generateHowToSchema() {
   };
 }
 
+export function generateWebPageSchema(page: {
+  name: string;
+  description: string;
+  url: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.name,
+    description: page.description,
+    url: page.url,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'Ambrosia Ventures Deal Calculator',
+      url: BASE_URL,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Ambrosia Ventures',
+      url: BASE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BASE_URL}/logo.png`,
+      },
+    },
+  };
+}
+
+export function generateAboutPageSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About Ambrosia Ventures',
+    description: 'Life sciences M&A advisory and deal intelligence platform. Learn about our team, methodology, and mission to bring data-driven transparency to biopharma deal-making.',
+    url: `${BASE_URL}/about`,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'Ambrosia Ventures Deal Calculator',
+      url: BASE_URL,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Ambrosia Ventures',
+      url: BASE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BASE_URL}/logo.png`,
+      },
+    },
+  };
+}
+
 export function generateBreadcrumbSchema(
   items: Array<{ name: string; url?: string }>
 ): BreadcrumbSchema {

@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server';
+import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 
 const SITE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -14,7 +15,7 @@ export async function GET() {
       .order('published_at', { ascending: false })
       .limit(50);
 
-    if (posts) {
+    if (posts && posts.length > 0) {
       items = posts
         .map(
           (post) => `
@@ -27,9 +28,37 @@ export async function GET() {
     </item>`
         )
         .join('');
+    } else {
+      // Fallback to hardcoded blog posts
+      items = hardcodedBlogPosts
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+        .map(
+          (post) => `
+    <item>
+      <title><![CDATA[${post.title}]]></title>
+      <link>${SITE_URL}/blog/${post.slug}</link>
+      <guid isPermaLink="true">${SITE_URL}/blog/${post.slug}</guid>
+      <description><![CDATA[${post.excerpt}]]></description>
+      <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
+    </item>`
+        )
+        .join('');
     }
   } catch {
-    // Blog table may not exist yet — return empty feed
+    // DB unavailable — use hardcoded blog posts
+    items = hardcodedBlogPosts
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .map(
+        (post) => `
+    <item>
+      <title><![CDATA[${post.title}]]></title>
+      <link>${SITE_URL}/blog/${post.slug}</link>
+      <guid isPermaLink="true">${SITE_URL}/blog/${post.slug}</guid>
+      <description><![CDATA[${post.excerpt}]]></description>
+      <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
+    </item>`
+      )
+      .join('');
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { getAllInsightSlugs } from '@/lib/insightPages';
 import { getAllTermSlugs } from '@/lib/glossaryTerms';
+import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
@@ -144,6 +145,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.log('Sitemap: Dynamic content tables not available yet');
   }
 
+  // Fallback to hardcoded blog posts if DB returned none
+  if (blogPages.length === 0 && hardcodedBlogPosts.length > 0) {
+    blogPages = hardcodedBlogPosts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+  }
+
   // Add blog index if there are posts
   if (blogPages.length > 0) {
     staticPages.push({
@@ -153,6 +164,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     });
   }
+
+  // About page
+  staticPages.push({
+    url: `${baseUrl}/about`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  });
 
   // Benchmark pages (statically generated)
   const benchmarkSlugs = getAllBenchmarkSlugs();
