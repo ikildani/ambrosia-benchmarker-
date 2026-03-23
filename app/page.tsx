@@ -342,35 +342,34 @@ export default function Home() {
         <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-16 xl:gap-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center lg:text-left lg:flex-1">
 
-          {/* Headline */}
-          <h1 className={`text-4xl sm:text-5xl lg:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <span className="text-slate-900 dark:text-white">Deal Terms</span>
+          {/* Headline — answers one question in 5 seconds */}
+          <h1 className={`text-4xl sm:text-5xl lg:text-[64px] xl:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight leading-[1.08] transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <span className="text-slate-900 dark:text-white">Know what your</span>
             <br />
-            <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              Calculator
-            </span>
+            <span className="text-slate-900 dark:text-white">deal is </span>
+            <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">worth</span>
           </h1>
 
-          {/* Subheadline */}
+          {/* Subheadline — pain point, then solution */}
           <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            Instant benchmarks from <span className="font-semibold text-slate-700 dark:text-slate-200">2,600+ real deals</span> across 12 therapeutic areas.
-            {' '}rNPV modeling, Monte Carlo simulation, market intelligence & AI partner matching.
+            Stop guessing on upfronts, milestones, and royalties.
+            {' '}Benchmark your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">2,600+ real transactions</span> in seconds.
           </p>
 
-          {/* CTA Buttons */}
+          {/* Single clear CTA */}
           <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <Link
               href="/calculator"
-              className="group relative inline-flex items-center justify-center gap-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold px-8 py-4 rounded-xl
-                       shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-[15px]"
+              className="group relative inline-flex items-center justify-center gap-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold px-10 py-4 rounded-xl
+                       shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-base"
             >
-              <span>Run Benchmark</span>
+              <span>Benchmark Your Deal — Free</span>
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
 
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <Link
                 href="/dashboard"
                 className="group inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium px-8 py-4 rounded-xl
@@ -378,30 +377,22 @@ export default function Home() {
               >
                 <span>My Dashboard</span>
               </Link>
-            ) : (
-              <a
-                href="#pricing"
-                className="group inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium px-8 py-4 rounded-xl
-                         hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white transition-all duration-300 w-full sm:w-auto text-[15px]"
-              >
-                <span>View Pricing</span>
-              </a>
             )}
           </div>
 
-          {/* Proof points — minimal, inline */}
+          {/* Social proof — what, not features */}
           <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              2,600+ deals
+              2,600+ verified deals
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              12 therapeutic areas
+              Results in 30 seconds
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              850+ companies
+              Free to start
             </span>
           </div>
           </div>
