@@ -272,5 +272,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages];
+  // Lead magnet / data insight pages
+  const leadMagnetPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/insights/biopharma-deal-benchmarks-2026`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+  ];
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages];
 }
