@@ -44,6 +44,28 @@
     justify-content: center;
     padding: 80px 90px;
   }
+  /* Shared logo bar across all slides */
+  .logo-bar {
+    position: absolute;
+    top: 44px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 10;
+  }
+  .logo-bar img {
+    height: 32px;
+    width: auto;
+  }
+  .logo-bar .wordmark {
+    font-size: 15px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+  }
+
   .slide-1 .accent-line {
     width: 60px;
     height: 4px;
@@ -320,13 +342,12 @@
     text-align: center;
     padding: 80px 100px;
   }
-  .slide-4 .logo-mark {
-    width: 72px; height: 72px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 900; color: #fff;
+  .slide-4 .logo-hero {
     margin-bottom: 48px;
+  }
+  .slide-4 .logo-hero img {
+    height: 48px;
+    width: auto;
   }
   .slide-4 h2 {
     font-size: 48px;
@@ -400,12 +421,15 @@
 
 <!-- ═══════════════ SLIDE 1: THE HOOK ═══════════════ -->
 <div class="slide slide-1">
+  <div class="logo-bar">
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" />
+  </div>
   <div class="accent-line"></div>
   <div class="stat-huge">29%</div>
   <h1>Preclinical deal values<br>are up. <span>Upfronts<br>barely moved.</span></h1>
   <p class="subtitle">Where's the extra $225M going?<br>Milestones. Here's the data.</p>
   <div class="bottom-bar">
-    <span class="brand">AMBROSIA VENTURES</span>
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" style="height: 20px; opacity: 0.5;" />
     <div class="page-dots">
       <span class="dot active"></span>
       <span class="dot"></span>
@@ -418,6 +442,9 @@
 
 <!-- ═══════════════ SLIDE 2: THE DATA ═══════════════ -->
 <div class="slide slide-2">
+  <div class="logo-bar">
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" />
+  </div>
   <div class="section-label">Preclinical Deal Economics</div>
   <h2>Total deal values are inflating.<br>Upfronts are staying flat.</h2>
 
@@ -458,7 +485,7 @@
   </div>
 
   <div class="bottom-bar">
-    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" style="height: 18px; opacity: 0.4;" />
     <div class="page-indicator">
       <span class="dot"></span>
       <span class="dot active"></span>
@@ -470,6 +497,9 @@
 
 <!-- ═══════════════ SLIDE 3: THE WHY ═══════════════ -->
 <div class="slide slide-3">
+  <div class="logo-bar">
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" />
+  </div>
   <div class="section-label">What's Driving the Inflation</div>
   <h2>Platform modalities are repricing<br>preclinical deal economics</h2>
 
@@ -524,7 +554,7 @@
   </div>
 
   <div class="bottom-bar">
-    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" style="height: 18px; opacity: 0.4;" />
     <div class="page-indicator">
       <span class="dot"></span>
       <span class="dot"></span>
@@ -536,7 +566,7 @@
 
 <!-- ═══════════════ SLIDE 4: CTA ═══════════════ -->
 <div class="slide slide-4">
-  <div class="logo-mark">A</div>
+  <div class="logo-hero"><img src="/logo-white.svg" alt="Ambrosia Ventures" /></div>
   <h2>Benchmark your deal<br>against 3,400+ real<br>transactions</h2>
   <p class="desc">Model upfronts, milestones, and royalties for any phase, modality, and therapeutic area. Free.</p>
   <div class="cta-button">
@@ -558,7 +588,7 @@
   </div>
   <div class="url">calculator.ambrosiaventures.co</div>
   <div class="bottom-bar">
-    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <img src="/logo-white.svg" alt="Ambrosia Ventures" style="height: 18px; opacity: 0.4;" />
     <div class="page-indicator">
       <span class="dot"></span>
       <span class="dot"></span>
