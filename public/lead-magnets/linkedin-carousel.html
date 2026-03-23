@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Carousel — Ambrosia Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #f1f5f9;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+  .instructions {
+    max-width: 600px;
+    text-align: center;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .instructions strong { color: #0f172a; }
+  .slide {
+    width: 1080px;
+    height: 1080px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    page-break-after: always;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 1 — THE HOOK
+     ═══════════════════════════════════════════════ */
+  .slide-1 {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 90px;
+  }
+  .slide-1 .accent-line {
+    width: 60px;
+    height: 4px;
+    background: #3b82f6;
+    border-radius: 2px;
+    margin-bottom: 48px;
+  }
+  .slide-1 .stat-huge {
+    font-size: 120px;
+    font-weight: 900;
+    color: #3b82f6;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin-bottom: 24px;
+  }
+  .slide-1 h1 {
+    font-size: 52px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    margin-bottom: 32px;
+    letter-spacing: -1px;
+  }
+  .slide-1 h1 span { color: #94a3b8; }
+  .slide-1 .subtitle {
+    font-size: 22px;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: 700px;
+  }
+  .slide-1 .bottom-bar {
+    position: absolute;
+    bottom: 60px;
+    left: 90px;
+    right: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .slide-1 .brand {
+    font-size: 16px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .slide-1 .deal-count {
+    font-size: 15px;
+    color: #475569;
+  }
+  .slide-1 .page-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .slide-1 .page-dots .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #334155;
+  }
+  .slide-1 .page-dots .dot.active { background: #3b82f6; width: 24px; border-radius: 4px; }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 2 — THE DATA TABLE
+     ═══════════════════════════════════════════════ */
+  .slide-2 {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 80px;
+  }
+  .slide-2 .section-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3b82f6;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .slide-2 h2 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 48px;
+    letter-spacing: -0.5px;
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    flex: 1;
+  }
+  .data-table th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 0 20px 0;
+    border-bottom: 2px solid #1e293b;
+  }
+  .data-table th:not(:first-child) { text-align: right; }
+  .data-table td {
+    padding: 22px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #cbd5e1;
+    border-bottom: 1px solid #1e293b;
+  }
+  .data-table td:not(:first-child) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table tr.highlight td {
+    color: #ffffff;
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.08);
+  }
+  .data-table tr.highlight td:first-child {
+    border-left: 3px solid #3b82f6;
+    padding-left: 16px;
+  }
+  .data-table .change {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-left: 8px;
+  }
+  .slide-2 .insight-box {
+    margin-top: auto;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .slide-2 .insight-box .icon {
+    width: 36px; height: 36px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: #60a5fa;
+    font-size: 18px;
+  }
+  .slide-2 .insight-box p {
+    font-size: 18px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .slide-2 .insight-box strong { color: #e2e8f0; }
+
+  .slide-2 .bottom-bar,
+  .slide-3 .bottom-bar,
+  .slide-4 .bottom-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-indicator {
+    display: flex; gap: 8px;
+  }
+  .page-indicator .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #334155;
+  }
+  .page-indicator .dot.active { background: #3b82f6; width: 24px; border-radius: 4px; }
+  .brand-sm { font-size: 14px; font-weight: 600; color: #475569; }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 3 — THE WHY (MODALITY BREAKDOWN)
+     ═══════════════════════════════════════════════ */
+  .slide-3 {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 80px 100px;
+  }
+  .slide-3 .section-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3b82f6;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .slide-3 h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 48px;
+  }
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .bar-label {
+    width: 180px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #cbd5e1;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 48px;
+    background: #1e293b;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 100px;
+  }
+  .bar-fill.blue { background: linear-gradient(90deg, #1e40af, #3b82f6); }
+  .bar-fill.blue-light { background: linear-gradient(90deg, #1e3a5f, #2563eb); }
+  .bar-fill.slate { background: linear-gradient(90deg, #1e293b, #475569); }
+
+  .slide-3 .callout {
+    margin-top: 40px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04));
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 16px;
+    padding: 28px 32px;
+  }
+  .slide-3 .callout .big-stat {
+    font-size: 48px;
+    font-weight: 900;
+    color: #3b82f6;
+    margin-bottom: 8px;
+  }
+  .slide-3 .callout p {
+    font-size: 20px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  .slide-3 .callout strong { color: #e2e8f0; }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 4 — CTA
+     ═══════════════════════════════════════════════ */
+  .slide-4 {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 100px;
+  }
+  .slide-4 .logo-mark {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 900; color: #fff;
+    margin-bottom: 48px;
+  }
+  .slide-4 h2 {
+    font-size: 48px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+  }
+  .slide-4 .desc {
+    font-size: 22px;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: 650px;
+    margin-bottom: 56px;
+  }
+  .slide-4 .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 22px;
+    font-weight: 700;
+    padding: 22px 48px;
+    border-radius: 16px;
+    text-decoration: none;
+    margin-bottom: 48px;
+  }
+  .slide-4 .stats-row {
+    display: flex;
+    gap: 64px;
+  }
+  .slide-4 .stats-row .stat {
+    text-align: center;
+  }
+  .slide-4 .stats-row .stat-val {
+    font-size: 36px;
+    font-weight: 800;
+    color: #3b82f6;
+  }
+  .slide-4 .stats-row .stat-label {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+  .slide-4 .url {
+    position: absolute;
+    bottom: 100px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #475569;
+    letter-spacing: 0.5px;
+  }
+
+  /* Print styles for PDF export */
+  @media print {
+    body { padding: 0; gap: 0; background: white; }
+    .instructions { display: none; }
+    .slide { page-break-after: always; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="instructions">
+  <strong>How to export:</strong> Open this file in Chrome. Right-click each slide and "Save image as" (or use a screenshot tool at exactly 1080x1080).
+  <br>Or press <strong>Cmd+P</strong> → Save as PDF (set margins to None, scale to fit).
+  <br>Upload the PDF directly to LinkedIn as a Document post.
+</div>
+
+<!-- ═══════════════ SLIDE 1: THE HOOK ═══════════════ -->
+<div class="slide slide-1">
+  <div class="accent-line"></div>
+  <div class="stat-huge">29%</div>
+  <h1>Preclinical deal values<br>are up. <span>Upfronts<br>barely moved.</span></h1>
+  <p class="subtitle">Where's the extra $225M going?<br>Milestones. Here's the data.</p>
+  <div class="bottom-bar">
+    <span class="brand">AMBROSIA VENTURES</span>
+    <div class="page-dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+    <span class="deal-count">3,400+ deals analyzed</span>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 2: THE DATA ═══════════════ -->
+<div class="slide slide-2">
+  <div class="section-label">Preclinical Deal Economics</div>
+  <h2>Total deal values are inflating.<br>Upfronts are staying flat.</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Period</th>
+        <th>Deals</th>
+        <th>Median TDV</th>
+        <th>Median Upfront</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2019 - 2021</td>
+        <td>110</td>
+        <td>$775M</td>
+        <td>$73M</td>
+      </tr>
+      <tr>
+        <td>2022 - 2023</td>
+        <td>113</td>
+        <td>$795M</td>
+        <td>$70M</td>
+      </tr>
+      <tr class="highlight">
+        <td>2024 - 2025</td>
+        <td>196</td>
+        <td>$1,000M <span class="change">+29%</span></td>
+        <td>$94M</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight-box">
+    <div class="icon">&#8593;</div>
+    <p><strong>Milestone packages are 25-30% larger</strong> than 2020-era comparables. Licensees stay disciplined on upfronts but load the back-end with richer milestones.</p>
+  </div>
+
+  <div class="bottom-bar">
+    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <div class="page-indicator">
+      <span class="dot"></span>
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 3: THE WHY ═══════════════ -->
+<div class="slide slide-3">
+  <div class="section-label">What's Driving the Inflation</div>
+  <h2>Platform modalities are repricing<br>preclinical deal economics</h2>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <div class="bar-label">Small Molecule</div>
+      <div class="bar-track">
+        <div class="bar-fill blue" style="width: 100%;">$1,515M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Antibody</div>
+      <div class="bar-track">
+        <div class="bar-fill blue" style="width: 99%;">$1,500M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Oligonucleotide</div>
+      <div class="bar-track">
+        <div class="bar-fill blue-light" style="width: 88%;">$1,338M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Gene Therapy</div>
+      <div class="bar-track">
+        <div class="bar-fill blue-light" style="width: 86%;">$1,300M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">CAR-T</div>
+      <div class="bar-track">
+        <div class="bar-fill slate" style="width: 66%;">$1,000M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">mRNA</div>
+      <div class="bar-track">
+        <div class="bar-fill slate" style="width: 64%;">$974M</div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Bispecific</div>
+      <div class="bar-track">
+        <div class="bar-fill slate" style="width: 56%;">$850M</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="big-stat">$1B / $1B</div>
+    <p><strong>Preclinical CAR-T deals</strong> show $1B median upfront AND $1B median TDV. The market is paying <strong>approved-asset prices</strong> for preclinical cell therapy platforms.</p>
+  </div>
+
+  <div class="bottom-bar">
+    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <div class="page-indicator">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot active"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 4: CTA ═══════════════ -->
+<div class="slide slide-4">
+  <div class="logo-mark">A</div>
+  <h2>Benchmark your deal<br>against 3,400+ real<br>transactions</h2>
+  <p class="desc">Model upfronts, milestones, and royalties for any phase, modality, and therapeutic area. Free.</p>
+  <div class="cta-button">
+    Open the Calculator &#8594;
+  </div>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val">3,400+</div>
+      <div class="stat-label">Verified deals</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">12</div>
+      <div class="stat-label">Therapeutic areas</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">850+</div>
+      <div class="stat-label">Companies</div>
+    </div>
+  </div>
+  <div class="url">calculator.ambrosiaventures.co</div>
+  <div class="bottom-bar">
+    <span class="brand-sm">AMBROSIA VENTURES</span>
+    <div class="page-indicator">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot active"></span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
