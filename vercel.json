@@ -59,6 +59,10 @@
       "schedule": "0 14 * * 1"
     },
     {
+      "path": "/api/cron/drip-emails",
+      "schedule": "0 */6 * * *"
+    },
+    {
       "path": "/api/cron/benchmark-calibration",
       "schedule": "0 10 * * 2"
     },

@@ -54,20 +54,42 @@ export async function GET(request: NextRequest) {
 
     if (usersError) {
       console.error('Failed to fetch pro users:', usersError.message);
-      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
-    if (!proUsers || proUsers.length === 0) {
-      console.log('No pro users found, skipping digest sends');
+    // Step 2b: Also fetch newsletter subscribers who completed the drip sequence
+    const { data: dripCompleted } = await supabase
+      .from('newsletter_subscribers')
+      .select('email')
+      .eq('status', 'active')
+      .eq('drip_completed', true);
+
+    // Merge Pro users + drip-completed subscribers (deduplicate by email)
+    const allEmails = new Map<string, { id?: string; email: string; isPro: boolean }>();
+
+    (proUsers || []).forEach(u => {
+      allEmails.set(u.email.toLowerCase(), { id: u.id, email: u.email, isPro: true });
+    });
+
+    (dripCompleted || []).forEach(s => {
+      const key = s.email.toLowerCase();
+      if (!allEmails.has(key)) {
+        allEmails.set(key, { email: s.email, isPro: false });
+      }
+    });
+
+    if (allEmails.size === 0) {
+      console.log('No eligible recipients found, skipping digest sends');
       return NextResponse.json({ success: true, snapshot_id: snapshot.id, emails_sent: 0 });
     }
 
-    // Filter out users who opted out of weekly digest
-    const userIds = proUsers.map((u) => u.id);
+    console.log(`Digest recipients: ${allEmails.size} total (${(proUsers || []).length} Pro, ${(dripCompleted || []).length} drip-completed)`);
+
+    // Filter out Pro users who opted out of weekly digest
+    const proUserIds = (proUsers || []).map((u) => u.id);
     const { data: emailPrefs } = await supabase
       .from('email_preferences')
       .select('user_id, weekly_digest')
-      .in('user_id', userIds);
+      .in('user_id', proUserIds.length > 0 ? proUserIds : ['none']);
 
     const optedOut = new Set(
       (emailPrefs || [])
@@ -75,8 +97,15 @@ export async function GET(request: NextRequest) {
         .map((p) => p.user_id)
     );
 
-    const eligibleUsers = proUsers.filter((u) => !optedOut.has(u.id));
-    console.log(`Sending digest to ${eligibleUsers.length} of ${proUsers.length} pro users`);
+    // Remove opted-out Pro users from the list
+    for (const [key, user] of allEmails) {
+      if (user.isPro && user.id && optedOut.has(user.id)) {
+        allEmails.delete(key);
+      }
+    }
+
+    const eligibleUsers = Array.from(allEmails.values());
+    console.log(`Sending digest to ${eligibleUsers.length} recipients`);
 
     // Step 3: Send emails in batches
     let emailsSent = 0;
@@ -88,16 +117,20 @@ export async function GET(request: NextRequest) {
 
       const results = await Promise.allSettled(
         batch.map(async (user) => {
-          // Fetch user's watchlist items
-          const { data: watchlistItems } = await supabase
-            .from('watchlist_items')
-            .select('item_type, item_value')
-            .eq('user_id', user.id);
+          // Fetch watchlist only for Pro users (they have user IDs)
+          let watchlistItems: { item_type: string; item_value: string }[] = [];
+          if (user.id) {
+            const { data } = await supabase
+              .from('watchlist_items')
+              .select('item_type, item_value')
+              .eq('user_id', user.id);
+            watchlistItems = data || [];
+          }
 
           const userName = user.email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
           const html = buildWeeklyDigestHtml(
             snapshot,
-            watchlistItems || [],
+            watchlistItems,
             userName
           );
 
@@ -107,25 +140,21 @@ export async function GET(request: NextRequest) {
             html,
           });
 
-          if (result.success) {
-            // Log the send
+          if (result.success && user.id) {
+            // Log the send (only for tracked users)
             await supabase.from('digest_sends').insert({
               user_id: user.id,
               snapshot_id: snapshot.id,
               digest_type: 'weekly',
               resend_id: result.id || null,
-            });
+            }).catch(() => {});
 
-            // Also log to email_logs
-            const { error: logError } = await supabase.from('email_logs').insert({
+            await supabase.from('email_logs').insert({
               user_id: user.id,
               email_type: 'weekly_digest',
               status: 'sent',
               metadata: { snapshot_id: snapshot.id },
-            });
-            if (logError) {
-              console.warn(`Failed to log digest email for user ${user.id}:`, logError);
-            }
+            }).catch(() => {});
           }
 
           return result;

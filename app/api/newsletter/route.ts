@@ -56,7 +56,21 @@ export async function POST(request: NextRequest) {
         source: source,
         subscribed_at: new Date().toISOString(),
         metadata: calculationContext,
+        drip_day0_sent: true,
+        drip_day3_sent: false,
+        drip_day5_sent: false,
+        drip_completed: false,
       });
+
+    // Send Day 0 drip email immediately (fire and forget)
+    if (!error) {
+      import('@/lib/email/drip-sequences').then(({ buildDay0Email }) => {
+        import('@/lib/email/client').then(({ sendEmail: send }) => {
+          const { subject, html } = buildDay0Email(email, calculationContext);
+          send({ to: email.toLowerCase(), subject, html }).catch(() => {});
+        });
+      }).catch(() => {});
+    }
 
     if (error) {
       console.error('Newsletter subscription error:', error);
