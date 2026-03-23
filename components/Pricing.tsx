@@ -366,18 +366,6 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
         </div>
 
-        {/* Free tier — text only */}
-        <p className="text-center text-sm text-neutral-500 dark:text-slate-400 mb-12">
-          Not ready?{' '}
-          <button
-            onClick={(e) => { e.stopPropagation(); onSelectTier('free'); }}
-            className="text-teal-600 dark:text-teal-400 font-medium hover:underline"
-          >
-            Start with unlimited free calculations
-          </button>
-          {' '} — no credit card required.
-        </p>
-
         {/* Enterprise CTA */}
         <div className="text-center">
           <div className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-4 sm:p-6 bg-neutral-50 dark:bg-slate-800 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700">
@@ -430,6 +418,16 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             </svg>
             <span className="text-xs sm:text-sm font-medium">Powered by Stripe</span>
           </div>
+        </div>
+
+        {/* Free fallback — bottom, subtle */}
+        <div className="mt-10 text-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); onSelectTier('free'); }}
+            className="text-xs text-neutral-400 dark:text-slate-500 hover:text-neutral-600 dark:hover:text-slate-300 transition-colors"
+          >
+            Just exploring? Try the calculator free — no account required →
+          </button>
         </div>
       </div>
     </section>
