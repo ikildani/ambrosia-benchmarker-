@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { email } = parsed.data;
+    const source = body.source || 'blog';
+    const calculationContext = body.calculation_context || null;
 
     const supabase = createServiceClient();
 
@@ -33,16 +35,27 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existing) {
+      // Update with latest context even if already subscribed
+      if (calculationContext) {
+        await supabase
+          .from('newsletter_subscribers')
+          .update({
+            metadata: calculationContext,
+            source: source,
+          })
+          .eq('email', email.toLowerCase());
+      }
       return apiSuccess({ message: 'Already subscribed' });
     }
 
-    // Insert new subscriber
+    // Insert new subscriber with full context for AlaricAI pipeline
     const { error } = await supabase
       .from('newsletter_subscribers')
       .insert({
         email: email.toLowerCase(),
-        source: 'blog',
+        source: source,
         subscribed_at: new Date().toISOString(),
+        metadata: calculationContext,
       });
 
     if (error) {

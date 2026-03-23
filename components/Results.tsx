@@ -823,11 +823,24 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           totalDealValue: `${formatCurrency(terms.totalDealValue.low)} - ${formatCurrency(terms.totalDealValue.high)}`,
         }),
       });
-      // Also save to newsletter API
+      // Save to newsletter API + link email to anonymous calculation data
       fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailForResults, source: 'results' }),
+        body: JSON.stringify({
+          email: emailForResults,
+          source: 'results_gate',
+          calculation_context: {
+            modality: labels.modality,
+            phase: labels.phase,
+            indication: labels.indication,
+            territory: labels.territory,
+            upfront_median: terms.upfront.median,
+            total_deal_value_median: terms.totalDealValue.median,
+            royalty_low: terms.royaltyRate?.low,
+            royalty_high: terms.royaltyRate?.high,
+          },
+        }),
       }).catch(() => {});
       setEmailSubmitted(true);
       sessionStorage.setItem('email_captured', 'true');
