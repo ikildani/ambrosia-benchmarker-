@@ -944,37 +944,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         onCopyResults={handleCopyResults}
       />
 
-      {/* Email Capture Bar */}
-      {!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && (
-        <div className="px-4 sm:px-6 lg:px-8 xl:px-10 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border-b border-teal-100 dark:border-teal-800">
-          <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 max-w-xl mx-auto">
-            <div className="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-400 flex-shrink-0">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="font-medium">Email me my results</span>
-            </div>
-            <input
-              type="email"
-              value={emailForResults}
-              onChange={(e) => setEmailForResults(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className="flex-1 w-full sm:w-auto px-3 py-1.5 text-sm rounded-lg border border-teal-200 dark:border-teal-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-            <button
-              type="submit"
-              disabled={emailSubmitting}
-              className="px-4 py-1.5 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 flex-shrink-0"
-            >
-              {emailSubmitting ? 'Sending...' : 'Send'}
-            </button>
-          </form>
-        </div>
-      )}
+      {/* Email confirmed bar */}
       {emailSubmitted && (
         <div className="px-4 sm:px-6 lg:px-8 py-2.5 bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-800 text-center">
-          <span className="text-sm text-teal-700 dark:text-teal-400 font-medium">Results sent! Check your inbox.</span>
+          <span className="text-sm text-teal-700 dark:text-teal-400 font-medium">✓ Full results unlocked. Check your inbox for a copy.</span>
         </div>
       )}
 
@@ -1154,8 +1127,56 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
-        {/* Deal Terms Grid */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7">
+        {/* Email Gate — blur details until email provided */}
+        {!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro && (
+          <div className="relative mb-8">
+            {/* Blurred preview */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 max-w-md w-full mx-4 text-center">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Unlock full deal breakdown</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">Enter your email to see detailed benchmarks, comparable deals, and sensitivity analysis.</p>
+                <form onSubmit={handleEmailSubmit} className="space-y-3">
+                  <input
+                    type="email"
+                    value={emailForResults}
+                    onChange={(e) => setEmailForResults(e.target.value)}
+                    placeholder="you@company.com"
+                    required
+                    autoFocus
+                    className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={emailSubmitting}
+                    className="w-full py-3 text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all disabled:opacity-50"
+                  >
+                    {emailSubmitting ? 'Unlocking...' : 'See Full Results'}
+                  </button>
+                </form>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-3">
+                  We&apos;ll send you weekly deal insights. Unsubscribe anytime.
+                </p>
+              </div>
+            </div>
+            {/* Blurred content behind */}
+            <div className="filter blur-md opacity-50 pointer-events-none select-none" style={{ minHeight: '400px' }}>
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7">
+                {/* Placeholder cards */}
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 h-48" />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Deal Terms Grid — visible when email captured or authenticated */}
+        <div className={`grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7 ${!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro ? 'hidden' : ''}`}>
           {/* Upfront Payment */}
           <MetricCard
             title={dtl?.upfrontLabel || 'Upfront Payment'}
