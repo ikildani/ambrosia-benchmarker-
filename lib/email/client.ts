@@ -310,6 +310,71 @@ export async function sendAdminSignupNotification(newUser: {
   });
 }
 
+export async function sendAdminSubscriptionNotification(details: {
+  email: string;
+  name?: string;
+  type: 'pro_subscription' | 'report_purchase' | 'trial_started';
+  amount?: number;
+  promoCode?: string;
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'ikildani@ambrosiaventures.co';
+  const timestamp = new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
+  const typeLabels: Record<string, { label: string; color: string }> = {
+    pro_subscription: { label: 'New Pro Subscription', color: '#14b8a6' },
+    report_purchase: { label: 'Deal Report Purchased', color: '#8b5cf6' },
+    trial_started: { label: 'Trial Started (AMBROSIA)', color: '#f59e0b' },
+  };
+
+  const { label, color } = typeLabels[details.type] || typeLabels.pro_subscription;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <div style="background: #0f172a; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+          <h2 style="color: ${color}; margin: 0; font-size: 18px;">${label}</h2>
+        </div>
+        <div style="background: #fff; padding: 24px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 80px;">Email</td>
+              <td style="padding: 8px 0; font-weight: 600;">${details.email}</td>
+            </tr>
+            ${details.name ? `<tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Name</td>
+              <td style="padding: 8px 0;">${details.name}</td>
+            </tr>` : ''}
+            ${details.amount ? `<tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Amount</td>
+              <td style="padding: 8px 0; font-weight: 600; color: #16a34a;">$${(details.amount / 100).toFixed(2)}</td>
+            </tr>` : ''}
+            ${details.promoCode ? `<tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Promo</td>
+              <td style="padding: 8px 0;">${details.promoCode}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Time</td>
+              <td style="padding: 8px 0;">${timestamp}</td>
+            </tr>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `${label}: ${details.name || details.email}`,
+    html,
+  });
+}
+
 export async function sendUpgradeConfirmation(to: string, name: string) {
   const html = `
     <!DOCTYPE html>

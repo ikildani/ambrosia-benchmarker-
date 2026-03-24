@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError, maskEmail } from '@/lib/sentry-api';
+import { sendAdminSubscriptionNotification, sendUpgradeConfirmation } from '@/lib/email/client';
 
 // Stripe Webhook Handler
 // To enable webhooks:
@@ -115,6 +116,14 @@ export async function POST(request: NextRequest) {
               },
               user_tier: 'report',
             });
+
+            // Notify admin of report purchase
+            const reportEmail = session.customer_email || session.customer_details?.email;
+            sendAdminSubscriptionNotification({
+              email: reportEmail || 'unknown',
+              type: 'report_purchase',
+              amount: session.amount_total || undefined,
+            }).catch(err => console.error('Webhook: Admin report notification error:', err));
           }
           break;
         }
@@ -187,6 +196,22 @@ export async function POST(request: NextRequest) {
           },
           user_tier: 'pro',
         });
+
+        // Notify admin of new subscription
+        const promoUsed = session.metadata?.promo_code;
+        const isTrial = promoUsed === 'AMBROSIA';
+        sendAdminSubscriptionNotification({
+          email: customerEmail || 'unknown',
+          type: isTrial ? 'trial_started' : 'pro_subscription',
+          amount: session.amount_total || undefined,
+          promoCode: promoUsed || undefined,
+        }).catch(err => console.error('Webhook: Admin subscription notification error:', err));
+
+        // Send upgrade confirmation to user
+        if (customerEmail) {
+          sendUpgradeConfirmation(customerEmail, session.customer_details?.name || 'there')
+            .catch(err => console.error('Webhook: Upgrade confirmation email error:', err));
+        }
         break;
       }
 
