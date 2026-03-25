@@ -13,7 +13,7 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 import { getRecencyWeight } from '@/lib/comparableDeals';
-import { calculatePharmaIntent } from '@/lib/services/pharma-intent';
+import { calculatePharmaIntent, type TrialForIntent } from '@/lib/services/pharma-intent';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -428,7 +428,7 @@ export interface PartnerMatch {
   strategic_context?: StrategicContext;
 
   // Pharma Intent Score (Pro tier only)
-  pharma_intent?: import('@/lib/services/pharma-intent').PharmaIntentResult;
+  pharma_intent?: import('@/lib/services/pharma-intent').PharmaIntentResult | null;
 }
 
 export interface MatchReason {
@@ -495,19 +495,29 @@ export async function findPartnerMatches(
   // Pre-fetch deals for all companies if enhanced breakdown is needed
   // This is more efficient than fetching per-company
   let companyDealsMap: Map<string, CompanyDeal[]> = new Map();
+  let companyTrialsMap: Map<string, TrialForIntent[]> = new Map();
   if (includeEnhancedBreakdown) {
     const companyIds = companies.map((c) => c.id);
-    const { data: allDeals } = await supabase
-      .from('deals')
-      .select(
-        'id, asset_name, licensor_id, licensee_id, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
-      )
-      .or(`licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`)
-      .gte('announced_date', new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString())
-      .order('announced_date', { ascending: false });
 
-    if (allDeals) {
-      for (const deal of allDeals as CompanyDeal[]) {
+    // Pre-fetch deals and trials in parallel
+    const [dealsResult, trialsResult] = await Promise.all([
+      supabase
+        .from('deals')
+        .select(
+          'id, asset_name, licensor_id, licensee_id, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
+        )
+        .or(`licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`)
+        .gte('announced_date', new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString())
+        .order('announced_date', { ascending: false }),
+      supabase
+        .from('company_trials')
+        .select('company_id, modality, indication_category, indication_specific, phase, status, enrollment_count, is_collaboration, primary_completion_date')
+        .in('company_id', companyIds)
+        .in('status', ['recruiting', 'active_not_recruiting', 'not_yet_recruiting']),
+    ]);
+
+    if (dealsResult.data) {
+      for (const deal of dealsResult.data as CompanyDeal[]) {
         const licensorDeals = companyDealsMap.get(deal.licensor_id) || [];
         licensorDeals.push(deal);
         companyDealsMap.set(deal.licensor_id, licensorDeals);
@@ -515,6 +525,14 @@ export async function findPartnerMatches(
         const licenseeDeals = companyDealsMap.get(deal.licensee_id) || [];
         licenseeDeals.push(deal);
         companyDealsMap.set(deal.licensee_id, licenseeDeals);
+      }
+    }
+
+    if (trialsResult.data) {
+      for (const trial of trialsResult.data as TrialForIntent[]) {
+        const trials = companyTrialsMap.get(trial.company_id) || [];
+        trials.push(trial);
+        companyTrialsMap.set(trial.company_id, trials);
       }
     }
   }
@@ -585,18 +603,19 @@ export async function findPartnerMatches(
 
         // Pharma Intent Score — predictive acquisition likelihood
         try {
-          // Collect all deals across companies for competitive pressure analysis
+          const companyTrials = companyTrialsMap.get(company.id) || [];
           const allDealsFlat = Array.from(companyDealsMap.values()).flat();
           match.pharma_intent = calculatePharmaIntent(
             company,
             input.modality,
             input.indication_specific || input.indication_category || '',
             companyDeals,
-            [], // trials not pre-fetched — intent engine handles gracefully
+            companyTrials,
             allDealsFlat,
+            // Press releases and research signals are not pre-fetched (expensive)
+            // They'll be populated in a future iteration via async enrichment
           );
         } catch (err) {
-          // Intent score is non-critical — never block partner matching
           console.error(`[PharmaIntent] Error for ${company.name}:`, err);
         }
       }
