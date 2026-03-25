@@ -73,6 +73,7 @@ interface PartnerMatch {
     signals: string[];
     modalityFit: number;
     indicationFit: number;
+    preferredDealType?: string;
   } | null;
 }
 
@@ -450,6 +451,9 @@ export function PartnerMatches({
                           </div>
                           <div className="text-xs text-gray-500 dark:text-slate-400">
                             {match.pharma_intent.timing.replace('_', '-')} timeline &bull; {Math.round(match.pharma_intent.confidence * 100)}% confidence
+                            {match.pharma_intent.preferredDealType && (
+                              <> &bull; Prefers <span className="font-semibold text-gray-600 dark:text-slate-300">{match.pharma_intent.preferredDealType}</span></>
+                            )}
                           </div>
                         </div>
                       </div>

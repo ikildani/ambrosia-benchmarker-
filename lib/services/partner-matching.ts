@@ -601,7 +601,7 @@ export async function findPartnerMatches(
           relevance: generateDealRelevance(deal),
         }));
 
-        // Pharma Intent Score — predictive acquisition likelihood
+        // Pharma Intent Score v3 — predictive acquisition likelihood
         try {
           const companyTrials = companyTrialsMap.get(company.id) || [];
           const allDealsFlat = Array.from(companyDealsMap.values()).flat();
@@ -612,8 +612,10 @@ export async function findPartnerMatches(
             companyDeals,
             companyTrials,
             allDealsFlat,
-            // Press releases and research signals are not pre-fetched (expensive)
-            // They'll be populated in a future iteration via async enrichment
+            undefined, // pressReleases — future async enrichment
+            undefined, // researchSignals — future async enrichment
+            input.development_phase || undefined, // targetPhase for company type × phase interaction
+            input.therapeutic_area || undefined,   // targetTA for TA-specific patent cliff relevance
           );
         } catch (err) {
           console.error(`[PharmaIntent] Error for ${company.name}:`, err);
