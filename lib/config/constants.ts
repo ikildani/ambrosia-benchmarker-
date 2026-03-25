@@ -16,7 +16,7 @@ export const PRICING = {
 } as const;
 
 export const DEAL_STATS = {
-  TOTAL_DEALS: '2,600+',
+  TOTAL_DEALS: '3,500+',
   TOTAL_COMPANIES: '850+',
   TOTAL_DEALS_DESCRIPTION: 'real biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, press releases, and regulatory databases',
   NEUROLOGY_DEALS: '150+',

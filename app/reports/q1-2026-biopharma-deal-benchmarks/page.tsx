@@ -16,17 +16,17 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Q1 2026 Biopharma Deal Benchmarks Report: Trends from 2,600+ Transactions | Ambrosia Ventures',
+  title: 'Q1 2026 Biopharma Deal Benchmarks Report: Trends from 3,500+ Transactions | Ambrosia Ventures',
   description: 'Quarterly analysis of biopharma licensing deal economics across 12 therapeutic areas. Phase-by-phase benchmarks, modality premiums, territory dynamics, and real deal highlights.',
   keywords: ['biopharma deal benchmarks 2026', 'licensing deal report', 'pharma deal economics Q1 2026', 'biopharma licensing benchmarks', 'oncology deal benchmarks', 'metabolic deal benchmarks', 'modality premiums biopharma', 'territory licensing dynamics'],
   openGraph: {
     title: 'Q1 2026 Biopharma Deal Benchmarks Report',
-    description: 'Quarterly analysis of biopharma licensing deal economics across 12 therapeutic areas from 2,600+ verified transactions.',
+    description: 'Quarterly analysis of biopharma licensing deal economics across 12 therapeutic areas from 3,500+ verified transactions.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks',
     images: [{ url: '/api/og?title=Q1%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Trends%20from%202%2C600%2B%20Transactions&type=insight', width: 1200, height: 630 }],
   },
-  twitter: { card: 'summary_large_image', title: 'Q1 2026 Biopharma Deal Benchmarks: Trends from 2,600+ Transactions', description: 'Metabolic surpasses oncology, immunology premiums widen, and radiopharmaceuticals lead modality multipliers.' },
+  twitter: { card: 'summary_large_image', title: 'Q1 2026 Biopharma Deal Benchmarks: Trends from 3,500+ Transactions', description: 'Metabolic surpasses oncology, immunology premiums widen, and radiopharmaceuticals lead modality multipliers.' },
   alternates: { canonical: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks' },
 };
 
@@ -37,9 +37,9 @@ export default function Q1BenchmarkReportPage() {
     { '@type': 'ListItem', position: 3, name: 'Q1 2026 Biopharma Deal Benchmarks' },
   ]};
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-25', dateModified: '2026-03-25', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
-  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, royalty ranges from 2,600+ verified biopharma transactions.', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
+  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, royalty ranges from 3,500+ verified biopharma transactions.', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
-    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 2,600+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), press releases, and regulatory databases. Updated weekly.' } },
+    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 3,500+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), press releases, and regulatory databases. Updated weekly.' } },
     { '@type': 'Question', name: 'Why did metabolic/obesity deals surpass oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Immunology Phase 2 upfronts reached $350M — nearly 3x oncology ($120M) — driven by anti-TL1A mechanism validation. Metabolic/obesity TDV ($1.7B) also exceeds oncology ($1.3B), driven by GLP-1 commercial validation.' } },
     { '@type': 'Question', name: 'What is the largest modality premium in biopharma?', acceptedAnswer: { '@type': 'Answer', text: 'Radiopharmaceuticals at 1.60x over small molecules, reflecting Novartis Pluvicto validation and supply-constrained bidding for platform companies.' } },
   ]};
@@ -86,7 +86,7 @@ export default function Q1BenchmarkReportPage() {
                 Biopharma Deal<br className="hidden sm:block" /> Benchmarks
               </h1>
               <p className="text-base text-slate-500 max-w-xl leading-relaxed">
-                A quarterly analysis of licensing economics across 12 therapeutic areas, drawn from 2,600+ verified transactions.
+                A quarterly analysis of licensing economics across 12 therapeutic areas, drawn from 3,500+ verified transactions.
               </p>
             </div>
             <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
@@ -99,7 +99,7 @@ export default function Q1BenchmarkReportPage() {
           <div className="border-t border-b border-slate-200 py-5 mb-8">
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
               {[
-                { value: '2,600+', label: 'Deals' },
+                { value: '3,500+', label: 'Deals' },
                 { value: '12', label: 'Therap. Areas' },
                 { value: '$120M', label: 'Onco Ph2 Upfront' },
                 { value: '1.60x', label: 'Radiopharm Mult.' },
@@ -194,7 +194,7 @@ export default function Q1BenchmarkReportPage() {
               ['Approved', '$700M', '$4.5B', '18–28%', '15.6%'],
             ]}
             freeRows={5}
-            footnote="Source: Ambrosia Ventures analysis of 2,600+ verified transactions (2020–2026). TDV = Total Deal Value."
+            footnote="Source: Ambrosia Ventures analysis of 3,500+ verified transactions (2020–2026). TDV = Total Deal Value."
           />
 
           {/* Insight callout — left border style */}
@@ -216,7 +216,7 @@ export default function Q1BenchmarkReportPage() {
             <p className="text-lg sm:text-xl text-slate-500 mt-4 max-w-lg mx-auto leading-relaxed">
               The Phase 1→2 upfront multiplier — the single largest value inflection point in biopharma deal economics
             </p>
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures analysis of 2,600+ transactions (2020–2026)</p>
+            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures analysis of 3,500+ transactions (2020–2026)</p>
           </div>
         </section>
 
@@ -454,7 +454,7 @@ export default function Q1BenchmarkReportPage() {
           <div className="border-l-4 border-slate-300 pl-5 py-3">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Methodology</p>
             <p className="text-sm text-slate-600 leading-relaxed">
-              This report draws from 2,600+ verified biopharma licensing and M&A transactions executed between 2020 and 2026.
+              This report draws from 3,500+ verified biopharma licensing and M&A transactions executed between 2020 and 2026.
               Sources include SEC filings (8-K, 10-K, 10-Q), company press releases, investor presentations, and regulatory databases.
               New deals are ingested weekly via automated SEC EDGAR monitoring and verified before inclusion.
               Full methodology: <Link href="/methodology" className="text-teal-600 hover:text-teal-700">ambrosiaventures.co/methodology</Link>.
@@ -484,7 +484,7 @@ export default function Q1BenchmarkReportPage() {
           <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
           <div className="divide-y divide-slate-200">
             {[
-              { q: 'What data sources does this report use?', a: 'The report draws from 2,600+ verified biopharma licensing and M&A transactions (2020–2026). Sources include SEC filings, press releases, investor presentations, and regulatory databases. Updated weekly via automated monitoring.' },
+              { q: 'What data sources does this report use?', a: 'The report draws from 3,500+ verified biopharma licensing and M&A transactions (2020–2026). Sources include SEC filings, press releases, investor presentations, and regulatory databases. Updated weekly via automated monitoring.' },
               { q: 'Why did metabolic/obesity deals surpass oncology?', a: 'The GLP-1 revolution created a buyer\'s race for next-generation metabolic assets. Validated commercial success of semaglutide/tirzepatide, plus a projected $100B+ annual obesity market by 2030, supports premium valuations for differentiated pipeline assets.' },
               { q: 'What is the largest modality premium?', a: 'Radiopharmaceuticals at 1.60x over small molecules. Driven by Novartis Pluvicto validation (>$1B annual sales in 18 months), constrained isotope supply, and platform acquisition competition among BMS, Lilly, and AstraZeneca.' },
               { q: 'How often are benchmarks updated?', a: 'The full dataset is updated weekly. Quarterly reports provide point-in-time narrative analysis. The deal calculator reflects real-time data.' },
