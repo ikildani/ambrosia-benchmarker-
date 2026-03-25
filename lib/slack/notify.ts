@@ -45,9 +45,13 @@ export async function notifyNewSignup(user: {
   email: string;
   name?: string;
   company?: string;
+  tier?: string;
 }): Promise<void> {
+  const tierLabel = user.tier === 'pro' ? 'PRO' : user.tier === 'report' ? 'REPORT' : 'FREE';
+  const tierEmoji = user.tier === 'pro' ? ':star:' : user.tier === 'report' ? ':page_facing_up:' : ':wave:';
   const fields = [
     { type: 'mrkdwn', text: `*Email:*\n${user.email}` },
+    { type: 'mrkdwn', text: `*Tier:*\n${tierLabel}` },
   ];
   if (user.name) fields.push({ type: 'mrkdwn', text: `*Name:*\n${user.name}` });
   if (user.company) fields.push({ type: 'mrkdwn', text: `*Company:*\n${user.company}` });
@@ -55,13 +59,13 @@ export async function notifyNewSignup(user: {
 
   await postToSlack(
     [{
-      color: '#14b8a6',
+      color: user.tier === 'pro' ? '#8b5cf6' : user.tier === 'report' ? '#f59e0b' : '#14b8a6',
       blocks: [
-        { type: 'header', text: { type: 'plain_text', text: 'New Signup on Deal Calculator', emoji: true } },
+        { type: 'header', text: { type: 'plain_text', text: `New Signup — ${tierLabel}`, emoji: true } },
         { type: 'section', fields },
       ],
     }],
-    `New signup: ${user.name || user.email}`,
+    `${tierEmoji} New ${tierLabel} signup: ${user.name || user.email}`,
   );
 }
 
@@ -219,6 +223,59 @@ export async function notifyLogin(user: {
       ],
     }],
     `Login: ${user.name || user.email}`,
+  );
+}
+
+export async function notifyDailyStats(stats: {
+  totalUsers: number;
+  freeUsers: number;
+  proUsers: number;
+  reportUsers: number;
+  newSignupsToday: number;
+  newProToday: number;
+  newReportsToday: number;
+  calculationsToday: number;
+  newsletterSubscribers: number;
+}): Promise<void> {
+  const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  await postToSlack(
+    [{
+      color: '#2563eb',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: `Daily Platform Stats — ${date}`, emoji: true } },
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: [
+              `*Total Users:* ${stats.totalUsers.toLocaleString()}`,
+              `├ Free: ${stats.freeUsers.toLocaleString()}`,
+              `├ Pro: ${stats.proUsers.toLocaleString()}`,
+              `└ Report: ${stats.reportUsers.toLocaleString()}`,
+            ].join('\n'),
+          },
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*New Signups Today:*\n${stats.newSignupsToday}` },
+            { type: 'mrkdwn', text: `*New Pro Today:*\n${stats.newProToday}` },
+            { type: 'mrkdwn', text: `*Reports Purchased Today:*\n${stats.newReportsToday}` },
+            { type: 'mrkdwn', text: `*Calculations Today:*\n${stats.calculationsToday}` },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
+            { type: 'mrkdwn', text: `Newsletter subscribers: ${stats.newsletterSubscribers.toLocaleString()} | Pro MRR: $${(stats.proUsers * 99).toLocaleString()}/mo` },
+          ],
+        },
+      ],
+    }],
+    `Daily stats: ${stats.totalUsers} users (${stats.freeUsers} free, ${stats.proUsers} pro, ${stats.reportUsers} report) | ${stats.newSignupsToday} new today`,
   );
 }
 

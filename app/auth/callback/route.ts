@@ -83,10 +83,16 @@ export async function GET(request: NextRequest) {
           console.log('[Auth Callback] Email verified for user:', user.email);
 
           // Notify admin of new verified signup
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('tier')
+            .eq('id', user.id)
+            .single();
           const signupInfo = {
             email: user.email || '',
             name: user.user_metadata?.name || user.user_metadata?.full_name,
             company: user.user_metadata?.company,
+            tier: profile?.tier || 'free',
           };
           sendAdminSignupNotification(signupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
           notifyNewSignup(signupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
@@ -103,6 +109,7 @@ export async function GET(request: NextRequest) {
           email: user.email || '',
           name: user.user_metadata?.name || user.user_metadata?.full_name,
           company: user.user_metadata?.company,
+          tier: 'free',
         };
         sendAdminSignupNotification(oauthSignupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
         notifyNewSignup(oauthSignupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
