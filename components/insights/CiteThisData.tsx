@@ -98,7 +98,7 @@ export function CiteThisData({ title, pageUrl, embedType = 'phase-upfront', embe
       </div>
 
       <div className="bg-slate-50 px-5 py-2.5 border-t border-slate-200">
-        <p className="text-xs text-slate-400">Data sourced from 3,500+ verified biopharma transactions. Updated monthly.</p>
+        <p className="text-xs text-slate-400">Data sourced from 3,400+ verified biopharma transactions. Updated monthly.</p>
       </div>
     </div>
   );

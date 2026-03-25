@@ -541,7 +541,7 @@ export default function BiopharmaDealValuationMethodsPage() {
           <InsightCTA
             variant="bottom"
             heading="Valuation Starts With Data"
-            description="Our calculator anchors your deal valuation with comparable transaction benchmarks from 3,500+ real biopharma deals — the comps layer that every valuation needs."
+            description="Our calculator anchors your deal valuation with comparable transaction benchmarks from 3,400+ real biopharma deals — the comps layer that every valuation needs."
           />
         </article>
       </main>

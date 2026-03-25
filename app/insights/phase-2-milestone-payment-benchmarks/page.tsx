@@ -496,7 +496,7 @@ export default function Phase2MilestoneBenchmarksPage() {
               {
                 href: '/insights/pharma-licensing-royalty-rates',
                 title: 'Pharma Licensing Royalty Rates',
-                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 3,500+ transactions.',
+                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 3,400+ transactions.',
                 badge: 'Data Report',
               },
               {

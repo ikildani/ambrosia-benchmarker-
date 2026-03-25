@@ -107,7 +107,7 @@ export default function DealTermsByTherapeuticAreaPage() {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Biopharma Deal Terms by Therapeutic Area: 12-TA Phase 2 & Phase 3 Benchmarks',
-    description: 'Median upfront payments and total deal values for biopharma licensing deals across 12 therapeutic areas at Phase 2 and Phase 3, derived from 3,500+ transactions (2020-2026).',
+    description: 'Median upfront payments and total deal values for biopharma licensing deals across 12 therapeutic areas at Phase 2 and Phase 3, derived from 3,400+ transactions (2020-2026).',
     url: PAGE_URL,
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     datePublished: '2026-03-24',
@@ -194,7 +194,7 @@ export default function DealTermsByTherapeuticAreaPage() {
             <div className="flex items-center gap-8 mt-8 pt-8 border-t border-slate-100">
               <div><p className="text-2xl font-bold text-slate-900">12</p><p className="text-xs text-slate-400 uppercase tracking-wide">Therapeutic areas</p></div>
               <div><p className="text-2xl font-bold text-slate-900">$4.5B</p><p className="text-xs text-slate-400 uppercase tracking-wide">Highest Phase 3 TDV</p></div>
-              <div><p className="text-2xl font-bold text-slate-900">3,500+</p><p className="text-xs text-slate-400 uppercase tracking-wide">Deals analyzed</p></div>
+              <div><p className="text-2xl font-bold text-slate-900">3,400+</p><p className="text-xs text-slate-400 uppercase tracking-wide">Deals analyzed</p></div>
             </div>
           </div>
         </header>
@@ -485,7 +485,7 @@ export default function DealTermsByTherapeuticAreaPage() {
           <InsightCTA
             variant="bottom"
             heading="Benchmark Your Therapeutic Area"
-            description="Generate deal benchmarks for your specific therapeutic area, phase, and modality — calibrated from 3,500+ real transactions across 12 TAs."
+            description="Generate deal benchmarks for your specific therapeutic area, phase, and modality — calibrated from 3,400+ real transactions across 12 TAs."
           />
         </article>
       </main>

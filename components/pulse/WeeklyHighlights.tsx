@@ -14,9 +14,9 @@ function formatUsd(amount: number | null): string {
 
 function formatModality(modality: string): string {
   return modality
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+    .replace(/([a-z])([A-Z])/g, '$1 $2')  // camelCase → spaced
+    .replace(/_/g, ' ')                     // snake_case → spaced
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsProps) {

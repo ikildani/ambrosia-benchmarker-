@@ -353,7 +353,7 @@ export default function Home() {
           {/* Subheadline — pain point, then solution */}
           <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             Stop guessing on upfronts, milestones, and royalties.
-            {' '}Benchmark your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">3,500+ real transactions</span> in seconds.
+            {' '}Benchmark your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">3,400+ real transactions</span> in seconds.
           </p>
 
           {/* Single clear CTA */}
@@ -384,7 +384,7 @@ export default function Home() {
           <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              3,500+ verified deals
+              3,400+ verified deals
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -513,7 +513,7 @@ export default function Home() {
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
                 title: 'Deal Benchmarking',
-                description: 'Instant benchmarks from 3,500+ real deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
+                description: 'Instant benchmarks from 3,400+ real deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.',
                 gradient: 'from-slate-800 to-slate-900',
               },
               {

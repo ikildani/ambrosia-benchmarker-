@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
   let title = 'Deal Analysis | Ambrosia Ventures';
-  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 3,500+ transactions.';
+  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 3,400+ transactions.';
 
   try {
     const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       const data = await response.json();
       if (data.labels) {
         title = `${data.labels.modality} ${data.labels.indication} Deal Analysis | Ambrosia Ventures`;
-        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 3,500+ transactions.`;
+        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 3,400+ transactions.`;
       }
     }
   } catch { /* generic metadata fallback */ }
@@ -84,7 +84,7 @@ export default async function SharePage({ params }: Props) {
           <div className="flex items-center gap-3 text-sm text-slate-600 mt-2">
             <span className="px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/[0.05] text-xs font-semibold text-slate-500">{phase}</span>
             <span className="text-slate-700">&bull;</span>
-            <span className="text-xs text-slate-600">Based on 3,500+ biopharma transactions</span>
+            <span className="text-xs text-slate-600">Based on 3,400+ biopharma transactions</span>
           </div>
         </div>
       </header>

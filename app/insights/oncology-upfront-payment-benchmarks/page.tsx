@@ -18,7 +18,7 @@ const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculato
 
 export const metadata: Metadata = {
   title: 'Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks | Ambrosia Ventures',
-  description: 'Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities from 3,500+ real transactions.',
+  description: 'Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities from 3,400+ real transactions.',
   keywords: [
     'average upfront payment oncology licensing deal',
     'oncology licensing deal benchmarks',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Oncology Licensing Upfronts: $14M Discovery to $800M Approved',
-    description: 'Benchmark data across 7 development phases and 8 modalities from 3,500+ real biopharma transactions.',
+    description: 'Benchmark data across 7 development phases and 8 modalities from 3,400+ real biopharma transactions.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
@@ -165,7 +165,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             </nav>
             <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
             <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks</h1>
-            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Oncology upfronts range 57x from discovery to approval. Here is the benchmark data across 7 development phases and 8 modalities from 3,500+ real transactions.</p>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Oncology upfronts range 57x from discovery to approval. Here is the benchmark data across 7 development phases and 8 modalities from 3,400+ real transactions.</p>
           </div>
         </header>
 
@@ -243,7 +243,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             freeRows={4}
             ctaText="Unlock all 7 phases — Free calculator"
             ctaHref="/calculator"
-            footnote="Source: Ambrosia Benchmarker, 3,500+ transactions 2020-2026. Median values."
+            footnote="Source: Ambrosia Benchmarker, 3,400+ transactions 2020-2026. Median values."
           />
         </div>
 
@@ -464,7 +464,7 @@ export default function OncologyUpfrontBenchmarksPage() {
                 What is the average upfront payment for an oncology licensing deal?
               </summary>
               <p className="text-slate-600">
-                The median upfront payment for oncology licensing deals ranges from $14M at the discovery stage to $800M for approved assets. At Phase 2 — the most common deal stage — the median upfront is $95M, with total deal values reaching $1.1 billion. These figures represent medians from 3,500+ tracked transactions; individual deals vary based on modality, competitive dynamics, data quality, and strategic fit.
+                The median upfront payment for oncology licensing deals ranges from $14M at the discovery stage to $800M for approved assets. At Phase 2 — the most common deal stage — the median upfront is $95M, with total deal values reaching $1.1 billion. These figures represent medians from 3,400+ tracked transactions; individual deals vary based on modality, competitive dynamics, data quality, and strategic fit.
               </p>
             </details>
 
@@ -539,7 +539,7 @@ export default function OncologyUpfrontBenchmarksPage() {
         <InsightCTA
           variant="bottom"
           heading="Benchmark Your Oncology Asset"
-          description="Model upfronts, milestones, and royalties by phase, modality, and indication — powered by 3,500+ real oncology transactions."
+          description="Model upfronts, milestones, and royalties by phase, modality, and indication — powered by 3,400+ real oncology transactions."
         />
       </main>
       <SiteFooter />

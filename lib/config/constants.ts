@@ -27,8 +27,9 @@ export function formatDealCount(count: number): string {
 
 // Live deal count — updated by daily-stats cron writing to this file,
 // or manually when the number is known to have changed significantly.
-// Current DB count as of last check: 3,561
-const LIVE_DEAL_COUNT = 3561;
+// Current verified deal count (excludes 'other'/internal — matches /api/deals/stats)
+// Last checked: 2026-03-25 — DB total: 3,561, verified by TA: 3,439
+const LIVE_DEAL_COUNT = 3439;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
