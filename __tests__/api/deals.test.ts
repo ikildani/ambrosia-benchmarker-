@@ -126,15 +126,15 @@ describe('/api/deals', () => {
     });
 
     it('should show all data for pro users', async () => {
-      // Mock pro user lookup
+      // Mock pro user lookup via x-user-id UUID header fallback
       mockSupabase.single.mockResolvedValueOnce({
         data: { tier: 'pro' },
         error: null,
       });
 
-      // Send email in header instead of query params
+      // Use x-user-id header with valid UUID (route's Method 2 fallback)
       const request = new NextRequest('http://localhost/api/deals', {
-        headers: { 'X-User-Email': 'pro@example.com' },
+        headers: { 'X-User-Id': '00000000-0000-0000-0000-000000000001' },
       });
 
       const response = await GET(request);

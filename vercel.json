@@ -89,6 +89,30 @@
     {
       "path": "/api/cron/research-enrichment",
       "schedule": "0 6 * * 6"
+    },
+    {
+      "path": "/api/cron/qa-health-check",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/seo-content",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/seo-health",
+      "schedule": "0 7 * * 0"
+    },
+    {
+      "path": "/api/cron/gsc-sync",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/ctr-optimize",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/competitor-intel",
+      "schedule": "0 13 * * *"
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import SharedCalculationView from '@/components/SharedCalculationView';
 
 interface Props {
@@ -11,129 +12,163 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
   const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
-  // Fetch shared data for dynamic title/description
-  let title = 'Shared Deal Analysis | Ambrosia Ventures';
-  let description = 'View this shared biotech licensing deal analysis from Ambrosia Ventures Calculator.';
+  let title = 'Deal Analysis | Ambrosia Ventures';
+  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 3,500+ transactions.';
 
   try {
-    const response = await fetch(`${baseUrl}/api/share/${token}`, {
-      cache: 'no-store',
-    });
+    const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
     if (response.ok) {
       const data = await response.json();
       if (data.labels) {
         title = `${data.labels.modality} ${data.labels.indication} Deal Analysis | Ambrosia Ventures`;
-        description = `${data.labels.phase} ${data.labels.modality} deal analysis for ${data.labels.indication}. View benchmarked deal terms, milestones, and royalties.`;
+        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 3,500+ transactions.`;
       }
     }
-  } catch {
-    // Fall back to generic metadata
-  }
+  } catch { /* generic metadata fallback */ }
 
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: 'Ambrosia Ventures Deal Analysis',
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImageUrl],
-    },
-    robots: {
-      index: false, // Don't index shared pages
-      follow: false,
-    },
+    openGraph: { title, description, type: 'website', images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Ambrosia Ventures Deal Analysis' }] },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImageUrl] },
+    robots: { index: false, follow: false },
   };
 }
 
 async function getSharedCalculation(token: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
-    const response = await fetch(`${baseUrl}/api/share/${token}`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
+    const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
+    if (!response.ok) return null;
     return response.json();
-  } catch (error) {
-    console.error('Error fetching shared calculation:', error);
-    return null;
-  }
+  } catch { return null; }
 }
 
 export default async function SharePage({ params }: Props) {
   const { token } = await params;
   const data = await getSharedCalculation(token);
+  if (!data) notFound();
 
-  if (!data) {
-    notFound();
-  }
+  const modality = data.labels?.modality || 'Deal';
+  const indication = data.labels?.indication || '';
+  const phase = data.labels?.phase || '';
 
   return (
-    <main className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-            <span className="text-sm font-medium text-teal-400">Shared Analysis</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            {data.labels?.modality || 'Deal'} Analysis
-          </h1>
-          <p className="text-neutral-300">
-            {data.labels?.phase} &bull; {data.labels?.indication}
-          </p>
-          <div className="flex items-center gap-4 mt-4 text-sm text-neutral-400">
-            <span>Shared {new Date(data.createdAt).toLocaleDateString()}</span>
-            <span>&bull;</span>
-            <span>{data.viewCount} views</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SharedCalculationView results={data.results} labels={data.labels} />
-
-        {/* CTA */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
-          <h3 className="text-xl font-bold text-white mb-2">
-            Run Your Own Analysis
-          </h3>
-          <p className="text-neutral-300 mb-4 max-w-lg mx-auto">
-            Use the Ambrosia Ventures Deal Calculator to benchmark your biotech
-            licensing deals in seconds.
-          </p>
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all"
-          >
+    <main className="min-h-screen bg-[#0c1220]">
+      {/* Nav */}
+      <nav className="border-b border-white/[0.04]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+          <a href="/">
+            <Image src="/logo-white.png" alt="Ambrosia Ventures" width={140} height={28} className="h-5 w-auto opacity-70" />
+          </a>
+          <a href="/calculator" className="text-xs font-semibold text-slate-600 hover:text-teal-400 transition-colors tracking-wide uppercase">
             Try the Calculator
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
           </a>
         </div>
+      </nav>
+
+      {/* Hero */}
+      <header className="pt-12 pb-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></div>
+            <span className="text-[11px] font-bold text-teal-400/80 tracking-[0.15em] uppercase">Deal Intelligence Report</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl font-black tracking-[-0.03em] leading-[1.05] text-white mb-4">
+            {modality}<br />
+            <span className="text-slate-600">{indication}</span>
+          </h1>
+
+          <div className="flex items-center gap-3 text-sm text-slate-600 mt-2">
+            <span className="px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/[0.05] text-xs font-semibold text-slate-500">{phase}</span>
+            <span className="text-slate-700">&bull;</span>
+            <span className="text-xs text-slate-600">Based on 3,500+ biopharma transactions</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <SharedCalculationView results={data.results} labels={data.labels} />
       </div>
+
+      {/* Report Purchase CTA */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
+          {/* Glows */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2"></div>
+
+          <div className="relative z-10 p-8 sm:p-14">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-[11px] font-bold text-teal-400/70 tracking-[0.15em] uppercase mb-6">Full Deal Intelligence Report</p>
+
+              <h3 className="text-3xl sm:text-4xl font-black text-white tracking-[-0.02em] mb-4">
+                Get the complete analysis<br />
+                <span className="text-teal-400">for {modality}.</span>
+              </h3>
+
+              <p className="text-slate-500 text-lg leading-relaxed mb-10 max-w-lg mx-auto">
+                Everything above, plus comparable transactions, sensitivity analysis, partner matching, and a negotiation playbook — in a board-ready PDF.
+              </p>
+
+              {/* What's included */}
+              <div className="grid sm:grid-cols-2 gap-3 text-left max-w-md mx-auto mb-10">
+                {[
+                  'Comparable deal transactions',
+                  'Sensitivity analysis',
+                  'Partner matching (850+ companies)',
+                  'Negotiation playbook',
+                  'rNPV & Monte Carlo model',
+                  'Exportable PDF report',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2.5 text-sm text-slate-400">
+                    <svg className="w-4 h-4 text-teal-500/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              {/* Primary CTA */}
+              <a
+                href="/calculator"
+                className="inline-flex items-center gap-3 px-10 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-400 transition-all text-lg shadow-lg shadow-teal-500/15"
+              >
+                Get the Full Report
+                <span className="text-teal-200 font-normal text-base">$149</span>
+              </a>
+
+              {/* Secondary */}
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <a href="/calculator" className="text-sm font-medium text-slate-600 hover:text-teal-400 transition-colors">
+                  or try the calculator free &rarr;
+                </a>
+                <span className="text-xs text-slate-700">
+                  Unlimited reports with Pro ($99/mo) &bull; <a href="/calculator?promo=AMBROSIA" className="text-teal-500/50 hover:text-teal-400">7-day free trial</a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/[0.04]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Image src="/logo-white.png" alt="Ambrosia Ventures" width={120} height={24} className="h-4 w-auto opacity-30" />
+            <span className="text-[11px] text-slate-600">Data-driven deal intelligence</span>
+          </div>
+          <div className="flex items-center gap-6 text-[11px] text-slate-600">
+            <a href="/methodology" className="hover:text-slate-400 transition-colors">Methodology</a>
+            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

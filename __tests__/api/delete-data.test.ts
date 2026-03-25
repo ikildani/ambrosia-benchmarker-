@@ -84,6 +84,11 @@ jest.mock('@/lib/sentry-api', () => ({
   captureApiError: jest.fn(),
 }));
 
+jest.mock('@/lib/audit-log', () => ({
+  logAuditEvent: jest.fn().mockResolvedValue(undefined),
+  getAuditContext: jest.fn().mockReturnValue({ ip: '127.0.0.1', user_agent: 'test' }),
+}));
+
 // Import after mocking
 import { DELETE } from '@/app/api/user/delete-data/route';
 

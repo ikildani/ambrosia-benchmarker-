@@ -21,6 +21,8 @@ function createChain(overrides: Record<string, unknown> = {}) {
     delete: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
     gte: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    not: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
     single: jest.fn().mockResolvedValue({ data: null, error: null }),
@@ -31,6 +33,8 @@ function createChain(overrides: Record<string, unknown> = {}) {
   (chain.delete as jest.Mock).mockReturnValue(chain);
   (chain.eq as jest.Mock).mockReturnValue(chain);
   (chain.gte as jest.Mock).mockReturnValue(chain);
+  (chain.lte as jest.Mock).mockReturnValue(chain);
+  (chain.not as jest.Mock).mockReturnValue(chain);
   (chain.order as jest.Mock).mockReturnValue(chain);
   (chain.limit as jest.Mock).mockReturnValue(chain);
   return chain;
@@ -135,7 +139,7 @@ describe('/api/pulse', () => {
       (snapshotChain2.single as jest.Mock).mockResolvedValueOnce({ data: snapshotData, error: null });
 
       const dealsChain2 = createChain();
-      (dealsChain2.order as jest.Mock).mockResolvedValueOnce({ data: dealData, error: null });
+      (dealsChain2.limit as jest.Mock).mockResolvedValueOnce({ data: dealData, error: null });
 
       fromChains = [profileChain, snapshotChain2, dealsChain2];
 
@@ -176,7 +180,7 @@ describe('/api/pulse', () => {
 
       // Chain 1: deals
       const dealsChain = createChain();
-      (dealsChain.order as jest.Mock).mockResolvedValueOnce({ data: dealData, error: null });
+      (dealsChain.limit as jest.Mock).mockResolvedValueOnce({ data: dealData, error: null });
 
       fromChains = [snapshotChain, dealsChain];
 
@@ -210,7 +214,7 @@ describe('/api/pulse', () => {
 
       // Chain 1: deals query (runs in parallel, but snapshot error is checked)
       const dealsChain = createChain();
-      (dealsChain.order as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
+      (dealsChain.limit as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
 
       fromChains = [snapshotChain, dealsChain];
 
