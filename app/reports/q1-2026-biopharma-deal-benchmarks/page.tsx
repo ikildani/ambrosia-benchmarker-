@@ -76,40 +76,48 @@ export default function Q1BenchmarkReportPage() {
             <span className="text-slate-500">Q1 2026</span>
           </nav>
 
-          <div className="flex items-start gap-5 mb-3">
-            <div className="hidden sm:block w-px h-16 bg-teal-500 mt-1" />
-            <div>
-              <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-2">Quarterly Report · March 2026</p>
-              <h1 className="text-4xl sm:text-[3.25rem] font-bold text-slate-900 leading-[1.1] tracking-tight">
-                Biopharma Deal Benchmarks
+          <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Quarterly Report · March 2026</p>
+
+          <div className="sm:flex items-end gap-10 mb-8">
+            <div className="flex-1">
+              <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">
+                Biopharma Deal<br className="hidden sm:block" /> Benchmarks
               </h1>
+              <p className="text-base text-slate-500 max-w-xl leading-relaxed">
+                A quarterly analysis of licensing economics across 12 therapeutic areas, drawn from 2,600+ verified transactions.
+              </p>
+            </div>
+            <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
+              <div className="text-[5.5rem] sm:text-[7rem] font-bold text-slate-900 leading-none tracking-tight tabular-nums">$2.0<span className="text-[3rem] sm:text-[4rem] text-slate-400 font-normal">B</span></div>
+              <p className="text-[11px] text-slate-400 uppercase tracking-widest mt-1">Metabolic Ph2 Median TDV</p>
+              <p className="text-[11px] text-teal-600 font-semibold uppercase tracking-wide">Highest of any TA</p>
             </div>
           </div>
 
-          <p className="text-lg text-slate-500 max-w-2xl leading-relaxed mt-6 mb-10">
-            A quarterly analysis of biopharma licensing economics across 12 therapeutic areas, drawn from 2,600+ verified transactions. Published by Ambrosia Ventures.
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-200 rounded-lg overflow-hidden mb-10">
-            {[
-              { value: '2,600+', label: 'Verified Transactions' },
-              { value: '$2.0B', label: 'Metabolic Ph2 TDV' },
-              { value: '1.60x', label: 'Radiopharm Premium' },
-              { value: '12', label: 'Therapeutic Areas' },
-            ].map((stat, i) => (
-              <div key={i} className="bg-white p-5 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">{stat.value}</div>
-                <div className="text-[11px] text-slate-400 mt-1.5 uppercase tracking-wide">{stat.label}</div>
-              </div>
-            ))}
+          <div className="border-t border-b border-slate-200 py-5 mb-8">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
+              {[
+                { value: '2,600+', label: 'Deals' },
+                { value: '12', label: 'Therap. Areas' },
+                { value: '$95M', label: 'Onco Ph2 Upfront' },
+                { value: '1.60x', label: 'Radiopharm Mult.' },
+                { value: '180', label: 'Q1 Transactions' },
+                { value: '+15%', label: 'Territory Splits YoY' },
+              ].map((stat, i) => (
+                <div key={i}>
+                  <div className="text-lg font-bold text-slate-900 tabular-nums">{stat.value}</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wide">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
             <span>Published March 25, 2026</span>
-            <span className="text-slate-300">|</span>
+            <span className="text-slate-300">·</span>
             <span>Ambrosia Ventures Research</span>
-            <span className="text-slate-300">|</span>
-            <span>Data current through March 2026</span>
+            <span className="text-slate-300">·</span>
+            <span>18 min read</span>
           </div>
         </div>
       </header>
@@ -196,6 +204,20 @@ export default function Q1BenchmarkReportPage() {
           </div>
         </section>
 
+        {/* ── DRAMATIC PULL QUOTE ── */}
+        <section className="border-y border-slate-200 bg-white">
+          <div className="max-w-4xl mx-auto px-6 py-16 sm:py-20 text-center">
+            <p className="text-[11px] text-slate-400 uppercase tracking-[0.3em] mb-4">The headline number</p>
+            <div className="flex items-baseline justify-center gap-3">
+              <span className="text-6xl sm:text-8xl font-bold text-slate-900 tabular-nums tracking-tight">2.3x</span>
+            </div>
+            <p className="text-lg sm:text-xl text-slate-500 mt-4 max-w-lg mx-auto leading-relaxed">
+              The Phase 1→2 upfront multiplier — the single largest value inflection point in biopharma deal economics
+            </p>
+            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures analysis of 2,600+ transactions (2020–2026)</p>
+          </div>
+        </section>
+
         {/* ── SECTION 2: THERAPEUTIC AREAS ── */}
         <section className="bg-slate-50 border-y border-slate-200">
           <div className="max-w-4xl mx-auto px-6 py-16">
@@ -214,10 +236,11 @@ export default function Q1BenchmarkReportPage() {
               Oncology stabilized at $95M Phase 2 median upfront — virtually unchanged from 2024. This is normalization, not decline: oncology remains the highest-volume TA, but the extraordinary 2022-2023 cycle (Pfizer/Seagen $43B, AbbVie/ImmunoGen $10.1B, BMS/RayzeBio $4.1B) has corrected. Buyers are more disciplined, particularly for assets without clear <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">differentiation</Link> from standard-of-care.
             </p>
 
-            {/* Pull quote */}
-            <div className="text-center py-10 my-8 border-y border-slate-300">
-              <div className="text-5xl font-bold text-teal-700 tabular-nums">$150M</div>
-              <div className="text-base text-slate-500 mt-2">Metabolic Phase 2 Median Upfront — Highest of Any Therapeutic Area</div>
+            {/* Inline data annotation */}
+            <div className="border-l-4 border-slate-300 pl-5 py-2 my-8">
+              <p className="text-sm text-slate-600 leading-relaxed italic">
+                &ldquo;Immunology Phase 2 upfronts now exceed oncology by 26% — a shift driven almost entirely by anti-TL1A mechanism validation.&rdquo;
+              </p>
             </div>
 
             <div className="mt-10 mb-2">
@@ -265,6 +288,17 @@ export default function Q1BenchmarkReportPage() {
               freeRows={6}
               footnote="Source: Ambrosia Ventures. Medians from 2020–2026 verified transactions."
             />
+          </div>
+        </section>
+
+        {/* ── PULL QUOTE 2 ── */}
+        <section className="border-y border-slate-200 bg-slate-50">
+          <div className="max-w-4xl mx-auto px-6 py-14 sm:flex items-center gap-10">
+            <div className="text-6xl sm:text-7xl font-bold text-teal-700 tabular-nums tracking-tight flex-shrink-0">$150M</div>
+            <div className="mt-4 sm:mt-0">
+              <p className="text-slate-700 leading-relaxed">Phase 2 metabolic/obesity median upfront — 58% above oncology and the highest of any therapeutic area. The GLP-1 revolution has fundamentally repriced buyer expectations for metabolic pipeline assets.</p>
+              <p className="text-xs text-slate-400 mt-2">Metabolic/Obesity Phase 2 · 2020–2026 · n=79 deals</p>
+            </div>
           </div>
         </section>
 
