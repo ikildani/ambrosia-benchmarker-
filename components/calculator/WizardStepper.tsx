@@ -41,9 +41,9 @@ function WizardStepperInner({
     if (newStep === currentStep) return;
     setDirection(newStep > currentStep ? 1 : -1);
     onStepChange(newStep);
-    // Scroll to top of wizard content when step changes
+    // Scroll to top of wizard content area (not page top)
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }, [currentStep, onStepChange]);
 

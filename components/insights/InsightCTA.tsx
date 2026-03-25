@@ -20,7 +20,7 @@ export function InsightCTA({
           {heading || 'Run Your Own Benchmark'}
         </h3>
         <p className="text-slate-300 mb-6 max-w-xl mx-auto">
-          {description || 'Model upfronts, milestones, and royalties for your specific asset — powered by 2,600+ real transactions.'}
+          {description || 'Model upfronts, milestones, and royalties for your specific asset — powered by 3,500+ real transactions.'}
         </p>
         <Link
           href={calculatorHref}
@@ -42,7 +42,7 @@ export function InsightCTA({
           {heading || 'Run Your Own Deal Benchmark'}
         </h2>
         <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-          {description || 'Model upfronts, milestones, and royalties for any phase, modality, and therapeutic area — powered by 2,600+ real transactions.'}
+          {description || 'Model upfronts, milestones, and royalties for any phase, modality, and therapeutic area — powered by 3,500+ real transactions.'}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link

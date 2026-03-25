@@ -163,7 +163,7 @@ export default async function InsightPage({
       <section className="border-t border-slate-800 py-12 text-center">
         <div className="mx-auto max-w-2xl px-6">
           <p className="text-slate-500 text-sm mb-4">
-            Benchmarks powered by 2,600+ real biopharma licensing deals
+            Benchmarks powered by 3,500+ real biopharma licensing deals
           </p>
           <Link
             href="/calculator"

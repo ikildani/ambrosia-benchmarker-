@@ -70,7 +70,7 @@ export function PhaseUpfrontChart({ data, title, yLabel = 'Median Upfront ($M)',
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-slate-400 mt-2 text-center">
-        Source: Ambrosia Ventures analysis of 2,600+ biopharma licensing transactions (2020–2026)
+        Source: Ambrosia Ventures analysis of 3,500+ biopharma licensing transactions (2020–2026)
       </p>
     </div>
   );
