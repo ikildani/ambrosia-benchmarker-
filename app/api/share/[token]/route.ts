@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
+import { notifyShareView } from '@/lib/slack/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,11 +47,25 @@ export async function GET(
     // Increment view count
     await supabase.rpc('increment_share_views', { p_token: token });
 
+    // Notify admin on Slack (non-blocking, only on first few views to avoid spam)
+    const viewCount = (shared.view_count || 0) + 1;
+    if (viewCount <= 10) {
+      const labels = shared.labels as Record<string, string> | null;
+      notifyShareView({
+        token,
+        modality: labels?.modality || 'Unknown',
+        indication: labels?.indication || '',
+        phase: labels?.phase || '',
+        viewCount,
+        ip: getIdentifier(request),
+      }).catch(() => {});
+    }
+
     return apiSuccess({
       inputs: shared.inputs,
       results: shared.results,
       labels: shared.labels,
-      viewCount: (shared.view_count || 0) + 1,
+      viewCount,
       createdAt: shared.created_at,
       expiresAt: shared.expires_at,
     });

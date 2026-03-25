@@ -221,3 +221,30 @@ export async function notifyLogin(user: {
     `Login: ${user.name || user.email}`,
   );
 }
+
+export async function notifyShareView(details: {
+  token: string;
+  modality: string;
+  indication?: string;
+  phase?: string;
+  viewCount: number;
+  ip?: string;
+}): Promise<void> {
+  const fields = [
+    { type: 'mrkdwn', text: `*Report:*\n${details.modality}${details.indication ? ` — ${details.indication}` : ''}` },
+    { type: 'mrkdwn', text: `*Phase:*\n${details.phase || 'N/A'}` },
+    { type: 'mrkdwn', text: `*View #:*\n${details.viewCount}` },
+    { type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` },
+  ];
+
+  await postToSlack(
+    [{
+      color: '#06b6d4',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: 'Shared Report Viewed', emoji: true } },
+        { type: 'section', fields },
+      ],
+    }],
+    `Report viewed: ${details.modality} (view #${details.viewCount})`,
+  );
+}
