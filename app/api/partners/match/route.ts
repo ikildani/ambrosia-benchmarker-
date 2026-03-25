@@ -200,6 +200,8 @@ export async function POST(request: NextRequest) {
           watch_outs: match.watch_outs || null,
           relevant_deals: match.relevant_deals || null,
           strategic_context: match.strategic_context || null,
+          // Pharma Intent Score (Pro tier only)
+          pharma_intent: match.pharma_intent || null,
         };
       }
     });

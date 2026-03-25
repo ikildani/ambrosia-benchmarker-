@@ -63,6 +63,17 @@ interface PartnerMatch {
   watch_outs?: WatchOutFactor[] | null;
   relevant_deals?: RelevantDeal[] | null;
   strategic_context?: StrategicContext | null;
+  // Pharma Intent Score (Pro tier only)
+  pharma_intent?: {
+    intentScore: number;
+    intentTier: string;
+    confidence: number;
+    timing: string;
+    factors: { name: string; score: number; weight: number; evidence: string }[];
+    signals: string[];
+    modalityFit: number;
+    indicationFit: number;
+  } | null;
 }
 
 interface UpgradeCTA {
@@ -370,7 +381,16 @@ export function PartnerMatches({
                     </div>
                     <span className="text-xs text-gray-400 dark:text-slate-500">match</span>
                   </div>
-                  {!match.profile_locked && match.deals_last_12mo !== null && match.deals_last_12mo > 0 && (
+                  {!match.profile_locked && match.pharma_intent && (
+                    <div className={`text-xs font-semibold mt-1 ${
+                      match.pharma_intent.intentScore >= 70 ? 'text-teal-600 dark:text-teal-400' :
+                      match.pharma_intent.intentScore >= 40 ? 'text-amber-600 dark:text-amber-400' :
+                      'text-gray-500 dark:text-slate-500'
+                    }`}>
+                      {match.pharma_intent.intentScore}% intent
+                    </div>
+                  )}
+                  {!match.profile_locked && !match.pharma_intent && match.deals_last_12mo !== null && match.deals_last_12mo > 0 && (
                     <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                       {match.deals_last_12mo} deal{match.deals_last_12mo > 1 ? 's' : ''} in 12mo
                     </div>
@@ -389,6 +409,7 @@ export function PartnerMatches({
               <>
                 {/* Enhanced Score Breakdown (when available) */}
                 {match.detailed_breakdown && userAsset ? (
+                  <>
                   <ScoreBreakdown
                     companyId={match.company_id}
                     companyName={match.company_name}
@@ -404,6 +425,73 @@ export function PartnerMatches({
                     sessionId={sessionId}
                     tier={userTier}
                   />
+                  {/* Pharma Intent Score Section */}
+                  {match.pharma_intent && (
+                    <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${
+                          match.pharma_intent.intentScore >= 70 ? 'bg-gradient-to-br from-teal-500 to-cyan-500' :
+                          match.pharma_intent.intentScore >= 40 ? 'bg-gradient-to-br from-amber-500 to-orange-500' :
+                          'bg-gradient-to-br from-gray-400 to-gray-500'
+                        }`}>
+                          {match.pharma_intent.intentScore}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-gray-900 dark:text-white">
+                            Pharma Intent Score
+                            <span className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                              match.pharma_intent.intentTier === 'very_high' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' :
+                              match.pharma_intent.intentTier === 'high' ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400' :
+                              match.pharma_intent.intentTier === 'moderate' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                              'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-400'
+                            }`}>
+                              {match.pharma_intent.intentTier.replace('_', ' ')}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-slate-400">
+                            {match.pharma_intent.timing.replace('_', '-')} timeline &bull; {Math.round(match.pharma_intent.confidence * 100)}% confidence
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Intent Signals */}
+                      {match.pharma_intent.signals.length > 0 && (
+                        <div className="space-y-1.5 mb-3">
+                          {match.pharma_intent.signals.map((signal, i) => (
+                            <div key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-slate-300">
+                              <svg className="w-3.5 h-3.5 text-teal-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              </svg>
+                              {signal}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Intent Factors */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {match.pharma_intent.factors.map((factor, i) => (
+                          <div key={i} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+                            <span className="text-xs text-gray-600 dark:text-slate-400 truncate">{factor.name}</span>
+                            <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
+                              <div className="w-12 h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    factor.score >= 70 ? 'bg-teal-500' :
+                                    factor.score >= 40 ? 'bg-amber-500' :
+                                    'bg-gray-400'
+                                  }`}
+                                  style={{ width: `${factor.score}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-semibold text-gray-700 dark:text-slate-300 w-7 text-right">{factor.score}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  </>
                 ) : (
               <div className="border-t border-gray-100 dark:border-slate-700 px-4 py-4 bg-gradient-to-b from-gray-50/50 dark:from-slate-700/50 to-white dark:to-slate-800">
                 {loadingDetails ? (

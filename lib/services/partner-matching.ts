@@ -13,6 +13,7 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 import { getRecencyWeight } from '@/lib/comparableDeals';
+import { calculatePharmaIntent } from '@/lib/services/pharma-intent';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -425,6 +426,9 @@ export interface PartnerMatch {
   watch_outs?: WatchOutFactor[];
   relevant_deals?: RelevantDeal[];
   strategic_context?: StrategicContext;
+
+  // Pharma Intent Score (Pro tier only)
+  pharma_intent?: import('@/lib/services/pharma-intent').PharmaIntentResult;
 }
 
 export interface MatchReason {
@@ -578,6 +582,23 @@ export async function findPartnerMatches(
           deal_type: deal.deal_type,
           relevance: generateDealRelevance(deal),
         }));
+
+        // Pharma Intent Score — predictive acquisition likelihood
+        try {
+          // Collect all deals across companies for competitive pressure analysis
+          const allDealsFlat = Array.from(companyDealsMap.values()).flat();
+          match.pharma_intent = calculatePharmaIntent(
+            company,
+            input.modality,
+            input.indication_specific || input.indication_category || '',
+            companyDeals,
+            [], // trials not pre-fetched — intent engine handles gracefully
+            allDealsFlat,
+          );
+        } catch (err) {
+          // Intent score is non-critical — never block partner matching
+          console.error(`[PharmaIntent] Error for ${company.name}:`, err);
+        }
       }
 
       scoredMatches.push(match);
