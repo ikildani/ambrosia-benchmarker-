@@ -147,14 +147,14 @@ export async function GET(request: NextRequest) {
               snapshot_id: snapshot.id,
               digest_type: 'weekly',
               resend_id: result.id || null,
-            }).catch(() => {});
+            }).then(() => {}, () => {});
 
             await supabase.from('email_logs').insert({
               user_id: user.id,
               email_type: 'weekly_digest',
               status: 'sent',
               metadata: { snapshot_id: snapshot.id },
-            }).catch(() => {});
+            }).then(() => {}, () => {});
           }
 
           return result;
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
       emails_sent: emailsSent,
       emails_errors: emailErrors,
       email_error_details: errorDetails.length > 0 ? errorDetails : undefined,
-      total_pro_users: proUsers.length,
+      total_pro_users: proUsers?.length ?? 0,
       eligible_users: eligibleUsers.length,
     });
   } catch (error) {

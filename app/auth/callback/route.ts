@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { sendAdminSignupNotification } from '@/lib/email/client';
+import { notifyNewSignup, notifyLogin } from '@/lib/slack/notify';
 
 // User-friendly error messages
 const ERROR_MESSAGES: Record<string, string> = {
@@ -82,11 +83,13 @@ export async function GET(request: NextRequest) {
           console.log('[Auth Callback] Email verified for user:', user.email);
 
           // Notify admin of new verified signup
-          sendAdminSignupNotification({
+          const signupInfo = {
             email: user.email || '',
             name: user.user_metadata?.name || user.user_metadata?.full_name,
             company: user.user_metadata?.company,
-          }).catch(err => console.error('[Auth Callback] Admin notification error:', err));
+          };
+          sendAdminSignupNotification(signupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
+          notifyNewSignup(signupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
         }
       }
     }
@@ -96,11 +99,27 @@ export async function GET(request: NextRequest) {
       const user = data.user;
       const isNewUser = user.created_at && (Date.now() - new Date(user.created_at).getTime() < 60000);
       if (isNewUser) {
-        sendAdminSignupNotification({
+        const oauthSignupInfo = {
           email: user.email || '',
           name: user.user_metadata?.name || user.user_metadata?.full_name,
           company: user.user_metadata?.company,
-        }).catch(err => console.error('[Auth Callback] Admin notification error:', err));
+        };
+        sendAdminSignupNotification(oauthSignupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
+        notifyNewSignup(oauthSignupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
+      }
+    }
+
+    // Notify admin of login (for returning users — new signups already get a signup notification)
+    if (data.user) {
+      const loginUser = data.user;
+      const isNewUser = loginUser.created_at && (Date.now() - new Date(loginUser.created_at).getTime() < 60000);
+      if (!isNewUser) {
+        const loginMethod = type === 'magiclink' ? 'Magic Link' : !type ? 'Google OAuth' : 'Email';
+        notifyLogin({
+          email: loginUser.email || '',
+          name: loginUser.user_metadata?.name || loginUser.user_metadata?.full_name,
+          method: loginMethod,
+        }).catch(err => console.error('[Auth Callback] Slack login notification error:', err));
       }
     }
 

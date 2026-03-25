@@ -5,6 +5,7 @@ import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
 import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { notifyCalculation } from '@/lib/slack/notify';
 
 /** Sanitize numeric output — reject NaN/Infinity, return null for invalid */
 function safeNum(v: unknown): number | null {
@@ -38,18 +39,22 @@ export async function POST(request: NextRequest) {
     const authUser = await getAuthenticatedUser(request);
     const verifiedUserId = authUser?.id || null;
 
-    // Get user tier from verified user
+    // Get user tier and email from verified user
     let userTier = 'free';
+    let userEmail: string | undefined;
+    let userName: string | undefined;
     if (verifiedUserId) {
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('tier')
+        .select('tier, email, full_name')
         .eq('id', verifiedUserId)
         .single();
 
       if (profile?.tier) {
         userTier = profile.tier;
       }
+      userEmail = profile?.email || undefined;
+      userName = profile?.full_name || undefined;
     }
 
     // Store the calculation
@@ -143,6 +148,23 @@ export async function POST(request: NextRequest) {
         })
       ).catch(() => {});
     }
+
+    // Notify admin via Slack (non-blocking)
+    notifyCalculation({
+      email: userEmail,
+      name: userName,
+      tier: userTier,
+      therapeuticArea: body.therapeutic_area || 'oncology',
+      modality: body.modality,
+      phase: body.development_phase,
+      indication: body.indication_specific || body.indication_category || undefined,
+      dealType: body.deal_type || undefined,
+      upfrontLow: safeNum(body.outputs?.upfront_low),
+      upfrontMid: safeNum(body.outputs?.upfront_mid),
+      upfrontHigh: safeNum(body.outputs?.upfront_high),
+      totalDealValueLow: safeNum(body.outputs?.total_deal_value_low),
+      totalDealValueHigh: safeNum(body.outputs?.total_deal_value_high),
+    }).catch(err => console.error('Slack calculation notification error:', err));
 
     return apiSuccess({ calculation_id: calculation!.id });
   } catch (error) {

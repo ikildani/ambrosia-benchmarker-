@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError, maskEmail } from '@/lib/sentry-api';
 import { sendAdminSubscriptionNotification, sendUpgradeConfirmation } from '@/lib/email/client';
+import { notifyProSubscription, notifyTrialStarted, notifyReportPurchase } from '@/lib/slack/notify';
 
 // Stripe Webhook Handler
 // To enable webhooks:
@@ -124,6 +125,10 @@ export async function POST(request: NextRequest) {
               type: 'report_purchase',
               amount: session.amount_total || undefined,
             }).catch(err => console.error('Webhook: Admin report notification error:', err));
+            notifyReportPurchase({
+              email: reportEmail || 'unknown',
+              amount: session.amount_total || undefined,
+            }).catch(err => console.error('Webhook: Slack report notification error:', err));
           }
           break;
         }
@@ -206,6 +211,12 @@ export async function POST(request: NextRequest) {
           amount: session.amount_total || undefined,
           promoCode: promoUsed || undefined,
         }).catch(err => console.error('Webhook: Admin subscription notification error:', err));
+        const slackNotify = isTrial ? notifyTrialStarted : notifyProSubscription;
+        slackNotify({
+          email: customerEmail || 'unknown',
+          amount: session.amount_total || undefined,
+          promoCode: promoUsed || undefined,
+        }).catch(err => console.error('Webhook: Slack subscription notification error:', err));
 
         // Send upgrade confirmation to user
         if (customerEmail) {
@@ -302,14 +313,58 @@ export async function POST(request: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice;
         console.log('Payment succeeded:', invoice.id);
 
-        // Track successful payment (useful for renewals)
-        if (invoice.billing_reason === 'subscription_cycle') {
-          const customerId = invoice.customer as string;
+        const invoiceCustomerId = invoice.customer as string;
+        const invoiceEmail = invoice.customer_email;
+        const invoiceSubId = (invoice as unknown as { subscription: string | null }).subscription;
 
+        // Safety net: ensure paying users are Pro regardless of how the subscription was created.
+        // This catches cases where checkout.session.completed was missed or the sub was created in Stripe Dashboard.
+        if (invoiceSubId && invoiceEmail) {
+          // Try to find and upgrade user by email
+          const { data: invoiceProfile } = await supabase
+            .from('user_profiles')
+            .select('id, tier, stripe_customer_id')
+            .eq('email', invoiceEmail)
+            .single();
+
+          if (invoiceProfile && invoiceProfile.tier !== 'pro') {
+            await supabase
+              .from('user_profiles')
+              .update({
+                tier: 'pro',
+                stripe_customer_id: invoiceCustomerId,
+                stripe_subscription_id: invoiceSubId,
+                subscription_status: 'active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', invoiceProfile.id);
+            console.log('User upgraded to pro via invoice payment:', invoiceEmail);
+
+            // Notify admin via Slack
+            notifyProSubscription({
+              email: invoiceEmail,
+            }).catch(err => console.error('Webhook: Slack invoice upgrade notification error:', err));
+          } else if (invoiceProfile && !invoiceProfile.stripe_customer_id) {
+            // User is already Pro but missing Stripe IDs — backfill them
+            await supabase
+              .from('user_profiles')
+              .update({
+                stripe_customer_id: invoiceCustomerId,
+                stripe_subscription_id: invoiceSubId,
+                subscription_status: 'active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', invoiceProfile.id);
+            console.log('Backfilled Stripe IDs for:', invoiceEmail);
+          }
+        }
+
+        // Track successful payment
+        if (invoice.billing_reason === 'subscription_cycle') {
           await supabase.from('events').insert({
             event_type: 'subscription_renewed',
             event_data: {
-              stripe_customer_id: customerId,
+              stripe_customer_id: invoiceCustomerId,
               invoice_id: invoice.id,
               amount_paid: invoice.amount_paid,
               currency: invoice.currency,

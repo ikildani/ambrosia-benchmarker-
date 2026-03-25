@@ -1,16 +1,13 @@
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 
-// Lazy initialization to avoid build errors when RESEND_API_KEY is not set
-let resendClient: Resend | null = null;
+const DEFAULT_FROM = 'Ambrosia Ventures <info@ambrosiaventures.co>';
+const DEFAULT_REPLY_TO = 'hello@ambrosiaventures.co';
 
-function getResendClient(): Resend | null {
-  if (!process.env.RESEND_API_KEY) {
-    return null;
-  }
-  if (!resendClient) {
-    resendClient = new Resend(process.env.RESEND_API_KEY);
-  }
-  return resendClient;
+function initSendGrid(): boolean {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) return false;
+  sgMail.setApiKey(apiKey);
+  return true;
 }
 
 export interface EmailOptions {
@@ -24,30 +21,25 @@ export interface EmailOptions {
 export async function sendEmail(options: EmailOptions) {
   const { to, subject, html, from, replyTo } = options;
 
-  const resend = getResendClient();
-  if (!resend) {
-    console.log('Resend API key not configured, skipping email');
+  if (!initSendGrid()) {
+    console.log('SendGrid API key not configured, skipping email');
     return { success: false, error: 'Email not configured' };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: from || (process.env.RESEND_FROM_EMAIL || 'Ambrosia Ventures <onboarding@resend.dev>'),
-      to: [to],
+    const [response] = await sgMail.send({
+      to,
+      from: from || DEFAULT_FROM,
+      replyTo: replyTo || DEFAULT_REPLY_TO,
       subject,
       html,
-      replyTo: replyTo || 'hello@ambrosiaventures.co',
     });
 
-    if (error) {
-      console.error('Error sending email:', error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, id: data?.id };
-  } catch (error) {
-    console.error('Email send error:', error);
-    return { success: false, error: 'Failed to send email' };
+    return { success: true, id: response.headers['x-message-id'] };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to send email';
+    console.error('Email send error:', message);
+    return { success: false, error: message };
   }
 }
 
@@ -187,9 +179,8 @@ export async function sendReportEmail(
   pdfBuffer: Buffer,
   fileName: string
 ) {
-  const resend = getResendClient();
-  if (!resend) {
-    console.log('Resend API key not configured, skipping email');
+  if (!initSendGrid()) {
+    console.log('SendGrid API key not configured, skipping email');
     return { success: false, error: 'Email not configured' };
   }
 
@@ -233,29 +224,27 @@ export async function sendReportEmail(
   `;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'Ambrosia Ventures <onboarding@resend.dev>',
-      to: [to],
+    const [response] = await sgMail.send({
+      to,
+      from: DEFAULT_FROM,
+      replyTo: DEFAULT_REPLY_TO,
       subject: `Your Ambrosia Deal Report: ${indication}`,
       html,
-      replyTo: 'hello@ambrosiaventures.co',
       attachments: [
         {
           filename: fileName,
-          content: pdfBuffer,
+          content: pdfBuffer.toString('base64'),
+          type: 'application/pdf',
+          disposition: 'attachment',
         },
       ],
     });
 
-    if (error) {
-      console.error('Error sending report email:', error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, id: data?.id };
-  } catch (error) {
-    console.error('Report email send error:', error);
-    return { success: false, error: 'Failed to send report email' };
+    return { success: true, id: response.headers['x-message-id'] };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to send report email';
+    console.error('Report email send error:', message);
+    return { success: false, error: message };
   }
 }
 

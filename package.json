@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
+    "@sendgrid/mail": "^8.1.6",
     "@sentry/nextjs": "^10.38.0",
     "@sparticuz/chromium": "^143.0.4",
     "@supabase/ssr": "^0.8.0",
