@@ -4,6 +4,8 @@ import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { getAllInsightSlugs } from '@/lib/insightPages';
 import { getAllTermSlugs } from '@/lib/glossaryTerms';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
+import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
+import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
@@ -282,5 +284,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages];
+  // SEO long-form insight pages
+  const seoInsightPages: MetadataRoute.Sitemap = SEO_INSIGHT_SLUGS.map(slug => ({
+    url: `${baseUrl}/insights/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.9,
+  }));
+
+  // Programmatic data pages (TA × Phase × Territory)
+  const programmaticSlugs = getAllProgrammaticSlugs();
+  const programmaticPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/data`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    ...programmaticSlugs.map(slug => ({
+      url: `${baseUrl}/data/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  ];
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages];
 }
