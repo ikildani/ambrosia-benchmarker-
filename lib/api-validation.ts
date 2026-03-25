@@ -156,6 +156,7 @@ export const checkoutSchema = z.object({
   purchaseType: z.enum(['subscription', 'report']).default('subscription'),
   billingInterval: z.enum(['monthly', 'annual']).default('monthly'),
   promoCode: z.string().optional(),
+  shareToken: z.string().optional(),
   calculationData: z.object({
     inputs: z.record(z.string(), z.unknown()),
     results: z.record(z.string(), z.unknown()),

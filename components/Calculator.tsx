@@ -207,10 +207,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // ── Effects ────────────────────────────────────────────────────────────────
 
   // Check for report purchase from URL params (after Stripe redirect)
+  // Also load share token data to pre-fill the calculator
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const reportId = params.get('report');
+    const shareToken = params.get('token');
+
     if (reportId) {
       setReportPurchaseId(reportId);
       fetch(`/api/report-purchase/${reportId}`)
@@ -218,10 +221,47 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         .then(data => {
           if (data.status === 'completed') {
             setReportVerified(true);
+            // Pre-fill from purchased report's calculation inputs
+            if (data.calculationInputs) {
+              const inp = data.calculationInputs;
+              const patch: Record<string, unknown> = {};
+              if (inp.therapeuticArea) patch.therapeuticArea = inp.therapeuticArea;
+              if (inp.modality) patch.modality = inp.modality;
+              if (inp.phase) patch.phase = inp.phase;
+              if (inp.indication) patch.indication = inp.indication;
+              if (inp.territory) patch.territory = inp.territory;
+              if (inp.dealType) patch.dealType = inp.dealType;
+              if (Object.keys(patch).length > 0) {
+                actions.bulkSet(patch as Partial<typeof state>);
+              }
+            }
           }
         })
-        .catch(() => {/* Report verification failed, stay on free tier */});
+        .catch(() => {/* Report verification failed */});
     }
+
+    // Pre-fill from share token (for cold email recipients)
+    if (shareToken && !reportId) {
+      fetch(`/api/share/${shareToken}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.inputs) {
+            const inp = data.inputs;
+            const patch: Record<string, unknown> = {};
+            if (inp.therapeuticArea) patch.therapeuticArea = inp.therapeuticArea;
+            if (inp.modality) patch.modality = inp.modality;
+            if (inp.phase) patch.phase = inp.phase;
+            if (inp.indication) patch.indication = inp.indication;
+            if (inp.territory) patch.territory = inp.territory;
+            if (inp.dealType) patch.dealType = inp.dealType;
+            if (Object.keys(patch).length > 0) {
+              actions.bulkSet(patch as Partial<typeof state>);
+            }
+          }
+        })
+        .catch(() => {/* Share token fetch failed */});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Check if onboarding should show for first-time users

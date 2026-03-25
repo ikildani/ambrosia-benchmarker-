@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import SharedCalculationView from '@/components/SharedCalculationView';
+import ShareReportButton from '@/components/ShareReportButton';
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -132,14 +133,12 @@ export default async function SharePage({ params }: Props) {
                 ))}
               </div>
 
-              {/* Primary CTA */}
-              <a
-                href="/calculator"
-                className="inline-flex items-center gap-3 px-10 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-400 transition-all text-lg shadow-lg shadow-teal-500/15"
-              >
-                Get the Full Report
-                <span className="text-teal-200 font-normal text-base">$149</span>
-              </a>
+              {/* Primary CTA — direct checkout */}
+              <ShareReportButton
+                inputs={data.inputs || {}}
+                results={data.results || {}}
+                token={token}
+              />
 
               {/* Secondary */}
               <div className="mt-6 flex flex-col items-center gap-3">
