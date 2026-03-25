@@ -39,7 +39,7 @@ export default function Q1BenchmarkReportPage() {
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, royalty ranges from 2,600+ verified biopharma transactions.', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
     { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 2,600+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), press releases, and regulatory databases. Updated weekly.' } },
-    { '@type': 'Question', name: 'Why did metabolic/obesity deals surpass oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Metabolic Phase 2 TDV reached $2.0B vs oncology\'s $1.1B, driven by GLP-1 commercial validation and a projected $100B+ annual market by 2030.' } },
+    { '@type': 'Question', name: 'Why did metabolic/obesity deals surpass oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Immunology Phase 2 upfronts reached $350M — nearly 3x oncology ($120M) — driven by anti-TL1A mechanism validation. Metabolic/obesity TDV ($1.7B) also exceeds oncology ($1.3B), driven by GLP-1 commercial validation.' } },
     { '@type': 'Question', name: 'What is the largest modality premium in biopharma?', acceptedAnswer: { '@type': 'Answer', text: 'Radiopharmaceuticals at 1.60x over small molecules, reflecting Novartis Pluvicto validation and supply-constrained bidding for platform companies.' } },
   ]};
 
@@ -88,9 +88,9 @@ export default function Q1BenchmarkReportPage() {
               </p>
             </div>
             <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
-              <div className="text-[5.5rem] sm:text-[7rem] font-bold text-slate-900 leading-none tracking-tight tabular-nums">$2.0<span className="text-[3rem] sm:text-[4rem] text-slate-400 font-normal">B</span></div>
-              <p className="text-[11px] text-slate-400 uppercase tracking-widest mt-1">Metabolic Ph2 Median TDV</p>
-              <p className="text-[11px] text-teal-600 font-semibold uppercase tracking-wide">Highest of any TA</p>
+              <div className="text-[5.5rem] sm:text-[7rem] font-bold text-slate-900 leading-none tracking-tight tabular-nums">$350<span className="text-[3rem] sm:text-[4rem] text-slate-400 font-normal">M</span></div>
+              <p className="text-[11px] text-slate-400 uppercase tracking-widest mt-1">Immunology Ph2 Median Upfront</p>
+              <p className="text-[11px] text-teal-600 font-semibold uppercase tracking-wide">Nearly 3x Oncology</p>
             </div>
           </div>
 
@@ -99,7 +99,7 @@ export default function Q1BenchmarkReportPage() {
               {[
                 { value: '2,600+', label: 'Deals' },
                 { value: '12', label: 'Therap. Areas' },
-                { value: '$95M', label: 'Onco Ph2 Upfront' },
+                { value: '$120M', label: 'Onco Ph2 Upfront' },
                 { value: '1.60x', label: 'Radiopharm Mult.' },
                 { value: '180', label: 'Q1 Transactions' },
                 { value: '+15%', label: 'Territory Splits YoY' },
@@ -128,9 +128,9 @@ export default function Q1BenchmarkReportPage() {
           <h2 className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-6">Executive Summary</h2>
           <div className="space-y-5">
             {[
-              { num: 1, bold: 'Metabolic surpasses oncology.', text: 'Phase 2 metabolic/obesity total deal values ($2.0B median) now exceed oncology ($1.1B) for the first time, driven by validated GLP-1 commercial potential and a projected $100B+ annual market by 2030.' },
-              { num: 2, bold: 'Immunology premiums widen.', text: 'Phase 2 immunology upfronts ($120M) exceed oncology ($95M) by 26%, fueled by the anti-TL1A validation from Merck\'s $10.8B Prometheus acquisition and the expanding CAR-T autoimmune pipeline.' },
-              { num: 3, bold: 'ADC normalization complete.', text: 'ADC deal values corrected from 2023 peaks (Pfizer/Seagen at $43B created temporary distortion) but remain the second-highest modality at 1.50x premium, behind radiopharmaceuticals.' },
+              { num: 1, bold: 'Immunology commands the highest Phase 2 upfronts.', text: 'At $350M median, immunology Phase 2 upfronts are nearly 3x oncology ($120M) — driven by the anti-TL1A mechanism validation from Merck\'s $10.8B Prometheus acquisition and expanding CAR-T autoimmune programs.' },
+              { num: 2, bold: 'Metabolic surpasses oncology on total value.', text: 'Metabolic/obesity Phase 2 TDV ($1.7B) exceeds oncology ($1.3B), with upfronts at $255M median. GLP-1 commercial validation and a projected $100B+ annual market by 2030 are driving premium valuations.' },
+              { num: 3, bold: 'ADC normalization complete.', text: 'ADC deal values corrected from 2023 peaks (Pfizer/Seagen at $43B created temporary distortion) but remain the second-highest modality at 1.45x premium, behind radiopharmaceuticals.' },
               { num: 4, bold: 'Radiopharmaceuticals lead.', text: 'At 1.60x over small molecule baselines, radiopharmaceuticals command the largest single-modality premium — driven by Pluvicto validation, isotope supply constraints, and platform acquisition competition.' },
               { num: 5, bold: 'Territory splits accelerate.', text: 'Territory-split deals increased 15% YoY as biotechs retain US rights while licensing ex-US. China standalone value declined to 5-8% of global (from 10-15% peak), except in metabolic assets.' },
             ].map(({ num, bold, text }) => (
@@ -151,7 +151,7 @@ export default function Q1BenchmarkReportPage() {
           <h2 className="text-2xl font-bold text-slate-900 mb-6" id="market-overview">The New Hierarchy of Deal Value</h2>
 
           <p className="text-slate-700 leading-relaxed mb-5">
-            The first quarter of 2026 confirmed a structural shift in biopharma deal economics: <strong className="text-slate-900">oncology is no longer the default highest-value therapeutic area for licensing transactions.</strong> Metabolic and obesity assets now command the richest total deal values at Phase 2, with median packages reaching $2.0 billion compared to oncology&apos;s long-standing $1.1 billion benchmark. The validated commercial potential of GLP-1 receptor agonists, dual and triple incretin combinations, and oral obesity therapies has fundamentally repriced buyer expectations.
+            The first quarter of 2026 confirmed a structural shift in biopharma deal economics: <strong className="text-slate-900">oncology is no longer the default highest-value therapeutic area for licensing transactions.</strong> Metabolic and obesity assets now command the richest total deal values at Phase 2, with median packages reaching $2.0 billion compared to oncology&apos;s long-standing $1.3 billion benchmark. The validated commercial potential of GLP-1 receptor agonists, dual and triple incretin combinations, and oral obesity therapies has fundamentally repriced buyer expectations.
           </p>
 
           <p className="text-slate-700 leading-relaxed mb-5">
@@ -161,16 +161,16 @@ export default function Q1BenchmarkReportPage() {
           <div className="mt-10 mb-2">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1</p>
             <h3 className="text-base font-bold text-slate-900 mb-1">Oncology Median Upfront by Development Phase</h3>
-            <p className="text-xs text-slate-400 mb-4">The Phase 1→2 jump (2.3x) is the single largest value inflection point in biopharma deal economics.</p>
+            <p className="text-xs text-slate-400 mb-4">The Phase 1→2 jump (2.0x) is the single largest value inflection point in biopharma deal economics.</p>
           </div>
 
           <PhaseUpfrontChart
             data={[
               { phase: 'Preclinical', low: 10, median: 22, high: 45 },
-              { phase: 'Phase 1', low: 20, median: 42, high: 85 },
-              { phase: 'Phase 2', low: 45, median: 95, high: 200, highlight: true },
-              { phase: 'Phase 3', low: 110, median: 230, high: 500 },
-              { phase: 'Approved', low: 400, median: 800, high: 1600 },
+              { phase: 'Phase 1', low: 30, median: 60, high: 120 },
+              { phase: 'Phase 2', low: 60, median: 120, high: 250, highlight: true },
+              { phase: 'Phase 3', low: 175, median: 350, high: 600 },
+              { phase: 'Approved', low: 350, median: 700, high: 1500 },
             ]}
             title=""
             yLabel="Median Upfront ($M)"
@@ -186,10 +186,10 @@ export default function Q1BenchmarkReportPage() {
             headers={['Phase', 'Median Upfront', 'Median TDV', 'Royalty Range', 'Upfront % of TDV']}
             rows={[
               ['Preclinical', '$22M', '$400M', '5–10%', '5.5%'],
-              ['Phase 1', '$42M', '$650M', '6–12%', '6.5%'],
-              ['Phase 2', '$95M', '$1.1B', '8–15%', '8.6%'],
-              ['Phase 3', '$230M', '$2.5B', '12–20%', '9.2%'],
-              ['Approved', '$800M', '$6.0B', '18–25%', '13.3%'],
+              ['Phase 1', '$60M', '$700M', '8–14%', '8.6%'],
+              ['Phase 2', '$120M', '$1.3B', '11–18%', '9.2%'],
+              ['Phase 3', '$350M', '$2.5B', '15–23%', '14.0%'],
+              ['Approved', '$700M', '$4.5B', '18–28%', '15.6%'],
             ]}
             freeRows={5}
             footnote="Source: Ambrosia Ventures analysis of 2,600+ verified transactions (2020–2026). TDV = Total Deal Value."
@@ -199,7 +199,7 @@ export default function Q1BenchmarkReportPage() {
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
             <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
             <p className="text-slate-700 leading-relaxed">
-              The Phase 1→2 jump (2.3x on upfront, 1.7x on TDV) is where clinical proof-of-concept converts speculative platform bets into quantifiable commercial opportunities — and where buyers pay the steepest premium for de-risked assets.
+              The Phase 1→2 jump (2.0x on upfront, 1.7x on TDV) is where clinical proof-of-concept converts speculative platform bets into quantifiable commercial opportunities — and where buyers pay the steepest premium for de-risked assets.
             </p>
           </div>
         </section>
@@ -209,7 +209,7 @@ export default function Q1BenchmarkReportPage() {
           <div className="max-w-4xl mx-auto px-6 py-16 sm:py-20 text-center">
             <p className="text-[11px] text-slate-400 uppercase tracking-[0.3em] mb-4">The headline number</p>
             <div className="flex items-baseline justify-center gap-3">
-              <span className="text-6xl sm:text-8xl font-bold text-slate-900 tabular-nums tracking-tight">2.3x</span>
+              <span className="text-6xl sm:text-8xl font-bold text-slate-900 tabular-nums tracking-tight">2.0x</span>
             </div>
             <p className="text-lg sm:text-xl text-slate-500 mt-4 max-w-lg mx-auto leading-relaxed">
               The Phase 1→2 upfront multiplier — the single largest value inflection point in biopharma deal economics
@@ -225,7 +225,7 @@ export default function Q1BenchmarkReportPage() {
             <h2 className="text-2xl font-bold text-slate-900 mb-6" id="therapeutic-areas">Therapeutic Area Dynamics</h2>
 
             <p className="text-slate-700 leading-relaxed mb-5">
-              Metabolic/obesity completed its ascent to the top of the deal hierarchy. Median Phase 2 upfronts reached <strong className="text-slate-900">$150 million</strong> — 58% above oncology&apos;s $95 million. Total deal values hit $2.0 billion, reflecting buyer confidence in next-generation GLP-1 oral formulations, combination therapies, and the projected $100B+ annual obesity market by 2030.
+              Immunology emerged as the highest-value therapeutic area for Phase 2 licensing, with median upfronts reaching <strong className="text-slate-900">$350 million</strong> — nearly 3x oncology&apos;s $120 million. This premium is driven almost entirely by the anti-TL1A mechanism validation following Merck&apos;s $10.8B Prometheus acquisition. Metabolic/obesity Phase 2 upfronts reached $255 million with $1.7B total deal values, reflecting GLP-1 commercial validation and the projected $100B+ annual obesity market by 2030.
             </p>
 
             <p className="text-slate-700 leading-relaxed mb-5">
@@ -233,13 +233,13 @@ export default function Q1BenchmarkReportPage() {
             </p>
 
             <p className="text-slate-700 leading-relaxed mb-5">
-              Oncology stabilized at $95M Phase 2 median upfront — virtually unchanged from 2024. This is normalization, not decline: oncology remains the highest-volume TA, but the extraordinary 2022-2023 cycle (Pfizer/Seagen $43B, AbbVie/ImmunoGen $10.1B, BMS/RayzeBio $4.1B) has corrected. Buyers are more disciplined, particularly for assets without clear <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">differentiation</Link> from standard-of-care.
+              Oncology stabilized at $120M Phase 2 median upfront — virtually unchanged from 2024. This is normalization, not decline: oncology remains the highest-volume TA, but the extraordinary 2022-2023 cycle (Pfizer/Seagen $43B, AbbVie/ImmunoGen $10.1B, BMS/RayzeBio $4.1B) has corrected. Buyers are more disciplined, particularly for assets without clear <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">differentiation</Link> from standard-of-care.
             </p>
 
             {/* Inline data annotation */}
             <div className="border-l-4 border-slate-300 pl-5 py-2 my-8">
               <p className="text-sm text-slate-600 leading-relaxed italic">
-                &ldquo;Immunology Phase 2 upfronts now exceed oncology by 26% — a shift driven almost entirely by anti-TL1A mechanism validation.&rdquo;
+                &ldquo;Immunology Phase 2 upfronts ($350M) are nearly 3x oncology ($120M) — a shift driven by TL1A validation and the CAR-T autoimmune pipeline.&rdquo;
               </p>
             </div>
 
@@ -251,9 +251,9 @@ export default function Q1BenchmarkReportPage() {
 
             <PhaseUpfrontChart
               data={[
-                { phase: 'Metabolic', low: 75, median: 150, high: 300 },
-                { phase: 'Immunology', low: 60, median: 120, high: 250 },
-                { phase: 'Oncology', low: 45, median: 95, high: 200 },
+                { phase: 'Immunology', low: 150, median: 350, high: 800 },
+                { phase: 'Metabolic', low: 128, median: 255, high: 570 },
+                { phase: 'Oncology', low: 60, median: 120, high: 250 },
                 { phase: 'Hematology', low: 40, median: 80, high: 170 },
                 { phase: 'Neurology', low: 35, median: 75, high: 160 },
                 { phase: 'Cardio', low: 30, median: 65, high: 135 },
@@ -272,18 +272,18 @@ export default function Q1BenchmarkReportPage() {
             <GatedBenchmarkTable
               headers={['Therapeutic Area', 'Median Upfront', 'Median TDV', 'Base Royalty']}
               rows={[
-                ['Metabolic / Obesity', '$150M', '$2.0B', '10%'],
-                ['Immunology', '$120M', '$1.5B', '9%'],
-                ['Oncology', '$95M', '$1.1B', '8%'],
-                ['Hematology', '$80M', '$950M', '8%'],
-                ['Neurology', '$75M', '$900M', '7%'],
-                ['Cardiovascular', '$65M', '$800M', '7%'],
-                ['Rare Disease', '$60M', '$750M', '9%'],
-                ['Ophthalmology', '$55M', '$650M', '7%'],
-                ['Infectious Disease', '$50M', '$600M', '6%'],
-                ['Dermatology', '$45M', '$550M', '7%'],
-                ['Gastroenterology', '$40M', '$500M', '6%'],
-                ["Women's Health", '$35M', '$450M', '6%'],
+                ['Immunology', '$350M', '$1.8B', '10–17%'],
+                ['Metabolic / Obesity', '$255M', '$1.7B', '12–22%'],
+                ['Oncology', '$120M', '$1.3B', '11–18%'],
+                ['Hematology', '$80M', '$950M', '8–15%'],
+                ['Neurology', '$75M', '$900M', '7–14%'],
+                ['Cardiovascular', '$65M', '$800M', '7–13%'],
+                ['Rare Disease', '$60M', '$750M', '8–15%'],
+                ['Ophthalmology', '$55M', '$650M', '7–13%'],
+                ['Infectious Disease', '$50M', '$600M', '6–12%'],
+                ['Dermatology', '$45M', '$550M', '7–13%'],
+                ['Gastroenterology', '$40M', '$500M', '6–12%'],
+                ["Women's Health", '$35M', '$450M', '6–11%'],
               ]}
               freeRows={6}
               footnote="Source: Ambrosia Ventures. Medians from 2020–2026 verified transactions."
@@ -294,10 +294,10 @@ export default function Q1BenchmarkReportPage() {
         {/* ── PULL QUOTE 2 ── */}
         <section className="border-y border-slate-200 bg-slate-50">
           <div className="max-w-4xl mx-auto px-6 py-14 sm:flex items-center gap-10">
-            <div className="text-6xl sm:text-7xl font-bold text-teal-700 tabular-nums tracking-tight flex-shrink-0">$150M</div>
+            <div className="text-6xl sm:text-7xl font-bold text-teal-700 tabular-nums tracking-tight flex-shrink-0">$350M</div>
             <div className="mt-4 sm:mt-0">
-              <p className="text-slate-700 leading-relaxed">Phase 2 metabolic/obesity median upfront — 58% above oncology and the highest of any therapeutic area. The GLP-1 revolution has fundamentally repriced buyer expectations for metabolic pipeline assets.</p>
-              <p className="text-xs text-slate-400 mt-2">Metabolic/Obesity Phase 2 · 2020–2026 · n=79 deals</p>
+              <p className="text-slate-700 leading-relaxed">Phase 2 immunology median upfront — nearly 3x oncology ($120M) and the highest of any therapeutic area. The anti-TL1A validation and CAR-T autoimmune pipeline have fundamentally repriced immunology deal economics.</p>
+              <p className="text-xs text-slate-400 mt-2">Immunology Phase 2 · 2020–2026 · Ambrosia Ventures analysis</p>
             </div>
           </div>
         </section>
@@ -312,7 +312,7 @@ export default function Q1BenchmarkReportPage() {
           </p>
 
           <p className="text-slate-700 leading-relaxed mb-5">
-            ADC premiums normalized to 1.50x from a ~1.70x peak during the 2023 Pfizer/Seagen cycle. At the normalized level, ADCs remain the second-highest modality with strong buyer interest in next-generation payloads and novel targets beyond HER2/Trop-2. Bispecific antibodies held at 1.40x, buoyed by teclistamab, epcoritamab, and glofitamab validation in hematologic malignancies. See our <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rate benchmarks</Link> for modality-specific royalty analysis.
+            ADC premiums normalized to 1.45x from a ~1.70x peak during the 2023 Pfizer/Seagen cycle. At the normalized level, ADCs remain the second-highest modality with strong buyer interest in next-generation payloads and novel targets beyond HER2/Trop-2. Bispecific antibodies held at 1.40x, buoyed by teclistamab, epcoritamab, and glofitamab validation in hematologic malignancies. See our <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rate benchmarks</Link> for modality-specific royalty analysis.
           </p>
 
           <div className="mt-10 mb-2">
@@ -324,10 +324,11 @@ export default function Q1BenchmarkReportPage() {
           <PhaseUpfrontChart
             data={[
               { phase: 'Radiopharm', low: 140, median: 160, high: 180 },
-              { phase: 'ADC', low: 130, median: 150, high: 170, highlight: true },
-              { phase: 'Bispecific', low: 120, median: 140, high: 160 },
-              { phase: 'CAR-T', low: 115, median: 135, high: 155 },
-              { phase: 'mRNA', low: 115, median: 135, high: 155 },
+              { phase: 'ADC', low: 125, median: 145, high: 165, highlight: true },
+              { phase: 'CAR-T (Solid)', low: 120, median: 140, high: 160 },
+              { phase: 'Bispecific', low: 115, median: 135, high: 155 },
+              { phase: 'PROTAC', low: 115, median: 135, high: 155 },
+              { phase: 'mRNA', low: 110, median: 130, high: 150 },
               { phase: 'Sm. Mol.', low: 90, median: 100, high: 110 },
             ]}
             title=""
@@ -352,12 +353,13 @@ export default function Q1BenchmarkReportPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Radiopharmaceuticals', '1.60x', '$152M', '↑ New leader'],
-                    ['ADC', '1.50x', '$142M', '↓ Normalized from 1.70x'],
-                    ['Bispecific Antibodies', '1.40x', '$133M', '→ Stable'],
-                    ['CAR-T / Cell Therapy', '1.35x', '$128M', '→ Stable'],
-                    ['mRNA Therapeutics', '1.35x', '$128M', '↑ Beyond vaccines'],
-                    ['Small Molecule', '1.00x', '$95M', '→ Baseline'],
+                    ['Radiopharmaceuticals', '1.60x', '$192M', '↑ New leader'],
+                    ['ADC', '1.45x', '$174M', '↓ Normalized'],
+                    ['CAR-T (Solid Tumor)', '1.40x', '$168M', '→ High interest'],
+                    ['Bispecific Antibodies', '1.35x', '$162M', '→ Stable'],
+                    ['PROTAC / Degrader', '1.35x', '$162M', '→ Strong interest'],
+                    ['mRNA Therapeutics', '1.30x', '$156M', '↑ Beyond vaccines'],
+                    ['Small Molecule', '1.00x', '$120M', '→ Baseline'],
                   ].map(([mod, mult, implied, trend], i) => (
                     <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
                       <td className="py-3 px-4 font-medium text-slate-800">{mod}</td>
@@ -369,7 +371,7 @@ export default function Q1BenchmarkReportPage() {
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-slate-400 mt-3">Implied upfront = Phase 2 oncology small molecule median ($95M) × multiplier.</p>
+            <p className="text-xs text-slate-400 mt-3">Implied upfront = Phase 2 oncology small molecule median ($120M) × multiplier.</p>
           </div>
         </section>
 
