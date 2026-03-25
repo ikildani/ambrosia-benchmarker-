@@ -2,10 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -142,26 +141,47 @@ export default function Phase2MilestoneBenchmarksPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Phase 2 Licensing Milestone Payments: How Much Should You Expect?"
-          titleAccent={{ text: 'Phase 2', color: 'text-blue-400' }}
-          subtitle="Phase 2 is the single most valuable inflection point in deal economics. Here is how milestones break down across clinical, regulatory, and commercial triggers."
-          badge="Milestone Analysis"
-          readTime="13 min read"
-          stats={[
-            { value: '2.1x', label: 'Ph1 to Ph2 jump' },
-            { value: '6', label: 'TAs benchmarked' },
-            { value: '$1.1B', label: 'Oncology median TDV' },
-          ]}
-          breadcrumbLabel="Phase 2 Milestone Benchmarks"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-[11px] text-slate-400 mb-10 uppercase tracking-widest">
+              <Link href="/" className="hover:text-slate-600">Home</Link>
+              <span className="text-slate-300">/</span>
+              <Link href="/insights" className="hover:text-slate-600">Insights</Link>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-500">Phase 2 Milestone Benchmarks</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Phase 2 Licensing Milestone Payments: How Much Should You Expect?</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Phase 2 is the single most valuable inflection point in deal economics. Here is how milestones break down across clinical, regulatory, and commercial triggers.</p>
+          </div>
+        </header>
+
+        {/* Section 1: white */}
+        <article className="max-w-4xl mx-auto px-6 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <TrustBar />
 
             <AuthorByline date="March 24, 2026" />
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
+              <span>Published March 25, 2026</span>
+              <span className="text-slate-300">&middot;</span>
+              <span>Ambrosia Ventures Research</span>
+            </div>
 
             <KeyTakeaways takeaways={[
               'Phase 2 milestone payments represent 55-65% of total deal value — the largest single component after upfront.',
@@ -189,7 +209,7 @@ export default function Phase2MilestoneBenchmarksPage() {
             </p>
 
             <p>
-              This analysis draws on over 2,600 transactions in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to present the definitive guide to Phase 2 milestone payment benchmarks. We cover milestone splits by category, benchmark structures by therapeutic area, modality-adjusted values, and the specific trigger definitions that maximize total deal economics. For the broader context of how these milestones fit into overall <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms across therapeutic areas</Link>, see our companion analysis.
+              This analysis draws on over 3,500 transactions in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to present the definitive guide to Phase 2 milestone payment benchmarks. We cover milestone splits by category, benchmark structures by therapeutic area, modality-adjusted values, and the specific trigger definitions that maximize total deal economics. For the broader context of how these milestones fit into overall <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms across therapeutic areas</Link>, see our companion analysis.
             </p>
 
             <h2 id="phase-2-inflection">Phase 2 as the Inflection Point: The Numbers</h2>
@@ -233,7 +253,8 @@ export default function Phase2MilestoneBenchmarksPage() {
           </div>
         </article>
 
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1</p>
           <GatedBenchmarkTable
             headers={['Therapeutic Area', 'Total Milestones', 'Clinical (35-45%)', 'Regulatory (20-30%)', 'Commercial (30-40%)']}
             rows={[
@@ -251,7 +272,7 @@ export default function Phase2MilestoneBenchmarksPage() {
           />
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 mt-8">
+        <div className="max-w-4xl mx-auto px-6 mt-8">
           <PhaseUpfrontChart
             data={[
               { phase: 'Metabolic', low: 900, median: 1500, high: 2500 },
@@ -266,67 +287,73 @@ export default function Phase2MilestoneBenchmarksPage() {
           />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
-          <div className="prose prose-slate prose-lg max-w-none">
+        {/* Section 2: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <InsightCallout title="Why metabolic milestone pools are the largest">
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Why metabolic milestone pools are the largest</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Metabolic diseases command the largest Phase 2 milestone pools ($1.2B median) because of the GLP-1 effect. The validated multi-hundred-billion-dollar addressable market for obesity, diabetes, and NASH therapies means commercial milestones can be structured with cumulative sales thresholds at $1B, $3B, $5B, and $10B — tier levels that would be unrealistic in most other therapeutic areas but are achievable given the precedents set by semaglutide and tirzepatide.
+                </p>
+              </div>
+
+              <InsightCTA
+                variant="mid"
+                heading="Model Your Milestone Structure"
+                description="Calculate clinical, regulatory, and commercial milestone splits for your specific Phase 2 asset across any therapeutic area."
+              />
+
+              <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+
+              <h2 id="modality-impact">Modality Impact on Phase 2 Milestone Economics</h2>
+
               <p>
-                Metabolic diseases command the largest Phase 2 milestone pools ($1.2B median) because of the GLP-1 effect. The validated multi-hundred-billion-dollar addressable market for obesity, diabetes, and NASH therapies means commercial milestones can be structured with cumulative sales thresholds at $1B, $3B, $5B, and $10B — tier levels that would be unrealistic in most other therapeutic areas but are achievable given the precedents set by semaglutide and tirzepatide.
+                Modality multipliers affect not just upfront payments but the entire milestone structure. A 1.50x ADC multiplier applied to a Phase 2 <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> baseline produces a materially different milestone pool than a 1.00x small molecule deal. For the full modality breakdown including all 8 drug formats, see our <Link href="/insights/oncology-upfront-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">oncology upfront payment benchmarks</Link>.
               </p>
-            </InsightCallout>
 
-            <InsightCTA
-              variant="mid"
-              heading="Model Your Milestone Structure"
-              description="Calculate clinical, regulatory, and commercial milestone splits for your specific Phase 2 asset across any therapeutic area."
+              <p>
+                Beyond the multiplier arithmetic, certain modalities also introduce unique milestone categories that do not exist in small molecule deals. ADC deals frequently include <strong>indication expansion milestones</strong> — payments triggered when the licensee initiates clinical trials or achieves regulatory approval in additional tumor types beyond the primary indication. Given that successful ADCs like Enhertu have expanded from HER2-positive breast cancer to HER2-low breast cancer, gastric cancer, and lung cancer, these expansion milestones can add 15-25% to total milestone value.
+              </p>
+
+              <p>
+                Gene therapy and cell therapy deals may include <strong>manufacturing milestones</strong> — payments tied to successful technology transfer, GMP manufacturing at scale, or achievement of specific potency and yield targets. These reflect the unique manufacturing risk inherent in these modalities and are typically structured as the earliest milestone triggers, payable within 12-18 months of deal signing.
+              </p>
+
+              <p>
+                mRNA oncology deals, following the Merck-Moderna precedent, often include <strong>combination therapy milestones</strong> — payments triggered when the mRNA asset achieves positive results in combination with an existing standard of care (typically a checkpoint inhibitor). These milestones recognize that mRNA cancer vaccines are likely to be used in combination rather than as monotherapy, and their value depends on the synergistic clinical effect.
+              </p>
+
+              <h3>Table 2: Phase 2 Implied Milestones by Modality (Oncology Baseline)</h3>
+
+            </div>
+          </article>
+
+          <div className="max-w-4xl mx-auto px-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2</p>
+            <GatedBenchmarkTable
+              headers={['Modality', 'Multiplier', 'Implied Total Milestones', 'Unique Milestone Categories']}
+              rows={[
+                ['Radiopharmaceutical', <strong key="rp-m" className="text-blue-700">1.60x</strong>, '$1,056M', 'Supply chain + manufacturing'],
+                ['ADC', <strong key="adc-m" className="text-blue-700">1.50x</strong>, '$990M', 'Indication expansion'],
+                ['Bispecific', <strong key="bis-m" className="text-blue-700">1.40x</strong>, '$924M', 'Combination therapy'],
+                ['CAR-T', <strong key="cart-m" className="text-blue-700">1.35x</strong>, '$891M', 'Manufacturing + vein-to-vein'],
+                ['mRNA', <strong key="mrna-m" className="text-blue-700">1.35x</strong>, '$891M', 'Combination + platform expansion'],
+                ['PROTAC', <strong key="protac-m" className="text-blue-700">1.35x</strong>, '$891M', 'Target degradation validation'],
+                ['Gene Therapy', <strong key="gene-m" className="text-blue-700">1.25x</strong>, '$825M', 'Manufacturing + durability'],
+                ['Small Molecule', <strong key="sm-m" className="text-blue-700">1.00x</strong>, '$660M', 'Standard structure'],
+              ]}
+              freeRows={4}
+              ctaText="Unlock all 8 modalities — Free calculator"
+              ctaHref="/calculator"
+              footnote="Implied milestones = oncology Phase 2 baseline milestones ($660M) x modality multiplier."
             />
-
-            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
-
-            <h2 id="modality-impact">Modality Impact on Phase 2 Milestone Economics</h2>
-
-            <p>
-              Modality multipliers affect not just upfront payments but the entire milestone structure. A 1.50x ADC multiplier applied to a Phase 2 <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> baseline produces a materially different milestone pool than a 1.00x small molecule deal. For the full modality breakdown including all 8 drug formats, see our <Link href="/insights/oncology-upfront-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">oncology upfront payment benchmarks</Link>.
-            </p>
-
-            <p>
-              Beyond the multiplier arithmetic, certain modalities also introduce unique milestone categories that do not exist in small molecule deals. ADC deals frequently include <strong>indication expansion milestones</strong> — payments triggered when the licensee initiates clinical trials or achieves regulatory approval in additional tumor types beyond the primary indication. Given that successful ADCs like Enhertu have expanded from HER2-positive breast cancer to HER2-low breast cancer, gastric cancer, and lung cancer, these expansion milestones can add 15-25% to total milestone value.
-            </p>
-
-            <p>
-              Gene therapy and cell therapy deals may include <strong>manufacturing milestones</strong> — payments tied to successful technology transfer, GMP manufacturing at scale, or achievement of specific potency and yield targets. These reflect the unique manufacturing risk inherent in these modalities and are typically structured as the earliest milestone triggers, payable within 12-18 months of deal signing.
-            </p>
-
-            <p>
-              mRNA oncology deals, following the Merck-Moderna precedent, often include <strong>combination therapy milestones</strong> — payments triggered when the mRNA asset achieves positive results in combination with an existing standard of care (typically a checkpoint inhibitor). These milestones recognize that mRNA cancer vaccines are likely to be used in combination rather than as monotherapy, and their value depends on the synergistic clinical effect.
-            </p>
-
-            <h3>Table 2: Phase 2 Implied Milestones by Modality (Oncology Baseline)</h3>
-
           </div>
-        </article>
-
-        <div className="max-w-3xl mx-auto px-4">
-          <GatedBenchmarkTable
-            headers={['Modality', 'Multiplier', 'Implied Total Milestones', 'Unique Milestone Categories']}
-            rows={[
-              ['Radiopharmaceutical', <strong key="rp-m" className="text-blue-700">1.60x</strong>, '$1,056M', 'Supply chain + manufacturing'],
-              ['ADC', <strong key="adc-m" className="text-blue-700">1.50x</strong>, '$990M', 'Indication expansion'],
-              ['Bispecific', <strong key="bis-m" className="text-blue-700">1.40x</strong>, '$924M', 'Combination therapy'],
-              ['CAR-T', <strong key="cart-m" className="text-blue-700">1.35x</strong>, '$891M', 'Manufacturing + vein-to-vein'],
-              ['mRNA', <strong key="mrna-m" className="text-blue-700">1.35x</strong>, '$891M', 'Combination + platform expansion'],
-              ['PROTAC', <strong key="protac-m" className="text-blue-700">1.35x</strong>, '$891M', 'Target degradation validation'],
-              ['Gene Therapy', <strong key="gene-m" className="text-blue-700">1.25x</strong>, '$825M', 'Manufacturing + durability'],
-              ['Small Molecule', <strong key="sm-m" className="text-blue-700">1.00x</strong>, '$660M', 'Standard structure'],
-            ]}
-            freeRows={4}
-            ctaText="Unlock all 8 modalities — Free calculator"
-            ctaHref="/calculator"
-            footnote="Implied milestones = oncology Phase 2 baseline milestones ($660M) x modality multiplier."
-          />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
+        {/* Section 3: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="milestone-triggers">Milestone Triggers That Maximize Total Value</h2>
@@ -347,29 +374,46 @@ export default function Phase2MilestoneBenchmarksPage() {
               <strong>Commercial milestone optimization.</strong> Commercial milestones should be structured as escalating cumulative net sales tiers rather than single-year thresholds. The standard tier structure is: first commercial sale (5-10% of commercial milestones), $500M cumulative net sales (15-20%), $1B cumulative (20-25%), $2B cumulative (20-25%), and $5B cumulative (15-20%). Using cumulative rather than annual thresholds ensures that a drug with a slower ramp-up trajectory (common in specialty markets) will still trigger milestones, whereas annual thresholds may never be met.
             </p>
 
-            <InsightCallout title="The $100M trigger design mistake">
-              <p>
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">The $100M trigger design mistake</p>
+              <p className="text-slate-700 leading-relaxed">
                 One of the most common and costly mistakes in milestone design is setting the first commercial milestone at $1B in cumulative sales rather than $500M. In our dataset, only 35-40% of licensed drugs achieve $1B in cumulative sales within 5 years of launch. By adding a $500M threshold, you create a milestone that triggers at a 55-60% rate — capturing $30-50M in additional expected value that would otherwise be forfeited. Always include a sub-billion-dollar commercial threshold.
               </p>
-            </InsightCallout>
+            </div>
 
-            <h2 id="real-deals">Real Deals with Disclosed Milestone Structures</h2>
+          </div>
+        </article>
 
-            <p>
-              While most deal milestones are disclosed only in aggregate, several high-profile Phase 2 era deals have provided enough detail to illustrate best-practice milestone design.
-            </p>
+        {/* Section 4: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              <strong>Daiichi Sankyo-AstraZeneca (Enhertu expansion):</strong> The $6.9B total value includes approximately $4B in milestones structured across clinical (new indication trial initiations and data readouts), regulatory (approval in each new indication), and commercial (tiered sales thresholds for Enhertu across all approved indications). The indication expansion structure — where each new tumor type triggers its own cascade of clinical, regulatory, and commercial milestones — is a masterclass in milestone design for platform assets.
-            </p>
+              <h2 id="real-deals">Real Deals with Disclosed Milestone Structures</h2>
 
-            <p>
-              <strong>Merck-Moderna (mRNA cancer vaccine):</strong> The co-development structure includes shared costs and profit splits, but also incorporates substantial milestones tied to Phase 3 initiation in multiple tumor types, regulatory submissions, and cumulative sales thresholds. The unique feature is a <strong>mechanism validation milestone</strong> — a payment triggered when the personalized mRNA vaccine approach demonstrates clinical benefit in a second tumor type beyond melanoma, validating the platform rather than a single product.
-            </p>
+              <p>
+                While most deal milestones are disclosed only in aggregate, several high-profile Phase 2 era deals have provided enough detail to illustrate best-practice milestone design.
+              </p>
 
-            <p>
-              <strong>Vertex-Alpine ($4.9B, IgAN):</strong> While structured as an acquisition, the implied milestone structure embedded in the valuation reflects clinical milestones for porolimab in IgA nephropathy (Phase 3 initiation and readout), regulatory milestones (NDA filing and approval), and commercial milestones tied to projected peak sales in the IgAN market. The 67% premium to Alpine&apos;s share price reflected Vertex&apos;s confidence that these downstream milestones would be achieved.
-            </p>
+              <p>
+                <strong>Daiichi Sankyo-AstraZeneca (Enhertu expansion):</strong> The $6.9B total value includes approximately $4B in milestones structured across clinical (new indication trial initiations and data readouts), regulatory (approval in each new indication), and commercial (tiered sales thresholds for Enhertu across all approved indications). The indication expansion structure — where each new tumor type triggers its own cascade of clinical, regulatory, and commercial milestones — is a masterclass in milestone design for platform assets.
+              </p>
+
+              <p>
+                <strong>Merck-Moderna (mRNA cancer vaccine):</strong> The co-development structure includes shared costs and profit splits, but also incorporates substantial milestones tied to Phase 3 initiation in multiple tumor types, regulatory submissions, and cumulative sales thresholds. The unique feature is a <strong>mechanism validation milestone</strong> — a payment triggered when the personalized mRNA vaccine approach demonstrates clinical benefit in a second tumor type beyond melanoma, validating the platform rather than a single product.
+              </p>
+
+              <p>
+                <strong>Vertex-Alpine ($4.9B, IgAN):</strong> While structured as an acquisition, the implied milestone structure embedded in the valuation reflects clinical milestones for porolimab in IgA nephropathy (Phase 3 initiation and readout), regulatory milestones (NDA filing and approval), and commercial milestones tied to projected peak sales in the IgAN market. The 67% premium to Alpine&apos;s share price reflected Vertex&apos;s confidence that these downstream milestones would be achieved.
+              </p>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 5: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="milestone-optimization">Clinical vs. Regulatory vs. Commercial Milestone Optimization</h2>
 
@@ -452,7 +496,7 @@ export default function Phase2MilestoneBenchmarksPage() {
               {
                 href: '/insights/pharma-licensing-royalty-rates',
                 title: 'Pharma Licensing Royalty Rates',
-                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 2,600+ transactions.',
+                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 3,500+ transactions.',
                 badge: 'Data Report',
               },
               {

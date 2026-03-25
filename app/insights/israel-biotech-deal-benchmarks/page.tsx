@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -130,22 +129,40 @@ export default function IsraelBiotechDealBenchmarksPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Israel Biotech Deal Benchmarks: Licensing Data for the Startup Nation"
-          titleAccent={{ text: 'Startup Nation', color: 'text-blue-400' }}
-          subtitle="1,600+ life sciences companies. $2.5B+ in annual venture investment. Disproportionate innovation per capita. Here is how Israeli biotech deals benchmark against global standards."
-          badge="Regional Intelligence"
-          readTime="14 min read"
-          stats={[
-            { value: '1,600+', label: 'Israeli life sciences cos' },
-            { value: '$2.5B+', label: 'Annual venture funding' },
-            { value: '280+', label: 'Comparable deals' },
-          ]}
-          breadcrumbLabel="Israel Biotech Benchmarks"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
-          <AuthorByline date="March 24, 2026" />
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-xs text-slate-400 mb-8">
+              <Link href="/" className="hover:text-teal-600 transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/insights" className="hover:text-teal-600 transition-colors">Insights</Link>
+              <span>/</span>
+              <span className="text-slate-600">Israel Biotech Deal Benchmarks</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report &middot; March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Israel Biotech Deal Benchmarks: Licensing Data for the Startup Nation</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">1,600+ life sciences companies. $2.5B+ in annual venture investment. Disproportionate innovation per capita. Here is how Israeli biotech deals benchmark against global standards.</p>
+          </div>
+        </header>
+
+        <article className="max-w-4xl mx-auto px-6 py-12">
+          <div className="flex items-center gap-4 text-sm text-slate-500 mb-8">
+            <AuthorByline date="March 24, 2026" />
+            <span className="text-slate-300">|</span>
+            <span>14 min read</span>
+          </div>
 
           <KeyTakeaways
             takeaways={[
@@ -180,7 +197,7 @@ export default function IsraelBiotechDealBenchmarksPage() {
             </p>
 
             <p>
-              This analysis draws on <strong className="text-blue-700">280+ comparable biopharma transactions</strong> from 2020 through Q1 2026, with specific focus on Israeli-originated assets, Israel-US partnership structures, and academic technology transfer patterns from Israel's leading research institutions. For a broader view of how these benchmarks compare globally, see our <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing deal terms</Link> analysis.
+              This analysis draws on <strong className="text-blue-700">3,500+ comparable biopharma transactions</strong> from 2020 through Q1 2026, with specific focus on Israeli-originated assets, Israel-US partnership structures, and academic technology transfer patterns from Israel's leading research institutions. For a broader view of how these benchmarks compare globally, see our <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing deal terms</Link> analysis.
             </p>
 
             <h2 id="israeli-deal-economics">Israeli Biotech Deal Economics: Phase-Based Benchmarks</h2>
@@ -194,18 +211,21 @@ export default function IsraelBiotechDealBenchmarksPage() {
             </p>
           </div>
 
-          <GatedBenchmarkTable
-            headers={['Phase at Signing', 'Median Upfront (Israeli)', 'Median Total Value', 'Upfront % of TDV', 'Global Benchmark Upfront']}
-            rows={[
-              ['Preclinical', <strong key="pc" className="text-blue-700">$8-30M</strong>, '$50-500M', '8-12%', '$50-100M'],
-              ['Phase 1', <strong key="p1" className="text-blue-700">$20-80M</strong>, '$200M-$1.5B', '10-14%', '$100-200M'],
-              ['Phase 1/2', <strong key="p12" className="text-blue-700">$40-120M</strong>, '$400M-$2B', '10-15%', '$150-300M'],
-              ['Phase 2', <strong key="p2" className="text-blue-700">$80-200M</strong>, '$600M-$3B', '12-16%', '$200-400M'],
-              ['Platform / Technology', <strong key="pt" className="text-blue-700">$15-60M</strong>, '$100M-$1B', '10-20%', 'Variable'],
-            ]}
-            freeRows={3}
-            footnote="Source: Ambrosia Ventures analysis of Israeli-originated biopharma deals (2020-2026). Israeli upfronts are 30-50% lower than global benchmarks at equivalent stages, reflecting earlier licensing timing and milestone-weighted structures."
-          />
+          <div className="my-10">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-3">Exhibit 1</p>
+            <GatedBenchmarkTable
+              headers={['Phase at Signing', 'Median Upfront (Israeli)', 'Median Total Value', 'Upfront % of TDV', 'Global Benchmark Upfront']}
+              rows={[
+                ['Preclinical', <strong key="pc" className="text-blue-700">$8-30M</strong>, '$50-500M', '8-12%', '$50-100M'],
+                ['Phase 1', <strong key="p1" className="text-blue-700">$20-80M</strong>, '$200M-$1.5B', '10-14%', '$100-200M'],
+                ['Phase 1/2', <strong key="p12" className="text-blue-700">$40-120M</strong>, '$400M-$2B', '10-15%', '$150-300M'],
+                ['Phase 2', <strong key="p2" className="text-blue-700">$80-200M</strong>, '$600M-$3B', '12-16%', '$200-400M'],
+                ['Platform / Technology', <strong key="pt" className="text-blue-700">$15-60M</strong>, '$100M-$1B', '10-20%', 'Variable'],
+              ]}
+              freeRows={3}
+              footnote="Source: Ambrosia Ventures analysis of Israeli-originated biopharma deals (2020-2026). Israeli upfronts are 30-50% lower than global benchmarks at equivalent stages, reflecting earlier licensing timing and milestone-weighted structures."
+            />
+          </div>
 
           <PhaseUpfrontChart
             data={[
@@ -218,37 +238,41 @@ export default function IsraelBiotechDealBenchmarksPage() {
             yLabel="Median Upfront ($M)"
           />
 
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <p>
+                The upfront discount for Israeli deals is not a reflection of lower asset quality. Rather, it reflects the <strong>timing premium</strong> that Israeli companies pay by licensing earlier. A preclinical Israeli asset licensed at $15M upfront with $400M in milestones may ultimately generate more total value for the licensor than waiting for Phase 2 data — because the milestone payments, triggered by the partner's investment in clinical development, come without the licensor bearing the capital cost of advancing the asset.
+              </p>
+
+              <h2 id="biotech-strengths">Israel's Biotech Strengths</h2>
+
+              <p>
+                Israel's biotech innovation clusters around several areas of distinctive strength, each with different deal dynamics. For how deal terms vary by therapeutic focus, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">therapeutic area benchmarks</Link>.
+              </p>
+
+              <p>
+                <strong>AI-driven drug discovery.</strong> Israel has become a global hub for computational drug discovery, with companies leveraging machine learning for target identification, molecular design, and clinical trial optimization. Companies in this space typically license platform technology rather than individual molecules, structuring deals with technology access fees, per-target milestones, and downstream royalties. The AI drug discovery deal model is still evolving globally, but Israeli companies like CytoReason and Quris have been at the forefront of establishing deal frameworks.
+              </p>
+
+              <p>
+                <strong>Oncology platforms.</strong> Israel's strength in computational biology translates directly into <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> platform innovation. Compugen (CGEN) exemplifies this — the company's computational pipeline for immuno-oncology targets led to the <strong>Compugen/Bayer collaboration</strong> for novel checkpoint targets, structured as a multi-target deal with per-target milestones. Israeli oncology platform deals typically provide the licensor with retained rights to a subset of targets while granting the partner exclusive rights to lead programs.
+              </p>
+
+              <p>
+                <strong>Immune-oncology and immunology.</strong> Building on Israel's deep immunology research tradition (Weizmann Institute, Hebrew University), Israeli biotechs have contributed significantly to novel immune checkpoint approaches, combination immunotherapy strategies, and innate immunity modulators. BiLineRx and its BL-8040 (motixafortide) program, partnered with multiple collaborators, demonstrates the pathway from Israeli academic immunology to clinical-stage asset.
+              </p>
+
+              <p>
+                <strong>Digital health and medtech convergence.</strong> A uniquely Israeli strength is the convergence of digital health, medical devices, and therapeutics. Companies like Check-Cap (CT colonography capsule) blur the line between medtech and pharma, creating deal structures that combine therapeutic licensing with device partnerships. This convergence creates opportunities for novel deal structures that traditional pharma licensing frameworks do not capture well.
+              </p>
+
+              <p>
+                <strong>Cell and gene therapy manufacturing.</strong> Gamida Cell (now part of the broader cell therapy landscape following its Takeda partnership) pioneered stem cell expansion technology in Israel. The Israeli cell therapy ecosystem has expanded to include multiple companies focusing on manufacturing innovation — a critical capability as the global cell therapy market demands scalable production. These manufacturing-focused deals often include technology licensing with retained manufacturing rights.
+              </p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
-            <p>
-              The upfront discount for Israeli deals is not a reflection of lower asset quality. Rather, it reflects the <strong>timing premium</strong> that Israeli companies pay by licensing earlier. A preclinical Israeli asset licensed at $15M upfront with $400M in milestones may ultimately generate more total value for the licensor than waiting for Phase 2 data — because the milestone payments, triggered by the partner's investment in clinical development, come without the licensor bearing the capital cost of advancing the asset.
-            </p>
-
-            <h2 id="biotech-strengths">Israel's Biotech Strengths</h2>
-
-            <p>
-              Israel's biotech innovation clusters around several areas of distinctive strength, each with different deal dynamics. For how deal terms vary by therapeutic focus, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">therapeutic area benchmarks</Link>.
-            </p>
-
-            <p>
-              <strong>AI-driven drug discovery.</strong> Israel has become a global hub for computational drug discovery, with companies leveraging machine learning for target identification, molecular design, and clinical trial optimization. Companies in this space typically license platform technology rather than individual molecules, structuring deals with technology access fees, per-target milestones, and downstream royalties. The AI drug discovery deal model is still evolving globally, but Israeli companies like CytoReason and Quris have been at the forefront of establishing deal frameworks.
-            </p>
-
-            <p>
-              <strong>Oncology platforms.</strong> Israel's strength in computational biology translates directly into <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> platform innovation. Compugen (CGEN) exemplifies this — the company's computational pipeline for immuno-oncology targets led to the <strong>Compugen/Bayer collaboration</strong> for novel checkpoint targets, structured as a multi-target deal with per-target milestones. Israeli oncology platform deals typically provide the licensor with retained rights to a subset of targets while granting the partner exclusive rights to lead programs.
-            </p>
-
-            <p>
-              <strong>Immune-oncology and immunology.</strong> Building on Israel's deep immunology research tradition (Weizmann Institute, Hebrew University), Israeli biotechs have contributed significantly to novel immune checkpoint approaches, combination immunotherapy strategies, and innate immunity modulators. BiLineRx and its BL-8040 (motixafortide) program, partnered with multiple collaborators, demonstrates the pathway from Israeli academic immunology to clinical-stage asset.
-            </p>
-
-            <p>
-              <strong>Digital health and medtech convergence.</strong> A uniquely Israeli strength is the convergence of digital health, medical devices, and therapeutics. Companies like Check-Cap (CT colonography capsule) blur the line between medtech and pharma, creating deal structures that combine therapeutic licensing with device partnerships. This convergence creates opportunities for novel deal structures that traditional pharma licensing frameworks do not capture well.
-            </p>
-
-            <p>
-              <strong>Cell and gene therapy manufacturing.</strong> Gamida Cell (now part of the broader cell therapy landscape following its Takeda partnership) pioneered stem cell expansion technology in Israel. The Israeli cell therapy ecosystem has expanded to include multiple companies focusing on manufacturing innovation — a critical capability as the global cell therapy market demands scalable production. These manufacturing-focused deals often include technology licensing with retained manufacturing rights.
-            </p>
-
             <h2 id="out-licensing-model">The Israeli Out-Licensing Model</h2>
 
             <p>
@@ -272,9 +296,10 @@ export default function IsraelBiotechDealBenchmarksPage() {
             </p>
           </div>
 
-          <InsightCallout title="Valuation Timing Adjustment">
-            Israeli biotechs typically out-license 1-2 phases earlier than US counterparts. When benchmarking an Israeli preclinical deal against global databases, compare against the lowest quartile of preclinical deals or the upper quartile of discovery-stage deals — not the median preclinical benchmark. Adjust valuation expectations accordingly to reflect the earlier timing, smaller upfronts, and heavier milestone weighting that characterize the Israeli deal model.
-          </InsightCallout>
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Valuation Timing Adjustment</p>
+            <p className="text-slate-700 leading-relaxed">Israeli biotechs typically out-license 1-2 phases earlier than US counterparts. When benchmarking an Israeli preclinical deal against global databases, compare against the lowest quartile of preclinical deals or the upper quartile of discovery-stage deals — not the median preclinical benchmark. Adjust valuation expectations accordingly to reflect the earlier timing, smaller upfronts, and heavier milestone weighting that characterize the Israeli deal model.</p>
+          </div>
 
           <InsightCTA
             variant="mid"
@@ -284,33 +309,37 @@ export default function IsraelBiotechDealBenchmarksPage() {
 
           <MiniCalculator defaultTA="oncology" defaultPhase="preclinical" defaultModality="smallMolecule" />
 
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="notable-deals">Notable Israeli Biotech Deals</h2>
+
+              <p>
+                Several landmark transactions from the Israeli ecosystem illustrate the range and evolution of deal structures. For context on <Link href="/insights/oncology-upfront-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">oncology upfront benchmarks</Link> globally, see our dedicated analysis.
+              </p>
+
+              <p>
+                <strong>Teva Pharmaceutical Industries</strong> remains the anchor of Israel's pharma sector. While Teva's generics business dominates its revenue, the company has structured innovative partnerships for its novel pipeline, including collaborations in biosimilars, neuroscience, and immunology. Teva's licensing deals serve as a reference point for Israeli biotech valuations — as the country's largest pharmaceutical company, Teva's willingness to pay for external innovation sets a floor for Israeli asset values. Teva's recent pivot toward innovative assets has increased its licensing activity, with deals in the <strong>$200M-$1B total value range</strong> for late-stage assets.
+              </p>
+
+              <p>
+                <strong>Compugen / Bayer.</strong> The Compugen/Bayer immuno-oncology collaboration targets novel immune checkpoint candidates identified through Compugen's computational discovery platform. Structured as a multi-target deal, it includes per-target option fees, development milestones, and commercialization milestones. The deal demonstrates the value of Israeli computational biology platforms — Bayer is paying for access to Compugen's ability to identify novel targets, not just a single molecule.
+              </p>
+
+              <p>
+                <strong>Gamida Cell / Takeda.</strong> Gamida Cell's omidubicel (now Omisirge), a nicotinamide-expanded cord blood stem cell therapy, was developed through collaboration with Takeda for commercialization. This deal illustrates the Israeli cell therapy pathway — Israeli innovation in stem cell expansion technology, partnered with a Japanese pharmaceutical company's global commercial infrastructure. The deal was structured with co-development elements, reflecting Gamida Cell's retained manufacturing expertise.
+              </p>
+
+              <p>
+                <strong>BiLineRx partnerships.</strong> BiLineRx's BL-8040 (motixafortide), a CXCR4 antagonist, has been licensed through multiple partnership structures spanning hematology, oncology, and stem cell mobilization indications. The multi-indication licensing approach is characteristic of Israeli platform-based assets — the underlying biology supports multiple therapeutic applications, each of which can be partnered separately or together.
+              </p>
+
+              <p>
+                <strong>CytoDyn (Israel-linked development).</strong> While US-headquartered, CytoDyn's development programs have drawn on Israeli clinical and regulatory expertise. The company's leronlimab has been developed through a network of partnerships that illustrate how Israeli biotech expertise flows into global development programs, even when the corporate entity is based elsewhere.
+              </p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="notable-deals">Notable Israeli Biotech Deals</h2>
-
-            <p>
-              Several landmark transactions from the Israeli ecosystem illustrate the range and evolution of deal structures. For context on <Link href="/insights/oncology-upfront-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">oncology upfront benchmarks</Link> globally, see our dedicated analysis.
-            </p>
-
-            <p>
-              <strong>Teva Pharmaceutical Industries</strong> remains the anchor of Israel's pharma sector. While Teva's generics business dominates its revenue, the company has structured innovative partnerships for its novel pipeline, including collaborations in biosimilars, neuroscience, and immunology. Teva's licensing deals serve as a reference point for Israeli biotech valuations — as the country's largest pharmaceutical company, Teva's willingness to pay for external innovation sets a floor for Israeli asset values. Teva's recent pivot toward innovative assets has increased its licensing activity, with deals in the <strong>$200M-$1B total value range</strong> for late-stage assets.
-            </p>
-
-            <p>
-              <strong>Compugen / Bayer.</strong> The Compugen/Bayer immuno-oncology collaboration targets novel immune checkpoint candidates identified through Compugen's computational discovery platform. Structured as a multi-target deal, it includes per-target option fees, development milestones, and commercialization milestones. The deal demonstrates the value of Israeli computational biology platforms — Bayer is paying for access to Compugen's ability to identify novel targets, not just a single molecule.
-            </p>
-
-            <p>
-              <strong>Gamida Cell / Takeda.</strong> Gamida Cell's omidubicel (now Omisirge), a nicotinamide-expanded cord blood stem cell therapy, was developed through collaboration with Takeda for commercialization. This deal illustrates the Israeli cell therapy pathway — Israeli innovation in stem cell expansion technology, partnered with a Japanese pharmaceutical company's global commercial infrastructure. The deal was structured with co-development elements, reflecting Gamida Cell's retained manufacturing expertise.
-            </p>
-
-            <p>
-              <strong>BiLineRx partnerships.</strong> BiLineRx's BL-8040 (motixafortide), a CXCR4 antagonist, has been licensed through multiple partnership structures spanning hematology, oncology, and stem cell mobilization indications. The multi-indication licensing approach is characteristic of Israeli platform-based assets — the underlying biology supports multiple therapeutic applications, each of which can be partnered separately or together.
-            </p>
-
-            <p>
-              <strong>CytoDyn (Israel-linked development).</strong> While US-headquartered, CytoDyn's development programs have drawn on Israeli clinical and regulatory expertise. The company's leronlimab has been developed through a network of partnerships that illustrate how Israeli biotech expertise flows into global development programs, even when the corporate entity is based elsewhere.
-            </p>
-
             <h2 id="deal-structure">Deal Structure for Israeli Biotechs</h2>
 
             <p>
@@ -354,31 +383,35 @@ export default function IsraelBiotechDealBenchmarksPage() {
             <p>
               <strong>Key differences from US academic licensing.</strong> Israeli TTOs operate with more commercial autonomy than typical US university technology transfer offices. They frequently take equity positions in spinout companies (standard in Israel, still controversial in the US), engage in active deal-making rather than passive licensing, and maintain long-term relationships with pharmaceutical company BD teams. Israeli TTOs are also more willing to negotiate exclusive licenses for narrow fields of use, allowing multiple companies to develop different applications of the same underlying technology.
             </p>
-
-            <h2 id="practical-recommendations">Practical Recommendations for Israeli Biotech Founders</h2>
-
-            <p>
-              Based on our analysis, several practical patterns emerge for Israeli biotech companies approaching their first licensing transaction. For full <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link> across all phases and therapeutic areas, see our benchmarks page.
-            </p>
-
-            <p>
-              <strong>Stage your data package for earlier licensing.</strong> Because Israeli deals typically close at preclinical-Phase 1, invest in creating compelling preclinical data packages that address the specific questions pharmaceutical company BD teams will ask: mechanism validation, target engagement proof, preliminary toxicology, and manufacturing feasibility. A strong preclinical package at an Israeli biotech can command better economics than a marginal Phase 1 dataset at a US company.
-            </p>
-
-            <p>
-              <strong>Price for the Israeli deal market, not global medians.</strong> Israeli preclinical upfronts of $8-30M are not a failure — they are the market rate for earlier-stage licensing from a smaller ecosystem. Focus on total deal value, milestone design, and retained rights rather than maximizing the upfront payment. A $15M upfront with $500M in well-structured milestones and retained manufacturing rights can be more valuable than a $40M upfront with $300M in milestones and no retained rights.
-            </p>
-
-            <p>
-              <strong>Leverage the Israel-US axis.</strong> The strongest partnership model for Israeli biotechs remains the US pharma partnership. Build relationships with US pharmaceutical company BD teams through JP Morgan, BIO International, and Israel-specific partnering events. Israeli biotechs that maintain a US clinical or business development presence (even a single BD professional based in the US) close deals 30-40% faster than those operating exclusively from Israel.
-            </p>
-
-            <p>
-              <strong>Retain what you can commercialize.</strong> If your company has manufacturing capabilities, negotiate retained manufacturing rights aggressively. If you have a platform technology, license programs individually while retaining the platform. The incremental economic value from retained rights can equal or exceed the licensing economics over the life of the partnership.
-            </p>
-
-            <h2 id="faq">Frequently Asked Questions</h2>
           </div>
+
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="practical-recommendations">Practical Recommendations for Israeli Biotech Founders</h2>
+
+              <p>
+                Based on our analysis, several practical patterns emerge for Israeli biotech companies approaching their first licensing transaction. For full <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link> across all phases and therapeutic areas, see our benchmarks page.
+              </p>
+
+              <p>
+                <strong>Stage your data package for earlier licensing.</strong> Because Israeli deals typically close at preclinical-Phase 1, invest in creating compelling preclinical data packages that address the specific questions pharmaceutical company BD teams will ask: mechanism validation, target engagement proof, preliminary toxicology, and manufacturing feasibility. A strong preclinical package at an Israeli biotech can command better economics than a marginal Phase 1 dataset at a US company.
+              </p>
+
+              <p>
+                <strong>Price for the Israeli deal market, not global medians.</strong> Israeli preclinical upfronts of $8-30M are not a failure — they are the market rate for earlier-stage licensing from a smaller ecosystem. Focus on total deal value, milestone design, and retained rights rather than maximizing the upfront payment. A $15M upfront with $500M in well-structured milestones and retained manufacturing rights can be more valuable than a $40M upfront with $300M in milestones and no retained rights.
+              </p>
+
+              <p>
+                <strong>Leverage the Israel-US axis.</strong> The strongest partnership model for Israeli biotechs remains the US pharma partnership. Build relationships with US pharmaceutical company BD teams through JP Morgan, BIO International, and Israel-specific partnering events. Israeli biotechs that maintain a US clinical or business development presence (even a single BD professional based in the US) close deals 30-40% faster than those operating exclusively from Israel.
+              </p>
+
+              <p>
+                <strong>Retain what you can commercialize.</strong> If your company has manufacturing capabilities, negotiate retained manufacturing rights aggressively. If you have a platform technology, license programs individually while retaining the platform. The incremental economic value from retained rights can equal or exceed the licensing economics over the life of the partnership.
+              </p>
+
+              <h2 id="faq">Frequently Asked Questions</h2>
+            </div>
+          </section>
 
           <div className="my-8 space-y-0">
             <details className="group border-b border-slate-200 py-4">

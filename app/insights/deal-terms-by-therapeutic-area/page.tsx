@@ -2,10 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -108,7 +107,7 @@ export default function DealTermsByTherapeuticAreaPage() {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Biopharma Deal Terms by Therapeutic Area: 12-TA Phase 2 & Phase 3 Benchmarks',
-    description: 'Median upfront payments and total deal values for biopharma licensing deals across 12 therapeutic areas at Phase 2 and Phase 3, derived from 2,600+ transactions (2020-2026).',
+    description: 'Median upfront payments and total deal values for biopharma licensing deals across 12 therapeutic areas at Phase 2 and Phase 3, derived from 3,500+ transactions (2020-2026).',
     url: PAGE_URL,
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     datePublished: '2026-03-24',
@@ -167,22 +166,42 @@ export default function DealTermsByTherapeuticAreaPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Biopharma Deal Terms by Therapeutic Area: A 12-TA Comparison"
-          titleAccent={{ text: '12-TA Comparison', color: 'text-blue-400' }}
-          subtitle="Metabolic/obesity now commands the highest total deal values. Immunology leads Phase 2 upfronts. A comprehensive benchmark comparison across every major therapeutic area."
-          badge="Data Report"
-          readTime="14 min read"
-          stats={[
-            { value: '12', label: 'Therapeutic areas' },
-            { value: '$4.5B', label: 'Highest Phase 3 TDV' },
-            { value: '2,600+', label: 'Deals analyzed' },
-          ]}
-          breadcrumbLabel="Deal Terms by TA"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-sm text-slate-400 mb-8">
+              <Link href="/" className="hover:text-teal-600 transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/insights" className="hover:text-teal-600 transition-colors">Insights</Link>
+              <span>/</span>
+              <span className="text-slate-600">Deal Terms by TA</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report &middot; March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Biopharma Deal Terms by Therapeutic Area: A 12-TA Comparison</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Metabolic/obesity now commands the highest total deal values. Immunology leads Phase 2 upfronts. A comprehensive benchmark comparison across every major therapeutic area.</p>
+            <div className="flex items-center gap-8 mt-8 pt-8 border-t border-slate-100">
+              <div><p className="text-2xl font-bold text-slate-900">12</p><p className="text-xs text-slate-400 uppercase tracking-wide">Therapeutic areas</p></div>
+              <div><p className="text-2xl font-bold text-slate-900">$4.5B</p><p className="text-xs text-slate-400 uppercase tracking-wide">Highest Phase 3 TDV</p></div>
+              <div><p className="text-2xl font-bold text-slate-900">3,500+</p><p className="text-xs text-slate-400 uppercase tracking-wide">Deals analyzed</p></div>
+            </div>
+          </div>
+        </header>
+
+        <article className="max-w-4xl mx-auto px-6 py-12">
           <AuthorByline date="2026-03-24" />
+          <p className="text-sm text-slate-400 -mt-4 mb-8">14 min read</p>
 
           <KeyTakeaways
             takeaways={[
@@ -195,104 +214,112 @@ export default function DealTermsByTherapeuticAreaPage() {
 
           <TableOfContents items={tocItems} />
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <TrustBar />
+          <section className="bg-white">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <TrustBar />
 
-            <p>
-              Therapeutic area is the second most important variable in biopharma deal economics, after development phase. A Phase 2 <Link href="/therapeutic-areas/immunology" className="text-teal-600 font-medium hover:text-teal-700">immunology</Link> asset and a Phase 2 dermatology asset may have identical clinical data packages, but the licensing terms they command can differ by 3x or more on <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront</Link> alone. Understanding these TA-specific dynamics is not optional for deal professionals — it is the difference between leaving hundreds of millions on the table and negotiating from an informed position.
-            </p>
+              <p>
+                Therapeutic area is the second most important variable in biopharma deal economics, after development phase. A Phase 2 <Link href="/therapeutic-areas/immunology" className="text-teal-600 font-medium hover:text-teal-700">immunology</Link> asset and a Phase 2 dermatology asset may have identical clinical data packages, but the licensing terms they command can differ by 3x or more on <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront</Link> alone. Understanding these TA-specific dynamics is not optional for deal professionals — it is the difference between leaving hundreds of millions on the table and negotiating from an informed position.
+              </p>
 
-            <p>
-              This analysis benchmarks deal terms across all 12 major therapeutic areas at both Phase 2 and Phase 3, the two most active licensing windows. For each TA, we report median upfront payments and median total deal values, anchored by real marquee transactions that define the current market. For the full methodology behind these benchmarks, see our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link>.
-            </p>
+              <p>
+                This analysis benchmarks deal terms across all 12 major therapeutic areas at both Phase 2 and Phase 3, the two most active licensing windows. For each TA, we report median upfront payments and median total deal values, anchored by real marquee transactions that define the current market. For the full methodology behind these benchmarks, see our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link>.
+              </p>
 
-            <p>
-              The data reveals three critical shifts that are reshaping deal economics in 2026: metabolic/obesity&apos;s ascent to the highest-valued therapeutic area, immunology&apos;s continued premium driven by validated biology, and the emergence of previously &quot;quiet&quot; TAs like gastroenterology and dermatology as serious deal markets.
-            </p>
+              <p>
+                The data reveals three critical shifts that are reshaping deal economics in 2026: metabolic/obesity&apos;s ascent to the highest-valued therapeutic area, immunology&apos;s continued premium driven by validated biology, and the emergence of previously &quot;quiet&quot; TAs like gastroenterology and dermatology as serious deal markets.
+              </p>
 
-            <h2 id="phase-2-benchmarks">Phase 2 Deal Benchmarks: 12 Therapeutic Areas</h2>
+              <h2 id="phase-2-benchmarks">Phase 2 Deal Benchmarks: 12 Therapeutic Areas</h2>
 
-            <p>
-              Phase 2 is the proof-of-concept inflection point where the majority of biopharma out-licensing occurs. The table below shows median upfront payments and total deal values for Phase 2 assets across all 12 benchmarked therapeutic areas. The spread is remarkable: a Phase 2 metabolic asset commands nearly 4x the upfront of a Phase 2 women&apos;s health asset. For a closer look at how <Link href="/insights/phase-2-milestone-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">Phase 2 milestone payments</Link> layer on top of these upfronts, see our dedicated report.
-            </p>
-          </div>
+              <p>
+                Phase 2 is the proof-of-concept inflection point where the majority of biopharma out-licensing occurs. The table below shows median upfront payments and total deal values for Phase 2 assets across all 12 benchmarked therapeutic areas. The spread is remarkable: a Phase 2 metabolic asset commands nearly 4x the upfront of a Phase 2 women&apos;s health asset. For a closer look at how <Link href="/insights/phase-2-milestone-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">Phase 2 milestone payments</Link> layer on top of these upfronts, see our dedicated report.
+              </p>
+            </div>
 
-          <GatedBenchmarkTable
-            headers={['Therapeutic Area', 'Median Upfront', 'Median Total Value', 'Upfront/TDV Ratio']}
-            rows={[
-              [<strong key="met" className="text-blue-700">Metabolic / Obesity</strong>, <strong key="met-u" className="text-blue-700">$150M</strong>, <strong key="met-t" className="text-blue-700">$2.0B</strong>, '7.5%'],
-              [<strong key="imm" className="text-blue-700">Immunology</strong>, <strong key="imm-u" className="text-blue-700">$120M</strong>, <strong key="imm-t" className="text-blue-700">$1.5B</strong>, '8.0%'],
-              ['Oncology', '$95M', '$1.1B', '8.6%'],
-              ['Hematology', '$80M', '$950M', '8.4%'],
-              ['Neurology', '$75M', '$900M', '8.3%'],
-              ['Gastroenterology', '$70M', '$850M', '8.2%'],
-              ['Cardiovascular', '$65M', '$800M', '8.1%'],
-              ['Rare Disease', '$60M', '$750M', '8.0%'],
-              ['Ophthalmology', '$55M', '$650M', '8.5%'],
-              ['Infectious Disease', '$50M', '$600M', '8.3%'],
-              ['Dermatology', '$45M', '$550M', '8.2%'],
-              ['Women\'s Health', '$40M', '$500M', '8.0%'],
-            ]}
-            freeRows={5}
-            ctaText="Unlock all 12 TA benchmarks — Pro subscription"
-            ctaHref="/#pricing"
-            footnote="Phase 2 medians from Ambrosia Ventures database (2020-2026). TDV = Total Deal Value including milestones."
-          />
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mt-10 mb-2">Exhibit 1</p>
+            <GatedBenchmarkTable
+              headers={['Therapeutic Area', 'Median Upfront', 'Median Total Value', 'Upfront/TDV Ratio']}
+              rows={[
+                [<strong key="met" className="text-blue-700">Metabolic / Obesity</strong>, <strong key="met-u" className="text-blue-700">$150M</strong>, <strong key="met-t" className="text-blue-700">$2.0B</strong>, '7.5%'],
+                [<strong key="imm" className="text-blue-700">Immunology</strong>, <strong key="imm-u" className="text-blue-700">$120M</strong>, <strong key="imm-t" className="text-blue-700">$1.5B</strong>, '8.0%'],
+                ['Oncology', '$95M', '$1.1B', '8.6%'],
+                ['Hematology', '$80M', '$950M', '8.4%'],
+                ['Neurology', '$75M', '$900M', '8.3%'],
+                ['Gastroenterology', '$70M', '$850M', '8.2%'],
+                ['Cardiovascular', '$65M', '$800M', '8.1%'],
+                ['Rare Disease', '$60M', '$750M', '8.0%'],
+                ['Ophthalmology', '$55M', '$650M', '8.5%'],
+                ['Infectious Disease', '$50M', '$600M', '8.3%'],
+                ['Dermatology', '$45M', '$550M', '8.2%'],
+                ['Women\'s Health', '$40M', '$500M', '8.0%'],
+              ]}
+              freeRows={5}
+              ctaText="Unlock all 12 TA benchmarks — Pro subscription"
+              ctaHref="/#pricing"
+              footnote="Phase 2 medians from Ambrosia Ventures database (2020-2026). TDV = Total Deal Value including milestones."
+            />
 
-          <PhaseUpfrontChart
-            data={[
-              { phase: 'Metabolic', low: 75, median: 150, high: 300 },
-              { phase: 'Immunology', low: 60, median: 120, high: 250 },
-              { phase: 'Oncology', low: 45, median: 95, high: 200 },
-              { phase: 'Hematology', low: 40, median: 80, high: 170 },
-              { phase: 'Neurology', low: 35, median: 75, high: 160 },
-              { phase: 'GI', low: 35, median: 70, high: 145 },
-              { phase: 'Cardio', low: 30, median: 65, high: 135 },
-              { phase: 'Rare Dis.', low: 30, median: 60, high: 130 },
-              { phase: 'Ophthalm.', low: 25, median: 55, high: 115 },
-              { phase: 'Infect. Dis.', low: 25, median: 50, high: 100 },
-              { phase: 'Dermatol.', low: 20, median: 45, high: 90 },
-              { phase: "Women's H.", low: 20, median: 40, high: 85 },
-            ]}
-            title="Phase 2 Median Upfront Across 12 Therapeutic Areas"
-            yLabel="Median Upfront ($M)"
-          />
+            <PhaseUpfrontChart
+              data={[
+                { phase: 'Metabolic', low: 75, median: 150, high: 300 },
+                { phase: 'Immunology', low: 60, median: 120, high: 250 },
+                { phase: 'Oncology', low: 45, median: 95, high: 200 },
+                { phase: 'Hematology', low: 40, median: 80, high: 170 },
+                { phase: 'Neurology', low: 35, median: 75, high: 160 },
+                { phase: 'GI', low: 35, median: 70, high: 145 },
+                { phase: 'Cardio', low: 30, median: 65, high: 135 },
+                { phase: 'Rare Dis.', low: 30, median: 60, high: 130 },
+                { phase: 'Ophthalm.', low: 25, median: 55, high: 115 },
+                { phase: 'Infect. Dis.', low: 25, median: 50, high: 100 },
+                { phase: 'Dermatol.', low: 20, median: 45, high: 90 },
+                { phase: "Women's H.", low: 20, median: 40, high: 85 },
+              ]}
+              title="Phase 2 Median Upfront Across 12 Therapeutic Areas"
+              yLabel="Median Upfront ($M)"
+            />
+          </section>
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="phase-3-benchmarks">Phase 3 Deal Benchmarks: 12 Therapeutic Areas</h2>
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10 rounded-sm">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="phase-3-benchmarks">Phase 3 Deal Benchmarks: 12 Therapeutic Areas</h2>
 
-            <p>
-              Phase 3 deal economics shift dramatically. The risk of pivotal trial failure narrows the valuation range between TAs, but the absolute numbers increase substantially. Metabolic/obesity assets at Phase 3 command a staggering $4.5 billion in median total deal value — a reflection of the GLP-1 revolution and the massive commercial models now validated by Novo Nordisk and Eli Lilly.
-            </p>
-          </div>
+              <p>
+                Phase 3 deal economics shift dramatically. The risk of pivotal trial failure narrows the valuation range between TAs, but the absolute numbers increase substantially. Metabolic/obesity assets at Phase 3 command a staggering $4.5 billion in median total deal value — a reflection of the GLP-1 revolution and the massive commercial models now validated by Novo Nordisk and Eli Lilly.
+              </p>
+            </div>
 
-          <GatedBenchmarkTable
-            headers={['Therapeutic Area', 'Median Upfront', 'Median Total Value', 'Ph2-to-Ph3 Multiplier']}
-            rows={[
-              [<strong key="met3" className="text-blue-700">Metabolic / Obesity</strong>, <strong key="met3-u" className="text-blue-700">$400M</strong>, <strong key="met3-t" className="text-blue-700">$4.5B</strong>, '2.25x'],
-              [<strong key="imm3" className="text-blue-700">Immunology</strong>, <strong key="imm3-u" className="text-blue-700">$300M</strong>, <strong key="imm3-t" className="text-blue-700">$3.2B</strong>, '2.13x'],
-              ['Oncology', '$230M', '$2.5B', '2.27x'],
-              ['Hematology', '$200M', '$2.2B', '2.32x'],
-              ['Neurology', '$180M', '$2.0B', '2.22x'],
-              ['Gastroenterology', '$170M', '$1.9B', '2.24x'],
-              ['Cardiovascular', '$160M', '$1.8B', '2.25x'],
-              ['Rare Disease', '$140M', '$1.7B', '2.27x'],
-              ['Ophthalmology', '$130M', '$1.5B', '2.31x'],
-              ['Infectious Disease', '$120M', '$1.4B', '2.33x'],
-              ['Dermatology', '$100M', '$1.2B', '2.18x'],
-              ['Women\'s Health', '$90M', '$1.1B', '2.20x'],
-            ]}
-            freeRows={4}
-            ctaText="Unlock all 12 Phase 3 TA benchmarks — Pro subscription"
-            ctaHref="/#pricing"
-            footnote="Phase 3 medians from Ambrosia Ventures database (2020-2026). Multiplier shows Phase 3 TDV / Phase 2 TDV."
-          />
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mt-10 mb-2">Exhibit 2</p>
+            <GatedBenchmarkTable
+              headers={['Therapeutic Area', 'Median Upfront', 'Median Total Value', 'Ph2-to-Ph3 Multiplier']}
+              rows={[
+                [<strong key="met3" className="text-blue-700">Metabolic / Obesity</strong>, <strong key="met3-u" className="text-blue-700">$400M</strong>, <strong key="met3-t" className="text-blue-700">$4.5B</strong>, '2.25x'],
+                [<strong key="imm3" className="text-blue-700">Immunology</strong>, <strong key="imm3-u" className="text-blue-700">$300M</strong>, <strong key="imm3-t" className="text-blue-700">$3.2B</strong>, '2.13x'],
+                ['Oncology', '$230M', '$2.5B', '2.27x'],
+                ['Hematology', '$200M', '$2.2B', '2.32x'],
+                ['Neurology', '$180M', '$2.0B', '2.22x'],
+                ['Gastroenterology', '$170M', '$1.9B', '2.24x'],
+                ['Cardiovascular', '$160M', '$1.8B', '2.25x'],
+                ['Rare Disease', '$140M', '$1.7B', '2.27x'],
+                ['Ophthalmology', '$130M', '$1.5B', '2.31x'],
+                ['Infectious Disease', '$120M', '$1.4B', '2.33x'],
+                ['Dermatology', '$100M', '$1.2B', '2.18x'],
+                ['Women\'s Health', '$90M', '$1.1B', '2.20x'],
+              ]}
+              freeRows={4}
+              ctaText="Unlock all 12 Phase 3 TA benchmarks — Pro subscription"
+              ctaHref="/#pricing"
+              footnote="Phase 3 medians from Ambrosia Ventures database (2020-2026). Multiplier shows Phase 3 TDV / Phase 2 TDV."
+            />
+          </section>
 
-          <InsightCallout title="The Phase 2-to-Phase 3 multiplier is remarkably consistent">
-            <p>
+          {/* Callout — replaces InsightCallout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+            <p className="text-sm font-semibold text-slate-900 mb-2">The Phase 2-to-Phase 3 multiplier is remarkably consistent</p>
+            <p className="text-slate-600 leading-relaxed">
               Across all 12 therapeutic areas, the Phase 2-to-Phase 3 total deal value multiplier falls in a narrow 2.13x-2.33x range. This means the relative premium for Phase 3 data is approximately the same regardless of TA — what varies dramatically is the absolute base from which that multiplier applies. A 2.25x multiplier on a $2B metabolic Phase 2 deal yields $4.5B; the same multiplier on a $500M women&apos;s health deal yields $1.1B.
             </p>
-          </InsightCallout>
+          </div>
 
           <InsightCTA
             variant="mid"
@@ -302,86 +329,98 @@ export default function DealTermsByTherapeuticAreaPage() {
 
           <MiniCalculator defaultTA="immunology" defaultPhase="phase2" defaultModality="smallMolecule" />
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="metabolic-obesity">Why Metabolic/Obesity Now Commands the Highest Valuations</h2>
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10 rounded-sm">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="metabolic-obesity">Why Metabolic/Obesity Now Commands the Highest Valuations</h2>
 
-            <p>
-              The metabolic/obesity therapeutic area has undergone a complete repricing over the past three years. As recently as 2022, metabolic deals were a middle-of-the-pack category, with total values roughly comparable to cardiovascular. The catalyst was not a single deal but a convergence of forces that created the largest addressable market in pharmaceutical history.
-            </p>
+              <p>
+                The metabolic/obesity therapeutic area has undergone a complete repricing over the past three years. As recently as 2022, metabolic deals were a middle-of-the-pack category, with total values roughly comparable to cardiovascular. The catalyst was not a single deal but a convergence of forces that created the largest addressable market in pharmaceutical history.
+              </p>
 
-            <p>
-              <strong>The GLP-1 revolution</strong> validated a commercial model that few had imagined possible. Novo Nordisk&apos;s Wegovy and Eli Lilly&apos;s Zepbound demonstrated that anti-obesity drugs could achieve unprecedented patient demand, with combined revenues projected to exceed $100 billion annually by 2030. This created a race among every major pharma company to secure pipeline assets in the GLP-1 and related pathways.
-            </p>
+              <p>
+                <strong>The GLP-1 revolution</strong> validated a commercial model that few had imagined possible. Novo Nordisk&apos;s Wegovy and Eli Lilly&apos;s Zepbound demonstrated that anti-obesity drugs could achieve unprecedented patient demand, with combined revenues projected to exceed $100 billion annually by 2030. This created a race among every major pharma company to secure pipeline assets in the GLP-1 and related pathways.
+              </p>
 
-            <p>
-              <strong>Marquee deal: Novo Nordisk / Catalent ($16.5B, 2024).</strong> While technically a manufacturing acquisition, this deal was driven entirely by GLP-1 production capacity. It signaled that the metabolic space had become so valuable that companies would spend tens of billions simply to ensure supply. The <strong>Eli Lilly</strong> portfolio of mounjaro licensing deals, exceeding $3.2 billion in aggregate, further anchored the TA&apos;s premium.
-            </p>
+              <p>
+                <strong>Marquee deal: Novo Nordisk / Catalent ($16.5B, 2024).</strong> While technically a manufacturing acquisition, this deal was driven entirely by GLP-1 production capacity. It signaled that the metabolic space had become so valuable that companies would spend tens of billions simply to ensure supply. The <strong>Eli Lilly</strong> portfolio of mounjaro licensing deals, exceeding $3.2 billion in aggregate, further anchored the TA&apos;s premium.
+              </p>
 
-            <p>
-              For biotech founders with metabolic assets, the implication is clear: the market is willing to pay 2-3x the historical norm for credible obesity and diabetes programs, particularly those offering oral formulations, next-generation mechanisms (amylin agonists, GDF15, GIPR antagonists), or combination approaches. However, the bar for &quot;credible&quot; is rising as the competitive landscape intensifies.
-            </p>
+              <p>
+                For biotech founders with metabolic assets, the implication is clear: the market is willing to pay 2-3x the historical norm for credible obesity and diabetes programs, particularly those offering oral formulations, next-generation mechanisms (amylin agonists, GDF15, GIPR antagonists), or combination approaches. However, the bar for &quot;credible&quot; is rising as the competitive landscape intensifies.
+              </p>
+            </div>
+          </section>
 
-            <h2 id="immunology-premium">Immunology&apos;s Hidden Premium</h2>
+          <section className="bg-white">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="immunology-premium">Immunology&apos;s Hidden Premium</h2>
 
-            <p>
-              <Link href="/therapeutic-areas/immunology" className="text-teal-600 font-medium hover:text-teal-700">Immunology</Link> has quietly become the second highest-valued therapeutic area, commanding Phase 2 upfronts of $120M and Phase 3 total values of $3.2B. Two factors drive this premium.
-            </p>
+              <p>
+                <Link href="/therapeutic-areas/immunology" className="text-teal-600 font-medium hover:text-teal-700">Immunology</Link> has quietly become the second highest-valued therapeutic area, commanding Phase 2 upfronts of $120M and Phase 3 total values of $3.2B. Two factors drive this premium.
+              </p>
 
-            <p>
-              <strong>First, the anti-TL1A wave.</strong> The <strong>Merck / Prometheus deal ($10.8B)</strong> for an anti-TL1A antibody in Crohn&apos;s disease reset market expectations for the entire inflammatory bowel disease space. TL1A inhibition is emerging as the next major mechanism in autoimmune disease, with applications across IBD, fibrotic diseases, and potentially atopic dermatitis. Every major pharma company is now seeking TL1A-class assets, creating intense competition that drives valuations higher.
-            </p>
+              <p>
+                <strong>First, the anti-TL1A wave.</strong> The <strong>Merck / Prometheus deal ($10.8B)</strong> for an anti-TL1A antibody in Crohn&apos;s disease reset market expectations for the entire inflammatory bowel disease space. TL1A inhibition is emerging as the next major mechanism in autoimmune disease, with applications across IBD, fibrotic diseases, and potentially atopic dermatitis. Every major pharma company is now seeking TL1A-class assets, creating intense competition that drives valuations higher.
+              </p>
 
-            <p>
-              <strong>Second, CAR-T in autoimmune disease.</strong> The application of CAR-T cell therapy to autoimmune conditions (lupus, scleroderma, myasthenia gravis) is generating remarkable early clinical data. While deal volume is still limited, the few transactions that have occurred suggest valuations comparable to CAR-T oncology deals, with the added advantage of a much larger addressable patient population.
-            </p>
+              <p>
+                <strong>Second, CAR-T in autoimmune disease.</strong> The application of CAR-T cell therapy to autoimmune conditions (lupus, scleroderma, myasthenia gravis) is generating remarkable early clinical data. While deal volume is still limited, the few transactions that have occurred suggest valuations comparable to CAR-T oncology deals, with the added advantage of a much larger addressable patient population.
+              </p>
 
-            <p>
-              <strong>Roche / Telavant ($7.1B)</strong> further anchored immunology&apos;s premium, demonstrating that acquirers will pay aggressive multiples for validated immunology mechanisms even at relatively early stages of development. For context on how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> differ in immunology versus other TAs, see our royalty benchmark report.
-            </p>
+              <p>
+                <strong>Roche / Telavant ($7.1B)</strong> further anchored immunology&apos;s premium, demonstrating that acquirers will pay aggressive multiples for validated immunology mechanisms even at relatively early stages of development. For context on how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> differ in immunology versus other TAs, see our royalty benchmark report.
+              </p>
 
-            <h2 id="emerging-hotspots">Emerging TA Hotspots</h2>
+              <h2 id="emerging-hotspots">Emerging TA Hotspots</h2>
 
-            <p>
-              Beyond the headline TAs, three areas are experiencing meaningful deal activity increases that are reshaping their benchmark ranges.
-            </p>
+              <p>
+                Beyond the headline TAs, three areas are experiencing meaningful deal activity increases that are reshaping their benchmark ranges.
+              </p>
 
-            <p>
-              <strong>Gastroenterology</strong> has been transformed by the anti-TL1A biology that spans both immunology and GI classifications. The Merck/Prometheus deal anchored in Crohn&apos;s disease created ripple effects across the entire GI space, pulling up valuations for assets targeting ulcerative colitis, celiac disease, and eosinophilic GI disorders. Phase 2 GI upfronts have risen from $40M to $70M in just two years.
-            </p>
+              <p>
+                <strong>Gastroenterology</strong> has been transformed by the anti-TL1A biology that spans both immunology and GI classifications. The Merck/Prometheus deal anchored in Crohn&apos;s disease created ripple effects across the entire GI space, pulling up valuations for assets targeting ulcerative colitis, celiac disease, and eosinophilic GI disorders. Phase 2 GI upfronts have risen from $40M to $70M in just two years.
+              </p>
 
-            <p>
-              <strong>Dermatology</strong> is experiencing renewed interest driven by JAK inhibitor competition, TYK2 inhibitor development, and the expanding atopic dermatitis market. While absolute deal values remain modest ($45M upfront at Phase 2), the year-over-year growth rate in dermatology deal volume is among the highest across all TAs. The <strong>Pfizer / Arena</strong> partnership in dermatologic conditions signaled that major pharma is willing to invest in the space.
-            </p>
+              <p>
+                <strong>Dermatology</strong> is experiencing renewed interest driven by JAK inhibitor competition, TYK2 inhibitor development, and the expanding atopic dermatitis market. While absolute deal values remain modest ($45M upfront at Phase 2), the year-over-year growth rate in dermatology deal volume is among the highest across all TAs. The <strong>Pfizer / Arena</strong> partnership in dermatologic conditions signaled that major pharma is willing to invest in the space.
+              </p>
 
-            <p>
-              <strong>Rare disease</strong> continues to command orphan drug premiums that defy its small patient populations. Seven-year market exclusivity, accelerated FDA pathways, and pricing power ($200K-500K+ per patient annually) allow rare disease deals to approach or exceed the per-deal values of much larger therapeutic areas. The <strong>Vertex / Alpine ($4.9B)</strong> deal for IgA nephropathy demonstrated that the rare disease premium remains intact. For a comprehensive overview of rare disease deal dynamics, explore our <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">therapeutic area benchmarks</Link> starting with oncology.
-            </p>
+              <p>
+                <strong>Rare disease</strong> continues to command orphan drug premiums that defy its small patient populations. Seven-year market exclusivity, accelerated FDA pathways, and pricing power ($200K-500K+ per patient annually) allow rare disease deals to approach or exceed the per-deal values of much larger therapeutic areas. The <strong>Vertex / Alpine ($4.9B)</strong> deal for IgA nephropathy demonstrated that the rare disease premium remains intact. For a comprehensive overview of rare disease deal dynamics, explore our <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">therapeutic area benchmarks</Link> starting with oncology.
+              </p>
+            </div>
+          </section>
 
-            <h2 id="marquee-deals">Marquee Deals by Therapeutic Area</h2>
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10 rounded-sm">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="marquee-deals">Marquee Deals by Therapeutic Area</h2>
 
-            <p>
-              The following transactions represent the market-defining deal in each of the six highest-valued therapeutic areas:
-            </p>
+              <p>
+                The following transactions represent the market-defining deal in each of the six highest-valued therapeutic areas:
+              </p>
 
-            <ul>
-              <li><strong>Metabolic:</strong> Novo Nordisk / Catalent — $16.5B (2024). GLP-1 manufacturing capacity acquisition that signaled the scale of the obesity opportunity.</li>
-              <li><strong>Immunology:</strong> Merck / Prometheus — $10.8B. Anti-TL1A for Crohn&apos;s disease. Reset valuation expectations for the entire autoimmune space.</li>
-              <li><strong>Neurology:</strong> AbbVie / Cerevel — $8.7B. Broad <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neuroscience</Link> portfolio including schizophrenia, Parkinson&apos;s, and mood disorders.</li>
-              <li><strong>Oncology:</strong> Pfizer / Seagen — $43B (2023). The largest <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> deal in history, driven by the ADC platform and commercial franchise.</li>
-              <li><strong>Cardiovascular:</strong> BridgeBio / Astellas — $1.7B ex-US. ATTR cardiomyopathy with mid-single to low-double digit tiered royalties.</li>
-              <li><strong>Rare Disease:</strong> Vertex / Alpine — $4.9B. IgA nephropathy program demonstrating rare disease premium intact.</li>
-            </ul>
+              <ul>
+                <li><strong>Metabolic:</strong> Novo Nordisk / Catalent — $16.5B (2024). GLP-1 manufacturing capacity acquisition that signaled the scale of the obesity opportunity.</li>
+                <li><strong>Immunology:</strong> Merck / Prometheus — $10.8B. Anti-TL1A for Crohn&apos;s disease. Reset valuation expectations for the entire autoimmune space.</li>
+                <li><strong>Neurology:</strong> AbbVie / Cerevel — $8.7B. Broad <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neuroscience</Link> portfolio including schizophrenia, Parkinson&apos;s, and mood disorders.</li>
+                <li><strong>Oncology:</strong> Pfizer / Seagen — $43B (2023). The largest <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> deal in history, driven by the ADC platform and commercial franchise.</li>
+                <li><strong>Cardiovascular:</strong> BridgeBio / Astellas — $1.7B ex-US. ATTR cardiomyopathy with mid-single to low-double digit tiered royalties.</li>
+                <li><strong>Rare Disease:</strong> Vertex / Alpine — $4.9B. IgA nephropathy program demonstrating rare disease premium intact.</li>
+              </ul>
 
-            <p>
-              Each of these deals reflects TA-specific dynamics: metabolic rewards manufacturing scale, immunology rewards validated mechanisms, neurology rewards broad portfolio coverage, and oncology rewards platform-level technology. For additional detail on how <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link> are structured in these marquee transactions, see our glossary.
-            </p>
-          </div>
+              <p>
+                Each of these deals reflects TA-specific dynamics: metabolic rewards manufacturing scale, immunology rewards validated mechanisms, neurology rewards broad portfolio coverage, and oncology rewards platform-level technology. For additional detail on how <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link> are structured in these marquee transactions, see our glossary.
+              </p>
+            </div>
+          </section>
 
-          <InsightCallout title="Cross-TA portfolio strategy">
-            <p>
+          {/* Callout — replaces InsightCallout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+            <p className="text-sm font-semibold text-slate-900 mb-2">Cross-TA portfolio strategy</p>
+            <p className="text-slate-600 leading-relaxed">
               If your company has assets spanning multiple therapeutic areas, deal timing should account for TA-specific premiums. It may be optimal to out-license a Phase 2 metabolic asset (at $150M upfront) before a Phase 2 neurology asset (at $75M), even if the neurology asset is further along clinically. The TA premium can outweigh a full phase advance in some comparisons.
             </p>
-          </InsightCallout>
+          </div>
 
           <div className="prose prose-slate prose-lg max-w-none">
             <h2 id="faq">Frequently Asked Questions</h2>
@@ -446,7 +485,7 @@ export default function DealTermsByTherapeuticAreaPage() {
           <InsightCTA
             variant="bottom"
             heading="Benchmark Your Therapeutic Area"
-            description="Generate deal benchmarks for your specific therapeutic area, phase, and modality — calibrated from 2,600+ real transactions across 12 TAs."
+            description="Generate deal benchmarks for your specific therapeutic area, phase, and modality — calibrated from 3,500+ real transactions across 12 TAs."
           />
         </article>
       </main>

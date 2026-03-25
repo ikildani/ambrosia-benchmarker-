@@ -2,10 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -19,7 +18,7 @@ const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculato
 
 export const metadata: Metadata = {
   title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows | Ambrosia Ventures',
-  description: 'Analysis of 2,600+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures across all major therapeutic areas.',
+  description: 'Analysis of 3,500+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures across all major therapeutic areas.',
   keywords: [
     'biotech out-licensing deal terms 2025',
     'biotech licensing deal structure',
@@ -32,7 +31,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
-    description: '2,600+ deals analyzed. Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.',
+    description: '3,500+ deals analyzed. Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
     images: [{ url: '/api/og?title=Out-Licensing%20Deal%20Terms%202025%E2%80%932026&subtitle=What%20the%20Data%20Shows&type=insight', width: 1200, height: 630 }],
@@ -62,7 +61,7 @@ export default function BiotechOutLicensingPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
-    description: 'Analysis of 2,600+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures.',
+    description: 'Analysis of 3,500+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures.',
     author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
     publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
@@ -142,26 +141,47 @@ export default function BiotechOutLicensingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows"
-          titleAccent={{ text: '2025-2026', color: 'text-blue-400' }}
-          subtitle="What 2,600+ biopharma transactions reveal about deal structure, upfronts, milestones, and royalties across 5 deal types and 12 therapeutic areas."
-          badge="Market Analysis"
-          readTime="14 min read"
-          stats={[
-            { value: '2,600+', label: 'Deals analyzed' },
-            { value: '5', label: 'Deal types' },
-            { value: '12', label: 'Therapeutic areas' },
-          ]}
-          breadcrumbLabel="Out-Licensing Deal Terms"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-[11px] text-slate-400 mb-10 uppercase tracking-widest">
+              <Link href="/" className="hover:text-slate-600">Home</Link>
+              <span className="text-slate-300">/</span>
+              <Link href="/insights" className="hover:text-slate-600">Insights</Link>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-500">Out-Licensing Deal Terms</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">What 3,500+ biopharma transactions reveal about deal structure, upfronts, milestones, and royalties across 5 deal types and 12 therapeutic areas.</p>
+          </div>
+        </header>
+
+        {/* Section 1: white */}
+        <article className="max-w-4xl mx-auto px-6 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <TrustBar />
 
             <AuthorByline date="March 24, 2026" />
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
+              <span>Published March 25, 2026</span>
+              <span className="text-slate-300">&middot;</span>
+              <span>Ambrosia Ventures Research</span>
+            </div>
 
             <KeyTakeaways takeaways={[
               'Out-licensing deal terms in 2025-2026 reflect a bimodal market: mega-deals ($5B+) and competitive discovery-stage scouting ($50-200M).',
@@ -185,7 +205,7 @@ export default function BiotechOutLicensingPage() {
             </p>
 
             <p>
-              This analysis breaks down the five dominant deal structures in biopharma out-licensing — licensing, acquisition, co-development, option, and collaboration — with benchmark economics for each, cross-referenced against 12 therapeutic areas and 7 development phases. The data is drawn from over 2,600 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> from 2020 through Q1 2026. For a deeper dive into how to evaluate these structures for your specific situation, see our guide on <Link href="/guides/biotech-licensing-deal-structure" className="text-teal-600 font-medium hover:text-teal-700">biotech licensing deal structure</Link>.
+              This analysis breaks down the five dominant deal structures in biopharma out-licensing — licensing, acquisition, co-development, option, and collaboration — with benchmark economics for each, cross-referenced against 12 therapeutic areas and 7 development phases. The data is drawn from over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> from 2020 through Q1 2026. For a deeper dive into how to evaluate these structures for your specific situation, see our guide on <Link href="/guides/biotech-licensing-deal-structure" className="text-teal-600 font-medium hover:text-teal-700">biotech licensing deal structure</Link>.
             </p>
 
             <h2 id="market-snapshot">Market Snapshot: 2025-2026 Deal Environment</h2>
@@ -213,7 +233,8 @@ export default function BiotechOutLicensingPage() {
           </div>
         </article>
 
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1</p>
           <GatedBenchmarkTable
             headers={['Deal Type', 'Upfront (% of TDV)', 'Milestones / Cost Share', 'Royalty / Profit Split']}
             rows={[
@@ -226,11 +247,11 @@ export default function BiotechOutLicensingPage() {
             freeRows={5}
             ctaText="Model any deal type — Free calculator"
             ctaHref="/calculator"
-            footnote="Source: Ambrosia Benchmarker, 2,600+ transactions 2020-2026."
+            footnote="Source: Ambrosia Benchmarker, 3,500+ transactions 2020-2026."
           />
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 mt-8">
+        <div className="max-w-4xl mx-auto px-6 mt-8">
           <PhaseUpfrontChart
             data={[
               { phase: 'Metabolic', low: 75, median: 150, high: 300 },
@@ -245,42 +266,53 @@ export default function BiotechOutLicensingPage() {
           />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
-          <div className="prose prose-slate prose-lg max-w-none">
+        {/* Section 2: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              <strong>Licensing</strong> remains the most common out-licensing structure, accounting for roughly 45% of all tracked deals. The 15-20% upfront as a percentage of total deal value is the benchmark starting point, though actual percentages vary by phase (earlier phases tend toward the lower end, later phases toward the higher end). The <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> portion (55-65% of TDV) is typically split between clinical (35-45%), regulatory (20-30%), and commercial (30-40%) triggers. Royalties range from 8-15% of net sales, with tiered structures common for assets with blockbuster potential.
-            </p>
-
-            <p>
-              <strong>Acquisitions</strong> deliver 100% upfront by definition, at a premium to market capitalization for public biotechs. The median acquisition premium in our dataset is 45-60% for clinical-stage companies, though premiums exceeding 100% are not uncommon for assets with Phase 3 data or first-in-class mechanisms. The key benchmark consideration is not the premium percentage but the unaffected market cap — the price target before any deal speculation.
-            </p>
-
-            <p>
-              <strong>Co-development</strong> structures sacrifice upfront economics (10-15% of TDV) in exchange for long-term profit participation. Instead of royalties, the licensor shares development costs (typically 50-60%) and receives a profit split on commercial sales. For a blockbuster drug, a 50/50 profit split can deliver 3-5x more cumulative value than a 12% royalty — but only if you have the balance sheet to fund your share of Phase 3 development costs. This structure is increasingly popular among well-capitalized biotechs that want to retain commercial upside.
-            </p>
-
-            <p>
-              <strong>Option</strong> deals have grown from approximately 8% of tracked deals in 2020 to roughly 18% in 2025. The structure provides an option fee (5-10% of expected TDV) upfront, followed by an exercise payment (15-25%) triggered by a predefined clinical milestone — most commonly Phase 2 data readout. The appeal for licensors is that the option fee is non-refundable, and if the option is exercised, the total economics often exceed a comparably staged licensing deal because the exercise payment reflects updated (lower) clinical risk.
-            </p>
-
-            <p>
-              <strong>Collaboration</strong> structures are the most complex, combining upfront payments (8-12%), milestone payments (60-70%), and shared commercialization responsibilities. These are most common in therapeutic areas where both parties bring complementary commercial infrastructure — for example, a US-focused biotech collaborating with a partner that has superior ex-US commercial capabilities. Our <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European licensing analysis</Link> covers geographic deal structures in more detail.
-            </p>
-
-            <InsightCallout title="Structure selection framework">
               <p>
-                Choose licensing if you need maximum near-term cash. Choose co-development if you have cash runway and believe in blockbuster potential. Choose option structures if you want to lock in a partner while preserving upside from upcoming data. Choose collaboration if you intend to commercialize in at least one geography.
+                <strong>Licensing</strong> remains the most common out-licensing structure, accounting for roughly 45% of all tracked deals. The 15-20% upfront as a percentage of total deal value is the benchmark starting point, though actual percentages vary by phase (earlier phases tend toward the lower end, later phases toward the higher end). The <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> portion (55-65% of TDV) is typically split between clinical (35-45%), regulatory (20-30%), and commercial (30-40%) triggers. Royalties range from 8-15% of net sales, with tiered structures common for assets with blockbuster potential.
               </p>
-            </InsightCallout>
 
-            <InsightCTA
-              variant="mid"
-              heading="Model Any Deal Structure"
-              description="Compare licensing, co-dev, option, and collaboration economics side-by-side for your specific asset."
-            />
+              <p>
+                <strong>Acquisitions</strong> deliver 100% upfront by definition, at a premium to market capitalization for public biotechs. The median acquisition premium in our dataset is 45-60% for clinical-stage companies, though premiums exceeding 100% are not uncommon for assets with Phase 3 data or first-in-class mechanisms. The key benchmark consideration is not the premium percentage but the unaffected market cap — the price target before any deal speculation.
+              </p>
 
-            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+              <p>
+                <strong>Co-development</strong> structures sacrifice upfront economics (10-15% of TDV) in exchange for long-term profit participation. Instead of royalties, the licensor shares development costs (typically 50-60%) and receives a profit split on commercial sales. For a blockbuster drug, a 50/50 profit split can deliver 3-5x more cumulative value than a 12% royalty — but only if you have the balance sheet to fund your share of Phase 3 development costs. This structure is increasingly popular among well-capitalized biotechs that want to retain commercial upside.
+              </p>
+
+              <p>
+                <strong>Option</strong> deals have grown from approximately 8% of tracked deals in 2020 to roughly 18% in 2025. The structure provides an option fee (5-10% of expected TDV) upfront, followed by an exercise payment (15-25%) triggered by a predefined clinical milestone — most commonly Phase 2 data readout. The appeal for licensors is that the option fee is non-refundable, and if the option is exercised, the total economics often exceed a comparably staged licensing deal because the exercise payment reflects updated (lower) clinical risk.
+              </p>
+
+              <p>
+                <strong>Collaboration</strong> structures are the most complex, combining upfront payments (8-12%), milestone payments (60-70%), and shared commercialization responsibilities. These are most common in therapeutic areas where both parties bring complementary commercial infrastructure — for example, a US-focused biotech collaborating with a partner that has superior ex-US commercial capabilities. Our <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European licensing analysis</Link> covers geographic deal structures in more detail.
+              </p>
+
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Structure selection framework</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Choose licensing if you need maximum near-term cash. Choose co-development if you have cash runway and believe in blockbuster potential. Choose option structures if you want to lock in a partner while preserving upside from upcoming data. Choose collaboration if you intend to commercialize in at least one geography.
+                </p>
+              </div>
+
+              <InsightCTA
+                variant="mid"
+                heading="Model Any Deal Structure"
+                description="Compare licensing, co-dev, option, and collaboration economics side-by-side for your specific asset."
+              />
+
+              <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 3: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="phase-by-phase-economics">Phase-by-Phase Economics Across Top Therapeutic Areas</h2>
 
@@ -293,7 +325,8 @@ export default function BiotechOutLicensingPage() {
           </div>
         </article>
 
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2</p>
           <GatedBenchmarkTable
             headers={['Therapeutic Area', 'Ph2 Median Upfront', 'Ph2 Total Value', 'Royalty Range', 'Ph1 → Ph2 Jump']}
             rows={[
@@ -313,48 +346,59 @@ export default function BiotechOutLicensingPage() {
           />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
-          <div className="prose prose-slate prose-lg max-w-none">
+        {/* Section 4: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              The most striking feature of this data is that metabolic diseases — not <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> — command the highest Phase 2 upfronts at $150M median. This reflects the GLP-1 revolution: the commercial validation of semaglutide and tirzepatide created a multi-hundred-billion-dollar addressable market for metabolic therapies, and pharma companies are bidding aggressively for assets that could capture even a fraction of that opportunity. The Merck acquisition of Prometheus at $10.8 billion and similar metabolic-adjacent deals have recalibrated the entire therapeutic area.
-            </p>
-
-            <p>
-              Immunology follows at $120M median Phase 2 upfront, driven by the anti-TL1A wave and the continued expansion of JAK inhibitor and IL-pathway programs. The Roche-Telavant deal at $7.1 billion and the Vertex-Alpine IgAN deal at $4.9 billion established new reference points for immunology licensing economics. For a complete breakdown of how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> vary across these TAs, see our dedicated analysis.
-            </p>
-
-            <h2 id="real-deal-comps">Real Deal Comps: Marquee 2024-2025 Transactions</h2>
-
-            <p>
-              <strong>AbbVie-Cerevel: $8.7 billion (2024).</strong> AbbVie&apos;s acquisition of Cerevel Therapeutics for $8.7 billion was the largest <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neuroscience</Link> deal in the dataset, reflecting AbbVie&apos;s strategic imperative to build a post-Humira pipeline in CNS disorders. The deal valued Cerevel&apos;s Phase 2/3 schizophrenia asset (emraclidine) and a broader neuroscience pipeline at approximately 15x peak sales estimates. For neurology licensors, the Cerevel deal established that first-in-class mechanisms in large CNS indications can command acquisition multiples previously reserved for oncology.
-            </p>
-
-            <p>
-              <strong>Biogen-Sage: $7.6 billion neuroscience pipeline deal.</strong> Biogen&apos;s partnership with Sage Therapeutics demonstrated that even assets with mixed Phase 3 results can command significant deal value when the unmet need is large enough. Zuranolone&apos;s approval in postpartum depression, combined with ongoing development in MDD, supported total deal economics that exceeded initial market expectations.
-            </p>
-
-            <p>
-              <strong>Vertex-Alpine: $4.9 billion, IgAN.</strong> The Vertex acquisition of Alpine Immune Sciences for its BAFF/APRIL antagonist porolimab demonstrated the premium that immunology assets with differentiated mechanisms can command. The deal was structured as a full acquisition at a 67% premium to Alpine&apos;s unaffected share price, reflecting both the clinical promise of the asset and the competitive dynamics in IgA nephropathy.
-            </p>
-
-            <p>
-              <strong>Roche-Telavant: $7.1 billion.</strong> Roche&apos;s acquisition of Telavant from Roivant Sciences for its anti-TL1A antibody RVT-3101 in inflammatory bowel disease was one of the defining immunology deals of 2024. The deal valued a Phase 3 asset at $7.1 billion, establishing a benchmark for TL1A-targeting programs that reverberated across the competitive landscape.
-            </p>
-
-            <p>
-              <strong>Alnylam-Roche: $2.2 billion, RNAi cardiovascular.</strong> The Alnylam-Roche partnership for zilebesiran, an investigational RNAi therapeutic targeting hypertension, demonstrated that modality innovation can drive premium deal terms even in therapeutic areas (cardiovascular) that traditionally carry lower valuations than oncology or immunology. The co-development structure with significant upfront and milestone payments reflected Roche&apos;s conviction in the RNAi platform for chronic cardiovascular conditions.
-            </p>
-
-            <p>
-              <strong>BridgeBio-Astellas: $1.7 billion, ex-US licensing.</strong> BridgeBio&apos;s licensing of acoramidis (for ATTR cardiomyopathy) to Astellas for ex-US rights at $1.7 billion demonstrated the value of geographic licensing structures for validated assets. By retaining US commercial rights, BridgeBio maintained the highest-value commercial opportunity while monetizing ex-US rights at a premium.
-            </p>
-
-            <InsightCallout title="Deal comp insight">
               <p>
-                Notice the pattern: 4 of these 6 marquee deals were structured as acquisitions, not licensing agreements. When pharma sees a truly differentiated asset, they increasingly prefer full ownership to shared economics. If your asset is in a competitive therapeutic area with multiple interested parties, consider whether an acquisition outcome might better serve your shareholders than a licensing structure. See our guide on <Link href="/guides/pharma-ma-vs-licensing" className="text-teal-600 font-medium hover:text-teal-700">pharma M&A vs. licensing</Link> for a detailed comparison framework.
+                The most striking feature of this data is that metabolic diseases — not <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology</Link> — command the highest Phase 2 upfronts at $150M median. This reflects the GLP-1 revolution: the commercial validation of semaglutide and tirzepatide created a multi-hundred-billion-dollar addressable market for metabolic therapies, and pharma companies are bidding aggressively for assets that could capture even a fraction of that opportunity. The Merck acquisition of Prometheus at $10.8 billion and similar metabolic-adjacent deals have recalibrated the entire therapeutic area.
               </p>
-            </InsightCallout>
+
+              <p>
+                Immunology follows at $120M median Phase 2 upfront, driven by the anti-TL1A wave and the continued expansion of JAK inhibitor and IL-pathway programs. The Roche-Telavant deal at $7.1 billion and the Vertex-Alpine IgAN deal at $4.9 billion established new reference points for immunology licensing economics. For a complete breakdown of how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> vary across these TAs, see our dedicated analysis.
+              </p>
+
+              <h2 id="real-deal-comps">Real Deal Comps: Marquee 2024-2025 Transactions</h2>
+
+              <p>
+                <strong>AbbVie-Cerevel: $8.7 billion (2024).</strong> AbbVie&apos;s acquisition of Cerevel Therapeutics for $8.7 billion was the largest <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neuroscience</Link> deal in the dataset, reflecting AbbVie&apos;s strategic imperative to build a post-Humira pipeline in CNS disorders. The deal valued Cerevel&apos;s Phase 2/3 schizophrenia asset (emraclidine) and a broader neuroscience pipeline at approximately 15x peak sales estimates. For neurology licensors, the Cerevel deal established that first-in-class mechanisms in large CNS indications can command acquisition multiples previously reserved for oncology.
+              </p>
+
+              <p>
+                <strong>Biogen-Sage: $7.6 billion neuroscience pipeline deal.</strong> Biogen&apos;s partnership with Sage Therapeutics demonstrated that even assets with mixed Phase 3 results can command significant deal value when the unmet need is large enough. Zuranolone&apos;s approval in postpartum depression, combined with ongoing development in MDD, supported total deal economics that exceeded initial market expectations.
+              </p>
+
+              <p>
+                <strong>Vertex-Alpine: $4.9 billion, IgAN.</strong> The Vertex acquisition of Alpine Immune Sciences for its BAFF/APRIL antagonist porolimab demonstrated the premium that immunology assets with differentiated mechanisms can command. The deal was structured as a full acquisition at a 67% premium to Alpine&apos;s unaffected share price, reflecting both the clinical promise of the asset and the competitive dynamics in IgA nephropathy.
+              </p>
+
+              <p>
+                <strong>Roche-Telavant: $7.1 billion.</strong> Roche&apos;s acquisition of Telavant from Roivant Sciences for its anti-TL1A antibody RVT-3101 in inflammatory bowel disease was one of the defining immunology deals of 2024. The deal valued a Phase 3 asset at $7.1 billion, establishing a benchmark for TL1A-targeting programs that reverberated across the competitive landscape.
+              </p>
+
+              <p>
+                <strong>Alnylam-Roche: $2.2 billion, RNAi cardiovascular.</strong> The Alnylam-Roche partnership for zilebesiran, an investigational RNAi therapeutic targeting hypertension, demonstrated that modality innovation can drive premium deal terms even in therapeutic areas (cardiovascular) that traditionally carry lower valuations than oncology or immunology. The co-development structure with significant upfront and milestone payments reflected Roche&apos;s conviction in the RNAi platform for chronic cardiovascular conditions.
+              </p>
+
+              <p>
+                <strong>BridgeBio-Astellas: $1.7 billion, ex-US licensing.</strong> BridgeBio&apos;s licensing of acoramidis (for ATTR cardiomyopathy) to Astellas for ex-US rights at $1.7 billion demonstrated the value of geographic licensing structures for validated assets. By retaining US commercial rights, BridgeBio maintained the highest-value commercial opportunity while monetizing ex-US rights at a premium.
+              </p>
+
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Deal comp insight</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Notice the pattern: 4 of these 6 marquee deals were structured as acquisitions, not licensing agreements. When pharma sees a truly differentiated asset, they increasingly prefer full ownership to shared economics. If your asset is in a competitive therapeutic area with multiple interested parties, consider whether an acquisition outcome might better serve your shareholders than a licensing structure. See our guide on <Link href="/guides/pharma-ma-vs-licensing" className="text-teal-600 font-medium hover:text-teal-700">pharma M&A vs. licensing</Link> for a detailed comparison framework.
+                </p>
+              </div>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 5: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="negotiation-leverage">Negotiation Leverage by Phase</h2>
 
@@ -378,37 +422,54 @@ export default function BiotechOutLicensingPage() {
               <strong>Phase 3 and beyond (leverage plateau):</strong> Late-stage assets command higher absolute upfronts but lower leverage in percentage terms. The licensee is now acquiring a near-certain commercial asset, and the negotiation shifts from risk-sharing to commercial value allocation. Your leverage at this stage depends almost entirely on competitive dynamics — how many other pharma companies want this asset and how urgently they need it.
             </p>
 
-            <h2 id="what-founders-get-wrong">What Founders Get Wrong in Term Sheets</h2>
+          </div>
+        </article>
 
-            <p>
-              After analyzing thousands of deal outcomes, several systematic mistakes emerge in how biotech founders approach term sheet negotiation.
-            </p>
+        {/* Section 6: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              <strong>Mistake 1: Optimizing for headline total deal value.</strong> The most common founder error is focusing on total deal value (TDV) rather than the risk-adjusted expected value. A deal with $50M upfront and $2B in milestones sounds better than a deal with $80M upfront and $800M in milestones — until you realize that the $2B deal has milestones tied to Phase 3 success, regulatory approval, and $5B in cumulative sales, each of which requires multiplying probabilities. The risk-adjusted expected value of the second deal may be higher. Our <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">biotech deal valuation guide</Link> walks through this calculation step by step.
-            </p>
+              <h2 id="what-founders-get-wrong">What Founders Get Wrong in Term Sheets</h2>
 
-            <p>
-              <strong>Mistake 2: Undervaluing upfront relative to milestones.</strong> A dollar of <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront</Link> is worth more than a dollar of milestone, always. Upfront is certain, immediate, and non-dilutive. Milestones are probabilistic, deferred, and often contingent on decisions that the licensee controls (like whether to advance into Phase 3). Our data shows that only 35-45% of clinical milestones and 20-25% of commercial milestones are ever triggered. Price accordingly.
-            </p>
-
-            <p>
-              <strong>Mistake 3: Ignoring diligence obligations.</strong> The most valuable clause in many licensing agreements is not the financial terms — it is the diligence obligation. A licensee that is obligated to advance your program on a specific timeline, with defined <Link href="/glossary/development-milestones" className="text-teal-600 font-medium hover:text-teal-700">development milestones</Link> and sunset clauses, is fundamentally different from a licensee with discretionary development rights. Founders routinely accept weaker diligence terms in exchange for marginally higher financial terms, which is almost always the wrong trade.
-            </p>
-
-            <p>
-              <strong>Mistake 4: Treating royalty rates as fixed.</strong> Royalty rates should be negotiated as tiered structures with escalators tied to commercial performance. A flat 10% royalty on a drug that achieves $5B in peak sales is a meaningfully different outcome than a 8%/12%/15% tiered royalty on the same drug, even though both might appear similar at signing. Tiered royalties align incentives and capture disproportionate upside from blockbuster outcomes. For detailed benchmarks on how to structure these tiers, see our <Link href="/guides/negotiate-pharma-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty negotiation guide</Link>.
-            </p>
-
-            <p>
-              <strong>Mistake 5: Negotiating geography as an afterthought.</strong> Geographic rights allocation is one of the highest-leverage negotiation variables, yet many founders treat it as a binary (worldwide vs. not worldwide) decision. The BridgeBio-Astellas deal ($1.7B for ex-US rights only) demonstrates the enormous value that can be preserved by retaining commercial rights in your strongest market. If you have US commercial ambitions, negotiate geographic splits aggressively.
-            </p>
-
-            <InsightCallout title="Bottom line for founders">
               <p>
-                Optimize for risk-adjusted expected value, not headline numbers. Maximize upfront as a percentage of total economics. Negotiate diligence obligations as aggressively as financial terms. Structure royalties as tiered escalators. And always consider geographic splits before defaulting to worldwide rights.
+                After analyzing thousands of deal outcomes, several systematic mistakes emerge in how biotech founders approach term sheet negotiation.
               </p>
-            </InsightCallout>
+
+              <p>
+                <strong>Mistake 1: Optimizing for headline total deal value.</strong> The most common founder error is focusing on total deal value (TDV) rather than the risk-adjusted expected value. A deal with $50M upfront and $2B in milestones sounds better than a deal with $80M upfront and $800M in milestones — until you realize that the $2B deal has milestones tied to Phase 3 success, regulatory approval, and $5B in cumulative sales, each of which requires multiplying probabilities. The risk-adjusted expected value of the second deal may be higher. Our <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">biotech deal valuation guide</Link> walks through this calculation step by step.
+              </p>
+
+              <p>
+                <strong>Mistake 2: Undervaluing upfront relative to milestones.</strong> A dollar of <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront</Link> is worth more than a dollar of milestone, always. Upfront is certain, immediate, and non-dilutive. Milestones are probabilistic, deferred, and often contingent on decisions that the licensee controls (like whether to advance into Phase 3). Our data shows that only 35-45% of clinical milestones and 20-25% of commercial milestones are ever triggered. Price accordingly.
+              </p>
+
+              <p>
+                <strong>Mistake 3: Ignoring diligence obligations.</strong> The most valuable clause in many licensing agreements is not the financial terms — it is the diligence obligation. A licensee that is obligated to advance your program on a specific timeline, with defined <Link href="/glossary/development-milestones" className="text-teal-600 font-medium hover:text-teal-700">development milestones</Link> and sunset clauses, is fundamentally different from a licensee with discretionary development rights. Founders routinely accept weaker diligence terms in exchange for marginally higher financial terms, which is almost always the wrong trade.
+              </p>
+
+              <p>
+                <strong>Mistake 4: Treating royalty rates as fixed.</strong> Royalty rates should be negotiated as tiered structures with escalators tied to commercial performance. A flat 10% royalty on a drug that achieves $5B in peak sales is a meaningfully different outcome than a 8%/12%/15% tiered royalty on the same drug, even though both might appear similar at signing. Tiered royalties align incentives and capture disproportionate upside from blockbuster outcomes. For detailed benchmarks on how to structure these tiers, see our <Link href="/guides/negotiate-pharma-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty negotiation guide</Link>.
+              </p>
+
+              <p>
+                <strong>Mistake 5: Negotiating geography as an afterthought.</strong> Geographic rights allocation is one of the highest-leverage negotiation variables, yet many founders treat it as a binary (worldwide vs. not worldwide) decision. The BridgeBio-Astellas deal ($1.7B for ex-US rights only) demonstrates the enormous value that can be preserved by retaining commercial rights in your strongest market. If you have US commercial ambitions, negotiate geographic splits aggressively.
+              </p>
+
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Bottom line for founders</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Optimize for risk-adjusted expected value, not headline numbers. Maximize upfront as a percentage of total economics. Negotiate diligence obligations as aggressively as financial terms. Structure royalties as tiered escalators. And always consider geographic splits before defaulting to worldwide rights.
+                </p>
+              </div>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 7: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="faq">Frequently Asked Questions</h2>
 
@@ -463,7 +524,7 @@ export default function BiotechOutLicensingPage() {
               {
                 href: '/insights/pharma-licensing-royalty-rates',
                 title: 'Pharma Licensing Royalty Rates',
-                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 2,600+ transactions.',
+                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 3,500+ transactions.',
                 badge: 'Data Report',
               },
               {
@@ -498,7 +559,7 @@ export default function BiotechOutLicensingPage() {
         <InsightCTA
           variant="bottom"
           heading="Model Your Deal Structure"
-          description="Compare licensing, co-development, option, and collaboration economics for your specific asset — powered by 2,600+ real transactions."
+          description="Compare licensing, co-development, option, and collaboration economics for your specific asset — powered by 3,500+ real transactions."
         />
       </main>
       <SiteFooter />

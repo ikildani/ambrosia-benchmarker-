@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -128,22 +127,40 @@ export default function BiotechLicensingEuropePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Biotech Licensing Deal Terms in Europe: Benchmarks & Regional Dynamics"
-          titleAccent={{ text: 'Europe', color: 'text-blue-400' }}
-          subtitle="European out-licensing has distinct dynamics shaped by EMA pathways, territory split economics, and a maturing continental biotech ecosystem. Here is what the data shows."
-          badge="Regional Intelligence"
-          readTime="12 min read"
-          stats={[
-            { value: '25-35%', label: 'EU share of global value' },
-            { value: '280+', label: 'Comparable deals' },
-            { value: '2020-26', label: 'Time period' },
-          ]}
-          breadcrumbLabel="Biotech Licensing Europe"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
-          <AuthorByline date="March 24, 2026" />
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-xs text-slate-400 mb-8">
+              <Link href="/" className="hover:text-teal-600 transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/insights" className="hover:text-teal-600 transition-colors">Insights</Link>
+              <span>/</span>
+              <span className="text-slate-600">Biotech Licensing Europe</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report &middot; March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Biotech Licensing Deal Terms in Europe: Benchmarks & Regional Dynamics</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">European out-licensing has distinct dynamics shaped by EMA pathways, territory split economics, and a maturing continental biotech ecosystem. Here is what the data shows.</p>
+          </div>
+        </header>
+
+        <article className="max-w-4xl mx-auto px-6 py-12">
+          <div className="flex items-center gap-4 text-sm text-slate-500 mb-8">
+            <AuthorByline date="March 24, 2026" />
+            <span className="text-slate-300">|</span>
+            <span>12 min read</span>
+          </div>
 
           <KeyTakeaways
             takeaways={[
@@ -174,7 +191,7 @@ export default function BiotechLicensingEuropePage() {
             </p>
 
             <p>
-              This analysis draws on <strong className="text-blue-700">280+ comparable biopharma transactions</strong> from 2020 through early 2026, with a specific focus on how territory scope affects <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link>, total deal value, milestone structures, and <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty economics</Link>. Whether you are a European biotech founder preparing for your first licensing conversation or a BD professional benchmarking a regional deal, this data provides the quantitative foundation you need.
+              This analysis draws on <strong className="text-blue-700">3,500+ comparable biopharma transactions</strong> from 2020 through early 2026, with a specific focus on how territory scope affects <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link>, total deal value, milestone structures, and <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty economics</Link>. Whether you are a European biotech founder preparing for your first licensing conversation or a BD professional benchmarking a regional deal, this data provides the quantitative foundation you need.
             </p>
 
             <h2 id="territory-economics">Territory Economics: How Geography Shapes Deal Value</h2>
@@ -192,18 +209,21 @@ export default function BiotechLicensingEuropePage() {
             </p>
           </div>
 
-          <GatedBenchmarkTable
-            headers={['Territory Scope', 'Upfront as % of Global', 'Total Value Multiplier', 'Typical Royalty Adj.', 'Common Deal Type']}
-            rows={[
-              ['Global Rights', <strong key="g1" className="text-blue-700">100% (baseline)</strong>, '1.0x', 'Baseline (12-20%)', 'Licensing / Collaboration'],
-              ['US-Only', <strong key="u1" className="text-blue-700">65-70%</strong>, '0.65-0.70x', '-0 to -2 pp', 'Licensing'],
-              ['EU-Only (EEA + UK)', <strong key="e1" className="text-blue-700">25-35%</strong>, '0.25-0.35x', '-2 to -5 pp', 'Licensing / Co-promote'],
-              ['Ex-US (EU + Japan + ROW)', <strong key="x1" className="text-blue-700">55-65%</strong>, '0.55-0.65x', '-1 to -3 pp', 'Licensing / Collaboration'],
-              ['APAC (China + Japan + SEA)', <strong key="a1" className="text-blue-700">20-30%</strong>, '0.20-0.30x', '-3 to -6 pp', 'Licensing / Option'],
-            ]}
-            freeRows={3}
-            footnote="Source: Ambrosia Ventures analysis of 280+ biopharma licensing transactions (2020-2026). Royalty adjustment expressed as percentage points vs. global baseline."
-          />
+          <div className="my-10">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-3">Exhibit 1</p>
+            <GatedBenchmarkTable
+              headers={['Territory Scope', 'Upfront as % of Global', 'Total Value Multiplier', 'Typical Royalty Adj.', 'Common Deal Type']}
+              rows={[
+                ['Global Rights', <strong key="g1" className="text-blue-700">100% (baseline)</strong>, '1.0x', 'Baseline (12-20%)', 'Licensing / Collaboration'],
+                ['US-Only', <strong key="u1" className="text-blue-700">65-70%</strong>, '0.65-0.70x', '-0 to -2 pp', 'Licensing'],
+                ['EU-Only (EEA + UK)', <strong key="e1" className="text-blue-700">25-35%</strong>, '0.25-0.35x', '-2 to -5 pp', 'Licensing / Co-promote'],
+                ['Ex-US (EU + Japan + ROW)', <strong key="x1" className="text-blue-700">55-65%</strong>, '0.55-0.65x', '-1 to -3 pp', 'Licensing / Collaboration'],
+                ['APAC (China + Japan + SEA)', <strong key="a1" className="text-blue-700">20-30%</strong>, '0.20-0.30x', '-3 to -6 pp', 'Licensing / Option'],
+              ]}
+              freeRows={3}
+              footnote="Source: Ambrosia Ventures analysis of 280+ biopharma licensing transactions (2020-2026). Royalty adjustment expressed as percentage points vs. global baseline."
+            />
+          </div>
 
           <PhaseUpfrontChart
             data={[
@@ -218,31 +238,36 @@ export default function BiotechLicensingEuropePage() {
             yLabel="% of Global Value"
           />
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <p>
-              Several factors push EU-only deals toward the higher end of the 25-35% range. Assets with <strong>EMA orphan drug designation</strong> command premium territory economics because European rare disease pricing, while lower than the US, still offers attractive margins with less competitive pressure. Similarly, assets with <strong>EMA PRIME designation</strong> (Priority Medicines) benefit from accelerated assessment timelines that reduce time-to-market risk for the licensee. <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">Oncology assets</Link> with companion diagnostics also command higher EU territory value due to the EMA's growing alignment with biomarker-driven approvals.
-            </p>
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <p>
+                Several factors push EU-only deals toward the higher end of the 25-35% range. Assets with <strong>EMA orphan drug designation</strong> command premium territory economics because European rare disease pricing, while lower than the US, still offers attractive margins with less competitive pressure. Similarly, assets with <strong>EMA PRIME designation</strong> (Priority Medicines) benefit from accelerated assessment timelines that reduce time-to-market risk for the licensee. <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">Oncology assets</Link> with companion diagnostics also command higher EU territory value due to the EMA's growing alignment with biomarker-driven approvals.
+              </p>
 
-            <h2 id="eu-comparable-deals">EU-Relevant Comparable Deals</h2>
+              <h2 id="eu-comparable-deals">EU-Relevant Comparable Deals</h2>
 
-            <p>
-              Real transaction data anchors any licensing negotiation. The following deals illustrate the range of structures and economics that European territory licensing can take. Note the variation in upfront-to-total-value ratios, which reflects differences in clinical stage, competitive dynamics, and strategic fit between partners. For broader context on how these deals compare to <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing benchmarks</Link>, see our comprehensive deal terms analysis.
-            </p>
-          </div>
+              <p>
+                Real transaction data anchors any licensing negotiation. The following deals illustrate the range of structures and economics that European territory licensing can take. Note the variation in upfront-to-total-value ratios, which reflects differences in clinical stage, competitive dynamics, and strategic fit between partners. For broader context on how these deals compare to <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing benchmarks</Link>, see our comprehensive deal terms analysis.
+              </p>
+            </div>
 
-          <GatedBenchmarkTable
-            headers={['Deal', 'Territory', 'Total Value', 'Upfront', 'Therapeutic Area']}
-            rows={[
-              ['BridgeBio / Astellas (2024)', 'Ex-US (Europe + Japan + ROW)', <strong key="bb" className="text-blue-700">$1.7B</strong>, '$400M', 'Cardiovascular (ATTR)'],
-              ['Alnylam / Roche (2024)', 'Global', <strong key="ar" className="text-blue-700">$2.2B</strong>, '$310M', 'Cardiovascular (RNAi)'],
-              ['Menarini / Radius Health', 'Europe Rights', <strong key="mr" className="text-blue-700">$1.3B</strong>, '$200M', 'Oncology (Breast)'],
-              ['Ipsen / Exelixis', 'Ex-US', <strong key="ie" className="text-blue-700">$1.8B</strong>, 'Royalty-based', 'Oncology (Cabozantinib)'],
-              ['BioNTech / Multiple Partners', 'EU-centric', <strong key="bn" className="text-blue-700">$500M-$2B+</strong>, 'Variable', 'Oncology (mRNA Platform)'],
-              ['Galapagos / Gilead (Restructured)', 'Europe Retained', <strong key="gg" className="text-blue-700">$5.1B (original)</strong>, '$3.95B (original)', 'Immunology (Filgotinib)'],
-            ]}
-            freeRows={3}
-            footnote="Source: Public filings, press releases, and Ambrosia Ventures deal database. Values represent headline deal economics."
-          />
+            <div className="my-10">
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-3">Exhibit 2</p>
+              <GatedBenchmarkTable
+                headers={['Deal', 'Territory', 'Total Value', 'Upfront', 'Therapeutic Area']}
+                rows={[
+                  ['BridgeBio / Astellas (2024)', 'Ex-US (Europe + Japan + ROW)', <strong key="bb" className="text-blue-700">$1.7B</strong>, '$400M', 'Cardiovascular (ATTR)'],
+                  ['Alnylam / Roche (2024)', 'Global', <strong key="ar" className="text-blue-700">$2.2B</strong>, '$310M', 'Cardiovascular (RNAi)'],
+                  ['Menarini / Radius Health', 'Europe Rights', <strong key="mr" className="text-blue-700">$1.3B</strong>, '$200M', 'Oncology (Breast)'],
+                  ['Ipsen / Exelixis', 'Ex-US', <strong key="ie" className="text-blue-700">$1.8B</strong>, 'Royalty-based', 'Oncology (Cabozantinib)'],
+                  ['BioNTech / Multiple Partners', 'EU-centric', <strong key="bn" className="text-blue-700">$500M-$2B+</strong>, 'Variable', 'Oncology (mRNA Platform)'],
+                  ['Galapagos / Gilead (Restructured)', 'Europe Retained', <strong key="gg" className="text-blue-700">$5.1B (original)</strong>, '$3.95B (original)', 'Immunology (Filgotinib)'],
+                ]}
+                freeRows={3}
+                footnote="Source: Public filings, press releases, and Ambrosia Ventures deal database. Values represent headline deal economics."
+              />
+            </div>
+          </section>
 
           <div className="prose prose-slate prose-lg max-w-none">
             <p>
@@ -288,29 +313,33 @@ export default function BiotechLicensingEuropePage() {
 
           <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
 
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="ema-fda-arbitrage">EMA vs. FDA Regulatory Arbitrage</h2>
+
+              <p>
+                The European Medicines Agency and the US FDA operate under different regulatory philosophies, timelines, and evidentiary standards. These differences create arbitrage opportunities — and risks — that directly affect licensing deal economics. See our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology page</Link> for how we model regulatory risk into deal benchmarks.
+              </p>
+
+              <p>
+                <strong>Dual-filing advantage.</strong> Assets with parallel FDA and EMA submissions de-risk the deal for both parties. In our dataset, dual-filing assets command a <strong className="text-blue-700">15-25% premium on total deal value</strong> compared to FDA-only filings, because the licensee gains near-simultaneous access to both major markets. For European biotechs, this means investing in EMA regulatory strategy early — even before a licensing deal — can materially increase deal economics.
+              </p>
+
+              <p>
+                <strong>EMA conditional marketing authorization.</strong> The EMA's conditional approval pathway allows earlier European market entry for assets addressing unmet medical needs, based on less comprehensive data than a standard application. While the US has its own accelerated pathways (Breakthrough Therapy, Accelerated Approval), the EMA's conditional approval has been particularly impactful in oncology and rare disease. Assets with EMA conditional approval potential see <strong>higher European territory value</strong> because the licensee can begin generating revenue earlier.
+              </p>
+
+              <p>
+                <strong>Pediatric Investigation Plans (PIPs).</strong> A uniquely European requirement, PIPs can add 6-12 months to European development timelines but also provide 2 years of supplementary protection certificate (SPC) extension. Experienced European licensees price this correctly; less experienced US companies sometimes undervalue the SPC extension or overestimate the PIP cost. Licensors should ensure the deal structure accounts for PIP obligations with milestone adjustments.
+              </p>
+
+              <p>
+                <strong>Health Technology Assessment (HTA).</strong> Europe's fragmented HTA landscape — with NICE (UK), G-BA (Germany), HAS (France), and AIFA (Italy) each conducting independent assessments — creates a more complex market access environment than the US. This complexity is reflected in deal economics: EU-only royalty rates are typically <strong>2-5 percentage points lower</strong> than global rates, partially reflecting the higher commercialization cost per patient in Europe due to payer fragmentation.
+              </p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="ema-fda-arbitrage">EMA vs. FDA Regulatory Arbitrage</h2>
-
-            <p>
-              The European Medicines Agency and the US FDA operate under different regulatory philosophies, timelines, and evidentiary standards. These differences create arbitrage opportunities — and risks — that directly affect licensing deal economics. See our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology page</Link> for how we model regulatory risk into deal benchmarks.
-            </p>
-
-            <p>
-              <strong>Dual-filing advantage.</strong> Assets with parallel FDA and EMA submissions de-risk the deal for both parties. In our dataset, dual-filing assets command a <strong className="text-blue-700">15-25% premium on total deal value</strong> compared to FDA-only filings, because the licensee gains near-simultaneous access to both major markets. For European biotechs, this means investing in EMA regulatory strategy early — even before a licensing deal — can materially increase deal economics.
-            </p>
-
-            <p>
-              <strong>EMA conditional marketing authorization.</strong> The EMA's conditional approval pathway allows earlier European market entry for assets addressing unmet medical needs, based on less comprehensive data than a standard application. While the US has its own accelerated pathways (Breakthrough Therapy, Accelerated Approval), the EMA's conditional approval has been particularly impactful in oncology and rare disease. Assets with EMA conditional approval potential see <strong>higher European territory value</strong> because the licensee can begin generating revenue earlier.
-            </p>
-
-            <p>
-              <strong>Pediatric Investigation Plans (PIPs).</strong> A uniquely European requirement, PIPs can add 6-12 months to European development timelines but also provide 2 years of supplementary protection certificate (SPC) extension. Experienced European licensees price this correctly; less experienced US companies sometimes undervalue the SPC extension or overestimate the PIP cost. Licensors should ensure the deal structure accounts for PIP obligations with milestone adjustments.
-            </p>
-
-            <p>
-              <strong>Health Technology Assessment (HTA).</strong> Europe's fragmented HTA landscape — with NICE (UK), G-BA (Germany), HAS (France), and AIFA (Italy) each conducting independent assessments — creates a more complex market access environment than the US. This complexity is reflected in deal economics: EU-only royalty rates are typically <strong>2-5 percentage points lower</strong> than global rates, partially reflecting the higher commercialization cost per patient in Europe due to payer fragmentation.
-            </p>
-
             <h2 id="european-biotech-licensor">European Biotech as Licensor</h2>
 
             <p>
@@ -356,35 +385,38 @@ export default function BiotechLicensingEuropePage() {
             </p>
           </div>
 
-          <InsightCallout title="Strategic Insight for EU-Focused Biotechs">
-            Negotiate global rights with territorial carve-back provisions, not EU-only licenses. A global deal with retained co-promote or co-exclusive rights in your home European markets delivers 2-3x more total value than an EU-only deal, while preserving your commercial presence where your infrastructure and relationships are strongest.
-          </InsightCallout>
-
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="structuring-european-deals">Structuring European Deals: Practical Recommendations</h2>
-
-            <p>
-              Based on our analysis of 280+ transactions, several practical patterns emerge for European biotech licensing. For full <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link> across all deal types and therapeutic areas, see our benchmarks page.
-            </p>
-
-            <p>
-              <strong>Milestone design.</strong> European deals should include EMA-specific milestones — filing acceptance, CHMP positive opinion, EC marketing authorization — in addition to standard clinical milestones. These regulatory milestones typically represent <strong>5-10% of total milestone value</strong> and provide the licensor with cash flow aligned to European market entry timing.
-            </p>
-
-            <p>
-              <strong>Royalty tiering by market.</strong> Consider structuring royalties with market-specific tiers rather than a flat global rate. German and UK sales often warrant higher royalty percentages than Southern European markets due to pricing differences. This approach can increase total royalty value by <strong>8-12%</strong> compared to flat-rate structures.
-            </p>
-
-            <p>
-              <strong>Manufacturing rights.</strong> European biotechs with manufacturing capabilities should negotiate retained manufacturing rights or preferred supplier agreements. This preserves margin (manufacturing margins of 30-50% on API supply) and maintains strategic control. BioNTech's retention of European manufacturing for its mRNA products is the gold standard for this approach.
-            </p>
-
-            <p>
-              <strong>Reversion clauses.</strong> Include territory-specific reversion clauses that trigger if the licensee fails to file in key European markets within defined timelines. A typical structure provides 18-24 months post-US-approval for European filing, with automatic reversion of EU rights if the deadline is missed.
-            </p>
-
-            <h2 id="faq">Frequently Asked Questions</h2>
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Strategic Insight for EU-Focused Biotechs</p>
+            <p className="text-slate-700 leading-relaxed">Negotiate global rights with territorial carve-back provisions, not EU-only licenses. A global deal with retained co-promote or co-exclusive rights in your home European markets delivers 2-3x more total value than an EU-only deal, while preserving your commercial presence where your infrastructure and relationships are strongest.</p>
           </div>
+
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="structuring-european-deals">Structuring European Deals: Practical Recommendations</h2>
+
+              <p>
+                Based on our analysis of 280+ transactions, several practical patterns emerge for European biotech licensing. For full <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link> across all deal types and therapeutic areas, see our benchmarks page.
+              </p>
+
+              <p>
+                <strong>Milestone design.</strong> European deals should include EMA-specific milestones — filing acceptance, CHMP positive opinion, EC marketing authorization — in addition to standard clinical milestones. These regulatory milestones typically represent <strong>5-10% of total milestone value</strong> and provide the licensor with cash flow aligned to European market entry timing.
+              </p>
+
+              <p>
+                <strong>Royalty tiering by market.</strong> Consider structuring royalties with market-specific tiers rather than a flat global rate. German and UK sales often warrant higher royalty percentages than Southern European markets due to pricing differences. This approach can increase total royalty value by <strong>8-12%</strong> compared to flat-rate structures.
+              </p>
+
+              <p>
+                <strong>Manufacturing rights.</strong> European biotechs with manufacturing capabilities should negotiate retained manufacturing rights or preferred supplier agreements. This preserves margin (manufacturing margins of 30-50% on API supply) and maintains strategic control. BioNTech's retention of European manufacturing for its mRNA products is the gold standard for this approach.
+              </p>
+
+              <p>
+                <strong>Reversion clauses.</strong> Include territory-specific reversion clauses that trigger if the licensee fails to file in key European markets within defined timelines. A typical structure provides 18-24 months post-US-approval for European filing, with automatic reversion of EU rights if the deadline is missed.
+              </p>
+
+              <h2 id="faq">Frequently Asked Questions</h2>
+            </div>
+          </section>
 
           <div className="my-8 space-y-0">
             <details className="group border-b border-slate-200 py-4">

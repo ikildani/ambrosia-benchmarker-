@@ -2,10 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -142,26 +141,47 @@ export default function PreclinicalValuationPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Preclinical Asset Valuation for Licensing: Benchmark Data & Deal Structures"
-          titleAccent={{ text: 'Preclinical', color: 'text-blue-400' }}
-          subtitle="Preclinical deals still command $22M median upfront and $400M total value. Here is the complete benchmark across 12 therapeutic areas, platform vs. single-asset structures, and rNPV methodology."
-          badge="Valuation Analysis"
-          readTime="14 min read"
-          stats={[
-            { value: '$22M', label: 'Median upfront' },
-            { value: '$400M', label: 'Median total value' },
-            { value: '12', label: 'TAs benchmarked' },
-          ]}
-          breadcrumbLabel="Preclinical Valuation"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-[11px] text-slate-400 mb-10 uppercase tracking-widest">
+              <Link href="/" className="hover:text-slate-600">Home</Link>
+              <span className="text-slate-300">/</span>
+              <Link href="/insights" className="hover:text-slate-600">Insights</Link>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-500">Preclinical Valuation</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Preclinical Asset Valuation for Licensing: Benchmark Data & Deal Structures</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Preclinical deals still command $22M median upfront and $400M total value. Here is the complete benchmark across 12 therapeutic areas, platform vs. single-asset structures, and rNPV methodology.</p>
+          </div>
+        </header>
+
+        {/* Section 1: white */}
+        <article className="max-w-4xl mx-auto px-6 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <TrustBar />
 
             <AuthorByline date="March 24, 2026" />
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
+              <span>Published March 25, 2026</span>
+              <span className="text-slate-300">&middot;</span>
+              <span>Ambrosia Ventures Research</span>
+            </div>
 
             <KeyTakeaways takeaways={[
               'Preclinical assets still command $22M median upfront in oncology — platform technologies with multiple targets can reach $45M+.',
@@ -189,7 +209,7 @@ export default function PreclinicalValuationPage() {
             </p>
 
             <p>
-              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset of 2,600+ transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
+              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset of 3,500+ transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
             </p>
 
             <h2 id="preclinical-baselines">Preclinical Baselines by Therapeutic Area</h2>
@@ -207,7 +227,8 @@ export default function PreclinicalValuationPage() {
           </div>
         </article>
 
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1</p>
           <GatedBenchmarkTable
             headers={['Therapeutic Area', 'Median Upfront', 'Median Total Value', 'Royalty Range']}
             rows={[
@@ -231,7 +252,7 @@ export default function PreclinicalValuationPage() {
           />
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 mt-8">
+        <div className="max-w-4xl mx-auto px-6 mt-8">
           <PhaseUpfrontChart
             data={[
               { phase: 'Metabolic', low: 15, median: 35, high: 70 },
@@ -246,45 +267,51 @@ export default function PreclinicalValuationPage() {
           />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
-          <div className="prose prose-slate prose-lg max-w-none">
+        {/* Section 2: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <InsightCallout title="The metabolic premium is real — and growing">
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">The metabolic premium is real — and growing</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Metabolic preclinical upfronts have increased approximately 60% since 2022, driven entirely by the GLP-1 market expansion. Pharma companies that missed the first wave of GLP-1 development (dominated by Novo Nordisk and Eli Lilly) are now aggressively pursuing next-generation metabolic assets — oral formulations, dual/triple agonists, and complementary mechanisms — at preclinical stages that would have been considered too early for licensing just three years ago.
+                </p>
+              </div>
+
+              <h2 id="what-drives-premiums">What Drives Preclinical Premiums</h2>
+
               <p>
-                Metabolic preclinical upfronts have increased approximately 60% since 2022, driven entirely by the GLP-1 market expansion. Pharma companies that missed the first wave of GLP-1 development (dominated by Novo Nordisk and Eli Lilly) are now aggressively pursuing next-generation metabolic assets — oral formulations, dual/triple agonists, and complementary mechanisms — at preclinical stages that would have been considered too early for licensing just three years ago.
+                Within each therapeutic area, individual preclinical deals can exceed the median by 30-100%. The factors that drive these premiums are consistent across TAs, though their relative importance varies. Understanding these drivers is essential for any team preparing a preclinical out-licensing strategy — see our guide on <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">how to value a biotech deal</Link> for a step-by-step framework.
               </p>
-            </InsightCallout>
 
-            <h2 id="what-drives-premiums">What Drives Preclinical Premiums</h2>
+              <h3>Table 2: Preclinical Premium Drivers</h3>
 
-            <p>
-              Within each therapeutic area, individual preclinical deals can exceed the median by 30-100%. The factors that drive these premiums are consistent across TAs, though their relative importance varies. Understanding these drivers is essential for any team preparing a preclinical out-licensing strategy — see our guide on <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">how to value a biotech deal</Link> for a step-by-step framework.
-            </p>
+            </div>
+          </article>
 
-            <h3>Table 2: Preclinical Premium Drivers</h3>
-
+          <div className="max-w-4xl mx-auto px-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2</p>
+            <GatedBenchmarkTable
+              headers={['Premium Driver', 'Impact on Upfront', 'Why It Matters', 'Evidence Required']}
+              rows={[
+                ['Platform technology', <strong key="plat" className="text-blue-700">2.0-3.0x</strong>, 'Multi-product pipeline potential', 'Demonstrated modularity, 3+ candidates'],
+                ['Validated target (genetic)', <strong key="gen" className="text-blue-700">1.5-2.0x</strong>, 'GWAS/Mendelian evidence reduces PoS', 'Published human genetic association'],
+                ['Novel mechanism (first-in-class)', <strong key="novel" className="text-blue-700">1.3-1.8x</strong>, 'No clinical-stage competitors', 'Freedom-to-operate analysis'],
+                ['Strong in vivo efficacy', <strong key="vivo" className="text-blue-700">1.2-1.5x</strong>, 'Disease-relevant animal model data', 'Dose-response, disease modification'],
+                ['IND-ready package', <strong key="ind" className="text-blue-700">1.2-1.4x</strong>, 'Reduces licensee time-to-clinic', 'Tox complete, CMC established, IND draft'],
+                ['Competitive auction (3+ bidders)', <strong key="auction" className="text-blue-700">1.3-1.5x</strong>, 'Supply-demand dynamics', 'Parallel CDA executions, term sheets'],
+              ]}
+              freeRows={4}
+              ctaText="Model your premium factors — Free calculator"
+              ctaHref="/calculator"
+              footnote="Multipliers are applied to the TA-specific preclinical baseline. Factors are partially additive but subject to diminishing returns."
+            />
           </div>
-        </article>
-
-        <div className="max-w-3xl mx-auto px-4">
-          <GatedBenchmarkTable
-            headers={['Premium Driver', 'Impact on Upfront', 'Why It Matters', 'Evidence Required']}
-            rows={[
-              ['Platform technology', <strong key="plat" className="text-blue-700">2.0-3.0x</strong>, 'Multi-product pipeline potential', 'Demonstrated modularity, 3+ candidates'],
-              ['Validated target (genetic)', <strong key="gen" className="text-blue-700">1.5-2.0x</strong>, 'GWAS/Mendelian evidence reduces PoS', 'Published human genetic association'],
-              ['Novel mechanism (first-in-class)', <strong key="novel" className="text-blue-700">1.3-1.8x</strong>, 'No clinical-stage competitors', 'Freedom-to-operate analysis'],
-              ['Strong in vivo efficacy', <strong key="vivo" className="text-blue-700">1.2-1.5x</strong>, 'Disease-relevant animal model data', 'Dose-response, disease modification'],
-              ['IND-ready package', <strong key="ind" className="text-blue-700">1.2-1.4x</strong>, 'Reduces licensee time-to-clinic', 'Tox complete, CMC established, IND draft'],
-              ['Competitive auction (3+ bidders)', <strong key="auction" className="text-blue-700">1.3-1.5x</strong>, 'Supply-demand dynamics', 'Parallel CDA executions, term sheets'],
-            ]}
-            freeRows={4}
-            ctaText="Model your premium factors — Free calculator"
-            ctaHref="/calculator"
-            footnote="Multipliers are applied to the TA-specific preclinical baseline. Factors are partially additive but subject to diminishing returns."
-          />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
+        {/* Section 3: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <p>
@@ -311,49 +338,66 @@ export default function PreclinicalValuationPage() {
 
             <MiniCalculator defaultTA="oncology" defaultPhase="preclinical" defaultModality="smallMolecule" />
 
-            <h2 id="rnpv-methodology">rNPV at Preclinical: How Licensees Calculate Your Value</h2>
+          </div>
+        </article>
 
-            <p>
-              Understanding how licensees value your preclinical asset is essential for setting realistic expectations and structuring productive negotiations. The dominant methodology is risk-adjusted net present value (rNPV), which models the expected commercial value of the asset and discounts backward through each development phase to arrive at the present value — the maximum price the licensee should rationally pay. Our <Link href="/guides/rnpv-biotech-valuation" className="text-teal-600 font-medium hover:text-teal-700">rNPV biotech valuation guide</Link> covers this methodology in full detail.
-            </p>
+        {/* Section 4: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              The rNPV calculation has four core inputs:
-            </p>
+              <h2 id="rnpv-methodology">rNPV at Preclinical: How Licensees Calculate Your Value</h2>
 
-            <p>
-              <strong>1. Peak sales estimate.</strong> The licensee models the drug&apos;s projected peak annual sales based on patient population size, expected market share, pricing assumptions, and competitive landscape. For a preclinical oncology asset targeting a solid tumor indication, a typical peak sales estimate might be $1-3 billion, depending on the indication and competitive positioning.
-            </p>
-
-            <p>
-              <strong>2. Probability of success (PoS).</strong> This is the cumulative probability of reaching approval from the preclinical stage. Industry-wide averages for preclinical PoS are approximately 5-10%, meaning that for every 10-20 preclinical assets licensed, only one will reach market. However, PoS varies dramatically by therapeutic area (oncology has lower PoS than metabolic diseases), modality (novel modalities have lower PoS than established ones), and target validation level (genetically validated targets have higher PoS).
-            </p>
-
-            <p>
-              <strong>3. Development costs.</strong> The licensee must fund the entire development program from IND-enabling studies through Phase 3 and regulatory filing. Total development costs for a single-asset program range from $500 million to $2 billion, depending on therapeutic area, trial complexity, and regulatory pathway. These costs are subtracted from the projected commercial value before risk adjustment.
-            </p>
-
-            <p>
-              <strong>4. Discount rate (WACC).</strong> Licensees typically apply a 10-15% weighted average cost of capital to discount future cash flows to present value. Higher discount rates reflect greater uncertainty and longer time-to-market. For preclinical assets with 10-15 year timelines to commercial launch, the discount rate dramatically compresses present value.
-            </p>
-
-            <p>
-              To illustrate, consider a preclinical oncology small molecule targeting a solid tumor with projected peak sales of $2 billion:
-            </p>
-
-            <p>
-              Peak sales: $2B annual. Revenue duration: 10 years post-launch. Net revenue (after COGS, SGA): approximately 40% margin = $800M annual. Cumulative net revenue (undiscounted): $8B. Probability of success from preclinical: 7%. Risk-adjusted revenue: $560M. Discount to present value (12% WACC, 12 years to launch): approximately $140M. Minus development costs (risk-adjusted): approximately $60M. rNPV: approximately $80M.
-            </p>
-
-            <p>
-              In this simplified model, the licensee&apos;s rNPV for the asset is approximately $80M — but they will not pay $80M at preclinical. They will offer a fraction of this value as upfront and milestones, typically 25-50% of their rNPV, reflecting their required return on invested capital. This explains why the median preclinical upfront ($22M) represents only a fraction of the projected commercial value — the licensee is discounting for clinical risk, time value of money, and their own required return threshold. The <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link> explains how our benchmarks incorporate these valuation dynamics.
-            </p>
-
-            <InsightCallout title="How to use rNPV in negotiation">
               <p>
-                Build your own rNPV model before entering negotiations. If you can demonstrate that the licensee&apos;s internal rNPV for your asset exceeds $100M (which you can infer from their peak sales estimates, therapeutic area PoS benchmarks, and development cost assumptions), you have a strong basis for negotiating an upfront above the $22M median. The key is to shift the conversation from &quot;what do preclinical deals pay?&quot; to &quot;what is this specific asset worth to your specific pipeline?&quot;
+                Understanding how licensees value your preclinical asset is essential for setting realistic expectations and structuring productive negotiations. The dominant methodology is risk-adjusted net present value (rNPV), which models the expected commercial value of the asset and discounts backward through each development phase to arrive at the present value — the maximum price the licensee should rationally pay. Our <Link href="/guides/rnpv-biotech-valuation" className="text-teal-600 font-medium hover:text-teal-700">rNPV biotech valuation guide</Link> covers this methodology in full detail.
               </p>
-            </InsightCallout>
+
+              <p>
+                The rNPV calculation has four core inputs:
+              </p>
+
+              <p>
+                <strong>1. Peak sales estimate.</strong> The licensee models the drug&apos;s projected peak annual sales based on patient population size, expected market share, pricing assumptions, and competitive landscape. For a preclinical oncology asset targeting a solid tumor indication, a typical peak sales estimate might be $1-3 billion, depending on the indication and competitive positioning.
+              </p>
+
+              <p>
+                <strong>2. Probability of success (PoS).</strong> This is the cumulative probability of reaching approval from the preclinical stage. Industry-wide averages for preclinical PoS are approximately 5-10%, meaning that for every 10-20 preclinical assets licensed, only one will reach market. However, PoS varies dramatically by therapeutic area (oncology has lower PoS than metabolic diseases), modality (novel modalities have lower PoS than established ones), and target validation level (genetically validated targets have higher PoS).
+              </p>
+
+              <p>
+                <strong>3. Development costs.</strong> The licensee must fund the entire development program from IND-enabling studies through Phase 3 and regulatory filing. Total development costs for a single-asset program range from $500 million to $2 billion, depending on therapeutic area, trial complexity, and regulatory pathway. These costs are subtracted from the projected commercial value before risk adjustment.
+              </p>
+
+              <p>
+                <strong>4. Discount rate (WACC).</strong> Licensees typically apply a 10-15% weighted average cost of capital to discount future cash flows to present value. Higher discount rates reflect greater uncertainty and longer time-to-market. For preclinical assets with 10-15 year timelines to commercial launch, the discount rate dramatically compresses present value.
+              </p>
+
+              <p>
+                To illustrate, consider a preclinical oncology small molecule targeting a solid tumor with projected peak sales of $2 billion:
+              </p>
+
+              <p>
+                Peak sales: $2B annual. Revenue duration: 10 years post-launch. Net revenue (after COGS, SGA): approximately 40% margin = $800M annual. Cumulative net revenue (undiscounted): $8B. Probability of success from preclinical: 7%. Risk-adjusted revenue: $560M. Discount to present value (12% WACC, 12 years to launch): approximately $140M. Minus development costs (risk-adjusted): approximately $60M. rNPV: approximately $80M.
+              </p>
+
+              <p>
+                In this simplified model, the licensee&apos;s rNPV for the asset is approximately $80M — but they will not pay $80M at preclinical. They will offer a fraction of this value as upfront and milestones, typically 25-50% of their rNPV, reflecting their required return on invested capital. This explains why the median preclinical upfront ($22M) represents only a fraction of the projected commercial value — the licensee is discounting for clinical risk, time value of money, and their own required return threshold. The <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link> explains how our benchmarks incorporate these valuation dynamics.
+              </p>
+
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">How to use rNPV in negotiation</p>
+                <p className="text-slate-700 leading-relaxed">
+                  Build your own rNPV model before entering negotiations. If you can demonstrate that the licensee&apos;s internal rNPV for your asset exceeds $100M (which you can infer from their peak sales estimates, therapeutic area PoS benchmarks, and development cost assumptions), you have a strong basis for negotiating an upfront above the $22M median. The key is to shift the conversation from &quot;what do preclinical deals pay?&quot; to &quot;what is this specific asset worth to your specific pipeline?&quot;
+                </p>
+              </div>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 5: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="platform-vs-single-asset">Platform vs. Single-Asset Preclinical Valuation</h2>
 
@@ -389,19 +433,35 @@ export default function PreclinicalValuationPage() {
               For licensors, the implication is clear: if your technology genuinely meets the platform criteria, invest heavily in demonstrating modularity before entering deal discussions. Having 3-5 preclinical candidates at various stages of development — even if only one is IND-ready — provides tangible evidence of platform value that supports premium pricing. For guidance on how to structure the licensing terms for platform deals, see our <Link href="/guides/biotech-licensing-deal-structure" className="text-teal-600 font-medium hover:text-teal-700">biotech licensing deal structure guide</Link>.
             </p>
 
-            <h2 id="real-deal-examples">Real Preclinical Deal Examples</h2>
+          </div>
+        </article>
 
-            <p>
-              <strong>Alnylam-Roche ($2.2B, RNAi cardiovascular):</strong> While the Alnylam-Roche deal for zilebesiran was structured around a clinical-stage lead asset, the partnership included preclinical-stage options on additional RNAi targets in cardiovascular disease. The preclinical component was valued at an implied premium reflecting Alnylam&apos;s validated RNAi delivery platform — a textbook example of how platform technology inflates preclinical valuations.
-            </p>
+        {/* Section 6: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              <strong>Discovery-stage platform deals:</strong> Several notable discovery-to-preclinical platform deals in 2024-2025 have established new reference points. Gene editing platforms (CRISPR-based and base editing) have commanded $30-50M upfronts for preclinical-stage programs, reflecting both the platform premium and the transformative clinical potential of one-time curative therapies. These deals typically include option rights on 3-5 additional targets, with each option exercise triggering a separate milestone payment.
-            </p>
+              <h2 id="real-deal-examples">Real Preclinical Deal Examples</h2>
 
-            <p>
-              <strong>Single-asset preclinical deals in metabolic diseases:</strong> The GLP-1 revolution has created a unique category of high-value preclinical single-asset deals. Preclinical oral GLP-1 receptor agonists, dual GLP-1/GIP agonists, and next-generation amylin analogs have commanded upfronts in the $30-50M range — well above the $35M metabolic median — driven by competitive urgency from pharma companies that need a presence in the obesity and diabetes market. For how these preclinical economics compare to the broader <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">2025-2026 out-licensing landscape</Link>, see our market analysis.
-            </p>
+              <p>
+                <strong>Alnylam-Roche ($2.2B, RNAi cardiovascular):</strong> While the Alnylam-Roche deal for zilebesiran was structured around a clinical-stage lead asset, the partnership included preclinical-stage options on additional RNAi targets in cardiovascular disease. The preclinical component was valued at an implied premium reflecting Alnylam&apos;s validated RNAi delivery platform — a textbook example of how platform technology inflates preclinical valuations.
+              </p>
+
+              <p>
+                <strong>Discovery-stage platform deals:</strong> Several notable discovery-to-preclinical platform deals in 2024-2025 have established new reference points. Gene editing platforms (CRISPR-based and base editing) have commanded $30-50M upfronts for preclinical-stage programs, reflecting both the platform premium and the transformative clinical potential of one-time curative therapies. These deals typically include option rights on 3-5 additional targets, with each option exercise triggering a separate milestone payment.
+              </p>
+
+              <p>
+                <strong>Single-asset preclinical deals in metabolic diseases:</strong> The GLP-1 revolution has created a unique category of high-value preclinical single-asset deals. Preclinical oral GLP-1 receptor agonists, dual GLP-1/GIP agonists, and next-generation amylin analogs have commanded upfronts in the $30-50M range — well above the $35M metabolic median — driven by competitive urgency from pharma companies that need a presence in the obesity and diabetes market. For how these preclinical economics compare to the broader <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">2025-2026 out-licensing landscape</Link>, see our market analysis.
+              </p>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 7: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="when-to-license">When to License at Preclinical vs. Wait for Phase 1</h2>
 
@@ -421,11 +481,12 @@ export default function PreclinicalValuationPage() {
               <strong>The hybrid approach:</strong> Increasingly, biotechs are structuring preclinical deals with Phase 1 option components. The licensor receives a preclinical upfront ($15-25M) and the licensee funds the IND-enabling studies and Phase 1 trial. If Phase 1 data is positive, the deal converts to a full licensing agreement with Phase 2+ terms. If data is negative, the licensee walks away having spent only the upfront. This structure eliminates the licensor&apos;s dilution and clinical execution risk while preserving Phase 1 upside economics.
             </p>
 
-            <InsightCallout title="Decision framework">
-              <p>
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Decision framework</p>
+              <p className="text-slate-700 leading-relaxed">
                 License at preclinical if: cash runway is less than 18 months, competitive dynamics are urgent, or Phase 1 study design carries meaningful risk. Wait for Phase 1 if: cash runway exceeds 30 months, safety profile is well-characterized, and multiple pharma partners have expressed interest. Consider the hybrid approach if: you want de-risked development capital without equity dilution.
               </p>
-            </InsightCallout>
+            </div>
 
             <p>
               For detailed analysis of how Phase 2 data further transforms deal economics, see our <Link href="/insights/phase-2-milestone-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">Phase 2 milestone benchmark analysis</Link>. For oncology-specific phase benchmarks, see the <Link href="/insights/oncology-upfront-payment-benchmarks" className="text-teal-600 font-medium hover:text-teal-700">oncology upfront payment analysis</Link>. And for a complete overview of how these benchmarks fit into the <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">full benchmarks database</Link>, explore our interactive tool.

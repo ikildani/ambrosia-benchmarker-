@@ -2,10 +2,9 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -19,7 +18,7 @@ const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculato
 
 export const metadata: Metadata = {
   title: 'Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks | Ambrosia Ventures',
-  description: 'Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities from 2,600+ real transactions.',
+  description: 'Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities from 3,500+ real transactions.',
   keywords: [
     'average upfront payment oncology licensing deal',
     'oncology licensing deal benchmarks',
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Oncology Licensing Upfronts: $14M Discovery to $800M Approved',
-    description: 'Benchmark data across 7 development phases and 8 modalities from 2,600+ real biopharma transactions.',
+    description: 'Benchmark data across 7 development phases and 8 modalities from 3,500+ real biopharma transactions.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
@@ -142,30 +141,51 @@ export default function OncologyUpfrontBenchmarksPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks"
-          titleAccent={{ text: 'Oncology', color: 'text-blue-400' }}
-          subtitle="Oncology upfronts range 57x from discovery to approval. Here is the benchmark data across 7 development phases and 8 modalities from 2,600+ real transactions."
-          badge="Data Report"
-          readTime="12 min read"
-          stats={[
-            { value: '7', label: 'Phases benchmarked' },
-            { value: '8', label: 'Modalities compared' },
-            { value: '2,600+', label: 'Deals analyzed' },
-          ]}
-          breadcrumbLabel="Oncology Upfront Benchmarks"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-[11px] text-slate-400 mb-10 uppercase tracking-widest">
+              <Link href="/" className="hover:text-slate-600">Home</Link>
+              <span className="text-slate-300">/</span>
+              <Link href="/insights" className="hover:text-slate-600">Insights</Link>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-500">Oncology Upfront Benchmarks</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Oncology upfronts range 57x from discovery to approval. Here is the benchmark data across 7 development phases and 8 modalities from 3,500+ real transactions.</p>
+          </div>
+        </header>
+
+        {/* Section 1: white */}
+        <article className="max-w-4xl mx-auto px-6 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <TrustBar />
 
             <AuthorByline date="March 24, 2026" />
 
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
+              <span>Published March 25, 2026</span>
+              <span className="text-slate-300">&middot;</span>
+              <span>Ambrosia Ventures Research</span>
+            </div>
+
             <KeyTakeaways takeaways={[
               'Oncology upfronts span 57x from $14M at discovery to $800M for approved assets — phase is the single largest value driver.',
-              'Phase 2 proof-of-concept is the critical inflection point: upfronts jump 2.3x from Phase 1 ($42M → $95M), the largest single-phase multiplier.',
+              'Phase 2 proof-of-concept is the critical inflection point: upfronts jump 2.3x from Phase 1 ($42M to $95M), the largest single-phase multiplier.',
               'ADC and radiopharmaceutical modalities command 1.50x-1.60x premiums over small molecules — a $50M-$150M uplift at Phase 2.',
               'Pfizer-Seagen ($43B) reset the entire oncology platform value paradigm in 2023.',
             ]} />
@@ -185,7 +205,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             </p>
 
             <p>
-              This analysis presents the complete upfront payment benchmarks for <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology licensing deals</Link> from 2020 through early 2026, drawing on over 2,600 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link>. We cover every development phase from discovery through approved, every major modality from small molecules to radiopharmaceuticals, and the real deal comps that define the current market. For a broader view of deal economics across all therapeutic areas, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
+              This analysis presents the complete upfront payment benchmarks for <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology licensing deals</Link> from 2020 through early 2026, drawing on over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link>. We cover every development phase from discovery through approved, every major modality from small molecules to radiopharmaceuticals, and the real deal comps that define the current market. For a broader view of deal economics across all therapeutic areas, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
             </p>
 
             <h2 id="why-oncology-upfronts-vary">Why Oncology Upfronts Vary 57x by Phase</h2>
@@ -207,7 +227,8 @@ export default function OncologyUpfrontBenchmarksPage() {
           </div>
         </article>
 
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1</p>
           <GatedBenchmarkTable
             headers={['Phase at Signing', 'Median Upfront', 'Median Total Value', 'Royalty Range']}
             rows={[
@@ -222,11 +243,11 @@ export default function OncologyUpfrontBenchmarksPage() {
             freeRows={4}
             ctaText="Unlock all 7 phases — Free calculator"
             ctaHref="/calculator"
-            footnote="Source: Ambrosia Benchmarker, 2,600+ transactions 2020-2026. Median values."
+            footnote="Source: Ambrosia Benchmarker, 3,500+ transactions 2020-2026. Median values."
           />
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 mt-8">
+        <div className="max-w-4xl mx-auto px-6 mt-8">
           <PhaseUpfrontChart
             data={[
               { phase: 'Discovery', low: 7, median: 14, high: 29 },
@@ -242,71 +263,77 @@ export default function OncologyUpfrontBenchmarksPage() {
           />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
-          <div className="prose prose-slate prose-lg max-w-none">
+        {/* Section 2: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <InsightCallout title="Key insight for Phase 1 licensors">
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key insight for Phase 1 licensors</p>
+                <p className="text-slate-700 leading-relaxed">
+                  If your asset has Phase 2 data readout within 6-12 months, delaying your deal by one phase transition could unlock an additional $53M in median upfront value — a 2.3x improvement. The risk premium compresses sharply at proof-of-concept. Of course, this must be weighed against cash runway, competitive dynamics, and the probability of a positive readout.
+                </p>
+              </div>
+
               <p>
-                If your asset has Phase 2 data readout within 6-12 months, delaying your deal by one phase transition could unlock an additional $53M in median upfront value — a 2.3x improvement. The risk premium compresses sharply at proof-of-concept. Of course, this must be weighed against cash runway, competitive dynamics, and the probability of a positive readout.
+                Several structural factors explain why the phase curve is steeper in oncology than in many other therapeutic areas. First, oncology clinical programs tend to be shorter. A Phase 2 oncology trial in a solid tumor indication can read out in 12 to 18 months, compared to 24 to 36 months in <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neurology</Link>. This compresses the licensee&apos;s time-to-value and supports higher upfronts relative to milestone-heavy structures.
               </p>
-            </InsightCallout>
 
-            <p>
-              Several structural factors explain why the phase curve is steeper in oncology than in many other therapeutic areas. First, oncology clinical programs tend to be shorter. A Phase 2 oncology trial in a solid tumor indication can read out in 12 to 18 months, compared to 24 to 36 months in <Link href="/therapeutic-areas/neurology" className="text-teal-600 font-medium hover:text-teal-700">neurology</Link>. This compresses the licensee&apos;s time-to-value and supports higher upfronts relative to milestone-heavy structures.
-            </p>
+              <p>
+                Second, oncology benefits from accelerated regulatory pathways. <Link href="/glossary/breakthrough-therapy-designation" className="text-teal-600 font-medium hover:text-teal-700">Breakthrough Therapy Designations</Link>, Priority Review, and Accelerated Approval create a shorter, more predictable path to market, which reduces the risk discount licensees apply to late-stage assets. A Phase 3 oncology asset with Breakthrough Therapy Designation is a meaningfully different proposition than a Phase 3 oncology asset without it.
+              </p>
 
-            <p>
-              Second, oncology benefits from accelerated regulatory pathways. <Link href="/glossary/breakthrough-therapy-designation" className="text-teal-600 font-medium hover:text-teal-700">Breakthrough Therapy Designations</Link>, Priority Review, and Accelerated Approval create a shorter, more predictable path to market, which reduces the risk discount licensees apply to late-stage assets. A Phase 3 oncology asset with Breakthrough Therapy Designation is a meaningfully different proposition than a Phase 3 oncology asset without it.
-            </p>
+              <p>
+                Third, the commercial opportunity in oncology is exceptionally well-characterized. Top-line revenue models for oncology indications benefit from decades of pricing data, well-understood patient flow dynamics, and established payer reimbursement frameworks. A licensee modeling a Phase 2 NSCLC asset can reference Keytruda, Tagrisso, and a dozen other commercial benchmarks — a luxury not available in many emerging therapeutic areas. Our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">full benchmarks database</Link> provides these reference points across all major indications.
+              </p>
 
-            <p>
-              Third, the commercial opportunity in oncology is exceptionally well-characterized. Top-line revenue models for oncology indications benefit from decades of pricing data, well-understood patient flow dynamics, and established payer reimbursement frameworks. A licensee modeling a Phase 2 NSCLC asset can reference Keytruda, Tagrisso, and a dozen other commercial benchmarks — a luxury not available in many emerging therapeutic areas. Our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">full benchmarks database</Link> provides these reference points across all major indications.
-            </p>
+              <h2 id="modality-premiums">Modality Premiums: How Drug Format Changes the Equation</h2>
 
-            <h2 id="modality-premiums">Modality Premiums: How Drug Format Changes the Equation</h2>
+              <p>
+                Phase is the primary driver of oncology deal economics, but modality is the second most important variable. Not all oncology assets are created equal, and the market applies distinct premiums (or discounts) based on the drug format. These modality multipliers reflect a combination of factors: manufacturing complexity, clinical differentiation potential, competitive scarcity, and the track record of recent landmark deals.
+              </p>
 
-            <p>
-              Phase is the primary driver of oncology deal economics, but modality is the second most important variable. Not all oncology assets are created equal, and the market applies distinct premiums (or discounts) based on the drug format. These modality multipliers reflect a combination of factors: manufacturing complexity, clinical differentiation potential, competitive scarcity, and the track record of recent landmark deals.
-            </p>
+              <p>
+                Radiopharmaceuticals command the highest modality premium in oncology at 1.60x the small molecule baseline. This reflects the extreme supply constraint — very few companies have the manufacturing infrastructure and radiochemistry expertise to develop radiopharmaceuticals at scale — combined with the clinical impact demonstrated by Novartis&apos;s Pluvicto in metastatic castration-resistant prostate cancer.
+              </p>
 
-            <p>
-              Radiopharmaceuticals command the highest modality premium in oncology at 1.60x the small molecule baseline. This reflects the extreme supply constraint — very few companies have the manufacturing infrastructure and radiochemistry expertise to develop radiopharmaceuticals at scale — combined with the clinical impact demonstrated by Novartis&apos;s Pluvicto in metastatic castration-resistant prostate cancer.
-            </p>
+              <p>
+                Antibody-drug conjugates follow at 1.50x, driven by the transformative clinical results of Enhertu and the commercial validation of the Pfizer-Seagen acquisition. Bispecific antibodies sit at 1.40x, reflecting the competitive intensity in T-cell engager development and the commercial success of Tecvayli and Elrexfio in multiple myeloma. For a deeper look at how <Link href="/glossary/protac-proteolysis-targeting-chimera" className="text-teal-600 font-medium hover:text-teal-700">PROTACs</Link> and other novel modalities are reshaping deal premiums, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology page</Link>.
+              </p>
 
-            <p>
-              Antibody-drug conjugates follow at 1.50x, driven by the transformative clinical results of Enhertu and the commercial validation of the Pfizer-Seagen acquisition. Bispecific antibodies sit at 1.40x, reflecting the competitive intensity in T-cell engager development and the commercial success of Tecvayli and Elrexfio in multiple myeloma. For a deeper look at how <Link href="/glossary/protac-proteolysis-targeting-chimera" className="text-teal-600 font-medium hover:text-teal-700">PROTACs</Link> and other novel modalities are reshaping deal premiums, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology page</Link>.
-            </p>
+              <h3>Table 2: Oncology Modality Premium Multipliers</h3>
 
-            <h3>Table 2: Oncology Modality Premium Multipliers</h3>
+              <p>
+                These multipliers are applied to the phase-specific baseline upfront. For example, a Phase 2 ADC asset would benchmark at $95M x 1.50 = $142.5M median upfront.
+              </p>
 
-            <p>
-              These multipliers are applied to the phase-specific baseline upfront. For example, a Phase 2 ADC asset would benchmark at $95M x 1.50 = $142.5M median upfront.
-            </p>
+            </div>
+          </article>
 
+          <div className="max-w-4xl mx-auto px-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2</p>
+            <GatedBenchmarkTable
+              headers={['Modality', 'Multiplier', 'Phase 2 Implied Upfront', 'Key Driver']}
+              rows={[
+                ['Radiopharmaceutical', <strong key="radio" className="text-blue-700">1.60x</strong>, '$152M', 'Supply scarcity + Pluvicto validation'],
+                ['ADC', <strong key="adc" className="text-blue-700">1.50x</strong>, '$142.5M', 'Enhertu + Seagen acquisition halo'],
+                ['Bispecific', <strong key="bis" className="text-blue-700">1.40x</strong>, '$133M', 'T-cell engager competitive intensity'],
+                ['CAR-T', <strong key="cart" className="text-blue-700">1.35x</strong>, '$128M', 'Manufacturing scale challenges'],
+                ['mRNA', <strong key="mrna" className="text-blue-700">1.35x</strong>, '$128M', 'Vaccine success extension to oncology'],
+                ['PROTAC', <strong key="protac" className="text-blue-700">1.35x</strong>, '$128M', 'Novel MOA + oral bioavailability'],
+                ['Gene Therapy', <strong key="gene" className="text-blue-700">1.25x</strong>, '$119M', 'Durability uncertainty offsets novelty'],
+                ['Small Molecule', <strong key="sm" className="text-blue-700">1.00x</strong>, '$95M', 'Baseline reference class'],
+              ]}
+              freeRows={4}
+              ctaText="Unlock all 8 modalities — Free calculator"
+              ctaHref="/calculator"
+              footnote="Multipliers applied to phase-specific baselines. Phase 2 baseline: $95M."
+            />
           </div>
-        </article>
-
-        <div className="max-w-3xl mx-auto px-4">
-          <GatedBenchmarkTable
-            headers={['Modality', 'Multiplier', 'Phase 2 Implied Upfront', 'Key Driver']}
-            rows={[
-              ['Radiopharmaceutical', <strong key="radio" className="text-blue-700">1.60x</strong>, '$152M', 'Supply scarcity + Pluvicto validation'],
-              ['ADC', <strong key="adc" className="text-blue-700">1.50x</strong>, '$142.5M', 'Enhertu + Seagen acquisition halo'],
-              ['Bispecific', <strong key="bis" className="text-blue-700">1.40x</strong>, '$133M', 'T-cell engager competitive intensity'],
-              ['CAR-T', <strong key="cart" className="text-blue-700">1.35x</strong>, '$128M', 'Manufacturing scale challenges'],
-              ['mRNA', <strong key="mrna" className="text-blue-700">1.35x</strong>, '$128M', 'Vaccine success extension to oncology'],
-              ['PROTAC', <strong key="protac" className="text-blue-700">1.35x</strong>, '$128M', 'Novel MOA + oral bioavailability'],
-              ['Gene Therapy', <strong key="gene" className="text-blue-700">1.25x</strong>, '$119M', 'Durability uncertainty offsets novelty'],
-              ['Small Molecule', <strong key="sm" className="text-blue-700">1.00x</strong>, '$95M', 'Baseline reference class'],
-            ]}
-            freeRows={4}
-            ctaText="Unlock all 8 modalities — Free calculator"
-            ctaHref="/calculator"
-            footnote="Multipliers applied to phase-specific baselines. Phase 2 baseline: $95M."
-          />
         </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-8">
+        {/* Section 3: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
           <div className="prose prose-slate prose-lg max-w-none">
 
             <InsightCTA
@@ -353,33 +380,50 @@ export default function OncologyUpfrontBenchmarksPage() {
               This deal illustrates why the mRNA oncology multiplier sits at 1.35x. The modality is novel enough to command a premium, but the clinical evidence base is still maturing relative to ADCs and bispecifics, which have multiple approved products validating their platforms.
             </p>
 
-            <h2 id="what-drives-upfronts-above-median">What Drives Upfronts Above Median</h2>
+          </div>
+        </article>
 
-            <p>
-              Median benchmarks are starting points, not ceilings. In practice, the most favorable oncology deals exceed median upfronts by 30-80%, and the factors that drive this outperformance are consistent and identifiable. Understanding these drivers is essential for any team entering negotiations — and for building the kind of <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">robust valuation model</Link> that supports above-market deal terms.
-            </p>
+        {/* Section 4: slate-50 */}
+        <div className="border-y border-slate-200 bg-slate-50">
+          <article className="max-w-4xl mx-auto px-6 py-8">
+            <div className="prose prose-slate prose-lg max-w-none">
 
-            <p>
-              <strong>Biomarker-selected populations.</strong> Oncology assets with companion diagnostics or biomarker-defined patient populations consistently command premium upfronts. The reason is straightforward: a biomarker-selected population de-risks the Phase 3 trial by enriching for responders. When a licensee can see a 40% response rate in a biomarker-positive population versus 12% in an all-comers trial, they can model Phase 3 success probability with much higher confidence, which compresses the risk discount and inflates the upfront.
-            </p>
+              <h2 id="what-drives-upfronts-above-median">What Drives Upfronts Above Median</h2>
 
-            <p>
-              <strong>Competitive auction dynamics.</strong> Nothing drives upfronts above median more reliably than having multiple serious bidders. In practice, this means running a structured process with 3-5 qualified pharma partners rather than a bilateral negotiation. Our data shows that assets negotiated through competitive processes achieve 25-35% higher upfronts on average compared to bilateral deals at the same phase and modality.
-            </p>
-
-            <p>
-              <strong>First-in-class versus best-in-class positioning.</strong> First-in-class oncology assets with novel mechanisms of action command a scarcity premium, particularly at earlier stages where the licensee is betting on mechanism validation. Best-in-class assets in validated mechanisms command a different kind of premium — certainty — particularly at Phase 2 and beyond, where head-to-head differentiation data supports confident commercial projections.
-            </p>
-
-            <p>
-              <strong>Platform expansion potential.</strong> The difference between a single-indication oncology asset and a platform with 5-8 potential tumor type expansions is enormous in deal economics. Platform assets allow licensees to model a cascade of follow-on indications, each with incremental revenue and incrementally lower development costs, which inflates the rNPV calculation and supports higher upfronts. Our <Link href="/insights/preclinical-asset-valuation-licensing" className="text-teal-600 font-medium hover:text-teal-700">preclinical valuation analysis</Link> explores the platform premium in detail.
-            </p>
-
-            <InsightCallout title="Negotiation insight">
               <p>
-                If you have competitive interest from multiple partners, disclose this fact early in the process. Our data suggests that even the perception of competitive dynamics — documented through parallel CDA executions — increases initial offers by 15-20%. The upfront premium from a true auction is even higher.
+                Median benchmarks are starting points, not ceilings. In practice, the most favorable oncology deals exceed median upfronts by 30-80%, and the factors that drive this outperformance are consistent and identifiable. Understanding these drivers is essential for any team entering negotiations — and for building the kind of <Link href="/guides/how-to-value-biotech-deal" className="text-teal-600 font-medium hover:text-teal-700">robust valuation model</Link> that supports above-market deal terms.
               </p>
-            </InsightCallout>
+
+              <p>
+                <strong>Biomarker-selected populations.</strong> Oncology assets with companion diagnostics or biomarker-defined patient populations consistently command premium upfronts. The reason is straightforward: a biomarker-selected population de-risks the Phase 3 trial by enriching for responders. When a licensee can see a 40% response rate in a biomarker-positive population versus 12% in an all-comers trial, they can model Phase 3 success probability with much higher confidence, which compresses the risk discount and inflates the upfront.
+              </p>
+
+              <p>
+                <strong>Competitive auction dynamics.</strong> Nothing drives upfronts above median more reliably than having multiple serious bidders. In practice, this means running a structured process with 3-5 qualified pharma partners rather than a bilateral negotiation. Our data shows that assets negotiated through competitive processes achieve 25-35% higher upfronts on average compared to bilateral deals at the same phase and modality.
+              </p>
+
+              <p>
+                <strong>First-in-class versus best-in-class positioning.</strong> First-in-class oncology assets with novel mechanisms of action command a scarcity premium, particularly at earlier stages where the licensee is betting on mechanism validation. Best-in-class assets in validated mechanisms command a different kind of premium — certainty — particularly at Phase 2 and beyond, where head-to-head differentiation data supports confident commercial projections.
+              </p>
+
+              <p>
+                <strong>Platform expansion potential.</strong> The difference between a single-indication oncology asset and a platform with 5-8 potential tumor type expansions is enormous in deal economics. Platform assets allow licensees to model a cascade of follow-on indications, each with incremental revenue and incrementally lower development costs, which inflates the rNPV calculation and supports higher upfronts. Our <Link href="/insights/preclinical-asset-valuation-licensing" className="text-teal-600 font-medium hover:text-teal-700">preclinical valuation analysis</Link> explores the platform premium in detail.
+              </p>
+
+              <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Negotiation insight</p>
+                <p className="text-slate-700 leading-relaxed">
+                  If you have competitive interest from multiple partners, disclose this fact early in the process. Our data suggests that even the perception of competitive dynamics — documented through parallel CDA executions — increases initial offers by 15-20%. The upfront premium from a true auction is even higher.
+                </p>
+              </div>
+
+            </div>
+          </article>
+        </div>
+
+        {/* Section 5: white */}
+        <article className="max-w-4xl mx-auto px-6 py-8">
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <h2 id="adc-premium-landscape">How ADCs Reset the Oncology Premium Landscape</h2>
 
@@ -410,7 +454,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             <h2 id="methodology">Methodology and Data Sources</h2>
 
             <p>
-              The benchmarks in this analysis are derived from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset, which tracks over 2,600 biopharma transactions from 2020 through Q1 2026. Data sources include SEC filings (8-K, 10-K, and 10-Q), company press releases, and verified third-party databases. All values are reported as medians unless otherwise noted. Modality multipliers are calculated as the ratio of modality-specific median upfronts to small molecule baselines at equivalent phases. The <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">companion analysis on deal structure terms</Link> provides additional context on <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> and royalty benchmarks. For details on how our calculations work, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link>.
+              The benchmarks in this analysis are derived from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset, which tracks over 3,500 biopharma transactions from 2020 through Q1 2026. Data sources include SEC filings (8-K, 10-K, and 10-Q), company press releases, and verified third-party databases. All values are reported as medians unless otherwise noted. Modality multipliers are calculated as the ratio of modality-specific median upfronts to small molecule baselines at equivalent phases. The <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">companion analysis on deal structure terms</Link> provides additional context on <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> and royalty benchmarks. For details on how our calculations work, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link>.
             </p>
 
             <h2 id="faq">Frequently Asked Questions</h2>
@@ -420,7 +464,7 @@ export default function OncologyUpfrontBenchmarksPage() {
                 What is the average upfront payment for an oncology licensing deal?
               </summary>
               <p className="text-slate-600">
-                The median upfront payment for oncology licensing deals ranges from $14M at the discovery stage to $800M for approved assets. At Phase 2 — the most common deal stage — the median upfront is $95M, with total deal values reaching $1.1 billion. These figures represent medians from 2,600+ tracked transactions; individual deals vary based on modality, competitive dynamics, data quality, and strategic fit.
+                The median upfront payment for oncology licensing deals ranges from $14M at the discovery stage to $800M for approved assets. At Phase 2 — the most common deal stage — the median upfront is $95M, with total deal values reaching $1.1 billion. These figures represent medians from 3,500+ tracked transactions; individual deals vary based on modality, competitive dynamics, data quality, and strategic fit.
               </p>
             </details>
 
@@ -495,7 +539,7 @@ export default function OncologyUpfrontBenchmarksPage() {
         <InsightCTA
           variant="bottom"
           heading="Benchmark Your Oncology Asset"
-          description="Model upfronts, milestones, and royalties by phase, modality, and indication — powered by 2,600+ real oncology transactions."
+          description="Model upfronts, milestones, and royalties by phase, modality, and indication — powered by 3,500+ real oncology transactions."
         />
       </main>
       <SiteFooter />

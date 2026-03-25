@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { InsightPageHeader } from '@/components/insights/InsightPageHeader';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightCallout } from '@/components/insights/InsightCallout';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
@@ -130,22 +129,40 @@ export default function OutLicensingAsiaPacificPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
 
       <main className="min-h-screen bg-white">
-        <InsightPageHeader
-          title="Out-Licensing Benchmarks Asia Pacific: Japan, China & Regional Data"
-          titleAccent={{ text: 'Asia Pacific', color: 'text-blue-400' }}
-          subtitle="APAC accounts for 20-30% of global biopharma deal value. Japan commands a per-market premium. China is evolving from net importer to global licensor. Here is what the deal data reveals."
-          badge="Regional Intelligence"
-          readTime="13 min read"
-          stats={[
-            { value: '20-30%', label: 'APAC share of global value' },
-            { value: '280+', label: 'Comparable deals' },
-            { value: '2020-26', label: 'Time period' },
-          ]}
-          breadcrumbLabel="Out-Licensing Asia Pacific"
-        />
+        {/* Dark masthead */}
+        <div className="bg-slate-900">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><AmbrosiaLogo variant="reversed" height={32} /></Link>
+            <div className="flex items-center gap-4">
+              <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+              <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+            </div>
+          </div>
+        </div>
 
-        <article className="max-w-3xl mx-auto px-4 py-12">
-          <AuthorByline date="March 24, 2026" />
+        {/* White hero */}
+        <header className="bg-white border-b border-slate-200">
+          <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+          <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+            <nav className="flex items-center gap-2 text-xs text-slate-400 mb-8">
+              <Link href="/" className="hover:text-teal-600 transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/insights" className="hover:text-teal-600 transition-colors">Insights</Link>
+              <span>/</span>
+              <span className="text-slate-600">Out-Licensing Asia Pacific</span>
+            </nav>
+            <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report &middot; March 2026</p>
+            <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Out-Licensing Benchmarks Asia Pacific: Japan, China & Regional Data</h1>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">APAC accounts for 20-30% of global biopharma deal value. Japan commands a per-market premium. China is evolving from net importer to global licensor. Here is what the deal data reveals.</p>
+          </div>
+        </header>
+
+        <article className="max-w-4xl mx-auto px-6 py-12">
+          <div className="flex items-center gap-4 text-sm text-slate-500 mb-8">
+            <AuthorByline date="March 24, 2026" />
+            <span className="text-slate-300">|</span>
+            <span>13 min read</span>
+          </div>
 
           <KeyTakeaways
             takeaways={[
@@ -176,7 +193,7 @@ export default function OutLicensingAsiaPacificPage() {
             </p>
 
             <p>
-              For biotech companies structuring APAC licensing strategies — whether as a Western company seeking regional partners or as an APAC-based company looking to out-license globally — territory economics vary dramatically by country. This analysis draws on <strong className="text-blue-700">280+ comparable biopharma transactions</strong> from 2020 through Q1 2026 to quantify APAC territory value, identify optimal partnership structures, and benchmark against real deal data. For context on how APAC territory economics compare to <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European deal dynamics</Link>, see our dedicated Europe analysis.
+              For biotech companies structuring APAC licensing strategies — whether as a Western company seeking regional partners or as an APAC-based company looking to out-license globally — territory economics vary dramatically by country. This analysis draws on <strong className="text-blue-700">3,500+ comparable biopharma transactions</strong> from 2020 through Q1 2026 to quantify APAC territory value, identify optimal partnership structures, and benchmark against real deal data. For context on how APAC territory economics compare to <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European deal dynamics</Link>, see our dedicated Europe analysis.
             </p>
 
             <h2 id="apac-territory-economics">APAC Territory Economics</h2>
@@ -194,18 +211,21 @@ export default function OutLicensingAsiaPacificPage() {
             </p>
           </div>
 
-          <GatedBenchmarkTable
-            headers={['Territory', 'Share of Global Value', 'Typical Upfront Range (Ph2)', 'Royalty Adj. vs. Global', 'Key Regulatory Body']}
-            rows={[
-              ['Japan-Only', <strong key="j1" className="text-blue-700">12-18%</strong>, '$40-120M', '-2 to -4 pp', 'PMDA'],
-              ['China-Only (Greater China)', <strong key="c1" className="text-blue-700">8-15%</strong>, '$20-80M', '-4 to -7 pp', 'NMPA'],
-              ['Greater APAC (Japan + China + SEA + ANZ)', <strong key="a1" className="text-blue-700">20-30%</strong>, '$80-200M', '-2 to -5 pp', 'Multiple'],
-              ['Global (baseline)', <strong key="g1" className="text-blue-700">100%</strong>, '$200-400M', 'Baseline (12-20%)', 'FDA + EMA + PMDA'],
-              ['Ex-US (includes APAC)', <strong key="x1" className="text-blue-700">55-65%</strong>, '$120-280M', '-1 to -3 pp', 'EMA + PMDA + NMPA'],
-            ]}
-            freeRows={3}
-            footnote="Source: Ambrosia Ventures analysis of 280+ biopharma licensing transactions (2020-2026). Phase 2 upfront ranges for mid-cap therapeutic assets. Royalty adjustment in percentage points vs. global baseline."
-          />
+          <div className="my-10">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-3">Exhibit 1</p>
+            <GatedBenchmarkTable
+              headers={['Territory', 'Share of Global Value', 'Typical Upfront Range (Ph2)', 'Royalty Adj. vs. Global', 'Key Regulatory Body']}
+              rows={[
+                ['Japan-Only', <strong key="j1" className="text-blue-700">12-18%</strong>, '$40-120M', '-2 to -4 pp', 'PMDA'],
+                ['China-Only (Greater China)', <strong key="c1" className="text-blue-700">8-15%</strong>, '$20-80M', '-4 to -7 pp', 'NMPA'],
+                ['Greater APAC (Japan + China + SEA + ANZ)', <strong key="a1" className="text-blue-700">20-30%</strong>, '$80-200M', '-2 to -5 pp', 'Multiple'],
+                ['Global (baseline)', <strong key="g1" className="text-blue-700">100%</strong>, '$200-400M', 'Baseline (12-20%)', 'FDA + EMA + PMDA'],
+                ['Ex-US (includes APAC)', <strong key="x1" className="text-blue-700">55-65%</strong>, '$120-280M', '-1 to -3 pp', 'EMA + PMDA + NMPA'],
+              ]}
+              freeRows={3}
+              footnote="Source: Ambrosia Ventures analysis of 280+ biopharma licensing transactions (2020-2026). Phase 2 upfront ranges for mid-cap therapeutic assets. Royalty adjustment in percentage points vs. global baseline."
+            />
+          </div>
 
           <PhaseUpfrontChart
             data={[
@@ -219,28 +239,33 @@ export default function OutLicensingAsiaPacificPage() {
             yLabel="% of Global Value"
           />
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="apac-comparable-deals">APAC-Relevant Comparable Deals</h2>
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="apac-comparable-deals">APAC-Relevant Comparable Deals</h2>
 
-            <p>
-              The following transactions illustrate the spectrum of APAC licensing structures, from massive global collaborations with Japanese partners to focused China license-in deals. Note the wide range in deal structures — reflecting the diversity of APAC partnership models. For a broader view of how these deals compare across <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">therapeutic areas</Link>, see our TA-specific analysis.
-            </p>
-          </div>
+              <p>
+                The following transactions illustrate the spectrum of APAC licensing structures, from massive global collaborations with Japanese partners to focused China license-in deals. Note the wide range in deal structures — reflecting the diversity of APAC partnership models. For a broader view of how these deals compare across <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">therapeutic areas</Link>, see our TA-specific analysis.
+              </p>
+            </div>
 
-          <GatedBenchmarkTable
-            headers={['Deal', 'Territory', 'Total Value', 'Upfront', 'Therapeutic Area']}
-            rows={[
-              ['Daiichi Sankyo / AstraZeneca', 'Global (ADC Collaboration)', <strong key="ds" className="text-blue-700">$6.9B</strong>, '$1.35B', 'Oncology (Enhertu ADC)'],
-              ['Eisai / Biogen', 'Global (Co-Development)', <strong key="eb" className="text-blue-700">$2.5B+</strong>, 'Co-investment', "Neurology (Leqembi / Alzheimer's)"],
-              ['BeiGene / Novartis (2021)', 'Ex-China Rights', <strong key="bn" className="text-blue-700">$650M</strong>, '$300M', 'Oncology (Tislelizumab)'],
-              ['BridgeBio / Astellas (2024)', 'Ex-US (incl. Japan)', <strong key="bb" className="text-blue-700">$1.7B</strong>, '$400M', 'Cardiovascular (ATTR)'],
-              ['Takeda / Multiple Partners', 'Japan + Select APAC', <strong key="tk" className="text-blue-700">$500M-$2B range</strong>, '$100-400M', 'Neuroscience + GI'],
-              ['Zai Lab / Multiple Licensors', 'Greater China + APAC', <strong key="zl" className="text-blue-700">$200M-$800M range</strong>, '$30-100M', 'Oncology + Immunology'],
-              ['Samsung Bioepis / Multiple', 'Korea Hub + Global', <strong key="sb" className="text-blue-700">$200M-$500M range</strong>, 'Variable', 'Biosimilars'],
-            ]}
-            freeRows={4}
-            footnote="Source: Public filings, press releases, and Ambrosia Ventures deal database. Values represent headline deal economics for selected representative transactions."
-          />
+            <div className="my-10">
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-3">Exhibit 2</p>
+              <GatedBenchmarkTable
+                headers={['Deal', 'Territory', 'Total Value', 'Upfront', 'Therapeutic Area']}
+                rows={[
+                  ['Daiichi Sankyo / AstraZeneca', 'Global (ADC Collaboration)', <strong key="ds" className="text-blue-700">$6.9B</strong>, '$1.35B', 'Oncology (Enhertu ADC)'],
+                  ['Eisai / Biogen', 'Global (Co-Development)', <strong key="eb" className="text-blue-700">$2.5B+</strong>, 'Co-investment', "Neurology (Leqembi / Alzheimer's)"],
+                  ['BeiGene / Novartis (2021)', 'Ex-China Rights', <strong key="bn" className="text-blue-700">$650M</strong>, '$300M', 'Oncology (Tislelizumab)'],
+                  ['BridgeBio / Astellas (2024)', 'Ex-US (incl. Japan)', <strong key="bb" className="text-blue-700">$1.7B</strong>, '$400M', 'Cardiovascular (ATTR)'],
+                  ['Takeda / Multiple Partners', 'Japan + Select APAC', <strong key="tk" className="text-blue-700">$500M-$2B range</strong>, '$100-400M', 'Neuroscience + GI'],
+                  ['Zai Lab / Multiple Licensors', 'Greater China + APAC', <strong key="zl" className="text-blue-700">$200M-$800M range</strong>, '$30-100M', 'Oncology + Immunology'],
+                  ['Samsung Bioepis / Multiple', 'Korea Hub + Global', <strong key="sb" className="text-blue-700">$200M-$500M range</strong>, 'Variable', 'Biosimilars'],
+                ]}
+                freeRows={4}
+                footnote="Source: Public filings, press releases, and Ambrosia Ventures deal database. Values represent headline deal economics for selected representative transactions."
+              />
+            </div>
+          </section>
 
           <div className="prose prose-slate prose-lg max-w-none">
             <h2 id="japan-premium-partner">Japan as Licensee: The Premium Partner</h2>
@@ -270,9 +295,10 @@ export default function OutLicensingAsiaPacificPage() {
             </p>
           </div>
 
-          <InsightCallout title="Japan Territory Premium">
-            Japan-only deals command 12-18% of global value — but include a 15-25% premium for regulatory certainty. PMDA review timelines are the most predictable among major markets, and NHI pricing for innovative therapies remains favorable relative to other ex-US markets. Factor this premium into your territory allocation models.
-          </InsightCallout>
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Japan Territory Premium</p>
+            <p className="text-slate-700 leading-relaxed">Japan-only deals command 12-18% of global value — but include a 15-25% premium for regulatory certainty. PMDA review timelines are the most predictable among major markets, and NHI pricing for innovative therapies remains favorable relative to other ex-US markets. Factor this premium into your territory allocation models.</p>
+          </div>
 
           <InsightCTA
             variant="mid"
@@ -282,29 +308,33 @@ export default function OutLicensingAsiaPacificPage() {
 
           <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
 
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="china-licensing-evolution">China Licensing Evolution: From License-In to License-Out</h2>
+
+              <p>
+                China's biopharma licensing landscape has undergone a fundamental transformation over the past five years. The traditional model — Western biotech licenses China rights to a local partner — still represents the majority of China-focused deals. But an increasingly significant counter-flow has emerged: Chinese biotechs licensing their own innovations to global partners.
+              </p>
+
+              <p>
+                <strong>The license-in model.</strong> Companies like Zai Lab and BeiGene built their initial portfolios by licensing innovative assets from Western biotechs for Greater China (mainland China, Hong Kong, Macau, and Taiwan, often plus select Southeast Asian markets). The Zai Lab model has become a template: acquire China + APAC rights at a <strong>15-25% discount to global deal value</strong>, manage NMPA regulatory submissions independently, and build commercial infrastructure to launch products in China 1-2 years after US approval. This model works because Chinese regulatory timelines have compressed dramatically — NMPA approval lag vs. FDA has shrunk from 5-7 years (pre-2017) to 1-3 years (current).
+              </p>
+
+              <p>
+                <strong>The license-out pivot.</strong> BeiGene's $650M deal with Novartis for ex-China rights to tislelizumab marked a watershed moment — the first time a Chinese biotech licensed a major immuno-oncology asset to a Western pharma company at scale. While the deal ultimately faced commercial challenges, it established the precedent that Chinese innovation could command global licensing economics. Since then, several Chinese biotechs have executed or attempted global out-licensing deals, including Hengrui, Hutchmed, and Legend Biotech (whose BCMA CAR-T was licensed to Janssen for $350M upfront).
+              </p>
+
+              <p>
+                <strong>Pricing pressures.</strong> China's Volume-Based Procurement (VBP) system and National Reimbursement Drug List (NRDL) negotiations have introduced significant pricing risk for licensed products. Generic drugs face 50-90% price cuts through VBP, and even innovative products must negotiate NRDL inclusion at discounts of 30-60% from list price. For licensors, this means <strong>China territory value for commodity therapeutic areas has declined</strong>, while innovative first-in-class or best-in-class assets retain strong economics because NRDL pricing remains attractive relative to development costs.
+              </p>
+
+              <p>
+                <strong>WuXi and the CDMO-licensing nexus.</strong> WuXi AppTec, WuXi Biologics, and related entities have created a unique deal ecosystem where CDMO relationships evolve into licensing partnerships. Several $200M-$500M deals have originated from WuXi's client relationships, where the CDMO's deep knowledge of a molecule's manufacturing profile leads to China-focused licensing agreements. This pattern is expected to accelerate as WuXi's client base expands.
+              </p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="china-licensing-evolution">China Licensing Evolution: From License-In to License-Out</h2>
-
-            <p>
-              China's biopharma licensing landscape has undergone a fundamental transformation over the past five years. The traditional model — Western biotech licenses China rights to a local partner — still represents the majority of China-focused deals. But an increasingly significant counter-flow has emerged: Chinese biotechs licensing their own innovations to global partners.
-            </p>
-
-            <p>
-              <strong>The license-in model.</strong> Companies like Zai Lab and BeiGene built their initial portfolios by licensing innovative assets from Western biotechs for Greater China (mainland China, Hong Kong, Macau, and Taiwan, often plus select Southeast Asian markets). The Zai Lab model has become a template: acquire China + APAC rights at a <strong>15-25% discount to global deal value</strong>, manage NMPA regulatory submissions independently, and build commercial infrastructure to launch products in China 1-2 years after US approval. This model works because Chinese regulatory timelines have compressed dramatically — NMPA approval lag vs. FDA has shrunk from 5-7 years (pre-2017) to 1-3 years (current).
-            </p>
-
-            <p>
-              <strong>The license-out pivot.</strong> BeiGene's $650M deal with Novartis for ex-China rights to tislelizumab marked a watershed moment — the first time a Chinese biotech licensed a major immuno-oncology asset to a Western pharma company at scale. While the deal ultimately faced commercial challenges, it established the precedent that Chinese innovation could command global licensing economics. Since then, several Chinese biotechs have executed or attempted global out-licensing deals, including Hengrui, Hutchmed, and Legend Biotech (whose BCMA CAR-T was licensed to Janssen for $350M upfront).
-            </p>
-
-            <p>
-              <strong>Pricing pressures.</strong> China's Volume-Based Procurement (VBP) system and National Reimbursement Drug List (NRDL) negotiations have introduced significant pricing risk for licensed products. Generic drugs face 50-90% price cuts through VBP, and even innovative products must negotiate NRDL inclusion at discounts of 30-60% from list price. For licensors, this means <strong>China territory value for commodity therapeutic areas has declined</strong>, while innovative first-in-class or best-in-class assets retain strong economics because NRDL pricing remains attractive relative to development costs.
-            </p>
-
-            <p>
-              <strong>WuXi and the CDMO-licensing nexus.</strong> WuXi AppTec, WuXi Biologics, and related entities have created a unique deal ecosystem where CDMO relationships evolve into licensing partnerships. Several $200M-$500M deals have originated from WuXi's client relationships, where the CDMO's deep knowledge of a molecule's manufacturing profile leads to China-focused licensing agreements. This pattern is expected to accelerate as WuXi's client base expands.
-            </p>
-
             <h2 id="korea-australia-hubs">Korea and Australia as Emerging Deal Hubs</h2>
 
             <p>
@@ -336,29 +366,33 @@ export default function OutLicensingAsiaPacificPage() {
             <p>
               <strong>Technology platform partnerships.</strong> APAC pharmaceutical companies are increasingly interested in platform technology access, not just individual molecule rights. AI drug discovery platforms, mRNA technologies, and cell therapy manufacturing platforms are being licensed to APAC partners as technology transfers, with the Asian partner contributing manufacturing scale and regional clinical development expertise. These deals are structured differently from traditional molecule licensing — typically with lower upfronts but higher manufacturing royalties and technology access fees.
             </p>
-
-            <h2 id="deal-structure-patterns">Deal Structure Patterns by APAC Sub-Region</h2>
-
-            <p>
-              Each APAC sub-region has characteristic deal structure patterns that experienced BD professionals should understand. For how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> vary across these territories, see our dedicated analysis.
-            </p>
-
-            <p>
-              <strong>Japan:</strong> Higher upfronts (20-30% of total deal value), balanced milestone schedules, reliable payment execution, co-development preferred, 18-24 month deal timelines. Japanese partners almost never default on milestones — a significant advantage for cash-planning.
-            </p>
-
-            <p>
-              <strong>China:</strong> Lower upfronts (10-20% of total deal value), heavier milestone weighting, option-based structures increasingly common, 6-12 month deal timelines. Payment reliability has improved but remains variable depending on the partner's financial position. <strong>Escrow arrangements</strong> for milestones above $50M are increasingly standard.
-            </p>
-
-            <p>
-              <strong>Korea:</strong> Mid-range upfronts, often structured around manufacturing economics (technology transfer fees, CMO preferred supplier arrangements), strategic value emphasized over territory economics alone, 12-18 month timelines.
-            </p>
-
-            <p>
-              <strong>Australia/NZ:</strong> Typically bundled with broader APAC or ex-US rights rather than standalone. When licensed separately, economics are minimal ($1-5M upfronts) and the value is primarily in clinical trial site access.
-            </p>
           </div>
+
+          <section className="bg-slate-50 -mx-6 px-6 py-12 my-10">
+            <div className="prose prose-slate prose-lg max-w-none">
+              <h2 id="deal-structure-patterns">Deal Structure Patterns by APAC Sub-Region</h2>
+
+              <p>
+                Each APAC sub-region has characteristic deal structure patterns that experienced BD professionals should understand. For how <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> vary across these territories, see our dedicated analysis.
+              </p>
+
+              <p>
+                <strong>Japan:</strong> Higher upfronts (20-30% of total deal value), balanced milestone schedules, reliable payment execution, co-development preferred, 18-24 month deal timelines. Japanese partners almost never default on milestones — a significant advantage for cash-planning.
+              </p>
+
+              <p>
+                <strong>China:</strong> Lower upfronts (10-20% of total deal value), heavier milestone weighting, option-based structures increasingly common, 6-12 month deal timelines. Payment reliability has improved but remains variable depending on the partner's financial position. <strong>Escrow arrangements</strong> for milestones above $50M are increasingly standard.
+              </p>
+
+              <p>
+                <strong>Korea:</strong> Mid-range upfronts, often structured around manufacturing economics (technology transfer fees, CMO preferred supplier arrangements), strategic value emphasized over territory economics alone, 12-18 month timelines.
+              </p>
+
+              <p>
+                <strong>Australia/NZ:</strong> Typically bundled with broader APAC or ex-US rights rather than standalone. When licensed separately, economics are minimal ($1-5M upfronts) and the value is primarily in clinical trial site access.
+              </p>
+            </div>
+          </section>
 
           <div className="prose prose-slate prose-lg max-w-none">
             <h2 id="faq">Frequently Asked Questions</h2>
