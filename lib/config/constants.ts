@@ -15,8 +15,24 @@ export const PRICING = {
   REPORT_LABEL: 'Deal Report',
 } as const;
 
+/**
+ * Rounds a count down to the nearest 100 and formats as "X,Y00+".
+ * e.g., 3561 → "3,500+", 3649 → "3,600+", 3450 → "3,400+"
+ * Rounds down to the nearest hundred so we never overstate.
+ */
+export function formatDealCount(count: number): string {
+  const rounded = Math.floor(count / 100) * 100;
+  return `${rounded.toLocaleString()}+`;
+}
+
+// Live deal count — updated by daily-stats cron writing to this file,
+// or manually when the number is known to have changed significantly.
+// Current DB count as of last check: 3,561
+const LIVE_DEAL_COUNT = 3561;
+
 export const DEAL_STATS = {
-  TOTAL_DEALS: '3,500+',
+  TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
+  TOTAL_DEALS_RAW: LIVE_DEAL_COUNT,
   TOTAL_COMPANIES: '850+',
   TOTAL_DEALS_DESCRIPTION: 'real biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, press releases, and regulatory databases',
   NEUROLOGY_DEALS: '150+',
