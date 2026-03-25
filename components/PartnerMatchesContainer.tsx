@@ -205,31 +205,48 @@ export default function PartnerMatchesContainer({
     <div>
       {/* Partner Filter Controls */}
       <div className="mt-8 border-t border-neutral-200 dark:border-slate-700 pt-6 mb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filter:</span>
-          <select
-            value={filterDealType}
-            onChange={(e) => setFilterDealType(e.target.value)}
-            className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-            aria-label="Filter by deal type preference"
-          >
-            <option value="all">All deal types</option>
-            <option value="licensing">Licensing</option>
-            <option value="acquisition">Acquisition</option>
-            <option value="collaboration">Collaboration</option>
-          </select>
-          <select
-            value={filterTerritory}
-            onChange={(e) => setFilterTerritory(e.target.value)}
-            className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-            aria-label="Filter by partner territory"
-          >
-            <option value="all">All territories</option>
-            <option value="us">US-based</option>
-            <option value="eu">Europe</option>
-            <option value="japan">Japan</option>
-            <option value="asia">Asia-Pacific</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Filter:</span>
+          {/* Deal Type Filter — pill buttons */}
+          {[
+            { value: 'all', label: 'All Types' },
+            { value: 'licensing', label: 'Licensing' },
+            { value: 'acquisition', label: 'Acquisition' },
+            { value: 'collaboration', label: 'Collaboration' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setFilterDealType(opt.value)}
+              className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all ${
+                filterDealType === opt.value
+                  ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/20'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+          {/* Territory Filter — pill buttons */}
+          {[
+            { value: 'all', label: 'Global' },
+            { value: 'us', label: 'US' },
+            { value: 'eu', label: 'Europe' },
+            { value: 'japan', label: 'Japan' },
+            { value: 'asia', label: 'APAC' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setFilterTerritory(opt.value)}
+              className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all ${
+                filterTerritory === opt.value
+                  ? 'bg-cyan-500 text-white shadow-sm shadow-cyan-500/20'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
           {(filterDealType !== 'all' || filterTerritory !== 'all') && (
             <button
               onClick={() => { setFilterDealType('all'); setFilterTerritory('all'); }}
