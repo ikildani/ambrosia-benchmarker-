@@ -143,88 +143,161 @@ export async function GET(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 3: Financial Model (rNPV + Monte Carlo + Scenarios)
+  // CHECK 3: Financial Model (MC+rNPV) — 4 TA combos
   // ═══════════════════════════════════════════════════
-  try {
-    const dealTermsResult = calculateDealTerms(TEST_INPUT);
-    const financialResult = runFinancialModel(TEST_INPUT, dealTermsResult);
+  {
+    const fmCombos: { ta: string; mod: string; ind: string; phase: string }[] = [
+      { ta: 'oncology', mod: 'smallMolecule', ind: 'solid_tumor', phase: 'phase2' },
+      { ta: 'neurology', mod: 'smallMolecule', ind: 'neurodegeneration', phase: 'preclinical' },
+      { ta: 'immunology', mod: 'monoclonalAntibody', ind: 'autoimmune_systemic', phase: 'phase1' },
+      { ta: 'rareDisease', mod: 'geneTherapy', ind: 'rare_genetic', phase: 'preclinical' },
+    ];
+    let fmPassed = 0;
+    const fmFailures: string[] = [];
 
-    const mcOk = financialResult.monteCarlo && financialResult.monteCarlo.iterations >= 1000;
-    const rnpvOk = financialResult.rnpv && financialResult.rnpv.riskAdjustedNPV > 0;
-    const defenseOk = financialResult.defensiveAnalysis && financialResult.defensiveAnalysis.defensiveFloor >= 0;
+    for (const combo of fmCombos) {
+      try {
+        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: combo.ta as CalculationInput['therapeuticArea'], modality: combo.mod as CalculationInput['modality'], indication: combo.ind as CalculationInput['indication'], phase: combo.phase as CalculationInput['phase'] };
+        const dealResult = calculateDealTerms(input);
+        const fm = runFinancialModel(input, dealResult);
 
-    if (mcOk && rnpvOk && defenseOk) {
-      const mc = financialResult.monteCarlo;
-      checks.push({ name: 'Financial Model (MC+rNPV)', status: 'pass', details: `${mc.iterations} iterations | P50 $${Math.round(mc.percentiles.p50)}M | P(NPV>0) ${(mc.probabilityOfPositiveNPV * 100).toFixed(0)}%` });
-    } else {
-      const issues = [];
-      if (!mcOk) issues.push('Monte Carlo failed');
-      if (!rnpvOk) issues.push('rNPV failed');
-      if (!defenseOk) issues.push('Defensive analysis failed');
-      checks.push({ name: 'Financial Model (MC+rNPV)', status: 'fail', details: issues.join('; ') });
+        if (fm.monteCarlo?.iterations >= 1000 && fm.defensiveAnalysis !== undefined && fm.defensiveAnalysis !== null) {
+          fmPassed++;
+        } else {
+          fmFailures.push(`${combo.ta}/${combo.mod}: MC or defense missing`);
+        }
+      } catch (err) {
+        fmFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'CRASH'}`);
+      }
     }
-  } catch (err) {
-    checks.push({ name: 'Financial Model (MC+rNPV)', status: 'fail', details: `CRASH — ${err instanceof Error ? err.message : String(err)}` });
+
+    checks.push({
+      name: 'Financial Model (MC+rNPV)',
+      status: fmFailures.length === 0 ? 'pass' : 'fail',
+      details: fmFailures.length === 0 ? `${fmPassed}/${fmCombos.length} combos valid` : `${fmFailures.length} failures: ${fmFailures.join('; ')}`,
+    });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 4: Tornado Sensitivity
+  // CHECK 4: Tornado Sensitivity — 3 TA combos
   // ═══════════════════════════════════════════════════
-  try {
-    const dealTermsResult = calculateDealTerms(TEST_INPUT);
-    const sensitivities = computeTornadoSensitivities(TEST_INPUT, dealTermsResult);
+  {
+    const tsCombos: { ta: string; mod: string; ind: string }[] = [
+      { ta: 'oncology', mod: 'adc', ind: 'solid_tumor' },
+      { ta: 'metabolic', mod: 'smallMolecule', ind: 'diabetes_type2' },
+      { ta: 'hematology', mod: 'cellTherapy', ind: 'aml' },
+    ];
+    let tsPassed = 0;
+    const tsFailures: string[] = [];
 
-    if (!sensitivities || sensitivities.length === 0) {
-      checks.push({ name: 'Tornado Sensitivity', status: 'fail', details: 'No sensitivities returned' });
-    } else {
-      const valid = sensitivities.every(s => s.highValue >= s.lowValue);
-      checks.push({
-        name: 'Tornado Sensitivity',
-        status: valid ? 'pass' : 'warn',
-        details: `${sensitivities.length} factors | Top driver: ${sensitivities[0]?.factor || 'N/A'}`,
-      });
+    for (const combo of tsCombos) {
+      try {
+        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: combo.ta as CalculationInput['therapeuticArea'], modality: combo.mod as CalculationInput['modality'], indication: combo.ind as CalculationInput['indication'] };
+        const dealResult = calculateDealTerms(input);
+        const sensitivities = computeTornadoSensitivities(input, dealResult);
+
+        if (sensitivities && sensitivities.length > 0 && sensitivities.every(s => s.highValue >= s.lowValue)) {
+          tsPassed++;
+        } else {
+          tsFailures.push(`${combo.ta}/${combo.mod}: invalid output`);
+        }
+      } catch (err) {
+        tsFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'CRASH'}`);
+      }
     }
-  } catch (err) {
-    checks.push({ name: 'Tornado Sensitivity', status: 'fail', details: `CRASH — ${err instanceof Error ? err.message : String(err)}` });
+
+    checks.push({
+      name: 'Tornado Sensitivity',
+      status: tsFailures.length === 0 ? 'pass' : 'fail',
+      details: tsFailures.length === 0 ? `${tsPassed}/${tsCombos.length} combos valid` : `${tsFailures.length} failures: ${tsFailures.join('; ')}`,
+    });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 5: Partner Matching
+  // CHECK 5: Partner Matching — 5 TA combos
   // ═══════════════════════════════════════════════════
-  try {
-    const { findPartnerMatches } = await import('@/lib/services/partner-matching');
-    const matchResult = await findPartnerMatches(supabase, {
-      modality: 'smallMolecule',
-      development_phase: 'phase2',
-      indication_category: 'solid_tumor',
-      indication_specific: null,
-      territory_scope: 'global',
-      therapeutic_area: 'oncology',
-    }, { limit: 5, includeEnhancedBreakdown: false });
+  {
+    const pmCombos: { ta: string; mod: string; ind: string; phase: string }[] = [
+      { ta: 'oncology', mod: 'smallMolecule', ind: 'solid_tumor', phase: 'phase2' },
+      { ta: 'neurology', mod: 'smallMolecule', ind: 'neurodegeneration', phase: 'preclinical' },
+      { ta: 'immunology', mod: 'monoclonalAntibody', ind: 'autoimmune_systemic', phase: 'phase1' },
+      { ta: 'rareDisease', mod: 'geneTherapy', ind: 'rare_genetic', phase: 'preclinical' },
+      { ta: 'infectiousDisease', mod: 'smallMolecule', ind: 'bacterial', phase: 'preclinical' },
+    ];
+    let pmPassed = 0;
+    const pmFailures: string[] = [];
 
-    if (matchResult.total_matches >= 0 && matchResult.generated_at) {
-      checks.push({ name: 'Partner Matching', status: 'pass', details: `${matchResult.total_matches} matches found | Top: ${matchResult.matches[0]?.company_name || 'N/A'}` });
-    } else {
-      checks.push({ name: 'Partner Matching', status: 'warn', details: `Unexpected result format` });
+    try {
+      const { findPartnerMatches } = await import('@/lib/services/partner-matching');
+
+      for (const combo of pmCombos) {
+        try {
+          const result = await findPartnerMatches(supabase, {
+            modality: combo.mod,
+            development_phase: combo.phase,
+            indication_category: combo.ind,
+            indication_specific: null,
+            territory_scope: 'global',
+            therapeutic_area: combo.ta,
+          }, { limit: 3, includeEnhancedBreakdown: false });
+
+          if (result.total_matches >= 0 && result.generated_at) {
+            pmPassed++;
+          } else {
+            pmFailures.push(`${combo.ta}/${combo.mod}: unexpected format`);
+          }
+        } catch (err) {
+          pmFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'error'}`);
+        }
+      }
+    } catch (err) {
+      pmFailures.push(`Module import failed: ${err instanceof Error ? err.message : 'error'}`);
     }
-  } catch (err) {
-    checks.push({ name: 'Partner Matching', status: 'warn', details: `Error — ${err instanceof Error ? err.message : String(err)}` });
+
+    checks.push({
+      name: 'Partner Matching',
+      status: pmFailures.length === 0 ? 'pass' : pmFailures.length <= 1 ? 'warn' : 'fail',
+      details: pmFailures.length === 0 ? `${pmPassed}/${pmCombos.length} combos valid` : `${pmFailures.length} failures: ${pmFailures.join('; ')}`,
+    });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 6: Competitive Landscape
+  // CHECK 6: Competitive Landscape — 4 indications
   // ═══════════════════════════════════════════════════
-  try {
-    const { analyzeCompetitiveLandscape } = await import('@/lib/services/pipeline-intelligence');
-    const landscape = await analyzeCompetitiveLandscape(supabase, 'lung_nsclc', 'smallMolecule');
+  {
+    const clCombos: { ind: string; mod: string }[] = [
+      { ind: 'lung_nsclc', mod: 'smallMolecule' },
+      { ind: 'breast_tnbc', mod: 'adc' },
+      { ind: 'autoimmune_systemic', mod: 'monoclonalAntibody' },
+      { ind: 'neurodegeneration', mod: 'smallMolecule' },
+    ];
+    let clPassed = 0;
+    const clFailures: string[] = [];
 
-    if (landscape && landscape.competitiveDensityScore >= 0) {
-      checks.push({ name: 'Competitive Landscape', status: 'pass', details: `Density ${landscape.competitiveDensityScore}/100 | ${landscape.totalCompetingAssets} competing assets` });
-    } else {
-      checks.push({ name: 'Competitive Landscape', status: 'warn', details: 'Unexpected result' });
+    try {
+      const { analyzeCompetitiveLandscape } = await import('@/lib/services/pipeline-intelligence');
+
+      for (const combo of clCombos) {
+        try {
+          const landscape = await analyzeCompetitiveLandscape(supabase, combo.ind, combo.mod);
+          if (landscape && landscape.competitiveDensityScore >= 0 && landscape.competitiveDensityScore <= 100) {
+            clPassed++;
+          } else {
+            clFailures.push(`${combo.ind}: invalid density score`);
+          }
+        } catch (err) {
+          clFailures.push(`${combo.ind}: ${err instanceof Error ? err.message : 'error'}`);
+        }
+      }
+    } catch (err) {
+      clFailures.push(`Module import failed: ${err instanceof Error ? err.message : 'error'}`);
     }
-  } catch (err) {
-    checks.push({ name: 'Competitive Landscape', status: 'warn', details: `Error — ${err instanceof Error ? err.message : String(err)}` });
+
+    checks.push({
+      name: 'Competitive Landscape',
+      status: clFailures.length === 0 ? 'pass' : clFailures.length <= 1 ? 'warn' : 'fail',
+      details: clFailures.length === 0 ? `${clPassed}/${clCombos.length} indications valid` : `${clFailures.length} failures: ${clFailures.join('; ')}`,
+    });
   }
 
   // ═══════════════════════════════════════════════════
