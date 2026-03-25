@@ -13,7 +13,7 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 import { getRecencyWeight } from '@/lib/comparableDeals';
-import { calculatePharmaIntent, type TrialForIntent } from '@/lib/services/pharma-intent';
+import { calculatePharmaIntent, type TrialForIntent, type PressReleaseForIntent, type ResearchSignalForIntent } from '@/lib/services/pharma-intent';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -496,6 +496,8 @@ export async function findPartnerMatches(
   // This is more efficient than fetching per-company
   let companyDealsMap: Map<string, CompanyDeal[]> = new Map();
   let companyTrialsMap: Map<string, TrialForIntent[]> = new Map();
+  let companyPressMap: Map<string, PressReleaseForIntent[]> = new Map();
+  let companyResearchMap: Map<string, ResearchSignalForIntent[]> = new Map();
   if (includeEnhancedBreakdown) {
     const companyIds = companies.map((c) => c.id);
 
@@ -534,6 +536,70 @@ export async function findPartnerMatches(
         trials.push(trial);
         companyTrialsMap.set(trial.company_id, trials);
       }
+    }
+
+    // Pre-fetch press releases and research signals for intent scoring
+    // Wrapped in try/catch to never block partner matching
+    const companyNames = companies.map((c) => (c as CompanyProfile).name).filter(Boolean);
+
+    try {
+      const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString();
+      const twelveMonthsAgo = new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [pressResult, researchResult] = await Promise.all([
+        // Press releases: companies_mentioned overlaps with any company name (GIN index)
+        supabase
+          .from('press_releases')
+          .select('headline, body_text, published_at, is_deal_announcement, companies_mentioned')
+          .gte('published_at', sixMonthsAgo)
+          .overlaps('companies_mentioned', companyNames)
+          .order('published_at', { ascending: false })
+          .limit(1000),
+        // Research signals: organization_name matches any company name
+        supabase
+          .from('research_signals')
+          .select('signal_type, therapeutic_area, funding_amount_usd, published_date, organization_name')
+          .gte('published_date', twelveMonthsAgo)
+          .in('organization_name', companyNames)
+          .order('published_date', { ascending: false })
+          .limit(1000),
+      ]);
+
+      if (pressResult.data) {
+        for (const pr of pressResult.data as PressReleaseForIntent[]) {
+          if (pr.companies_mentioned) {
+            for (const companyName of pr.companies_mentioned) {
+              // Find the matching company to get its ID for the map
+              const matchedCompany = companies.find(
+                (c) => (c as CompanyProfile).name === companyName
+              ) as CompanyProfile | undefined;
+              if (matchedCompany) {
+                const existing = companyPressMap.get(matchedCompany.id) || [];
+                existing.push(pr);
+                companyPressMap.set(matchedCompany.id, existing);
+              }
+            }
+          }
+        }
+      }
+
+      if (researchResult.data) {
+        for (const rs of researchResult.data as ResearchSignalForIntent[]) {
+          if (rs.organization_name) {
+            const matchedCompany = companies.find(
+              (c) => (c as CompanyProfile).name === rs.organization_name
+            ) as CompanyProfile | undefined;
+            if (matchedCompany) {
+              const existing = companyResearchMap.get(matchedCompany.id) || [];
+              existing.push(rs);
+              companyResearchMap.set(matchedCompany.id, existing);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[PartnerMatching] Non-blocking: failed to pre-fetch press/research signals:', err);
+      // Maps remain empty — intent scoring will work without these signals
     }
   }
 
@@ -605,6 +671,8 @@ export async function findPartnerMatches(
         try {
           const companyTrials = companyTrialsMap.get(company.id) || [];
           const allDealsFlat = Array.from(companyDealsMap.values()).flat();
+          const companyPress = companyPressMap.get(company.id) || undefined;
+          const companyResearch = companyResearchMap.get(company.id) || undefined;
           match.pharma_intent = calculatePharmaIntent(
             company,
             input.modality,
@@ -612,8 +680,8 @@ export async function findPartnerMatches(
             companyDeals,
             companyTrials,
             allDealsFlat,
-            undefined, // pressReleases — future async enrichment
-            undefined, // researchSignals — future async enrichment
+            companyPress,
+            companyResearch,
             input.development_phase || undefined, // targetPhase for company type × phase interaction
             input.therapeutic_area || undefined,   // targetTA for TA-specific patent cliff relevance
           );
