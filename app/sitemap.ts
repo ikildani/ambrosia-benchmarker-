@@ -309,5 +309,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages];
+  // Backlink engine pages
+  const backlinkPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/press/data-kit`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/reports/q1-2026-biopharma-deal-benchmarks`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+  ];
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages, ...backlinkPages];
 }

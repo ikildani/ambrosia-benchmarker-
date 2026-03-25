@@ -7,6 +7,9 @@ import {
   formatCurrency,
 } from '@/lib/seo/programmatic-pages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import dynamic from 'next/dynamic';
+
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
 
 export async function generateStaticParams() {
   return getAllProgrammaticSlugs().map((slug) => ({ slug }));
@@ -378,6 +381,16 @@ export default async function ProgrammaticDataPage({
               </svg>
             </Link>
           </div>
+        </section>
+
+        {/* Cite This Data */}
+        <section className="max-w-3xl mx-auto px-4 pb-12">
+          <CiteThisData
+            title={page.h1}
+            pageUrl={`/data/${page.slug}`}
+            embedType="phase-upfront"
+            embedTA={page.ta.key}
+          />
         </section>
       </main>
 
