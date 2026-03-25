@@ -6,6 +6,7 @@ import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TrustBar } from '@/components/insights/TrustBar';
+import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
@@ -50,41 +51,66 @@ export default function Q1BenchmarkReportPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
+      {/* ── MASTHEAD ── */}
+      <div className="bg-slate-900">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/">
+            <AmbrosiaLogo variant="reversed" height={32} />
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/calculator" className="text-xs text-slate-400 hover:text-white transition-colors">Calculator</Link>
+            <Link href="/benchmarks" className="text-xs text-slate-400 hover:text-white transition-colors">Benchmarks</Link>
+          </div>
+        </div>
+      </div>
+
       {/* ── HERO ── */}
       <header className="bg-white border-b border-slate-200">
-        <div className="h-1 bg-gradient-to-r from-teal-500 via-blue-500 to-teal-500" />
-        <div className="max-w-4xl mx-auto px-6 pt-16 pb-12">
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-8">
+        <div className="h-[3px] bg-gradient-to-r from-teal-600 via-teal-400 to-teal-600" />
+        <div className="max-w-4xl mx-auto px-6 pt-14 pb-14">
+          <nav className="flex items-center gap-2 text-[11px] text-slate-400 mb-10 uppercase tracking-widest">
             <Link href="/" className="hover:text-slate-600">Home</Link>
-            <span>/</span>
+            <span className="text-slate-300">/</span>
             <Link href="/reports" className="hover:text-slate-600">Reports</Link>
-            <span>/</span>
-            <span className="text-slate-600">Q1 2026</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-500">Q1 2026</span>
           </nav>
-          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-3">Q1 2026 · Quarterly Report</p>
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight mb-4">
-            Biopharma Deal<br />Benchmarks
-          </h1>
-          <p className="text-lg text-slate-500 max-w-2xl leading-relaxed mb-8">
-            Quarterly analysis of licensing economics across 12 therapeutic areas, 7 development phases, and 8 modalities — drawn from 2,600+ verified transactions.
+
+          <div className="flex items-start gap-5 mb-3">
+            <div className="hidden sm:block w-px h-16 bg-teal-500 mt-1" />
+            <div>
+              <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-2">Quarterly Report · March 2026</p>
+              <h1 className="text-4xl sm:text-[3.25rem] font-bold text-slate-900 leading-[1.1] tracking-tight">
+                Biopharma Deal Benchmarks
+              </h1>
+            </div>
+          </div>
+
+          <p className="text-lg text-slate-500 max-w-2xl leading-relaxed mt-6 mb-10">
+            A quarterly analysis of biopharma licensing economics across 12 therapeutic areas, drawn from 2,600+ verified transactions. Published by Ambrosia Ventures.
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-200 rounded-lg overflow-hidden mb-10">
             {[
-              { value: '2,600+', label: 'Verified Deals', accent: false },
-              { value: '$2.0B', label: 'Metabolic Ph2 TDV', accent: true },
-              { value: '1.60x', label: 'Radiopharm Premium', accent: false },
-              { value: '12', label: 'Therapeutic Areas', accent: false },
+              { value: '2,600+', label: 'Verified Transactions' },
+              { value: '$2.0B', label: 'Metabolic Ph2 TDV' },
+              { value: '1.60x', label: 'Radiopharm Premium' },
+              { value: '12', label: 'Therapeutic Areas' },
             ].map((stat, i) => (
-              <div key={i} className={`rounded-xl p-4 text-center ${stat.accent ? 'bg-teal-50 border border-teal-200' : 'bg-slate-50 border border-slate-200'}`}>
-                <div className={`text-2xl sm:text-3xl font-bold tabular-nums ${stat.accent ? 'text-teal-700' : 'text-slate-900'}`}>{stat.value}</div>
-                <div className="text-xs text-slate-500 mt-1">{stat.label}</div>
+              <div key={i} className="bg-white p-5 text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">{stat.value}</div>
+                <div className="text-[11px] text-slate-400 mt-1.5 uppercase tracking-wide">{stat.label}</div>
               </div>
             ))}
           </div>
 
-          <AuthorByline date="March 25, 2026" />
-          <TrustBar />
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wide">
+            <span>Published March 25, 2026</span>
+            <span className="text-slate-300">|</span>
+            <span>Ambrosia Ventures Research</span>
+            <span className="text-slate-300">|</span>
+            <span>Data current through March 2026</span>
+          </div>
         </div>
       </header>
 
@@ -319,7 +345,7 @@ export default function Q1BenchmarkReportPage() {
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-8" id="deal-highlights">Landmark Transactions</h2>
 
-            <div className="space-y-5">
+            <div className="space-y-0 divide-y divide-slate-200 border-y border-slate-200">
               {[
                 { value: '$16.5B', companies: 'Novo Nordisk / Catalent', meta: 'Metabolic · Manufacturing Acquisition · 2024', analysis: 'Largest manufacturing deal in biopharma history. Secured GLP-1 fill-finish capacity to address chronic semaglutide supply shortages. Signaled that manufacturing infrastructure is now a strategic asset worth acquisition premiums.' },
                 { value: '$10.8B', companies: 'Merck / Prometheus Biosciences', meta: 'Immunology · Anti-TL1A · Crohn\'s · 2023', analysis: 'Validated anti-TL1A as a blockbuster mechanism. At 7.2x the median Phase 2 immunology TDV, the premium reflects first-in-class data, precision diagnostics, and Merck\'s Keytruda patent cliff diversification.' },
@@ -327,14 +353,13 @@ export default function Q1BenchmarkReportPage() {
                 { value: '$7.1B', companies: 'Roche / Telavant', meta: 'Immunology · Anti-TL1A · IBD · 2024', analysis: 'Confirmed Merck/Prometheus was not an outlier but a new valuation tier for TL1A. Earlier-stage asset, yet only 34% lower deal value — demonstrating how validated mechanism data lifts the entire class.' },
                 { value: '$4.9B', companies: 'Vertex / Alpine Immune Sciences', meta: 'Renal / Immunology · IgAN · 2024', analysis: 'Vertex\'s expansion beyond CF and pain into IgA nephropathy. Reflects the growing convergence of immunology and nephrology deal economics following sparsentan approval.' },
               ].map((deal, i) => (
-                <div key={i} className="flex gap-6 bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                  <div className="flex-shrink-0 w-24 text-center">
-                    <div className="text-2xl font-bold text-teal-700 tabular-nums">{deal.value}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wide">Total Value</div>
+                <div key={i} className="flex gap-6 bg-white py-6 px-2">
+                  <div className="flex-shrink-0 w-20">
+                    <div className="text-xl font-bold text-slate-900 tabular-nums leading-none">{deal.value}</div>
                   </div>
                   <div className="min-w-0">
-                    <h4 className="font-bold text-slate-900">{deal.companies}</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">{deal.meta}</p>
+                    <h4 className="text-sm font-bold text-slate-900">{deal.companies}</h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5 uppercase tracking-wide">{deal.meta}</p>
                     <p className="text-sm text-slate-600 mt-2 leading-relaxed">{deal.analysis}</p>
                   </div>
                 </div>
