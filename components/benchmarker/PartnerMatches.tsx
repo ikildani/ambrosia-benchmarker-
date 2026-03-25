@@ -74,6 +74,12 @@ interface PartnerMatch {
     modalityFit: number;
     indicationFit: number;
     preferredDealType?: string;
+    timingProbabilities?: {
+      within6mo: number;
+      within12mo: number;
+      within18mo: number;
+      within24mo: number;
+    };
   } | null;
 }
 
@@ -467,6 +473,29 @@ export function PartnerMatches({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                               </svg>
                               {signal}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Timing Probabilities */}
+                      {match.pharma_intent.timingProbabilities && (
+                        <div className="flex gap-2 mb-3">
+                          {[
+                            { label: '6mo', value: match.pharma_intent.timingProbabilities.within6mo },
+                            { label: '12mo', value: match.pharma_intent.timingProbabilities.within12mo },
+                            { label: '18mo', value: match.pharma_intent.timingProbabilities.within18mo },
+                            { label: '24mo', value: match.pharma_intent.timingProbabilities.within24mo },
+                          ].map(({ label, value }) => (
+                            <div key={label} className="flex-1 text-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+                              <div className={`text-sm font-bold ${
+                                value >= 0.6 ? 'text-teal-600 dark:text-teal-400' :
+                                value >= 0.3 ? 'text-amber-600 dark:text-amber-400' :
+                                'text-gray-500 dark:text-slate-500'
+                              }`}>
+                                {Math.round(value * 100)}%
+                              </div>
+                              <div className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{label}</div>
                             </div>
                           ))}
                         </div>

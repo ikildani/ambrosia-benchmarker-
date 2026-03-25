@@ -15,6 +15,28 @@ export interface CalibratedWeights {
   factorCorrelations: Record<string, number>;
   accuracyEstimate: number;
   calibratedAt: string;
+  // Timing distribution: probability of deal within each window, by intent tier
+  timingDistribution: TimingDistribution;
+}
+
+export interface TimingDistribution {
+  // For each intent tier, the probability of a deal closing within each time window
+  byTier: Record<string, TierTiming>;
+  // Overall conversion rates by window
+  overall: WindowProbabilities;
+}
+
+export interface TierTiming {
+  sampleSize: number;
+  probabilities: WindowProbabilities;
+  medianDaysToConversion: number | null;
+}
+
+export interface WindowProbabilities {
+  within6mo: number;   // 0-1
+  within12mo: number;  // 0-1
+  within18mo: number;  // 0-1
+  within24mo: number;  // 0-1
 }
 
 interface HistoricalDeal {
@@ -284,6 +306,11 @@ export async function calibrateIntentWeights(
 
   const accuracy = correctPredictions / snapshots.length;
 
+  // 9. Compute timing distribution from historical deal-to-deal intervals
+  // For companies that did multiple deals, measure time between consecutive deals
+  // and compute probability of next deal within each time window by intent score tier
+  const timingDistribution = computeTimingDistribution(typedDeals, snapshots, weights, medianScore);
+
   return {
     weights,
     sampleSize: snapshots.length,
@@ -292,6 +319,7 @@ export async function calibrateIntentWeights(
     factorCorrelations: correlations,
     accuracyEstimate: Number(accuracy.toFixed(4)),
     calibratedAt: new Date().toISOString(),
+    timingDistribution,
   };
 }
 
@@ -348,4 +376,119 @@ function computeMedianScore(snapshots: CompanySnapshot[], weights: Record<string
   const scores = snapshots.map((s) => computeSnapshotScore(s, weights)).sort((a, b) => a - b);
   const mid = Math.floor(scores.length / 2);
   return scores.length % 2 !== 0 ? scores[mid] : (scores[mid - 1] + scores[mid]) / 2;
+}
+
+// ─── Timing Distribution ────────────────────────────────
+
+function computeTimingDistribution(
+  deals: HistoricalDeal[],
+  snapshots: CompanySnapshot[],
+  weights: Record<string, number>,
+  medianScore: number
+): TimingDistribution {
+  // Group deals by licensee and sort by date
+  const dealsByLicensee = new Map<string, HistoricalDeal[]>();
+  for (const deal of deals) {
+    if (!deal.licensee_id) continue;
+    const existing = dealsByLicensee.get(deal.licensee_id) || [];
+    existing.push(deal);
+    dealsByLicensee.set(deal.licensee_id, existing);
+  }
+
+  // For each company, compute consecutive deal intervals
+  interface DealInterval {
+    companyId: string;
+    daysBetween: number;
+    intentScore: number; // reconstructed score at time of first deal
+  }
+  const intervals: DealInterval[] = [];
+
+  for (const [companyId, companyDeals] of dealsByLicensee) {
+    if (companyDeals.length < 2) continue;
+
+    // Sort by date ascending
+    const sorted = [...companyDeals].sort((a, b) =>
+      new Date(a.announced_date).getTime() - new Date(b.announced_date).getTime()
+    );
+
+    // Compute intervals between consecutive deals
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const d1 = new Date(sorted[i].announced_date);
+      const d2 = new Date(sorted[i + 1].announced_date);
+      const daysBetween = Math.round((d2.getTime() - d1.getTime()) / 86400000);
+
+      if (daysBetween <= 0 || daysBetween > 730) continue; // Skip same-day or >2yr gaps
+
+      // Reconstruct intent score at time of first deal
+      const snapshot = snapshots.find(s => s.companyId === companyId);
+      const intentScore = snapshot ? computeSnapshotScore(snapshot, weights) : medianScore;
+
+      intervals.push({ companyId, daysBetween, intentScore });
+    }
+  }
+
+  // Classify intervals into intent tiers
+  const scoreThresholds = {
+    very_high: 0.8,
+    high: 0.6,
+    moderate: 0.4,
+    low: 0.2,
+  };
+
+  // Normalize scores to 0-1 range
+  const allScores = intervals.map(i => i.intentScore);
+  const maxScore = Math.max(...allScores, 1);
+  const minScore = Math.min(...allScores, 0);
+  const scoreRange = maxScore - minScore || 1;
+
+  function tierForScore(score: number): string {
+    const normalized = (score - minScore) / scoreRange;
+    if (normalized >= scoreThresholds.very_high) return 'very_high';
+    if (normalized >= scoreThresholds.high) return 'high';
+    if (normalized >= scoreThresholds.moderate) return 'moderate';
+    if (normalized >= scoreThresholds.low) return 'low';
+    return 'minimal';
+  }
+
+  function windowProbs(days: number[]): WindowProbabilities {
+    if (days.length === 0) return { within6mo: 0, within12mo: 0, within18mo: 0, within24mo: 0 };
+    const n = days.length;
+    return {
+      within6mo: Number((days.filter(d => d <= 180).length / n).toFixed(3)),
+      within12mo: Number((days.filter(d => d <= 365).length / n).toFixed(3)),
+      within18mo: Number((days.filter(d => d <= 548).length / n).toFixed(3)),
+      within24mo: Number((days.filter(d => d <= 730).length / n).toFixed(3)),
+    };
+  }
+
+  function medianValue(arr: number[]): number | null {
+    if (arr.length === 0) return null;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  }
+
+  // Group by tier
+  const tierGroups: Record<string, number[]> = {
+    very_high: [], high: [], moderate: [], low: [], minimal: [],
+  };
+  for (const interval of intervals) {
+    const tier = tierForScore(interval.intentScore);
+    tierGroups[tier].push(interval.daysBetween);
+  }
+
+  const byTier: Record<string, TierTiming> = {};
+  for (const [tier, days] of Object.entries(tierGroups)) {
+    byTier[tier] = {
+      sampleSize: days.length,
+      probabilities: windowProbs(days),
+      medianDaysToConversion: medianValue(days),
+    };
+  }
+
+  // Overall
+  const allDays = intervals.map(i => i.daysBetween);
+  const overall = windowProbs(allDays);
+
+  return { byTier, overall };
 }
