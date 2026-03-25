@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDailyStats } from '@/lib/slack/notify';
+import { updateDealCountIfChanged } from '@/lib/seo/deal-count-updater';
 
 export const maxDuration = 30;
 
@@ -75,6 +76,21 @@ export async function POST(request: NextRequest) {
       .from('newsletter_subscribers')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
+
+    // Auto-update deal count in constants.ts if rounded value changed
+    // Query verified deals (excluding 'other' TA, matching /api/deals/stats)
+    const { count: verifiedDeals } = await supabase
+      .from('deals')
+      .select('*', { count: 'exact', head: true })
+      .not('therapeutic_area', 'eq', 'other')
+      .not('therapeutic_area', 'like', '_%');
+
+    if (verifiedDeals) {
+      const updateResult = await updateDealCountIfChanged(verifiedDeals);
+      if (updateResult.updated) {
+        console.log(`[Daily Stats] Deal count updated: ${updateResult.previousDisplay} → ${updateResult.newDisplay}`);
+      }
+    }
 
     await notifyDailyStats({
       totalUsers: totalUsers || 0,

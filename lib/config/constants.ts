@@ -1,5 +1,6 @@
 // Centralized constants for marketing/pricing/stats strings
-// Update here when pricing, deal counts, or benchmark dates change
+// LIVE_DEAL_COUNT is auto-updated by the daily-stats cron via GitHub API.
+// Do not manually edit LIVE_DEAL_COUNT — the cron manages it.
 
 export const PRICING = {
   PRO_MONTHLY: '$99/month',
@@ -17,19 +18,18 @@ export const PRICING = {
 
 /**
  * Rounds a count down to the nearest 100 and formats as "X,Y00+".
- * e.g., 3561 → "3,500+", 3649 → "3,600+", 3450 → "3,400+"
- * Rounds down to the nearest hundred so we never overstate.
+ * e.g., 3561 → "3,500+", 3649 → "3,600+", 3439 → "3,400+"
+ * Always rounds down so we never overstate.
  */
 export function formatDealCount(count: number): string {
   const rounded = Math.floor(count / 100) * 100;
   return `${rounded.toLocaleString()}+`;
 }
 
-// Live deal count — updated by daily-stats cron writing to this file,
-// or manually when the number is known to have changed significantly.
-// Current verified deal count (excludes 'other'/internal — matches /api/deals/stats)
-// Last checked: 2026-03-25 — DB total: 3,561, verified by TA: 3,439
-const LIVE_DEAL_COUNT = 3439;
+// AUTO-UPDATED BY CRON — do not edit manually
+// This value is the verified deal count (excludes 'other'/internal TAs)
+// Updated daily by /api/cron/daily-stats via GitHub API
+export const LIVE_DEAL_COUNT = 3439;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
@@ -48,7 +48,7 @@ export const DEAL_STATS = {
   METABOLIC_DEALS_DESCRIPTION: 'metabolic/obesity R&D partnerships',
   METABOLIC_TOTAL_VALUE: '$25B+',
   METABOLIC_TIMEFRAME: '2017-2026',
-} as const;
+};
 
 export const BENCHMARK_VERSION = {
   LABEL: '2025-2026 Market Benchmarks v5.0',
