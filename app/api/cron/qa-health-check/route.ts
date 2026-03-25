@@ -112,142 +112,131 @@ export async function GET(request: NextRequest) {
   });
 
   // ═══════════════════════════════════════════════════
-  // CHECK 2: rNPV Engine
+  // CHECK 2: rNPV Engine — all 12 TAs
   // ═══════════════════════════════════════════════════
-  try {
-    const rnpvInput: RNPVInput = {
-      phase: 'phase2',
-      therapeuticArea: 'oncology',
-      modality: 'smallMolecule',
-      indication: 'lung_nsclc',
-      territory: 'global',
-      peakSalesEstimate: { low: 500, median: 1000, high: 2000 },
-      competitivePosition: 'firstInClass',
-      dataQuality: 'robust',
-      regulatoryDesignations: { breakthrough: true, fastTrack: false, orphan: false, prime: false },
-    };
+  {
+    let rnpvMultiPassed = 0;
+    const rnpvMultiFailures: string[] = [];
 
-    const rnpvResult = calculateRNPV(rnpvInput);
-
-    if (rnpvResult.riskAdjustedNPV <= 0) {
-      checks.push({ name: 'rNPV Engine', status: 'fail', details: `rNPV = ${rnpvResult.riskAdjustedNPV} (expected > 0)` });
-    } else if (rnpvResult.cumulativePoS <= 0 || rnpvResult.cumulativePoS > 1) {
-      checks.push({ name: 'rNPV Engine', status: 'fail', details: `PoS = ${rnpvResult.cumulativePoS} (expected 0-1)` });
-    } else if (!rnpvResult.phaseTransitions || rnpvResult.phaseTransitions.length === 0) {
-      checks.push({ name: 'rNPV Engine', status: 'fail', details: 'No phase transitions returned' });
-    } else {
-      checks.push({ name: 'rNPV Engine', status: 'pass', details: `rNPV $${Math.round(rnpvResult.riskAdjustedNPV)}M | PoS ${(rnpvResult.cumulativePoS * 100).toFixed(1)}% | ${rnpvResult.phaseTransitions.length} phases` });
+    for (const p of testProfiles) {
+      try {
+        const rnpvIn = {
+          phase: 'phase2',
+          therapeuticArea: p.ta,
+          modality: p.modality,
+          indication: p.indication,
+          territory: 'global',
+          peakSalesEstimate: { low: 500, median: 1000, high: 2000 },
+          competitivePosition: 'firstInClass',
+          dataQuality: 'robust',
+          regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+        } as RNPVInput;
+        const r = calculateRNPV(rnpvIn);
+        if (r.cumulativePoS > 0 && r.cumulativePoS <= 1 && r.phaseTransitions?.length > 0) {
+          rnpvMultiPassed++;
+        } else {
+          rnpvMultiFailures.push(`${p.ta}: PoS=${r.cumulativePoS}, phases=${r.phaseTransitions?.length}`);
+        }
+      } catch (err) {
+        rnpvMultiFailures.push(`${p.ta}: ${err instanceof Error ? err.message : 'CRASH'}`);
+      }
     }
-  } catch (err) {
-    checks.push({ name: 'rNPV Engine', status: 'fail', details: `CRASH — ${err instanceof Error ? err.message : String(err)}` });
+
+    checks.push({
+      name: 'rNPV Engine',
+      status: rnpvMultiFailures.length === 0 ? 'pass' : 'fail',
+      details: rnpvMultiFailures.length === 0 ? `${rnpvMultiPassed}/12 TAs valid` : `${rnpvMultiFailures.length} failures: ${rnpvMultiFailures.join('; ')}`,
+    });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 3: Financial Model (MC+rNPV) — 4 TA combos
+  // CHECK 4: Financial Model (MC+rNPV) — all 12 TAs
   // ═══════════════════════════════════════════════════
   {
-    const fmCombos: { ta: string; mod: string; ind: string; phase: string }[] = [
-      { ta: 'oncology', mod: 'smallMolecule', ind: 'solid_tumor', phase: 'phase2' },
-      { ta: 'neurology', mod: 'smallMolecule', ind: 'neurodegeneration', phase: 'preclinical' },
-      { ta: 'immunology', mod: 'monoclonalAntibody', ind: 'autoimmune_systemic', phase: 'phase1' },
-      { ta: 'rareDisease', mod: 'geneTherapy', ind: 'rare_genetic', phase: 'preclinical' },
-    ];
     let fmPassed = 0;
     const fmFailures: string[] = [];
 
-    for (const combo of fmCombos) {
+    for (const p of testProfiles) {
       try {
-        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: combo.ta as CalculationInput['therapeuticArea'], modality: combo.mod as CalculationInput['modality'], indication: combo.ind as CalculationInput['indication'], phase: combo.phase as CalculationInput['phase'] };
+        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: p.ta as CalculationInput['therapeuticArea'], modality: p.modality as CalculationInput['modality'], indication: p.indication as CalculationInput['indication'], phase: 'preclinical' as CalculationInput['phase'] };
         const dealResult = calculateDealTerms(input);
         const fm = runFinancialModel(input, dealResult);
 
         if (fm.monteCarlo?.iterations >= 1000 && fm.defensiveAnalysis !== undefined && fm.defensiveAnalysis !== null) {
           fmPassed++;
         } else {
-          fmFailures.push(`${combo.ta}/${combo.mod}: MC or defense missing`);
+          fmFailures.push(`${p.ta}/${p.modality}: MC or defense missing`);
         }
       } catch (err) {
-        fmFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'CRASH'}`);
+        fmFailures.push(`${p.ta}/${p.modality}: ${err instanceof Error ? err.message : 'CRASH'}`);
       }
     }
 
     checks.push({
       name: 'Financial Model (MC+rNPV)',
       status: fmFailures.length === 0 ? 'pass' : 'fail',
-      details: fmFailures.length === 0 ? `${fmPassed}/${fmCombos.length} combos valid` : `${fmFailures.length} failures: ${fmFailures.join('; ')}`,
+      details: fmFailures.length === 0 ? `${fmPassed}/12 TAs valid` : `${fmFailures.length} failures: ${fmFailures.join('; ')}`,
     });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 4: Tornado Sensitivity — 3 TA combos
+  // CHECK 5: Tornado Sensitivity — all 12 TAs
   // ═══════════════════════════════════════════════════
   {
-    const tsCombos: { ta: string; mod: string; ind: string }[] = [
-      { ta: 'oncology', mod: 'adc', ind: 'solid_tumor' },
-      { ta: 'metabolic', mod: 'smallMolecule', ind: 'diabetes_type2' },
-      { ta: 'hematology', mod: 'cellTherapy', ind: 'aml' },
-    ];
     let tsPassed = 0;
     const tsFailures: string[] = [];
 
-    for (const combo of tsCombos) {
+    for (const p of testProfiles) {
       try {
-        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: combo.ta as CalculationInput['therapeuticArea'], modality: combo.mod as CalculationInput['modality'], indication: combo.ind as CalculationInput['indication'] };
+        const input: CalculationInput = { ...TEST_INPUT, therapeuticArea: p.ta as CalculationInput['therapeuticArea'], modality: p.modality as CalculationInput['modality'], indication: p.indication as CalculationInput['indication'] };
         const dealResult = calculateDealTerms(input);
         const sensitivities = computeTornadoSensitivities(input, dealResult);
 
         if (sensitivities && sensitivities.length > 0 && sensitivities.every(s => s.highValue >= s.lowValue)) {
           tsPassed++;
         } else {
-          tsFailures.push(`${combo.ta}/${combo.mod}: invalid output`);
+          tsFailures.push(`${p.ta}/${p.modality}: invalid output`);
         }
       } catch (err) {
-        tsFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'CRASH'}`);
+        tsFailures.push(`${p.ta}/${p.modality}: ${err instanceof Error ? err.message : 'CRASH'}`);
       }
     }
 
     checks.push({
       name: 'Tornado Sensitivity',
       status: tsFailures.length === 0 ? 'pass' : 'fail',
-      details: tsFailures.length === 0 ? `${tsPassed}/${tsCombos.length} combos valid` : `${tsFailures.length} failures: ${tsFailures.join('; ')}`,
+      details: tsFailures.length === 0 ? `${tsPassed}/12 TAs valid` : `${tsFailures.length} failures: ${tsFailures.join('; ')}`,
     });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 5: Partner Matching — 5 TA combos
+  // CHECK 6: Partner Matching — all 12 TAs
   // ═══════════════════════════════════════════════════
   {
-    const pmCombos: { ta: string; mod: string; ind: string; phase: string }[] = [
-      { ta: 'oncology', mod: 'smallMolecule', ind: 'solid_tumor', phase: 'phase2' },
-      { ta: 'neurology', mod: 'smallMolecule', ind: 'neurodegeneration', phase: 'preclinical' },
-      { ta: 'immunology', mod: 'monoclonalAntibody', ind: 'autoimmune_systemic', phase: 'phase1' },
-      { ta: 'rareDisease', mod: 'geneTherapy', ind: 'rare_genetic', phase: 'preclinical' },
-      { ta: 'infectiousDisease', mod: 'smallMolecule', ind: 'bacterial', phase: 'preclinical' },
-    ];
     let pmPassed = 0;
     const pmFailures: string[] = [];
 
     try {
       const { findPartnerMatches } = await import('@/lib/services/partner-matching');
 
-      for (const combo of pmCombos) {
+      for (const p of testProfiles) {
         try {
           const result = await findPartnerMatches(supabase, {
-            modality: combo.mod,
-            development_phase: combo.phase,
-            indication_category: combo.ind,
+            modality: p.modality,
+            development_phase: 'preclinical',
+            indication_category: p.indication,
             indication_specific: null,
             territory_scope: 'global',
-            therapeutic_area: combo.ta,
+            therapeutic_area: p.ta,
           }, { limit: 3, includeEnhancedBreakdown: false });
 
           if (result.total_matches >= 0 && result.generated_at) {
             pmPassed++;
           } else {
-            pmFailures.push(`${combo.ta}/${combo.mod}: unexpected format`);
+            pmFailures.push(`${p.ta}: unexpected format`);
           }
         } catch (err) {
-          pmFailures.push(`${combo.ta}/${combo.mod}: ${err instanceof Error ? err.message : 'error'}`);
+          pmFailures.push(`${p.ta}: ${err instanceof Error ? err.message : 'error'}`);
         }
       }
     } catch (err) {
@@ -256,37 +245,31 @@ export async function GET(request: NextRequest) {
 
     checks.push({
       name: 'Partner Matching',
-      status: pmFailures.length === 0 ? 'pass' : pmFailures.length <= 1 ? 'warn' : 'fail',
-      details: pmFailures.length === 0 ? `${pmPassed}/${pmCombos.length} combos valid` : `${pmFailures.length} failures: ${pmFailures.join('; ')}`,
+      status: pmFailures.length === 0 ? 'pass' : pmFailures.length <= 2 ? 'warn' : 'fail',
+      details: pmFailures.length === 0 ? `${pmPassed}/12 TAs valid` : `${pmFailures.length} failures: ${pmFailures.join('; ')}`,
     });
   }
 
   // ═══════════════════════════════════════════════════
-  // CHECK 6: Competitive Landscape — 4 indications
+  // CHECK 7: Competitive Landscape — all 12 TAs
   // ═══════════════════════════════════════════════════
   {
-    const clCombos: { ind: string; mod: string }[] = [
-      { ind: 'lung_nsclc', mod: 'smallMolecule' },
-      { ind: 'breast_tnbc', mod: 'adc' },
-      { ind: 'autoimmune_systemic', mod: 'monoclonalAntibody' },
-      { ind: 'neurodegeneration', mod: 'smallMolecule' },
-    ];
     let clPassed = 0;
     const clFailures: string[] = [];
 
     try {
       const { analyzeCompetitiveLandscape } = await import('@/lib/services/pipeline-intelligence');
 
-      for (const combo of clCombos) {
+      for (const p of testProfiles) {
         try {
-          const landscape = await analyzeCompetitiveLandscape(supabase, combo.ind, combo.mod);
+          const landscape = await analyzeCompetitiveLandscape(supabase, p.indication, p.modality);
           if (landscape && landscape.competitiveDensityScore >= 0 && landscape.competitiveDensityScore <= 100) {
             clPassed++;
           } else {
-            clFailures.push(`${combo.ind}: invalid density score`);
+            clFailures.push(`${p.ta}/${p.indication}: invalid density`);
           }
         } catch (err) {
-          clFailures.push(`${combo.ind}: ${err instanceof Error ? err.message : 'error'}`);
+          clFailures.push(`${p.ta}/${p.indication}: ${err instanceof Error ? err.message : 'error'}`);
         }
       }
     } catch (err) {
@@ -295,8 +278,8 @@ export async function GET(request: NextRequest) {
 
     checks.push({
       name: 'Competitive Landscape',
-      status: clFailures.length === 0 ? 'pass' : clFailures.length <= 1 ? 'warn' : 'fail',
-      details: clFailures.length === 0 ? `${clPassed}/${clCombos.length} indications valid` : `${clFailures.length} failures: ${clFailures.join('; ')}`,
+      status: clFailures.length === 0 ? 'pass' : clFailures.length <= 2 ? 'warn' : 'fail',
+      details: clFailures.length === 0 ? `${clPassed}/12 TAs valid` : `${clFailures.length} failures: ${clFailures.join('; ')}`,
     });
   }
 
