@@ -329,8 +329,8 @@ export async function runCompletenessAudit(
       const { error: insertError } = await supabase.from('deals').insert({
         licensee_name: deal.licensee,
         licensor_name: deal.licensor,
-        licensee_id: licenseeCompany?.id || null,
-        licensor_id: licensorCompany?.id || null,
+        licensee_id: (licenseeCompany as unknown as { id?: string })?.id ?? licenseeCompany ?? null,
+        licensor_id: (licensorCompany as unknown as { id?: string })?.id ?? licensorCompany ?? null,
         asset_name: deal.asset_name,
         deal_type: deal.deal_type?.toLowerCase() || 'license',
         total_deal_value: deal.total_value_usd,
