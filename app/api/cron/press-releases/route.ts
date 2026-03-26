@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
 import { logCronRun, reclassifyOtherDeals } from '@/lib/cron-utils';
+import { notifyHighValueDeal } from '@/lib/slack/notify';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,28 @@ export async function GET(request: NextRequest) {
     if (result.deals_inserted > 0) {
       const reclassified = await reclassifyOtherDeals(supabase);
       if (reclassified > 0) console.log(`Reclassified ${reclassified} 'other' deals`);
+
+      // Alert on high-value deals ($500M+)
+      const { data: newBigDeals } = await supabase
+        .from('deals')
+        .select('licensee_name, licensor_name, asset_name, total_deal_value_usd, deal_type, therapeutic_area, announced_date')
+        .gte('created_at', new Date(startTime).toISOString())
+        .gte('total_deal_value_usd', 500000000)
+        .order('total_deal_value_usd', { ascending: false });
+
+      if (newBigDeals && newBigDeals.length > 0) {
+        for (const deal of newBigDeals) {
+          await notifyHighValueDeal({
+            licensee: deal.licensee_name,
+            licensor: deal.licensor_name,
+            asset: deal.asset_name || 'Undisclosed',
+            totalValue: deal.total_deal_value_usd,
+            dealType: deal.deal_type,
+            therapeuticArea: deal.therapeutic_area,
+            announcedDate: deal.announced_date,
+          }).catch(err => console.error('[Press Releases] Slack alert error:', err));
+        }
+      }
     }
 
     await logCronRun(supabase, 'press_releases_cron', {

@@ -279,6 +279,47 @@ export async function notifyDailyStats(stats: {
   );
 }
 
+export async function notifyHighValueDeal(deal: {
+  licensee: string;
+  licensor: string;
+  asset: string;
+  totalValue: number;
+  dealType: string;
+  therapeuticArea: string;
+  announcedDate: string;
+}): Promise<void> {
+  const valueStr = deal.totalValue >= 1e9
+    ? `$${(deal.totalValue / 1e9).toFixed(1)}B`
+    : `$${(deal.totalValue / 1e6).toFixed(0)}M`;
+
+  await postToSlack(
+    [{
+      color: '#f59e0b',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: `🚨 High-Value Deal Ingested: ${valueStr}`, emoji: true } },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*Licensee:*\n${deal.licensee}` },
+            { type: 'mrkdwn', text: `*Licensor:*\n${deal.licensor}` },
+            { type: 'mrkdwn', text: `*Asset:*\n${deal.asset}` },
+            { type: 'mrkdwn', text: `*Value:*\n${valueStr}` },
+            { type: 'mrkdwn', text: `*Type:*\n${deal.dealType}` },
+            { type: 'mrkdwn', text: `*TA:*\n${deal.therapeuticArea}` },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
+            { type: 'mrkdwn', text: `Announced: ${deal.announcedDate} | Ingested: ${formatTimestamp()}` },
+          ],
+        },
+      ],
+    }],
+    `🚨 High-value deal: ${deal.licensor} → ${deal.licensee} (${valueStr}) — ${deal.asset}`,
+  );
+}
+
 export async function notifyShareView(details: {
   token: string;
   modality: string;
