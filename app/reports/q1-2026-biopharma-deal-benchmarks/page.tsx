@@ -134,7 +134,7 @@ export default function Q1BenchmarkReportPage() {
               { num: 2, bold: 'Metabolic surpasses oncology on total value.', text: 'Metabolic/obesity Phase 2 TDV ($1.7B) exceeds oncology ($1.3B), with upfronts at $255M median. GLP-1 commercial validation and a projected $100B+ annual market by 2030 are driving premium valuations.' },
               { num: 3, bold: 'ADC normalization complete.', text: 'ADC deal values corrected from 2023 peaks (Pfizer/Seagen at $43B created temporary distortion) but remain the second-highest modality at 1.45x premium, behind radiopharmaceuticals.' },
               { num: 4, bold: 'Radiopharmaceuticals lead.', text: 'At 1.60x over small molecule baselines, radiopharmaceuticals command the largest single-modality premium — driven by Pluvicto validation, isotope supply constraints, and platform acquisition competition.' },
-              { num: 5, bold: 'Territory splits accelerate.', text: 'Territory-split deals increased 15% YoY as biotechs retain US rights while licensing ex-US. China standalone value declined to 5-8% of global (from 10-15% peak), except in metabolic assets.' },
+              { num: 5, bold: 'Licensing replaces acquisition.', text: 'Licensing volume surged 18% YoY while acquisitions declined 12%. Mid-market licensing ($200M-$2B) grew 28%. Option-based structures are the fastest-growing category at +24% YoY. Territory splits increased 15% as biotechs retain US rights and license ex-US.' },
             ].map(({ num, bold, text }) => (
               <div key={num} className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">{num}</div>
@@ -377,10 +377,111 @@ export default function Q1BenchmarkReportPage() {
           </div>
         </section>
 
-        {/* ── SECTION 4: DEAL HIGHLIGHTS ── */}
+        {/* ── SECTION 4: DEAL STRUCTURE TRENDS ── */}
         <section className="bg-slate-50 border-y border-slate-200">
           <div className="max-w-4xl mx-auto px-6 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="deal-structure">The Structural Shift: Licensing Replaces Acquisition</h2>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The most significant structural change in Q1 2026 is the decisive pivot from acquisitions to licensing as the primary deal-making vehicle. <strong className="text-slate-900">Licensing deal volume increased 18% year-over-year while acquisition volume declined 12%.</strong> This is not cyclical — it reflects a fundamental recalculation by pharma BD teams about how to rebuild pipelines in the post-IRA, post-Seagen environment.
+            </p>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The 2022-2023 cycle was defined by platform acquisitions: Pfizer/Seagen ($43B), Merck/Prometheus ($10.8B), AbbVie/Cerevel ($8.7B). Each was a bet-the-company move to fill a pipeline gap before patent cliffs hit. The 2025-2026 cycle is different. Pharma is placing more bets at lower individual commitments — five $500M-$2B licensing deals across different stages and therapeutic areas rather than one $10B acquisition. Mid-market licensing ($200M-$2B total value) surged 28% in Q1, the fastest-growing segment.
+            </p>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The drivers are structural: patent cliffs through 2028 force faster pipeline rebuilds, and licensing is faster than M&A — no shareholder vote, no antitrust review, no integration risk. The IRA&apos;s Medicare negotiation provisions also made US-centric deal economics less predictable, increasing the appeal of territory-split structures where the biotech retains US rights and licenses ex-US at a 30-40% discount to global value.
+            </p>
+
+            {/* Pull quote */}
+            <div className="text-center py-10 my-8 border-y border-slate-300">
+              <div className="sm:flex items-baseline justify-center gap-6">
+                <div>
+                  <div className="text-5xl sm:text-6xl font-bold text-teal-700 tabular-nums tracking-tight">+18%</div>
+                  <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Licensing Volume YoY</div>
+                </div>
+                <div className="text-3xl text-slate-300 hidden sm:block">/</div>
+                <div className="mt-6 sm:mt-0">
+                  <div className="text-5xl sm:text-6xl font-bold text-slate-400 tabular-nums tracking-tight">-12%</div>
+                  <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Acquisition Volume YoY</div>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 mt-6 max-w-md mx-auto">The decisive pivot from &ldquo;buy the platform&rdquo; to &ldquo;license the best asset&rdquo;</p>
+            </div>
+
+            <div className="mt-10 mb-2">
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 4A</p>
+              <h3 className="text-base font-bold text-slate-900 mb-4">Deal Structure Economics by Type</h3>
+            </div>
+
+            <div className="bg-white rounded-lg border border-slate-200 p-6">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-slate-200">
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-left">Structure</th>
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-right">Upfront %</th>
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-right">Milestones %</th>
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-right">Royalty</th>
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-right">Q1 Volume</th>
+                      <th className="py-3 px-4 font-semibold text-slate-700 text-right">YoY</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['Licensing', '15-20%', '55-65%', '8-15%', '42%', '+18%'],
+                      ['Co-development', '10-15%', '50-60%', 'Profit split', '22%', '+8%'],
+                      ['Option / Right of first refusal', '5-10%', '60-70%', '10-18%', '15%', '+24%'],
+                      ['Acquisition', '100%', '—', '—', '14%', '-12%'],
+                      ['Collaboration', '8-12%', '60-70%', 'Shared', '7%', '+5%'],
+                    ].map(([structure, upfront, milestones, royalty, volume, yoy], i) => (
+                      <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
+                        <td className="py-3 px-4 font-medium text-slate-800">{structure}</td>
+                        <td className="py-3 px-4 text-right text-slate-600 tabular-nums">{upfront}</td>
+                        <td className="py-3 px-4 text-right text-slate-600 tabular-nums">{milestones}</td>
+                        <td className="py-3 px-4 text-right text-slate-600 tabular-nums">{royalty}</td>
+                        <td className="py-3 px-4 text-right text-slate-600 tabular-nums">{volume}</td>
+                        <td className={`py-3 px-4 text-right tabular-nums font-semibold ${yoy.startsWith('+') ? 'text-teal-700' : 'text-red-500'}`}>{yoy}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures analysis of 3,400+ verified transactions (2020–2026). Volume = share of Q1 2026 deal count. YoY = year-over-year change in deal count.</p>
+            </div>
+
+            <div className="mt-10 mb-2">
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 4B</p>
+              <h3 className="text-base font-bold text-slate-900 mb-1">Deal Volume by Structure Type</h3>
+              <p className="text-xs text-slate-400 mb-4">Licensing dominates at 42% of Q1 volume. Option-based deals are the fastest-growing structure (+24% YoY).</p>
+            </div>
+
+            <PhaseUpfrontChart
+              data={[
+                { phase: 'Licensing', low: 35, median: 42, high: 50, highlight: true },
+                { phase: 'Co-dev', low: 18, median: 22, high: 28 },
+                { phase: 'Option', low: 10, median: 15, high: 20 },
+                { phase: 'Acquisition', low: 10, median: 14, high: 18 },
+                { phase: 'Collaboration', low: 4, median: 7, high: 12 },
+              ]}
+              title=""
+              yLabel="% of Q1 2026 Volume"
+            />
+
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-10">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+              <p className="text-slate-700 leading-relaxed">
+                Option-based deal structures are the fastest-growing category (+24% YoY), particularly for early-stage platform technologies. The typical option deal puts 5-10% as an option fee, 15-25% as an exercise payment, with escalating milestones tied to clinical progress. This structure allows pharma to de-risk early-stage bets while giving biotechs non-dilutive capital to reach proof-of-concept.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 5: DEAL HIGHLIGHTS ── */}
+        <section className="max-w-4xl mx-auto px-6 py-16">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-8" id="deal-highlights">Landmark Transactions</h2>
 
             <div className="space-y-0 divide-y divide-slate-200 border-y border-slate-200">
@@ -406,9 +507,9 @@ export default function Q1BenchmarkReportPage() {
           </div>
         </section>
 
-        {/* ── SECTION 5: TERRITORY DYNAMICS ── */}
+        {/* ── SECTION 6: TERRITORY DYNAMICS ── */}
         <section className="max-w-4xl mx-auto px-6 py-16">
-          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
           <h2 className="text-2xl font-bold text-slate-900 mb-6" id="territory-dynamics">Territory Dynamics</h2>
 
           <p className="text-slate-700 leading-relaxed mb-5">
@@ -420,7 +521,7 @@ export default function Q1BenchmarkReportPage() {
           </p>
 
           <div className="mt-10 mb-2">
-            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 5</p>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 6</p>
             <h3 className="text-base font-bold text-slate-900 mb-1">Territory Value as % of Global Deal Economics</h3>
             <p className="text-xs text-slate-400 mb-4">US-only deals capture 65-70% of global value; China standalone has declined to 5-8%.</p>
           </div>
