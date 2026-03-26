@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
 
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 12px 12px 0 0; text-align: center;">
+            <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="160" style="display: block; margin: 0 auto 16px; width: 160px; height: auto;">
             <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #14b8a6; font-weight: 700; margin-bottom: 8px;">New Internship Application</div>
             <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 800;">${name}</h1>
             <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">${university} · ${graduation_year} · ${major}</p>
