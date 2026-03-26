@@ -16,6 +16,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
+import { notifyHighValueDeal } from '@/lib/slack/notify';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -92,6 +93,29 @@ export async function GET(request: NextRequest) {
     const reclassified = await reclassifyOtherDeals(supabase);
     const statsUpdated = await updateCompanyStats(supabase, result.deals_inserted * 2);
     console.log(`[perplexity] Post-processing: ${reclassified} reclassified, ${statsUpdated} company stats updated`);
+
+    // Alert on high-value deals
+    const { data: newBigDeals } = await supabase
+      .from('deals')
+      .select('licensee_name, licensor_name, asset_name, total_deal_value_usd, deal_type, therapeutic_area, announced_date')
+      .eq('source_type', 'perplexity_sweep')
+      .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
+      .gte('total_deal_value_usd', 500000000)
+      .order('total_deal_value_usd', { ascending: false });
+
+    if (newBigDeals) {
+      for (const deal of newBigDeals) {
+        await notifyHighValueDeal({
+          licensee: deal.licensee_name,
+          licensor: deal.licensor_name,
+          asset: deal.asset_name || 'Undisclosed',
+          totalValue: deal.total_deal_value_usd,
+          dealType: deal.deal_type,
+          therapeuticArea: deal.therapeutic_area,
+          announcedDate: deal.announced_date,
+        }).catch(err => console.error('[Perplexity] Slack alert error:', err));
+      }
+    }
   }
 
   // Log with cursor in notes field for rotation tracking

@@ -246,6 +246,72 @@ export async function runPerplexityDealDiscovery(
     errors: [] as string[],
   };
 
+  // MEGA-DEAL SWEEP: runs every cycle, catches high-value deals regardless of TA rotation
+  // This ensures no major deal ($100M+) is missed between TA-specific queries
+  const megaDealQuery = `List ALL biopharma licensing deals, acquisitions, collaborations, and partnerships announced in the last 7 days (since ${new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]}). Include: company names, asset/drug name, deal value, upfront payment, deal type, therapeutic area, and development phase. Focus on deals with disclosed financial terms. Include deals of ALL sizes.`;
+
+  try {
+    console.log('[perplexity] Running mega-deal sweep for last 7 days...');
+    const sweepText = await queryPerplexityForDeals(megaDealQuery, perplexityApiKey);
+    result.queries_run++;
+
+    if (sweepText && sweepText.length >= 50) {
+      const sweepDeals = await extractDealsFromText(sweepText, 'multi_ta', anthropicApiKey);
+      result.deals_discovered += sweepDeals.length;
+      console.log(`[perplexity] Mega-deal sweep: Discovered ${sweepDeals.length} deals`);
+
+      for (const deal of sweepDeals) {
+        if (!deal.licensor || !deal.licensee || !deal.asset_name) continue;
+        if (deal.confidence < 70) continue;
+
+        try {
+          const ta = deal.therapeutic_area || deriveTherapeuticArea(deal.indication || '');
+          const { data: existing } = await supabase
+            .from('deals')
+            .select('id')
+            .ilike('licensee_name', `%${deal.licensee.substring(0, 15)}%`)
+            .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`)
+            .limit(1)
+            .maybeSingle();
+
+          if (!existing) {
+            const licensorCompanyId = await findOrCreateCompany(supabase, deal.licensor).catch(() => null);
+            const licenseeCompanyId = await findOrCreateCompany(supabase, deal.licensee).catch(() => null);
+
+            await supabase.from('deals').insert({
+              licensor_name: deal.licensor,
+              licensee_name: deal.licensee,
+              licensor_id: licensorCompanyId,
+              licensee_id: licenseeCompanyId,
+              asset_name: deal.asset_name,
+              deal_type: deal.deal_type || 'license',
+              upfront_usd: deal.upfront_usd,
+              milestones_total_usd: deal.milestones_total_usd,
+              total_deal_value_usd: deal.total_deal_value_usd,
+              indication_category: deal.indication,
+              therapeutic_area: ta,
+              modality: deal.modality || 'smallMolecule',
+              phase_at_signing: deal.phase || 'unknown',
+              territory: deal.territory || 'global',
+              announced_date: deal.announced_date || new Date().toISOString().split('T')[0],
+              source_type: 'perplexity_sweep',
+              source_url: deal.source_url,
+              confidence_score: deal.confidence,
+              extraction_notes: `Mega-deal sweep discovery. Confidence: ${deal.confidence}%`,
+            });
+
+            result.deals_inserted++;
+            result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
+          }
+        } catch (err) {
+          result.errors.push(`Sweep insert: ${deal.licensor}/${deal.licensee}: ${String(err)}`);
+        }
+      }
+    }
+  } catch (err) {
+    result.errors.push(`Mega-deal sweep error: ${String(err)}`);
+  }
+
   for (const ta of tas) {
     if (Date.now() - startTime > timeBudget) break;
 
