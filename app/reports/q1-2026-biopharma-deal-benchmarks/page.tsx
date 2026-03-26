@@ -504,7 +504,6 @@ export default function Q1BenchmarkReportPage() {
                 </div>
               ))}
             </div>
-          </div>
         </section>
 
         {/* ── SECTION 6: TERRITORY DYNAMICS ── */}
