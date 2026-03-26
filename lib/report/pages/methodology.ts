@@ -21,7 +21,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           <div class="section-title">How the Model Works</div>
           <div class="card" style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">
             <p style="margin-bottom: 7px;">
-              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against 3,400+ publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
+              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against 2,500+ publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Base Valuation:</strong> Initial deal value ranges are established using therapeutic area-specific benchmarks derived from actual transaction data, stratified by development phase.

@@ -1,6 +1,6 @@
 /**
  * Auto-updates LIVE_DEAL_COUNT in lib/config/constants.ts via GitHub API
- * when the rounded deal count changes (e.g., crosses from 3,400+ to 3,500+).
+ * when the rounded deal count changes (e.g., crosses from 2,500+ to 3,500+).
  * Called by the daily-stats cron.
  */
 

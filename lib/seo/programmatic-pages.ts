@@ -140,7 +140,7 @@ function buildAllPages(): ProgrammaticPageData[] {
           const territoryLabel = territory.key === 'global' ? '' : ` ${territory.label}`;
           const title = `${ta.label} ${phase.label} Licensing Deal Benchmarks${territoryLabel} | Ambrosia Ventures`;
           const h1 = `${ta.label} ${phase.label} Deal Benchmarks${territoryLabel ? ` — ${territory.label}` : ''}`;
-          const metaDescription = `${phase.label} ${ta.label.toLowerCase()} licensing deals${territoryLabel ? ` in ${territory.label}` : ''}: ${formatCurrency(result.terms.upfront.median)} median upfront, ${formatCurrency(result.terms.totalDealValue.median)} total value, ${result.tieredRoyalties.base.low}–${result.tieredRoyalties.base.high}% royalty. From 3,400+ verified transactions.`;
+          const metaDescription = `${phase.label} ${ta.label.toLowerCase()} licensing deals${territoryLabel ? ` in ${territory.label}` : ''}: ${formatCurrency(result.terms.upfront.median)} median upfront, ${formatCurrency(result.terms.totalDealValue.median)} total value, ${result.tieredRoyalties.base.low}–${result.tieredRoyalties.base.high}% royalty. From 2,500+ verified transactions.`;
 
           pages.push({
             slug,

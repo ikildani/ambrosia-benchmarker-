@@ -29,7 +29,8 @@ export function formatDealCount(count: number): string {
 // AUTO-UPDATED BY CRON — do not edit manually
 // This value is the verified deal count (excludes 'other'/internal TAs)
 // Updated daily by /api/cron/daily-stats via GitHub API
-export const LIVE_DEAL_COUNT = 3439;
+// 2026-03-26: Major dedup — removed 103 fake FDA approvals + 907 duplicates
+export const LIVE_DEAL_COUNT = 2535;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),

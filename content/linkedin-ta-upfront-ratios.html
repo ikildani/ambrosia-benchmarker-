@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA Upfront Ratios — Ambrosia Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0e17;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1080px;
+    height: 1080px;
+    background: #090d16;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+  }
+
+  .glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .glow-tr {
+    top: -250px; right: -150px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(20,184,166,0.04) 0%, transparent 60%);
+  }
+
+  .inner {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 52px 64px;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-img { height: 32px; width: auto; opacity: 0.8; }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(20,184,166,0.6);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .line {
+    width: 48px;
+    height: 3px;
+    background: #14b8a6;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    opacity: 0.6;
+  }
+
+  .kicker {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .title {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    color: #f1f5f9;
+    margin-bottom: 44px;
+  }
+
+  .title .teal { color: #14b8a6; }
+
+  /* ── Punchline callout ── */
+  .punchline {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 40px;
+    padding: 20px 28px;
+    background: rgba(20,184,166,0.04);
+    border: 1px solid rgba(20,184,166,0.08);
+    border-radius: 16px;
+  }
+
+  .punch-num {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1;
+    color: #14b8a6;
+  }
+
+  .punch-vs {
+    font-size: 24px;
+    font-weight: 800;
+    color: #64748b;
+    margin: 0 4px;
+  }
+
+  .punch-num-dim {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1;
+    color: #64748b;
+  }
+
+  .punch-text {
+    font-size: 15px;
+    color: #94a3b8;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .punch-text strong {
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  /* ── Chart ── */
+  .chart {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .label {
+    width: 150px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .label-name {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .label-median {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 1px;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 38px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 14px;
+  }
+
+  .bar-value {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── Color scale: teal intensity fades as ratio drops, oncology gets warm accent ── */
+
+  /* Hematology — strongest teal, highlighted */
+  .row-heme .label-name { color: #14b8a6; }
+  .row-heme .bar-fill { background: linear-gradient(90deg, #14b8a6, #0d9488); }
+  .row-heme .bar-value { color: #fff; }
+
+  /* Rare Disease */
+  .row-rare .label-name { color: #99f6e4; }
+  .row-rare .bar-fill { background: linear-gradient(90deg, rgba(20,184,166,0.65), rgba(20,184,166,0.4)); }
+  .row-rare .bar-value { color: #fff; }
+
+  /* Immunology */
+  .row-immu .label-name { color: #94a3b8; }
+  .row-immu .bar-fill { background: linear-gradient(90deg, rgba(20,184,166,0.45), rgba(20,184,166,0.25)); }
+  .row-immu .bar-value { color: #e2e8f0; }
+
+  /* Cardiovascular */
+  .row-card .label-name { color: #94a3b8; }
+  .row-card .bar-fill { background: linear-gradient(90deg, rgba(20,184,166,0.38), rgba(20,184,166,0.2)); }
+  .row-card .bar-value { color: #cbd5e1; }
+
+  /* Metabolic — transition zone */
+  .row-meta .label-name { color: #64748b; }
+  .row-meta .bar-fill { background: linear-gradient(90deg, rgba(100,116,139,0.4), rgba(100,116,139,0.2)); }
+  .row-meta .bar-value { color: #94a3b8; }
+
+  /* Infectious Disease */
+  .row-infe .label-name { color: #64748b; }
+  .row-infe .bar-fill { background: linear-gradient(90deg, rgba(100,116,139,0.3), rgba(100,116,139,0.15)); }
+  .row-infe .bar-value { color: #94a3b8; }
+
+  /* Oncology — warm accent to draw attention as the outlier */
+  .row-onco .label-name { color: #f59e0b; }
+  .row-onco .label-median { color: #b45309; }
+  .row-onco .bar-fill { background: linear-gradient(90deg, rgba(245,158,11,0.35), rgba(245,158,11,0.15)); border: 1px solid rgba(245,158,11,0.15); }
+  .row-onco .bar-value { color: #fbbf24; }
+
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  .source {
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="glow glow-tr"></div>
+
+  <div class="inner">
+    <div class="top">
+      <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" class="logo-img">
+      <div class="tag">Deal Intelligence</div>
+    </div>
+
+    <div class="center">
+      <div class="line"></div>
+      <div class="kicker">3,500+ biopharma deals analyzed</div>
+      <div class="title">
+        Upfront as % of total deal value<br>
+        <span class="teal">by therapeutic area.</span>
+      </div>
+
+      <!-- Punchline: 92% vs 25% -->
+      <div class="punchline">
+        <div>
+          <div class="punch-num">92%</div>
+        </div>
+        <div class="punch-vs">vs</div>
+        <div>
+          <div class="punch-num-dim">25%</div>
+        </div>
+        <div class="punch-text">
+          <strong>Hematology</strong> puts almost everything upfront.<br>
+          <strong>Oncology</strong> ties 75% to milestones.
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart">
+        <div class="row row-heme">
+          <div class="label">
+            <div class="label-name">Hematology</div>
+            <div class="label-median">$1.1B median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 92%">
+              <div class="bar-value">92%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-rare">
+          <div class="label">
+            <div class="label-name">Rare Disease</div>
+            <div class="label-median">$500M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 85%">
+              <div class="bar-value">85%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-immu">
+          <div class="label">
+            <div class="label-name">Immunology</div>
+            <div class="label-median">$500M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 77%">
+              <div class="bar-value">77%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-card">
+          <div class="label">
+            <div class="label-name">Cardiovascular</div>
+            <div class="label-median">$310M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 75%">
+              <div class="bar-value">75%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-meta">
+          <div class="label">
+            <div class="label-name">Metabolic</div>
+            <div class="label-median">$320M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 57%">
+              <div class="bar-value">57%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-infe">
+          <div class="label">
+            <div class="label-name">Infectious Dis.</div>
+            <div class="label-median">$130M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 43%">
+              <div class="bar-value">43%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-onco">
+          <div class="label">
+            <div class="label-name">Oncology</div>
+            <div class="label-median">$197M median</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 25%">
+              <div class="bar-value">25%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="source">Ambrosia Ventures | calculator.ambrosiaventures.co</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

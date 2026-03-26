@@ -37,7 +37,7 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Validate deal terms with rNPV models and benchmarks from 3,400+ deals across 850+ companies',
+      'Validate deal terms with rNPV models and benchmarks from 2,500+ deals across 850+ companies',
       'Review Monte Carlo probability distributions and scenario comparisons',
       'Monitor market trends with Market Pulse intelligence and deal alerts',
     ],
