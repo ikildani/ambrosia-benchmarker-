@@ -134,7 +134,76 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 6. Log cron run
+    // 6. Send daily SEO digest to #seo-alerts
+    const totalClicks = performanceData.reduce((sum, r) => sum + r.clicks, 0);
+    const totalImpressions = performanceData.reduce((sum, r) => sum + r.impressions, 0);
+    const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
+    const avgPosition = performanceData.length > 0
+      ? performanceData.reduce((sum, r) => sum + r.position, 0) / performanceData.length
+      : 0;
+
+    // Top queries by impressions
+    const topQueries = performanceData
+      .sort((a, b) => b.impressions - a.impressions)
+      .slice(0, 5);
+
+    // Pages gaining/dropping (compare position to previous data)
+    const previousIndexed = yesterdayMetric?.data?.indexedPages as number | undefined;
+    const indexedDelta = previousIndexed ? indexedCount - previousIndexed : 0;
+    const indexedDeltaStr = indexedDelta > 0 ? `+${indexedDelta}` : indexedDelta === 0 ? 'no change' : `${indexedDelta}`;
+
+    const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+    const seoWebhook = process.env.SLACK_SEO_WEBHOOK_URL;
+    if (seoWebhook) {
+      const topQueryLines = topQueries.map((q, i) =>
+        `${i + 1}. "${q.query}" — pos ${q.position.toFixed(1)}, CTR ${(q.ctr * 100).toFixed(1)}%, ${q.impressions} imp`
+      ).join('\n');
+
+      await fetch(seoWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: `Daily SEO Report — ${dateStr}`,
+          attachments: [{
+            color: '#2563eb',
+            blocks: [
+              {
+                type: 'header',
+                text: { type: 'plain_text', text: `📈 Daily SEO Report — ${dateStr}`, emoji: true },
+              },
+              {
+                type: 'section',
+                fields: [
+                  { type: 'mrkdwn', text: `*Indexed Pages:*\n${indexedCount.toLocaleString()} (${indexedDeltaStr} from yesterday)` },
+                  { type: 'mrkdwn', text: `*Total Impressions (28d):*\n${totalImpressions.toLocaleString()}` },
+                  { type: 'mrkdwn', text: `*Total Clicks (28d):*\n${totalClicks.toLocaleString()}` },
+                  { type: 'mrkdwn', text: `*Avg CTR:*\n${avgCtr.toFixed(1)}%` },
+                  { type: 'mrkdwn', text: `*Avg Position:*\n${avgPosition.toFixed(1)}` },
+                  { type: 'mrkdwn', text: `*Queries Tracked:*\n${performanceData.length.toLocaleString()}` },
+                ],
+              },
+              { type: 'divider' },
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `*Top Queries by Impressions:*\n\`\`\`\n${topQueryLines || 'No data yet'}\n\`\`\``,
+                },
+              },
+              {
+                type: 'context',
+                elements: [
+                  { type: 'mrkdwn', text: `Data: Google Search Console | 28-day window | Sitemap submitted ✓` },
+                ],
+              },
+            ],
+          }],
+        }),
+      }).catch(err => console.error('[gsc-sync] SEO digest Slack error:', err));
+    }
+
+    // 7. Log cron run
     await logCronRun(supabase, 'gsc-sync', {
       fetched: performanceData.length,
       processed: performanceData.length,
