@@ -43,6 +43,8 @@ const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEma
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
 const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
+const EmailGatedDownload = dynamic(() => import('@/components/insights/EmailGatedDownload').then(m => ({ default: m.EmailGatedDownload })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
 export const metadata: Metadata = {
   title: 'Q1 2026 Biopharma Deal Benchmarks Report: Analysis of 2,339 Transactions (2020-2026) | Ambrosia Ventures',
@@ -124,6 +126,16 @@ export default async function Q1BenchmarkReportPage() {
     <>
       <ScrollProgress />
       <ReportViewTracker report="q1-2026" />
+      <StickyTOC sections={[
+        { id: 'market-overview', label: 'Market Overview', number: 1 },
+        { id: 'therapeutic-areas', label: 'Therapeutic Areas', number: 2 },
+        { id: 'conditional-value', label: 'Conditional Value', number: 3 },
+        { id: 'deal-structure', label: 'Deal Structure', number: 4 },
+        { id: 'deal-highlights', label: 'Deal Highlights', number: 5 },
+        { id: 'territory-dynamics', label: 'Territory', number: 6 },
+        { id: 'modality-premiums', label: 'Modality', number: 7 },
+        { id: 'methodology', label: 'Methodology', number: 8 },
+      ]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />
@@ -876,6 +888,15 @@ export default async function Q1BenchmarkReportPage() {
             heading="Get the Q2 Report First"
             description="Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from 2,339+ verified transactions."
             source="q1-2026-report"
+          />
+        </section>
+
+        {/* ── DOWNLOAD ── */}
+        <section className="max-w-4xl mx-auto px-6 pb-6">
+          <EmailGatedDownload
+            reportTitle="Q1 2026 Biopharma Deal Benchmarks"
+            reportUrl="/reports/q1-2026-biopharma-deal-benchmarks"
+            source="q1-2026-report-download"
           />
         </section>
 
