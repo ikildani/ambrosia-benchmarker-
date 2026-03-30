@@ -86,7 +86,7 @@ function DatabaseCoverageSection() {
             <p className="text-sm text-slate-500 dark:text-slate-400">{total.toLocaleString()} verified transactions across {stats.length} therapeutic areas</p>
           </div>
           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
-            Updated daily from SEC filings, press releases & regulatory databases
+            Updated daily from SEC filings, press releases, FTC pre-merger filings & regulatory databases
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
@@ -543,7 +543,7 @@ export default function Home() {
               {
                 icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
                 title: 'Enterprise-Grade Platform',
-                description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and weekly SEC EDGAR data ingestion.',
+                description: 'GDPR-compliant data handling, authenticated APIs, rate-limited endpoints, WCAG-accessible interface, and daily SEC EDGAR + FTC pre-merger data ingestion.',
                 gradient: 'from-slate-500 to-slate-700',
               },
             ].map((feature, idx) => (
@@ -740,14 +740,14 @@ export default function Home() {
         <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Built for Life Sciences Deal-Making</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-            Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings and press releases. Updated weekly with new transactions.
+            Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings, press releases, and FTC pre-merger filings. Updated daily with new transactions.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[
-              { icon: '📄', label: 'SEC EDGAR 8-K Filings', desc: 'Primary deal data extracted from regulatory filings' },
+              { icon: '📄', label: 'SEC EDGAR Filings', desc: '8-K and 10-K deal data extracted from regulatory filings' },
+              { icon: '⚖️', label: 'FTC Pre-Merger', desc: 'Hart-Scott-Rodino filings and merger review actions' },
               { icon: '🔬', label: 'ClinicalTrials.gov', desc: 'Pipeline and trial data for partner intelligence' },
-              { icon: '📊', label: 'Weekly Updates', desc: 'New deals ingested every Monday at 4AM UTC' },
-              { icon: '🔒', label: 'Enterprise Security', desc: 'GDPR-compliant, authenticated APIs, encrypted data' },
+              { icon: '📰', label: 'Press Releases', desc: 'GlobeNewsWire, BusinessWire, PRNewswire — daily ingestion' },
             ].map((source, idx) => (
               <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 text-left">
                 <div className="text-2xl mb-2">{source.icon}</div>
