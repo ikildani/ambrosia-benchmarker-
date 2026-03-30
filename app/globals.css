@@ -943,3 +943,54 @@ select::selection {
     background: none !important;
   }
 }
+
+/* Print styles for report PDF download */
+@media print {
+  /* Hide navigation, CTAs, interactive elements */
+  nav, footer,
+  [data-hide-print],
+  .fixed,
+  button:not([data-print-button]),
+  iframe {
+    display: none !important;
+  }
+
+  /* Clean white background */
+  body, main, section {
+    background: white !important;
+    color: #1e293b !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Ensure charts print */
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
+
+  /* Page breaks */
+  section {
+    page-break-inside: avoid;
+  }
+
+  h2 {
+    page-break-after: avoid;
+  }
+
+  /* Tighter spacing for print */
+  .max-w-4xl {
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Show URLs for links */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.7em;
+    color: #64748b;
+  }
+}
