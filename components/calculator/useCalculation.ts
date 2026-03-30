@@ -89,6 +89,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const calculatingRef = useRef(false);
   const calculationCountRef = useRef(0);
 
+  const FREE_MONTHLY_LIMIT = 5;
+  const [monthlyLimitHit, setMonthlyLimitHit] = useState(false);
+
   const handleCalculate = useCallback((state: CalculatorFormState) => {
     // Require all primary fields to be selected
     if (!isReadyToCalculate(state)) {
@@ -99,6 +102,36 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     // Gate 4th+ calculation behind account creation for anonymous users
     if (!isAuthenticated && getUsage().count >= 3) {
       openAuthModal('signup');
+      return;
+    }
+
+    // Monthly calculation limit for free users
+    if (isAuthenticated && tier === 'free' && !monthlyLimitHit) {
+      // Check monthly count from server
+      fetch(`/api/calculations?user_id=${userId}&count=true&month=true`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.data?.count >= FREE_MONTHLY_LIMIT) {
+            setMonthlyLimitHit(true);
+            toast.error(`You've reached your ${FREE_MONTHLY_LIMIT} free calculations this month. Upgrade to Pro for unlimited access.`, {
+              duration: 8000,
+              action: {
+                label: 'Upgrade',
+                onClick: () => window.location.assign('/calculator?upgrade=true'),
+              },
+            });
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (monthlyLimitHit && tier === 'free') {
+      toast.error(`Monthly limit reached (${FREE_MONTHLY_LIMIT}/${FREE_MONTHLY_LIMIT}). Upgrade to Pro for unlimited calculations.`, {
+        action: {
+          label: 'Upgrade',
+          onClick: () => window.location.assign('/calculator?upgrade=true'),
+        },
+      });
       return;
     }
 

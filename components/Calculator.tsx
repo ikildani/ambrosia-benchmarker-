@@ -751,7 +751,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           )}
 
           <p className="text-center text-xs text-neutral-500 mt-4">
-            Free — unlimited calculations with headline estimates
+            Free — 5 calculations per month with headline estimates
           </p>
         </div>
       </div>
