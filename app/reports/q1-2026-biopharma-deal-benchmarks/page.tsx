@@ -36,7 +36,7 @@ export default function Q1BenchmarkReportPage() {
     { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://calculator.ambrosiaventures.co/reports' },
     { '@type': 'ListItem', position: 3, name: 'Q1 2026 Biopharma Deal Benchmarks' },
   ]};
-  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-25', dateModified: '2026-03-25', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
+  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, royalty ranges from 2,500+ verified biopharma transactions.', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
     { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 2,500+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), press releases, and regulatory databases. Updated weekly.' } },
@@ -103,7 +103,7 @@ export default function Q1BenchmarkReportPage() {
                 { value: '12', label: 'Therap. Areas' },
                 { value: '$120M', label: 'Onco Ph2 Upfront' },
                 { value: '1.60x', label: 'Radiopharm Mult.' },
-                { value: '180', label: 'Q1 Transactions' },
+                { value: '191', label: 'Q1 Transactions' },
                 { value: '+15%', label: 'Territory Splits YoY' },
               ].map((stat, i) => (
                 <div key={i}>
@@ -115,7 +115,7 @@ export default function Q1BenchmarkReportPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400 uppercase tracking-wider">
-            <span>Published March 25, 2026</span>
+            <span>Published March 30, 2026</span>
             <span className="text-slate-300">·</span>
             <span>Ambrosia Ventures Research</span>
             <span className="text-slate-300">·</span>
@@ -157,7 +157,7 @@ export default function Q1BenchmarkReportPage() {
           </p>
 
           <p className="text-slate-700 leading-relaxed mb-5">
-            Deal volume remained robust with approximately 180 transactions in Q1 — a 12% increase year-over-year. The composition shifted: while mega-deals (&gt;$5B) declined from 2023 records, mid-market transactions ($200M–$2B) surged 28%. Pharma BD teams are diversifying risk across more, smaller bets. Early-stage scouting (preclinical and Phase 1) reached 34% of volume, up from 28% in Q1 2025 — large pharma is moving upstream, driven by <Link href="/glossary/breakthrough-therapy-designation" className="text-teal-600 font-medium hover:text-teal-700">patent cliff</Link> pressure through 2028.
+            Deal volume remained robust with 191 transactions in Q1 — a 12% increase year-over-year. The composition shifted: while mega-deals (&gt;$5B) declined from 2023 records, mid-market transactions ($200M–$2B) surged 28%. Pharma BD teams are diversifying risk across more, smaller bets. Early-stage scouting (preclinical and Phase 1) reached 34% of volume, up from 28% in Q1 2025 — large pharma is moving upstream, driven by <Link href="/glossary/breakthrough-therapy-designation" className="text-teal-600 font-medium hover:text-teal-700">patent cliff</Link> pressure through 2028.
           </p>
 
           <div className="mt-10 mb-2">
@@ -486,11 +486,11 @@ export default function Q1BenchmarkReportPage() {
 
             <div className="space-y-0 divide-y divide-slate-200 border-y border-slate-200">
               {[
-                { value: '$16.5B', companies: 'Novo Nordisk / Catalent', meta: 'Metabolic · Manufacturing Acquisition · 2024', analysis: 'Largest manufacturing deal in biopharma history. Secured GLP-1 fill-finish capacity to address chronic semaglutide supply shortages. Signaled that manufacturing infrastructure is now a strategic asset worth acquisition premiums.' },
-                { value: '$10.8B', companies: 'Merck / Prometheus Biosciences', meta: 'Immunology · Anti-TL1A · Crohn\'s · 2023', analysis: 'Validated anti-TL1A as a blockbuster mechanism. At 7.2x the median Phase 2 immunology TDV, the premium reflects first-in-class data, precision diagnostics, and Merck\'s Keytruda patent cliff diversification.' },
-                { value: '$8.7B', companies: 'AbbVie / Cerevel Therapeutics', meta: 'Neuroscience · Pipeline Acquisition · 2024', analysis: 'All-cash at 52% premium for a multi-asset neuroscience pipeline (schizophrenia, Parkinson\'s, epilepsy). Repriced neurology platform valuations and signaled AbbVie\'s urgency post-Botox growth slowdown.' },
-                { value: '$7.1B', companies: 'Roche / Telavant', meta: 'Immunology · Anti-TL1A · IBD · 2024', analysis: 'Confirmed Merck/Prometheus was not an outlier but a new valuation tier for TL1A. Earlier-stage asset, yet only 34% lower deal value — demonstrating how validated mechanism data lifts the entire class.' },
-                { value: '$4.9B', companies: 'Vertex / Alpine Immune Sciences', meta: 'Renal / Immunology · IgAN · 2024', analysis: 'Vertex\'s expansion beyond CF and pain into IgA nephropathy. Reflects the growing convergence of immunology and nephrology deal economics following sparsentan approval.' },
+                { value: '$6.7B', companies: 'Merck / Terns Pharmaceuticals', meta: 'Hematology · CML · Acquisition · March 25, 2026', analysis: 'All-cash acquisition at $53/share (31% premium to 60-day VWAP) for TERN-701, an oral allosteric BCR::ABL1 TKI for chronic myeloid leukemia. Merck\'s largest hematology move, driven by Keytruda patent cliff diversification pressure.' },
+                { value: '$3.0B', companies: 'Novartis / Synnovation Therapeutics', meta: 'Oncology · PI3Ka Inhibitor · Acquisition · March 20, 2026', analysis: '$2B upfront plus up to $1B in milestones for SNV4818, a pan-mutant-selective PI3Ka inhibitor in Phase 1/2 for breast cancer. Targets the 40% of ER+/HER2- patients with PIK3CA mutations.' },
+                { value: '$2.2B', companies: 'Gilead Sciences / Ouro Medicines', meta: 'Immunology · T Cell Engager · Acquisition · March 23, 2026', analysis: '$1.675B upfront plus up to $500M in milestones for OM336 (gamgertamig), a BCMAxCD3 T cell engager for autoimmune diseases. Orphan Drug and Fast Track designated. Galapagos co-developing at 50/50 cost share.' },
+                { value: '$1.7B', companies: 'Novartis / SciNeuro', meta: 'Neurology · Alzheimer\'s BBB Shuttle · License · January 12, 2026', analysis: '$165M upfront for a preclinical amyloid beta antibody with proprietary blood-brain barrier shuttle technology. Up to $1.5B in milestones plus royalties. Signals Novartis\'s conviction that BBB delivery is the key to next-gen Alzheimer\'s therapeutics.' },
+                { value: '$785M', companies: 'Collegium / Corium Therapeutics', meta: 'Neurology · ADHD · Acquisition · March 19, 2026', analysis: '$650M cash upfront plus up to $135M in milestones for Azstarys (serdexmethylphenidate), an approved ADHD treatment with 760,000+ prescriptions in 2025 and patents through December 2037.' },
               ].map((deal, i) => (
                 <div key={i} className="flex gap-6 bg-white py-6 px-2">
                   <div className="flex-shrink-0 w-20">
