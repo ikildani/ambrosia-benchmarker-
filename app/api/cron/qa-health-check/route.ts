@@ -458,6 +458,33 @@ export async function GET(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════════════════════
+  // CHECK 12: Anthropic API Health (deal ingestion depends on this)
+  // ═══════════════════════════════════════════════════════════
+  {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicKey) {
+      checks.push({ name: 'AI Ingestion (Claude)', status: 'fail', details: 'ANTHROPIC_API_KEY not configured — all deal ingestion is BLOCKED' });
+    } else {
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+        });
+        if (res.ok) {
+          checks.push({ name: 'AI Ingestion (Claude)', status: 'pass', details: 'Anthropic API responding — deal extraction active' });
+        } else {
+          const errBody = await res.text().catch(() => '');
+          const isCredits = errBody.includes('credit balance') || errBody.includes('billing');
+          checks.push({ name: 'AI Ingestion (Claude)', status: 'fail', details: isCredits ? 'CREDITS DEPLETED — all deal ingestion is BLOCKED. Add credits at console.anthropic.com' : `API error ${res.status}: ${errBody.substring(0, 100)}` });
+        }
+      } catch (err) {
+        checks.push({ name: 'AI Ingestion (Claude)', status: 'fail', details: `API unreachable: ${err instanceof Error ? err.message : 'unknown'}` });
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // RESULTS + SLACK
   // ═══════════════════════════════════════════════════════════
   const totalDuration = Date.now() - totalStart;
