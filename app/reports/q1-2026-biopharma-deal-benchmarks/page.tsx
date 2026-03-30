@@ -22,6 +22,22 @@ const PhaseUpfrontChart = dynamic(
   () => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })),
   { loading: () => <ChartSkeleton /> }
 );
+const DealVolumeStackedChart = dynamic(
+  () => import('@/components/insights/DealVolumeStackedChart').then(m => ({ default: m.DealVolumeStackedChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const RangeChart = dynamic(
+  () => import('@/components/insights/RangeChart').then(m => ({ default: m.RangeChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const TrendLineChart = dynamic(
+  () => import('@/components/insights/TrendLineChart').then(m => ({ default: m.TrendLineChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const WaterfallChart = dynamic(
+  () => import('@/components/insights/WaterfallChart').then(m => ({ default: m.WaterfallChart })),
+  { loading: () => <ChartSkeleton /> }
+);
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
@@ -226,17 +242,14 @@ export default async function Q1BenchmarkReportPage() {
             <p className="text-xs text-slate-400 mb-4">Based on 1,223 oncology transactions (2020-2026). The Phase 1 to Phase 2 jump (2.1x) is the largest single value inflection in biopharma deal economics.</p>
           </div>
 
-          <PhaseUpfrontChart
+          <WaterfallChart
             data={[
-              { phase: 'Preclinical', low: 30, median: 66, high: 150 },
-              { phase: 'Phase 1', low: 60, median: 134, high: 280 },
-              { phase: 'Phase 2', low: 198, median: 282, high: 386, highlight: true },
-              { phase: 'Phase 3', low: 400, median: 683, high: 1200 },
-              { phase: 'Approved', low: 900, median: 1973, high: 4000 },
+              { phase: 'Preclinical', value: 66, n: 231 },
+              { phase: 'Phase 1', value: 134, n: 247 },
+              { phase: 'Phase 2', value: 282, n: 257 },
+              { phase: 'Phase 3', value: 683, n: 239 },
+              { phase: 'Approved', value: 1973, n: 249 },
             ]}
-            title=""
-            yLabel="Median Upfront ($M)"
-            accentPhase="Phase 2"
           />
 
           <div className="mt-10 mb-2">
@@ -263,18 +276,16 @@ export default async function Q1BenchmarkReportPage() {
             <p className="text-xs text-slate-400 mb-4">n=2,339 total. 2026 figures are year-to-date through March 31. Volume nearly doubled from 2020 to 2024 while average deal size compressed 42%.</p>
           </div>
 
-          <PhaseUpfrontChart
+          <DealVolumeStackedChart
             data={[
-              { phase: '2020', low: 200, median: 269, high: 300 },
-              { phase: '2021', low: 220, median: 279, high: 310 },
-              { phase: '2022', low: 260, median: 317, high: 350 },
-              { phase: '2023', low: 310, median: 362, high: 400 },
-              { phase: '2024', low: 450, median: 535, high: 580, highlight: true },
-              { phase: '2025', low: 330, median: 387, high: 430 },
-              { phase: '2026 YTD', low: 150, median: 190, high: 220 },
+              { year: '2020', licensing: 58, acquisitions: 73, collaborations: 69, other: 69, total: 269 },
+              { year: '2021', licensing: 48, acquisitions: 68, collaborations: 75, other: 88, total: 279 },
+              { year: '2022', licensing: 79, acquisitions: 75, collaborations: 72, other: 91, total: 317 },
+              { year: '2023', licensing: 116, acquisitions: 86, collaborations: 70, other: 90, total: 362 },
+              { year: '2024', licensing: 190, acquisitions: 110, collaborations: 95, other: 140, total: 535 },
+              { year: '2025', licensing: 140, acquisitions: 82, collaborations: 68, other: 97, total: 387 },
+              { year: '2026', licensing: 101, acquisitions: 36, collaborations: 20, other: 33, total: 190 },
             ]}
-            title=""
-            yLabel="Number of Deals"
           />
 
           <div className="mt-8 mb-2">
@@ -420,18 +431,16 @@ export default async function Q1BenchmarkReportPage() {
               <p className="text-xs text-slate-400 mb-4">Wider bars indicate greater valuation dispersion. Oncology (n=236) has the tightest range; gastroenterology (n=10) and metabolic (n=11) show extreme dispersion driven by small samples and bimodal deal distributions.</p>
             </div>
 
-            <PhaseUpfrontChart
+            <RangeChart
               data={[
-                { phase: 'Onco (n=236)', low: 198, median: 282, high: 386, highlight: true },
-                { phase: 'Neuro (n=18)', low: 125, median: 226, high: 510 },
-                { phase: 'Immuno (n=15)', low: 98, median: 400, high: 1250 },
-                { phase: 'Cardio (n=11)', low: 205, median: 310, high: 860 },
-                { phase: 'Metab (n=11)', low: 175, median: 1200, high: 1650 },
-                { phase: 'Gastro (n=10)', low: 109, median: 725, high: 3200 },
-                { phase: 'Hemat (n=5)', low: 200, median: 200, high: 1100 },
+                { label: 'Metabolic', p25: 175, median: 1200, p75: 1650, n: 11, highlight: true },
+                { label: 'Gastroenterology', p25: 109, median: 725, p75: 3200, n: 10 },
+                { label: 'Immunology', p25: 98, median: 400, p75: 1250, n: 15 },
+                { label: 'Cardiovascular', p25: 205, median: 310, p75: 860, n: 11 },
+                { label: 'Oncology', p25: 198, median: 282, p75: 386, n: 236 },
+                { label: 'Neurology', p25: 125, median: 226, p75: 510, n: 18 },
+                { label: 'Hematology', p25: 200, median: 200, p75: 1100, n: 5 },
               ]}
-              title=""
-              yLabel="Upfront ($M) — P25 / Median / P75"
             />
           </div>
         </section>
@@ -470,18 +479,19 @@ export default async function Q1BenchmarkReportPage() {
             <p className="text-xs text-slate-400 mb-4">Declining conditional value share indicates sellers are capturing more value at signing. n=87 for 2026 YTD — interpret with caution.</p>
           </div>
 
-          <PhaseUpfrontChart
+          <TrendLineChart
             data={[
-              { phase: '2020', low: 72, median: 77, high: 81 },
-              { phase: '2021', low: 75, median: 80, high: 84 },
-              { phase: '2022', low: 73, median: 78, high: 82 },
-              { phase: '2023', low: 70, median: 74, high: 79 },
-              { phase: '2024', low: 69, median: 73, high: 78 },
-              { phase: '2025', low: 73, median: 78, high: 82 },
-              { phase: '2026 YTD', low: 67, median: 71, high: 76 },
+              { year: '2020', value: 76.5, n: 244 },
+              { year: '2021', value: 79.7, n: 242 },
+              { year: '2022', value: 77.5, n: 274 },
+              { year: '2023', value: 74.1, n: 298 },
+              { year: '2024', value: 73.0, n: 406 },
+              { year: '2025', value: 77.9, n: 276 },
+              { year: '2026', value: 71.0, n: 87 },
             ]}
-            title=""
-            yLabel="Conditional Value (% of TDV)"
+            yLabel="Conditional %"
+            color="#ef4444"
+            referenceLine={{ value: 75, label: '75% threshold' }}
           />
 
           <div className="mt-8 mb-2">
