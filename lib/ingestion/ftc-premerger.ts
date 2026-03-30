@@ -253,6 +253,7 @@ export async function runFTCIngestion(
             licensee_id: acquirerId,
             asset_name: `${deal.target} (FTC ${deal.ftc_action})`,
             asset_description: deal.summary,
+            modality: 'other',
             deal_type: 'acquisition',
             total_deal_value_usd: deal.deal_value_usd,
             indication_category: deal.indication?.toLowerCase().replace(/\s+/g, '_') || null,
