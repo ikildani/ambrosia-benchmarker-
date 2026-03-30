@@ -7,6 +7,7 @@ import { InsightCTA } from '@/components/insights/InsightCTA';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { TrustBar } from '@/components/insights/TrustBar';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import { createServiceClient } from '@/lib/supabase/server';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
@@ -30,7 +31,49 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks' },
 };
 
-export default function Q1BenchmarkReportPage() {
+// Revalidate every 6 hours so new deals appear without a full redeploy
+export const revalidate = 21600;
+
+async function getTopDeals() {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('deals')
+      .select('licensee_name, licensor_name, asset_name, total_deal_value_usd, upfront_usd, deal_type, therapeutic_area, announced_date')
+      .gte('announced_date', '2026-01-01')
+      .lte('announced_date', '2026-03-31')
+      .gte('total_deal_value_usd', 500000000)
+      .eq('verified', true)
+      .order('total_deal_value_usd', { ascending: false })
+      .limit(8);
+
+    return (data || []).map(d => {
+      const valueB = d.total_deal_value_usd / 1e9;
+      const valueStr = valueB >= 1 ? `$${valueB.toFixed(1)}B` : `$${Math.round(d.total_deal_value_usd / 1e6)}M`;
+      const upfrontStr = d.upfront_usd
+        ? (d.upfront_usd >= 1e9 ? `$${(d.upfront_usd / 1e9).toFixed(1)}B` : `$${Math.round(d.upfront_usd / 1e6)}M`)
+        : null;
+      const ta = (d.therapeutic_area || '').replace(/([A-Z])/g, ' $1').replace(/^./, (c: string) => c.toUpperCase()).trim();
+      const type = (d.deal_type || '').replace(/_/g, ' ').replace(/^./, (c: string) => c.toUpperCase());
+      const date = new Date(d.announced_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      return {
+        value: valueStr,
+        companies: `${d.licensor_name} → ${d.licensee_name}`,
+        meta: `${ta} · ${type} · ${date}`,
+        analysis: upfrontStr
+          ? `${upfrontStr} upfront. ${d.asset_name || ''}`
+          : d.asset_name || '',
+      };
+    });
+  } catch (err) {
+    console.error('[Q1 Report] Failed to fetch deals:', err);
+    return [];
+  }
+}
+
+export default async function Q1BenchmarkReportPage() {
+  const topDeals = await getTopDeals();
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
     { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://calculator.ambrosiaventures.co/reports' },
@@ -485,14 +528,7 @@ export default function Q1BenchmarkReportPage() {
             <h2 className="text-2xl font-bold text-slate-900 mb-8" id="deal-highlights">Landmark Transactions</h2>
 
             <div className="space-y-0 divide-y divide-slate-200 border-y border-slate-200">
-              {[
-                { value: '$6.7B', companies: 'Merck / Terns Pharmaceuticals', meta: 'Hematology · CML · Acquisition · March 25, 2026', analysis: 'All-cash acquisition at $53/share (31% premium to 60-day VWAP) for TERN-701, an oral allosteric BCR::ABL1 TKI for chronic myeloid leukemia. Merck\'s largest hematology move, driven by Keytruda patent cliff diversification pressure.' },
-                { value: '$3.0B', companies: 'Novartis / Synnovation Therapeutics', meta: 'Oncology · PI3Ka Inhibitor · Acquisition · March 20, 2026', analysis: '$2B upfront plus up to $1B in milestones for SNV4818, a pan-mutant-selective PI3Ka inhibitor in Phase 1/2 for breast cancer. Targets the 40% of ER+/HER2- patients with PIK3CA mutations.' },
-                { value: '$2.2B', companies: 'Gilead Sciences / Ouro Medicines', meta: 'Immunology · T Cell Engager · Acquisition · March 23, 2026', analysis: '$1.675B upfront plus up to $500M in milestones for OM336 (gamgertamig), a BCMAxCD3 T cell engager for autoimmune diseases. Orphan Drug and Fast Track designated. Galapagos co-developing at 50/50 cost share.' },
-                { value: '$1.7B', companies: 'Novartis / SciNeuro', meta: 'Neurology · Alzheimer\'s BBB Shuttle · License · January 12, 2026', analysis: '$165M upfront for a preclinical amyloid beta antibody with proprietary blood-brain barrier shuttle technology. Up to $1.5B in milestones plus royalties. Signals Novartis\'s conviction that BBB delivery is the key to next-gen Alzheimer\'s therapeutics.' },
-                { value: '$2.75B', companies: 'Eli Lilly / Insilico Medicine', meta: 'Oncology · AI Drug Discovery · License · March 29, 2026', analysis: '$115M upfront plus up to $2.63B in milestones and royalties for exclusive worldwide rights to AI-developed oral therapeutics. Insilico has 28 AI-designed drugs, nearly half clinical-stage. The largest AI drug discovery licensing deal to date.' },
-                { value: '$785M', companies: 'Collegium / Corium Therapeutics', meta: 'Neurology · ADHD · Acquisition · March 19, 2026', analysis: '$650M cash upfront plus up to $135M in milestones for Azstarys (serdexmethylphenidate), an approved ADHD treatment with 760,000+ prescriptions in 2025 and patents through December 2037.' },
-              ].map((deal, i) => (
+              {topDeals.map((deal, i) => (
                 <div key={i} className="flex gap-6 bg-white py-6 px-2">
                   <div className="flex-shrink-0 w-20">
                     <div className="text-xl font-bold text-slate-900 tabular-nums leading-none">{deal.value}</div>
