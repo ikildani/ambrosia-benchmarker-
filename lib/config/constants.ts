@@ -36,7 +36,7 @@ export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
   TOTAL_DEALS_RAW: LIVE_DEAL_COUNT,
   TOTAL_COMPANIES: '850+',
-  TOTAL_DEALS_DESCRIPTION: 'real biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, press releases, and regulatory databases',
+  TOTAL_DEALS_DESCRIPTION: 'real biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases',
   NEUROLOGY_DEALS: '150+',
   NEUROLOGY_DEALS_DESCRIPTION: 'neurology R&D partnerships',
   NEUROLOGY_TOTAL_VALUE: '$45.9B',

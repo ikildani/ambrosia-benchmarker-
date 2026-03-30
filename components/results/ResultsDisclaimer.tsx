@@ -41,7 +41,7 @@ function MethodologySection() {
               competitive landscape, regulatory pathway) are applied as multiplicative adjustments to base deal ranges.
             </p>
             <p>
-              Data is sourced from SEC EDGAR 8-K filings, company press releases, ClinicalTrials.gov, and FDA Orange Book.
+              Data is sourced from SEC EDGAR 8-K filings, FTC premerger filings, company press releases, ClinicalTrials.gov, and FDA Orange Book.
               Benchmarks are refreshed daily. All ranges represent the 25th to 75th percentile of comparable transactions.
             </p>
             <p className="text-slate-500 dark:text-slate-400">
@@ -81,7 +81,7 @@ function ResultsDisclaimerInner() {
             <a href="/methodology" className="text-teal-600 hover:text-teal-700 underline">Methodology</a>
           </p>
           <p className="text-xs text-slate-500 leading-relaxed mt-2">
-            <strong className="text-slate-600 dark:text-slate-400">Data Sources:</strong> Sourced from SEC regulatory filings, press releases, and 10+ databases.
+            <strong className="text-slate-600 dark:text-slate-400">Data Sources:</strong> Sourced from SEC regulatory filings, FTC premerger filings, press releases, and 10+ databases.
             Updated multiple times daily.
           </p>
         </div>

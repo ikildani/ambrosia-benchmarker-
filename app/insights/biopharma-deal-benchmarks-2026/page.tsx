@@ -279,7 +279,7 @@ export default function DealInsightsReport() {
               </Link>
             </div>
             <p className="text-sm text-slate-500 mt-6">
-              Data updated daily from SEC filings, press releases, and verified sources.
+              Data updated daily from SEC filings, FTC premerger filings, press releases, and verified sources.
             </p>
           </div>
         </section>

@@ -88,7 +88,7 @@ export default function PressPage() {
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Data Sources</h3>
                 <p className="text-slate-600 dark:text-slate-300">
-                  SEC filings (8-K, 10-K, 10-Q), company press releases, investor presentations, and verified
+                  SEC filings (8-K, 10-K, 10-Q), FTC premerger filings, company press releases, investor presentations, and verified
                   industry databases. All financial terms are cross-referenced for accuracy.
                 </p>
               </div>

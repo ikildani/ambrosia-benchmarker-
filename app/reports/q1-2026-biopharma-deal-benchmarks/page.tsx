@@ -82,7 +82,7 @@ export default async function Q1BenchmarkReportPage() {
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, royalty ranges from 2,500+ verified biopharma transactions.', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
-    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 2,500+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), press releases, and regulatory databases. Updated weekly.' } },
+    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report draws from 2,500+ verified biopharma licensing and M&A transactions (2020-2026). Sources include SEC filings (8-K, 10-K, 10-Q), FTC premerger filings, press releases, and regulatory databases. Updated weekly.' } },
     { '@type': 'Question', name: 'Why did metabolic/obesity deals surpass oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Immunology Phase 2 upfronts reached $350M — nearly 3x oncology ($120M) — driven by anti-TL1A mechanism validation. Metabolic/obesity TDV ($1.7B) also exceeds oncology ($1.3B), driven by GLP-1 commercial validation.' } },
     { '@type': 'Question', name: 'What is the largest modality premium in biopharma?', acceptedAnswer: { '@type': 'Answer', text: 'Radiopharmaceuticals at 1.60x over small molecules, reflecting Novartis Pluvicto validation and supply-constrained bidding for platform companies.' } },
   ]};
@@ -592,7 +592,7 @@ export default async function Q1BenchmarkReportPage() {
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Methodology</p>
             <p className="text-sm text-slate-600 leading-relaxed">
               This report draws from 2,500+ verified biopharma licensing and M&A transactions executed between 2020 and 2026.
-              Sources include SEC filings (8-K, 10-K, 10-Q), company press releases, investor presentations, and regulatory databases.
+              Sources include SEC filings (8-K, 10-K, 10-Q), FTC premerger filings, company press releases, investor presentations, and regulatory databases.
               New deals are ingested weekly via automated SEC EDGAR monitoring and verified before inclusion.
               Full methodology: <Link href="/methodology" className="text-teal-600 hover:text-teal-700">ambrosiaventures.co/methodology</Link>.
             </p>
@@ -621,7 +621,7 @@ export default async function Q1BenchmarkReportPage() {
           <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
           <div className="divide-y divide-slate-200">
             {[
-              { q: 'What data sources does this report use?', a: 'The report draws from 2,500+ verified biopharma licensing and M&A transactions (2020–2026). Sources include SEC filings, press releases, investor presentations, and regulatory databases. Updated weekly via automated monitoring.' },
+              { q: 'What data sources does this report use?', a: 'The report draws from 2,500+ verified biopharma licensing and M&A transactions (2020–2026). Sources include SEC filings, FTC premerger filings, press releases, investor presentations, and regulatory databases. Updated weekly via automated monitoring.' },
               { q: 'Why did metabolic/obesity deals surpass oncology?', a: 'The GLP-1 revolution created a buyer\'s race for next-generation metabolic assets. Validated commercial success of semaglutide/tirzepatide, plus a projected $100B+ annual obesity market by 2030, supports premium valuations for differentiated pipeline assets.' },
               { q: 'What is the largest modality premium?', a: 'Radiopharmaceuticals at 1.60x over small molecules. Driven by Novartis Pluvicto validation (>$1B annual sales in 18 months), constrained isotope supply, and platform acquisition competition among BMS, Lilly, and AstraZeneca.' },
               { q: 'How often are benchmarks updated?', a: 'The full dataset is updated weekly. Quarterly reports provide point-in-time narrative analysis. The deal calculator reflects real-time data.' },

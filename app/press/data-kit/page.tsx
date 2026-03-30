@@ -151,7 +151,7 @@ export default function PressDataKitPage() {
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Methodology</h2>
           <p className="text-slate-700 leading-relaxed mb-4">
             All benchmarks are derived from a proprietary database of 2,500+ verified biopharma licensing and M&amp;A
-            transactions executed between 2020 and 2026. Primary sources include SEC filings (8-K, 10-K, 10-Q), company
+            transactions executed between 2020 and 2026. Primary sources include SEC filings (8-K, 10-K, 10-Q), FTC premerger filings, company
             press releases, investor presentations, and regulatory databases. Every deal record includes upfront payment,
             milestone structure, royalty terms, development phase, therapeutic area, modality, and territory scope.
           </p>
@@ -229,7 +229,7 @@ export default function PressDataKitPage() {
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">100-Word Version</p>
                   <div className="bg-slate-50 rounded-lg p-4">
                     <p className="text-sm text-slate-700 leading-relaxed">
-                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 2,500+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 850+ company profiles and ingests new deal data weekly from SEC filings, press releases, and regulatory databases.
+                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 2,500+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 850+ company profiles and ingests new deal data weekly from SEC filings, FTC premerger filings, press releases, and regulatory databases.
                     </p>
                   </div>
                 </div>

@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "What data sources power the benchmarks?",
-    answer: "Every benchmark is derived from real transaction data sourced from SEC filings (10-K, 10-Q, 8-K), public deal announcements, press releases, and verified industry databases. Our dataset covers licensing, acquisitions, collaborations, option agreements, and co-development deals from 2017 to present. Data is continuously refreshed as new transactions are disclosed — including weekly automated scraping of SEC EDGAR 8-K filings."
+    answer: "Every benchmark is derived from real transaction data sourced from SEC filings (10-K, 10-Q, 8-K), FTC premerger filings, public deal announcements, press releases, and verified industry databases. Our dataset covers licensing, acquisitions, collaborations, option agreements, and co-development deals from 2017 to present. Data is continuously refreshed as new transactions are disclosed — including weekly automated scraping of SEC EDGAR 8-K filings and FTC Hart-Scott-Rodino filings."
   },
   {
     question: "How accurate are the deal estimates?",

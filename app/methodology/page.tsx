@@ -72,6 +72,7 @@ export default function MethodologyPage() {
             <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-8">Primary Sources</h3>
             <ul className="text-slate-600 dark:text-slate-300">
               <li><strong>SEC Regulatory Filings</strong> — 8-K material definitive agreements, the filings companies are legally required to submit when entering material licensing, collaboration, or acquisition agreements</li>
+              <li><strong>FTC Premerger Filings</strong> — Hart-Scott-Rodino Act filings and Federal Trade Commission merger review actions that capture deal activity above reporting thresholds</li>
               <li><strong>Press Release Wires</strong> — Deal announcements from global press distribution networks, filtered for biopharma relevance and financial term disclosure</li>
               <li><strong>Regulatory Agency Databases</strong> — FDA, EMA, and other regulatory body approval and authorization records that signal commercial-stage deal activity</li>
               <li><strong>Clinical Trial Registries</strong> — Partnership and sponsor changes in registered clinical trials that indicate underlying licensing or collaboration agreements</li>

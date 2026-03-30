@@ -190,7 +190,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
       </div>
       <div>
         <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">15+ comparable transactions</p>
-        <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Real deals with parties, values, dates, and structure — sourced from SEC filings</p>
+        <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Real deals with parties, values, dates, and structure — sourced from SEC filings and FTC premerger filings</p>
       </div>
     </div>
     <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">

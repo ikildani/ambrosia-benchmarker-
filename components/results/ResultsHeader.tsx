@@ -118,7 +118,7 @@ function ResultsHeaderInner({
             Benchmarks: {BENCHMARK_VERSION.LABEL} | Data through March 2026
           </p>
           <p className="mt-0.5 text-xs text-white/40">
-            Based on {DEAL_STATS_TOTAL} publicly disclosed licensing deals from SEC filings and press releases
+            Based on {DEAL_STATS_TOTAL} publicly disclosed licensing deals from SEC filings, FTC premerger filings, and press releases
           </p>
         </div>
 

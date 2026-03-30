@@ -46,7 +46,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
               <strong>Coverage:</strong> 12 therapeutic areas — Oncology (solid tumor + hematology), Neurology (CNS), Immunology/Autoimmune, Metabolic/Obesity, Cardiovascular, Infectious Disease, Ophthalmology, Women&rsquo;s Health, Rare Disease, Dermatology, Pulmonology, and Gastroenterology.
             </p>
             <p style="margin-bottom: 7px;">
-              <strong>Data Sources:</strong> SEC EDGAR filings, ClinicalTrials.gov, company press releases, analyst reports, and proprietary deal databases.
+              <strong>Data Sources:</strong> SEC EDGAR filings, FTC premerger filings, ClinicalTrials.gov, company press releases, analyst reports, and proprietary deal databases.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>AI Analysis:</strong> Strategic narrative and negotiation playbook powered by Claude (Anthropic), providing contextual intelligence beyond quantitative benchmarks.
@@ -77,7 +77,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       <div class="disclaimer-box">
         <div style="font-weight: 700; margin-bottom: 6px; font-size: 10px; color: ${COLORS.gray600};">ABOUT THESE BENCHMARKS</div>
         <p style="margin-bottom: 5px;">
-          This report is produced by the Ambrosia Deal Benchmarker, calibrated against 3,000+ verified biopharma transactions from SEC regulatory filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
+          This report is produced by the Ambrosia Deal Benchmarker, calibrated against 3,000+ verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
         </p>
         <p style="margin-bottom: 5px;">
           Individual deal outcomes depend on asset-specific factors including proprietary clinical data, IP landscape, competitive dynamics, regulatory interactions, and negotiation leverage. These benchmarks provide data-driven anchor points for deal strategy — for definitive structuring, engage qualified financial and legal advisors.

@@ -3,7 +3,7 @@
 // Rare Disease, Hematology, Dermatology, Gastroenterology,
 // Combination Therapy, and Geographic-specific deals (2017-2026)
 //
-// Sources: SEC 8-K filings, company press releases, investor presentations
+// Sources: SEC 8-K filings, FTC premerger filings, company press releases, investor presentations
 // Where exact terms were not publicly disclosed, estimates are noted.
 
 export interface ExtendedComparableDeal {
