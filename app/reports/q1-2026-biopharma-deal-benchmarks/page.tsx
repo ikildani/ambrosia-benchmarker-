@@ -9,7 +9,19 @@ import { TrustBar } from '@/components/insights/TrustBar';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { createServiceClient } from '@/lib/supabase/server';
 
-const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
+const ChartSkeleton = () => (
+  <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+    <div className="h-64 sm:h-80 flex items-end gap-2 px-8 pb-8 animate-pulse">
+      {[35, 50, 65, 80, 95].map((h, i) => (
+        <div key={i} className="flex-1 bg-slate-100 rounded-t" style={{ height: `${h}%` }} />
+      ))}
+    </div>
+  </div>
+);
+const PhaseUpfrontChart = dynamic(
+  () => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })),
+  { loading: () => <ChartSkeleton /> }
+);
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));

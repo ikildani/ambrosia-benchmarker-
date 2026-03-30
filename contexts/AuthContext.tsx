@@ -114,18 +114,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const previousTierRef = useRef<'free' | 'pro' | 'report'>('free');
 
-  // Show "Welcome to Pro" toast once per upgrade
+  // Show "Welcome to Pro" toast ONLY on actual Stripe upgrades (not PRO_EMAILS auto-detection)
+  // Stripe checkout redirects with ?upgraded=stripe in the URL
   useEffect(() => {
-    const prev = previousTierRef.current;
-    previousTierRef.current = tier;
-
-    if (prev === 'free' && (tier === 'pro' || tier === 'report')) {
-      // Only show once per session
-      if (typeof window !== 'undefined' && !sessionStorage.getItem('pro_welcome_shown')) {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('upgraded') === 'stripe' && !sessionStorage.getItem('pro_welcome_shown')) {
         sessionStorage.setItem('pro_welcome_shown', 'true');
         toast.success('Welcome to Pro! All features are now unlocked.');
+        // Clean URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('upgraded');
+        window.history.replaceState({}, '', url.toString());
       }
     }
+    previousTierRef.current = tier;
   }, [tier]);
 
   // Initialize from localStorage and listen to Supabase auth state
