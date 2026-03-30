@@ -104,6 +104,64 @@ export async function POST(request: NextRequest) {
       newsletterSubscribers: newsletterSubscribers || 0,
     });
 
+    // ── Full user roster with last activity ──
+    const { data: allUsers } = await supabase
+      .from('user_profiles')
+      .select('id, email, full_name, tier, created_at, updated_at')
+      .order('created_at', { ascending: false });
+
+    // Get last login from Supabase Auth
+    const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 100 });
+    const loginMap = new Map<string, string | null>();
+    for (const au of authData?.users || []) {
+      if (au.email) loginMap.set(au.email.toLowerCase(), au.last_sign_in_at || null);
+    }
+
+    // Get last calculation per user
+    const { data: lastCalcs } = await supabase
+      .from('calculations')
+      .select('user_id, created_at')
+      .not('user_id', 'is', null)
+      .order('created_at', { ascending: false });
+
+    const lastCalcMap = new Map<string, string>();
+    if (lastCalcs) {
+      for (const calc of lastCalcs) {
+        if (calc.user_id && !lastCalcMap.has(calc.user_id)) {
+          lastCalcMap.set(calc.user_id, calc.created_at);
+        }
+      }
+    }
+
+    // Send full user roster to Slack
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+    if (webhookUrl && allUsers && allUsers.length > 0) {
+      const userLines = allUsers.map(u => {
+        const tier = (u.tier || 'free').toUpperCase();
+        const joined = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const lastLogin = loginMap.get(u.email?.toLowerCase());
+        const loginStr = lastLogin ? new Date(lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never';
+        const lastCalc = lastCalcMap.get(u.id);
+        const calcStr = lastCalc ? new Date(lastCalc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never';
+        return `${u.email} | ${tier} | Joined ${joined} | Login: ${loginStr} | Calc: ${calcStr}`;
+      }).join('\n');
+
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: 'Daily User Roster',
+          attachments: [{
+            color: '#2563eb',
+            blocks: [
+              { type: 'header', text: { type: 'plain_text', text: 'All Users — Daily Roster' } },
+              { type: 'section', text: { type: 'mrkdwn', text: '```\n' + userLines + '\n```' } },
+            ],
+          }],
+        }),
+      }).catch(() => {});
+    }
+
     return NextResponse.json({
       success: true,
       stats: {
