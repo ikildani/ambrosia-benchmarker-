@@ -1,8 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import SharedCalculationView from '@/components/SharedCalculationView';
 import ShareReportButton from '@/components/ShareReportButton';
+
+const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -56,6 +59,13 @@ export default async function SharePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-[#0c1220]">
+      <ShareViewTracker
+        token={token}
+        company={data.recipientCompany || data.labels?.company}
+        modality={data.labels?.modality}
+        indication={data.labels?.indication}
+        phase={data.labels?.phase}
+      />
       {/* Nav */}
       <nav className="border-b border-white/[0.04]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
