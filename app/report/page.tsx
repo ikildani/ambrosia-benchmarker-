@@ -698,7 +698,7 @@ export default function ReportPage() {
               </p>
             </div>
             <Link
-              href="/calculator?tab=pricing"
+              href="/#pricing"
               className="inline-flex items-center gap-2 px-6 py-3 text-xs font-semibold text-violet-400 border border-violet-500/20 rounded-xl hover:bg-violet-500/[0.06] transition-all whitespace-nowrap"
             >
               View Pro Plans
@@ -775,7 +775,7 @@ export default function ReportPage() {
           </div>
 
           <p className="mt-6 text-xs text-slate-600">
-            or <Link href="/calculator?tab=pricing" className="text-teal-500/50 hover:text-teal-400 transition-colors">subscribe to Pro for unlimited reports</Link>
+            or <Link href="/#pricing" className="text-teal-500/50 hover:text-teal-400 transition-colors">subscribe to Pro for unlimited reports</Link>
           </p>
         </div>
       </section>
