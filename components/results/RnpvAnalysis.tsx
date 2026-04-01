@@ -32,6 +32,25 @@ const fmt = (v: number) => {
 
 const fmtPct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
+/** Convert raw phase keys to display names */
+const phaseDisplayName = (phase: string): string => {
+  const map: Record<string, string> = {
+    discovery: 'Discovery',
+    preclinical: 'Preclinical',
+    phase1: 'Phase 1',
+    phase1_2: 'Phase 1/2',
+    phase2: 'Phase 2',
+    phase2_3: 'Phase 2/3',
+    phase3: 'Phase 3',
+    nda_filed: 'NDA Filed',
+    approved: 'Approved',
+    regulatory: 'Regulatory Review',
+  };
+  // Handle "Phase 2 -> Phase 3" style labels too
+  if (phase.includes('->') || phase.includes('→')) return phase;
+  return map[phase] || phase.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+};
+
 const ChartTooltipContent = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
@@ -401,7 +420,7 @@ export default function RnpvAnalysis({
                           const maxVal = Math.max(...realOptions.optionValueByPhase.map(p => p.optionValue), 1);
                           return (
                             <div key={i} className="flex items-center gap-3">
-                              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-24 text-right flex-shrink-0 truncate">{phase.phase}</span>
+                              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-24 text-right flex-shrink-0 truncate">{phaseDisplayName(phase.phase)}</span>
                               <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700/50 rounded overflow-hidden relative">
                                 <div className="absolute inset-y-0 left-0 bg-teal-500/20 rounded" style={{ width: `${(phase.intrinsicValue / maxVal) * 100}%` }} />
                                 <div className="absolute inset-y-0 left-0 bg-teal-500/50 rounded" style={{ width: `${(phase.optionValue / maxVal) * 100}%` }} />

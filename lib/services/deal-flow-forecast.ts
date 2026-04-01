@@ -426,8 +426,8 @@ function computeMomentumTrend(
   const momentumScore = weightTotal > 0 ? weightedSum / weightTotal : 0;
 
   const trend: DealFlowForecast['trend'] =
-    momentumScore > 0.10 ? 'accelerating'
-    : momentumScore < -0.10 ? 'decelerating'
+    momentumScore > 0.04 ? 'accelerating'
+    : momentumScore < -0.04 ? 'decelerating'
     : 'stable';
 
   return { trend, momentumScore };
@@ -689,10 +689,11 @@ export async function forecastDealFlow(
   const olderAvg = dealCounts.slice(-8, -4).reduce((a, b) => a + b, 0) / 4;
 
   const sentiment: DealFlowForecast['marketSentiment'] =
-    trend === 'accelerating' && recentAvg > olderAvg * 1.25 ? 'hot'
+    trend === 'accelerating' && recentAvg > olderAvg * 1.15 ? 'hot'
     : trend === 'accelerating' ? 'warm'
-    : trend === 'decelerating' && recentAvg < olderAvg * 0.75 ? 'cooling'
+    : trend === 'decelerating' && recentAvg < olderAvg * 0.85 ? 'cooling'
     : trend === 'decelerating' ? 'neutral'
+    : recentAvg > olderAvg * 1.10 ? 'warm'
     : 'neutral';
 
   // ─── Narrative ──────────────────────────────────────────────────────

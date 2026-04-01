@@ -388,8 +388,10 @@ export function calculateRealOptions(
 
   for (const pt of baseResult.phaseTransitions) {
     const ptIdx = phaseIndex(pt.phase);
-    // Include phases from current through the phase before approval
-    if (ptIdx >= currentIdx && ptIdx < approvedIdx) {
+    // Include phases that are between current and approval
+    // Use lenient matching: include if not approved and has real cost/duration
+    const isApprovedPhase = pt.phase === 'approved' || pt.phase === 'launch';
+    if (!isApprovedPhase && pt.costEstimate > 0 && pt.yearsToComplete > 0) {
       remainingPhases.push({
         phase: pt.phase,
         cost: pt.costEstimate,
