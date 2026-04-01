@@ -53,9 +53,9 @@ const reportModules = [
   {
     icon: Users,
     title: 'Partner Intelligence',
-    subtitle: 'AI-scored partner matching',
-    description: 'Every potential partner ranked by therapeutic alignment, pipeline gaps, deal history, geography, and financial capacity. With deal benchmarks per partner.',
-    highlight: `${DEAL_STATS.TOTAL_COMPANIES} companies screened`,
+    subtitle: 'AI-scored matching + Pharma Intent Score',
+    description: 'Every potential partner ranked by therapeutic alignment, pipeline gaps, deal history, geography, and financial capacity — plus our proprietary Pharma Intent Score, an 8-factor predictive model that forecasts which companies are most likely to do a deal in your space.',
+    highlight: `${DEAL_STATS.TOTAL_COMPANIES} companies · Intent scoring`,
     color: 'violet',
   },
   {
@@ -532,7 +532,7 @@ export default function ReportPage() {
                 {[
                   'Deal terms benchmark (upfronts, milestones, royalties)',
                   'Comparable transactions analysis',
-                  'AI-scored partner matching (850+ companies)',
+                  'AI-scored partner matching + Pharma Intent Score (850+ companies)',
                   'Competitive landscape & pipeline mapping',
                   'Monte Carlo sensitivity & rNPV modeling',
                   'Negotiation playbook with leverage analysis',
