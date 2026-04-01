@@ -416,23 +416,25 @@ export function calculateRealOptions(
     };
   }
 
-  // --- 4. Calculate pro-rated downstream value for each phase ---
-  // The underlying value (S) for each phase option is the rNPV of all
-  // cash flows that occur after that phase completes. We approximate this
-  // by distributing the total rNPV across phases proportional to the
-  // probability mass they contribute.
-  const totalCashFlowPV = baseResult.cashFlows.reduce(
-    (sum, cf) => sum + cf.riskAdjustedPV,
-    0,
-  ) + baseResult.terminalValue;
+  // --- 4. Calculate UNADJUSTED downstream value for real options ---
+  // Critical: Use unadjustedNPV, NOT risk-adjusted. The option pricing lattice
+  // already captures uncertainty through implied volatility. Using risk-adjusted
+  // PV would double-count risk and collapse all option values to zero for
+  // early-stage assets where PoS is low (e.g., 5% cumulative PoS turns $1B into $50M,
+  // which is less than the $200-500M in development costs across 7 phases).
+  //
+  // Source: Trigeorgis & Reuer (2017) — "the underlying in a real option is the
+  // gross project value BEFORE risk adjustment, since the option framework
+  // prices risk through the volatility parameter."
+  const totalCashFlowPV = Math.max(baseResult.unadjustedNPV, 0);
 
   // --- 5. Build compound option backwards ---
   // Start from the last phase and work back. Each phase's option value
   // becomes the underlying for the previous phase's option.
   const optionValueByPhase: RealOptionsResult['optionValueByPhase'] = [];
 
-  // The underlying for the final phase is the total commercial value
-  let downstreamValue = Math.max(totalCashFlowPV, 0);
+  // The underlying for the final phase is the total unadjusted commercial value
+  let downstreamValue = totalCashFlowPV;
 
   // Process phases in reverse order (last phase first)
   for (let i = remainingPhases.length - 1; i >= 0; i--) {
