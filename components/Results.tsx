@@ -811,19 +811,28 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     if (!emailForResults || emailSubmitting) return;
     setEmailSubmitting(true);
     try {
-      // Send to Formspree
-      await fetch('https://formspree.io/f/maqbwgbq', {
+      // Save to newsletter + send results via email
+      const emailRes = await fetch('/api/email-results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: emailForResults,
-          source: 'results_email_capture',
           analysis: `${labels.phase} ${labels.modality} ${labels.indication}`,
-          upfront: `${formatCurrency(terms.upfront.low)} - ${formatCurrency(terms.upfront.high)}`,
-          totalDealValue: `${formatCurrency(terms.totalDealValue.low)} - ${formatCurrency(terms.totalDealValue.high)}`,
+          territory: (labels as Record<string, string>).territory || 'Global',
+          upfront_low: formatCurrency(terms.upfront.low),
+          upfront_high: formatCurrency(terms.upfront.high),
+          upfront_median: formatCurrency(terms.upfront.median),
+          total_low: formatCurrency(terms.totalDealValue.low),
+          total_high: formatCurrency(terms.totalDealValue.high),
+          total_median: formatCurrency(terms.totalDealValue.median),
+          royalty_low: (terms as unknown as Record<string, { low?: number; high?: number }>).royaltyRate?.low,
+          royalty_high: (terms as unknown as Record<string, { low?: number; high?: number }>).royaltyRate?.high,
         }),
       });
-      // Save to newsletter API + link email to anonymous calculation data
+      if (!emailRes.ok) {
+        console.error('Email results API error:', await emailRes.text());
+      }
+      // Also save to newsletter subscribers
       fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -837,8 +846,6 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             territory: (labels as Record<string, string>).territory,
             upfront_median: terms.upfront.median,
             total_deal_value_median: terms.totalDealValue.median,
-            royalty_low: (terms as unknown as Record<string, { low?: number; high?: number }>).royaltyRate?.low,
-            royalty_high: (terms as unknown as Record<string, { low?: number; high?: number }>).royaltyRate?.high,
           },
         }),
       }).catch(() => {});

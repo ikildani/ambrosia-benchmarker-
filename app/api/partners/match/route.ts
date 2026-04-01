@@ -121,6 +121,15 @@ export async function POST(request: NextRequest) {
     // SECURITY: Tier is verified server-side (session cookie, database, or PRO_EMAILS allowlist).
     // Client-provided tier is never trusted for authorization.
 
+    // DEV ONLY: Allow ?test_tier=free to override tier for testing gating
+    if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
+      const url = new URL(request.url);
+      const testTier = url.searchParams.get('test_tier');
+      if (testTier === 'free' || testTier === 'pro' || testTier === 'report') {
+        userTier = testTier;
+      }
+    }
+
     // Build match input
     const matchInput: MatchInput = {
       modality,

@@ -99,8 +99,15 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       return;
     }
 
-    // Gate 4th+ calculation behind account creation for anonymous users
-    if (!isAuthenticated && getUsage().count >= 3) {
+    // Require authentication — no anonymous calculations
+    if (!isAuthenticated) {
+      toast.error('Create a free account to run calculations.', {
+        duration: 6000,
+        action: {
+          label: 'Sign Up',
+          onClick: () => openAuthModal('signup'),
+        },
+      });
       openAuthModal('signup');
       return;
     }
