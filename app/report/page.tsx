@@ -753,8 +753,8 @@ export default function ReportPage() {
             </h2>
 
             <p className="text-base text-slate-400 max-w-lg mx-auto mb-0 leading-relaxed">
-              Select your asset parameters below. Preview the free analysis, then unlock the full report
-              for {PRICING.REPORT_PRICE}.
+              Select your asset parameters. See your deal benchmarks instantly.
+              Unlock the full report for {PRICING.REPORT_PRICE} — no page reload, no friction.
             </p>
           </div>
 
