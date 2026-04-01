@@ -126,7 +126,7 @@ const faqs = [
   },
   {
     q: 'Can I try before I buy?',
-    a: 'Yes. The calculator gives you free deal term ranges, a competitive snapshot, and comparable deal previews — no account required. The $149 report unlocks the full analysis with partner matching, sensitivity modeling, and negotiation strategy.',
+    a: 'Yes. The calculator gives you free deal term ranges, a competitive snapshot, and comparable deal previews — no account required. The $499 report unlocks the full analysis with partner matching, sensitivity modeling, and negotiation strategy.',
   },
   {
     q: 'Is there a subscription option?',
@@ -460,7 +460,7 @@ export default function ReportPage() {
                 step: '03',
                 icon: FileText,
                 title: 'Unlock the full report',
-                desc: 'One click, $149. Get the complete package: partner matching, sensitivity modeling, negotiation playbook, and PDF + Excel exports.',
+                desc: 'One click, $499. Get the complete package: partner matching, sensitivity modeling, negotiation playbook, and PDF + Excel exports.',
                 detail: 'Instant download via Stripe',
               },
             ].map((item, i) => (

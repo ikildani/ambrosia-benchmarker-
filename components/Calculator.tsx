@@ -221,18 +221,24 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         .then(data => {
           if (data.status === 'completed') {
             setReportVerified(true);
-            // Pre-fill from purchased report's calculation inputs
+            // Pre-fill from purchased report's calculation inputs and auto-calculate
             if (data.calculationInputs) {
               const inp = data.calculationInputs;
-              const patch: Record<string, unknown> = {};
+              const patch: Record<string, unknown> = { showTemplates: false, quickMode: false };
               if (inp.therapeuticArea) patch.therapeuticArea = inp.therapeuticArea;
               if (inp.modality) patch.modality = inp.modality;
               if (inp.phase) patch.phase = inp.phase;
               if (inp.indication) patch.indication = inp.indication;
               if (inp.territory) patch.territory = inp.territory;
               if (inp.dealType) patch.dealType = inp.dealType;
-              if (Object.keys(patch).length > 0) {
+              if (Object.keys(patch).length > 1) {
                 actions.bulkSet(patch as Partial<typeof state>);
+                // Auto-calculate after pre-fill so the report buyer sees results immediately
+                try {
+                  const fullState = { ...state, ...patch };
+                  const calcInput = buildCalculationInput(fullState as typeof state);
+                  calc.setResult(calculateDealTerms(calcInput));
+                } catch { /* Calculation will be triggered manually */ }
               }
             }
           }

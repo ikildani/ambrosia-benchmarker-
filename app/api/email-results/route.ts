@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
             Get comparable transactions, partner matches (850+ companies scored), sensitivity analysis, competitive landscape, and a negotiation playbook.
           </p>
           <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; padding: 10px 24px; background: #00c9a7; color: #0a0f1a; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 6px;">
-            Get Full Report — $149
+            Get Full Report — $499
           </a>
         </div>
 
