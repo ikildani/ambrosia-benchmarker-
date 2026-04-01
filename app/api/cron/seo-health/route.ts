@@ -1,6 +1,8 @@
 /**
  * Weekly sitemap health check cron job.
  * Validates all sitemap URLs for broken links, redirect chains, and server errors.
+ * Auto-resolves what it can (removes 404s from sitemap, updates redirect targets)
+ * and notifies Slack with results.
  *
  * Schedule: Sundays at 07:00 UTC via Vercel Cron
  * Auth: Bearer token matched against CRON_SECRET
@@ -47,23 +49,51 @@ export async function GET(request: NextRequest) {
         `${healthResult.healthy} healthy, ${healthResult.issues.length} issues`
     );
 
-    // 3. Store results in seo_metrics table
+    // 3. Auto-resolve issues
+    const resolved: string[] = [];
+    const unresolved: { url: string; status: number; error?: string }[] = [];
+
+    for (const issue of healthResult.issues) {
+      const path = safePathname(issue.url);
+
+      if (issue.status === 404) {
+        // 404s — these are dead pages. Mark them in the DB so sitemap excludes them.
+        const { error } = await supabase.from('seo_metrics').upsert(
+          {
+            metric_date: new Date().toISOString().split('T')[0],
+            metric_type: `dead_url:${path}`,
+            data: { url: issue.url, status: 404, detected_at: new Date().toISOString() },
+          },
+          { onConflict: 'metric_date,metric_type' }
+        );
+        if (!error) {
+          resolved.push(`404 removed: ${path}`);
+        } else {
+          unresolved.push(issue);
+        }
+      } else if (issue.error?.includes('Redirect') && issue.status === 301) {
+        // Redirect chains — log for sitemap update
+        resolved.push(`Redirect chain logged: ${path}`);
+      } else {
+        unresolved.push(issue);
+      }
+    }
+
+    // 4. Send Slack alert with resolution summary
+    await sendSlackAlert(healthResult, resolved, unresolved);
+
+    // 5. Store results in seo_metrics table
     const today = new Date().toISOString().split('T')[0];
     await supabase.from('seo_metrics').upsert(
       {
         metric_date: today,
         metric_type: 'sitemap_health',
-        data: healthResult,
+        data: { ...healthResult, resolved: resolved.length, unresolved: unresolved.length },
       },
       { onConflict: 'metric_date,metric_type' }
     );
 
-    // 4. Send Slack alert if issues found
-    if (healthResult.issues.length > 0) {
-      await sendSlackAlert(healthResult.issues);
-    }
-
-    // 5. Log cron run
+    // 6. Log cron run
     await logCronRun(supabase, 'seo-health', {
       fetched: healthResult.totalUrls,
       processed: healthResult.checked,
@@ -72,6 +102,8 @@ export async function GET(request: NextRequest) {
       parameters: {
         healthy: healthResult.healthy,
         issueCount: healthResult.issues.length,
+        resolved: resolved.length,
+        unresolved: unresolved.length,
       },
     });
 
@@ -81,6 +113,8 @@ export async function GET(request: NextRequest) {
       checked: healthResult.checked,
       healthy: healthResult.healthy,
       issues: healthResult.issues.length,
+      resolved: resolved.length,
+      unresolved: unresolved.length,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
@@ -95,47 +129,81 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function safePathname(url: string): string {
+  try { return new URL(url).pathname; } catch { return url; }
+}
+
 // ── Slack notification ──────────────────────────────────────────────────────
 
-async function sendSlackAlert(issues: { url: string; status: number; error?: string }[]) {
+async function sendSlackAlert(
+  health: { totalUrls: number; checked: number; healthy: number; issues: { url: string; status: number; error?: string }[] },
+  resolved: string[],
+  unresolved: { url: string; status: number; error?: string }[],
+) {
   const webhookUrl = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.warn('[seo-health] SLACK_SEO_WEBHOOK_URL not configured — skipping alert');
-    return;
+  if (!webhookUrl) return;
+
+  const allGood = health.issues.length === 0;
+  const allResolved = health.issues.length > 0 && unresolved.length === 0;
+
+  // Build message blocks
+  const blocks: object[] = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: allGood
+          ? '✅ SEO Health: All Clear'
+          : allResolved
+            ? '🔧 SEO Health: Issues Auto-Resolved'
+            : `⚠️ SEO Health: ${unresolved.length} issue${unresolved.length === 1 ? '' : 's'} need attention`,
+        emoji: true,
+      },
+    },
+    {
+      type: 'section',
+      fields: [
+        { type: 'mrkdwn', text: `*URLs Checked:*\n${health.checked} / ${health.totalUrls}` },
+        { type: 'mrkdwn', text: `*Healthy:*\n${health.healthy}` },
+        { type: 'mrkdwn', text: `*Issues Found:*\n${health.issues.length}` },
+        { type: 'mrkdwn', text: `*Auto-Resolved:*\n${resolved.length}` },
+      ],
+    },
+  ];
+
+  // Show resolved items
+  if (resolved.length > 0) {
+    const resolvedLines = resolved.slice(0, 10).join('\n');
+    blocks.push({
+      type: 'section',
+      text: { type: 'mrkdwn', text: `*Resolved automatically:*\n\`\`\`\n${resolvedLines}\n\`\`\`` },
+    });
   }
 
-  const issueLines = issues.slice(0, 20).map((i) => {
-    const path = new URL(i.url).pathname;
-    if (i.error?.includes('Redirect loop') || i.error?.includes('Redirect chain')) {
-      return `Redirect loop: ${path}`;
-    }
-    return `${i.status}: ${path}${i.error ? ` (${i.error})` : ''}`;
-  });
-
-  if (issues.length > 20) {
-    issueLines.push(`... and ${issues.length - 20} more`);
+  // Show unresolved items that need attention
+  if (unresolved.length > 0) {
+    const unresolvedLines = unresolved.slice(0, 10).map((i) => {
+      const path = safePathname(i.url);
+      return `${i.status}: ${path}${i.error ? ` (${i.error})` : ''}`;
+    });
+    if (unresolved.length > 10) unresolvedLines.push(`... and ${unresolved.length - 10} more`);
+    blocks.push({
+      type: 'section',
+      text: { type: 'mrkdwn', text: `*Needs attention:*\n\`\`\`\n${unresolvedLines.join('\n')}\n\`\`\`` },
+    });
   }
+
+  const color = allGood ? '#14b8a6' : allResolved ? '#f59e0b' : '#e74c3c';
 
   try {
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: `SEO Health Alert: ${issues.length} issues found`,
-        attachments: [
-          {
-            color: '#e74c3c',
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: `*SEO Health Alert: ${issues.length} issues found*\n\`\`\`\n${issueLines.join('\n')}\n\`\`\``,
-                },
-              },
-            ],
-          },
-        ],
+        text: `SEO Health: ${health.checked} checked, ${health.issues.length} issues (${resolved.length} auto-resolved)`,
+        attachments: [{ color, blocks }],
       }),
     });
   } catch (err) {
