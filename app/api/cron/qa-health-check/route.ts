@@ -485,6 +485,78 @@ export async function GET(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════════════════════
+  // CHECK: Stale Deal Counts in Static Pages
+  // Scans app/ for hardcoded deal count strings that don't match
+  // the current LIVE_DEAL_COUNT (rounded to nearest 100).
+  // ═══════════════════════════════════════════════════════════
+  try {
+    const { LIVE_DEAL_COUNT: liveDealCount, formatDealCount: fmtCount } = await import('@/lib/config/constants');
+    const currentFormatted = fmtCount(liveDealCount); // e.g., "2,500+"
+    const currentRoundedNum = Math.floor(liveDealCount / 100) * 100; // e.g., 2500
+
+    // Stale patterns: any "N,NNN+" where N,NNN doesn't match current rounded count
+    // Check common hardcoded values that would be stale
+    const stalePatterns = [
+      '1,500+', '1,600+', '1,700+', '1,800+', '1,900+',
+      '2,000+', '2,100+', '2,200+', '2,300+', '2,400+',
+      '2,500+', '2,600+', '2,700+', '2,800+', '2,900+',
+      '3,000+', '3,100+', '3,200+', '3,300+', '3,400+',
+      '3,500+', '3,600+', '3,700+', '3,800+', '3,900+',
+      '4,000+', '4,500+', '5,000+',
+    ].filter(p => p !== currentFormatted);
+
+    // Also check patterns like "2,500" without +, and "3500+" without comma
+    const fs = await import('fs');
+    const path = await import('path');
+    const appDir = path.join(process.cwd(), 'app');
+
+    const staleFiles: { file: string; pattern: string; line: number }[] = [];
+
+    function scanDir(dir: string) {
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
+            scanDir(fullPath);
+          } else if (entry.isFile() && (entry.name.endsWith('.tsx') || entry.name.endsWith('.ts'))) {
+            try {
+              const content = fs.readFileSync(fullPath, 'utf-8');
+              const lines = content.split('\n');
+              for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                // Skip imports, comments, and the constants file itself
+                if (line.trim().startsWith('import ') || line.trim().startsWith('//') || fullPath.includes('constants.ts')) continue;
+                for (const pattern of stalePatterns) {
+                  if (line.includes(pattern) && (line.includes('deal') || line.includes('Deal') || line.includes('transaction') || line.includes('Transaction'))) {
+                    const relPath = fullPath.replace(process.cwd() + '/', '');
+                    staleFiles.push({ file: relPath, pattern, line: i + 1 });
+                  }
+                }
+              }
+            } catch { /* skip unreadable files */ }
+          }
+        }
+      } catch { /* skip unreadable dirs */ }
+    }
+
+    scanDir(appDir);
+
+    if (staleFiles.length === 0) {
+      checks.push({ name: 'Deal Count Consistency', status: 'pass', details: `All pages consistent with current count (${currentFormatted})` });
+    } else {
+      const fileList = staleFiles.slice(0, 10).map(f => `${f.file}:${f.line} says "${f.pattern}"`).join(', ');
+      checks.push({
+        name: 'Deal Count Consistency',
+        status: 'warn',
+        details: `${staleFiles.length} stale deal count(s) found (current: ${currentFormatted}). ${fileList}`,
+      });
+    }
+  } catch (err) {
+    checks.push({ name: 'Deal Count Consistency', status: 'warn', details: `Scan failed: ${err instanceof Error ? err.message : 'unknown'}` });
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // RESULTS + SLACK
   // ═══════════════════════════════════════════════════════════
   const totalDuration = Date.now() - totalStart;
