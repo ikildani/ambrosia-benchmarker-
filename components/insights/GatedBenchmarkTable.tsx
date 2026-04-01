@@ -15,7 +15,7 @@ export function GatedBenchmarkTable({
   headers,
   rows,
   freeRows = 3,
-  ctaText = 'Unlock full benchmarks — $149 report or Pro subscription',
+  ctaText = 'Unlock full benchmarks — $499 report or Pro subscription',
   ctaHref = '/#pricing',
   footnote,
 }: GatedBenchmarkTableProps) {

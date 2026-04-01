@@ -451,7 +451,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     href="/report"
                     className="inline-flex items-center px-6 py-3 bg-white dark:bg-slate-800 text-teal-700 dark:text-teal-400 font-semibold rounded-xl border border-teal-200 dark:border-teal-800 hover:border-teal-400 transition-colors text-sm"
                   >
-                    Get a Full Report — $149
+                    Get a Full Report — $499
                   </Link>
                 </div>
               </div>

@@ -59,7 +59,7 @@ export default function ShareReportButton({ inputs, results, token }: ShareRepor
         ) : (
           <>
             Get the Full Report
-            <span className="text-teal-200 font-normal text-base">$149</span>
+            <span className="text-teal-200 font-normal text-base">$499</span>
           </>
         )}
       </button>

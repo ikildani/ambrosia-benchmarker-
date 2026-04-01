@@ -6,16 +6,16 @@ import {
   ArrowRight, CheckCircle2, Zap, Target, LineChart,
   Building2, DollarSign, Percent, Scale, Clock,
   Database, Lock, Download, Star, ChevronRight,
-  Globe, Microscope, FlaskConical, Brain,
+  Globe, Microscope, FlaskConical, Brain, Calculator,
 } from 'lucide-react';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
-  title: 'Deal Intelligence Report — $149 | Ambrosia Ventures',
-  description: 'Board-ready biopharma deal benchmarking in 60 seconds. Comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by 2,500+ verified SEC filings.',
+  title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
+  description: 'Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by 2,500+ verified SEC filings.',
   openGraph: {
-    title: 'Deal Intelligence Report — $149 | Ambrosia Ventures',
+    title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
     description: 'Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from 2,500+ real transactions.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/report',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Intelligence Report — $149 | Ambrosia Ventures',
+    title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
     description: 'Board-ready biopharma deal benchmarking from 2,500+ real transactions.',
     images: ['/api/og'],
   },
@@ -76,6 +76,14 @@ const reportModules = [
     color: 'rose',
   },
   {
+    icon: Calculator,
+    title: 'rNPV & Deal Valuation',
+    subtitle: 'Probability-weighted asset value',
+    description: 'Risk-adjusted net present value modeling with phase-specific success probabilities, market sizing, and peak sales estimation. Know what your asset is actually worth before you negotiate.',
+    highlight: 'LoA-calibrated by phase + TA',
+    color: 'sky',
+  },
+  {
     icon: Scale,
     title: 'Negotiation Playbook',
     subtitle: 'Data-backed strategy',
@@ -91,6 +99,7 @@ const colorMap: Record<string, { bg: string; border: string; text: string; glow:
   violet:  { bg: 'bg-violet-500/[0.07]',   border: 'border-violet-500/[0.12]',  text: 'text-violet-400',  glow: 'group-hover:shadow-violet-500/5' },
   amber:   { bg: 'bg-amber-500/[0.07]',    border: 'border-amber-500/[0.12]',   text: 'text-amber-400',   glow: 'group-hover:shadow-amber-500/5' },
   rose:    { bg: 'bg-rose-500/[0.07]',     border: 'border-rose-500/[0.12]',    text: 'text-rose-400',    glow: 'group-hover:shadow-rose-500/5' },
+  sky:     { bg: 'bg-sky-500/[0.07]',      border: 'border-sky-500/[0.12]',     text: 'text-sky-400',     glow: 'group-hover:shadow-sky-500/5' },
   emerald: { bg: 'bg-emerald-500/[0.07]',  border: 'border-emerald-500/[0.12]', text: 'text-emerald-400', glow: 'group-hover:shadow-emerald-500/5' },
 };
 
@@ -379,7 +388,7 @@ export default function ReportPage() {
       <section className="relative py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="max-w-2xl mb-14">
-            <p className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-4">Six Analysis Modules</p>
+            <p className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-4">Seven Analysis Modules</p>
             <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
               Everything you need for a deal committee presentation
             </h2>
@@ -398,7 +407,7 @@ export default function ReportPage() {
                   className={`group relative bg-[#0c1220]/80 border border-white/[0.04] rounded-xl p-6 hover:border-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${c.glow}`}
                 >
                   {/* Top accent line */}
-                  <div className={`absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r ${c.text === 'text-teal-400' ? 'from-teal-500/30' : c.text === 'text-cyan-400' ? 'from-cyan-500/30' : c.text === 'text-violet-400' ? 'from-violet-500/30' : c.text === 'text-amber-400' ? 'from-amber-500/30' : c.text === 'text-rose-400' ? 'from-rose-500/30' : 'from-emerald-500/30'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  <div className={`absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r ${c.text === 'text-teal-400' ? 'from-teal-500/30' : c.text === 'text-cyan-400' ? 'from-cyan-500/30' : c.text === 'text-violet-400' ? 'from-violet-500/30' : c.text === 'text-amber-400' ? 'from-amber-500/30' : c.text === 'text-rose-400' ? 'from-rose-500/30' : c.text === 'text-sky-400' ? 'from-sky-500/30' : 'from-emerald-500/30'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
 
                   <div className={`w-11 h-11 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center mb-5`}>
                     <mod.icon className={`w-5 h-5 ${c.text}`} />
@@ -534,8 +543,9 @@ export default function ReportPage() {
                   'Deal terms benchmark (upfronts, milestones, royalties)',
                   'Comparable transactions analysis',
                   'AI-scored partner matching + Pharma Intent Score (850+ companies)',
+                  'rNPV & deal valuation modeling',
                   'Competitive landscape & pipeline mapping',
-                  'Monte Carlo sensitivity & rNPV modeling',
+                  'Monte Carlo sensitivity & tornado analysis',
                   'Negotiation playbook with leverage analysis',
                   'Board-ready PDF + structured Excel export',
                 ].map((item) => (

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>China Licensing Wave — Ambrosia Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #060910;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1080px;
+    height: 1080px;
+    background: #080b12;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ambient {
+    position: absolute;
+    bottom: -300px;
+    right: -200px;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(20,184,166,0.015) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 56px 72px 48px;
+  }
+
+  .logo-img {
+    height: auto;
+    width: 220px;
+    opacity: 1;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(20,184,166,0.12) 0%, rgba(20,184,166,0.03) 50%, transparent 100%);
+    margin-top: 16px;
+  }
+
+  /* ── Center everything ── */
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .context-above {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  /* ── The two numbers ── */
+  .num-block {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+
+  .big {
+    font-size: 148px;
+    font-weight: 900;
+    letter-spacing: -8px;
+    line-height: 0.82;
+  }
+
+  .big .sym {
+    font-size: 68px;
+    font-weight: 300;
+  }
+
+  .ghost {
+    color: #182030;
+  }
+
+  .ghost .sym {
+    color: #141b28;
+  }
+
+  .live {
+    color: #14b8a6;
+  }
+
+  .live .sym {
+    color: #0f766e;
+  }
+
+  .time-tag {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  .time-ghost { color: #243044; }
+  .time-live { color: rgba(20,184,166,0.4); }
+
+  /* ── Single line beneath ── */
+  .beneath {
+    font-size: 18px;
+    font-weight: 500;
+    color: #475569;
+    margin-top: 20px;
+    margin-bottom: 72px;
+    letter-spacing: -0.2px;
+  }
+
+  /* ── The three names ── */
+  .names {
+    display: flex;
+    gap: 28px;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .name {
+    font-size: 19px;
+    font-weight: 800;
+    color: #cbd5e1;
+    letter-spacing: -0.3px;
+  }
+
+  .name-dot {
+    font-size: 8px;
+    color: #1e293b;
+  }
+
+  .names-sub {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+
+  .names-note {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(20,184,166,0.3);
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="ambient"></div>
+
+  <div class="inner">
+    <img src="../public/logo-white.png" alt="Ambrosia Ventures" class="logo-img">
+    <div class="divider"></div>
+
+    <div class="center">
+      <div class="context-above">Chinese biotech out-licensing to Western pharma</div>
+
+      <div class="num-block">
+        <div class="big ghost"><span class="sym">$</span>52<span class="sym">B</span></div>
+        <div class="time-tag time-ghost">12 months &middot; 2024</div>
+      </div>
+      <div class="num-block">
+        <div class="big live"><span class="sym">$</span>52<span class="sym">B</span></div>
+        <div class="time-tag time-live">8 weeks &middot; 2026</div>
+      </div>
+
+      <div class="beneath">Same number. A fraction of the time.</div>
+
+      <div class="names">
+        <span class="name">Pfizer</span>
+        <span class="name-dot">&bull;</span>
+        <span class="name">BMS</span>
+        <span class="name-dot">&bull;</span>
+        <span class="name">Merck</span>
+      </div>
+      <div class="names-sub">All licensed the same drug class from Chinese biotechs.</div>
+      <div class="names-note">PD-1/VEGF bispecific antibodies &middot; None built in-house</div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">calculator.ambrosiaventures.co</div>
+      <div class="footer-text">3,500+ transactions tracked</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

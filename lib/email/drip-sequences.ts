@@ -137,7 +137,7 @@ export function buildDay3Email(
 
   <div style="text-align: center; margin: 28px 0 20px;">
     <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
-      Get the full breakdown — $149 per report
+      Get the full breakdown — $499 per report
     </a>
   </div>
 
@@ -223,14 +223,14 @@ export function buildDay5Email(email: string): { subject: string; html: string }
   </div>
 
   <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
-    <p style="margin: 0; font-size: 13px; color: #64748b;">A licensing consultant charges <span style="text-decoration: line-through;">$5,000–$15,000</span> for comparable analysis.</p>
-    <p style="margin: 8px 0 0; font-size: 28px; font-weight: 700; color: #0f172a;">$149</p>
+    <p style="margin: 0; font-size: 13px; color: #64748b;">A licensing consultant charges <span style="text-decoration: line-through;">$5,000–$25,000</span> for comparable analysis.</p>
+    <p style="margin: 8px 0 0; font-size: 28px; font-weight: 700; color: #0f172a;">$499</p>
     <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">One report. One deal. Everything you need.</p>
   </div>
 
   <div style="text-align: center; margin: 28px 0 20px;">
-    <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
-      Get Your Deal Report — $149
+    <a href="https://calculator.ambrosiaventures.co/report" style="display: inline-block; background: #0f172a; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+      Get Your Deal Report — $499
     </a>
   </div>
 

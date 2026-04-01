@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Gap Leverage — Ambrosia Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #060910;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1080px;
+    height: 1080px;
+    background: #080b12;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Single ambient glow — asymmetric, top-right */
+  .ambient {
+    position: absolute;
+    top: -500px;
+    right: -400px;
+    width: 1200px;
+    height: 1200px;
+    background: radial-gradient(circle, rgba(20,184,166,0.022) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 60px 72px 52px;
+  }
+
+  /* ── Logo ── */
+  .logo-img {
+    height: auto;
+    width: 220px;
+    opacity: 1;
+    margin-bottom: 0;
+  }
+
+  /* ── Top half: the number ── */
+  .top-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 40px;
+  }
+
+  .pre-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .big-number-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    line-height: 1;
+  }
+
+  .dollar {
+    font-size: 72px;
+    font-weight: 300;
+    color: #0f766e;
+    letter-spacing: -2px;
+  }
+
+  .number {
+    font-size: 180px;
+    font-weight: 900;
+    color: #14b8a6;
+    letter-spacing: -10px;
+    line-height: 0.8;
+  }
+
+  .unit {
+    font-size: 72px;
+    font-weight: 300;
+    color: #0f766e;
+    letter-spacing: -2px;
+    margin-left: -4px;
+  }
+
+  .number-context {
+    font-size: 18px;
+    font-weight: 500;
+    color: #475569;
+    margin-top: 14px;
+    letter-spacing: -0.2px;
+  }
+
+  /* ── Divider ── */
+  .mid-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(20,184,166,0.12) 0%, rgba(20,184,166,0.03) 50%, transparent 100%);
+  }
+
+  /* ── Bottom half: the insight ── */
+  .bottom-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+
+  .insight-line {
+    font-size: 26px;
+    font-weight: 700;
+    color: #cbd5e1;
+    letter-spacing: -0.8px;
+    line-height: 1.35;
+    margin-bottom: 36px;
+    max-width: 780px;
+  }
+
+  .insight-line .dim { color: #475569; font-weight: 500; }
+
+  /* ── Company evidence — single clean column ── */
+  .evidence {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: auto;
+  }
+
+  .evidence-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .ev-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #14b8a6;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+
+  .ev-company {
+    font-size: 13px;
+    font-weight: 700;
+    color: #94a3b8;
+    width: 110px;
+    flex-shrink: 0;
+  }
+
+  .ev-detail {
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+  }
+
+  .ev-detail .amount {
+    color: #14b8a6;
+    font-weight: 700;
+  }
+
+  .ev-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: #14b8a6;
+    background: rgba(20,184,166,0.06);
+    border: 1px solid rgba(20,184,166,0.1);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+
+  /* ── Punchline ── */
+  .punchline {
+    margin-top: 40px;
+  }
+
+  .punch-1 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #475569;
+    letter-spacing: -0.1px;
+  }
+
+  .punch-2 {
+    font-size: 20px;
+    font-weight: 900;
+    color: #e2e8f0;
+    letter-spacing: -0.5px;
+    margin-top: 2px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0;
+    padding-top: 24px;
+  }
+
+  .footer-url {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .footer-deals {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="ambient"></div>
+
+  <div class="inner">
+    <img src="../public/logo-white.png" alt="Ambrosia Ventures" class="logo-img">
+
+    <!-- Top Half: The Number -->
+    <div class="top-half">
+      <div class="pre-label">Q4 2025 — Q1 2026</div>
+      <div class="big-number-row">
+        <span class="dollar">$</span><span class="number">9.2</span><span class="unit">B</span>
+      </div>
+      <div class="number-context">in deals signed within 6 weeks of late-stage pipeline failures</div>
+    </div>
+
+    <div class="mid-line"></div>
+
+    <!-- Bottom Half: The Insight -->
+    <div class="bottom-half">
+      <div class="insight-line">
+        5 of the top 20 pharma companies lost a late-stage<br>
+        program in the last 6 months. <span class="dim">Then went shopping.</span>
+      </div>
+
+      <div class="evidence">
+        <div class="evidence-row">
+          <div class="ev-dot"></div>
+          <div class="ev-company">Novo Nordisk</div>
+          <div class="ev-detail">Semaglutide Ph3 Alzheimer's terminated &rarr; Aspect Biosystems acquired</div>
+        </div>
+        <div class="evidence-row">
+          <div class="ev-dot"></div>
+          <div class="ev-company">AbbVie</div>
+          <div class="ev-detail">Emraclidine <span class="amount">$3.5B</span> writedown &rarr; <span class="amount">$6.8B</span> in neuro deals within 90 days</div>
+        </div>
+        <div class="evidence-row">
+          <div class="ev-dot"></div>
+          <div class="ev-company">BMS</div>
+          <div class="ev-detail">Camzyos nHCM failed &rarr; Orbital <span class="amount">$1.5B</span> + BioNTech <span class="amount">$11.1B</span></div>
+        </div>
+        <div class="evidence-row">
+          <div class="ev-dot"></div>
+          <div class="ev-company">Eli Lilly</div>
+          <div class="ev-detail">Insilico Medicine <span class="amount">$2.75B</span> licensing deal <span class="ev-badge">This Week</span></div>
+        </div>
+      </div>
+
+      <div class="punchline">
+        <div class="punch-1">The science isn't 76% better.</div>
+        <div class="punch-2">The desperation is.</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-url">calculator.ambrosiaventures.co</div>
+      <div class="footer-deals">3,500+ transactions tracked</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

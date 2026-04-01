@@ -7,8 +7,8 @@ import { apiSuccess, apiError } from '@/lib/api-response';
 
 // Stripe Checkout Session API
 // Supports two purchase types:
-// 1. 'subscription' — $99/month Pro plan (default)
-// 2. 'report' — $149 one-time Deal Report
+// 1. 'subscription' — $299/month Pro plan (default)
+// 2. 'report' — $499 one-time Deal Report
 // SECURITY: userId is derived from auth session, never from request body
 
 export async function POST(request: NextRequest) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const promoCode = body.promoCode;
     const purchaseType = body.purchaseType;
 
-    // --- ONE-TIME DEAL REPORT ($149) ---
+    // --- ONE-TIME DEAL REPORT ($499) ---
     if (purchaseType === 'report') {
       const reportPriceId = process.env.STRIPE_REPORT_PRICE_ID?.trim();
       if (!reportPriceId) {
