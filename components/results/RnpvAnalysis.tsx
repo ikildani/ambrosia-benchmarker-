@@ -182,8 +182,8 @@ export default function RnpvAnalysis({
                 <Calculator className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h4 className="font-bold text-navy-800 dark:text-white text-sm sm:text-base">Institutional Valuation Engine</h4>
-                <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">rNPV + Real Options + Deal Waterfall + Scenario Analysis</p>
+                <h4 className="font-bold text-navy-800 dark:text-white text-sm sm:text-base">rNPV & Deal Valuation</h4>
+                <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">Risk-adjusted NPV · Real Options · Deal Waterfall · Scenario Analysis</p>
               </div>
             </div>
             <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 flex-shrink-0">
