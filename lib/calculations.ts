@@ -3438,6 +3438,8 @@ export const dermatologyIndicationOptions = [
     { value: 'nailPsoriasis', label: 'Nail Psoriasis' },
     { value: 'scalpPsoriasis', label: 'Scalp Psoriasis' },
     { value: 'palmoplantarPustulosis', label: 'Palmoplantar Pustulosis' },
+    { value: 'generalizedPustularPsoriasis', label: 'Generalized Pustular Psoriasis (GPP)' },
+    { value: 'inversePsoriasis', label: 'Inverse Psoriasis' },
   ]},
   { group: 'Autoimmune / Immune-Mediated', options: [
     { value: 'vitiligo', label: 'Vitiligo' },
@@ -3447,6 +3449,8 @@ export const dermatologyIndicationOptions = [
     { value: 'bullousPemphigoid', label: 'Bullous Pemphigoid' },
     { value: 'morphea', label: 'Morphea / Localized Scleroderma' },
     { value: 'lichenPlanus', label: 'Lichen Planus' },
+    { value: 'lichenSclerosus', label: 'Lichen Sclerosus' },
+    { value: 'lupusSkinDisease', label: 'Cutaneous Lupus Erythematosus (CLE)' },
   ]},
   { group: 'Blistering / Genetic', options: [
     { value: 'epidermolysis', label: 'Epidermolysis Bullosa' },
@@ -3455,11 +3459,15 @@ export const dermatologyIndicationOptions = [
   { group: 'Chronic Pruritic', options: [
     { value: 'prurigo', label: 'Prurigo Nodularis' },
     { value: 'contactDermatitis', label: 'Contact Dermatitis / Eczema' },
+    { value: 'chronicPruritusNOS', label: 'Chronic Pruritus (NOS)' },
+    { value: 'uremiaPruritus', label: 'Uremic Pruritus (CKD-Associated)' },
   ]},
   { group: 'Skin Oncology', options: [
     { value: 'basalCellCarcinoma', label: 'Basal Cell Carcinoma' },
     { value: 'squamousCellSkin', label: 'Cutaneous Squamous Cell Carcinoma' },
     { value: 'cutaneousMelanoma', label: 'Cutaneous Melanoma' },
+    { value: 'merkelCellDerm', label: 'Merkel Cell Carcinoma' },
+    { value: 'cutaneousLymphoma', label: 'Primary Cutaneous Lymphoma' },
   ]},
   { group: 'Other', options: [
     { value: 'acne', label: 'Severe Acne' },
@@ -3467,6 +3475,8 @@ export const dermatologyIndicationOptions = [
     { value: 'melasma', label: 'Melasma' },
     { value: 'hyperhidrosis', label: 'Hyperhidrosis' },
     { value: 'keloid', label: 'Keloid / Hypertrophic Scarring' },
+    { value: 'woundHealing', label: 'Chronic Wound Healing' },
+    { value: 'androgenicAlopecia', label: 'Androgenic Alopecia (Male/Female Pattern)' },
   ]},
 ];
 
@@ -3515,12 +3525,15 @@ export const gastroenterologyIndicationOptions = [
     { value: 'pouchitis', label: 'Pouchitis' },
     { value: 'microscopicColitis', label: 'Microscopic Colitis' },
     { value: 'perianalFistula', label: 'Perianal Fistula (CD)' },
+    { value: 'indeterminateColitis', label: 'Indeterminate Colitis' },
+    { value: 'ibdFibrosis', label: 'IBD-Associated Fibrosis / Strictures' },
   ]},
   { group: 'Eosinophilic / Immune', options: [
     { value: 'eosinophilicEsophagitis', label: 'Eosinophilic Esophagitis (EoE)' },
     { value: 'celiacDisease', label: 'Celiac Disease' },
     { value: 'giGvhd', label: 'GI Graft-vs-Host Disease' },
     { value: 'autoimmunePancreatitis', label: 'Autoimmune Pancreatitis' },
+    { value: 'eosinophilicGastritis', label: 'Eosinophilic Gastritis / Duodenitis' },
   ]},
   { group: 'Functional / Motility', options: [
     { value: 'ibsD', label: 'IBS-D (Diarrhea-Predominant)' },
@@ -3535,9 +3548,15 @@ export const gastroenterologyIndicationOptions = [
     { value: 'primaryBiliaryCholangitis', label: 'Primary Biliary Cholangitis (PBC)' },
     { value: 'nonAlcoholicSteatohepatitis', label: 'NASH / MASH' },
     { value: 'hepaticEncephalopathy', label: 'Hepatic Encephalopathy' },
+    { value: 'alcoholicHepatitis', label: 'Alcohol-Associated Hepatitis' },
+    { value: 'pscGI', label: 'Primary Sclerosing Cholangitis (PSC)' },
+    { value: 'liverFibrosis', label: 'Liver Fibrosis / Cirrhosis' },
+    { value: 'portalHypertension', label: 'Portal Hypertension' },
   ]},
   { group: 'Esophageal / Upper GI', options: [
     { value: 'barrettsEsophagus', label: "Barrett's Esophagus" },
+    { value: 'eosinophilicEsophagitisRefractory', label: 'Refractory Eosinophilic Esophagitis' },
+    { value: 'pepticUlcer', label: 'Peptic Ulcer Disease (H. pylori)' },
   ]},
   { group: 'Intestinal / Other', options: [
     { value: 'shortBowelSyndrome', label: 'Short Bowel Syndrome' },
@@ -3548,6 +3567,8 @@ export const gastroenterologyIndicationOptions = [
     { value: 'radiationProctitis', label: 'Radiation Proctitis / Enteritis' },
     { value: 'intestinalFailure', label: 'Intestinal Failure' },
     { value: 'colorectalPolyps', label: 'Colorectal Polyps / Chemoprevention' },
+    { value: 'familialPolyposisSyndromes', label: 'Familial Adenomatous Polyposis (FAP)' },
+    { value: 'giMotilityDisorders', label: 'GI Motility Disorders (General)' },
   ]},
 ];
 
