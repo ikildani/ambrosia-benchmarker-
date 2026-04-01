@@ -2319,6 +2319,9 @@ export const indicationOptions = [
     { value: 'penile', label: 'Penile Cancer' },
     { value: 'merkelCell', label: 'Merkel Cell Carcinoma' },
     { value: 'vulvar', label: 'Vulvar Cancer' },
+    { value: 'gist', label: 'GIST (Gastrointestinal Stromal Tumor)' },
+    { value: 'analCancer', label: 'Anal Cancer' },
+    { value: 'gallbladder', label: 'Gallbladder / Biliary Tract Cancer' },
   ]},
   { group: 'Pediatric Solid Tumors', options: [
     { value: 'neuroblastoma', label: 'Neuroblastoma' },
@@ -2326,6 +2329,9 @@ export const indicationOptions = [
     { value: 'osteosarcoma', label: 'Osteosarcoma' },
     { value: 'ewingSarcoma', label: 'Ewing Sarcoma' },
     { value: 'rhabdomyosarcoma', label: 'Rhabdomyosarcoma' },
+    { value: 'wilms', label: 'Wilms Tumor (Nephroblastoma)' },
+    { value: 'medulloblastoma', label: 'Medulloblastoma' },
+    { value: 'dipg', label: 'DIPG (Diffuse Intrinsic Pontine Glioma)' },
   ]},
   { group: 'Hematologic Malignancies', options: [
     { value: 'aml', label: 'AML' },
@@ -2351,6 +2357,18 @@ export const indicationOptions = [
     { value: 'castlemanDisease', label: 'Castleman Disease' },
     { value: 'aplasticAnemia', label: 'Aplastic Anemia' },
     { value: 'bpdcn', label: 'BPDCN (Blastic Plasmacytoid)' },
+    { value: 'lgll', label: 'Large Granular Lymphocytic Leukemia (LGLL)' },
+    { value: 'angioimmunoblastic', label: 'Angioimmunoblastic T-Cell Lymphoma' },
+  ]},
+  { group: 'Biomarker-Defined / Tumor-Agnostic', options: [
+    { value: 'krasMutant', label: 'KRAS-Mutant Tumors (G12C/G12D)' },
+    { value: 'claudin18_2', label: 'Claudin 18.2+ Tumors' },
+    { value: 'her2Low', label: 'HER2-Low Tumors' },
+    { value: 'msiHigh', label: 'MSI-High / dMMR Tumors' },
+    { value: 'ntrkFusion', label: 'NTRK Fusion-Positive Tumors' },
+    { value: 'ret', label: 'RET-Altered Tumors' },
+    { value: 'brafV600', label: 'BRAF V600E Tumors' },
+    { value: 'fgfrAltered', label: 'FGFR-Altered Tumors' },
   ]},
 ];
 
@@ -2438,6 +2456,9 @@ export const neurologyIndicationOptions = [
     { value: 'huntingtons', label: "Huntington's Disease" },
     { value: 'frontotemporal', label: 'Frontotemporal Dementia (FTD)' },
     { value: 'lewyBody', label: 'Lewy Body Dementia' },
+    { value: 'msa', label: 'Multiple System Atrophy (MSA)' },
+    { value: 'psp', label: 'Progressive Supranuclear Palsy (PSP)' },
+    { value: 'corticobasalDegen', label: 'Corticobasal Degeneration (CBD)' },
   ]},
   { group: 'Psychiatry', options: [
     { value: 'schizophrenia', label: 'Schizophrenia / Psychosis' },
@@ -2448,10 +2469,16 @@ export const neurologyIndicationOptions = [
     { value: 'ocd', label: 'OCD / Anxiety Disorders' },
     { value: 'adhd', label: 'ADHD' },
     { value: 'insomnia', label: 'Insomnia / Sleep Disorders' },
+    { value: 'trd', label: 'Treatment-Resistant Depression (TRD)' },
+    { value: 'anorexiaNervosa', label: 'Anorexia Nervosa' },
+    { value: 'socialAnxiety', label: 'Social Anxiety Disorder' },
+    { value: 'agitationDementia', label: 'Agitation in Dementia' },
   ]},
   { group: 'Movement & Seizure', options: [
     { value: 'epilepsy', label: 'Epilepsy' },
     { value: 'tremor', label: 'Movement Disorders (Tremor / Dystonia)' },
+    { value: 'tardiveDyskinesia', label: 'Tardive Dyskinesia' },
+    { value: 'lennoxGastaut', label: 'Lennox-Gastaut Syndrome' },
   ]},
   { group: 'Other CNS', options: [
     { value: 'pain', label: 'Pain (Chronic / Neuropathic)' },
@@ -2463,6 +2490,7 @@ export const neurologyIndicationOptions = [
     { value: 'clusterHeadache', label: 'Cluster Headache' },
     { value: 'restlessLeg', label: 'Restless Leg Syndrome' },
     { value: 'rareNeuro', label: 'Other Rare Neurological' },
+    { value: 'myalgicEncephalomyelitis', label: 'ME/CFS (Chronic Fatigue Syndrome)' },
   ]},
   { group: 'Neurodevelopmental & Rare', options: [
     { value: 'autism', label: 'Autism Spectrum Disorder' },
@@ -2487,6 +2515,8 @@ export const neurologyIndicationOptions = [
     { value: 'stiffPerson', label: 'Stiff Person Syndrome' },
     { value: 'gbs', label: 'Guillain-Barré Syndrome' },
     { value: 'neurofibromatosis', label: 'Neurofibromatosis (NF1/NF2)' },
+    { value: 'myasthenia', label: 'Myasthenia Gravis (gMG)' },
+    { value: 'cidpNeuro', label: 'CIDP (Chronic Inflammatory Demyelinating Polyneuropathy)' },
   ]},
   { group: 'Other Neurology', options: [
     { value: 'peripheralNeuropathy', label: 'Peripheral Neuropathy' },
@@ -2586,6 +2616,7 @@ export const immunologyIndicationOptions = [
     { value: 'crohns', label: "Crohn's Disease" },
     { value: 'ibd_broad', label: 'IBD (Broad UC + CD)' },
     { value: 'celiac', label: 'Celiac Disease' },
+    { value: 'eosinophilicGI', label: 'Eosinophilic GI Disorders (non-EoE)' },
   ]},
   { group: 'Rheumatologic', options: [
     { value: 'rheumatoidArthritis', label: 'Rheumatoid Arthritis' },
@@ -2594,6 +2625,8 @@ export const immunologyIndicationOptions = [
     { value: 'systemicSclerosis', label: 'Systemic Sclerosis' },
     { value: 'sjogrens', label: "Sjogren's Syndrome" },
     { value: 'aancaVasculitis', label: 'ANCA Vasculitis' },
+    { value: 'igg4Related', label: 'IgG4-Related Disease' },
+    { value: 'mixedConnectiveTissue', label: 'Mixed Connective Tissue Disease (MCTD)' },
   ]},
   { group: 'Dermatologic', options: [
     { value: 'atopicderm', label: 'Atopic Dermatitis' },
@@ -2627,6 +2660,7 @@ export const immunologyIndicationOptions = [
   { group: 'Transplant', options: [
     { value: 'gvhd', label: 'Graft-vs-Host Disease (GVHD)' },
     { value: 'organTransplant', label: 'Solid Organ Transplant Rejection' },
+    { value: 'xenotransplant', label: 'Xenotransplantation Tolerance' },
   ]},
   { group: 'Renal & Rare', options: [
     { value: 'igan', label: 'IgA Nephropathy' },
@@ -2638,6 +2672,8 @@ export const immunologyIndicationOptions = [
     { value: 'autoImmuneHepatitis', label: 'Autoimmune Hepatitis' },
     { value: 'nephroticSyndrome', label: 'Nephrotic Syndrome (General)' },
     { value: 'rareAutoimmune', label: 'Other Rare Autoimmune' },
+    { value: 'c3Glomerulopathy', label: 'C3 Glomerulopathy' },
+    { value: 'alportSyndrome', label: 'Alport Syndrome' },
   ]},
   { group: 'Musculoskeletal & Vascular', options: [
     { value: 'ankylosingSpondylitis', label: 'Ankylosing Spondylitis' },
@@ -2652,6 +2688,10 @@ export const immunologyIndicationOptions = [
     { value: 'sarcoidosis', label: 'Sarcoidosis' },
     { value: 'uveitis', label: 'Autoimmune Uveitis' },
     { value: 'primaryImmunodeficiency', label: 'Primary Immunodeficiency' },
+    { value: 'type1DiabetesAutoimmune', label: 'Type 1 Diabetes (Immune-Mediated)' },
+    { value: 'autoimmuneEncephalitis', label: 'Autoimmune Encephalitis' },
+    { value: 'chronicGvhd', label: 'Chronic GVHD' },
+    { value: 'neuromyelitisOptica', label: 'Neuromyelitis Optica (NMOSD)' },
   ]},
 ];
 
@@ -2711,10 +2751,16 @@ export const metabolicIndicationOptions = [
   { group: 'Obesity & Weight', options: [
     { value: 'obesity', label: 'Obesity / Chronic Weight Management' },
     { value: 'metabolicSyndrome', label: 'Metabolic Syndrome' },
+    { value: 'obesityPediatric', label: 'Pediatric / Adolescent Obesity' },
+    { value: 'obesitySleepApnea', label: 'Obesity with Obstructive Sleep Apnea' },
+    { value: 'obesityHeartFailure', label: 'Obesity-Related Heart Failure' },
+    { value: 'obesityCkd', label: 'Obesity-Related CKD' },
+    { value: 'weightRegain', label: 'Weight Regain Post-Bariatric' },
   ]},
   { group: 'Diabetes & Glycemic', options: [
     { value: 'type2Diabetes', label: 'Type 2 Diabetes' },
     { value: 'type1Diabetes', label: 'Type 1 Diabetes' },
+    { value: 'diabeticKidneyDisease', label: 'Diabetic Kidney Disease' },
   ]},
   { group: 'Organ-Specific Metabolic', options: [
     { value: 'nashMash', label: 'NASH / MASH (Fatty Liver)' },
@@ -2724,12 +2770,17 @@ export const metabolicIndicationOptions = [
   { group: 'Cardiovascular-Metabolic', options: [
     { value: 'hfpef', label: 'HFpEF (Heart Failure)' },
     { value: 'familialHypercholesterolemia', label: 'Familial Hypercholesterolemia' },
+    { value: 'severeHypertriglyceridemia', label: 'Severe Hypertriglyceridemia' },
+    { value: 'lpA', label: 'Elevated Lipoprotein(a)' },
   ]},
   { group: 'Endocrine', options: [
     { value: 'acromegaly', label: 'Acromegaly' },
     { value: 'cushings', label: "Cushing's Syndrome" },
     { value: 'congenitalAdrenalHyperplasia', label: 'Congenital Adrenal Hyperplasia (CAH)' },
     { value: 'congenitalHyperinsulinism', label: 'Congenital Hyperinsulinism' },
+    { value: 'hypoparathyroidism', label: 'Hypoparathyroidism' },
+    { value: 'adrenalInsufficiency', label: 'Adrenal Insufficiency' },
+    { value: 'ghDeficiency', label: 'Growth Hormone Deficiency' },
   ]},
   { group: 'Other Metabolic', options: [
     { value: 'gout', label: 'Gout / Hyperuricemia' },
@@ -2830,6 +2881,8 @@ export const cardiovascularIndicationOptions = [
     { value: 'dilatedCardiomyopathy', label: 'Dilated Cardiomyopathy (DCM)' },
     { value: 'transthyretinCardiomyopathy', label: 'Transthyretin Cardiomyopathy (ATTR-CM)' },
     { value: 'attrCardiomyopathy', label: 'ATTR Cardiomyopathy (Transthyretin)' },
+    { value: 'cardiacAmyloidosis', label: 'Cardiac Amyloidosis (AL/ATTR)' },
+    { value: 'arvc', label: 'Arrhythmogenic Right Ventricular Cardiomyopathy (ARVC)' },
   ]},
   { group: 'Acute Coronary & Stroke', options: [
     { value: 'acuteCoronarySyndrome', label: 'Acute Coronary Syndrome (ACS)' },
@@ -2862,6 +2915,8 @@ export const cardiovascularIndicationOptions = [
     { value: 'resistantHypertension', label: 'Resistant Hypertension' },
     { value: 'myocarditis', label: 'Myocarditis / Pericarditis' },
     { value: 'cardiacFibrosis', label: 'Cardiac Fibrosis' },
+    { value: 'chronicKidneyDiseaseCV', label: 'CKD-Associated Cardiovascular Risk' },
+    { value: 'cardiacSarcoidosis', label: 'Cardiac Sarcoidosis' },
   ]},
 ];
 
@@ -2913,6 +2968,8 @@ export const infectiousDiseaseIndicationOptions = [
     { value: 'hepatitisC', label: 'Hepatitis C (HCV Cure)' },
     { value: 'cmvInfection', label: 'CMV Infection' },
     { value: 'ebv', label: 'Epstein-Barr Virus (EBV)' },
+    { value: 'hpvTherapeutic', label: 'HPV (Therapeutic)' },
+    { value: 'hbvFunctionalCure', label: 'Hepatitis B Functional Cure' },
   ]},
   { group: 'Viral — Acute / Respiratory', options: [
     { value: 'rsv', label: 'RSV' },
@@ -2930,6 +2987,8 @@ export const infectiousDiseaseIndicationOptions = [
     { value: 'zika', label: 'Zika Virus' },
     { value: 'chikungunya', label: 'Chikungunya' },
     { value: 'lymeDisease', label: 'Lyme Disease' },
+    { value: 'ebolaMarburg', label: 'Ebola / Marburg Virus' },
+    { value: 'nipahVirus', label: 'Nipah Virus' },
   ]},
   { group: 'Bacterial', options: [
     { value: 'amrBacterial', label: 'AMR / Novel Antibiotics' },
@@ -2939,11 +2998,18 @@ export const infectiousDiseaseIndicationOptions = [
     { value: 'pneumococcal', label: 'Pneumococcal Disease' },
     { value: 'gonorrhea', label: 'Gonorrhea (Drug-Resistant)' },
     { value: 'syphilis', label: 'Syphilis' },
+    { value: 'groupAStrep', label: 'Group A Streptococcus (GAS)' },
+    { value: 'acinetobacter', label: 'Acinetobacter (Carbapenem-Resistant)' },
+    { value: 'pseudomonas', label: 'Pseudomonas (Drug-Resistant)' },
+    { value: 'ntm', label: 'Nontuberculous Mycobacteria (NTM)' },
   ]},
   { group: 'Fungal', options: [
     { value: 'fungalInfections', label: 'Invasive Fungal Infections' },
     { value: 'candidaInvasive', label: 'Invasive Candidiasis' },
     { value: 'aspergillosisInvasive', label: 'Invasive Aspergillosis' },
+    { value: 'mucormycosis', label: 'Mucormycosis' },
+    { value: 'candidaAuris', label: 'Candida auris' },
+    { value: 'coccidioidomycosis', label: 'Coccidioidomycosis (Valley Fever)' },
   ]},
 ];
 
@@ -3002,6 +3068,8 @@ export const ophthalmologyIndicationOptions = [
     { value: 'uveiticMacular', label: 'Uveitic Macular Edema' },
     { value: 'uveitisNonInfectious', label: 'Uveitis (Non-Infectious)' },
     { value: 'opticNeuritis', label: 'Optic Neuritis' },
+    { value: 'nmosdOptic', label: 'NMOSD-Associated Optic Neuritis' },
+    { value: 'macularTelangiectasia', label: 'Macular Telangiectasia Type 2' },
   ]},
   { group: 'Inherited Retinal Diseases', options: [
     { value: 'retinitisPigmentosa', label: 'Retinitis Pigmentosa' },
@@ -3011,6 +3079,9 @@ export const ophthalmologyIndicationOptions = [
     { value: 'choroideremia', label: 'Choroideremia' },
     { value: 'xLinkedRetinoschisis', label: 'X-Linked Retinoschisis' },
     { value: 'achromatopsia', label: 'Achromatopsia / Color Vision' },
+    { value: 'xlrp', label: 'X-Linked Retinitis Pigmentosa (XLRP)' },
+    { value: 'usherSyndrome', label: 'Usher Syndrome' },
+    { value: 'bestDisease', label: 'Best Vitelliform Macular Dystrophy' },
   ]},
   { group: 'Anterior Segment', options: [
     { value: 'glaucoma', label: 'Glaucoma' },
@@ -3025,6 +3096,7 @@ export const ophthalmologyIndicationOptions = [
     { value: 'fuchsDystrophy', label: "Fuchs' Endothelial Dystrophy" },
     { value: 'cornealDystrophy', label: 'Corneal Dystrophy (Other)' },
     { value: 'cornealNeovascularization', label: 'Corneal Neovascularization' },
+    { value: 'neurotrophicKeratitis', label: 'Neurotrophic Keratitis' },
   ]},
 ];
 
@@ -3082,6 +3154,9 @@ export const womensHealthIndicationOptions = [
     { value: 'menopause', label: 'Menopause / Vasomotor Symptoms' },
     { value: 'vaginalAtrophy', label: 'Vaginal Atrophy / GSM' },
     { value: 'vulvovaginalAtrophy', label: 'Vulvovaginal Atrophy' },
+    { value: 'menopauseCognitive', label: 'Menopause-Related Cognitive Decline' },
+    { value: 'menopauseOsteoporosis', label: 'Menopausal Osteoporosis' },
+    { value: 'femaleAndrogen', label: 'Female Androgen Deficiency / HSDD' },
   ]},
   { group: 'Maternal', options: [
     { value: 'postpartumDepression', label: 'Postpartum Depression' },
@@ -3092,6 +3167,8 @@ export const womensHealthIndicationOptions = [
     { value: 'gestationalDiabetes', label: 'Gestational Diabetes' },
     { value: 'hyperemesisGravidarum', label: 'Hyperemesis Gravidarum' },
     { value: 'placentaAccreta', label: 'Placenta Accreta Spectrum' },
+    { value: 'perinatalDepression', label: 'Perinatal Depression (Antepartum + Postpartum)' },
+    { value: 'recurrentPregnancyLoss', label: 'Recurrent Pregnancy Loss' },
   ]},
   { group: 'Menstrual & Uterine', options: [
     { value: 'menorrhagia', label: 'Menorrhagia (Heavy Menstrual Bleeding)' },
@@ -3102,6 +3179,8 @@ export const womensHealthIndicationOptions = [
   { group: 'Pelvic & Pain', options: [
     { value: 'vulvodynia', label: 'Vulvodynia / Chronic Pelvic Pain' },
     { value: 'cervicalDysplasia', label: 'Cervical Dysplasia / HPV Therapeutics' },
+    { value: 'adenomyosis', label: 'Adenomyosis' },
+    { value: 'interstitialCystitis', label: 'Interstitial Cystitis / Bladder Pain Syndrome' },
   ]},
   { group: 'Oncology & Prevention', options: [
     { value: 'breastCancerPrevention', label: 'Breast Cancer Prevention' },
@@ -3139,6 +3218,9 @@ export const rareDiseaseIndicationOptions = [
     { value: 'rareNeuro', label: 'Rare Neurological (ALS, Rett, Other)' },
     { value: 'marfanSyndrome', label: 'Marfan Syndrome' },
     { value: 'ehlersDanlos', label: 'Ehlers-Danlos Syndrome' },
+    { value: 'fshd', label: 'FSHD (Facioscapulohumeral Dystrophy)' },
+    { value: 'lgmdRare', label: 'Limb-Girdle Muscular Dystrophy (LGMD)' },
+    { value: 'myotonicDystrophyRare', label: 'Myotonic Dystrophy Type 1 (DM1)' },
   ]},
   { group: 'Lysosomal Storage', options: [
     { value: 'fabryDisease', label: 'Fabry Disease' },
@@ -3147,6 +3229,9 @@ export const rareDiseaseIndicationOptions = [
     { value: 'mucopolysaccharidosis', label: 'Mucopolysaccharidosis (MPS I/II/III)' },
     { value: 'niemannPickC', label: 'Niemann-Pick Disease Type C' },
     { value: 'cystinosis', label: 'Cystinosis' },
+    { value: 'krabbe', label: 'Krabbe Disease' },
+    { value: 'mld', label: 'Metachromatic Leukodystrophy (MLD)' },
+    { value: 'sanfilippo', label: 'Sanfilippo Syndrome (MPS III)' },
   ]},
   { group: 'Neurogenetic', options: [
     { value: 'neuronalCeroidLipofuscinosis', label: 'Batten Disease (NCL)' },
@@ -3156,6 +3241,9 @@ export const rareDiseaseIndicationOptions = [
     { value: 'praderWilli', label: 'Prader-Willi Syndrome' },
     { value: 'angelman', label: 'Angelman Syndrome' },
     { value: 'pkan', label: 'PKAN (Pantothenate Kinase-Associated Neurodegeneration)' },
+    { value: 'cdkl5Rare', label: 'CDKL5 Deficiency Disorder' },
+    { value: 'kcnq2', label: 'KCNQ2 Epileptic Encephalopathy' },
+    { value: 'aicardi', label: 'Aicardi-Goutieres Syndrome' },
   ]},
   { group: 'Genetic / Metabolic', options: [
     { value: 'cysticFibrosis', label: 'Cystic Fibrosis' },
@@ -3166,6 +3254,9 @@ export const rareDiseaseIndicationOptions = [
     { value: 'methylmalonicAcidemia', label: 'Methylmalonic Acidemia' },
     { value: 'propionicAcidemia', label: 'Propionic Acidemia' },
     { value: 'ornithineTranscarbamylaseDeficiency', label: 'OTC Deficiency' },
+    { value: 'aatdRare', label: 'Alpha-1 Antitrypsin Deficiency (Gene Therapy)' },
+    { value: 'leighSyndrome', label: 'Leigh Syndrome' },
+    { value: 'mmaRare', label: 'Methylmalonic/Propionic Acidemia (Gene Therapy)' },
   ]},
   { group: 'Hematologic Rare', options: [
     { value: 'hemophiliaA', label: 'Hemophilia A' },
@@ -3176,6 +3267,14 @@ export const rareDiseaseIndicationOptions = [
   ]},
   { group: 'Skeletal / Other', options: [
     { value: 'xlh', label: 'X-Linked Hypophosphatemia (XLH)' },
+    { value: 'achondroplasia', label: 'Achondroplasia' },
+    { value: 'fibrodysplasiaOssificans', label: 'Fibrodysplasia Ossificans Progressiva (FOP)' },
+    { value: 'osteogenesisImperfecta', label: 'Osteogenesis Imperfecta' },
+  ]},
+  { group: 'Pulmonary Rare', options: [
+    { value: 'lamRare', label: 'Lymphangioleiomyomatosis (LAM)' },
+    { value: 'pahRare', label: 'Pulmonary Arterial Hypertension (Rare/Pediatric)' },
+    { value: 'primaryCiliaryDyskinesia', label: 'Primary Ciliary Dyskinesia' },
   ]},
 ];
 
@@ -3237,13 +3336,18 @@ export const hematologyIndicationOptions = [
     { value: 'burkittLymphoma', label: 'Burkitt Lymphoma' },
     { value: 'primaryCnsLymphoma', label: 'Primary CNS Lymphoma' },
     { value: 'richtersTransformation', label: "Richter's Transformation" },
+    { value: 'mediastinalLargeBCell', label: 'Primary Mediastinal Large B-Cell Lymphoma' },
   ]},
   { group: 'T-Cell Malignancies', options: [
     { value: 'peripheralTCellLymphoma', label: 'Peripheral T-Cell Lymphoma (PTCL)' },
     { value: 'cutaneousTCellLymphoma', label: 'Cutaneous T-Cell Lymphoma (CTCL)' },
+    { value: 'adultTCellLeukemia', label: 'Adult T-Cell Leukemia/Lymphoma (ATLL)' },
+    { value: 'nkTCellLymphoma', label: 'NK/T-Cell Lymphoma' },
   ]},
   { group: 'Plasma Cell', options: [
     { value: 'myeloma', label: 'Multiple Myeloma' },
+    { value: 'smolderingMyeloma', label: 'Smoldering Multiple Myeloma' },
+    { value: 'alAmyloidosisHeme', label: 'AL Amyloidosis' },
   ]},
   { group: 'Myeloid Malignancies', options: [
     { value: 'aml', label: 'Acute Myeloid Leukemia (AML)' },
@@ -3256,6 +3360,8 @@ export const hematologyIndicationOptions = [
     { value: 'bpdcn', label: 'BPDCN (Blastic Plasmacytoid DC Neoplasm)' },
     { value: 'mastocytosis', label: 'Systemic Mastocytosis' },
     { value: 'hairyCellLeukemia', label: 'Hairy Cell Leukemia' },
+    { value: 'cmml', label: 'Chronic Myelomonocytic Leukemia (CMML)' },
+    { value: 'essentialThrombocythemia', label: 'Essential Thrombocythemia' },
   ]},
   { group: 'Non-Malignant', options: [
     { value: 'itp', label: 'Immune Thrombocytopenia (ITP)' },
@@ -3266,6 +3372,11 @@ export const hematologyIndicationOptions = [
     { value: 'thrombocytopeniaChemotherapy', label: 'Chemotherapy-Induced Thrombocytopenia' },
     { value: 'hemolyticAnemia', label: 'Autoimmune Hemolytic Anemia' },
     { value: 'paroxysomalNocturnalHemoglobinuria', label: 'PNH (Paroxysmal Nocturnal Hemoglobinuria)' },
+    { value: 'coldAgglutininHeme', label: 'Cold Agglutinin Disease' },
+    { value: 'sickleDisease', label: 'Sickle Cell Disease' },
+    { value: 'warmAutoimmune', label: 'Warm Autoimmune Hemolytic Anemia (wAIHA)' },
+    { value: 'pyruvateKinaseDeficiency', label: 'Pyruvate Kinase Deficiency' },
+    { value: 'diamondBlackfan', label: 'Diamond-Blackfan Anemia' },
   ]},
 ];
 
@@ -3320,6 +3431,8 @@ export const dermatologyIndicationOptions = [
     { value: 'hidradenitisSuppurativa', label: 'Hidradenitis Suppurativa' },
     { value: 'seborrheicDermatitis', label: 'Seborrheic Dermatitis' },
     { value: 'chronicHandEczema', label: 'Chronic Hand Eczema' },
+    { value: 'nummularDermatitis', label: 'Nummular Dermatitis' },
+    { value: 'contactDermatitisAllergic', label: 'Allergic Contact Dermatitis' },
   ]},
   { group: 'Psoriasis Subtypes', options: [
     { value: 'nailPsoriasis', label: 'Nail Psoriasis' },
