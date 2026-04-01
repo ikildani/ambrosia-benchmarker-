@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { blogPosts } from '@/lib/blogPosts';
+import { blogPosts, type BlogPost } from '@/lib/blogPosts';
+import { createServiceClient } from '@/lib/supabase/server';
 import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
@@ -57,7 +58,44 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Negotiation Strategy': 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
 };
 
-export default function BlogPage() {
+async function getAllPosts(): Promise<BlogPost[]> {
+  const staticPosts = [...blogPosts];
+  const staticSlugs = new Set(staticPosts.map(p => p.slug));
+
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('slug, title, meta_description, excerpt, category, published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false });
+
+    const dbPosts: BlogPost[] = (data || [])
+      .filter(d => !staticSlugs.has(d.slug))
+      .map(d => ({
+        slug: d.slug,
+        title: d.title,
+        metaDescription: d.meta_description || '',
+        excerpt: d.excerpt || d.meta_description || '',
+        author: 'Ambrosia Ventures',
+        publishedAt: d.published_at || '',
+        category: (d.category || 'Deal Intelligence').replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+        readTime: '5 min read',
+        content: '',
+        faqs: [],
+        relatedLinks: [],
+      }));
+
+    return [...staticPosts, ...dbPosts].sort(
+      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
+  } catch {
+    return staticPosts;
+  }
+}
+
+export default async function BlogPage() {
+  const allPosts = await getAllPosts();
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: BASE_URL },
     { name: 'Blog' },
@@ -115,7 +153,7 @@ export default function BlogPage() {
 
           {/* Blog Post Grid */}
           <div className="grid gap-8 md:grid-cols-2">
-            {blogPosts.map((post) => (
+            {allPosts.map((post) => (
               <article
                 key={post.slug}
                 className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-lg transition-all duration-200"
