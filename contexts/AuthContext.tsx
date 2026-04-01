@@ -361,7 +361,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user?.email) {
       const emailKey = `profile_cache_${user.email.toLowerCase().trim()}`;
       const profileToCache = {
-        id: user.id, // Persist user id across sign-outs
+        id: user.id,
         name: user.name,
         company: user.company,
         title: user.title,
@@ -379,15 +379,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_tier');
+    sessionStorage.clear();
 
-    // Sign out from Supabase if configured
+    // Sign out from Supabase — use scope: 'global' to invalidate all sessions
     if (isSupabaseConfigured()) {
       const supabase = createClient();
       if (supabase) {
         try {
-          const { error } = await supabase.auth.signOut();
+          const { error } = await supabase.auth.signOut({ scope: 'global' });
           if (error) {
             captureClientError(error, 'AuthContext', { context: 'Supabase signOut failed' });
+            // Force-clear Supabase cookies manually if signOut fails
+            document.cookie.split(';').forEach(c => {
+              const name = c.trim().split('=')[0];
+              if (name.startsWith('sb-') || name.includes('supabase')) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+              }
+            });
           }
         } catch (err) {
           captureClientError(err, 'AuthContext', { context: 'Supabase signOut threw exception' });
