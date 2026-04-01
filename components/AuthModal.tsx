@@ -93,17 +93,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         tabIndex={-1}
-        className="bg-white rounded-2xl shadow-2xl max-w-[420px] w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-slide-up"
+        className="bg-white dark:bg-[#0d1420] border dark:border-white/[0.06] rounded-2xl shadow-2xl max-w-[420px] w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-slide-up"
       >
         {/* Header */}
         <div className="px-8 pt-8 pb-2">
           <div className="flex items-center justify-between mb-6">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">AV</span>
-            </div>
+            <img src="/logo-white.png" alt="Ambrosia Ventures" className="h-7 w-auto hidden dark:block" />
+            <img src="/logo-color.png" alt="Ambrosia Ventures" className="h-7 w-auto dark:hidden" />
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all"
               aria-label="Close dialog"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,29 +111,29 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
             </button>
           </div>
 
-          <h3 id="auth-modal-title" className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h3 id="auth-modal-title" className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {getTitle()}
           </h3>
-          <p className="text-sm text-slate-500 mt-1">{getSubtitle()}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{getSubtitle()}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={actions.handleSubmit} className="px-8 pb-8 pt-4">
           {actions.error && (
-            <div role="alert" className="mb-5 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2.5">
+            <div role="alert" className="mb-5 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-start gap-2.5">
               <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-red-700 text-sm">{actions.error}</p>
+              <p className="text-red-700 dark:text-red-400 text-sm">{actions.error}</p>
             </div>
           )}
 
           {actions.success && (
-            <div role="status" className="mb-5 p-3 bg-teal-50 border border-teal-200 rounded-lg flex items-start gap-2.5">
-              <svg className="w-4 h-4 text-teal-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div role="status" className="mb-5 p-3 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 rounded-lg flex items-start gap-2.5">
+              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-teal-800 text-sm">{actions.success}</p>
+              <p className="text-teal-800 dark:text-teal-300 text-sm">{actions.success}</p>
             </div>
           )}
 
@@ -154,8 +153,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
             <button
               type="submit"
               disabled={actions.isLoading}
-              className="w-full mt-6 bg-slate-900 text-white font-semibold py-3 px-6 rounded-lg
-                       hover:bg-slate-800 transition-all duration-200
+              className="w-full mt-6 bg-teal-500 hover:bg-teal-400 text-[#0a0f1a] font-bold py-3 px-6 rounded-lg
+                       transition-all duration-200 shadow-lg shadow-teal-500/20 hover:shadow-teal-400/30
                        disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {actions.isLoading ? (
@@ -175,36 +174,36 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
           {/* Mode switching */}
           <div className="mt-5 text-center">
             {mode === 'signup' && (
-              <p className="text-slate-500 text-sm">
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signin')}
-                  className="text-slate-900 font-semibold hover:underline"
+                  className="text-slate-900 dark:text-teal-400 font-semibold hover:underline"
                 >
                   Sign in
                 </button>
               </p>
             )}
             {mode === 'signin' && (
-              <p className="text-slate-500 text-sm">
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signup')}
-                  className="text-slate-900 font-semibold hover:underline"
+                  className="text-slate-900 dark:text-teal-400 font-semibold hover:underline"
                 >
                   Create one
                 </button>
               </p>
             )}
             {mode === 'forgot-password' && (
-              <p className="text-slate-500 text-sm">
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Remember your password?{' '}
                 <button
                   type="button"
                   onClick={() => handleModeSwitch('signin')}
-                  className="text-slate-900 font-semibold hover:underline"
+                  className="text-slate-900 dark:text-teal-400 font-semibold hover:underline"
                 >
                   Sign in
                 </button>
@@ -213,10 +212,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
           </div>
 
           {mode === 'signup' && (
-            <p className="mt-5 text-[11px] text-slate-400 text-center leading-relaxed">
+            <p className="mt-5 text-[11px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
               By creating an account, you agree to our{' '}
-              <a href="/terms" className="underline hover:text-slate-600">Terms</a> and{' '}
-              <a href="/privacy" className="underline hover:text-slate-600">Privacy Policy</a>.
+              <a href="/terms" className="underline hover:text-slate-600 dark:hover:text-slate-300">Terms</a> and{' '}
+              <a href="/privacy" className="underline hover:text-slate-600 dark:hover:text-slate-300">Privacy Policy</a>.
             </p>
           )}
         </form>

@@ -24,7 +24,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
     <div className="space-y-5">
       {/* Full Name */}
       <div>
-        <label htmlFor="auth-name" className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label htmlFor="auth-name" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Full Name <span className="text-red-500" aria-hidden="true">*</span>
         </label>
         <input
@@ -37,9 +37,9 @@ export default function SignUpForm({ form }: SignUpFormProps) {
           aria-required="true"
           aria-invalid={touched.name && !!fieldErrors.name}
           aria-describedby={touched.name && fieldErrors.name ? 'name-error' : undefined}
-          className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+          className={`w-full px-4 py-3.5 bg-neutral-50 dark:bg-white/[0.04] border rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-slate-500
                    focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
-                   ${touched.name && fieldErrors.name ? 'border-red-400' : 'border-neutral-200'}`}
+                   ${touched.name && fieldErrors.name ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
         />
         {touched.name && fieldErrors.name && (
           <p id="name-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.name}</p>
@@ -48,7 +48,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
 
       {/* Email */}
       <div>
-        <label htmlFor="auth-email" className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label htmlFor="auth-email" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Work Email <span className="text-red-500" aria-hidden="true">*</span>
         </label>
         <input
@@ -61,9 +61,9 @@ export default function SignUpForm({ form }: SignUpFormProps) {
           aria-required="true"
           aria-invalid={touched.email && !!fieldErrors.email}
           aria-describedby={touched.email && fieldErrors.email ? 'email-error' : undefined}
-          className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+          className={`w-full px-4 py-3.5 bg-neutral-50 dark:bg-white/[0.04] border rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-slate-500
                    focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
-                   ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200'}`}
+                   ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
         />
         {touched.email && fieldErrors.email && (
           <p id="email-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.email}</p>
@@ -72,7 +72,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
 
       {/* Password */}
       <div>
-        <label htmlFor="auth-password" className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label htmlFor="auth-password" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Password <span className="text-red-500" aria-hidden="true">*</span>
         </label>
         <div className="relative">
@@ -91,7 +91,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
             ].filter(Boolean).join(' ') || undefined}
             className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
                      focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all pr-12
-                     ${touched.password && fieldErrors.password ? 'border-red-400' : 'border-neutral-200'}`}
+                     ${touched.password && fieldErrors.password ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
           />
           <button
             type="button"
@@ -120,7 +120,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
 
       {/* Confirm Password */}
       <div>
-        <label htmlFor="auth-confirm-password" className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label htmlFor="auth-confirm-password" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Confirm Password <span className="text-red-500">*</span>
         </label>
         <input
@@ -132,9 +132,9 @@ export default function SignUpForm({ form }: SignUpFormProps) {
           placeholder="••••••••"
           aria-invalid={touched.confirmPassword && !!fieldErrors.confirmPassword}
           aria-describedby={touched.confirmPassword && fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
-          className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+          className={`w-full px-4 py-3.5 bg-neutral-50 dark:bg-white/[0.04] border rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-slate-500
                    focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
-                   ${touched.confirmPassword && fieldErrors.confirmPassword ? 'border-red-400' : 'border-neutral-200'}`}
+                   ${touched.confirmPassword && fieldErrors.confirmPassword ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
         />
         {touched.confirmPassword && fieldErrors.confirmPassword && (
           <p id="confirm-password-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.confirmPassword}</p>
@@ -143,7 +143,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
 
       {/* Company */}
       <div>
-        <label className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Company <span className="text-neutral-400 font-normal">(optional)</span>
         </label>
         <input
@@ -151,7 +151,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
           value={company}
           onChange={(e) => setCompany(e.target.value)}
           placeholder="Biotech Inc."
-          className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
+          className="w-full px-4 py-3.5 bg-neutral-50 dark:bg-white/[0.04] border border-neutral-200 dark:border-white/[0.08] rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-slate-500
                    focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
         />
       </div>
@@ -165,7 +165,7 @@ export default function SignUpForm({ form }: SignUpFormProps) {
           onChange={(e) => setAcceptTerms(e.target.checked)}
           className="mt-1 w-4 h-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-500"
         />
-        <label htmlFor="terms" className="text-sm text-neutral-600">
+        <label htmlFor="terms" className="text-sm text-neutral-600 dark:text-slate-400">
           I agree to the{' '}
           <a href="/terms" target="_blank" className="text-teal-600 hover:text-teal-700 font-medium">
             Terms of Service

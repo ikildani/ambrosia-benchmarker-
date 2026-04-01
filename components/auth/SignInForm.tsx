@@ -25,7 +25,7 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
     <div className="space-y-5">
       {/* Email */}
       <div>
-        <label htmlFor="auth-email" className="block text-sm font-semibold text-neutral-700 mb-2">
+        <label htmlFor="auth-email" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
           Work Email <span className="text-red-500" aria-hidden="true">*</span>
         </label>
         <input
@@ -38,9 +38,9 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
           aria-required="true"
           aria-invalid={touched.email && !!fieldErrors.email}
           aria-describedby={touched.email && fieldErrors.email ? 'email-error' : undefined}
-          className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
+          className={`w-full px-4 py-3.5 bg-neutral-50 dark:bg-white/[0.04] border rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-slate-500
                    focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all
-                   ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200'}`}
+                   ${touched.email && fieldErrors.email ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
         />
         {touched.email && fieldErrors.email && (
           <p id="email-error" role="alert" className="mt-1.5 text-xs text-red-600">{fieldErrors.email}</p>
@@ -50,7 +50,7 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
       {/* Password field - hidden in magic link mode */}
       {!magicLinkMode && (
         <div>
-          <label htmlFor="auth-password" className="block text-sm font-semibold text-neutral-700 mb-2">
+          <label htmlFor="auth-password" className="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2">
             Password <span className="text-red-500" aria-hidden="true">*</span>
           </label>
           <div className="relative">
@@ -66,7 +66,7 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
               aria-describedby={touched.password && fieldErrors.password ? 'password-error' : undefined}
               className={`w-full px-4 py-3.5 bg-neutral-50 border rounded-xl text-neutral-900 placeholder-neutral-400
                        focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all pr-12
-                       ${touched.password && fieldErrors.password ? 'border-red-400' : 'border-neutral-200'}`}
+                       ${touched.password && fieldErrors.password ? 'border-red-400' : 'border-neutral-200 dark:border-white/[0.08]'}`}
             />
             <button
               type="button"
@@ -113,7 +113,7 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
           <button
             type="button"
             onClick={() => { setMode('forgot-password'); actions.clearMessages(); }}
-            className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+            className="text-sm text-neutral-500 dark:text-slate-400 hover:text-neutral-700 dark:hover:text-slate-300 transition-colors"
           >
             Forgot password?
           </button>
