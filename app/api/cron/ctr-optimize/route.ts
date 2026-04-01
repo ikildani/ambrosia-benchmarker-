@@ -82,7 +82,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Send Slack notification
-    if (results.length > 0 && process.env.SLACK_WEBHOOK_URL) {
+    const seoWebhook = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
+    if (results.length > 0 && seoWebhook) {
       const lines = results.map(
         (r) =>
           `*${r.pagePath}*\n` +
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
       );
 
       try {
-        await fetch(process.env.SLACK_WEBHOOK_URL, {
+        await fetch(seoWebhook, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

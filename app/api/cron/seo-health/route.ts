@@ -98,9 +98,9 @@ export async function GET(request: NextRequest) {
 // ── Slack notification ──────────────────────────────────────────────────────
 
 async function sendSlackAlert(issues: { url: string; status: number; error?: string }[]) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  const webhookUrl = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.warn('[seo-health] SLACK_WEBHOOK_URL not configured — skipping alert');
+    console.warn('[seo-health] SLACK_SEO_WEBHOOK_URL not configured — skipping alert');
     return;
   }
 

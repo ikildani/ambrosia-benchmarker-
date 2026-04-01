@@ -105,9 +105,9 @@ export async function publishBlogPost(
 // ── Slack notification ───────────────────────────────────────────────────────
 
 export async function notifySEOContentGenerated(slug: string, title: string): Promise<void> {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  const webhookUrl = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log('[Slack] SLACK_WEBHOOK_URL not configured, skipping notification');
+    console.log('[Slack] SLACK_SEO_WEBHOOK_URL not configured, skipping notification');
     return;
   }
 
