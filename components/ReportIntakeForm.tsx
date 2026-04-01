@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  ArrowRight, Lock, CheckCircle2, BarChart3,
+  ArrowRight, Lock, CheckCircle2, BarChart3, ChevronRight,
   Users, LineChart, Scale, Target, Loader2, Shield, Download,
   FileText, Sparkles, ArrowUpRight,
 } from 'lucide-react';
@@ -122,6 +122,17 @@ export default function ReportIntakeForm() {
   const [modality, setModality] = useState<Modality | ''>('');
   const [indication, setIndication] = useState<Indication | ''>('');
 
+  // Advanced parameters
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [territory, setTerritory] = useState('global');
+  const [competitivePosition, setCompetitivePosition] = useState('racing');
+  const [dataQuality, setDataQuality] = useState('promising');
+  const [combinationPotential, setCombinationPotential] = useState('some');
+  const [biomarker, setBiomarker] = useState('unselected');
+  const [breakthrough, setBreakthrough] = useState(false);
+  const [fastTrack, setFastTrack] = useState(false);
+  const [orphan, setOrphan] = useState(false);
+
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [calculationInput, setCalculationInput] = useState<CalculationInput | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -163,14 +174,14 @@ export default function ReportIntakeForm() {
         dealType: dealType as DealType,
         modality: modality as Modality,
         indication: indication as Indication,
-        territory: 'global',
-        biomarker: 'unselected',
+        territory,
+        biomarker: biomarker as any,
         lineOfTherapy: '2L',
         treatmentApproach: 'symptomatic',
-        combinationPotential: 'some',
-        competitivePosition: 'racing',
-        dataQuality: 'promising',
-        regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+        combinationPotential,
+        competitivePosition,
+        dataQuality,
+        regulatoryDesignations: { breakthrough, fastTrack, orphan, prime: false },
       };
 
       try {
@@ -182,7 +193,7 @@ export default function ReportIntakeForm() {
       }
       setIsCalculating(false);
     }, 800);
-  }, [ta, phase, dealType, modality, indication, isReady]);
+  }, [ta, phase, dealType, modality, indication, isReady, territory, competitivePosition, dataQuality, combinationPotential, biomarker, breakthrough, fastTrack, orphan]);
 
   // Scroll to results
   useEffect(() => {
@@ -300,6 +311,109 @@ export default function ReportIntakeForm() {
                 </div>
               </div>
 
+              {/* Advanced Parameters Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-xs font-medium text-teal-400/60 hover:text-teal-400 transition-colors mb-4"
+              >
+                <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
+                {showAdvanced ? 'Hide' : 'Show'} Advanced Parameters
+              </button>
+
+              {showAdvanced && (
+                <div className="space-y-4 mb-6 p-4 bg-white/[0.02] border border-white/[0.04] rounded-xl">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Territory */}
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Territory</label>
+                      <select value={territory} onChange={e => setTerritory(e.target.value)}
+                        className="w-full px-3 py-2.5 text-xs bg-[#0c1220] border border-white/[0.08] rounded-lg text-white focus:border-teal-500/50 focus:outline-none">
+                        <option value="global">Global</option>
+                        <option value="us">US</option>
+                        <option value="eu5">EU5</option>
+                        <option value="japan">Japan</option>
+                        <option value="china">China</option>
+                        <option value="ex_us">Ex-US</option>
+                      </select>
+                    </div>
+
+                    {/* Competitive Position */}
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Competitive Position</label>
+                      <select value={competitivePosition} onChange={e => setCompetitivePosition(e.target.value)}
+                        className="w-full px-3 py-2.5 text-xs bg-[#0c1220] border border-white/[0.08] rounded-lg text-white focus:border-teal-500/50 focus:outline-none">
+                        <option value="firstInClass">First-in-Class</option>
+                        <option value="firstToPivotal">First-to-Pivotal</option>
+                        <option value="bestInClass">Best-in-Class</option>
+                        <option value="racing">Racing (Default)</option>
+                        <option value="behind">Behind</option>
+                        <option value="crowded">Crowded</option>
+                      </select>
+                    </div>
+
+                    {/* Data Quality */}
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Data Quality</label>
+                      <select value={dataQuality} onChange={e => setDataQuality(e.target.value)}
+                        className="w-full px-3 py-2.5 text-xs bg-[#0c1220] border border-white/[0.08] rounded-lg text-white focus:border-teal-500/50 focus:outline-none">
+                        <option value="pivotalReady">Pivotal Ready</option>
+                        <option value="strongPhase2">Strong Phase 2</option>
+                        <option value="promising">Promising (Default)</option>
+                        <option value="mixed">Mixed</option>
+                        <option value="limited">Limited</option>
+                      </select>
+                    </div>
+
+                    {/* Combination Potential */}
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Combination Potential</label>
+                      <select value={combinationPotential} onChange={e => setCombinationPotential(e.target.value)}
+                        className="w-full px-3 py-2.5 text-xs bg-[#0c1220] border border-white/[0.08] rounded-lg text-white focus:border-teal-500/50 focus:outline-none">
+                        <option value="strong">Strong</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="some">Some (Default)</option>
+                        <option value="limited">Limited</option>
+                      </select>
+                    </div>
+
+                    {/* Biomarker */}
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Biomarker Status</label>
+                      <select value={biomarker} onChange={e => setBiomarker(e.target.value)}
+                        className="w-full px-3 py-2.5 text-xs bg-[#0c1220] border border-white/[0.08] rounded-lg text-white focus:border-teal-500/50 focus:outline-none">
+                        <option value="unselected">Unselected (Default)</option>
+                        <option value="validated">Validated Biomarker</option>
+                        <option value="exploratory">Exploratory Biomarker</option>
+                        <option value="companion_dx">Companion Diagnostic</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Regulatory Designations */}
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Regulatory Designations</label>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { key: 'breakthrough', label: 'Breakthrough Therapy', value: breakthrough, set: setBreakthrough },
+                        { key: 'fastTrack', label: 'Fast Track', value: fastTrack, set: setFastTrack },
+                        { key: 'orphan', label: 'Orphan Drug', value: orphan, set: setOrphan },
+                      ].map(d => (
+                        <label key={d.key} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={d.value}
+                            onChange={e => d.set(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-white/20 bg-transparent text-teal-500 focus:ring-teal-500/20"
+                          />
+                          <span className="text-xs text-slate-400">{d.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={handleGenerate}
                 disabled={!isReady || isCalculating}
@@ -370,7 +484,7 @@ export default function ReportIntakeForm() {
             <div className="bg-[#0c1220]/80 border border-white/[0.06] rounded-xl p-5">
               <div className="text-[9px] font-bold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Royalty Range</div>
               <div className="font-mono text-2xl font-extrabold text-white tracking-tight mb-1">
-                {(royalties.base.low * 100).toFixed(0)}–{(royalties.highTier.high * 100).toFixed(0)}%
+                {royalties.base.low.toFixed(1)}–{royalties.highTier.high.toFixed(1)}%
               </div>
               <div className="text-[11px] text-slate-500 mb-3">
                 Tiered: base / mid / high thresholds
