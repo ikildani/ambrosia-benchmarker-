@@ -21,6 +21,7 @@ interface ResultsHeaderProps {
   onCompare?: () => void;
   hasHistory?: boolean;
   onCopyResults?: () => void;
+  onBuyReport?: () => void;
 }
 
 function ResultsHeaderInner({
@@ -39,6 +40,7 @@ function ResultsHeaderInner({
   onCompare,
   hasHistory,
   onCopyResults,
+  onBuyReport,
 }: ResultsHeaderProps) {
   const [copyLabel, setCopyLabel] = useState('Copy');
 
@@ -86,13 +88,13 @@ function ResultsHeaderInner({
               </button>
             ) : (
               <button
-                onClick={onFreePDFClick}
+                onClick={onBuyReport}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span>Download Report</span>
+                <span>Get Full Report — $149</span>
               </button>
             )}
           </div>
@@ -138,13 +140,13 @@ function ResultsHeaderInner({
               </button>
             ) : (
               <button
-                onClick={onFreePDFClick}
+                onClick={onBuyReport}
                 className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-glow"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span>Download Report</span>
+                <span>Get Full Report — $149</span>
               </button>
             )}
           </div>

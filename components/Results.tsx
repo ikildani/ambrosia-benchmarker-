@@ -955,6 +955,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         onCompare={() => setShowHistoryPicker(true)}
         hasHistory={hasHistory}
         onCopyResults={handleCopyResults}
+        onBuyReport={onBuyReport}
       />
 
       {/* Email confirmed bar */}
