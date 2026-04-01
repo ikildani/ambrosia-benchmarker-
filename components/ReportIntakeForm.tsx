@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  ArrowRight, ChevronDown, Lock, CheckCircle2, BarChart3,
+  ArrowRight, Lock, CheckCircle2, BarChart3,
   Users, LineChart, Scale, Target, Loader2, Shield, Download,
   FileText, Sparkles, ArrowUpRight,
 } from 'lucide-react';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import SearchableCombobox, { type GroupedOption } from '@/components/calculator/SearchableCombobox';
 import {
   calculateDealTerms,
   formatCurrency,
@@ -14,6 +15,28 @@ import {
   dealTypeOptions,
   modalityOptions,
   indicationOptions,
+  neurologyModalityOptions,
+  neurologyIndicationOptions,
+  immunologyModalityOptions,
+  immunologyIndicationOptions,
+  metabolicModalityOptions,
+  metabolicIndicationOptions,
+  cardiovascularModalityOptions,
+  cardiovascularIndicationOptions,
+  infectiousDiseaseModalityOptions,
+  infectiousDiseaseIndicationOptions,
+  ophthalmologyModalityOptions,
+  ophthalmologyIndicationOptions,
+  womensHealthModalityOptions,
+  womensHealthIndicationOptions,
+  rareDiseaseModalityOptions,
+  rareDiseaseIndicationOptions,
+  hematologyModalityOptions,
+  hematologyIndicationOptions,
+  dermatologyModalityOptions,
+  dermatologyIndicationOptions,
+  gastroenterologyModalityOptions,
+  gastroenterologyIndicationOptions,
   type CalculationInput,
   type CalculationResult,
   type Phase,
@@ -23,21 +46,62 @@ import {
   type TherapeuticArea,
 } from '@/lib/calculations';
 
-/* ─── Constants ────────────────────────────────────────────────────── */
+/* ─── TA → option maps (same as Calculator.tsx) ────────────────────── */
 
-const TA_OPTIONS = [
-  { value: 'oncology', label: 'Oncology' },
-  { value: 'neurology', label: 'Neurology' },
-  { value: 'immunology', label: 'Immunology' },
-  { value: 'rareDisease', label: 'Rare Disease' },
-  { value: 'cardiovascular', label: 'Cardiovascular' },
-  { value: 'metabolic', label: 'Metabolic' },
-  { value: 'hematology', label: 'Hematology' },
-  { value: 'ophthalmology', label: 'Ophthalmology' },
-  { value: 'dermatology', label: 'Dermatology' },
-  { value: 'infectiousDisease', label: 'Infectious Disease' },
-  { value: 'gastroenterology', label: 'Gastroenterology' },
-  { value: 'womensHealth', label: "Women's Health" },
+const modalityMap: Record<TherapeuticArea, GroupedOption[]> = {
+  oncology: modalityOptions,
+  neurology: neurologyModalityOptions,
+  immunology: immunologyModalityOptions,
+  metabolic: metabolicModalityOptions,
+  cardiovascular: cardiovascularModalityOptions,
+  infectiousDisease: infectiousDiseaseModalityOptions,
+  ophthalmology: ophthalmologyModalityOptions,
+  womensHealth: womensHealthModalityOptions,
+  rareDisease: rareDiseaseModalityOptions,
+  hematology: hematologyModalityOptions,
+  dermatology: dermatologyModalityOptions,
+  gastroenterology: gastroenterologyModalityOptions,
+};
+
+const indicationMap: Record<TherapeuticArea, GroupedOption[]> = {
+  oncology: indicationOptions,
+  neurology: neurologyIndicationOptions,
+  immunology: immunologyIndicationOptions,
+  metabolic: metabolicIndicationOptions,
+  cardiovascular: cardiovascularIndicationOptions,
+  infectiousDisease: infectiousDiseaseIndicationOptions,
+  ophthalmology: ophthalmologyIndicationOptions,
+  womensHealth: womensHealthIndicationOptions,
+  rareDisease: rareDiseaseIndicationOptions,
+  hematology: hematologyIndicationOptions,
+  dermatology: dermatologyIndicationOptions,
+  gastroenterology: gastroenterologyIndicationOptions,
+};
+
+/* Wrap flat option arrays as GroupedOption[] for SearchableCombobox */
+const TA_GROUPS: GroupedOption[] = [
+  { group: 'Therapeutic Areas', options: [
+    { value: 'oncology', label: 'Oncology' },
+    { value: 'neurology', label: 'Neurology' },
+    { value: 'immunology', label: 'Immunology' },
+    { value: 'rareDisease', label: 'Rare Disease' },
+    { value: 'cardiovascular', label: 'Cardiovascular' },
+    { value: 'metabolic', label: 'Metabolic' },
+    { value: 'hematology', label: 'Hematology' },
+    { value: 'ophthalmology', label: 'Ophthalmology' },
+    { value: 'dermatology', label: 'Dermatology' },
+    { value: 'infectiousDisease', label: 'Infectious Disease' },
+    { value: 'gastroenterology', label: 'Gastroenterology' },
+    { value: 'womensHealth', label: "Women's Health" },
+  ]},
+];
+
+const PHASE_GROUPS: GroupedOption[] = [
+  { group: 'Development Phase', options: phaseOptions },
+];
+
+const DEAL_TYPE_GROUPS: GroupedOption[] = [
+  { group: 'Deal Type', options: dealTypeOptions },
 ];
 
 const LOCKED_SECTIONS = [
@@ -49,58 +113,14 @@ const LOCKED_SECTIONS = [
   { icon: FileText, label: 'PDF + Excel Export', desc: 'Board-ready formatting' },
 ];
 
-/* ─── Select Field ─────────────────────────────────────────────────── */
-
-function SelectField({
-  label, value, onChange, options, placeholder, grouped,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-  placeholder: string;
-  grouped?: { group: string; options: { value: string; label: string }[] }[];
-}) {
-  return (
-    <div>
-      <label className="block text-[11px] font-semibold text-slate-400 tracking-wide uppercase mb-2">
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-teal-500/30 focus:ring-2 focus:ring-teal-500/10 transition-all cursor-pointer hover:border-white/[0.12] pr-10"
-        >
-          <option value="" className="bg-[#0c1220] text-slate-400">{placeholder}</option>
-          {grouped ? (
-            grouped.map((g) => (
-              <optgroup key={g.group} label={g.group} className="bg-[#0c1220] text-white">
-                {g.options.map((o) => (
-                  <option key={o.value} value={o.value} className="bg-[#0c1220]">{o.label}</option>
-                ))}
-              </optgroup>
-            ))
-          ) : (
-            options.map((o) => (
-              <option key={o.value} value={o.value} className="bg-[#0c1220]">{o.label}</option>
-            ))
-          )}
-        </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-      </div>
-    </div>
-  );
-}
-
 /* ─── Main Component ───────────────────────────────────────────────── */
 
 export default function ReportIntakeForm() {
-  const [ta, setTA] = useState('');
-  const [phase, setPhase] = useState('');
-  const [dealType, setDealType] = useState('');
-  const [modality, setModality] = useState('');
-  const [indication, setIndication] = useState('');
+  const [ta, setTA] = useState<TherapeuticArea | ''>('');
+  const [phase, setPhase] = useState<Phase | ''>('');
+  const [dealType, setDealType] = useState<DealType | ''>('');
+  const [modality, setModality] = useState<Modality | ''>('');
+  const [indication, setIndication] = useState<Indication | ''>('');
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [calculationInput, setCalculationInput] = useState<CalculationInput | null>(null);
@@ -110,18 +130,32 @@ export default function ReportIntakeForm() {
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const flatModalities = useMemo(() => modalityOptions.flatMap((g) => g.options), []);
-  const flatIndications = useMemo(() => indicationOptions.flatMap((g) => g.options), []);
+  // TA-filtered options
+  const currentModalityOptions = useMemo(
+    () => ta ? (modalityMap[ta] || modalityOptions) : modalityOptions,
+    [ta]
+  );
+  const currentIndicationOptions = useMemo(
+    () => ta ? (indicationMap[ta] || indicationOptions) : indicationOptions,
+    [ta]
+  );
+
+  // Reset modality/indication when TA changes
+  const handleTAChange = useCallback((newTA: string) => {
+    setTA(newTA as TherapeuticArea);
+    setModality('');
+    setIndication('');
+    setResult(null);
+  }, []);
 
   const isReady = ta && phase && dealType && modality && indication;
 
   // Run calculation
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     if (!isReady) return;
     setIsCalculating(true);
     setResult(null);
 
-    // Small delay for visual feedback
     setTimeout(() => {
       const input: CalculationInput = {
         therapeuticArea: ta as TherapeuticArea,
@@ -144,13 +178,13 @@ export default function ReportIntakeForm() {
         setResult(calcResult);
         setCalculationInput(input);
       } catch {
-        // Fallback — shouldn't happen with valid inputs
+        // Fallback
       }
       setIsCalculating(false);
     }, 800);
-  };
+  }, [ta, phase, dealType, modality, indication, isReady]);
 
-  // Scroll to results when they appear
+  // Scroll to results
   useEffect(() => {
     if (result && resultsRef.current) {
       setTimeout(() => {
@@ -159,7 +193,7 @@ export default function ReportIntakeForm() {
     }
   }, [result]);
 
-  // Checkout
+  // Stripe checkout
   const handleCheckout = async () => {
     if (!result || !calculationInput) return;
     setCheckoutLoading(true);
@@ -171,13 +205,9 @@ export default function ReportIntakeForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           purchaseType: 'report',
-          calculationData: {
-            inputs: calculationInput,
-            results: result,
-          },
+          calculationData: { inputs: calculationInput, results: result },
         }),
       });
-
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
@@ -191,7 +221,6 @@ export default function ReportIntakeForm() {
     }
   };
 
-  // Reset to edit
   const handleEdit = () => {
     setResult(null);
     setCalculationInput(null);
@@ -222,11 +251,8 @@ export default function ReportIntakeForm() {
               </p>
             </div>
             {result && (
-              <button
-                onClick={handleEdit}
-                className="text-xs font-medium text-teal-400/70 hover:text-teal-400 transition-colors"
-              >
-                Edit
+              <button onClick={handleEdit} className="text-xs font-medium text-teal-400/70 hover:text-teal-400 transition-colors">
+                Edit parameters
               </button>
             )}
           </div>
@@ -235,12 +261,42 @@ export default function ReportIntakeForm() {
           {!result && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <SelectField label="Therapeutic Area" value={ta} onChange={setTA} options={TA_OPTIONS} placeholder="Select area..." />
-                <SelectField label="Development Phase" value={phase} onChange={setPhase} options={phaseOptions} placeholder="Select phase..." />
-                <SelectField label="Deal Type" value={dealType} onChange={setDealType} options={dealTypeOptions} placeholder="Select type..." />
-                <SelectField label="Modality" value={modality} onChange={setModality} options={flatModalities} placeholder="Select modality..." grouped={modalityOptions} />
+                <SearchableCombobox
+                  id="report-ta"
+                  label="Therapeutic Area"
+                  groups={TA_GROUPS}
+                  value={ta}
+                  onChange={handleTAChange}
+                />
+                <SearchableCombobox
+                  id="report-phase"
+                  label="Development Phase"
+                  groups={PHASE_GROUPS}
+                  value={phase}
+                  onChange={(v) => setPhase(v as Phase)}
+                />
+                <SearchableCombobox
+                  id="report-dealtype"
+                  label="Deal Type"
+                  groups={DEAL_TYPE_GROUPS}
+                  value={dealType}
+                  onChange={(v) => setDealType(v as DealType)}
+                />
+                <SearchableCombobox
+                  id="report-modality"
+                  label="Modality"
+                  groups={currentModalityOptions}
+                  value={modality}
+                  onChange={(v) => setModality(v as Modality)}
+                />
                 <div className="sm:col-span-2">
-                  <SelectField label="Indication" value={indication} onChange={setIndication} options={flatIndications} placeholder="Select indication..." grouped={indicationOptions} />
+                  <SearchableCombobox
+                    id="report-indication"
+                    label="Indication"
+                    groups={currentIndicationOptions}
+                    value={indication}
+                    onChange={(v) => setIndication(v as Indication)}
+                  />
                 </div>
               </div>
 
