@@ -20,7 +20,7 @@ import {
 
 export const maxDuration = 120;
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   // 1. Auth

@@ -15,7 +15,7 @@ import { GSCClient } from '@/lib/seo/gsc-client';
 
 export const maxDuration = 120;
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   // 1. Auth
   const authHeader = request.headers.get('authorization');
   const token = authHeader?.replace('Bearer ', '') || '';

@@ -129,7 +129,7 @@ function parseJsonResponse<T>(text: string): T {
 
 // ── Route handler ────────────────────────────────────────────────────────────
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   // 1. Auth

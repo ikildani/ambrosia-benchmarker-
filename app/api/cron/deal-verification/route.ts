@@ -41,7 +41,7 @@ async function postToSlack(attachments: object[], text: string): Promise<void> {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   // Auth: timing-safe compare against CRON_SECRET
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
