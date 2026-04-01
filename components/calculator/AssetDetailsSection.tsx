@@ -109,7 +109,56 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
     dermatology: dermatologyIndicationOptions,
     gastroenterology: gastroenterologyIndicationOptions,
   };
-  const indicationOptionsList = indicationMap[therapeuticArea] || indicationOptions;
+  const baseIndicationOptions = indicationMap[therapeuticArea] || indicationOptions;
+
+  // Reorder indications to surface modality-relevant ones first
+  const indicationOptionsList = useMemo(() => {
+    if (!modality) return baseIndicationOptions;
+
+    // Modality → indication affinity: indications where this modality is most commonly developed
+    const MODALITY_AFFINITY: Record<string, string[]> = {
+      // ADCs target solid tumors with surface antigens
+      adc: ['breast_her2', 'breast_tnbc', 'lung_nsclc', 'ovarian', 'gastric', 'bladder', 'cervical', 'endometrial', 'colorectal', 'dlbcl', 'myeloma'],
+      // Bispecifics target hematologic + solid tumors
+      bispecific: ['dlbcl', 'myeloma', 'all', 'lung_nsclc', 'breast_her2', 'prostate', 'colorectal', 'aml'],
+      // CAR-T primarily hematologic
+      carT_cd19: ['dlbcl', 'all', 'follicular', 'mantleCell', 'cll', 'marginalZone'],
+      carT_bcma: ['myeloma'],
+      carT_other: ['aml', 'myeloma', 'dlbcl', 'all', 'gbm', 'mesothelioma'],
+      // Gene therapy for monogenic/rare
+      geneTherapy_aav: ['sma', 'dmd', 'hemophilia', 'retinitis_pigmentosa', 'fabry', 'huntingtons'],
+      geneTherapy_lentiviral: ['sickleCell', 'betaThalassemia', 'all', 'aml'],
+      geneTherapy_other: ['sma', 'dmd', 'cysticFibrosis', 'hemophilia'],
+      // Radiopharmaceutical
+      radiopharmaceutical: ['prostate', 'neuroendocrine', 'thyroid', 'liver', 'neuroblastoma'],
+      // Small molecule — broad, but highlight common targets
+      smallMolecule: ['lung_nsclc', 'breast_hr', 'melanoma', 'renal', 'aml', 'cml', 'myeloma', 'mds', 'colorectal'],
+      // mAb — checkpoint, targeted
+      mab: ['lung_nsclc', 'melanoma', 'renal', 'bladder', 'headNeck', 'liver', 'gastric', 'hodgkins', 'dlbcl'],
+      // RNA-based
+      oligonucleotide: ['sma', 'huntingtons', 'als', 'dmd', 'hepatitisB', 'nash'],
+      mrna: ['melanoma', 'lung_nsclc', 'pancreatic', 'influenza', 'rsv'],
+      sirna: ['nash', 'hepatitisB', 'als', 'hereditary_attr'],
+      // Cell therapy beyond CAR-T
+      cellTherapy_other: ['type1Diabetes', 'myeloma', 'aml', 'parkinsons'],
+      // Vaccine
+      vaccine: ['lung_nsclc', 'melanoma', 'cervical', 'influenza', 'rsv', 'hepatitisB'],
+    };
+
+    const affinityList = MODALITY_AFFINITY[modality] || [];
+    if (affinityList.length === 0) return baseIndicationOptions;
+
+    const affinitySet = new Set(affinityList);
+
+    // Clone and reorder: put affinity indications first within each group
+    return baseIndicationOptions.map(group => ({
+      ...group,
+      options: [
+        ...group.options.filter(opt => affinitySet.has(opt.value)),
+        ...group.options.filter(opt => !affinitySet.has(opt.value)),
+      ],
+    }));
+  }, [baseIndicationOptions, modality]);
 
   // Filter phases based on selected deal type
   const filteredPhaseOptions = useMemo(
