@@ -937,3 +937,61 @@ export interface AcquisitionLikelihood {
   /** Overall narrative summarizing the acquisition likelihood assessment */
   narrative: string;
 }
+
+// ---------------------------------------------------------------------------
+// Deal Valuation Waterfall (Institutional Grade)
+// ---------------------------------------------------------------------------
+
+export interface DealWaterfallStep {
+  label: string;
+  adjustment: number;
+  runningTotal: number;
+  rationale: string;
+}
+
+export interface DealWaterfall {
+  steps: DealWaterfallStep[];
+  upfrontPayment: { low: number; median: number; high: number };
+  developmentMilestones: { low: number; median: number; high: number };
+  commercialMilestones: { low: number; median: number; high: number };
+  royaltyRate: { low: number; median: number; high: number };
+  totalDealValue: { low: number; median: number; high: number };
+  narrative: string;
+}
+
+// ---------------------------------------------------------------------------
+// Scenario Comparison (Bear/Base/Bull)
+// ---------------------------------------------------------------------------
+
+export interface ScenarioComparisonResult {
+  bear: { rnpv: number; impliedDeal: number; cumulativePoS: number; yearsToMarket: number; assumptions: string[] };
+  base: { rnpv: number; impliedDeal: number; cumulativePoS: number; yearsToMarket: number; assumptions: string[] };
+  bull: { rnpv: number; impliedDeal: number; cumulativePoS: number; yearsToMarket: number; assumptions: string[] };
+  expectedValue: number;
+  bearWeight: number;
+  baseWeight: number;
+  bullWeight: number;
+  narrative: string;
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle Extension Modeling
+// ---------------------------------------------------------------------------
+
+export interface LifecycleExtension {
+  type: 'labelExpansion' | 'pediatricExclusivity' | 'combinationApproval';
+  probability: number;
+  incrementalPeakSalesPercent: number;
+  lagYearsFromApproval: number;
+  rampYears: number;
+  additionalExclusivityYears: number;
+  narrative: string;
+}
+
+export interface LifecycleExtensionResult {
+  extensions: LifecycleExtension[];
+  baseRNPV: number;
+  extendedRNPV: number;
+  incrementalValue: number;
+  incrementalPercent: number;
+}

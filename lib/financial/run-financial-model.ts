@@ -17,6 +17,9 @@ import type {
   MarketSizeEstimate,
   FXSensitivity,
   ScenarioResult,
+  DealWaterfall,
+  ScenarioComparisonResult,
+  LifecycleExtensionResult,
 } from './types';
 import { calculateRNPV } from './rnpv-engine';
 import { runMonteCarlo } from './monte-carlo';
@@ -24,6 +27,9 @@ import { estimateMarketSize, getEpidemiologyData } from './market-size';
 import { calculateFXSensitivity } from './fx-sensitivity';
 import { runAllScenarios, getDefensiveAnalysis } from './scenario-planner';
 import { DEFAULT_DISCOUNT_RATES, TERRITORY_RISK_PREMIUM } from './discount-rates';
+import { buildDealWaterfall, generateScenarioComparison, calculateLifecycleExtensions } from './institutional-upgrades';
+import { calculateCompetitiveDynamics, calculateRealOptions } from './advanced-upgrades';
+import type { CompetitiveDynamicsResult, RealOptionsResult } from './advanced-upgrades';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -39,6 +45,12 @@ export interface FinancialModelResult {
     walkAwayThreshold: number;
     narrative: string;
   };
+  // Institutional-grade upgrades
+  dealWaterfall: DealWaterfall;
+  scenarioComparison: ScenarioComparisonResult;
+  lifecycleExtensions: LifecycleExtensionResult;
+  competitiveDynamics: CompetitiveDynamicsResult;
+  realOptions: RealOptionsResult;
 }
 
 /**
@@ -203,6 +215,21 @@ export function runFinancialModel(
   const scenarios = runAllScenarios(rnpvInput, rnpv);
   const defensiveAnalysis = getDefensiveAnalysis(rnpvInput, rnpv, scenarios);
 
+  // Step 6: Deal Valuation Waterfall — translates rNPV → buyer economics
+  const dealWaterfall = buildDealWaterfall(rnpvInput, rnpv);
+
+  // Step 7: Bear/Base/Bull Scenario Comparison
+  const scenarioComparison = generateScenarioComparison(rnpvInput, rnpv, calculateRNPV);
+
+  // Step 8: Lifecycle Extension Modeling — label expansion, pediatric exclusivity, combos
+  const lifecycleExtensions = calculateLifecycleExtensions(rnpvInput, rnpv);
+
+  // Step 9: Competitive Dynamics — time-varying market share erosion
+  const competitiveDynamics = calculateCompetitiveDynamics(rnpvInput, rnpv);
+
+  // Step 10: Real Options Overlay — compound optionality via binomial lattice
+  const realOptions = calculateRealOptions(rnpvInput, rnpv, monteCarlo);
+
   return {
     rnpv,
     monteCarlo,
@@ -210,5 +237,10 @@ export function runFinancialModel(
     fxSensitivity,
     scenarios,
     defensiveAnalysis,
+    dealWaterfall,
+    scenarioComparison,
+    lifecycleExtensions,
+    competitiveDynamics,
+    realOptions,
   };
 }
