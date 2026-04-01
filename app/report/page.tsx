@@ -9,6 +9,7 @@ import {
   Globe, Microscope, FlaskConical, Brain,
 } from 'lucide-react';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
   title: 'Deal Intelligence Report — $149 | Ambrosia Ventures',
@@ -171,49 +172,43 @@ export default function ReportPage() {
           </nav>
 
           {/* Hero content */}
-          <div className="max-w-6xl mx-auto px-6 pt-16 sm:pt-24 pb-28 sm:pb-36">
-            <div className="max-w-3xl">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-                <span className="text-[11px] font-bold text-teal-400/90 tracking-[0.12em] uppercase">
-                  {DEAL_STATS.TOTAL_DEALS} Verified Transactions
-                </span>
-              </div>
+          <div className="max-w-6xl mx-auto px-6 pt-16 sm:pt-20 pb-24 sm:pb-28">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+              {/* Left: copy */}
+              <div>
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+                  <span className="text-[11px] font-bold text-teal-400/90 tracking-[0.12em] uppercase">
+                    {DEAL_STATS.TOTAL_DEALS} Verified Transactions
+                  </span>
+                </div>
 
-              {/* Headline */}
-              <h1 className="font-display text-[2.75rem] sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.035em] leading-[1.02] text-white mb-6">
-                Deal intelligence<br />
-                <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
-                  that closes deals.
-                </span>
-              </h1>
+                {/* Headline */}
+                <h1 className="font-display text-[2.75rem] sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.035em] leading-[1.02] text-white mb-6">
+                  Deal intelligence<br />
+                  <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+                    that closes deals.
+                  </span>
+                </h1>
 
-              {/* Sub */}
-              <p className="text-lg sm:text-xl text-slate-400 max-w-xl mb-10 leading-relaxed font-light">
-                Comparable transactions, partner matching, sensitivity analysis, and a negotiation
-                playbook — generated in 60 seconds from {DEAL_STATS.TOTAL_DEALS} real SEC filings.
-              </p>
+                {/* Sub */}
+                <p className="text-base sm:text-lg text-slate-400 max-w-lg mb-8 leading-relaxed font-light">
+                  Comparable transactions, partner matching, sensitivity analysis, and a negotiation
+                  playbook — generated in 60 seconds from {DEAL_STATS.TOTAL_DEALS} real SEC filings.
+                </p>
 
-              {/* CTA cluster */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-12">
-                <Link
-                  href="/calculator"
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-400 hover:to-teal-300 text-[#080c16] font-bold rounded-xl transition-all shadow-[0_0_40px_rgba(20,184,166,0.15)] hover:shadow-[0_0_60px_rgba(20,184,166,0.25)] text-sm"
-                >
-                  Generate Your Report
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-                <div className="flex items-center gap-4">
+                {/* Price */}
+                <div className="flex items-center gap-4 mb-8">
+                  <span className="text-3xl font-extrabold text-white font-mono tracking-tight">{PRICING.REPORT_PRICE}</span>
                   <div className="flex flex-col">
-                    <span className="text-3xl font-extrabold text-white font-mono tracking-tight">{PRICING.REPORT_PRICE}</span>
-                    <span className="text-xs text-slate-500">One-time &middot; Instant delivery</span>
+                    <span className="text-xs text-slate-500">One-time payment</span>
+                    <span className="text-xs text-slate-600">Instant PDF + Excel delivery</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Trust bar */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-slate-500">
+                {/* Trust bar */}
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-slate-500">
                 {[
                   { icon: Download, label: 'PDF + Excel export' },
                   { icon: Shield, label: 'Secure Stripe checkout' },
@@ -225,6 +220,12 @@ export default function ReportPage() {
                     <span>{label}</span>
                   </div>
                 ))}
+              </div>
+              </div>
+
+              {/* Right: intake form */}
+              <div className="lg:pt-4">
+                <ReportIntakeForm />
               </div>
             </div>
           </div>
@@ -737,32 +738,29 @@ export default function ReportPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-teal-500/[0.03] rounded-full blur-[120px]" />
         </div>
 
-        <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
-            <Clock className="w-3 h-3 text-teal-400" />
-            <span className="text-[11px] font-bold text-teal-400/80 tracking-wide">Ready in 60 seconds</span>
+        <div className="relative max-w-4xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
+              <Clock className="w-3 h-3 text-teal-400" />
+              <span className="text-[11px] font-bold text-teal-400/80 tracking-wide">Ready in 60 seconds</span>
+            </div>
+
+            <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-5 leading-[1.05]">
+              Your next deal deserves<br />
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                better data.
+              </span>
+            </h2>
+
+            <p className="text-base text-slate-400 max-w-lg mx-auto mb-0 leading-relaxed">
+              Select your asset parameters below. Preview the free analysis, then unlock the full report
+              for {PRICING.REPORT_PRICE}.
+            </p>
           </div>
 
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-5 leading-[1.05]">
-            Your next deal deserves<br />
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              better data.
-            </span>
-          </h2>
-
-          <p className="text-base text-slate-400 max-w-lg mx-auto mb-10 leading-relaxed">
-            Input your asset parameters. Preview the free analysis. Unlock the full report
-            for {PRICING.REPORT_PRICE} — comparable deals, partner matches, sensitivity analysis,
-            and a data-backed negotiation playbook.
-          </p>
-
-          <Link
-            href="/calculator"
-            className="group inline-flex items-center gap-3 px-10 py-4.5 bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-400 hover:to-teal-300 text-[#080c16] font-bold rounded-xl transition-all shadow-[0_0_50px_rgba(20,184,166,0.2)] hover:shadow-[0_0_80px_rgba(20,184,166,0.3)] text-base"
-          >
-            Generate Your Report
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          <div className="max-w-xl mx-auto">
+            <ReportIntakeForm />
+          </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-[11px] text-slate-600">
             <span>{PRICING.REPORT_PRICE} one-time</span>
