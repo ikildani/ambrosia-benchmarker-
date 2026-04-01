@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { blogPosts, getBlogPost, getAllBlogSlugs } from '@/lib/blogPosts';
+import { blogPosts, getBlogPost, getAllBlogSlugs, type BlogPost } from '@/lib/blogPosts';
+import { createServiceClient } from '@/lib/supabase/server';
 import {
   generateArticleSchema,
   generateFAQSchema,
@@ -15,13 +16,50 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+/** Look up a blog post: static file first, then Supabase fallback for AI-generated posts */
+async function resolvePost(slug: string): Promise<BlogPost | null> {
+  const staticPost = getBlogPost(slug);
+  if (staticPost) return staticPost;
+
+  // Fallback: check Supabase blog_posts table
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('slug, title, meta_description, content, category, excerpt, published_at, tags')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single();
+
+    if (!data) return null;
+
+    return {
+      slug: data.slug,
+      title: data.title,
+      metaDescription: data.meta_description || data.excerpt || '',
+      excerpt: data.excerpt || data.meta_description || '',
+      author: 'Ambrosia Ventures',
+      publishedAt: data.published_at || new Date().toISOString(),
+      category: data.category || 'Deal Intelligence',
+      readTime: `${Math.max(3, Math.ceil((data.content?.length || 0) / 1500))} min read`,
+      content: data.content || '',
+      faqs: [],
+      relatedLinks: [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function generateStaticParams() {
   return getAllBlogSlugs().map((slug) => ({ slug }));
 }
 
+export const dynamicParams = true;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await resolvePost(slug);
 
   if (!post) {
     return { title: 'Post Not Found' };
@@ -62,7 +100,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await resolvePost(slug);
 
   if (!post) {
     notFound();
