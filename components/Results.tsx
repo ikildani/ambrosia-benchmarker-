@@ -1563,6 +1563,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 tier={tier || 'free'}
                 onUpgrade={onUpgrade}
                 onBuyReport={onBuyReport}
+                dealWaterfall={financialModel.dealWaterfall}
+                scenarioComparison={financialModel.scenarioComparison}
+                lifecycleExtensions={financialModel.lifecycleExtensions}
+                competitiveDynamics={financialModel.competitiveDynamics}
+                realOptions={financialModel.realOptions}
               />
             </FinancialErrorBoundary>
             <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
