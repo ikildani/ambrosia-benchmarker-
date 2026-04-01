@@ -16,7 +16,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
-import { notifyHighValueDeal } from '@/lib/slack/notify';
+import { notifyHighValueDeal, notifyIngestionRun } from '@/lib/slack/notify';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -94,11 +94,10 @@ export async function GET(request: NextRequest) {
     const statsUpdated = await updateCompanyStats(supabase, result.deals_inserted * 2);
     console.log(`[perplexity] Post-processing: ${reclassified} reclassified, ${statsUpdated} company stats updated`);
 
-    // Alert on high-value deals
+    // Alert on high-value deals (any source type from this run)
     const { data: newBigDeals } = await supabase
       .from('deals')
       .select('licensee_name, licensor_name, asset_name, total_deal_value_usd, deal_type, therapeutic_area, announced_date')
-      .eq('source_type', 'perplexity_sweep')
       .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
       .gte('total_deal_value_usd', 500000000)
       .order('total_deal_value_usd', { ascending: false });
@@ -116,6 +115,27 @@ export async function GET(request: NextRequest) {
         }).catch(err => console.error('[Perplexity] Slack alert error:', err));
       }
     }
+
+    // Send ingestion run summary
+    const { data: topDeals } = await supabase
+      .from('deals')
+      .select('licensor_name, licensee_name, total_deal_value_usd')
+      .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
+      .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
+      .limit(5);
+
+    await notifyIngestionRun({
+      source: 'Perplexity Discovery',
+      dealsDiscovered: result.deals_discovered,
+      dealsInserted: result.deals_inserted,
+      errors: result.errors.length,
+      therapeuticAreas: currentTAs,
+      topDeals: (topDeals || []).map(d => ({
+        licensor: d.licensor_name,
+        licensee: d.licensee_name,
+        value: d.total_deal_value_usd ? Number(d.total_deal_value_usd) : null,
+      })),
+    }).catch(err => console.error('[Perplexity] Ingestion summary Slack error:', err));
   }
 
   // Log with cursor in notes field for rotation tracking

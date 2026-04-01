@@ -320,6 +320,51 @@ export async function notifyHighValueDeal(deal: {
   );
 }
 
+export async function notifyIngestionRun(run: {
+  source: string;
+  dealsDiscovered: number;
+  dealsInserted: number;
+  errors: number;
+  therapeuticAreas: string[];
+  topDeals?: { licensor: string; licensee: string; value: number | null }[];
+}): Promise<void> {
+  if (run.dealsInserted === 0 && run.errors === 0) return; // Skip empty runs
+
+  const topDealLines = (run.topDeals || []).slice(0, 5).map(d => {
+    const val = d.value ? (d.value >= 1e9 ? `$${(d.value / 1e9).toFixed(1)}B` : `$${(d.value / 1e6).toFixed(0)}M`) : 'Undisclosed';
+    return `• ${d.licensor} → ${d.licensee} (${val})`;
+  }).join('\n');
+
+  await postToSlack(
+    [{
+      color: run.errors > 0 ? '#f59e0b' : '#14b8a6',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: `📥 Deal Ingestion: ${run.dealsInserted} new deals`, emoji: true } },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*Source:*\n${run.source}` },
+            { type: 'mrkdwn', text: `*Discovered:*\n${run.dealsDiscovered}` },
+            { type: 'mrkdwn', text: `*Inserted:*\n${run.dealsInserted}` },
+            { type: 'mrkdwn', text: `*Errors:*\n${run.errors}` },
+          ],
+        },
+        ...(topDealLines ? [{
+          type: 'section' as const,
+          text: { type: 'mrkdwn' as const, text: `*Top Deals:*\n${topDealLines}` },
+        }] : []),
+        {
+          type: 'context',
+          elements: [
+            { type: 'mrkdwn', text: `TAs: ${run.therapeuticAreas.join(', ')} | ${formatTimestamp()}` },
+          ],
+        },
+      ],
+    }],
+    `Deal ingestion: ${run.dealsInserted} new from ${run.source} (${run.therapeuticAreas.join(', ')})`,
+  );
+}
+
 export async function notifyShareView(details: {
   token: string;
   modality: string;
