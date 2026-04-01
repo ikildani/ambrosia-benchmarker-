@@ -117,6 +117,10 @@ const TA_DISCOVERY_QUERIES: Record<string, string[]> = {
     'Chinese biotech companies licensing drugs to Western pharma 2023-2025 with upfront payments and milestones, ex-China rights deals',
     'China-to-West pharma licensing deals 2024-2025 across all therapeutic areas with financial terms disclosed',
   ],
+  _mega_deals: [
+    'All major biopharma acquisitions and licensing deals announced in the last 7 days with deal values over $500 million. Include acquirer, target, deal value, therapeutic area, and drug names.',
+    'Biggest pharma and biotech deals announced this week including M&A, licensing, and collaboration agreements with financial terms disclosed. List all deals over $100 million.',
+  ],
 };
 
 /**

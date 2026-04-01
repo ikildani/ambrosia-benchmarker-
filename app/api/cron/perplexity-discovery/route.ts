@@ -21,19 +21,20 @@ import { notifyHighValueDeal, notifyIngestionRun } from '@/lib/slack/notify';
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-// Cycle through TAs — 2-3 per run, covering all over ~5 days
+// Cycle through TAs — 2-3 per run, covering all over ~3 days
+// Every run also includes _mega_deals query for large deals across all TAs
 // Includes cross-TA queries for underrepresented deal types
 const TA_ROTATION = [
-  ['neurology', 'immunology', 'cardiovascular'],
-  ['metabolic', 'infectiousDisease', 'rareDisease'],
-  ['hematology', 'ophthalmology', 'dermatology'],
-  ['gastroenterology', 'womensHealth'],
+  ['oncology', 'neurology', 'immunology'],
+  ['metabolic', 'cardiovascular', 'rareDisease'],
+  ['hematology', 'ophthalmology', 'infectiousDisease'],
+  ['dermatology', 'gastroenterology', 'womensHealth'],
   ['_option_deals', '_codev_deals', '_china_deals'],   // Cross-TA deal type focus
-  ['neurology', 'metabolic', 'rareDisease'],            // High-priority TAs again
+  ['oncology', 'neurology', 'metabolic'],               // High-priority TAs again
   ['immunology', 'cardiovascular', 'hematology'],
-  ['infectiousDisease', 'ophthalmology', 'dermatology'],
-  ['gastroenterology', 'womensHealth', 'neurology'],
-  ['_option_deals', '_codev_deals'],                     // Deal type focus again
+  ['rareDisease', 'ophthalmology', 'dermatology'],
+  ['infectiousDisease', 'gastroenterology', 'womensHealth'],
+  ['_option_deals', '_codev_deals', 'oncology'],        // Deal type focus + oncology
 ];
 
 export async function GET(request: NextRequest) {
@@ -78,7 +79,9 @@ export async function GET(request: NextRequest) {
 
   const lastIndex = lastRun?.notes ? parseInt(lastRun.notes, 10) : -1;
   const currentIndex = (isNaN(lastIndex) ? 0 : (lastIndex + 1)) % TA_ROTATION.length;
-  const currentTAs = TA_ROTATION[currentIndex];
+  const rotationTAs = TA_ROTATION[currentIndex];
+  // Always include mega-deals sweep to catch large deals across all TAs
+  const currentTAs = rotationTAs.includes('_mega_deals') ? rotationTAs : [...rotationTAs, '_mega_deals'];
 
   console.log(`[perplexity] Run ${currentIndex}/${TA_ROTATION.length}: ${currentTAs.join(', ')}`);
 
