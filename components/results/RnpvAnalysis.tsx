@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, Cell, ReferenceLine, Legend,
+  ResponsiveContainer, CartesianGrid, Cell, ReferenceLine,
 } from 'recharts';
 import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sparkles, BarChart3 } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
@@ -47,7 +47,7 @@ const phaseDisplayName = (phase: string): string => {
     regulatory: 'Regulatory Review',
   };
   // Handle "Phase 2 -> Phase 3" style labels too
-  if (phase.includes('->') || phase.includes('→')) return phase;
+  if (phase.includes('->') || phase.includes('\u2192')) return phase;
   return map[phase] || phase.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
@@ -56,11 +56,15 @@ const ChartTooltipContent = ({ active, payload, label }: any) => {
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 shadow-xl">
       <p className="text-[10px] text-slate-400 mb-1">{label}</p>
-      {payload.map((p: any, i: number) => (
-        <p key={i} className="text-xs font-mono font-semibold" style={{ color: p.color || p.fill }}>
-          {p.name}: {typeof p.value === 'number' ? fmt(p.value) : p.value}
-        </p>
-      ))}
+      {payload.map((p: any, i: number) => {
+        // Skip the invisible base bar in waterfall tooltips
+        if (p.dataKey === 'base' && p.fill === 'transparent') return null;
+        return (
+          <p key={i} className="text-xs font-mono font-semibold" style={{ color: p.color || p.fill }}>
+            {p.name}: {typeof p.value === 'number' ? fmt(p.value) : p.value}
+          </p>
+        );
+      })}
     </div>
   );
 };
@@ -77,7 +81,13 @@ export default function RnpvAnalysis({
   competitiveDynamics,
   realOptions,
 }: RnpvAnalysisProps) {
-  const [expandedSection, setExpandedSection] = useState<string | null>('revenue');
+  // Fix 2: Use a Set so multiple sections can be open simultaneously; scenarios + waterfall open by default
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['scenarios', 'waterfall']));
+  const toggle = (s: string) => setExpandedSections(prev => {
+    const next = new Set(prev);
+    if (next.has(s)) next.delete(s); else next.add(s);
+    return next;
+  });
 
   if (!rnpvResult) return (
     <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
@@ -86,13 +96,15 @@ export default function RnpvAnalysis({
   );
 
   const hasAccess = tier === 'pro' || tier === 'report';
-  const toggle = (s: string) => setExpandedSection(prev => prev === s ? null : s);
 
   const derived = useMemo(() => {
+    // Payback conditional on success — uses unadjusted PV, not risk-adjusted.
+    // BD teams want "if approved, when do we break even?" — not a PoS-weighted
+    // answer that's always N/A for early-stage because 5% PoS makes revenue tiny.
     let paybackYear: number | null = null;
     let cumulativeCF = 0;
     for (const cf of rnpvResult.cashFlows) {
-      cumulativeCF += cf.riskAdjustedPV;
+      cumulativeCF += cf.presentValue;
       if (cumulativeCF > 0 && paybackYear === null) paybackYear = cf.year;
     }
     const currentYear = new Date().getFullYear();
@@ -127,7 +139,6 @@ export default function RnpvAnalysis({
         base: cf.revenue,
       }));
     }
-    // Build multi-scenario revenue overlay from cash flow data
     const baseCFs = rnpvResult.cashFlows;
     const bearMultiplier = scenarioComparison.bear.rnpv / Math.max(scenarioComparison.base.rnpv, 1);
     const bullMultiplier = scenarioComparison.bull.rnpv / Math.max(scenarioComparison.base.rnpv, 1);
@@ -140,18 +151,37 @@ export default function RnpvAnalysis({
     }));
   }, [rnpvResult, scenarioComparison]);
 
-  // ── Chart Data: Waterfall ──
-  const waterfallData = useMemo(() => {
+  // ── Fix 1: True Waterfall Chart Data ──
+  const waterfallChartData = useMemo(() => {
     if (!dealWaterfall) return [];
-    return dealWaterfall.steps.map((step, i) => ({
-      name: step.label.length > 14 ? step.label.substring(0, 14) + '…' : step.label,
-      fullName: step.label,
-      value: step.runningTotal,
-      delta: step.adjustment,
-      fill: i === 0 ? CHART_COLORS.slate500 :
-            i === dealWaterfall.steps.length - 1 ? CHART_COLORS.teal500 :
-            step.adjustment >= 0 ? '#34d399' : '#f87171',
-    }));
+    return dealWaterfall.steps.map((step, i) => {
+      const isFirst = i === 0;
+      const isLast = i === dealWaterfall.steps.length - 1;
+      const shortName = step.label.length > 14 ? step.label.substring(0, 14) + '\u2026' : step.label;
+      if (isFirst || isLast) {
+        return {
+          name: shortName,
+          fullName: step.label,
+          base: 0,
+          delta: step.runningTotal,
+          adjustment: step.adjustment,
+          runningTotal: step.runningTotal,
+          fill: isFirst ? '#64748B' : CHART_COLORS.teal500,
+        };
+      }
+      const prevTotal = dealWaterfall.steps[i - 1].runningTotal;
+      const lower = Math.min(prevTotal, step.runningTotal);
+      const upper = Math.max(prevTotal, step.runningTotal);
+      return {
+        name: shortName,
+        fullName: step.label,
+        base: lower,
+        delta: upper - lower,
+        adjustment: step.adjustment,
+        runningTotal: step.runningTotal,
+        fill: step.adjustment >= 0 ? '#34d399' : '#f87171',
+      };
+    });
   }, [dealWaterfall]);
 
   // ── Chart Data: Scenario Bar Comparison ──
@@ -176,7 +206,7 @@ export default function RnpvAnalysis({
 
   const { paybackPeriod, annualizedReturn, cv, cvBenchmark, cvDivergence } = derived;
 
-  // Section header component
+  // Section header component — updated for Set-based expanded state
   const SectionToggle = ({ id, icon: Icon, title, badge, badgeColor }: {
     id: string; icon: any; title: string; badge?: string; badgeColor?: string;
   }) => (
@@ -186,7 +216,7 @@ export default function RnpvAnalysis({
         <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</span>
         {badge && <span className={`text-xs font-mono ml-2 ${badgeColor || 'text-teal-600 dark:text-teal-400'}`}>{badge}</span>}
       </div>
-      {expandedSection === id ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+      {expandedSections.has(id) ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
     </button>
   );
 
@@ -213,7 +243,7 @@ export default function RnpvAnalysis({
           <div className={`${!hasAccess ? 'blur-[6px] pointer-events-none' : ''} transition-all`}>
 
             {/* ═══ KPI Row ═══ */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <div className="p-3 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/10 dark:to-cyan-500/10 rounded-lg border border-teal-100 dark:border-teal-500/20 text-center">
                 <p className="text-[10px] font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total rNPV</p>
                 <p className="text-lg sm:text-xl font-bold text-teal-700 dark:text-teal-400 font-mono">{formatCurrency(rnpvResult.riskAdjustedNPV)}</p>
@@ -234,8 +264,32 @@ export default function RnpvAnalysis({
                 </p>
               </div>
               <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
-                <p className="text-[10px] font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-1">Payback</p>
+                <p className="text-[10px] font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-1">Payback (if appr.)</p>
                 <p className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white font-mono">{paybackPeriod}</p>
+              </div>
+            </div>
+
+            {/* ═══ Fix 3: Valuation Summary — Goldman one-pager row ═══ */}
+            <div className="grid grid-cols-5 gap-2 mb-5 p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg border border-slate-200 dark:border-slate-600">
+              <div className="text-center">
+                <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">rNPV</p>
+                <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">{fmt(rnpvResult.riskAdjustedNPV)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Implied Deal</p>
+                <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">{dealWaterfall ? fmt(dealWaterfall.totalDealValue.median) : '--'}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Expected Value</p>
+                <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">{scenarioComparison ? fmt(scenarioComparison.expectedValue) : '--'}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Option Value</p>
+                <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">{realOptions ? fmt(realOptions.totalOptionValue) : '--'}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Upfront Est.</p>
+                <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">{dealWaterfall ? fmt(dealWaterfall.upfrontPayment.median) : '--'}</p>
               </div>
             </div>
 
@@ -293,7 +347,7 @@ export default function RnpvAnalysis({
             {scenarioBarData.length > 0 && (
               <div className="mb-6">
                 <SectionToggle id="scenarios" icon={BarChart3} title="Bear / Base / Bull Scenarios" badge={`EV: ${fmt(scenarioComparison!.expectedValue)}`} />
-                {expandedSection === 'scenarios' && (
+                {expandedSections.has('scenarios') && (
                   <div className="mt-3">
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
@@ -318,7 +372,7 @@ export default function RnpvAnalysis({
                         { label: 'Bull', data: scenarioComparison!.bull, weight: scenarioComparison!.bullWeight, color: 'text-green-700 dark:text-green-400', bg: 'bg-green-50/50 dark:bg-green-500/5 border-green-100 dark:border-green-500/10' },
                       ].map(s => (
                         <div key={s.label} className={`p-3 rounded-lg border ${s.bg}`}>
-                          <p className="text-[10px] font-bold uppercase tracking-wider mb-1 ${s.color}">{s.label} ({(s.weight * 100).toFixed(0)}%)</p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${s.color}`}>{s.label} ({(s.weight * 100).toFixed(0)}%)</p>
                           <p className={`text-sm font-bold font-mono ${s.color}`}>{fmt(s.data.rnpv)}</p>
                           <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">PoS {fmtPct(s.data.cumulativePoS)} · {s.data.yearsToMarket.toFixed(1)}y</p>
                         </div>
@@ -329,15 +383,15 @@ export default function RnpvAnalysis({
               </div>
             )}
 
-            {/* ═══ DEAL WATERFALL CHART ═══ */}
-            {waterfallData.length > 0 && (
+            {/* ═══ Fix 1: TRUE WATERFALL CHART — stacked base+delta ═══ */}
+            {waterfallChartData.length > 0 && (
               <div className="mb-6">
                 <SectionToggle id="waterfall" icon={Layers} title="Deal Valuation Waterfall" badge={`${fmt(dealWaterfall!.totalDealValue.median)} total`} />
-                {expandedSection === 'waterfall' && (
+                {expandedSections.has('waterfall') && (
                   <div className="mt-3">
                     <div className="h-48">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={waterfallData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <BarChart data={waterfallChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} strokeOpacity={0.3} vertical={false} />
                           <XAxis dataKey="name" tick={{ fontSize: 9, fill: CHART_COLORS.axisLabel }} tickLine={false} axisLine={false} interval={0} />
                           <YAxis tick={{ fontSize: 10, fill: CHART_COLORS.axisLabel }} tickLine={false} axisLine={false} tickFormatter={fmt} width={52} />
@@ -347,17 +401,20 @@ export default function RnpvAnalysis({
                             return (
                               <div className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 shadow-xl">
                                 <p className="text-xs font-semibold text-white mb-1">{d?.fullName || d?.name}</p>
-                                <p className="text-xs font-mono text-teal-400">Value: {fmt(d?.value)}</p>
-                                {d?.delta !== undefined && d?.delta !== d?.value && (
-                                  <p className={`text-xs font-mono ${d.delta >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {d.delta >= 0 ? '+' : ''}{fmt(d.delta)}
+                                <p className="text-xs font-mono text-teal-400">Value: {fmt(d?.runningTotal)}</p>
+                                {d?.adjustment !== undefined && d?.adjustment !== d?.runningTotal && (
+                                  <p className={`text-xs font-mono ${d.adjustment >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {d.adjustment >= 0 ? '+' : ''}{fmt(d.adjustment)}
                                   </p>
                                 )}
                               </div>
                             );
                           }} />
-                          <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={56}>
-                            {waterfallData.map((entry, i) => <Cell key={i} fill={entry.fill} fillOpacity={0.75} />)}
+                          {/* Invisible base bar — creates the floating effect */}
+                          <Bar dataKey="base" stackId="waterfall" fill="transparent" radius={[0, 0, 0, 0]} maxBarSize={56} />
+                          {/* Visible delta bar — the actual colored segment */}
+                          <Bar dataKey="delta" stackId="waterfall" radius={[3, 3, 0, 0]} maxBarSize={56}>
+                            {waterfallChartData.map((entry, i) => <Cell key={i} fill={entry.fill} fillOpacity={0.75} />)}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
@@ -394,7 +451,7 @@ export default function RnpvAnalysis({
                   badge={`${realOptions.flexibilityPremium >= 0 ? '+' : ''}${fmt(realOptions.flexibilityPremium)} flexibility`}
                   badgeColor={realOptions.flexibilityPremium >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'}
                 />
-                {expandedSection === 'realOptions' && (
+                {expandedSections.has('realOptions') && (
                   <div className="mt-3">
                     <div className="grid grid-cols-3 gap-3 mb-4">
                       <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
@@ -446,10 +503,10 @@ export default function RnpvAnalysis({
                   badge={`${(competitiveDynamics.peakShareErosion * 100).toFixed(0)}% peak erosion`}
                   badgeColor={competitiveDynamics.peakShareErosion > 0.25 ? 'text-red-500 dark:text-red-400' : competitiveDynamics.peakShareErosion > 0.10 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}
                 />
-                {expandedSection === 'competitive' && (
+                {expandedSections.has('competitive') && (
                   <div className="mt-3">
-                    {/* Revenue erosion chart */}
-                    {competitiveChartData.length > 0 && (
+                    {/* Fix 4: Handle empty competitive chart data */}
+                    {competitiveChartData.length > 0 ? (
                       <div className="h-44 mb-4">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={competitiveChartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -472,6 +529,10 @@ export default function RnpvAnalysis({
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 italic">
+                        Revenue projection and competitor timelines do not overlap — competitive impact will materialize in later years.
+                      </p>
                     )}
 
                     <div className="grid grid-cols-3 gap-3 mb-3">
@@ -516,7 +577,7 @@ export default function RnpvAnalysis({
                 <SectionToggle id="lifecycle" icon={Shield} title="Lifecycle Extensions"
                   badge={`+${fmt(lifecycleExtensions.incrementalValue)} (${lifecycleExtensions.incrementalPercent.toFixed(0)}% upside)`}
                 />
-                {expandedSection === 'lifecycle' && (
+                {expandedSections.has('lifecycle') && (
                   <div className="mt-3">
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
@@ -581,10 +642,10 @@ export default function RnpvAnalysis({
             {rnpvResult.modelAssumptions.length > 0 && (
               <div>
                 <button onClick={() => toggle('assumptions')} className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider hover:text-slate-600 dark:hover:text-slate-400 transition-colors">
-                  {expandedSection === 'assumptions' ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                  {expandedSections.has('assumptions') ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                   Assumptions ({rnpvResult.modelAssumptions.length})
                 </button>
-                {expandedSection === 'assumptions' && (
+                {expandedSections.has('assumptions') && (
                   <ul className="mt-2 space-y-1">
                     {rnpvResult.modelAssumptions.map((a, i) => (
                       <li key={i} className="text-[10px] text-slate-500 dark:text-slate-400 pl-3 border-l-2 border-slate-200 dark:border-slate-600">{a}</li>
