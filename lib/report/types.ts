@@ -18,6 +18,12 @@ export interface PartnerForPDF {
     pipeline_gaps: string[];
     strategic_priorities: string[];
   } | null;
+  pharma_intent?: {
+    intentScore: number;
+    intentTier: string;
+    timing: string;
+    confidence: number;
+  } | null;
 }
 
 export interface PDFReportData {

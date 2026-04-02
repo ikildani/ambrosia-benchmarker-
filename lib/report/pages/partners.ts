@@ -68,24 +68,29 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
 
       <!-- Evaluation Matrix -->
       <div class="section-title">Partner Evaluation Matrix</div>
-      <div class="card" style="padding: 0; overflow: hidden;">
+      <div class="card" style="padding: 0; overflow: hidden; page-break-inside: avoid;">
         <table class="data-table">
           <thead>
             <tr>
               <th>Partner</th>
               <th style="text-align: center;">Match Score</th>
+              <th style="text-align: center;">Intent Score</th>
               <th style="text-align: center;">Deal Activity</th>
               <th style="text-align: center;">HQ</th>
               <th style="text-align: center;">Top Signal</th>
             </tr>
           </thead>
           <tbody>
-            ${topPartners.map(p => {
+            ${topPartners.slice(0, 6).map(p => {
               const cellBg = p.match_score >= 80 ? COLORS.tealLight : p.match_score >= 60 ? '#e0f2fe' : COLORS.amberLight;
+              const intentScore = (p as any).pharma_intent?.intentScore;
+              const intentColor = intentScore >= 70 ? COLORS.teal : intentScore >= 40 ? COLORS.amber : COLORS.gray400;
+              const intentTier = (p as any).pharma_intent?.intentTier;
               return `
               <tr>
                 <td style="font-weight: 600;">${escapeHtml(p.company_name)}</td>
                 <td style="text-align: center; background: ${cellBg}; font-weight: 700; color: ${COLORS.navy};">${p.match_score}%</td>
+                <td style="text-align: center; font-weight: 700; color: ${intentColor};">${intentScore != null ? `${intentScore}%` : '—'}</td>
                 <td style="text-align: center;">${p.deals_last_12mo}</td>
                 <td style="text-align: center; font-size: 9px;">${escapeHtml(p.hq_country || 'N/A')}</td>
                 <td style="text-align: center; font-size: 9px;">${p.match_reasons[0] ? escapeHtml(p.match_reasons[0].reason) : 'N/A'}</td>
@@ -95,6 +100,12 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
           </tbody>
         </table>
       </div>
+
+      ${topPartners.length > 6 ? `
+      <div style="font-size: 9px; color: ${COLORS.gray400}; margin-top: 6px; text-align: center;">
+        + ${topPartners.length - 6} additional partners available in the full platform analysis
+      </div>
+      ` : ''}
 
       ${pageFooter(meta.reportId)}
     </div>

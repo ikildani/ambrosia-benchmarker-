@@ -119,6 +119,7 @@ export default function PartnerMatchesContainer({
           deals_last_12mo: m.deals_last_12mo || 0,
           hq_country: m.hq_country,
           strategic_context: m.strategic_context || null,
+          pharma_intent: m.pharma_intent || null,
         })));
       }
     } catch (err) {

@@ -114,13 +114,15 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
               'MEDIUM': 'impact-medium',
               'LOW': 'impact-low',
             };
+            // Truncate long descriptions to prevent page overflow
+            const desc = insight.description.length > 180 ? insight.description.substring(0, 177) + '...' : insight.description;
             return `
-            <div class="card-sm">
+            <div class="card-sm" style="max-height: 90px; overflow: hidden;">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 3px;">
                 <span style="font-size: 10px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(insight.title)}</span>
                 <span class="badge ${impactCls[insight.impactLevel] || 'badge-gray'}">${insight.impactLevel}</span>
               </div>
-              <div style="font-size: 10px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(insight.description)}</div>
+              <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.45;">${escapeHtml(desc)}</div>
             </div>
             `;
           }).join('')}
