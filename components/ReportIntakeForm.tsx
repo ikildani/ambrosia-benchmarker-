@@ -178,9 +178,9 @@ export default function ReportIntakeForm() {
         biomarker: biomarker as any,
         lineOfTherapy: '2L',
         treatmentApproach: 'symptomatic',
-        combinationPotential,
-        competitivePosition,
-        dataQuality,
+        combinationPotential: combinationPotential as any,
+        competitivePosition: competitivePosition as any,
+        dataQuality: dataQuality as any,
         regulatoryDesignations: { breakthrough, fastTrack, orphan, prime: false },
       };
 
