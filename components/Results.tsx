@@ -30,6 +30,7 @@ const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparis
 const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligence'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const RnpvAnalysis = dynamic(() => import('./results/RnpvAnalysis'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const BuyerSpecificPanel = dynamic(() => import('./results/BuyerSpecificPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const MonteCarloResults = dynamic(() => import('./results/MonteCarloResults'), { ssr: false, loading: () => <ChartSkeleton /> });
 const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
@@ -1570,6 +1571,18 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 realOptions={financialModel.realOptions}
               />
             </FinancialErrorBoundary>
+            {financialModel.dealWaterfall && partnerMatches.length > 0 && (
+              <FinancialErrorBoundary fallbackTitle="Buyer-Specific Valuation unavailable">
+                <BuyerSpecificPanel
+                  partnerMatches={partnerMatches as any}
+                  dealWaterfall={financialModel.dealWaterfall}
+                  rnpvResult={financialModel.rnpv}
+                  tier={tier || 'free'}
+                  onUpgrade={onUpgrade}
+                  onBuyReport={onBuyReport}
+                />
+              </FinancialErrorBoundary>
+            )}
             <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
               <MonteCarloResults
                 monteCarloResult={financialModel.monteCarlo}

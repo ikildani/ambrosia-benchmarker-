@@ -114,10 +114,12 @@ export default function PartnerMatchesContainer({
       if (onMatchesLoaded && fetchedMatches.length > 0) {
         onMatchesLoaded(fetchedMatches.map((m: any) => ({
           company_name: m.company_name,
+          company_id: m.company_id || m.company_name,
           match_score: m.match_score,
           match_reasons: m.match_reasons || [],
           deals_last_12mo: m.deals_last_12mo || 0,
           hq_country: m.hq_country,
+          company_type: m.company_type || null,
           strategic_context: m.strategic_context || null,
           pharma_intent: m.pharma_intent || null,
         })));
