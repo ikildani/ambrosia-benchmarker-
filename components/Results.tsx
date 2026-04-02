@@ -1572,31 +1572,29 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 realOptions={financialModel.realOptions}
               />
             </FinancialErrorBoundary>
-            {financialModel.dealWaterfall && (
-              <FinancialErrorBoundary fallbackTitle="Buyer-Specific Valuation unavailable">
-                {partnerMatches.length > 0 ? (
-                  <BuyerSpecificPanel
-                    partnerMatches={partnerMatches as any}
-                    dealWaterfall={financialModel.dealWaterfall}
-                    rnpvResult={financialModel.rnpv}
-                    tier={tier || 'free'}
-                    onUpgrade={onUpgrade}
-                    onBuyReport={onBuyReport}
-                    onValuationComputed={setBuyerSpecificValuation}
-                  />
-                ) : (
-                  <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700/50 rounded-xl">
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                      <svg className="w-4 h-4 animate-spin text-teal-500" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Buyer-Specific Valuation loading — waiting for partner matches...
-                    </div>
-                  </div>
-                )}
-              </FinancialErrorBoundary>
-            )}
+            {/* Buyer-Specific Valuation */}
+            <div className="mt-6 p-4 bg-teal-900/20 border border-teal-500/30 rounded-xl">
+              <p className="text-xs text-teal-400 font-mono mb-2">
+                Debug: dealWaterfall={financialModel.dealWaterfall ? 'YES' : 'NULL'} | partners={partnerMatches.length}
+              </p>
+              {financialModel.dealWaterfall && partnerMatches.length > 0 && (
+                <BuyerSpecificPanel
+                  partnerMatches={partnerMatches as any}
+                  dealWaterfall={financialModel.dealWaterfall}
+                  rnpvResult={financialModel.rnpv}
+                  tier={tier || 'free'}
+                  onUpgrade={onUpgrade}
+                  onBuyReport={onBuyReport}
+                  onValuationComputed={setBuyerSpecificValuation}
+                />
+              )}
+              {!financialModel.dealWaterfall && (
+                <p className="text-xs text-red-400">dealWaterfall is null — financial model may have failed</p>
+              )}
+              {financialModel.dealWaterfall && partnerMatches.length === 0 && (
+                <p className="text-xs text-amber-400">Waiting for partner matches to load...</p>
+              )}
+            </div>
             <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
               <MonteCarloResults
                 monteCarloResult={financialModel.monteCarlo}
