@@ -587,6 +587,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
+  const [buyerSpecificValuation, setBuyerSpecificValuation] = useState<any>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showPlaybookModal, setShowPlaybookModal] = useState(false);
   const [emailForResults, setEmailForResults] = useState('');
@@ -1580,6 +1581,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   tier={tier || 'free'}
                   onUpgrade={onUpgrade}
                   onBuyReport={onBuyReport}
+                  onValuationComputed={setBuyerSpecificValuation}
                 />
               </FinancialErrorBoundary>
             )}
@@ -1800,6 +1802,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onMemoGenerated={(memo) => setDealMemo(memo)}
             onDownloadComplete={() => setToast({ message: 'Report downloaded successfully', type: 'success' })}
             format={reportFormat}
+            buyerSpecificValuation={buyerSpecificValuation}
           />
         )}
 

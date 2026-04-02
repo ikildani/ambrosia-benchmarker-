@@ -5,6 +5,7 @@ import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { RNPVResult, MonteCarloResult, MarketSizeEstimate, ScenarioResult, FXSensitivity, CompetitiveLandscape, DealFlowForecast, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult } from '@/lib/financial/types';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
+import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -59,6 +60,7 @@ export interface PDFReportData {
   lifecycleExtensions?: LifecycleExtensionResult;
   competitiveDynamics?: CompetitiveDynamicsResult;
   realOptions?: RealOptionsResult;
+  buyerSpecificValuation?: BuyerSpecificValuation;
 }
 
 export interface TocEntry {

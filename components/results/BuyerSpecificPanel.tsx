@@ -64,6 +64,8 @@ export interface BuyerSpecificPanelProps {
   onUpgrade?: () => void;
   /** Callback to trigger single-report purchase */
   onBuyReport?: () => void;
+  /** Callback when a buyer-specific valuation is computed — used to capture for PDF */
+  onValuationComputed?: (valuation: BuyerSpecificValuation | null) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +101,7 @@ export default function BuyerSpecificPanel({
   tier,
   onUpgrade,
   onBuyReport,
+  onValuationComputed,
 }: BuyerSpecificPanelProps) {
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -118,10 +121,15 @@ export default function BuyerSpecificPanel({
 
   // Compute buyer-specific valuation when a partner is selected
   const valuation: BuyerSpecificValuation | null = useMemo(() => {
-    if (!selectedPartner) return null;
+    if (!selectedPartner) {
+      onValuationComputed?.(null);
+      return null;
+    }
     const profile = buildBuyerProfileFromMatch(selectedPartner);
-    return calculateBuyerSpecificValuation(profile, dealWaterfall, rnpvResult);
-  }, [selectedPartner, dealWaterfall, rnpvResult]);
+    const result = calculateBuyerSpecificValuation(profile, dealWaterfall, rnpvResult);
+    onValuationComputed?.(result);
+    return result;
+  }, [selectedPartner, dealWaterfall, rnpvResult, onValuationComputed]);
 
   // ── Locked overlay for free tier ──
   if (!hasAccess) {

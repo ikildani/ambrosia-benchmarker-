@@ -24,6 +24,7 @@ import { renderDefensiveAdvicePage } from './pages/defensiveAdvice';
 import { renderScenarioComparisonPage } from './pages/scenarioComparison';
 import { renderDealWaterfallPage } from './pages/dealWaterfall';
 import { renderRealOptionsLifecyclePage } from './pages/realOptionsLifecycle';
+import { renderBuyerSpecificPage } from './pages/buyerSpecific';
 import type { PDFReportData, ReportMeta, TocEntry } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
@@ -42,6 +43,7 @@ export function generateReportHTML(data: PDFReportData): string {
   const hasScenarioComparison = !!data.scenarioComparison;
   const hasDealWaterfall = !!data.dealWaterfall;
   const hasAdvancedAnalytics = !!data.realOptions || !!data.competitiveDynamics || !!data.lifecycleExtensions;
+  const hasBuyerSpecific = !!data.buyerSpecificValuation;
 
   // Build TOC entries with correct page numbers
   const tocEntries: TocEntry[] = [];
@@ -68,6 +70,7 @@ export function generateReportHTML(data: PDFReportData): string {
     if (hasScenarioComparison) toc('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value');
     if (hasDealWaterfall) toc('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation');
     if (hasAdvancedAnalytics) toc('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions');
+    if (hasBuyerSpecific) toc('Buyer-Specific Valuation', 'Strategic premium analysis for selected partner');
   }
   toc('Methodology', 'Model design, data sources, and disclaimer');
 
@@ -113,6 +116,7 @@ export function generateReportHTML(data: PDFReportData): string {
     if (hasScenarioComparison) addPage(renderScenarioComparisonPage);
     if (hasDealWaterfall) addPage(renderDealWaterfallPage);
     if (hasAdvancedAnalytics) addPage(renderRealOptionsLifecyclePage);
+    if (hasBuyerSpecific) addPage(renderBuyerSpecificPage);
   }
   addPage(renderMethodologyPage);
 
