@@ -319,6 +319,11 @@ export default function ReportGenerationModal({
           scenarioResults: fm.scenarios,
           fxSensitivity: fm.fxSensitivity,
           defensiveAnalysis: fm.defensiveAnalysis,
+          dealWaterfall: fm.dealWaterfall,
+          scenarioComparison: fm.scenarioComparison,
+          lifecycleExtensions: fm.lifecycleExtensions,
+          competitiveDynamics: fm.competitiveDynamics,
+          realOptions: fm.realOptions,
         };
         pdfDataRef.current = pdfData;
 

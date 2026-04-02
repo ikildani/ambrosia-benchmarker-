@@ -21,6 +21,9 @@ import { renderFinancialModelPage } from './pages/financialModel';
 import { renderCurrencySensitivityPage } from './pages/currencySensitivity';
 import { renderDealFlowContextPage } from './pages/dealFlowContext';
 import { renderDefensiveAdvicePage } from './pages/defensiveAdvice';
+import { renderScenarioComparisonPage } from './pages/scenarioComparison';
+import { renderDealWaterfallPage } from './pages/dealWaterfall';
+import { renderRealOptionsLifecyclePage } from './pages/realOptionsLifecycle';
 import type { PDFReportData, ReportMeta, TocEntry } from './types';
 
 export type { PDFReportData, PartnerForPDF } from './types';
@@ -36,6 +39,9 @@ export function generateReportHTML(data: PDFReportData): string {
   // Conditionally included pages
   const hasPlaybook = !!data.playbookData;
   const hasFinancialModel = !!data.rnpvResult;
+  const hasScenarioComparison = !!data.scenarioComparison;
+  const hasDealWaterfall = !!data.dealWaterfall;
+  const hasAdvancedAnalytics = !!data.realOptions || !!data.competitiveDynamics || !!data.lifecycleExtensions;
 
   // Build TOC entries with correct page numbers
   const tocEntries: TocEntry[] = [];
@@ -59,6 +65,9 @@ export function generateReportHTML(data: PDFReportData): string {
     toc('Currency & Pricing Sensitivity', 'FX impact and regulatory pricing scenarios');
     toc('Deal Flow & Market Context', 'Historical deal flow, competitive landscape, and market sizing');
     toc('Defensive Analysis', 'Worst/best case scenarios and walk-away thresholds');
+    if (hasScenarioComparison) toc('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value');
+    if (hasDealWaterfall) toc('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation');
+    if (hasAdvancedAnalytics) toc('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions');
   }
   toc('Methodology', 'Model design, data sources, and disclaimer');
 
@@ -101,6 +110,9 @@ export function generateReportHTML(data: PDFReportData): string {
     addPage(renderCurrencySensitivityPage);
     addPage(renderDealFlowContextPage);
     addPage(renderDefensiveAdvicePage);
+    if (hasScenarioComparison) addPage(renderScenarioComparisonPage);
+    if (hasDealWaterfall) addPage(renderDealWaterfallPage);
+    if (hasAdvancedAnalytics) addPage(renderRealOptionsLifecyclePage);
   }
   addPage(renderMethodologyPage);
 
