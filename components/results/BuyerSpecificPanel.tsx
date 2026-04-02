@@ -108,9 +108,10 @@ export default function BuyerSpecificPanel({
 
   const hasAccess = tier === 'pro' || tier === 'report';
 
-  // Filter to partners that have pharma intent data
+  // Include all partners — those with intent data get full premium analysis,
+  // those without get a basic match-score-only premium
   const eligiblePartners = useMemo(
-    () => partnerMatches.filter(p => p.pharma_intent && p.pharma_intent.intentScore > 0),
+    () => partnerMatches.filter(p => p.match_score > 0),
     [partnerMatches],
   );
 

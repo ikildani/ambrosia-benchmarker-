@@ -24,6 +24,9 @@ export interface PartnerForPDF {
     intentTier: string;
     timing: string;
     confidence: number;
+    factors?: Array<{ name: string; score: number; weight: number }>;
+    signals?: string[];
+    preferredDealType?: string;
   } | null;
 }
 
