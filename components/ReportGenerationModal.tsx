@@ -94,6 +94,7 @@ export default function ReportGenerationModal({
   onMemoGenerated,
   onDownloadComplete,
   format,
+  buyerSpecificValuation,
 }: ReportGenerationModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>('idle');
   const [completedSteps, setCompletedSteps] = useState<Set<ModalStep>>(new Set());
