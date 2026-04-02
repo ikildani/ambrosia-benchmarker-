@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  ArrowRight, Lock, CheckCircle2, BarChart3, ChevronRight,
-  Users, LineChart, Scale, Target, Loader2, Shield, Download,
+  ArrowRight, Lock, CheckCircle2, BarChart3, ChevronRight, Building2,
+  Users, LineChart, Scale, Target, Loader2, Shield, Download, Calculator,
   FileText, Sparkles, ArrowUpRight,
 } from 'lucide-react';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
@@ -106,6 +106,8 @@ const DEAL_TYPE_GROUPS: GroupedOption[] = [
 
 const LOCKED_SECTIONS = [
   { icon: Users, label: 'Partner Intelligence + Pharma Intent Score', desc: '850+ companies ranked by fit' },
+  { icon: Calculator, label: 'rNPV & Deal Valuation', desc: 'Phase-specific LoA-calibrated asset value' },
+  { icon: Building2, label: 'Buyer-Specific Valuation', desc: 'What your asset is worth to each acquirer' },
   { icon: LineChart, label: 'Monte Carlo Sensitivity Analysis', desc: 'rNPV modeling with probability-weighted outcomes' },
   { icon: Scale, label: 'Negotiation Playbook', desc: 'Data-backed strategy for your counterparty' },
   { icon: Target, label: 'Competitive Landscape', desc: 'Pipeline mapping from ClinicalTrials.gov' },
