@@ -174,7 +174,7 @@ export default function ReportIntakeForm() {
         dealType: dealType as DealType,
         modality: modality as Modality,
         indication: indication as Indication,
-        territory,
+        territory: territory as any,
         biomarker: biomarker as any,
         lineOfTherapy: '2L',
         treatmentApproach: 'symptomatic',
