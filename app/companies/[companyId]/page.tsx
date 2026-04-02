@@ -178,7 +178,7 @@ async function getCompanySEOData(companyId: string) {
     // 3-year deal count for trend
     supabase
       .from('deals')
-      .select('announced_date, modality, indication_category')
+      .select('announced_date, modality, indication_category, therapeutic_area')
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
       .gte('announced_date', threeYearsAgo),
   ]);
