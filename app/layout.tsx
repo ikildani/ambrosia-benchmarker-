@@ -85,6 +85,26 @@ export default function RootLayout({
         <link rel="alternate" type="application/rss+xml" title="Ambrosia Ventures" href="/feed.xml" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
+        {/* LinkedIn Insight Tag — retargeting pixel for calculator visitors */}
+        {process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                _linkedin_partner_id = "${process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID}";
+                window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+                window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+                (function(l) {
+                  if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+                  window.lintrk.q=[]}
+                  var s = document.getElementsByTagName("script")[0];
+                  var b = document.createElement("script");
+                  b.type = "text/javascript";b.async = true;
+                  b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+                  s.parentNode.insertBefore(b, s);})(window.lintrk);
+              `,
+            }}
+          />
+        )}
       </head>
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans`}>
         <a
