@@ -246,7 +246,7 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 
 ### Pricing
 - Free: 5 calculations/month, basic deal term ranges
-- Pro: $99/month — all 14 engines, PDF/Excel, partner matching
+- Pro: $299/month — all 14 engines, PDF/Excel, partner matching
 - Report: $499 one-time — full board-ready report (20+ pages)
 
 ---
