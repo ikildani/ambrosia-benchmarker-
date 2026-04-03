@@ -282,7 +282,7 @@ export async function runPerplexityDealDiscovery(
             const licensorCompanyId = await findOrCreateCompany(supabase, deal.licensor).catch(() => null);
             const licenseeCompanyId = await findOrCreateCompany(supabase, deal.licensee).catch(() => null);
 
-            await supabase.from('deals').insert({
+            const { error: sweepInsertErr } = await supabase.from('deals').insert({
               licensor_name: deal.licensor,
               licensee_name: deal.licensee,
               licensor_id: licensorCompanyId,
@@ -304,7 +304,9 @@ export async function runPerplexityDealDiscovery(
               extraction_notes: `Mega-deal sweep discovery. Confidence: ${deal.confidence}%`,
             });
 
-            result.deals_inserted++;
+            // Skip duplicates silently (unique index catches them)
+            if (sweepInsertErr?.code === '23505') continue;
+            if (!sweepInsertErr) result.deals_inserted++;
             result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
           }
         } catch (err) {
@@ -386,11 +388,10 @@ export async function runPerplexityDealDiscovery(
               extraction_notes: `Perplexity discovery → Claude extraction`,
               extraction_model: 'perplexity+claude-sonnet-4',
               extraction_timestamp: new Date().toISOString(),
-            }, {
-              onConflict: 'licensor_name,licensee_name,asset_name,announced_date',
-              ignoreDuplicates: true,
             });
 
+            // Skip duplicates silently (unique index catches them)
+            if (insertError?.code === '23505') continue;
             if (!insertError) {
               result.deals_inserted++;
               result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;

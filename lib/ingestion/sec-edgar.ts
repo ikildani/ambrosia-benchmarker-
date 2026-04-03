@@ -818,7 +818,10 @@ export async function runDailyIngestion(
           });
 
           if (insertError) {
-            errors.push(`Insert error for ${filing.accessionNumber}: ${insertError.message}`);
+            // Skip duplicates silently (unique index catches them)
+            if (insertError.code !== '23505') {
+              errors.push(`Insert error for ${filing.accessionNumber}: ${insertError.message}`);
+            }
           } else {
             dealsExtracted++;
             console.log(`Extracted deal: ${deal.licensor} -> ${deal.licensee} (${deal.modality})`);
