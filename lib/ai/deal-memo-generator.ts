@@ -362,7 +362,7 @@ export class DealMemoGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey, timeout: 30_000 });
+    this.client = new Anthropic({ apiKey, timeout: 50_000 });
   }
 
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {

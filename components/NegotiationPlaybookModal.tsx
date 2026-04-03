@@ -154,6 +154,7 @@ export default function NegotiationPlaybookModal({
           labels,
         }),
         signal: controller.signal,
+        keepalive: true,
       });
 
       clearTimeout(timeoutId);

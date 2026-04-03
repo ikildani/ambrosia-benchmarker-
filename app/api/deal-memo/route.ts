@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { createServiceClient } from '@/lib/supabase/server';
 import { getDealMemoGenerator, DealMemo, DealMemoInput } from '@/lib/ai/deal-memo-generator';
 import { isProEmail } from '@/lib/config/authorized-emails';

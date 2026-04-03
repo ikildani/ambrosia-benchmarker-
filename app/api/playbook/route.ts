@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';

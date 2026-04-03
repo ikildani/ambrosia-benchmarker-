@@ -782,6 +782,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     if (memoLoading || dealMemo) return;
     setMemoLoading(true);
     setMemoError(null);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55000); // 55s client timeout
     try {
       const response = await fetch('/api/deal-memo', {
         method: 'POST',
@@ -794,15 +796,20 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           results: result,
           labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
         }),
+        signal: controller.signal,
+        keepalive: true,
       });
+      clearTimeout(timeoutId);
       if (!response.ok) {
         throw new Error('Failed to generate memo');
       }
       const data = await response.json();
       setDealMemo(data.memo || data);
-    } catch {
-      setMemoError('Unable to generate memo. Please try again.');
-      sonnerToast.error('Failed to generate deal memo');
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+      setMemoError(isTimeout ? 'Generation timed out. Please try again — it usually works on the second attempt.' : 'Unable to generate memo. Please try again.');
+      sonnerToast.error(isTimeout ? 'Deal memo timed out — try again' : 'Failed to generate deal memo');
     } finally {
       setMemoLoading(false);
     }
@@ -1187,7 +1194,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </div>
             </div>
             {/* Blurred content behind */}
-            <div className="filter blur-md opacity-50 pointer-events-none select-none" style={{ minHeight: '400px' }}>
+            <div className="opacity-30 pointer-events-none select-none" style={{ minHeight: '400px' }}>
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7">
                 {/* Placeholder cards */}
                 {[1,2,3,4,5,6].map(i => (
