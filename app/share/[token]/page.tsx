@@ -86,7 +86,7 @@ export default async function SharePage({ params }: Props) {
             <span className="text-[11px] font-bold text-teal-400/80 tracking-[0.15em] uppercase">Deal Intelligence Report</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-black tracking-[-0.03em] leading-[1.05] text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.03em] leading-[1.05] text-white mb-4">
             {modality}<br />
             <span className="text-slate-600">{indication}</span>
           </h1>

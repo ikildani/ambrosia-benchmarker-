@@ -200,9 +200,10 @@ export default function ReportIntakeForm() {
   // Scroll to results
   useEffect(() => {
     if (result && resultsRef.current) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+      return () => clearTimeout(timer);
     }
   }, [result]);
 
@@ -450,7 +451,7 @@ export default function ReportIntakeForm() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Upfront */}
             <div className="bg-[#0c1220]/80 border border-white/[0.06] rounded-xl p-5">
-              <div className="text-[9px] font-bold text-teal-400/60 tracking-[0.15em] uppercase mb-3">Upfront Payment</div>
+              <div className="text-[10px] sm:text-[9px] font-bold text-teal-400/60 tracking-[0.15em] uppercase mb-3">Upfront Payment</div>
               <div className="font-mono text-2xl font-extrabold text-white tracking-tight mb-1">
                 {formatCurrency(terms.upfront.median)}
               </div>
@@ -467,7 +468,7 @@ export default function ReportIntakeForm() {
 
             {/* Total Deal Value */}
             <div className="bg-[#0c1220]/80 border border-white/[0.06] rounded-xl p-5">
-              <div className="text-[9px] font-bold text-cyan-400/60 tracking-[0.15em] uppercase mb-3">Total Deal Value</div>
+              <div className="text-[10px] sm:text-[9px] font-bold text-cyan-400/60 tracking-[0.15em] uppercase mb-3">Total Deal Value</div>
               <div className="font-mono text-2xl font-extrabold text-white tracking-tight mb-1">
                 {formatCurrency(terms.totalDealValue.median)}
               </div>
@@ -484,7 +485,7 @@ export default function ReportIntakeForm() {
 
             {/* Royalties */}
             <div className="bg-[#0c1220]/80 border border-white/[0.06] rounded-xl p-5">
-              <div className="text-[9px] font-bold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Royalty Range</div>
+              <div className="text-[10px] sm:text-[9px] font-bold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Royalty Range</div>
               <div className="font-mono text-2xl font-extrabold text-white tracking-tight mb-1">
                 {royalties.base.low.toFixed(1)}–{royalties.highTier.high.toFixed(1)}%
               </div>
@@ -501,8 +502,8 @@ export default function ReportIntakeForm() {
 
           {/* Milestone Breakdown */}
           <div className="bg-[#0c1220]/80 border border-white/[0.06] rounded-xl p-5">
-            <div className="text-[9px] font-bold text-amber-400/60 tracking-[0.15em] uppercase mb-4">Milestone Structure</div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="text-[10px] sm:text-[10px] sm:text-[9px] font-bold text-amber-400/60 tracking-[0.15em] uppercase mb-4">Milestone Structure</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div>
                 <div className="font-mono text-lg font-bold text-white">{formatCurrency(terms.devMilestones.median)}</div>
                 <div className="text-[10px] text-slate-500">Development</div>

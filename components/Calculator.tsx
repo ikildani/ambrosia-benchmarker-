@@ -484,10 +484,12 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     calc.setResult(null);
   };
 
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const handleApplyTemplate = (template: DealTemplate) => {
     actions.applyTemplate(template);
     // Clear highlight after animation
-    setTimeout(() => actions.clearHighlights(), 2000);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => actions.clearHighlights(), 2000);
     trackParameterChange('template', 'none', template.id);
   };
 

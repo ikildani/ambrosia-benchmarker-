@@ -403,7 +403,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {relatedPosts.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-6">More from the Blog</h2>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {relatedPosts.map((related) => {
                     const rs = CATEGORY_STYLES[related.category] || DEFAULT_STYLE;
                     return (
