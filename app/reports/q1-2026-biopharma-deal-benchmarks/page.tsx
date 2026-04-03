@@ -47,17 +47,17 @@ const EmailGatedDownload = dynamic(() => import('@/components/insights/EmailGate
 const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
 export const metadata: Metadata = {
-  title: 'Q1 2026 Biopharma Deal Benchmarks Report: Analysis of 2,339 Transactions (2020-2026) | Ambrosia Ventures',
-  description: 'Institutional-grade quarterly analysis of biopharma deal economics across 13 therapeutic areas. Phase-by-phase benchmarks with sample sizes, upfront/TDV medians, conditional value trends, and deal structure evolution from 2,339 verified transactions.',
+  title: 'Q1 2026 Biopharma Deal Benchmarks Report: Analysis of 2,600+ Transactions (2020-2026) | Ambrosia Ventures',
+  description: 'Institutional-grade quarterly analysis of biopharma deal economics across 13 therapeutic areas. Phase-by-phase benchmarks with sample sizes, upfront/TDV medians, conditional value trends, and deal structure evolution from 2,600+ verified transactions.',
   keywords: ['biopharma deal benchmarks 2026', 'pharma deal economics Q1 2026', 'biopharma licensing benchmarks', 'pharma acquisitions 2026', 'co-development deals', 'oncology deal benchmarks', 'metabolic deal benchmarks', 'modality premiums biopharma', 'phase 2 upfront benchmarks'],
   openGraph: {
     title: 'Q1 2026 Biopharma Deal Benchmarks Report',
-    description: 'Institutional-grade analysis of biopharma deal economics from 2,339 verified transactions (2020-2026). Phase-by-phase medians with sample sizes across 13 therapeutic areas.',
+    description: 'Institutional-grade analysis of biopharma deal economics from 2,600+ verified transactions (2020-2026). Phase-by-phase medians with sample sizes across 13 therapeutic areas.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks',
-    images: [{ url: '/api/og?title=Q1%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Analysis%20of%202%2C339%20Transactions&type=insight', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=Q1%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Analysis%20of%202%2C600%2B%20Transactions&type=insight', width: 1200, height: 630 }],
   },
-  twitter: { card: 'summary_large_image', title: 'Q1 2026 Biopharma Deal Benchmarks: 2,339 Transactions Analyzed', description: 'Immunology Phase 2 median upfront reaches $400M (n=15). Licensing surpasses acquisitions. Conditional value share declines to 71%.' },
+  twitter: { card: 'summary_large_image', title: 'Q1 2026 Biopharma Deal Benchmarks: 2,600+ Transactions Analyzed', description: 'Immunology Phase 2 median upfront reaches $400M (n=15). Licensing surpasses acquisitions. Conditional value share declines to 71%.' },
   alternates: { canonical: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks' },
 };
 
@@ -174,9 +174,9 @@ export default async function Q1BenchmarkReportPage() {
     { '@type': 'ListItem', position: 3, name: 'Q1 2026 Biopharma Deal Benchmarks' },
   ]};
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
-  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, and deal structure economics from 2,339 verified biopharma transactions (2020-2026).', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
+  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: 'Phase-by-phase upfront payments, total deal values, and deal structure economics from 2,600+ verified biopharma transactions (2020-2026).', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
-    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report analyzes 2,339 verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, press releases, and ClinicalTrials.gov. Deals with undisclosed terms are excluded. Updated weekly via automated ingestion plus manual verification.' } },
+    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: 'The report analyzes 2,600+ verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, press releases, and ClinicalTrials.gov. Deals with undisclosed terms are excluded. Updated weekly via automated ingestion plus manual verification.' } },
     { '@type': 'Question', name: 'Why are immunology Phase 2 upfronts higher than oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Immunology Phase 2 median upfront is $400M (n=15) versus oncology at $282M (n=236). The smaller immunology sample is concentrated in high-value anti-TL1A and CAR-T autoimmune transactions, while oncology reflects a broader distribution across mechanisms and targets.' } },
     { '@type': 'Question', name: 'How should I interpret the sample sizes?', acceptedAnswer: { '@type': 'Answer', text: 'Larger samples (n>100) produce more stable estimates. Smaller samples (n<20) should be treated as directional. We report interquartile ranges (P25-P75) to convey dispersion. Medians are used throughout to minimize distortion from mega-deals.' } },
   ]};
@@ -191,9 +191,10 @@ export default async function Q1BenchmarkReportPage() {
         { id: 'conditional-value', label: 'Conditional Value', number: 3 },
         { id: 'deal-structure', label: 'Deal Structure', number: 4 },
         { id: 'deal-highlights', label: 'Deal Highlights', number: 5 },
-        { id: 'territory-dynamics', label: 'Territory', number: 6 },
+        { id: 'market-themes', label: 'Market Themes', number: 6 },
         { id: 'modality-premiums', label: 'Modality', number: 7 },
-        { id: 'methodology', label: 'Methodology', number: 8 },
+        { id: 'territory-dynamics', label: 'Territory', number: 8 },
+        { id: 'methodology', label: 'Methodology', number: 9 },
       ]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
@@ -233,7 +234,7 @@ export default async function Q1BenchmarkReportPage() {
                 Biopharma Deal<br className="hidden sm:block" /> Benchmarks
               </h1>
               <p className="text-base text-slate-500 max-w-xl leading-relaxed">
-                A quarterly analysis of deal economics across 13 therapeutic areas, drawn from 2,339 verified transactions with publicly disclosed terms. All figures represent medians with sample sizes reported throughout.
+                A quarterly analysis of deal economics across 13 therapeutic areas, drawn from 2,600+ verified transactions with publicly disclosed terms. All figures represent medians with sample sizes reported throughout.
               </p>
             </div>
             <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
@@ -246,7 +247,7 @@ export default async function Q1BenchmarkReportPage() {
           <div className="border-t border-b border-slate-200 py-5 mb-8">
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
               {[
-                { value: '2,339', label: 'Verified Deals' },
+                { value: '2,600+', label: 'Verified Deals' },
                 { value: '13', label: 'Therap. Areas' },
                 { value: '$282M', label: 'Onco Ph2 Upfront' },
                 { value: '190', label: 'Q1 2026 Deals' },
@@ -282,6 +283,7 @@ export default async function Q1BenchmarkReportPage() {
               { num: 3, bold: 'Upfront percentages are rising.', text: 'Average upfront as a percentage of TDV increased from 20.3% (2021) to 29.0% (2026 YTD, n=190). Sellers are negotiating more cash at signing — a structural shift reflecting tighter biotech capital markets and reduced appetite for milestone-heavy packages with uncertain timelines.' },
               { num: 4, bold: 'Licensing is the dominant structure.', text: 'Licensing accounts for 732 deals (31% of all transactions), followed by acquisitions at 530 (23%) and collaborations at 469 (20%). Co-development (294 deals, 13%) and options (289 deals, 12%) round out the structure mix. Licensing volume has grown from 58 deals in 2020 to 101 in Q1 2026 YTD alone.' },
               { num: 5, bold: 'Conditional value share is compressing.', text: 'The share of total deal value tied to milestones (conditional value) declined from 79.7% in 2021 (n=242) to 71.0% in 2026 YTD (n=87). Buyers are paying more upfront and structuring fewer, larger milestone payments tied to high-probability events rather than diffuse clinical and commercial triggers.' },
+              { num: 6, bold: 'China-to-West licensing has fundamentally shifted deal geography.', text: 'Chinese biotech out-licensing surged to $136B in 2025 (+162% YoY) and reached $52B in the first 8 weeks of 2026 \u2014 matching the entire 2024 total. Average China-originated deal size is $1.3B (+76% vs 2025). Six of the top 10 pharma companies have licensed from Chinese biotechs in the last 12 months, with ADCs and PD-1/VEGF bispecifics dominating. Key transactions: AstraZeneca/CSPC ($18.5B), GSK/Hengrui ($12B+), BMS/BioNTech-Biotheus ($11.1B), Pfizer/3SBio ($6B).' },
             ].map(({ num, bold, text }) => (
               <div key={num} className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">{num}</div>
@@ -344,7 +346,7 @@ export default async function Q1BenchmarkReportPage() {
           <div className="mt-10 mb-2">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1C</p>
             <h3 className="text-base font-bold text-slate-900 mb-1">Annual Deal Volume and Average Deal Size (2020-2026)</h3>
-            <p className="text-xs text-slate-400 mb-4">n=2,339 total. 2026 figures are year-to-date through March 31. Volume nearly doubled from 2020 to 2024 while average deal size compressed 42%.</p>
+            <p className="text-xs text-slate-400 mb-4">n=2,600+ total. 2026 figures are year-to-date through March 31. Volume nearly doubled from 2020 to 2024 while average deal size compressed 42%.</p>
           </div>
 
           <DealVolumeStackedChart
@@ -401,7 +403,7 @@ export default async function Q1BenchmarkReportPage() {
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n=2,339 verified transactions with publicly disclosed terms. 2026 YTD through March 31.</p>
+            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n=2,600+ verified transactions with publicly disclosed terms. 2026 YTD through March 31.</p>
           </div>
 
           {/* Insight callout */}
@@ -621,7 +623,7 @@ export default async function Q1BenchmarkReportPage() {
             <h2 className="text-2xl font-bold text-slate-900 mb-6" id="deal-structure">Deal Structure Composition</h2>
 
             <p className="text-slate-700 leading-relaxed mb-5">
-              Licensing is the dominant deal structure, accounting for 732 of 2,339 transactions (31%). Acquisitions represent 530 deals (23%), followed by collaborations at 469 (20%), co-developments at 294 (13%), and options at 289 (12%). This distribution has shifted meaningfully over the sample period: licensing grew from 58 deals in 2020 to 190 in 2024 (3.3x), while acquisitions grew more modestly from 73 to 110 (1.5x).
+              Licensing is the dominant deal structure, accounting for 732 of 2,600+ transactions (31%). Acquisitions represent 530 deals (23%), followed by collaborations at 469 (20%), co-developments at 294 (13%), and options at 289 (12%). This distribution has shifted meaningfully over the sample period: licensing grew from 58 deals in 2020 to 190 in 2024 (3.3x), while acquisitions grew more modestly from 73 to 110 (1.5x).
             </p>
 
             <p className="text-slate-700 leading-relaxed mb-5">
@@ -645,12 +647,12 @@ export default async function Q1BenchmarkReportPage() {
                   <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Acquisitions (23%)</div>
                 </div>
               </div>
-              <p className="text-sm text-slate-500 mt-6 max-w-md mx-auto">n=2,339 total transactions (2020-2026). Licensing surpassed acquisitions as the primary deal-making vehicle.</p>
+              <p className="text-sm text-slate-500 mt-6 max-w-md mx-auto">n=2,600+ total transactions (2020-2026). Licensing surpassed acquisitions as the primary deal-making vehicle.</p>
             </div>
 
             <div className="mt-10 mb-2">
               <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 4A</p>
-              <h3 className="text-base font-bold text-slate-900 mb-4">Deal Structure Split (n=2,339)</h3>
+              <h3 className="text-base font-bold text-slate-900 mb-4">Deal Structure Split (n=2,600+)</h3>
             </div>
 
             <div className="bg-white rounded-lg border border-slate-200 p-6">
@@ -686,7 +688,7 @@ export default async function Q1BenchmarkReportPage() {
                   </tbody>
                 </table>
               </div>
-              <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n=2,339 verified transactions (2020-2026). 2026 YTD through March 31.</p>
+              <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n=2,600+ verified transactions (2020-2026). 2026 YTD through March 31.</p>
             </div>
 
             <div className="mt-10 mb-2">
@@ -773,10 +775,128 @@ export default async function Q1BenchmarkReportPage() {
             )}
         </section>
 
-        {/* ── SECTION 6: MODALITY PREMIUMS ── */}
+        {/* ── SECTION 6: Q1 2026 MARKET THEMES ── */}
         <section className="bg-slate-50 border-y border-slate-200">
           <div className="max-w-4xl mx-auto px-6 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="market-themes">Q1 2026 Market Themes</h2>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              Three structural forces dominated biopharma dealmaking in the first quarter of 2026. These are not cyclical fluctuations &mdash; they represent durable shifts in how pharmaceutical companies build pipelines, source innovation, and allocate capital. Understanding these themes is essential for any BD team negotiating deals in the current environment.
+            </p>
+
+            {/* ── Theme 1: Pipeline Failures Driving Deal Surges ── */}
+            <div className="mt-10 mb-2">
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Theme 1</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Pipeline Failures Are Driving Replacement Deal Surges</h3>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              Five of the top 20 pharmaceutical companies lost late-stage programs in the last six months, triggering an unprecedented wave of replacement transactions. In the first six weeks of 2026 alone, $9.2B in replacement deals were announced &mdash; transactions where the acquirer&apos;s own pipeline failure was a primary catalyst. Average deal size is up 76% versus 2025, reflecting the urgency and competitive intensity of these replacement searches.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4 my-6">
+              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <div className="text-3xl font-bold text-slate-900 tabular-nums">$9.2B</div>
+                <div className="text-sm text-slate-500 mt-1">Replacement deals in first 6 weeks of 2026</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <div className="text-3xl font-bold text-slate-900 tabular-nums">+76%</div>
+                <div className="text-sm text-slate-500 mt-1">Average deal size increase vs 2025</div>
+              </div>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The pattern is stark. Novo Nordisk&apos;s EVOKE trial failure accelerated their move into next-generation delivery platforms, culminating in the Aspect Biosystems partnership. AbbVie wrote down $3.5B on emraclidine following Phase 2 futility, then executed $6.8B in neurology deals within 90 days &mdash; a pace that suggests replacement targets were already identified before the failure readout. Bristol Myers Squibb&apos;s Camzyos nHCM program failure preceded the $1.5B Orbital Therapeutics acquisition by just weeks.
+            </p>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              For biotech sellers, pipeline failures at large pharma create the single most favorable negotiating environment possible. The buyer has board-level pressure to fill a gap, a defined therapeutic area need, and allocated capital. Biotechs with Phase 2 assets in impacted therapeutic areas should expect inbound interest within days of a major failure readout &mdash; and should negotiate accordingly.
+            </p>
+
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+              <p className="text-slate-700 leading-relaxed">
+                Five of the top 20 pharma companies lost late-stage programs in the last six months. The $9.2B in replacement deals in the first six weeks of 2026 suggests a new pattern: pipeline failures are no longer absorbed quietly &mdash; they trigger immediate, aggressive external dealmaking at premium valuations.
+              </p>
+            </div>
+
+            {/* ── Theme 2: China-to-West Licensing Wave ── */}
+            <div className="mt-14 mb-2">
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Theme 2</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">China-to-West Licensing Wave</h3>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              Chinese biotech out-licensing has gone from a niche deal category to the single largest source of global licensing volume. Total deal value from Chinese biotechs reached $136B in 2025 (+162% YoY) and $52B in the first eight weeks of 2026 alone &mdash; matching the entire 2024 total in under two months. This is not cost arbitrage: average China-originated deal size is $1.3B, up 76% versus 2025, reflecting genuine innovation premium.
+            </p>
+
+            <div className="grid sm:grid-cols-3 gap-4 my-6">
+              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <div className="text-3xl font-bold text-slate-900 tabular-nums">$136B</div>
+                <div className="text-sm text-slate-500 mt-1">Chinese biotech out-licensing value in 2025</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <div className="text-3xl font-bold text-slate-900 tabular-nums">$52B</div>
+                <div className="text-sm text-slate-500 mt-1">First 8 weeks of 2026 (equals all of 2024)</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <div className="text-3xl font-bold text-slate-900 tabular-nums">$1.3B</div>
+                <div className="text-sm text-slate-500 mt-1">Avg China-originated deal size (+76% vs 2025)</div>
+              </div>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The PD-1/VEGF bispecific class illustrates the dynamic perfectly: Pfizer licensed from 3SBio, BMS partnered with BioNTech-Biotheus, and Merck acquired rights from LaNova &mdash; three separate Western pharma companies licensing the same drug class from three different Chinese biotechs. Chinese biotechs now account for approximately 90% of global ADC out-licensing, a concentration that reflects Western pipelines being structurally thin in antibody-drug conjugates and bispecific antibodies.
+            </p>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The key transactions underscore the scale: AstraZeneca/CSPC ($18.5B), GSK/Hengrui ($12B+), BMS/BioNTech-Biotheus ($11.1B), and Pfizer/3SBio ($6B). Six of the top 10 pharma companies have now licensed at least one asset from a Chinese biotech in the last 12 months. ADCs and PD-1/VEGF bispecifics dominate the flow, but the trend is expanding into small molecules, degraders, and cell therapies.
+            </p>
+
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+              <p className="text-slate-700 leading-relaxed">
+                This is not cost arbitrage &mdash; deal sizes are UP 76%. Western pharmaceutical pipelines are structurally thin in ADCs and bispecific antibodies, and Chinese biotechs built deep capability in exactly those modalities. The geography of biopharma innovation has permanently shifted.
+              </p>
+            </div>
+
+            {/* ── Theme 3: AI-Driven Drug Discovery ── */}
+            <div className="mt-14 mb-2">
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Theme 3</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">AI-Driven Drug Discovery Enters Deal Flow</h3>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              Eli Lilly&apos;s $2.75B deal with Insilico Medicine (announced March 29, 2026) marks the moment AI drug discovery became a credible dealmaking category. The transaction included $115M upfront for oral therapeutics developed using Insilico&apos;s AI-powered Pharma.AI platform &mdash; validating that AI-discovered molecules can command institutional-scale deal economics, not just research collaboration fees.
+            </p>
+
+            <div className="bg-slate-50 rounded-xl p-5 my-6 border border-slate-100">
+              <div className="text-3xl font-bold text-slate-900 tabular-nums">$2.75B</div>
+              <div className="text-sm text-slate-500 mt-1">Lilly/Insilico Medicine &mdash; largest AI drug discovery licensing deal to date (March 29, 2026)</div>
+            </div>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              The broader pipeline supports the trend: 28 drugs developed using AI tools are now in clinical or preclinical stages, with nearly half at clinical stage. The Lilly/Insilico deal is significant not for the AI label, but because the deal terms &mdash; $115M upfront, $2.75B total value &mdash; are consistent with Phase 1/2 licensing benchmarks for the relevant therapeutic areas. AI-discovered molecules are being priced on clinical merit, not on the novelty of their discovery methodology.
+            </p>
+
+            <p className="text-slate-700 leading-relaxed mb-5">
+              For BD teams, this has immediate practical implications. AI drug discovery companies are graduating from research collaboration partners (typical deal: $50-100M TDV, minimal upfront) to licensing partners commanding institutional-scale economics. Expect 3-5 additional AI-originated deals exceeding $1B TDV before year-end 2026, concentrated in oncology small molecules and metabolic targets where AI-driven structure prediction has the most validated track record.
+            </p>
+
+            <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+              <p className="text-slate-700 leading-relaxed">
+                AI drug discovery has crossed the deal threshold. The Lilly/Insilico deal proves AI-discovered molecules are priced on clinical merit, not novelty. With 28 AI-developed drugs in pipeline and nearly half at clinical stage, this category will generate meaningful deal flow through the remainder of 2026.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 7: MODALITY PREMIUMS ── */}
+        <section className="bg-slate-50 border-y border-slate-200">
+          <div className="max-w-4xl mx-auto px-6 py-16">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 7</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-6" id="modality-premiums">Modality Premiums</h2>
 
             <p className="text-slate-700 leading-relaxed mb-5">
@@ -788,7 +908,7 @@ export default async function Q1BenchmarkReportPage() {
             </p>
 
             <div className="mt-10 mb-2">
-              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 6A</p>
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 7A</p>
               <h3 className="text-base font-bold text-slate-900 mb-1">Modality Multipliers vs Small Molecule Baseline</h3>
               <p className="text-xs text-slate-400 mb-4">Multipliers applied to Phase 2 oncology small molecule median ($282M, n=236). Radiopharmaceuticals command the largest premium at 1.60x.</p>
             </div>
@@ -808,7 +928,7 @@ export default async function Q1BenchmarkReportPage() {
             />
 
             <div className="mt-10 mb-2">
-              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 6B</p>
+              <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 7B</p>
               <h3 className="text-base font-bold text-slate-900 mb-4">Modality Multipliers and Implied Phase 2 Upfronts</h3>
             </div>
 
@@ -848,9 +968,9 @@ export default async function Q1BenchmarkReportPage() {
           </div>
         </section>
 
-        {/* ── SECTION 7: TERRITORY DYNAMICS ── */}
+        {/* ── SECTION 8: TERRITORY DYNAMICS ── */}
         <section className="max-w-4xl mx-auto px-6 py-16">
-          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 7</p>
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 8</p>
           <h2 className="text-2xl font-bold text-slate-900 mb-6" id="territory-dynamics">Territory Dynamics</h2>
 
           <p className="text-slate-700 leading-relaxed mb-5">
@@ -862,7 +982,7 @@ export default async function Q1BenchmarkReportPage() {
           </p>
 
           <div className="mt-10 mb-2">
-            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 7</p>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 8</p>
             <h3 className="text-base font-bold text-slate-900 mb-1">Territory Value as % of Global Deal Economics</h3>
             <p className="text-xs text-slate-400 mb-4">US-only deals capture 65-70% of global value; China standalone has declined to 5-8%.</p>
           </div>
@@ -886,7 +1006,7 @@ export default async function Q1BenchmarkReportPage() {
           <div className="max-w-4xl mx-auto px-6 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your Own Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of 2,339 verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of 2,600+ verified transactions.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </div>
         </section>
@@ -900,7 +1020,7 @@ export default async function Q1BenchmarkReportPage() {
             <div>
               <h3 className="text-sm font-bold text-slate-900 mb-2">Sample Selection</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                This report analyzes 2,339 biopharma transactions executed between January 1, 2020 and March 31, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Each transaction is verified against at least one primary source before inclusion.
+                This report analyzes 2,600+ biopharma transactions executed between January 1, 2020 and March 31, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Each transaction is verified against at least one primary source before inclusion.
               </p>
             </div>
 
@@ -945,7 +1065,7 @@ export default async function Q1BenchmarkReportPage() {
         <section className="max-w-4xl mx-auto px-6 pb-12">
           <InlineEmailCapture
             heading="Get the Q2 Report First"
-            description="Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from 2,339+ verified transactions."
+            description="Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from 2,600+ verified transactions."
             source="q1-2026-report"
           />
         </section>
@@ -972,7 +1092,7 @@ export default async function Q1BenchmarkReportPage() {
           <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
           <div className="divide-y divide-slate-200">
             {[
-              { q: 'What data sources does this report use?', a: 'The report analyzes 2,339 verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. Deals with undisclosed financial terms are excluded. New transactions are ingested weekly via automated monitoring and verified before inclusion.' },
+              { q: 'What data sources does this report use?', a: 'The report analyzes 2,600+ verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. Deals with undisclosed financial terms are excluded. New transactions are ingested weekly via automated monitoring and verified before inclusion.' },
               { q: 'How should I interpret small sample sizes?', a: 'Cohorts with n>100 (e.g., oncology Phase 2, n=236) produce stable medians with tight interquartile ranges. Cohorts with n<20 (e.g., immunology Phase 2, n=15) are directional — the median is real but the confidence interval is wide. Cohorts with n<10 (e.g., hematology Phase 2, n=5) should be treated as indicative only. We report sample sizes and P25-P75 ranges throughout to enable readers to calibrate confidence.' },
               { q: 'Why are upfront percentages rising?', a: 'Average upfront as % of TDV increased from 20.3% (2021) to 29.0% (2026 YTD). Three factors drive this: (1) tighter biotech capital markets requiring larger upfronts to fund operations, (2) competitive intensity among buyers for differentiated assets, and (3) seller sophistication in negotiating upfront-weighted structures that reduce milestone risk.' },
               { q: 'What does conditional value mean?', a: 'Conditional value is the share of total deal value tied to milestones and contingent payments (regulatory, commercial, sales-based). A 71% conditional value means 71 cents of every deal dollar is contingent on future events. The declining trend (from 80% in 2021 to 71% in 2026) means more value is shifting to upfront payments.' },
