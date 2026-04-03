@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -354,6 +355,8 @@ export default function RNPVvsDCFPage() {
               <li><strong>You are running Monte Carlo sensitivity analysis.</strong> Simulating PoS as a distribution (rather than a point estimate) bridges the two methods and produces a range of outcomes that captures both clinical and commercial uncertainty.</li>
             </ul>
           </div>
+
+          <InsightEmailCapture slug="rnpv-vs-dcf-biotech-valuation" />
 
           <InsightCTA
             variant="mid"

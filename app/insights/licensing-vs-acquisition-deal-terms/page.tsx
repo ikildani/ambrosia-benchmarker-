@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -377,6 +378,8 @@ export default function LicensingVsAcquisitionPage() {
               For a drug that achieves $3B+ in peak annual sales, licensing economics (upfront + milestones + 12% royalties over 12 years) can deliver $4-6B in total value — potentially exceeding a $3B acquisition price. But this requires commercial success, which is never guaranteed. The licensing vs acquisition decision is fundamentally a bet on your asset&apos;s commercial trajectory.
             </p>
           </div>
+
+          <InsightEmailCapture slug="licensing-vs-acquisition-deal-terms" />
 
           <InsightCTA
             variant="mid"

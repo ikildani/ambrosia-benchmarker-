@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -404,6 +405,8 @@ export default function Phase2VsPhase3Page() {
               <li><strong>Regulatory tailwinds.</strong> Breakthrough designation, Fast Track, or orphan status reduces Phase 3 cost and timeline, improving the expected value calculation.</li>
             </ul>
           </div>
+
+          <InsightEmailCapture slug="phase-2-vs-phase-3-deal-economics" />
 
           <InsightCTA
             variant="mid"

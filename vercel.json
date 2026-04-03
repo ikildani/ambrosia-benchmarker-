@@ -145,6 +145,10 @@
     {
       "path": "/api/cron/indication-enrichment",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/seo-content-suggestions",
+      "schedule": "0 7 * * 3"
     }
   ]
 }

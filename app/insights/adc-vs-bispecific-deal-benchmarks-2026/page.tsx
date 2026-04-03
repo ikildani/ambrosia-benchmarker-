@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -383,6 +384,8 @@ export default function ADCvsBispecificPage() {
               ]}
             />
           </div>
+
+          <InsightEmailCapture slug="adc-vs-bispecific-deal-benchmarks-2026" />
 
           <InsightCTA
             variant="mid"

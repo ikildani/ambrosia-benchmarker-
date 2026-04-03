@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
@@ -371,6 +372,8 @@ export default function HowMuchIsBiotechAssetWorthPage() {
               The quality and maturity of your clinical data is the single most negotiable factor in valuation. Assets with biomarker-validated patient selection strategies, objective response endpoints, and durable follow-up data command 40-60% premiums over assets with less mature data packages. This is the highest-leverage area for value creation before going to market.
             </p>
           </div>
+
+          <InsightEmailCapture slug="how-much-is-my-biotech-asset-worth" />
 
           <InsightCTA
             variant="mid"

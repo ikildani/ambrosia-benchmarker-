@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
@@ -354,6 +355,8 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
               <strong>5. Predictive analytics.</strong> The most advanced platforms go beyond historical data to predict which companies are most likely to do deals in your space. Ambrosia Ventures&apos; <Link href="/insights/pharma-partner-identification-guide" className="text-teal-600 font-medium hover:text-teal-700">Pharma Intent Score</Link> is an 8-factor predictive model that forecasts deal likelihood based on pipeline gaps, patent cliffs, competitive pressure, deal velocity, and other signals.
             </p>
           </div>
+
+          <InsightEmailCapture slug="biopharma-deal-benchmarking-tools-2026" />
 
           <InsightCTA
             variant="mid"

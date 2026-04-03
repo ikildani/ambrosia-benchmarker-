@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
@@ -337,6 +338,8 @@ export default function DealCommitteePresentationGuidePage() {
               ]}
             />
           </div>
+
+          <InsightEmailCapture slug="deal-committee-presentation-guide" />
 
           <InsightCTA
             variant="mid"

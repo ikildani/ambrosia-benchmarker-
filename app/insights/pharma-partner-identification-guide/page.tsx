@@ -5,6 +5,7 @@ import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
@@ -383,6 +384,8 @@ export default function PharmaPartnerIdentificationGuidePage() {
               Rank your target partners into three tiers: Tier 1 (3-5 companies with highest intent scores and strategic fit — approach first), Tier 2 (5-7 companies with strong fit but moderate urgency — approach in parallel as a competitive dynamic), and Tier 3 (3-5 backup options). Approaching Tier 1 and Tier 2 simultaneously creates the competitive tension that drives upfront premiums of 20-40%.
             </p>
           </div>
+
+          <InsightEmailCapture slug="pharma-partner-identification-guide" />
 
           <InsightCTA
             variant="mid"
