@@ -1,61 +1,109 @@
-# Ambrosia Ventures Biopharma Deal Calculator
+# Ambrosia Ventures — Biopharma Deal Intelligence Platform
 
-> Instant biopharma deal term benchmarks, partner matching, and milestone breakdowns powered by 500+ real deals.
+> The most comprehensive biopharma deal benchmarking and valuation platform. 2,500+ verified transactions, 850+ pharma company profiles, 562 indications across 12 therapeutic areas. Institutional-grade rNPV, Monte Carlo, real options, and buyer-specific deal valuation.
 
 ## About
 
-The Ambrosia Ventures Biopharma Deal Calculator is a web-based tool that provides instant, data-driven estimates of biopharma licensing and partnership deal terms. It is built on an analyzed dataset of 500+ real biopharma transactions and is available at https://calculator.ambrosiaventures.co.
+Ambrosia Ventures operates the Biopharma Deal Intelligence Platform at https://calculator.ambrosiaventures.co — a web-based tool providing instant, data-driven deal benchmarks, asset valuation, partner matching, and negotiation intelligence for biopharma licensing, acquisition, co-development, option, and collaboration transactions.
 
-## Key Capabilities
-
-- Instant deal term benchmarks: get estimated upfront payments, milestones, royalties, and total deal values based on asset characteristics.
-- Partner matching: identify likely acquirer/partner companies based on therapeutic area, modality, and stage.
-- Milestone breakdowns: detailed development, regulatory, and commercial milestone estimates.
-- Phase-adjusted baselines: calculations adjust by development phase from Preclinical through Approved.
+The platform is used by BD teams, search & evaluation professionals, biotech founders, and investors to benchmark deal terms, identify optimal partners, and model asset value across development stages.
 
 ## Data Coverage
 
-The calculator draws from 500+ analyzed real biopharma deals spanning:
+- **2,500+ verified transactions** sourced daily from SEC 8-K filings, FTC pre-merger notifications, ClinicalTrials.gov, press releases, and regulatory databases
+- **850+ pharma/biotech company profiles** with patent cliff data, pipeline gaps, deal history, and acquisition appetite scoring
+- **562 indications** across 12 therapeutic areas
+- **40+ modalities** including small molecules, mAbs, ADCs, bispecifics, CAR-T, gene therapy, radiopharmaceuticals, oligonucleotides, mRNA, siRNA
 
-- Oncology: 17 modalities and 19+ indications
-- Neurology: 6 modalities and 15 indications
+## 12 Therapeutic Areas
 
-### Hot Modalities (Premium Multipliers)
+1. Oncology (77 indications) — solid tumors, hematologic malignancies, biomarker-defined/tumor-agnostic
+2. Neurology (59 indications) — neurodegeneration, psychiatry, movement disorders, neuromuscular
+3. Immunology (64 indications) — autoimmune, transplant, renal, inflammatory
+4. Metabolic (50 indications) — obesity/GLP-1, diabetes, endocrine, cardiovascular-metabolic
+5. Rare Disease (50 indications) — neuromuscular, lysosomal storage, neurogenetic, skeletal
+6. Hematology (43 indications) — lymphoid, myeloid, plasma cell, non-malignant
+7. Infectious Disease (40 indications) — viral, bacterial, fungal, vector-borne
+8. Dermatology (40 indications) — inflammatory, psoriasis, autoimmune, chronic pruritic
+9. Gastroenterology (39 indications) — IBD, eosinophilic, hepatobiliary, esophageal
+10. Women's Health (35 indications) — menopause, maternal, pelvic, reproductive
+11. Cardiovascular (33 indications) — heart failure, arrhythmia, vascular, structural
+12. Ophthalmology (32 indications) — retinal, inherited, corneal, glaucoma
 
-- Radiopharmaceuticals: 1.60x premium
-- ADCs (Antibody-Drug Conjugates): 1.45x premium
-- Molecular Glue: 1.40x premium
-- CAR-T Solid Tumor: 1.40x premium
+## 14 Calculation Engines
 
-### Phase Baselines (Total Deal Value)
+1. **Deal Terms Engine** — upfront payments, milestone structures, royalty ranges calibrated to TA, modality, phase, deal type, territory, and 150+ indication-level modifiers
+2. **rNPV (Risk-Adjusted NPV)** — phase-gated probability of success with 12 TA-specific PoS tables, modality adjustments, regulatory designation uplifts, and cross-validation against deal benchmarks
+3. **Monte Carlo Simulation** — 10,000-iteration stochastic valuation with correlated variables (PoS, peak sales, WACC, timeline, pricing) and phase-dependent correlation matrices
+4. **Tornado Sensitivity** — rank-ordered parameter sensitivity showing which inputs most strongly drive NPV variance
+5. **Partner Matching** — 850+ companies scored on therapeutic alignment, pipeline gaps, deal history, geography fit, and financial capacity
+6. **Pharma Intent Score** — 10-factor predictive model (patent cliff pressure, deal velocity, pipeline gap, alignment, competitive pressure, strategic signals, research investment, deal persistence, self-saturation penalty, portfolio balance) with backtesting calibration against 378 historical deals
+7. **Competitive Landscape** — pipeline mapping from ClinicalTrials.gov with crowding scores, differentiation analysis
+8. **Market Sizing** — TAM/SAM/SOM with epidemiological data, patient funnel, revenue projections
+9. **Deal Valuation Waterfall** — step-down from unadjusted NPV through PoS discount, strategic premium, deal structure allocation to upfront/milestones/royalties
+10. **Scenario Comparison** — Bear/Base/Bull deterministic scenarios with probability-weighted expected value
+11. **Real Options Overlay** — Cox-Ross-Rubinstein binomial lattice treating each clinical phase as a compound call option, capturing flexibility premium
+12. **Competitive Dynamics** — time-varying market share erosion modeling with auto-generated competitor timelines
+13. **Lifecycle Extensions** — label expansion, pediatric exclusivity, combination approval modeling
+14. **Buyer-Specific Valuation** — connects intent score to rNPV to show what a specific buyer would pay vs generic market value, with 5-factor strategic premium
 
-- Preclinical: ~$400M total
-- Phase 1: ~$800M total
-- Phase 2: ~$1.5B total
-- Phase 3: ~$2.8B total
-- Approved: ~$4.5B total
+## Deal Structure Benchmarks
 
-## Key Benchmark Ranges
+Typical deal structures from the platform's database:
 
-Typical deal structures include:
+### By Deal Type
+- Licensing: 14% upfront, 86% milestones
+- Acquisition: 51% upfront, 49% milestones
+- Co-development: 15% upfront, 85% milestones
+- Option: 14% upfront, 86% milestones
+- Collaboration: 16% upfront, 84% milestones
 
-- Upfront payments: 5-20% of total deal value depending on phase and modality
-- Development milestones: 20-35% of total deal value
-- Regulatory milestones: 10-20% of total deal value
-- Commercial milestones: 25-40% of total deal value
-- Royalty rates: tiered, typically ranging from mid-single digits to low-double digits
+### By Phase (Median Total Deal Value)
+- Preclinical: ~$400M
+- Phase 1: ~$800M
+- Phase 2: ~$1.5B
+- Phase 3: ~$2.8B
+- Approved: ~$4.5B
+
+### Hot Modalities (Premium Multipliers vs Small Molecule Baseline)
+- Radiopharmaceuticals: 1.60x
+- ADCs (Antibody-Drug Conjugates): 1.45x
+- Molecular Glue: 1.40x
+- CAR-T Solid Tumor: 1.40x
+- Bispecific Antibodies: 1.35x
+- Gene Therapy (AAV): 1.30x
+
+## Key Insight Pages
+
+- https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation — When to use rNPV vs DCF, PoS adjustment impact by phase
+- https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms — Side-by-side deal structure comparison
+- https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics — Proof-of-concept inflection and deal timing
+- https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026 — ADC vs bispecific deal terms with 2026 market data
+- https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026 — Annual deal benchmarks report
+- https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026 — Out-licensing term structures
 
 ## Pages
 
-- https://calculator.ambrosiaventures.co/ : Homepage with overview and quick start
-- https://calculator.ambrosiaventures.co/calculator : Main calculator tool for generating deal estimates
-- https://calculator.ambrosiaventures.co/benchmarks/ : Benchmark data by therapeutic area, modality, and phase
-
-## How to Use
-
-Visit https://calculator.ambrosiaventures.co/calculator to get instant deal term estimates. Select your therapeutic area, indication, modality, and development phase to receive a comprehensive deal structure estimate including upfront payment, milestones, royalties, and potential partners.
+- https://calculator.ambrosiaventures.co/ — Homepage with live demo and deal database coverage
+- https://calculator.ambrosiaventures.co/calculator — Main calculator with full intake form
+- https://calculator.ambrosiaventures.co/report — Custom deal report ($499) with inline intake form
+- https://calculator.ambrosiaventures.co/benchmarks/ — 251 benchmark pages by TA, modality, phase
+- https://calculator.ambrosiaventures.co/companies/ — 200+ company profiles with deal history
+- https://calculator.ambrosiaventures.co/therapeutic-areas/ — 12 TA-specific market pages
+- https://calculator.ambrosiaventures.co/insights/ — Deal intelligence articles and analysis
+- https://calculator.ambrosiaventures.co/guides/ — How-to guides for deal valuation and negotiation
+- https://calculator.ambrosiaventures.co/data/ — 360 programmatic data pages by TA × phase × territory
+- https://calculator.ambrosiaventures.co/glossary/ — 100+ biopharma deal term definitions
+- https://calculator.ambrosiaventures.co/methodology — Model design, data sources, and methodology
 
 ## Pricing
 
-- Free tier: 2 calculations per month
-- Pro tier: unlimited calculations, PDF export, and detailed partner matching information
+- Free: 5 calculations per month, basic deal term ranges
+- Pro: $99/month — unlimited calculations, rNPV, Monte Carlo, partner matching, PDF/Excel export
+- Report: $499 one-time — full deal intelligence report with all engines, buyer-specific valuation, negotiation playbook
+
+## Contact
+
+- Website: https://calculator.ambrosiaventures.co
+- Company: Ambrosia Ventures
+- Domain: ambrosiaventures.co

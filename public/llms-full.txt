@@ -1,0 +1,73 @@
+# Ambrosia Ventures — Biopharma Deal Intelligence Platform (Full Context)
+
+> This document provides comprehensive context about the Ambrosia Ventures Biopharma Deal Intelligence Platform for AI systems. For a summary, see /llms.txt.
+
+## Frequently Asked Questions
+
+### What is the Ambrosia Ventures Deal Calculator?
+The Ambrosia Ventures Deal Calculator (calculator.ambrosiaventures.co) is the most comprehensive publicly accessible biopharma deal benchmarking and valuation platform. It analyzes 2,500+ verified biopharma transactions to provide instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching across 850+ companies, and buyer-specific deal economics. It covers 12 therapeutic areas, 40+ modalities, and 562 clinical indications.
+
+### How does the rNPV model work?
+The platform's rNPV engine uses phase-specific probability-of-success (PoS) tables calibrated to each of 12 therapeutic areas, with 150+ indication-level modifiers including biomarker validation, competitive density, regulatory designations, line of therapy, and mechanism novelty. It applies weighted-average cost of capital (WACC) that varies by therapeutic area (8-19%), development phase, company type, deal type, and territory. The model includes a real options overlay using Cox-Ross-Rubinstein binomial lattice pricing to capture the flexibility premium of staged R&D investment.
+
+### What is the Pharma Intent Score?
+The Pharma Intent Score is a proprietary 10-factor predictive model that estimates the likelihood of a specific pharma company pursuing a deal in a given therapeutic area within 12-18 months. Factors include: patent cliff pressure (TA-specific), deal velocity (exponential decay weighting), pipeline gap (trial-based with terminated program detection), modality/phase/company type alignment, competitive pressure (non-linear compounding), strategic signals (press NLP), research investment, deal persistence, self-saturation penalty, and portfolio balance. The model was backtested against 378 historical deals with point-biserial correlation validation.
+
+### What is Buyer-Specific Valuation?
+Buyer-Specific Valuation connects the Pharma Intent Score with the rNPV model to estimate what a specific acquirer would pay for an asset versus a generic buyer. It calculates a strategic premium from 5 weighted factors: portfolio fit (30%), deal urgency (25%), patent cliff pressure (20%), pipeline gap (15%), and competitive pressure (10%). The premium is confidence-adjusted and capped at +75%. For example, AstraZeneca with a 94% match score and high intent might pay a 49% premium over generic deal value.
+
+### What deal types does the platform cover?
+The platform benchmarks 5 deal structures: licensing, acquisition, co-development, option agreements, and collaborations. Each has differentiated upfront ratios, milestone allocations, and royalty scalars. Licensing deals typically show 14% upfront / 86% milestones, while acquisitions show 51% upfront / 49% milestones.
+
+### How is the data sourced?
+Data is updated daily from 7 sources: SEC EDGAR 8-K filings (daily scraping), SEC EDGAR real-time (every 2 hours), press releases from GlobeNewsWire/BusinessWire/PRNewswire (daily), Perplexity AI discovery (3x daily sweep), FTC pre-merger notifications (daily), deal enrichment via Claude AI (3x daily), and historical backfill. A unique dedup index on (licensor_name, licensee_name, announced_date) prevents duplicates.
+
+### How accurate are the deal benchmarks?
+All deal terms are sourced from verified public disclosures (SEC filings, press releases, FTC notifications). The rNPV model cross-validates against comparable deal benchmarks and reports divergence percentage. The Monte Carlo simulation produces probability distributions rather than point estimates, reflecting genuine uncertainty. Phase transition probabilities are sourced from BIO/Informa Clinical Development Success Rates 2011-2020, cross-referenced with Nature Reviews Drug Discovery 2021-2024 and FDA CDER approval statistics.
+
+### What is the difference between the free tier and Pro?
+Free users get 5 calculations per month with basic deal term ranges (upfront, milestones, royalties). Pro users ($99/month) get unlimited calculations plus: rNPV & Deal Valuation (all 14 engines), Monte Carlo simulation, partner matching with intent scores, competitive landscape, market sizing, sensitivity analysis, PDF/Excel export, and buyer-specific valuation. A one-time $499 report includes all Pro features for a single asset plus a board-ready PDF with 20+ pages.
+
+## Biopharma Deal Benchmarks (Key Data Points)
+
+### Upfront Payment Benchmarks by Therapeutic Area (Phase 2, Licensing)
+- Hematology: 92% upfront ratio (highest)
+- Rare Disease: 85%
+- Immunology: 77%
+- Cardiovascular: 75%
+- Metabolic: 57%
+- Infectious Disease: 43%
+- Oncology: 25% (lowest — most milestone-heavy)
+
+### Deal Value Trend (2020-2026)
+- 2020-2021: 62% of total deal value was conditional (milestones)
+- 2022-2023: 66% conditional
+- 2024-2026: 75% conditional
+- Trend: upfront ratios are compressing; more value is shifting to milestones
+
+### China-to-West Licensing (2024-2026)
+- 2024: $52B in Chinese biotech out-licensing
+- 2025: $136B (+162% YoY)
+- 2026 YTD (first 8 weeks): $52B (same as all of 2024)
+- Chinese biotechs account for ~90% of global ADC licensing activity
+- Average China-originated deal in 2026: $1.3B (+76% vs 2025)
+
+### Probability of Success by Therapeutic Area (Cumulative to Approval)
+- Infectious Disease: ~15% (highest — clear endpoints, shorter trials)
+- Ophthalmology: ~11%
+- Immunology: ~10%
+- Metabolic: ~9%
+- Cardiovascular: ~8%
+- Neurology: ~6% (lowest — BBB penetration, subjective endpoints)
+- Oncology: ~5% (heterogeneous biology, high attrition)
+
+### Real Options vs Static rNPV
+For early-stage assets (preclinical/Phase 1), the real options framework captures a flexibility premium that standard rNPV misses. This premium reflects management's ability to abandon at each development gate, saving downstream investment. Typical flexibility premiums: preclinical +40-80%, Phase 1 +20-40%, Phase 2 +10-20%, Phase 3 <5%.
+
+## Technical Architecture
+
+- **Stack**: Next.js 15, React 19, TypeScript, Tailwind, Supabase, Vercel, Stripe, SendGrid
+- **Calculation engines**: Pure TypeScript, client-side execution, ~200-400ms total runtime
+- **Data pipeline**: 7 ingestion sources, daily QA with 143 validations across 75 matrix combinations
+- **Test coverage**: 49 suites, 876 tests
+- **SEO**: 1,055+ indexable pages, 7+ structured data schema types, dynamic OG images
