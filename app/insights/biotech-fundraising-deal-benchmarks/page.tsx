@@ -77,6 +77,54 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
   );
 }
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-36 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${Math.max((item.value / maxValue) * 100, 8)}%`, backgroundColor: color, opacity: 0.8 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BiotechFundraisingDealBenchmarksPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -231,6 +279,12 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             <p className="text-xs text-slate-400 mt-3">Fundraising ranges reflect oncology/immunology. Licensing from Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
+          <ComparisonCard
+            label="Phase 2 Biotech: Two Paths to $200M"
+            left={{ title: 'Series C ($200M raise)', value: '30% dilution', sub: 'Founders go from 20% to 14% ownership' }}
+            right={{ title: 'Licensing ($200M upfront)', value: '0% dilution', sub: 'Plus milestones + 12-18% royalties' }}
+          />
+
           <div className="my-8 grid sm:grid-cols-3 gap-4">
             <StatCard value="$180M" label="Phase 2 Licensing Upfront" sub="Median, oncology" />
             <StatCard value="20-25%" label="Series C Dilution" sub="Typical equity round" />
@@ -262,6 +316,74 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             <p>
               If your next value inflection (Phase 3 data readout, regulatory filing, approval) is 3+ years away and requires $300M+ in capital, a large pharma partner with existing clinical operations, regulatory expertise, and commercial infrastructure may reach that inflection faster. Time is the most expensive resource in drug development — 12-18 months of delay in a peak-sales ramp is worth hundreds of millions in lost revenue.
             </p>
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Founder Value Created by Path (Phase 2 Oncology Asset)</h3>
+            <HorizontalBarChart
+              maxValue={2500}
+              color="#059669"
+              data={[
+                { label: 'License (high PoS)', value: 1800, displayValue: '$1.8B cumulative' },
+                { label: 'License (med PoS)', value: 900, displayValue: '$900M cumulative' },
+                { label: 'IPO Path', value: 2500, displayValue: '$2.5B (if successful)' },
+                { label: 'Series C + Phase 3', value: 1200, displayValue: '$1.2B (risk-adj.)' },
+                { label: 'License (low PoS)', value: 450, displayValue: '$450M cumulative' },
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-3">Risk-adjusted founder value after dilution. Licensing cumulative = upfront + milestones + royalty NPV. Source: Ambrosia Ventures modeling.</p>
+          </div>
+
+          {/* Visual Decision Framework */}
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-6">3-Factor Decision Framework</h3>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {[
+                {
+                  factor: 'Probability of Success',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  ),
+                  license: 'Below 30%',
+                  raise: 'Above 50%',
+                },
+                {
+                  factor: 'Founder Dilution',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  license: 'Below 15% ownership',
+                  raise: 'Above 25% ownership',
+                },
+                {
+                  factor: 'Time to Inflection',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  license: '3+ years, $300M+',
+                  raise: 'Under 18 months',
+                },
+              ].map((item, i) => (
+                <div key={i} className="text-center p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex justify-center mb-3">{item.icon}</div>
+                  <div className="text-sm font-bold text-slate-800 mb-3">{item.factor}</div>
+                  <div className="space-y-2">
+                    <div className="text-xs bg-emerald-100 text-emerald-800 rounded-full px-3 py-1 font-medium">
+                      License: {item.license}
+                    </div>
+                    <div className="text-xs bg-slate-200 text-slate-700 rounded-full px-3 py-1 font-medium">
+                      Raise: {item.raise}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">

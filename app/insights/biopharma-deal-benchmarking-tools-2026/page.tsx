@@ -77,6 +77,54 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
   );
 }
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-36 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${Math.max((item.value / maxValue) * 100, 8)}%`, backgroundColor: color, opacity: 0.8 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -231,6 +279,15 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
               BD teams have three approaches to deal benchmarking, each with distinct trade-offs in cost, speed, and depth. The right approach depends on your deal volume, internal capabilities, and time constraints.
             </p>
 
+          </div>
+
+          <ComparisonCard
+            label="Time & Cost to First Benchmark"
+            left={{ title: 'Manual Research', value: '$0 + 40hrs', sub: 'Internal analyst time, 2-4 weeks' }}
+            right={{ title: 'Ambrosia Ventures', value: `${PRICING.PRO_MONTHLY} + 30s`, sub: 'Instant results, weekly updates' }}
+          />
+
+          <div className="prose prose-slate prose-lg max-w-none">
             <h3>Manual Research: Lowest Cost, Highest Risk</h3>
             <p>
               Many BD teams still benchmark deals by manually searching SEC filings, press releases, and industry reports. This approach is free but produces incomplete datasets (typically 10-30 comparable deals), takes 2-4 weeks per analysis, and introduces selection bias — analysts tend to find deals that confirm their existing expectations. Manual research is viable for teams doing 1-2 deals per year with generous timelines.
@@ -383,6 +440,73 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
               <li><strong>Boutique consulting</strong> (per engagement): $50,000-$150,000 per deal analysis. Deep strategic context but slow turnaround (4-8 weeks) and non-repeatable.</li>
               <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 8 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses. Or {PRICING.REPORT_PRICE} for a single deal report.</li>
             </ul>
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Annual Cost Comparison</h3>
+            <HorizontalBarChart
+              maxValue={500}
+              color="#6366f1"
+              data={[
+                { label: 'Advisory Firm', value: 500, displayValue: '$500K+/yr' },
+                { label: 'Consulting (1 deal)', value: 100, displayValue: '$50-150K' },
+                { label: 'Evaluate Pharma', value: 50, displayValue: '$25-50K/yr' },
+                { label: 'GlobalData', value: 100, displayValue: '$50-200K/yr' },
+                { label: 'Ambrosia Pro', value: 3.6, displayValue: '$3.6K/yr' },
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-4 text-center">Ambrosia Pro delivers 8 engines + {DEAL_STATS.TOTAL_DEALS} deals at 95% less than enterprise alternatives.</p>
+          </div>
+
+          {/* Visual feature comparison with check/X marks */}
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-5">At-a-Glance: Key Differentiators</h3>
+            <div className="space-y-3">
+              {[
+                { feature: 'Real-time deal data (weekly updates)', ambrosia: true, enterprise: false, consultant: false },
+                { feature: 'Monte Carlo + Tornado sensitivity', ambrosia: true, enterprise: false, consultant: false },
+                { feature: 'AI-scored partner matching', ambrosia: true, enterprise: false, consultant: false },
+                { feature: 'Pharma Intent Score (predictive)', ambrosia: true, enterprise: false, consultant: false },
+                { feature: 'Board-ready reports in 60 seconds', ambrosia: true, enterprise: false, consultant: false },
+                { feature: 'Self-service (no analyst required)', ambrosia: true, enterprise: true, consultant: false },
+                { feature: 'Deep strategic context', ambrosia: false, enterprise: false, consultant: true },
+                { feature: 'Broad market intelligence', ambrosia: false, enterprise: true, consultant: false },
+              ].map((row, i) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
+                  <div className="flex-1 text-sm text-slate-700">{row.feature}</div>
+                  <div className="w-20 flex justify-center">
+                    {row.ambrosia ? (
+                      <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                    )}
+                  </div>
+                  <div className="w-20 flex justify-center">
+                    {row.enterprise ? (
+                      <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                    )}
+                  </div>
+                  <div className="w-20 flex justify-center">
+                    {row.consultant ? (
+                      <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-200">
+              <div className="flex-1" />
+              <div className="w-20 text-center text-xs font-bold text-teal-700">Ambrosia</div>
+              <div className="w-20 text-center text-xs font-medium text-slate-500">Enterprise</div>
+              <div className="w-20 text-center text-xs font-medium text-slate-500">Consulting</div>
+            </div>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
 
             <p>
               The ROI calculation is straightforward: if a platform helps you negotiate even 1% higher upfront on a $100M deal, it has paid for itself for the next 28 years at {PRICING.PRO_MONTHLY}.

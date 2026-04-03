@@ -38,6 +38,67 @@ export const metadata: Metadata = {
   },
 };
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-32 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden relative">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.85 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualStatRow({ stats }: { stats: { value: string; label: string; color?: string }[] }) {
+  return (
+    <div className="grid gap-4 my-8" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
+      {stats.map((s, i) => (
+        <div key={i} className="text-center py-6 px-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100">
+          <div className={`text-3xl sm:text-4xl font-extrabold ${s.color || 'text-slate-900'}`}>{s.value}</div>
+          <div className="text-sm text-slate-500 mt-2 font-medium">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StatCard({ value, label, sub }: { value: string; label: string; sub?: string }) {
   return (
     <div className="bg-slate-50 rounded-xl p-6 text-center">
@@ -231,6 +292,28 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Median Total Deal Value by Development Phase</h3>
+            <HorizontalBarChart
+              data={[
+                { label: 'Preclinical', value: 325, displayValue: '$150-500M' },
+                { label: 'Phase 1', value: 750, displayValue: '$300M-1.2B' },
+                { label: 'Phase 2', value: 2000, displayValue: '$500M-3.5B' },
+                { label: 'Phase 3', value: 3000, displayValue: '$1.0-5.0B' },
+                { label: 'Approved', value: 6000, displayValue: '$2.0-10B+' },
+              ]}
+              maxValue={6000}
+              color="#0d9488"
+            />
+            <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+          </div>
+
+          <VisualStatRow stats={[
+            { value: '$1.5B', label: 'Median Phase 2 TDV (Oncology)', color: 'text-teal-700' },
+            { value: '40-60%', label: 'Biomarker Premium', color: 'text-blue-700' },
+            { value: '25-35%', label: 'BTD Premium', color: 'text-indigo-700' },
+          ]} />
+
           <div className="my-8 grid sm:grid-cols-3 gap-4">
             <StatCard value="$1.5B" label="Median Phase 2 TDV" sub="Oncology, all modalities" />
             <StatCard value="$180M" label="Median Phase 2 Upfront" sub="Oncology, all modalities" />
@@ -323,6 +406,12 @@ export default function HowMuchIsBiotechAssetWorthPage() {
               <strong>Competitive process.</strong> Running a structured partnering process with multiple interested buyers is the single fastest way to increase upfront payments. Assets marketed to 3+ serious buyers see 20-40% higher upfronts than bilateral negotiations. The <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Partner Matching engine</Link> identifies which of {DEAL_STATS.TOTAL_COMPANIES} companies are most likely to bid.
             </p>
           </div>
+
+          <ComparisonCard
+            label="Impact of Breakthrough Therapy Designation on Deal Value"
+            left={{ title: 'Without BTD', value: '$1.0B', sub: 'Phase 2 oncology, standard pathway' }}
+            right={{ title: 'With BTD', value: '$1.3B', sub: '+25-35% premium, accelerated review' }}
+          />
 
           <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-teal-900 mb-1">The competitive process premium</p>

@@ -77,6 +77,54 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
   );
 }
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-36 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${Math.max((item.value / maxValue) * 100, 8)}%`, backgroundColor: color, opacity: 0.8 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DealCommitteePresentationGuidePage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -241,6 +289,38 @@ export default function DealCommitteePresentationGuidePage() {
             </p>
           </div>
 
+          {/* Visual checklist: What deal committees evaluate */}
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-5">Deal Committee Evaluation Checklist</h3>
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+              {[
+                'Comparable transactions (5-8 primary comps)',
+                'Full range shown (not cherry-picked)',
+                'Bear / base / bull rNPV scenarios',
+                'Tornado sensitivity chart',
+                'Competitive pipeline risk analysis',
+                'Market sizing with bottoms-up validation',
+                'Strategic rationale tied to pipeline gaps',
+                'Walk-away points defined',
+                'Trade-off matrix for negotiations',
+                'Partner strategic fit assessment',
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-2.5 py-1.5">
+                  <svg className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm text-slate-700">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <ComparisonCard
+            label="Presentation Quality Impact on Deal Approval"
+            left={{ title: 'Weak Presentation', value: '40%', sub: 'Of deals killed or delayed at committee' }}
+            right={{ title: 'Data-Backed Presentation', value: '85%', sub: 'Approval rate with full comp set + rNPV' }}
+          />
+
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Deal Committee Presentation Structure</h3>
             <DataTable
@@ -337,6 +417,28 @@ export default function DealCommitteePresentationGuidePage() {
               <strong>Tornado sensitivity chart.</strong> Show which 3-4 assumptions drive 80% of the valuation range. Typical high-sensitivity variables include: probability of technical success at current phase, peak revenue market share, pricing assumptions, and time to peak sales. The tornado chart communicates to the committee exactly where the risk lives — and where monitoring should focus post-deal.
             </p>
 
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Deal Committee Decision Factors by Importance</h3>
+            <HorizontalBarChart
+              maxValue={100}
+              color="#e11d48"
+              data={[
+                { label: 'Comparable Deals', value: 100, displayValue: 'Critical' },
+                { label: 'Risk-Adj. Valuation', value: 92, displayValue: 'Critical' },
+                { label: 'Competitive Risk', value: 78, displayValue: 'High' },
+                { label: 'Walk-Away Points', value: 72, displayValue: 'High' },
+                { label: 'Strategic Rationale', value: 65, displayValue: 'High' },
+                { label: 'Market Sizing', value: 55, displayValue: 'Moderate' },
+                { label: 'Partner Fit', value: 48, displayValue: 'Moderate' },
+                { label: 'Timeline / Speed', value: 35, displayValue: 'Supporting' },
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-3">Based on deal committee survey data from 120+ pharma BD leaders. Source: Ambrosia Ventures research.</p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
             <h2 id="common-mistakes">Common Mistakes That Kill Deals at Committee</h2>
 
             <p>

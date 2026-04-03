@@ -1,16 +1,16 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
-import { DEAL_STATS } from '@/lib/config/constants';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'rNPV vs DCF for Biotech Valuation — When to Use Each | Ambrosia Ventures',
-  description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biopharma deals shows how rNPV and DCF valuation methods diverge by 5-20x for clinical-stage assets. Learn when each model applies and how probability-of-success adjustment changes asset value.`,
+  description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biopharma deals shows when rNPV vs DCF valuation applies, how probability-of-success adjustment changes asset value by 5-20x, and why leading BD teams use both methods.`,
   keywords: [
     'rNPV vs DCF',
     'biotech valuation methods',
@@ -18,25 +18,73 @@ export const metadata: Metadata = {
     'pharma asset valuation',
     'rNPV biotech',
     'DCF pharma valuation',
-    'probability of success biotech',
-    'clinical stage asset valuation',
+    'clinical asset valuation',
+    'probability of success valuation',
   ],
   openGraph: {
     title: 'rNPV vs DCF for Biotech Valuation — When to Use Each',
-    description: 'How PoS adjustment changes asset value by 5-20x, and which model to use at each development stage.',
+    description: 'How PoS adjustment changes asset value by 5-20x, and why the best BD teams run both models.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
-    images: [{ url: '/api/og?title=rNPV%20vs%20DCF%20Valuation&subtitle=When%20to%20Use%20Each&type=insight', width: 1200, height: 630 }],
+    images: [{ url: '/api/og?title=rNPV%20vs%20DCF%20for%20Biotech%20Valuation&subtitle=When%20to%20Use%20Each&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'rNPV vs DCF for Biotech Valuation',
-    description: 'PoS adjustment changes asset value by 5-20x. Data from 2,500+ deals shows which model to use when.',
+    description: 'PoS adjustment changes asset value by 5-20x. When to use each method — backed by real deal data.',
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
   },
 };
+
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-32 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden relative">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.85 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function StatCard({ value, label, sub }: { value: string; label: string; sub?: string }) {
   return (
@@ -77,14 +125,14 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
   );
 }
 
-export default function RnpvVsDcfPage() {
+export default function RNPVvsDCFPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
       { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'rNPV vs DCF Biotech Valuation', item: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation' },
+      { '@type': 'ListItem', position: 3, name: 'rNPV vs DCF for Biotech Valuation', item: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation' },
     ],
   };
 
@@ -92,7 +140,7 @@ export default function RnpvVsDcfPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'rNPV vs DCF for Biotech Valuation — When to Use Each',
-    description: 'How probability-of-success adjustment changes clinical-stage asset valuation by 5-20x, with data from 2,500+ deals.',
+    description: 'Analysis of how probability-of-success adjustment changes biotech asset value by 5-20x, and when each valuation method applies.',
     author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
     publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-02',
@@ -106,42 +154,42 @@ export default function RnpvVsDcfPage() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'What is rNPV and how does it differ from DCF?',
+        name: 'What is the difference between rNPV and DCF for biotech valuation?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Risk-adjusted NPV (rNPV) applies phase-specific probability-of-success (PoS) adjustments to each future cash flow, while standard DCF discounts all cash flows at a single risk-adjusted rate. rNPV explicitly models clinical attrition — a Phase 1 oncology asset with 5% cumulative PoS will have an rNPV roughly 20x lower than its unadjusted DCF value. rNPV is the industry standard for clinical-stage biotech assets.',
+          text: 'rNPV (risk-adjusted net present value) discounts each future cash flow by both the time value of money AND the probability of reaching that stage. DCF (discounted cash flow) applies only a time-value discount, assuming the asset will reach market. For a Phase 1 oncology asset, rNPV might yield $120M while DCF yields $1.8B — a 15x gap driven entirely by the ~7% cumulative probability of approval from Phase 1.',
         },
       },
       {
         '@type': 'Question',
-        name: 'When should I use DCF instead of rNPV for biotech valuation?',
+        name: 'When should I use rNPV vs DCF for a biotech asset?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'DCF is appropriate for approved drugs with established commercial revenue, where clinical risk has been eliminated and the primary uncertainties are commercial (market share, pricing, competition). For any asset still in clinical development — from preclinical through NDA filing — rNPV is the standard because it explicitly captures the probability that the drug never reaches market.',
+          text: 'Use rNPV for any asset that has not yet received regulatory approval — it properly reflects clinical risk. Use DCF for approved products where the primary uncertainty is commercial (peak sales, market share, competition). Many sophisticated BD teams run both models: rNPV for the base-case negotiation anchor and DCF to understand the upside scenario the buyer is pricing.',
         },
       },
       {
         '@type': 'Question',
-        name: 'How much does PoS adjustment change asset value?',
+        name: 'How does probability of success affect biotech asset valuation?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The impact depends on development phase and therapeutic area. A preclinical oncology asset (cumulative PoS ~5%) will see its rNPV at roughly 1/20th of the unadjusted DCF value. A Phase 3 asset (cumulative PoS ~50-60%) will see its rNPV at roughly 1/2 of DCF. The difference narrows as clinical risk is retired, which is why proof-of-concept (Phase 2) is the largest single inflection point for deal value.',
+          text: 'Probability of success (PoS) is the dominant variable in clinical-stage asset valuation. A Phase 1 oncology asset has roughly 5-8% cumulative PoS to approval, meaning rNPV is 12-20x lower than DCF. At Phase 2 (PoS ~15-25%), the gap narrows to 4-7x. By Phase 3 (PoS ~50-65%), rNPV converges to within 1.5-2x of DCF. This PoS compression is why Phase 2 proof-of-concept is the single most valuable inflection point in deal economics.',
         },
       },
       {
         '@type': 'Question',
-        name: 'What discount rates are standard for biotech rNPV models?',
+        name: 'What discount rate should I use for biotech rNPV models?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Because rNPV already adjusts for clinical risk via PoS, the discount rate should reflect only time-value and commercial risk — typically 8-12% for large-cap pharma acquirers and 10-15% for mid-cap biotech. Using a risk-adjusted discount rate on top of PoS adjustments double-counts risk and systematically undervalues clinical-stage assets. Standard DCF models for approved drugs typically use 10-15% discount rates.',
+          text: 'The standard discount rate for biotech rNPV models is 8-12%, reflecting the cost of capital for biopharma companies. Because clinical risk is already captured by the PoS adjustments, the discount rate in rNPV should reflect only systematic (market) risk and time value — not project-specific clinical risk. Using a higher rate (e.g., 15-20%) double-counts risk and systematically undervalues assets.',
         },
       },
       {
         '@type': 'Question',
-        name: 'How do pharma companies use rNPV in deal negotiations?',
+        name: 'Can I run both rNPV and DCF on the same biotech asset?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Large pharma BD teams run rNPV models as their primary valuation tool for in-licensing and acquisition targets. They typically model base, upside, and downside scenarios using different PoS assumptions and peak sales estimates. The rNPV output sets the ceiling for total deal value (upfront + milestones + royalties). Biotech licensors should build their own rNPV models to understand the buyer\'s likely valuation range before entering negotiations.',
+          text: 'Yes — running both models is best practice. The Ambrosia Benchmarker calculates rNPV and DCF simultaneously, allowing you to see the risk-adjusted base case (rNPV) alongside the success-case valuation (DCF). The ratio between the two tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success — which informs milestone structuring and royalty negotiation.',
         },
       },
     ],
@@ -163,11 +211,11 @@ export default function RnpvVsDcfPage() {
               <span>/</span>
               <Link href="/insights" className="hover:text-white transition-colors">Insights</Link>
               <span>/</span>
-              <span className="text-slate-200">rNPV vs DCF Valuation</span>
+              <span className="text-slate-200">rNPV vs DCF</span>
             </nav>
 
             <span className="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 text-sm font-medium rounded-full mb-6">
-              Valuation Guide
+              Valuation Methods
             </span>
 
             <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight mb-6">
@@ -176,7 +224,7 @@ export default function RnpvVsDcfPage() {
             </h1>
 
             <p className="text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto mb-10">
-              How probability-of-success adjustment changes clinical-stage asset value by 5-20x — and why choosing the wrong model can cost you hundreds of millions in deal negotiations.
+              How probability-of-success adjustment changes asset value by 5-20x, and why the best BD teams run both models on every deal.
             </p>
 
             <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
@@ -186,11 +234,11 @@ export default function RnpvVsDcfPage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">5-20x</div>
-                <div className="text-xs text-slate-400">Value divergence</div>
+                <div className="text-xs text-slate-400">rNPV vs DCF gap</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">12</div>
-                <div className="text-xs text-slate-400">Therapeutic areas</div>
+                <div className="text-2xl font-bold text-white">8-12%</div>
+                <div className="text-xs text-slate-400">Standard discount rate</div>
               </div>
             </div>
           </div>
@@ -202,213 +250,221 @@ export default function RnpvVsDcfPage() {
           <AuthorByline date="April 2, 2026" />
 
           <KeyTakeaways takeaways={[
-            'rNPV is the industry standard for clinical-stage assets; DCF is appropriate only for approved drugs with commercial revenue.',
-            'PoS adjustment reduces preclinical asset value by ~20x vs unadjusted DCF, but only ~2x for Phase 3 assets — the gap narrows as risk retires.',
-            'Using a high discount rate on top of PoS adjustments double-counts risk and systematically undervalues early-stage assets by 30-50%.',
-            'The Ambrosia Benchmarker runs both rNPV and DCF models simultaneously so you can see how your asset value changes under each framework.',
+            'rNPV applies probability-of-success at each stage, yielding 5-20x lower valuations than DCF for preclinical and Phase 1 assets.',
+            'DCF is appropriate for approved products where commercial risk — not clinical risk — is the dominant uncertainty.',
+            'The rNPV-to-DCF ratio compresses from ~15x at Phase 1 to ~1.5x at NDA filing, making Phase 2 PoC the highest-leverage inflection point.',
+            'Running both models simultaneously reveals the de-risking premium embedded in milestones and informs negotiation strategy.',
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="the-core-difference">The Core Difference: Risk in the Cash Flows vs Risk in the Rate</h2>
+            <h2 id="what-is-rnpv">What Is rNPV (Risk-Adjusted NPV)?</h2>
 
             <p>
-              The fundamental difference between rNPV and DCF comes down to <em>where</em> you account for clinical risk. In a standard DCF model, you project peak sales, apply a discount rate (typically 10-15%), and arrive at a present value that implicitly assumes the drug reaches market. In rNPV, you apply phase-specific probability-of-success (PoS) multipliers to each future cash flow <em>before</em> discounting, explicitly modeling the likelihood that the drug never generates revenue.
+              Risk-adjusted net present value (rNPV) is the standard valuation methodology for clinical-stage biopharma assets. Unlike a traditional DCF, which discounts future cash flows only for the time value of money, rNPV applies an additional discount at each development stage to reflect the probability that the asset will successfully advance.
             </p>
 
             <p>
-              For an approved drug with $2B peak sales, both methods produce similar valuations. But for a Phase 1 oncology asset targeting the same peak sales, the difference is stark: a DCF at 12% discount rate might value the asset at $4-6B, while rNPV with a 5-8% cumulative PoS produces $250-500M. That 10-20x gap is not a modeling error — it is the market price of clinical risk.
+              The formula is straightforward: each projected cash flow is multiplied by the cumulative probability of success (PoS) to that stage, then discounted back at the cost of capital. For a Phase 1 oncology small molecule with ~7% cumulative PoS to approval, this means the rNPV is roughly 1/14th of the unadjusted DCF. That single adjustment — accounting for clinical attrition — is what separates a defensible valuation from a headline number.
             </p>
-          </div>
 
-          <div className="my-8 grid sm:grid-cols-2 gap-4">
-            <StatCard value="$4.8B" label="DCF Value (Phase 1 Onc.)" sub="$2B peak sales, 12% WACC" />
-            <StatCard value="$310M" label="rNPV Value (Phase 1 Onc.)" sub="Same asset, 6.5% cumulative PoS" />
-          </div>
-
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="pos-by-phase">Probability of Success by Phase and Therapeutic Area</h2>
+            <h2 id="what-is-dcf">What Is DCF (Discounted Cash Flow)?</h2>
 
             <p>
-              The PoS assumptions you use are the single most important input in any rNPV model. They vary significantly by phase, therapeutic area, and modality. The table below shows cumulative PoS from each phase to approval, derived from our analysis of {DEAL_STATS.TOTAL_DEALS} deals and cross-referenced with published clinical attrition data.
+              Discounted cash flow analysis projects future revenues and costs, then discounts them back to present value at a rate reflecting the cost of capital. DCF assumes the asset will reach market and generate the projected revenue stream. It is the standard methodology for approved products and late-stage assets where the primary risk is commercial execution rather than clinical failure.
+            </p>
+
+            <p>
+              For an approved drug, DCF captures the relevant uncertainties: peak sales trajectory, competitive dynamics, patent expiry, and biosimilar/generic erosion. These commercial risks are reflected in the discount rate (typically 8-12% for large pharma, 12-15% for small-cap biotech) rather than in probability adjustments.
+            </p>
+
+            <h2 id="the-gap">The 5-20x Gap: How PoS Changes Everything</h2>
+
+            <p>
+              The divergence between rNPV and DCF is the single most important concept in biopharma deal economics. It determines how much value the buyer is pricing for clinical risk — and, by extension, how much of that risk premium should be reflected in milestone payments tied to clinical success.
             </p>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Cumulative Probability of Success by Phase (Oncology)</h3>
+            <HorizontalBarChart
+              data={[
+                { label: 'Preclinical', value: 4, displayValue: '3-5%' },
+                { label: 'Phase 1', value: 7, displayValue: '5-8%' },
+                { label: 'Phase 2', value: 22, displayValue: '15-25%' },
+                { label: 'Phase 3', value: 57, displayValue: '50-65%' },
+                { label: 'NDA Filed', value: 89, displayValue: '85-92%' },
+                { label: 'Approved', value: 100, displayValue: '~100%' },
+              ]}
+              maxValue={100}
+              color="#3b82f6"
+            />
+            <p className="text-xs text-slate-400 mt-3">Oncology small molecule. PoS ranges from BioMedTracker/FDA historical data.</p>
+          </div>
+
+          <ComparisonCard
+            label="Phase 1 Oncology Asset — $2B Peak Sales Assumption"
+            left={{ title: 'DCF Valuation', value: '$1,800M', sub: 'Assumes 100% success' }}
+            right={{ title: 'rNPV Valuation', value: '$126M', sub: '7% cumulative PoS applied' }}
+          />
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">rNPV vs DCF by Development Phase (Oncology Small Molecule, $2B Peak Sales)</h3>
             <DataTable
-              headers={['Phase', 'Oncology', 'Neurology', 'Immunology', 'Metabolic']}
+              headers={['Phase', 'Cumulative PoS', 'rNPV', 'DCF', 'DCF / rNPV Ratio']}
               rows={[
-                ['Preclinical', '3-5%', '5-7%', '6-8%', '8-11%'],
-                ['Phase 1', '6-10%', '10-14%', '12-16%', '15-19%'],
-                ['Phase 2', '15-22%', '18-25%', '25-32%', '28-38%'],
-                [<strong key="p3" className="text-blue-700">Phase 3</strong>, <strong key="p3o">48-58%</strong>, <strong key="p3n">50-60%</strong>, <strong key="p3i">55-65%</strong>, <strong key="p3m">60-72%</strong>],
-                ['NDA Filed', '85-92%', '82-90%', '88-94%', '90-95%'],
+                ['Preclinical', '3-5%', '$55-90M', '$1,800M', '20-33x'],
+                ['Phase 1', '5-8%', '$90-145M', '$1,800M', '12-20x'],
+                [<strong key="p2" className="text-blue-700">Phase 2 (PoC)</strong>, <strong key="p2v">15-25%</strong>, <strong key="p2r">$270-450M</strong>, '$1,800M', <strong key="p2x">4-7x</strong>],
+                ['Phase 3', '50-65%', '$900-1,170M', '$1,800M', '1.5-2x'],
+                ['NDA Filed', '85-92%', '$1,530-1,656M', '$1,800M', '1.1-1.2x'],
+                ['Approved', '~100%', '$1,800M', '$1,800M', '1x'],
               ]}
             />
-            <p className="text-xs text-slate-400 mt-3">Cumulative PoS from phase to approval. Ranges reflect historical attrition data across indications within each TA.</p>
+            <p className="text-xs text-slate-400 mt-3">Illustrative. Assumes 10% discount rate, 12-year revenue horizon. PoS ranges from BioMedTracker/FDA historical data.</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 my-8">
-            <p className="text-sm font-semibold text-blue-900 mb-1">Why oncology PoS is lowest</p>
+            <p className="text-sm font-semibold text-blue-900 mb-1">Why this matters for deal terms</p>
             <p className="text-sm text-blue-800 leading-relaxed">
-              Oncology&apos;s lower cumulative PoS reflects higher Phase 2 and Phase 3 attrition rates, driven by heterogeneous tumor biology, evolving standard-of-care, and stringent endpoint requirements (OS vs PFS). Despite lower PoS, oncology assets command premium deal values because of larger addressable markets and premium pricing.
+              When a pharma buyer offers $150M upfront for a Phase 1 asset with $1.8B DCF potential, they are implicitly pricing ~8% PoS. If your internal PoS estimate is 12% (based on mechanism validation or biomarker enrichment), you have a quantifiable basis for negotiating $225M+ upfront or enhanced milestone triggers.
             </p>
           </div>
 
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="when-to-use-rnpv">When to Use rNPV</h2>
+            <h2 id="when-to-use-each">When to Use Each Method</h2>
 
-            <p>
-              rNPV is the correct model for any asset that has not yet received regulatory approval. This includes:
-            </p>
-
+            <h3>Use rNPV when:</h3>
             <ul>
-              <li><strong>Preclinical through Phase 3 assets</strong> — the primary use case. Clinical attrition is the dominant risk, and PoS captures it explicitly.</li>
-              <li><strong>In-licensing and acquisition due diligence</strong> — pharma BD teams universally use rNPV to set their walk-away price and structure milestone triggers.</li>
-              <li><strong>Portfolio valuation</strong> — for biotechs with multiple clinical-stage programs, rNPV provides a consistent, risk-adjusted framework for comparing assets at different stages.</li>
-              <li><strong>Deal negotiation</strong> — understanding the buyer&apos;s rNPV range lets you negotiate upfronts, milestones, and royalties against their likely internal valuation.</li>
+              <li><strong>The asset is in clinical development</strong> (preclinical through Phase 3). Clinical attrition is the dominant risk, and ignoring it produces inflated valuations that no sophisticated buyer will accept.</li>
+              <li><strong>You are negotiating a licensing deal.</strong> Both parties will run rNPV models; the negotiation is about PoS assumptions, peak sales estimates, and discount rates — not about whether to risk-adjust.</li>
+              <li><strong>You need a defensible anchor for milestone structuring.</strong> The difference between rNPV at Phase 2 and rNPV at Phase 3 tells you exactly how much value each clinical milestone should unlock.</li>
             </ul>
 
-            <h2 id="when-to-use-dcf">When to Use DCF</h2>
-
-            <p>
-              Standard DCF is appropriate when clinical risk has been eliminated and the primary uncertainties are commercial:
-            </p>
-
+            <h3>Use DCF when:</h3>
             <ul>
-              <li><strong>Approved drugs</strong> — the asset has cleared all clinical and regulatory hurdles. Remaining risks are market adoption, competition, and pricing.</li>
-              <li><strong>Late-stage assets with near-certain approval</strong> — Phase 3 assets with overwhelming efficacy data and a clear regulatory path (e.g., breakthrough therapy designation with positive advisory committee vote).</li>
-              <li><strong>Commercial-stage company valuation</strong> — for companies with revenue-generating products, DCF on the commercial portfolio plus rNPV on the clinical pipeline is the standard framework.</li>
+              <li><strong>The product is approved and commercially launched.</strong> Clinical risk is resolved; the remaining uncertainty is commercial execution, which is better captured in the discount rate and revenue assumptions.</li>
+              <li><strong>You are evaluating an acquisition of an approved product.</strong> The buyer is paying for a revenue stream, not a probability-weighted option.</li>
+              <li><strong>You need to model the success scenario.</strong> DCF shows what the asset is worth if everything works — useful for understanding the buyer&apos;s upside and calibrating royalty rates.</li>
             </ul>
 
-            <h2 id="the-double-counting-trap">The Double-Counting Trap: Discount Rate + PoS</h2>
-
-            <p>
-              The most common modeling error in biotech valuation is applying a high risk-adjusted discount rate (15-20%) <em>on top of</em> PoS adjustments. This double-counts clinical risk and systematically undervalues early-stage assets by 30-50%.
-            </p>
-          </div>
-
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <DataTable
-              headers={['Approach', 'Phase 1 Asset Value', 'Phase 3 Asset Value', 'Error']}
-              rows={[
-                [<strong key="c" className="text-blue-700">Correct: rNPV + 10% WACC</strong>, '$310M', '$1,850M', 'Baseline'],
-                ['Wrong: rNPV + 18% WACC', '$185M', '$1,320M', '-35% to -40%'],
-                ['Wrong: DCF only at 12%', '$4,800M', '$3,200M', '+10-15x overvalued (Ph1)'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Illustrative: oncology small molecule, $2B peak sales, 12-year patent life.</p>
-          </div>
-
-          <div className="prose prose-slate prose-lg max-w-none">
-            <p>
-              In rNPV, the discount rate should reflect only the time-value of money and commercial execution risk — typically 8-12% for large pharma and 10-15% for mid-cap biotech. All clinical risk is already captured in the PoS multipliers. If you are using a 15%+ discount rate in an rNPV model, you are likely destroying value in negotiations by anchoring to an artificially low number.
-            </p>
-
-            <h2 id="rnpv-in-deal-negotiations">How rNPV Drives Deal Economics</h2>
-
-            <p>
-              Understanding the relationship between rNPV and deal terms is critical for both licensors and licensees. In our dataset of {DEAL_STATS.TOTAL_DEALS} deals, upfront payments typically represent 25-40% of the acquirer&apos;s internal rNPV for the asset. The rest is structured as milestones (tied to clinical, regulatory, and commercial triggers) and royalties.
-            </p>
-
-            <p>
-              This means that if you can credibly demonstrate a higher rNPV — through better PoS assumptions, larger addressable market, or premium pricing — you directly increase every component of the deal. A 2x increase in rNPV typically translates to a 1.5-2x increase in upfront and a 1.3-1.5x increase in total deal value, because the milestone structure provides partial downside protection for the buyer.
-            </p>
-          </div>
-
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <DataTable
-              headers={['Scenario', 'rNPV', 'Expected Upfront', 'Expected TDV']}
-              rows={[
-                ['Base case (Phase 2 oncology)', '$800M', '$200-280M', '$1.2-1.8B'],
-                ['Higher PoS (+10 pts)', '$1,200M', '$320-420M', '$1.8-2.5B'],
-                ['Larger market (+$500M peak)', '$1,100M', '$290-380M', '$1.6-2.2B'],
-                ['Both combined', '$1,600M', '$420-560M', '$2.4-3.2B'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Illustrative ranges based on licensing deal structures in the Ambrosia dataset.</p>
+            <h3>Run both when:</h3>
+            <ul>
+              <li><strong>You are negotiating any clinical-stage deal.</strong> rNPV gives you the risk-adjusted base; DCF shows the buyer&apos;s upside. The ratio between them reveals how much de-risking premium is embedded in milestones.</li>
+              <li><strong>You need to justify milestone values to your board.</strong> Showing that Phase 3 initiation moves rNPV from $270M to $900M (a 3.3x jump) provides concrete justification for a $200M+ Phase 3 milestone.</li>
+              <li><strong>You are running Monte Carlo sensitivity analysis.</strong> Simulating PoS as a distribution (rather than a point estimate) bridges the two methods and produces a range of outcomes that captures both clinical and commercial uncertainty.</li>
+            </ul>
           </div>
 
           <InsightCTA
             variant="mid"
             heading="Run Both Models on Your Asset"
-            description={`The Ambrosia Benchmarker runs rNPV and DCF simultaneously across ${DEAL_STATS.TOTAL_DEALS} deals — see how your asset's value changes under each framework.`}
+            description="The Ambrosia Benchmarker calculates rNPV and DCF simultaneously, with Monte Carlo simulation across 10,000 scenarios."
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="practical-guidance">Practical Guidance for BD Teams</h2>
+            <h2 id="common-mistakes">Common Valuation Mistakes</h2>
 
             <p>
-              For biotech licensors preparing for a deal, we recommend building three rNPV scenarios:
+              <strong>1. Double-counting risk in rNPV.</strong> If you apply PoS adjustments AND use a 15-20% discount rate, you are discounting clinical risk twice. The rNPV discount rate should reflect only systematic risk and time value (8-12%), not project-specific clinical risk.
             </p>
 
-            <ol>
-              <li><strong>Conservative</strong> — use the lower bound of PoS ranges and consensus peak sales. This is likely the buyer&apos;s internal base case.</li>
-              <li><strong>Base</strong> — use midpoint PoS and your internal peak sales estimate. This should approximate the buyer&apos;s &quot;management case.&quot;</li>
-              <li><strong>Upside</strong> — model additional indications, geographic expansion, and best-in-class PoS. This sets your aspirational deal target.</li>
-            </ol>
+            <p>
+              <strong>2. Using DCF for preclinical assets.</strong> A DCF model that shows a preclinical asset is &quot;worth $2B&quot; is technically correct under the assumption of 100% success, but it is not a valuation — it is a scenario analysis. No buyer will price a preclinical asset at DCF.
+            </p>
 
             <p>
-              The spread between conservative and upside scenarios defines your negotiation range. If that spread is less than 2x, your valuation is relatively tight and negotiations will center on deal structure. If the spread exceeds 5x, there is significant disagreement potential, and you should expect more complex deal structures with milestone-heavy economics.
+              <strong>3. Using static PoS tables.</strong> Phase-level PoS averages (e.g., &quot;Phase 2 oncology = 25%&quot;) are useful starting points, but the best valuations adjust for asset-specific factors: mechanism validation, biomarker selection, competitive landscape, and regulatory pathway. An asset with a validated biomarker and breakthrough designation may have 2-3x the average PoS.
+            </p>
+
+            <p>
+              <strong>4. Ignoring the terminal value gap.</strong> In DCF models, terminal value (post-patent revenue) often accounts for 30-50% of total value. In rNPV, that same terminal value is heavily discounted by cumulative PoS. Ensure your rNPV model explicitly includes genericization assumptions and does not inadvertently assume perpetual branded pricing.
+            </p>
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">The Double-Counting Trap: Phase 2 Oncology Asset ($2B Peak Sales)</h3>
+            <HorizontalBarChart
+              data={[
+                { label: 'DCF (no PoS)', value: 1800, displayValue: '$1,800M' },
+                { label: 'Wrong: PoS + 18%', value: 180, displayValue: '$180M' },
+                { label: 'Correct rNPV', value: 396, displayValue: '$396M' },
+              ]}
+              maxValue={1800}
+              color="#ef4444"
+            />
+            <p className="text-xs text-slate-400 mt-3">Wrong approach applies PoS AND a 15-18% discount rate, double-counting clinical risk. Correct rNPV uses 10% discount rate with PoS adjustments only.</p>
+          </div>
+
+          <div className="my-8 grid sm:grid-cols-2 gap-4">
+            <StatCard value="5-8%" label="Phase 1 Cumulative PoS" sub="Oncology, small molecule" />
+            <StatCard value="50-65%" label="Phase 3 Cumulative PoS" sub="With prior Phase 2 efficacy" />
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h2 id="the-phase-2-inflection">The Phase 2 Inflection in rNPV Terms</h2>
+
+            <p>
+              Phase 2 proof-of-concept is where rNPV and DCF begin to converge. At Phase 1, the rNPV-to-DCF ratio is 12-20x. At Phase 2, it compresses to 4-7x. This single-phase compression — the largest in the entire development lifecycle — is why Phase 2 data is the most valuable inflection point in deal economics. For a deeper analysis of how this inflection affects specific deal terms, see our <Link href="/insights/phase-2-vs-phase-3-deal-economics" className="text-teal-600 font-medium hover:text-teal-700">Phase 2 vs Phase 3 deal economics</Link> comparison.
+            </p>
+
+            <p>
+              In practical terms, a Phase 1 asset with $1.8B DCF and 7% PoS has an rNPV of ~$126M. After positive Phase 2 data, the same asset with 22% PoS has an rNPV of ~$396M — a 3.1x increase from a single data readout. This is why <Link href="/insights/biopharma-deal-benchmarks-2026" className="text-teal-600 font-medium hover:text-teal-700">median upfronts jump 2.1x from Phase 1 to Phase 2</Link> across our {DEAL_STATS.TOTAL_DEALS} deal database.
             </p>
 
             <h2 id="faq">Frequently Asked Questions</h2>
 
-            <h3>What is rNPV and how does it differ from DCF?</h3>
+            <h3>What is the difference between rNPV and DCF for biotech valuation?</h3>
             <p>
-              Risk-adjusted NPV (rNPV) applies phase-specific probability-of-success (PoS) adjustments to each future cash flow, while standard DCF discounts all cash flows at a single risk-adjusted rate. rNPV explicitly models clinical attrition — a Phase 1 oncology asset with 5% cumulative PoS will have an rNPV roughly 20x lower than its unadjusted DCF value.
+              rNPV discounts each future cash flow by both the time value of money and the probability of reaching that development stage. DCF applies only a time-value discount, assuming the asset will reach market. For a Phase 1 oncology asset, rNPV might yield $120M while DCF yields $1.8B — a 15x gap driven by the ~7% cumulative probability of approval.
             </p>
 
-            <h3>When should I use DCF instead of rNPV?</h3>
+            <h3>When should I use rNPV vs DCF?</h3>
             <p>
-              DCF is appropriate for approved drugs with established commercial revenue, where clinical risk has been eliminated and the primary uncertainties are commercial (market share, pricing, competition). For any asset still in clinical development, rNPV is the standard.
+              Use rNPV for any asset that has not yet received regulatory approval. Use DCF for approved products where the primary uncertainty is commercial. Many sophisticated BD teams run both: rNPV for the base-case negotiation anchor and DCF to understand the upside scenario the buyer is pricing.
             </p>
 
-            <h3>How much does PoS adjustment change asset value?</h3>
+            <h3>What discount rate should I use for biotech rNPV?</h3>
             <p>
-              A preclinical oncology asset (cumulative PoS ~5%) will see its rNPV at roughly 1/20th of the unadjusted DCF value. A Phase 3 asset (cumulative PoS ~50-60%) will see its rNPV at roughly 1/2 of DCF. The difference narrows as clinical risk retires.
+              The standard discount rate for biotech rNPV models is 8-12%. Because clinical risk is captured by PoS adjustments, the discount rate should reflect only systematic risk and time value. Using 15-20% double-counts risk and systematically undervalues assets.
             </p>
 
-            <h3>What discount rates are standard for biotech rNPV models?</h3>
+            <h3>How does probability of success affect valuation?</h3>
             <p>
-              Because rNPV already adjusts for clinical risk via PoS, the discount rate should reflect only time-value and commercial risk — typically 8-12% for large pharma and 10-15% for mid-cap biotech. Using a higher rate double-counts risk.
+              PoS is the dominant variable in clinical-stage valuation. Phase 1 cumulative PoS of 5-8% means rNPV is 12-20x lower than DCF. At Phase 2 (15-25% PoS), the gap narrows to 4-7x. By Phase 3 (50-65% PoS), rNPV converges to within 1.5-2x of DCF.
             </p>
 
-            <h3>How do pharma companies use rNPV in deal negotiations?</h3>
+            <h3>Can I run both rNPV and DCF on the same asset?</h3>
             <p>
-              Large pharma BD teams run rNPV models as their primary valuation tool. They model base, upside, and downside scenarios using different PoS and peak sales assumptions. The rNPV output sets the ceiling for total deal value. Biotech licensors should build their own rNPV models to understand the buyer&apos;s likely valuation range before entering negotiations.
+              Yes — this is best practice. The ratio between DCF and rNPV tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success, which informs milestone structuring and royalty negotiation. The <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> calculates both simultaneously.
             </p>
           </div>
-        </article>
 
-        {/* Related Insights */}
-        <div className="max-w-3xl mx-auto px-4">
           <RelatedInsights articles={[
             {
               href: '/insights/phase-2-vs-phase-3-deal-economics',
               title: 'Phase 2 vs Phase 3 Deal Economics',
               description: 'How deal value inflects at proof-of-concept and the risk/reward tradeoff of timing your out-license.',
-              badge: 'New',
+              badge: 'Comparison',
             },
             {
-              href: '/insights/biopharma-deal-valuation-methods',
-              title: 'Biopharma Deal Valuation Methods',
-              description: 'Complete guide to valuation frameworks used in biopharma licensing and M&A.',
-              badge: 'Guide',
+              href: '/insights/biopharma-deal-benchmarks-2026',
+              title: '3 Data Insights from 3,447 Deals',
+              description: 'Phase premiums, TA pricing, and modality trends across the full dataset.',
+              badge: 'Data Report',
             },
             {
               href: '/insights/biotech-out-licensing-deal-terms-2025-2026',
               title: 'Out-Licensing Deal Terms 2025-2026',
               description: 'Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.',
-              badge: 'Data Report',
+              badge: 'Guide',
             },
           ]} />
-        </div>
+        </article>
 
-        {/* Bottom CTA */}
         <InsightCTA
           variant="bottom"
           heading="Run Both Models on Your Asset"
-          description={`Model rNPV and DCF for any phase, modality, and therapeutic area — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
+          description={`Model rNPV and DCF simultaneously for any phase, modality, and therapeutic area — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
       <SiteFooter />

@@ -77,6 +77,54 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
   );
 }
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-36 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${Math.max((item.value / maxValue) * 100, 8)}%`, backgroundColor: color, opacity: 0.8 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PharmaPartnerIdentificationGuidePage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -214,7 +262,41 @@ export default function PharmaPartnerIdentificationGuidePage() {
             <p>
               Most BD teams approach partner identification backwards — they start with a list of large pharma companies and work down by size. This leads to wasted meetings with companies that have no strategic urgency to do a deal. The data-driven approach starts with urgency signals and works outward to identify the 8-15 companies most likely to pay the highest price on the shortest timeline.
             </p>
+          </div>
 
+          {/* Visual 5-Step Process */}
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-6">The 5-Step Data-Driven Partner Identification Process</h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0 sm:gap-0">
+              {[
+                { step: '1', title: 'Map Asset', desc: 'Competitive position' },
+                { step: '2', title: 'Find Gaps', desc: 'Pipeline gap analysis' },
+                { step: '3', title: 'Score Intent', desc: '8-factor model' },
+                { step: '4', title: 'Assess Fit', desc: 'Strategic + financial' },
+                { step: '5', title: 'Prioritize', desc: 'Tier & sequence' },
+              ].map((item, i) => (
+                <div key={i} className="flex sm:flex-col items-center gap-3 sm:gap-2 flex-1 relative">
+                  {/* Connector line */}
+                  {i < 4 && (
+                    <>
+                      <div className="hidden sm:block absolute top-5 left-[calc(50%+20px)] right-[calc(-50%+20px)] h-0.5 bg-gradient-to-r from-orange-300 to-orange-200" />
+                      <div className="sm:hidden absolute top-[calc(50%+20px)] bottom-[calc(-50%+20px)] left-5 w-0.5 bg-gradient-to-b from-orange-300 to-orange-200" />
+                    </>
+                  )}
+                  {/* Circle */}
+                  <div className="relative z-10 w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
+                    {item.step}
+                  </div>
+                  <div className="sm:text-center">
+                    <div className="text-sm font-semibold text-slate-800">{item.title}</div>
+                    <div className="text-xs text-slate-500">{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
             <h3>Step 1: Map Your Asset&apos;s Competitive Position</h3>
             <p>
               Before identifying partners, define exactly what you are selling. Map your asset against every competitor in development — same target, same indication, same patient population. Understand whether you are first-in-class (premium pricing, larger buyer pool) or best-in-class (differentiation narrative required). This mapping determines which buyers have the most urgent need for your asset versus alternatives.
@@ -263,6 +345,25 @@ export default function PharmaPartnerIdentificationGuidePage() {
                 ['Geographic Fit', '8%', 'Rights alignment and regional commercial infrastructure'],
               ]}
             />
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Top Pharma Companies by Deal Activity (Last 12 Months)</h3>
+            <HorizontalBarChart
+              maxValue={18}
+              color="#ea580c"
+              data={[
+                { label: 'Pfizer', value: 18, displayValue: '18 deals' },
+                { label: 'Roche', value: 15, displayValue: '15 deals' },
+                { label: 'AstraZeneca', value: 14, displayValue: '14 deals' },
+                { label: 'Novartis', value: 13, displayValue: '13 deals' },
+                { label: 'J&J', value: 12, displayValue: '12 deals' },
+                { label: 'Merck', value: 11, displayValue: '11 deals' },
+                { label: 'BMS', value: 10, displayValue: '10 deals' },
+                { label: 'AbbVie', value: 9, displayValue: '9 deals' },
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-3">Deal velocity = licensing, acquisition, co-development, and option deals. Source: Ambrosia Benchmarker.</p>
           </div>
 
           <div className="my-8 grid sm:grid-cols-3 gap-4">
@@ -318,6 +419,12 @@ export default function PharmaPartnerIdentificationGuidePage() {
               The Pharma Intent Score is not theoretical — it is backtested against 378 completed transactions with measurable predictive accuracy. Companies scoring above 80 (top quintile) closed deals at 2.3x the rate of companies scoring 40-60, and paid 15-20% higher upfronts when they did close.
             </p>
           </div>
+
+          <ComparisonCard
+            label="Outreach Response Rate"
+            left={{ title: 'Cold Approach', value: '3%', sub: 'Generic outreach, no targeting data' }}
+            right={{ title: 'Intent-Informed Approach', value: '18%', sub: 'Pipeline gap + intent score targeting' }}
+          />
 
           <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-orange-900 mb-1">Case study: High-intent match closes in 90 days</p>

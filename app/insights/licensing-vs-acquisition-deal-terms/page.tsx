@@ -38,6 +38,67 @@ export const metadata: Metadata = {
   },
 };
 
+function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
+  data: { label: string; value: number; displayValue: string }[];
+  maxValue: number;
+  color?: string;
+}) {
+  return (
+    <div className="space-y-3">
+      {data.map((item, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-32 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
+          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden relative">
+            <div
+              className="h-full rounded-md flex items-center justify-end px-2"
+              style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.85 }}
+            >
+              <span className="text-xs font-bold text-white">{item.displayValue}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComparisonCard({ left, right, label }: {
+  left: { title: string; value: string; sub?: string };
+  right: { title: string; value: string; sub?: string };
+  label: string;
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
+          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
+          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
+        </div>
+        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
+          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
+          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
+          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualStatRow({ stats }: { stats: { value: string; label: string; color?: string }[] }) {
+  return (
+    <div className="grid gap-4 my-8" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
+      {stats.map((s, i) => (
+        <div key={i} className="text-center py-6 px-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100">
+          <div className={`text-3xl sm:text-4xl font-extrabold ${s.color || 'text-slate-900'}`}>{s.value}</div>
+          <div className="text-sm text-slate-500 mt-2 font-medium">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StatCard({ value, label, sub }: { value: string; label: string; sub?: string }) {
   return (
     <div className="bg-slate-50 rounded-xl p-6 text-center">
@@ -236,10 +297,33 @@ export default function LicensingVsAcquisitionPage() {
             <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.</p>
           </div>
 
-          <div className="my-8 grid sm:grid-cols-2 gap-4">
-            <StatCard value="15-20%" label="Licensing Upfront (% of TDV)" sub="Median across all phases" />
-            <StatCard value="45-60%" label="Acquisition Premium" sub="To unaffected market cap" />
+          <ComparisonCard
+            label="Upfront Economics at Close"
+            left={{ title: 'Licensing Deal', value: '14-20%', sub: 'Upfront as % of total deal value' }}
+            right={{ title: 'Acquisition', value: '100%', sub: 'Full purchase price at close' }}
+          />
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Upfront Payment as % of Total Deal Value by Deal Type</h3>
+            <HorizontalBarChart
+              data={[
+                { label: 'Acquisition', value: 100, displayValue: '100%' },
+                { label: 'Collaboration', value: 22, displayValue: '22%' },
+                { label: 'Licensing', value: 17, displayValue: '14-20%' },
+                { label: 'Co-Development', value: 12, displayValue: '10-14%' },
+                { label: 'Option', value: 8, displayValue: '5-10%' },
+              ]}
+              maxValue={100}
+              color="#0d9488"
+            />
+            <p className="text-xs text-slate-400 mt-3">Median upfront as percentage of total deal value. Source: Ambrosia Benchmarker.</p>
           </div>
+
+          <VisualStatRow stats={[
+            { value: '15-20%', label: 'Licensing Upfront Ratio', color: 'text-slate-900' },
+            { value: '45-60%', label: 'Acquisition Premium', color: 'text-teal-700' },
+            { value: '8-15%', label: 'Royalty Rate Range', color: 'text-blue-700' },
+          ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
             <h2 id="licensing-economics">Licensing Economics in Detail</h2>
