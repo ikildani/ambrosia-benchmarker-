@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { checkoutSchema, formatZodErrors } from '@/lib/api-validation';
 import { apiSuccess, apiError } from '@/lib/api-response';
+import { notifyCheckoutStarted } from '@/lib/slack/notify';
 
 // Stripe Checkout Session API
 // Supports two purchase types:
@@ -85,6 +86,12 @@ export async function POST(request: NextRequest) {
         },
         ...(customerEmail ? { customer_email: customerEmail } : {}),
       });
+
+      // Notify Slack that checkout started (payment pending)
+      notifyCheckoutStarted({
+        email: customerEmail || 'anonymous',
+        type: 'report',
+      }).catch(() => {});
 
       return apiSuccess({ url: session.url, reportId: reportPurchase.id });
     }
@@ -191,6 +198,13 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
+
+    // Notify Slack that subscription checkout started
+    notifyCheckoutStarted({
+      email: customerEmail || 'anonymous',
+      type: billingInterval === 'annual' ? 'annual' : 'pro',
+    }).catch(() => {});
+
     return apiSuccess({ url: session.url });
   } catch (error: unknown) {
     console.error('Checkout error:', error);

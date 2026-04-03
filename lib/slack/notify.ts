@@ -139,6 +139,58 @@ export async function notifyReportPurchase(details: {
   );
 }
 
+export async function notifyCheckoutStarted(details: {
+  email: string;
+  type: 'report' | 'pro' | 'annual';
+  amount?: number;
+}): Promise<void> {
+  const typeLabel = details.type === 'report' ? 'Deal Report ($499)' : details.type === 'annual' ? 'Pro Annual ($199/mo)' : 'Pro Monthly ($299/mo)';
+  const fields = [
+    { type: 'mrkdwn', text: `*Email:*\n${details.email || 'anonymous'}` },
+    { type: 'mrkdwn', text: `*Product:*\n${typeLabel}` },
+  ];
+  if (details.amount) fields.push({ type: 'mrkdwn', text: `*Amount:*\n${formatAmount(details.amount)}` });
+  fields.push({ type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` });
+
+  await postToSlack(
+    [{
+      color: '#f59e0b',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: `⏳ Checkout Started — ${typeLabel}`, emoji: true } },
+        { type: 'section', fields },
+        { type: 'context', elements: [{ type: 'mrkdwn', text: 'Payment pending — will notify again when completed or if it fails.' }] },
+      ],
+    }],
+    `Checkout started: ${details.email || 'anonymous'} → ${typeLabel}`,
+  );
+}
+
+export async function notifyPaymentFailed(details: {
+  email: string;
+  type: 'report' | 'pro';
+  amount?: number;
+  reason?: string;
+}): Promise<void> {
+  const fields = [
+    { type: 'mrkdwn', text: `*Email:*\n${details.email || 'unknown'}` },
+    { type: 'mrkdwn', text: `*Product:*\n${details.type === 'report' ? 'Deal Report' : 'Pro Subscription'}` },
+  ];
+  if (details.amount) fields.push({ type: 'mrkdwn', text: `*Amount:*\n${formatAmount(details.amount)}` });
+  if (details.reason) fields.push({ type: 'mrkdwn', text: `*Reason:*\n${details.reason}` });
+  fields.push({ type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` });
+
+  await postToSlack(
+    [{
+      color: '#ef4444',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: '❌ Payment Failed', emoji: true } },
+        { type: 'section', fields },
+      ],
+    }],
+    `Payment failed: ${details.email || 'unknown'}`,
+  );
+}
+
 function formatDollars(amount: number | null): string {
   if (amount == null) return 'N/A';
   if (amount >= 1e9) return `$${(amount / 1e9).toFixed(1)}B`;

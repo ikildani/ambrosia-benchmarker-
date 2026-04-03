@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError, maskEmail } from '@/lib/sentry-api';
 import { sendAdminSubscriptionNotification, sendUpgradeConfirmation } from '@/lib/email/client';
-import { notifyProSubscription, notifyTrialStarted, notifyReportPurchase } from '@/lib/slack/notify';
+import { notifyProSubscription, notifyTrialStarted, notifyReportPurchase, notifyPaymentFailed } from '@/lib/slack/notify';
 
 // Stripe Webhook Handler
 // To enable webhooks:
@@ -401,6 +401,14 @@ export async function POST(request: NextRequest) {
           },
           user_tier: 'pro',
         });
+
+        // Notify Slack of payment failure
+        notifyPaymentFailed({
+          email: invoice.customer_email || 'unknown',
+          type: 'pro',
+          amount: invoice.amount_due,
+          reason: `Attempt ${invoice.attempt_count} failed`,
+        }).catch(() => {});
         break;
       }
 
