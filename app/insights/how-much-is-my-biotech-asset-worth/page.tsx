@@ -1,0 +1,395 @@
+import { Metadata } from 'next';
+import Link from 'next/link';
+import { SiteFooter } from '@/components/seo/SiteFooter';
+import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
+import { TrustBar } from '@/components/insights/TrustBar';
+import { AuthorByline } from '@/components/insights/AuthorByline';
+import { InsightCTA } from '@/components/insights/InsightCTA';
+import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+
+export const metadata: Metadata = {
+  title: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide | Ambrosia Ventures',
+  description: `Biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions. Phase-by-phase deal values for licensing, upfront payments, milestones, and royalties across 12 therapeutic areas.`,
+  keywords: [
+    'how much is my biotech asset worth',
+    'biotech asset valuation',
+    'what is my drug worth',
+    'biotech licensing valuation',
+    'drug asset valuation calculator',
+    'biotech out-licensing value',
+    'phase 2 asset valuation',
+    'biotech deal value calculator',
+  ],
+  openGraph: {
+    title: 'How Much Is My Biotech Asset Worth? — Data from 2,500+ Deals',
+    description: 'A Phase 2 oncology asset is worth $800M-$2.5B in total deal value. See phase-by-phase benchmarks from real transactions.',
+    type: 'article',
+    url: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+    images: [{ url: '/api/og?title=How%20Much%20Is%20My%20Biotech%20Asset%20Worth%3F&subtitle=Phase-by-Phase%20Valuation%20Guide&type=insight', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How Much Is My Biotech Asset Worth?',
+    description: 'Phase-by-phase biotech asset valuation benchmarks from 2,500+ real transactions.',
+  },
+  alternates: {
+    canonical: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+  },
+};
+
+function StatCard({ value, label, sub }: { value: string; label: string; sub?: string }) {
+  return (
+    <div className="bg-slate-50 rounded-xl p-6 text-center">
+      <div className="text-3xl sm:text-4xl font-bold text-slate-900">{value}</div>
+      <div className="text-sm font-medium text-slate-600 mt-1">{label}</div>
+      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
+  return (
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b-2 border-slate-200">
+            {headers.map((h, i) => (
+              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
+              {row.map((cell, j) => (
+                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default function HowMuchIsBiotechAssetWorthPage() {
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'How Much Is My Biotech Asset Worth?', item: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth' },
+    ],
+  };
+
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide',
+    description: 'Biotech asset valuation benchmarks from 2,500+ real transactions. Phase-by-phase deal values, the 5 factors that determine value, and how to increase your asset price before partnering.',
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    datePublished: '2026-04-03',
+    dateModified: '2026-04-03',
+    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How much is a Phase 2 biotech asset worth?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'A Phase 2 biotech asset is worth $500M-$3.5B in total deal value depending on therapeutic area, modality, and data quality. Oncology Phase 2 assets command $800M-$2.5B, while immunology Phase 2 assets range from $600M-$2.0B. The single biggest value driver is proof-of-concept data quality — assets with biomarker-validated endpoints command 40-60% premiums over assets with standard clinical endpoints.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What is my preclinical biotech asset worth?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Preclinical assets are worth $50M-$500M in total deal value, with median upfronts of $15-40M. The range is wide because preclinical valuation depends heavily on target validation, modality platform potential, and competitive landscape. ADC and cell therapy platforms command the highest preclinical valuations ($200M-$500M TDV) due to platform scalability.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How do I increase my biotech asset valuation before licensing?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Five strategies increase asset value before licensing: (1) biomarker validation that enables patient selection, (2) breakthrough therapy or fast track designation from FDA, (3) combination study data showing additive or synergistic benefit, (4) manufacturing de-risking through CMC optimization, and (5) competitive positioning through differentiated endpoints or populations.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What upfront payment should I expect for my biotech asset?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Upfront payments typically range from 10-18% of total deal value. For a Phase 2 oncology asset worth $1.5B TDV, expect $150M-$270M upfront. Upfront ratios are higher for later-stage assets (15-20% at Phase 3) and lower for preclinical (8-12%). Competitive auction dynamics can increase upfronts by 20-40% above median benchmarks.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does therapeutic area affect biotech asset valuation?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes, significantly. Oncology commands the highest deal values (median TDV $1.8B across all phases), followed by immunology ($1.4B), neurology ($1.2B), and metabolic ($1.1B). Within TAs, specific indications matter — an oncology asset in NSCLC is worth more than one in pancreatic cancer due to market size and competitive dynamics.',
+        },
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+
+      <main className="min-h-screen bg-white">
+        {/* Hero */}
+        <header className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-24 pb-20 px-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(59,130,246,0.08),transparent)]" />
+          <div className="relative max-w-3xl mx-auto text-center">
+            <nav className="flex items-center justify-center gap-2 text-sm text-slate-400 mb-8">
+              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/insights" className="hover:text-white transition-colors">Insights</Link>
+              <span>/</span>
+              <span className="text-slate-200">Asset Valuation Guide</span>
+            </nav>
+
+            <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 text-sm font-medium rounded-full mb-6">
+              Valuation Guide
+            </span>
+
+            <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight mb-6">
+              How Much Is My{' '}
+              <span className="text-teal-400">Biotech Asset Worth?</span>
+            </h1>
+
+            <p className="text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto mb-10">
+              A Phase 2 oncology asset is worth $800M-$2.5B in total deal value depending on modality, competitive position, and data quality. Here are the benchmarks from {DEAL_STATS.TOTAL_DEALS} real transactions.
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">$800M-$2.5B</div>
+                <div className="text-xs text-slate-400">Phase 2 oncology TDV</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">10-18%</div>
+                <div className="text-xs text-slate-400">Upfront as % of TDV</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">40-60%</div>
+                <div className="text-xs text-slate-400">Biomarker premium</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <article className="max-w-3xl mx-auto px-4 py-12">
+          <TrustBar />
+          <AuthorByline date="April 3, 2026" />
+
+          <KeyTakeaways takeaways={[
+            'Phase 2 oncology assets are worth $800M-$2.5B in total deal value, with upfronts of $80M-$450M. Immunology and neurology Phase 2 assets range from $600M-$2.0B.',
+            'Five factors determine 90% of your asset valuation: therapeutic area, modality, development phase, competitive position, and data quality.',
+            'Biomarker-validated assets command 40-60% premiums over assets with standard endpoints — the single highest-leverage way to increase your valuation.',
+            'Competitive auction dynamics (multiple interested buyers) increase upfronts by 20-40% above median benchmarks. Partner identification is a valuation lever.',
+          ]} />
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h2 id="phase-by-phase">Phase-by-Phase Asset Valuation Benchmarks</h2>
+
+            <p>
+              The value of your biotech asset is primarily determined by its development phase. Each phase transition represents a de-risking event that increases both the probability of success and the total deal value a buyer will pay. These benchmarks are derived from {DEAL_STATS.TOTAL_DEALS} real transactions across 12 therapeutic areas.
+            </p>
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Biotech Asset Valuation by Development Phase</h3>
+            <DataTable
+              headers={['Phase', 'Median TDV', 'Upfront Range', 'Upfront % of TDV', 'Royalty Range']}
+              rows={[
+                ['Preclinical', '$150-$500M', '$15-$40M', '8-12%', '4-8%'],
+                ['Phase 1', '$300M-$1.2B', '$30-$120M', '10-14%', '6-12%'],
+                [<strong key="p2" className="text-teal-700">Phase 2</strong>, <strong key="p2t">$500M-$3.5B</strong>, <strong key="p2u">$80-$450M</strong>, '12-16%', '8-15%'],
+                ['Phase 3', '$1.0B-$5.0B', '$200M-$1.0B', '15-20%', '12-20%'],
+                ['Approved / Filed', '$2.0B-$10B+', '$500M-$4.0B', '20-40%', '15-25%'],
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+          </div>
+
+          <div className="my-8 grid sm:grid-cols-3 gap-4">
+            <StatCard value="$1.5B" label="Median Phase 2 TDV" sub="Oncology, all modalities" />
+            <StatCard value="$180M" label="Median Phase 2 Upfront" sub="Oncology, all modalities" />
+            <StatCard value="12%" label="Median Royalty Rate" sub="Phase 2, tiered" />
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h2 id="five-factors">The 5 Factors That Determine Your Asset&apos;s Value</h2>
+
+            <p>
+              Five factors account for approximately 90% of the variance in biotech asset valuations. Understanding each factor — and where your asset sits — is the foundation for setting realistic deal expectations and identifying value-creation opportunities before going to market.
+            </p>
+
+            <h3>1. Therapeutic Area</h3>
+            <p>
+              Oncology commands the highest deal values, with median total deal values 30-50% above the all-TA average. This premium reflects larger addressable markets, faster regulatory pathways, and deeper buyer pools. Immunology and neurology rank second and third, while rare disease commands above-average upfront ratios (15-20% of TDV) due to accelerated approval pathways and pricing power.
+            </p>
+          </div>
+
+          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">Asset Valuation by Therapeutic Area (Phase 2)</h3>
+            <DataTable
+              headers={['Therapeutic Area', 'Median TDV', 'Median Upfront', 'Premium vs. Average']}
+              rows={[
+                [<strong key="onc" className="text-teal-700">Oncology</strong>, <strong key="onc-t">$1.5B</strong>, '$180M', '+35%'],
+                ['Immunology', '$1.2B', '$140M', '+15%'],
+                ['Neurology', '$1.0B', '$110M', 'Baseline'],
+                ['Metabolic', '$950M', '$100M', '-5%'],
+                ['Rare Disease', '$800M', '$130M', 'Higher upfront ratio'],
+                ['Cardiovascular', '$750M', '$85M', '-15%'],
+                ['Hematology', '$1.1B', '$125M', '+10%'],
+              ]}
+            />
+            <p className="text-xs text-slate-400 mt-3">Phase 2 assets, all modalities. Source: Ambrosia Benchmarker.</p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h3>2. Modality</h3>
+            <p>
+              Your modality — small molecule, antibody, ADC, cell therapy, gene therapy, or RNA — significantly affects valuation. ADCs command the highest median upfronts ($361M across all phases) due to platform scalability and commercial validation. Small molecules remain the highest-volume deal category but have lower median values unless targeting novel mechanisms. See our <Link href="/insights/adc-vs-bispecific-deal-benchmarks-2026" className="text-teal-600 font-medium hover:text-teal-700">ADC vs bispecific benchmarks</Link> for modality-specific data.
+            </p>
+
+            <h3>3. Development Phase</h3>
+            <p>
+              Each phase transition approximately doubles total deal value. The largest single jump occurs at proof-of-concept (Phase 2a data readout), where assets with positive PoC data see 2-4x valuation increases. Phase 3 initiation adds another 1.5-2x, and regulatory filing adds 1.3-1.5x. See our <Link href="/insights/phase-2-vs-phase-3-deal-economics" className="text-teal-600 font-medium hover:text-teal-700">Phase 2 vs Phase 3 deal economics</Link> analysis for detailed stage-gate data.
+            </p>
+
+            <h3>4. Competitive Position</h3>
+            <p>
+              First-in-class assets command 20-35% premiums over best-in-class assets in the same indication. However, best-in-class assets in validated target classes can also command strong valuations if differentiation is clear (better safety, superior efficacy, oral vs. IV). Crowded competitive landscapes compress valuations by 15-25% regardless of data quality.
+            </p>
+
+            <h3>5. Data Quality</h3>
+            <p>
+              The quality and maturity of your clinical data is the single most negotiable factor in valuation. Assets with biomarker-validated patient selection strategies, objective response endpoints, and durable follow-up data command 40-60% premiums over assets with less mature data packages. This is the highest-leverage area for value creation before going to market.
+            </p>
+          </div>
+
+          <InsightCTA
+            variant="mid"
+            heading="Get Your Asset's Exact Valuation"
+            description={`Model upfronts, milestones, royalties, and total deal value for your specific asset — calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. Board-ready report in 60 seconds.`}
+            calculatorHref="/report"
+          />
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h2 id="increase-value">How to Increase Your Asset&apos;s Value Before Licensing</h2>
+
+            <p>
+              The difference between a $500M deal and a $1.5B deal often comes down to positioning, not clinical data. These five strategies can increase your asset&apos;s value by 30-80% without additional clinical investment.
+            </p>
+
+            <p>
+              <strong>Biomarker validation.</strong> Assets with companion diagnostic strategies or biomarker-enriched trial designs command the largest premiums (40-60%). This signals to buyers that the asset can be developed efficiently in a defined patient population, reducing Phase 3 risk and accelerating time to market. If you have biomarker data, lead with it in every partnering conversation.
+            </p>
+
+            <p>
+              <strong>Regulatory designation.</strong> Breakthrough therapy designation (BTD) increases median deal value by 25-35%. Fast track designation adds 10-15%. These designations signal FDA alignment on the development path and reduce regulatory risk — a key concern for large pharma buyers who model 2-3 year regulatory timelines into their rNPV calculations.
+            </p>
+
+            <p>
+              <strong>Combination potential.</strong> Data showing additive or synergistic benefit in combination with standard-of-care or approved checkpoint inhibitors increases valuation by 20-30%. Buyers model combination revenues as incremental to monotherapy, effectively doubling the addressable market without proportional risk.
+            </p>
+
+            <p>
+              <strong>Manufacturing readiness.</strong> CMC de-risking — GMP-compliant process, validated analytical methods, identified CDMO partners — reduces perceived risk for buyers. Manufacturing-ready assets close 30-40% faster and avoid the 10-15% discount that buyers apply to assets with CMC uncertainty.
+            </p>
+
+            <p>
+              <strong>Competitive process.</strong> Running a structured partnering process with multiple interested buyers is the single fastest way to increase upfront payments. Assets marketed to 3+ serious buyers see 20-40% higher upfronts than bilateral negotiations. The <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Partner Matching engine</Link> identifies which of {DEAL_STATS.TOTAL_COMPANIES} companies are most likely to bid.
+            </p>
+          </div>
+
+          <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 my-8">
+            <p className="text-sm font-semibold text-teal-900 mb-1">The competitive process premium</p>
+            <p className="text-sm text-teal-800 leading-relaxed">
+              In our database of {DEAL_STATS.TOTAL_DEALS} transactions, deals that involved competitive processes (3+ bidders) had median upfronts 32% higher than bilateral negotiations for comparable assets. Identifying the right partners — companies with pipeline gaps, patent cliffs, and active BD mandates in your space — is as important as clinical data in determining your final deal value.
+            </p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <h2 id="faq">Frequently Asked Questions</h2>
+
+            <h3>How much is a Phase 2 biotech asset worth?</h3>
+            <p>
+              A Phase 2 biotech asset is worth $500M-$3.5B in total deal value depending on therapeutic area, modality, and data quality. Oncology Phase 2 assets command the highest values ($800M-$2.5B), followed by immunology ($600M-$2.0B) and neurology ($500M-$1.8B). Upfront payments typically represent 12-16% of total deal value at Phase 2. Use the <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}) for asset-specific benchmarks.
+            </p>
+
+            <h3>What is my preclinical biotech asset worth?</h3>
+            <p>
+              Preclinical assets range from $50M-$500M in total deal value, with median upfronts of $15-40M. Platform technologies (ADCs, RNA) command the upper range due to multi-target scalability. Single-target preclinical assets in validated mechanisms trade at $100-250M TDV. The key valuation driver at preclinical stage is target validation and competitive differentiation.
+            </p>
+
+            <h3>How do I increase my biotech asset valuation before licensing?</h3>
+            <p>
+              Five strategies increase asset value: biomarker validation (40-60% premium), regulatory designation like BTD (25-35% premium), combination data (20-30% premium), manufacturing readiness (avoids 10-15% discount), and running a competitive process with multiple buyers (20-40% higher upfronts). Biomarker validation delivers the highest ROI.
+            </p>
+
+            <h3>What upfront payment should I expect?</h3>
+            <p>
+              Upfronts typically range from 10-18% of total deal value. For a Phase 2 oncology asset worth $1.5B TDV, expect $150M-$270M upfront. Later-stage assets command higher ratios (15-20% at Phase 3, 20-40% at approval). Competitive auction dynamics can push upfronts 20-40% above median benchmarks.
+            </p>
+
+            <h3>Does therapeutic area affect valuation?</h3>
+            <p>
+              Significantly. Oncology commands the highest deal values (35% above average), followed by immunology (+15%), hematology (+10%), and neurology (baseline). Within TAs, indication matters — an oncology asset in NSCLC is worth more than one in pancreatic cancer due to market size. See our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by TA</Link> analysis.
+            </p>
+          </div>
+
+          <RelatedInsights articles={[
+            {
+              href: '/insights/phase-2-vs-phase-3-deal-economics',
+              title: 'Phase 2 vs Phase 3 Deal Economics',
+              description: 'When to deal at each stage and the proof-of-concept inflection point.',
+              badge: 'Comparison',
+            },
+            {
+              href: '/insights/oncology-upfront-payment-benchmarks',
+              title: 'Oncology Upfront Payment Benchmarks',
+              description: 'Phase-by-phase upfront data across all oncology modalities.',
+              badge: 'Benchmarks',
+            },
+            {
+              href: '/insights/pharma-partner-identification-guide',
+              title: 'Pharma Partner Identification Guide',
+              description: 'How to find the right licensing partner for your asset.',
+              badge: 'Strategy',
+            },
+          ]} />
+        </article>
+
+        <InsightCTA
+          variant="bottom"
+          heading="Get Your Asset's Exact Valuation"
+          description={`Generate a board-ready deal report with comparable transactions, rNPV valuation, partner matching, and negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. ${PRICING.REPORT_PRICE} one-time.`}
+          calculatorHref="/report"
+        />
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
