@@ -149,6 +149,26 @@
     {
       "path": "/api/cron/seo-content-suggestions",
       "schedule": "0 7 * * 3"
+    },
+    {
+      "path": "/api/cron/onboarding-drip",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/churn-prevention",
+      "schedule": "0 10 * * 3"
+    },
+    {
+      "path": "/api/cron/competitor-deal-alert",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/seo-performance",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/deal-data-health",
+      "schedule": "0 4 1 * *"
     }
   ]
 }
