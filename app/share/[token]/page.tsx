@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import SharedCalculationView from '@/components/SharedCalculationView';
-import ShareReportButton from '@/components/ShareReportButton';
 
 const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
 
@@ -128,11 +127,13 @@ export default async function SharePage({ params }: Props) {
               <div className="grid sm:grid-cols-2 gap-3 text-left max-w-md mx-auto mb-10">
                 {[
                   'Comparable deal transactions',
-                  'Sensitivity analysis',
-                  'Partner matching (850+ companies)',
+                  'rNPV & deal valuation',
+                  'Buyer-specific valuation',
+                  'Partner matching + Pharma Intent Score',
+                  'Monte Carlo sensitivity analysis',
                   'Negotiation playbook',
-                  'rNPV & Monte Carlo model',
-                  'Exportable PDF report',
+                  'Competitive landscape',
+                  'PDF + Excel export',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2.5 text-sm text-slate-400">
                     <svg className="w-4 h-4 text-teal-500/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,21 +144,22 @@ export default async function SharePage({ params }: Props) {
                 ))}
               </div>
 
-              {/* Primary CTA — direct checkout */}
-              <ShareReportButton
-                inputs={data.inputs || {}}
-                results={data.results || {}}
-                token={token}
-              />
+              {/* Primary CTA — report page */}
+              <a
+                href="/report"
+                className="inline-flex items-center gap-3 px-10 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-400 transition-all text-lg shadow-lg shadow-teal-500/15"
+              >
+                See Full Report Features
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
 
               {/* Secondary */}
               <div className="mt-6 flex flex-col items-center gap-3">
                 <a href="/calculator" className="text-sm font-medium text-slate-600 hover:text-teal-400 transition-colors">
                   or try the calculator free &rarr;
                 </a>
-                <span className="text-xs text-slate-700">
-                  Unlimited reports with Pro ($99/mo) &bull; <a href="/calculator?promo=AMBROSIA" className="text-teal-500/50 hover:text-teal-400">7-day free trial</a>
-                </span>
               </div>
             </div>
           </div>
