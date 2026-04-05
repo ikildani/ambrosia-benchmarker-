@@ -115,14 +115,20 @@ function generateTargetKeyword(
 export async function getNextTopic(
   supabase: SupabaseClient,
 ): Promise<TopicCandidate | null> {
-  // 1. Generate all valid combos in priority order
+  // 1. Generate all valid combos — interleave TAs and modalities to force
+  // topic diversity (avoid 4 ADC oncology Phase 2 posts in a row)
   const candidates: TopicCandidate[] = [];
   let comboIndex = 0;
 
-  for (const ta of TAS) {
-    for (const phase of PHASES) {
-      for (const modality of MODALITIES) {
-        for (const dealType of DEAL_TYPES) {
+  // Round-robin across dimensions: TA changes fastest, then Modality, then DealType, then Phase
+  // This produces "Oncology ADC" → "Neurology smallMolecule" → "Immunology mab" → etc
+  for (const phase of PHASES) {
+    for (const dealType of DEAL_TYPES) {
+      for (let mIdx = 0; mIdx < MODALITIES.length; mIdx++) {
+        for (let tIdx = 0; tIdx < TAS.length; tIdx++) {
+          // Offset the modality by the TA index to ensure each slot has a different modality-TA pairing
+          const modality = MODALITIES[(mIdx + tIdx) % MODALITIES.length];
+          const ta = TAS[tIdx];
           const topicKey = `${ta.key}:${dealType.key}:${modality.key}:${phase.key}`;
           candidates.push({
             topicKey,

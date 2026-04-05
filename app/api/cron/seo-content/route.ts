@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
-import { isTimeBudgetExceeded, logCronRun } from '@/lib/cron-utils';
+import { logCronRun } from '@/lib/cron-utils';
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { getNextTopic } from '@/lib/seo/topic-rotation';
 import { publishBlogPost, notifySEOContentGenerated } from '@/lib/seo/blog-publisher';
@@ -20,7 +20,8 @@ import { type GeneratedBlogContent } from '@/lib/ai/content-generator';
 import { COMPARABLE_DEALS } from '@/lib/comparableDeals';
 import { EXTENDED_COMPARABLE_DEALS } from '@/data/comparable-deals-extended';
 
-export const maxDuration = 120;
+export const maxDuration = 800; // 10 articles × ~60s each + buffer
+const ARTICLES_PER_RUN = 10;
 
 // ── Label maps ───────────────────────────────────────────────────────────────
 
@@ -152,117 +153,134 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
+  }
+  const client = new Anthropic({ apiKey });
+
+  const published: Array<{ slug: string; title: string; topicKey: string }> = [];
+  const errors: string[] = [];
 
   try {
-    // 2. Pick next topic
-    const topic = await getNextTopic(supabase);
-    if (!topic) {
-      console.log('[seo-content] All topics exhausted');
-      await logCronRun(supabase, 'seo-content', {
-        processed: 0,
-        parameters: { status: 'all_topics_exhausted' },
-      });
-      return NextResponse.json({ message: 'All topics exhausted' });
+    // Generate up to ARTICLES_PER_RUN articles per run
+    for (let i = 0; i < ARTICLES_PER_RUN; i++) {
+      // Time budget safety: leave ~60s per remaining article
+      const remainingTime = 780_000 - (Date.now() - startTime);
+      if (remainingTime < 70_000) {
+        console.log(`[seo-content] Time budget low, stopping at ${i}/${ARTICLES_PER_RUN}`);
+        break;
+      }
+
+      try {
+        // Pick next topic (skips already-generated ones)
+        const topic = await getNextTopic(supabase);
+        if (!topic) {
+          console.log('[seo-content] All topics exhausted');
+          break;
+        }
+
+        console.log(`[seo-content] [${i + 1}/${ARTICLES_PER_RUN}] Generating: ${topic.topicKey}`);
+
+        // Build prompt params
+        const phaseData = getPhaseData(topic.phase);
+        const comparableDeals = getComparableDeals(topic.therapeuticArea);
+
+        const promptParams: SEOBlogPromptParams = {
+          therapeuticArea: topic.therapeuticArea,
+          taLabel: TA_LABELS[topic.therapeuticArea] || topic.therapeuticArea,
+          phase: topic.phase,
+          phaseLabel: PHASE_LABELS[topic.phase] || topic.phase,
+          modality: topic.modality,
+          modalityLabel: MODALITY_LABELS[topic.modality] || topic.modality,
+          dealType: topic.dealType,
+          dealTypeLabel: DEAL_TYPE_LABELS[topic.dealType] || topic.dealType,
+          phaseData,
+          comparableDeals,
+        };
+
+        const prompt = generateSEOBlogPrompt(promptParams);
+
+        // Generate — bumped max_tokens for 2,500-3,500 word articles
+        const message = await client.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 12000,
+          messages: [{ role: 'user', content: prompt }],
+        });
+
+        const textContent = message.content.find((c) => c.type === 'text');
+        if (!textContent || textContent.type !== 'text') {
+          throw new Error('No text content in Claude response');
+        }
+
+        const blogContent = parseJsonResponse<GeneratedBlogContent>(textContent.text);
+
+        // Publish
+        const result = await publishBlogPost(supabase, blogContent, {
+          therapeuticArea: topic.therapeuticArea,
+          modality: topic.modality,
+          phase: topic.phase,
+          topicKey: topic.topicKey,
+        });
+
+        if (!result.success) {
+          throw new Error(`Publish failed: ${result.error}`);
+        }
+
+        published.push({
+          slug: result.slug!,
+          title: blogContent.title,
+          topicKey: topic.topicKey,
+        });
+
+        console.log(`[seo-content] [${i + 1}/${ARTICLES_PER_RUN}] Published "${blogContent.title}"`);
+      } catch (articleErr) {
+        const msg = articleErr instanceof Error ? articleErr.message : String(articleErr);
+        console.error(`[seo-content] Article ${i + 1} failed: ${msg}`);
+        errors.push(`Article ${i + 1}: ${msg}`);
+        // Continue with next article
+      }
     }
 
-    console.log(`[seo-content] Generating: ${topic.topicKey}`);
-
-    // 3. Check time budget
-    if (isTimeBudgetExceeded(startTime, 250_000)) {
-      return NextResponse.json({ error: 'Time budget exceeded before generation' }, { status: 408 });
+    // Single notification for the entire batch (instead of 10 separate Slack messages)
+    if (published.length > 0) {
+      await notifySEOContentGenerated(
+        published[0].slug,
+        `Batch: ${published.length} new articles — "${published[0].title}" + ${published.length - 1} more`,
+      );
     }
 
-    // 4. Build prompt params
-    const phaseData = getPhaseData(topic.phase);
-    const comparableDeals = getComparableDeals(topic.therapeuticArea);
-
-    const promptParams: SEOBlogPromptParams = {
-      therapeuticArea: topic.therapeuticArea,
-      taLabel: TA_LABELS[topic.therapeuticArea] || topic.therapeuticArea,
-      phase: topic.phase,
-      phaseLabel: PHASE_LABELS[topic.phase] || topic.phase,
-      modality: topic.modality,
-      modalityLabel: MODALITY_LABELS[topic.modality] || topic.modality,
-      dealType: topic.dealType,
-      dealTypeLabel: DEAL_TYPE_LABELS[topic.dealType] || topic.dealType,
-      phaseData,
-      comparableDeals,
-    };
-
-    // 5. Generate prompt
-    const prompt = generateSEOBlogPrompt(promptParams);
-
-    // 6. Call Claude
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY environment variable is required');
-    }
-
-    const client = new Anthropic({ apiKey });
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const textContent = message.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in Claude response');
-    }
-
-    // 7. Parse response
-    const blogContent = parseJsonResponse<GeneratedBlogContent>(textContent.text);
-
-    // 8. Check time budget again
-    if (isTimeBudgetExceeded(startTime, 250_000)) {
-      console.warn('[seo-content] Time budget exceeded after generation — publishing anyway');
-    }
-
-    // 9. Publish
-    const result = await publishBlogPost(supabase, blogContent, {
-      therapeuticArea: topic.therapeuticArea,
-      modality: topic.modality,
-      phase: topic.phase,
-      topicKey: topic.topicKey,
-    });
-
-    if (!result.success) {
-      throw new Error(`Publish failed: ${result.error}`);
-    }
-
-    // 10. Notify
-    await notifySEOContentGenerated(result.slug!, blogContent.title);
-
-    // 11. Log cron run
+    // Log cron run
     await logCronRun(supabase, 'seo-content', {
-      processed: 1,
-      inserted: 1,
+      processed: published.length,
+      inserted: published.length,
+      errors: errors.slice(0, 10),
       parameters: {
-        topicKey: topic.topicKey,
-        slug: result.slug,
-        title: blogContent.title,
+        articlesGenerated: published.length,
+        articlesRequested: ARTICLES_PER_RUN,
+        slugs: published.map((p) => p.slug),
       },
     });
 
     const durationMs = Date.now() - startTime;
-    console.log(`[seo-content] Published "${blogContent.title}" (${result.slug}) in ${durationMs}ms`);
+    console.log(`[seo-content] Done: ${published.length}/${ARTICLES_PER_RUN} published in ${durationMs}ms`);
 
     return NextResponse.json({
       success: true,
-      slug: result.slug,
-      title: blogContent.title,
-      topicKey: topic.topicKey,
+      published: published.length,
+      articles: published,
+      errors: errors.length,
       durationMs,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[seo-content] Error:', message);
+    console.error('[seo-content] Fatal error:', message);
 
     await logCronRun(supabase, 'seo-content', {
       errors: [message],
-      parameters: { stage: 'generation' },
+      parameters: { stage: 'batch_generation', publishedSoFar: published.length },
     });
 
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message, publishedSoFar: published.length }, { status: 500 });
   }
 }

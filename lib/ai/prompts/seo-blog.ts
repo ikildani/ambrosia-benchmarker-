@@ -1,6 +1,7 @@
 /**
- * SEO-optimized prompt template for daily blog generation.
- * Produces structured JSON output with real benchmark data and comparable deals.
+ * Worldclass SEO prompt for daily blog generation.
+ * Targets A+ quality: 2,500-3,500 words, original insights, data tables,
+ * specific deal examples, frameworks, and actionable guidance.
  */
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -47,76 +48,129 @@ export function generateSEOBlogPrompt(params: SEOBlogPromptParams): string {
   const dealsList = comparableDeals
     .map(
       (d) =>
-        `- ${d.licensor} / ${d.licensee} (${d.year}): $${d.upfront}M upfront, $${d.totalDealValue}M total deal value`,
+        `- ${d.licensor} → ${d.licensee} (${d.year}): $${d.upfront}M upfront / $${d.totalDealValue}M total`,
     )
     .join('\n');
 
-  return `You are an expert pharmaceutical business development analyst writing SEO-optimized content for biotech founders, BD executives, and investors. Write a comprehensive blog post about ${modalityLabel} ${taLabel} ${dealTypeLabel} deal benchmarks at the ${phaseLabel} stage.
+  return `You are a senior biopharma deal intelligence analyst writing for Ambrosia Ventures — a platform used by pharma BD teams, biotech founders, and investors. Your audience is sophisticated: directors, VPs, and C-suite executives who negotiate $50M-$5B deals. Write like a peer, not a content marketer.
 
-## Target Keyword
+Write an authoritative long-form article on ${modalityLabel} ${taLabel} ${dealTypeLabel} deals at ${phaseLabel} stage.
+
+## TARGET KEYWORD (primary)
 "${modalityLabel.toLowerCase()} ${taLabel.toLowerCase()} ${dealTypeLabel.toLowerCase()} deal terms ${phaseLabel.toLowerCase()}"
 
-## Exact Benchmark Data (use these numbers — do not fabricate)
-- Therapeutic Area: ${taLabel} (${therapeuticArea})
-- Phase: ${phaseLabel} (${phase})
-- Modality: ${modalityLabel} (${modality})
-- Deal Type: ${dealTypeLabel} (${dealType})
-- ${phaseLabel} Upfront Payment Range: $${phaseData.upfront.low}M - $${phaseData.upfront.high}M (median $${phaseData.upfront.median}M)
-- ${phaseLabel} Total Deal Value Range: $${phaseData.totalValue.low}M - $${phaseData.totalValue.high}M
-- Royalty Range: ${phaseData.royalty.base}% - ${phaseData.royalty.max}%
+## VERIFIED DATA (use these exact numbers — never fabricate)
+- **Therapeutic Area**: ${taLabel}
+- **Development Phase**: ${phaseLabel}
+- **Modality**: ${modalityLabel}
+- **Deal Type**: ${dealTypeLabel}
+- **${phaseLabel} Upfront Range**: $${phaseData.upfront.low}M – $${phaseData.upfront.high}M (median: $${phaseData.upfront.median}M)
+- **${phaseLabel} Total Deal Value Range**: $${phaseData.totalValue.low}M – $${phaseData.totalValue.high}M
+- **Royalty Range**: ${phaseData.royalty.base}% – ${phaseData.royalty.max}%
 
-## Real Comparable Deals (reference by name)
-${dealsList || 'No directly comparable deals available — focus on benchmark data.'}
+## REAL COMPARABLE DEALS (cite these by name with specific details)
+${dealsList || 'No directly comparable deals available — rely on benchmark data and broader market context.'}
 
-## Article Requirements
+## QUALITY STANDARDS (A+ GRADE REQUIRED)
 
-### Word Count
-Approximately 1,500 words.
+### Word count: 2,500–3,500 words minimum.
+Short articles get penalized by Google and fail to demonstrate authority. This article must be substantive.
 
-### Structure
-1. **Introduction** (150-200 words): Open with a key stat hook from the benchmark data. Establish why this specific combination matters for deal-makers.
-2. **Data Analysis** (400-500 words): Deep dive into the benchmark numbers. Include an HTML table comparing upfront, milestones, and total deal values across low/median/high scenarios. Discuss how ${modalityLabel} valuations differ from broader ${taLabel} averages.
-3. **Real Deal Examples** (300-400 words): Reference the specific comparable deals listed above by licensor and licensee name. Analyze what drove the deal economics in each case.
-4. **Implications for Founders** (250-350 words): Practical negotiation advice for biotech founders entering ${dealTypeLabel} discussions at the ${phaseLabel} stage. What leverage points exist? What terms to watch?
-5. **FAQ Section**: 5 questions with concise answers relevant to ${modalityLabel} ${taLabel} ${dealTypeLabel} deals.
+### Voice and stance
+- Write with authority. You know this space cold.
+- Use strong, declarative sentences. Avoid hedging ("it could be argued", "some experts say").
+- Take clear positions. If a deal structure is overpriced, say so. If Big Pharma is overpaying for ADCs, say so.
+- No fluff openings. No "In today's rapidly evolving landscape..." nonsense.
+- Write with a point of view — not a Wikipedia summary.
 
-### Internal Links (include naturally in the content)
-- [Deal Calculator](/calculator) — for running custom benchmarks
-- [${taLabel} Benchmarks](/benchmarks?ta=${therapeuticArea}) — for exploring ${taLabel} data
-- [Therapeutic Area Overview](/therapeutic-areas/${therapeuticArea}) — for full ${taLabel} landscape
+### Required elements (all must be present)
 
-### Tone & Style
-- Written for a BD professional audience — informed, data-driven, practical
-- Not too academic, not too casual
-- Specific numbers and real deal names wherever possible
-- Actionable insights, not generic observations
+1. **Hero stat opening** (first paragraph): Lead with the single most striking number from the benchmark data. Example: "The median upfront for a Phase 2 ADC licensing deal is now $120M — more than double the figure from five years ago. Here's what changed."
+
+2. **Original framework or thesis** (1-2 per article): Introduce a named framework or thesis unique to this article. Examples:
+   - "The 3x Rule": When total deal value exceeds 3x the upfront, the licensee is betting on clinical progression.
+   - "The Pipeline Gap Multiplier": Buyers with patent cliffs within 3 years pay 40-60% premiums.
+   - "The Platform Premium": Modality platforms command 2-4x higher valuations than single-asset deals.
+   Name your framework in bold.
+
+3. **Deal deconstruction**: Take 2-3 of the comparable deals listed above and break them down in detail:
+   - Why did they pay that upfront?
+   - What does the milestone structure tell you about buyer conviction?
+   - How did the royalty tiers reflect commercial risk?
+   - What would a BD person negotiate differently today?
+
+4. **Data tables**: Include at least TWO HTML tables:
+   - Table 1: Benchmark breakdown (upfront, milestones, royalties across low/median/high)
+   - Table 2: Comparable deals side-by-side with upfront %, total value, year, and your commentary
+   Tables must use proper <table>, <thead>, <tbody>, <tr>, <th>, <td> tags.
+
+5. **"What the data actually says" sections**: Short, punchy 2-3 sentence paragraphs that distill key insights. Format them as <blockquote> elements with a strong takeaway.
+
+6. **Contrarian insights**: At least one section must challenge conventional wisdom. Examples:
+   - "Why ${phaseLabel} is actually the wrong time to out-license"
+   - "The hidden cost of milestone-heavy deal structures"
+   - "Why royalty rates are a distraction — focus on tier thresholds instead"
+
+7. **Practical negotiation playbook**: Specific tactical advice with language like:
+   - "Before you accept the term sheet, calculate..."
+   - "Push back on X by citing the Y precedent"
+   - "The red flag in this structure is..."
+
+8. **Market context section**: Connect to current events, recent major deals, and broader trends. Reference specific 2025-2026 deals where relevant.
+
+9. **Founders vs. BD professionals split**: A section with distinct advice for each audience. Founders care about what their asset is worth. BD professionals care about deal committee defensibility.
+
+10. **Sharp conclusion**: End with a specific prediction or actionable next step. Not "In conclusion, deals are complex."
+
+### Structure (use these exact H2 sections, adapted to the topic)
+- Opening paragraph (hero stat + thesis)
+- **H2: The ${phaseLabel} ${modalityLabel} ${dealTypeLabel} Market Right Now** (current state + data table)
+- **H2: What the Benchmark Data Reveals** (deep analysis, frameworks)
+- **H2: Deal Deconstruction: How the Biggest ${taLabel} ${dealTypeLabel} Deals Were Structured** (comparable deals breakdown with second data table)
+- **H2: The Framework — [Your Named Framework]** (original insight)
+- **H2: Why Conventional Wisdom Is Wrong About [specific claim]** (contrarian section)
+- **H2: The Negotiation Playbook** (tactical advice)
+- **H2: For Biotech Founders** (founder-specific guidance)
+- **H2: For BD Professionals** (BD-specific guidance)
+- **H2: What Comes Next** (predictions + actionable conclusion)
+
+### Internal links (weave naturally, 3-5 total)
+- [Deal Calculator](/calculator) — custom benchmarks
+- [${taLabel} Deal Benchmarks](/benchmarks?ta=${therapeuticArea}) — TA-specific data
+- [Therapeutic Area Overview](/therapeutic-areas/${therapeuticArea}) — ${taLabel} landscape
+- [Get a Full Deal Report](/report) — personalized analysis
 
 ### SEO Requirements
-- Use the target keyword in the first paragraph and at least 2 H2 headers
-- Include keyword variations naturally throughout (e.g., "${taLabel.toLowerCase()} ${dealTypeLabel.toLowerCase()} benchmarks", "${modalityLabel.toLowerCase()} deal structure")
-- Meta description: 150-160 characters, includes primary keyword
-- Excerpt: 2-3 sentences for blog cards
+- Primary keyword in first 100 words AND in at least 3 H2s
+- 4-6 semantic keyword variations throughout
+- Meta description: 155-165 chars, compelling, includes primary keyword
+- Excerpt: 2-3 sentences, punchy, hooks the reader
 
-### Output Format
-Return the article as a single JSON object with this exact structure:
+### FAQ section (6 questions, substantive answers)
+Questions must be questions a BD professional would actually ask — not generic SEO questions. Answers must be 3-5 sentences each with specific data or examples.
+
+### Sources (4-6 required)
+Cite credible sources:
+- SEC 8-K filings (format: "Company 8-K filing, Month Year")
+- BioPharma Dive, Endpoints News, FiercePharma, STAT News articles
+- Industry reports (Evaluate Pharma, GlobalData, DealForma)
+- Press releases for referenced deals
+
+### Output format (strict JSON)
+Return ONLY a JSON object, no markdown wrapper, no commentary:
+
 {
-  "title": "Article title (50-60 characters ideal, includes primary keyword)",
-  "meta_description": "Compelling description for search results (150-160 chars)",
-  "excerpt": "2-3 sentence summary for blog listing cards",
-  "content": "Full article content in HTML format with proper h2, h3, p, table, ul/li tags",
+  "title": "SEO-optimized title, 50-65 chars, includes primary keyword",
+  "meta_description": "155-165 char description with primary keyword",
+  "excerpt": "2-3 sentence hook for blog listing",
+  "content": "Full HTML article with <h2>, <h3>, <p>, <table>, <blockquote>, <ul>, <strong> tags. 2,500-3,500 words.",
   "faqs": [
-    { "question": "Question 1?", "answer": "Answer 1" }
+    { "question": "Substantive BD question?", "answer": "3-5 sentence answer with data or examples." }
   ],
   "sources": [
-    { "title": "Source description", "url": "https://example.com" }
+    { "title": "Source title", "url": "https://example.com/article" }
   ]
 }
 
-### Sources Requirements
-Include 3-6 credible sources:
-- Industry publications (BioPharma Dive, Endpoints News, FiercePharma, STAT News)
-- SEC filings and press releases for referenced deals
-- Reputable databases (Evaluate Pharma, GlobalData, DealForma)
-
-Write the article now. Return ONLY the JSON object, no additional text.`;
+Do not return anything but the JSON object. Write the article now.`;
 }

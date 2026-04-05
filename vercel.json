@@ -15,6 +15,10 @@
     "app/api/partners/outreach/route.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "app/api/cron/seo-content/route.ts": {
+      "memory": 1024,
+      "maxDuration": 800
     }
   },
   "crons": [
