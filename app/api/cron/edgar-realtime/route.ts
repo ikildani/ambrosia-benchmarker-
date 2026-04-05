@@ -262,7 +262,10 @@ export async function GET(request: NextRequest) {
           });
 
           if (insertError) {
-            errors.push(`Insert error for ${accessionNumber}: ${insertError.message}`);
+            // Skip duplicates silently (unique index catches them)
+            if (insertError.code !== '23505') {
+              errors.push(`Insert error for ${accessionNumber}: ${insertError.message}`);
+            }
           } else {
             inserted++;
             console.log(

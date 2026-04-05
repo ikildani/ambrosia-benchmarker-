@@ -342,7 +342,10 @@ export async function runCompletenessAudit(
       });
 
       if (insertError) {
-        errors.push(`Insert failed for ${deal.licensor}/${deal.licensee}: ${insertError.message}`);
+        // Skip duplicates silently (unique index catches them)
+        if (insertError.code !== '23505') {
+          errors.push(`Insert failed for ${deal.licensor}/${deal.licensee}: ${insertError.message}`);
+        }
       } else {
         dealsAutoIngested++;
       }

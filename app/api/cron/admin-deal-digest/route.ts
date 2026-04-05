@@ -58,13 +58,11 @@ export async function GET(request: NextRequest) {
     .from('deals')
     .select('id', { count: 'exact', head: true });
 
-  // Breakdown by source
-  const bySource: Record<string, number> = {};
+  // Breakdown by TA and verification status
   const byTA: Record<string, number> = {};
   const byVerification: Record<string, number> = { verified: 0, pending: 0, flagged: 0 };
 
   (newDeals || []).forEach(d => {
-    bySource[d.source_type] = (bySource[d.source_type] || 0) + 1;
     if (d.therapeutic_area) byTA[d.therapeutic_area] = (byTA[d.therapeutic_area] || 0) + 1;
     const vs = d.verification_status || 'pending';
     if (byVerification[vs] !== undefined) byVerification[vs]++;
@@ -80,11 +78,6 @@ export async function GET(request: NextRequest) {
   if (!webhookUrl) {
     return NextResponse.json({ ok: true, sent: false, reason: 'no webhook' });
   }
-
-  const sourceLines = Object.entries(bySource)
-    .sort(([, a], [, b]) => b - a)
-    .map(([src, count]) => `  ${src}: ${count}`)
-    .join('\n');
 
   const taLines = Object.entries(byTA)
     .sort(([, a], [, b]) => b - a)
@@ -111,13 +104,6 @@ export async function GET(request: NextRequest) {
       ],
     },
   ];
-
-  if (sourceLines) {
-    blocks.push({
-      type: 'section',
-      text: { type: 'mrkdwn', text: `*By source:*\n\`\`\`${sourceLines}\`\`\`` },
-    });
-  }
 
   if (taLines) {
     blocks.push({

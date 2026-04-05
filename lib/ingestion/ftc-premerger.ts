@@ -276,7 +276,10 @@ export async function runFTCIngestion(
           });
 
           if (insertError) {
-            result.errors.push(`Insert ${deal.acquirer}/${deal.target}: ${insertError.message}`);
+            // Skip duplicates silently (unique index catches them)
+            if (insertError.code !== '23505') {
+              result.errors.push(`Insert ${deal.acquirer}/${deal.target}: ${insertError.message}`);
+            }
           } else {
             result.deals_inserted++;
             console.log(`[ftc] Inserted: ${deal.acquirer} acquiring ${deal.target} (${deal.ftc_action})`);
