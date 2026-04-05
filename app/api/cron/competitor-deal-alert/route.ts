@@ -150,15 +150,20 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+    // Weekly window: deals actually announced in the last 7 days (not just ingested recently).
+    // This prevents backfilled deals from being surfaced as "new" to users.
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const sevenDaysAgoTs = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // ── 1. Find deals announced in the last 6 hours ────────────────────
+    // ── 1. Find deals announced in the last 7 days (both announced + ingested recently) ──
     const { data: newDeals, error: dealsError } = await supabase
       .from('deals')
       .select('id, licensor_name, licensee_name, therapeutic_area, modality, indication_specific, upfront_usd, total_deal_value_usd, announced_date, asset_name')
-      .gte('created_at', sixHoursAgo)
+      .gte('announced_date', sevenDaysAgo)
+      .gte('created_at', sevenDaysAgoTs)
       .not('therapeutic_area', 'is', null)
-      .not('therapeutic_area', 'eq', 'other');
+      .not('therapeutic_area', 'eq', 'other')
+      .order('total_deal_value_usd', { ascending: false, nullsFirst: false });
 
     if (dealsError) {
       console.error('[Competitor Deal Alert] Deals query error:', dealsError);

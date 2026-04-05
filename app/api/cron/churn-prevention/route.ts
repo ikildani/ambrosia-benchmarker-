@@ -240,13 +240,14 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Get recent deals in their TA from the last 7 days
-        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        // Get deals ACTUALLY announced in the last 7 days (not just ingested)
+        // This prevents old backfilled deals from being shown as "new"
+        const sevenDaysAgoDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         const { data: recentDeals } = await supabase
           .from('deals')
           .select('licensee, licensor, total_deal_value, deal_type, announced_date')
           .eq('therapeutic_area', topTa)
-          .gte('created_at', sevenDaysAgo)
+          .gte('announced_date', sevenDaysAgoDate)
           .order('total_deal_value', { ascending: false, nullsFirst: false })
           .limit(5);
 
@@ -255,11 +256,12 @@ export async function GET(request: NextRequest) {
         let dealCount = dealsToShow.length;
 
         if (dealsToShow.length === 0) {
+          // Fallback: most recent deals by announced_date (not ingestion date)
           const { data: fallbackDeals } = await supabase
             .from('deals')
             .select('licensee, licensor, total_deal_value, deal_type, announced_date')
             .eq('therapeutic_area', topTa)
-            .order('created_at', { ascending: false })
+            .order('announced_date', { ascending: false, nullsFirst: false })
             .limit(3);
           dealsToShow = fallbackDeals || [];
           dealCount = dealsToShow.length;
