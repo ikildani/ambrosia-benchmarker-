@@ -379,30 +379,8 @@ export async function GET(request: NextRequest) {
     const totalErrors = (edgarResult.errors?.length || 0) + (pressResult.errors?.length || 0) + (fdaResult.errors?.length || 0) + backfillErrors.length;
     const hasPartialFailure = totalErrors > 0;
 
-    // Slack notification for deal ingestion results
-    const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-    if (webhookUrl && totalInserted > 0) {
-      fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: `Deal ingestion: ${totalInserted} new deals`,
-          attachments: [{
-            color: totalErrors === 0 ? '#16a34a' : '#f59e0b',
-            blocks: [
-              { type: 'header', text: { type: 'plain_text', text: `Deal Ingestion Complete — ${totalInserted} New Deals` } },
-              { type: 'section', fields: [
-                { type: 'mrkdwn', text: `*SEC EDGAR:*\n${edgarResult.deals || 0} deals` },
-                { type: 'mrkdwn', text: `*Press Releases:*\n${pressResult.deals_inserted || 0} deals` },
-                { type: 'mrkdwn', text: `*OpenFDA:*\n${fdaResult.inserted || 0} approvals` },
-                { type: 'mrkdwn', text: `*Errors:*\n${totalErrors}` },
-                { type: 'mrkdwn', text: `*Total in DB:*\n${totalDeals ?? '?'}` },
-              ]},
-            ],
-          }],
-        }),
-      }).catch(() => {});
-    }
+    // Per-run Slack notification removed — consolidated into weekly-deal-digest cron.
+    // Only high-value deals (>$500M) fire real-time alerts via notifyHighValueDeal.
 
     return NextResponse.json({
       success: true,

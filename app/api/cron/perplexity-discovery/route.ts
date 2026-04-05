@@ -16,7 +16,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
-import { notifyHighValueDeal, notifyIngestionRun } from '@/lib/slack/notify';
+import { notifyHighValueDeal } from '@/lib/slack/notify';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -119,26 +119,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Send ingestion run summary
-    const { data: topDeals } = await supabase
-      .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd')
-      .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
-      .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
-      .limit(5);
-
-    await notifyIngestionRun({
-      source: 'Perplexity Discovery',
-      dealsDiscovered: result.deals_discovered,
-      dealsInserted: result.deals_inserted,
-      errors: result.errors.length,
-      therapeuticAreas: currentTAs,
-      topDeals: (topDeals || []).map(d => ({
-        licensor: d.licensor_name,
-        licensee: d.licensee_name,
-        value: d.total_deal_value_usd ? Number(d.total_deal_value_usd) : null,
-      })),
-    }).catch(err => console.error('[Perplexity] Ingestion summary Slack error:', err));
+    // Per-run Slack summary removed — consolidated into weekly digest
+    // High-value deal alerts (>$500M) still fire real-time above
   }
 
   // Log with cursor in notes field for rotation tracking
