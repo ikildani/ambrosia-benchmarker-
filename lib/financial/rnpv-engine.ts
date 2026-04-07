@@ -22,7 +22,14 @@ import {
   COMPETITIVE_SHARE_TA_MULTIPLIER,
   COGS_BY_MODALITY_CATEGORY,
   SGA_BY_LIFECYCLE_STAGE,
+  DATA_QUALITY_TIMELINE_MULTIPLIER,
 } from './pos-tables';
+import {
+  MANUFACTURING_WACC_PREMIUM,
+  MARKET_ACCESS_DELAY_MONTHS,
+  checkPeakSalesRealism,
+  getGenericEntrenchmentMultiplier,
+} from './index-drugs';
 import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
 
 /**
@@ -375,7 +382,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const peakSalesEstimate = guardedPeakSales;
 
   // 1. Get discount rate (use guarded value, or compute from TA + territory + company type + deal type)
-  const discountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
+  // Add manufacturing complexity WACC premium for technically challenging modalities
+  const baseDiscountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
+  const mfgPremium = MANUFACTURING_WACC_PREMIUM[modality] || 0;
+  const discountRate = Math.min(0.30, baseDiscountRate + mfgPremium);
 
   // 2. Calculate cumulative PoS from current phase
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
@@ -450,6 +460,21 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Add regulatory review time
   yearsToMarket += durations.regulatory || 1.0;
 
+  // Apply data-quality-driven timeline adjustment (Nirav Jhaveri feedback)
+  // Better data → faster Phase 3 (smaller trial). Worse data → longer Phase 3.
+  const timelineMultiplier = DATA_QUALITY_TIMELINE_MULTIPLIER[dataQuality] || 1.0;
+  if (timelineMultiplier !== 1.0 && currentIdx <= phaseIndex('phase3')) {
+    const phase3Duration = durations.phase3 || 3.0;
+    const adjustment = phase3Duration * (timelineMultiplier - 1.0);
+    yearsToMarket = Math.max(0, yearsToMarket + adjustment);
+  }
+
+  // Apply market access delay (post-approval reimbursement lag)
+  const accessDelay = MARKET_ACCESS_DELAY_MONTHS[therapeuticArea]?.default || 0;
+  if (accessDelay > 0) {
+    yearsToMarket += accessDelay / 12; // Convert months to years
+  }
+
   // Apply scenario time-to-market adjustment (delays or accelerations)
   if (input.timeToMarketAdjustment) {
     yearsToMarket = Math.max(0, yearsToMarket + input.timeToMarketAdjustment);
@@ -462,11 +487,19 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Source: Internal calibration — data quality reflects confidence in projections
   const dataQualityAdj = getDataQualityAdjustment(dataQuality);
 
+  // 4b. Generic market entrenchment penalty (Nirav Jhaveri feedback)
+  // If entering a market where generics dominate, peak sales are penalized at launch
+  const genericEntrenchment = getGenericEntrenchmentMultiplier(therapeuticArea, input.indication);
+  const genericMultiplier = genericEntrenchment.multiplier;
+
   const adjustedPeakSales = {
-    low: peakSalesEstimate.low * dataQualityAdj,
-    median: peakSalesEstimate.median * dataQualityAdj,
-    high: peakSalesEstimate.high * dataQualityAdj,
+    low: peakSalesEstimate.low * dataQualityAdj * genericMultiplier,
+    median: peakSalesEstimate.median * dataQualityAdj * genericMultiplier,
+    high: peakSalesEstimate.high * dataQualityAdj * genericMultiplier,
   };
+
+  // 4c. Peak sales sanity check against index drug (Nirav Jhaveri feedback)
+  const peakSalesCheck = checkPeakSalesRealism(adjustedPeakSales.median, therapeuticArea, input.indication, modality);
 
   // 5. Project cash flows using median peak sales
   const cashFlows = projectCashFlows(
@@ -561,10 +594,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     ? ` (indication-adjusted: ${modifierKeys.join(', ')} → ${indicationModifier >= 1 ? '+' : ''}${((indicationModifier - 1) * 100).toFixed(1)}%)`
     : '';
   const modelAssumptions = [
-    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} risk-adjusted WACC${territory ? `, ${territory} territory` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType} deal structure` : ''})`,
+    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} WACC${mfgPremium > 0 ? ` + ${(mfgPremium * 100).toFixed(1)}pp CMC premium` : ''}${territory ? `, ${territory}` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType}` : ''})`,
     `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote}`,
-    `Years to market: ${yearsToMarket.toFixed(1)} years`,
-    `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M (adj. for data quality; competitive position applied upstream)`,
+    `Years to market: ${yearsToMarket.toFixed(1)} years${accessDelay > 0 ? ` (incl. ${accessDelay}mo market access lag)` : ''}${timelineMultiplier !== 1.0 ? ` (data quality: ${dataQuality} → ${timelineMultiplier > 1 ? '+' : ''}${((timelineMultiplier - 1) * 100).toFixed(0)}% P3 duration)` : ''}`,
+    `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M${genericMultiplier < 1.0 ? ` (×${genericMultiplier.toFixed(2)} generic entrenchment penalty)` : ''}`,
+    ...(peakSalesCheck.indexDrug ? [`Index drug: ${peakSalesCheck.indexDrug.name} at $${peakSalesCheck.indexDrug.peakSalesM.toLocaleString()}M — model is ${(peakSalesCheck.indexRatio * 100).toFixed(0)}% of index (${peakSalesCheck.confidence})`] : []),
     `Revenue ramp: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.rampUpYears ?? REVENUE_CURVE.rampUpYears)}yr ramp, ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.peakDurationYears ?? REVENUE_CURVE.peakDurationYears)}yr peak, ${((REVENUE_CURVE_OVERRIDES[therapeuticArea]?.declineRate ?? REVENUE_CURVE.declineRate) * 100).toFixed(0)}% annual decline`,
     `LOE: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval)} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`,
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
