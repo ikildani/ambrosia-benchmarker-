@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   CalculationInput,
@@ -61,6 +61,7 @@ interface UseCalculationOptions {
     count: number,
   ) => void;
   openAuthModal: (mode: 'signin' | 'signup') => void;
+  onLimitReached?: () => void;
 }
 
 export interface UseCalculationReturn {
@@ -77,10 +78,11 @@ export interface UseCalculationReturn {
     bulkSet: (fields: Partial<CalculatorFormState>) => void,
   ) => void;
   calculationCountRef: React.MutableRefObject<number>;
+  limitHit: boolean;
 }
 
 export function useCalculation(opts: UseCalculationOptions): UseCalculationReturn {
-  const { tier, isAuthenticated, userId, sessionId, anonymousId, trackCalculation, openAuthModal } = opts;
+  const { tier, isAuthenticated, userId, sessionId, anonymousId, trackCalculation, openAuthModal, onLimitReached } = opts;
 
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -89,8 +91,22 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const calculatingRef = useRef(false);
   const calculationCountRef = useRef(0);
 
-  const FREE_MONTHLY_LIMIT = 5;
-  const [monthlyLimitHit, setMonthlyLimitHit] = useState(false);
+  const FREE_CALC_LIMIT = 3;
+  const [limitHit, setLimitHit] = useState(false);
+
+  // Check limit on mount
+  useEffect(() => {
+    if (isAuthenticated && tier === 'free' && userId) {
+      fetch(`/api/calculations?user_id=${userId}&count=true&month=true`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.data?.count >= FREE_CALC_LIMIT) {
+            setLimitHit(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated, tier, userId]);
 
   const handleCalculate = useCallback((state: CalculatorFormState) => {
     // Require all primary fields to be selected
@@ -112,33 +128,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       return;
     }
 
-    // Monthly calculation limit for free users
-    if (isAuthenticated && tier === 'free' && !monthlyLimitHit) {
-      // Check monthly count from server
-      fetch(`/api/calculations?user_id=${userId}&count=true&month=true`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.data?.count >= FREE_MONTHLY_LIMIT) {
-            setMonthlyLimitHit(true);
-            toast.error(`You've reached your ${FREE_MONTHLY_LIMIT} free calculations this month. Upgrade to Pro for unlimited access.`, {
-              duration: 8000,
-              action: {
-                label: 'Upgrade',
-                onClick: () => window.location.assign('/calculator?upgrade=true'),
-              },
-            });
-          }
-        })
-        .catch(() => {});
-    }
-
-    if (monthlyLimitHit && tier === 'free') {
-      toast.error(`Monthly limit reached (${FREE_MONTHLY_LIMIT}/${FREE_MONTHLY_LIMIT}). Upgrade to Pro for unlimited calculations.`, {
-        action: {
-          label: 'Upgrade',
-          onClick: () => window.location.assign('/calculator?upgrade=true'),
-        },
-      });
+    // Hard block after 3 calculations for free users — triggers paywall
+    if (tier === 'free' && limitHit) {
+      onLimitReached?.();
       return;
     }
 
@@ -255,9 +247,13 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           // Clear wizard progress
           sessionStorage.removeItem('wizard_progress');
 
-          // Increment usage after successful calculation (only for free tier)
+          // Increment usage + check if limit reached (free tier only)
           if (tier === 'free') {
             incrementUsage();
+            calculationCountRef.current++;
+            if (calculationCountRef.current >= FREE_CALC_LIMIT) {
+              setLimitHit(true);
+            }
           }
 
           // Scroll to results
@@ -369,5 +365,6 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     handleCalculate,
     handleSensitivityApply,
     calculationCountRef,
+    limitHit,
   };
 }

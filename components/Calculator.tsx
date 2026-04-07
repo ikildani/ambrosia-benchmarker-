@@ -121,6 +121,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     anonymousId,
     trackCalculation,
     openAuthModal,
+    onLimitReached: () => {
+      setPaywallReason('pro_feature');
+      setShowPaywall(true);
+    },
   });
 
   // ── Local UI state (not form-related) ──────────────────────────────────────
