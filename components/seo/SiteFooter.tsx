@@ -19,6 +19,10 @@ const footerLinks = {
   Resources: [
     { label: 'Blog', href: '/blog' },
     { label: 'Guides', href: '/guides' },
+    { label: 'Licensing Benchmarks', href: '/guides/biopharma-licensing-benchmarks' },
+    { label: 'rNPV Guide', href: '/guides/rnpv-biotech-valuation' },
+    { label: 'Royalty Benchmarks', href: '/guides/negotiate-pharma-royalty-rates' },
+    { label: 'Deal Calculator Guide', href: '/guides/life-sciences-deal-calculator-guide' },
     { label: 'Reports', href: '/reports' },
     { label: 'Glossary', href: '/glossary' },
     { label: 'Insights', href: '/insights' },

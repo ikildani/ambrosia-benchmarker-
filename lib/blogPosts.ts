@@ -61,7 +61,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>If you are negotiating an ADC licensing deal in 2026, three dynamics should inform your strategy:</p>
 
-<p><strong>Benchmark against the current market, not historical averages.</strong> Using 2023 deal comps to anchor a 2026 negotiation will leave significant value on the table. The <a href="/calculator">Ambrosia deal calculator</a> provides current-year benchmarks calibrated to the most recent disclosed transactions.</p>
+<p><strong>Benchmark against the current market, not historical averages.</strong> Using 2023 deal comps to anchor a 2026 negotiation will leave significant value on the table. The <a href="/calculator">Ambrosia deal calculator</a> and our <a href="/guides/biopharma-licensing-benchmarks">comprehensive licensing benchmarks guide</a> provide current-year benchmarks calibrated to the most recent disclosed transactions.</p>
 
 <p><strong>Structure for indication optionality.</strong> ADC deals that grant worldwide, all-indication rights are commanding the largest total values. But biotech licensors should consider whether retaining rights to specific tumor types or geographies could yield greater long-term value, particularly if the asset demonstrates activity in indications where the licensor has existing commercial infrastructure.</p>
 
@@ -91,6 +91,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
       { href: '/calculator', label: 'Deal Calculator' },
       { href: '/glossary/upfront-payment', label: 'Upfront Payment Glossary' },
+      { href: '/guides/biopharma-licensing-benchmarks', label: 'Biopharma Licensing Benchmarks 2026' },
     ],
   },
   {
@@ -169,6 +170,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/benchmarks/glp1-obesity-deal-benchmarks-2026', label: 'GLP-1 Obesity Deal Benchmarks 2026' },
       { href: '/benchmarks/obesity-weight-loss-deal-benchmarks', label: 'Obesity & Weight Loss Deal Benchmarks' },
       { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/guides/how-to-value-biotech-deal', label: 'How to Value a Biotech Deal' },
     ],
   },
   {
@@ -490,7 +492,7 @@ export const blogPosts: BlogPost[] = [
   <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
 </div>
 
-<p>The asymmetry is striking. Gilead's maximum downside is $20M (the upfront) if both programs fail and the option is never exercised. The upside, if the Tubutecan platform delivers even one approved product in a major solid tumor indication, is measured in hundreds of millions. This is textbook option value — and it explains why Gilead accepted an apparently low total deal value.</p>
+<p>The asymmetry is striking. Gilead's maximum downside is $20M (the upfront) if both programs fail and the option is never exercised. The upside, if the Tubutecan platform delivers even one approved product in a major solid tumor indication, is measured in hundreds of millions. This is textbook option value — and it explains why Gilead accepted an apparently low total deal value. For a deeper dive into rNPV methodology, see our <a href="/guides/rnpv-biotech-valuation">complete rNPV valuation guide</a>.</p>
 
 <h3>Why Option/License Over Acquisition</h3>
 
@@ -583,6 +585,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
       { href: '/calculator', label: 'Deal Calculator' },
       { href: '/glossary/upfront-payment', label: 'Upfront Payment Glossary' },
+      { href: '/guides/rnpv-biotech-valuation', label: 'rNPV Biotech Valuation Guide' },
     ],
   },
   {
@@ -718,7 +721,7 @@ export const blogPosts: BlogPost[] = [
 
 <h3>1. Strengthen Termination and Reversion Provisions</h3>
 
-<p>Historically, many biotech companies accepted boilerplate termination clauses because the risk of termination seemed remote. That is no longer a defensible position. Modern licensing agreements should include:</p>
+<p>Historically, many biotech companies accepted boilerplate termination clauses because the risk of termination seemed remote. That is no longer a defensible position. Modern licensing agreements — as detailed in our <a href="/guides/biotech-licensing-deal-structure">deal structure guide</a> — should include:</p>
 
 <ul>
 <li><strong>Automatic reversion triggers</strong> tied to development milestones with defined timelines (e.g., if Phase 3 not initiated within 24 months of Phase 2 completion, rights revert)</li>
@@ -777,6 +780,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/insights/deal-benchmarks', label: 'Deal Benchmarks Dashboard' },
       { href: '/calculator', label: 'Deal Calculator' },
       { href: '/glossary/milestone-payment', label: 'Milestone Payment Glossary' },
+      { href: '/guides/biotech-licensing-deal-structure', label: 'Biotech Deal Structure Guide' },
     ],
   },
   {
@@ -853,7 +857,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>rNPV Model: VYKAT XR Revenue Projections</h2>
 
-<p>Using our <a href="/calculator">rNPV framework</a>, we model VYKAT XR's value under three scenarios, incorporating orphan drug economics, patent protection, and competitive risk:</p>
+<p>Using our <a href="/calculator">rNPV framework</a> (detailed in our <a href="/guides/rnpv-biotech-valuation">rNPV methodology guide</a>), we model VYKAT XR's value under three scenarios, incorporating orphan drug economics, patent protection, and competitive risk:</p>
 
 <h3>Key Model Assumptions</h3>
 
@@ -1017,6 +1021,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/insights/rare-disease-landscape', label: 'Rare Disease Landscape Analysis' },
       { href: '/calculator', label: 'Deal Calculator' },
       { href: '/glossary/risk-adjusted-npv', label: 'Risk-Adjusted NPV Glossary' },
+      { href: '/guides/rnpv-biotech-valuation', label: 'rNPV Biotech Valuation Guide' },
     ],
   },
   {
@@ -1254,7 +1259,7 @@ export const blogPosts: BlogPost[] = [
 
 <h3>1. Use Phase-Stratified Benchmarks, Not Headline Averages</h3>
 
-<p>The 90x difference between the smallest ADC deal (Gilead-Tubulis, $465M) and the largest (Pfizer-Seagen, $43B) makes averages meaningless. Deal teams must benchmark against transactions at comparable clinical stages, with comparable deal structures, and comparable asset profiles. The <a href="/calculator">Ambrosia deal calculator</a> provides phase-specific, modality-specific benchmarks calibrated to the most recent disclosed transactions.</p>
+<p>The 90x difference between the smallest ADC deal (Gilead-Tubulis, $465M) and the largest (Pfizer-Seagen, $43B) makes averages meaningless. Deal teams must benchmark against transactions at comparable clinical stages, with comparable deal structures, and comparable asset profiles. Our <a href="/guides/biopharma-licensing-benchmarks">2026 licensing benchmarks guide</a> provides the full dataset. Additionally, the <a href="/calculator">Ambrosia deal calculator</a> provides phase-specific, modality-specific benchmarks calibrated to the most recent disclosed transactions.</p>
 
 <h3>2. Model Option/License Structures Explicitly</h3>
 
@@ -1296,6 +1301,7 @@ export const blogPosts: BlogPost[] = [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
       { href: '/calculator', label: 'Deal Calculator' },
       { href: '/insights/deal-benchmarks', label: 'Deal Benchmarks Dashboard' },
+      { href: '/guides/biopharma-licensing-benchmarks', label: 'Biopharma Licensing Benchmarks 2026' },
     ],
   },
 ];

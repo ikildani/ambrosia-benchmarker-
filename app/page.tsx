@@ -762,6 +762,45 @@ export default function Home() {
       {/* Pricing Section */}
       <Pricing currentTier={tier} onSelectTier={handleTierChange} userEmail={user?.email} userId={user?.id} initialPromoCode={urlPromoCode} />
 
+      {/* Featured Guides */}
+      <section className="py-20 px-4 bg-slate-950 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-3">
+              Deal Intelligence Guides
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              In-depth resources for BD teams, deal committees, and licensing professionals — backed by data from {DEAL_STATS.TOTAL_DEALS} transactions.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { href: '/guides/biopharma-licensing-benchmarks', title: 'Biopharma Licensing Benchmarks 2026', desc: 'Upfront, milestone, and royalty benchmarks by phase, modality, and TA', tag: 'Data' },
+              { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Biotech Valuation Guide', desc: 'Phase transition probabilities, cash flow modeling, and Monte Carlo enhancement', tag: 'Methodology' },
+              { href: '/guides/negotiate-pharma-royalty-rates', title: 'Pharma Royalty Rate Benchmarks', desc: 'Royalty rates by phase and modality with negotiation strategies', tag: 'Benchmarks' },
+              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Deal Calculator Guide', desc: '14 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
+              { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
+              { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
+            ].map(guide => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="group bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:bg-white/[0.06] hover:border-teal-500/30 transition-all duration-300"
+              >
+                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 rounded mb-3">{guide.tag}</span>
+                <h3 className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors mb-2">{guide.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{guide.desc}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/guides" className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors">
+              View all guides →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <FAQSection />
 
