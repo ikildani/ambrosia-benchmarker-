@@ -250,22 +250,6 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <>
       <main className="min-h-screen bg-white dark:bg-slate-900">
-        {/* ━━━ HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-700 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-14">
-              <Link href="/" className="flex items-center text-base font-bold text-slate-900 dark:text-white">
-                Ambrosia Ventures
-              </Link>
-              <div className="flex items-center gap-5">
-                <Link href="/blog" className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Blog</Link>
-                <Link href="/calculator" className="text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 transition-colors">Calculator</Link>
-                <Link href="/report" className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors">Get Report</Link>
-              </div>
-            </div>
-          </div>
-        </header>
-
         {/* Structured Data */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
@@ -277,18 +261,18 @@ export default async function BlogPostPage({ params }: PageProps) {
         {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
         {/* ━━━ HERO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className={`relative bg-gradient-to-b ${style.gradient} to-white dark:to-slate-900`}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-100/50 via-transparent to-transparent dark:from-slate-800/50 pointer-events-none" />
+        <div className="relative bg-gradient-to-b from-[#0a0f1a] via-[#0d1420] to-white dark:to-slate-900">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(13,148,136,0.12),transparent)] pointer-events-none" />
 
           <article className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-16">
             {/* Breadcrumb */}
             <nav aria-label="Breadcrumb" className="mb-8">
-              <ol className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
-                <li><Link href="/" className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Home</Link></li>
-                <li aria-hidden="true" className="text-slate-300 dark:text-slate-600">/</li>
-                <li><Link href="/blog" className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Blog</Link></li>
-                <li aria-hidden="true" className="text-slate-300 dark:text-slate-600">/</li>
-                <li className="text-slate-600 dark:text-slate-400 font-medium truncate max-w-[220px] sm:max-w-none">{post.title}</li>
+              <ol className="flex items-center gap-2 text-sm text-slate-500">
+                <li><Link href="/" className="hover:text-teal-400 transition-colors">Home</Link></li>
+                <li aria-hidden="true" className="text-slate-700">/</li>
+                <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
+                <li aria-hidden="true" className="text-slate-700">/</li>
+                <li className="text-slate-400 font-medium truncate max-w-[220px] sm:max-w-none">{post.title}</li>
               </ol>
             </nav>
 
@@ -298,25 +282,25 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${style.badge}`}>
                   {post.category}
                 </span>
-                <span className="text-sm text-slate-400 dark:text-slate-500">{post.readTime}</span>
+                <span className="text-sm text-slate-500">{post.readTime}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-slate-900 dark:text-white leading-[1.12] tracking-tight mb-5">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-white leading-[1.12] tracking-tight mb-5">
                 {post.title}
               </h1>
 
-              <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">
+              <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mb-6">
                 {post.excerpt}
               </p>
 
-              <div className="flex items-center gap-4 pb-8 border-b border-slate-200/80 dark:border-slate-700/80">
+              <div className="flex items-center gap-4 pb-8 border-b border-white/10">
                 {/* Author avatar */}
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                   AV
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-slate-900 dark:text-white">{post.author}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="text-sm font-semibold text-white">{post.author}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
                     <time dateTime={post.publishedAt}>{publishedDate}</time>
                     <span>&middot;</span>
                     <span>Based on {DEAL_STATS.TOTAL_DEALS} transactions</span>
@@ -327,14 +311,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {/* ━━━ TABLE OF CONTENTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
             {toc.length >= 3 && (
-              <nav className="mb-10 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-700/50 p-5 sm:p-6">
-                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">In this article</p>
+              <nav className="mb-10 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-5 sm:p-6">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">In this article</p>
                 <ul className="space-y-2">
                   {toc.map((item) => (
                     <li key={item.id} className={item.level === 3 ? 'ml-4' : ''}>
                       <a
                         href={`#${item.id}`}
-                        className="text-sm text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors leading-relaxed"
+                        className="text-sm text-slate-400 hover:text-teal-400 transition-colors leading-relaxed"
                       >
                         {item.text}
                       </a>
@@ -356,7 +340,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                 prose-li:marker:text-teal-500 prose-li:leading-relaxed
                 prose-blockquote:border-l-teal-500 prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-slate-800/50 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:not-italic
                 prose-code:text-teal-700 dark:prose-code:text-teal-300 prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm
-                prose-table:text-sm prose-th:bg-slate-100 dark:prose-th:bg-slate-800 prose-th:font-bold prose-th:text-slate-700 dark:prose-th:text-slate-300
+                prose-table:border-collapse prose-table:w-full prose-table:rounded-lg prose-table:overflow-hidden
+                prose-thead:bg-slate-900 prose-thead:text-white
+                prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:text-xs prose-th:uppercase prose-th:tracking-wider prose-th:font-semibold prose-th:text-slate-300 prose-th:border-b prose-th:border-slate-700
+                prose-td:px-4 prose-td:py-3 prose-td:text-sm prose-td:border-b prose-td:border-slate-100 dark:prose-td:border-slate-800
                 prose-img:rounded-xl prose-img:shadow-lg
                 mb-16"
               dangerouslySetInnerHTML={{ __html: htmlContent }}
@@ -448,10 +435,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                     Open the Deal Calculator
                   </Link>
                   <Link
-                    href="/report"
+                    href="/pro"
                     className="inline-flex items-center px-6 py-3 bg-white dark:bg-slate-800 text-teal-700 dark:text-teal-400 font-semibold rounded-xl border border-teal-200 dark:border-teal-800 hover:border-teal-400 transition-colors text-sm"
                   >
-                    Get a Full Report — $499
+                    Go Pro — Unlimited Access
                   </Link>
                 </div>
               </div>
