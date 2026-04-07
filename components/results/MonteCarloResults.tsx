@@ -306,6 +306,40 @@ export default function MonteCarloResults({
               </div>
             </div>
 
+            {/* Risk Metrics — VaR/CVaR + Distribution Shape */}
+            {mc.var95 !== undefined && (
+              <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-100 dark:border-red-500/20">
+                  <p className="text-[10px] font-bold text-red-500/70 dark:text-red-400/70 uppercase tracking-wider mb-1">VaR (95%)</p>
+                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{formatCurrency(mc.var95)}</p>
+                  <p className="text-[10px] text-red-500/50 dark:text-red-400/40 mt-0.5">Worst case 95% of time</p>
+                </div>
+                <div className="p-3 bg-rose-50 dark:bg-rose-500/10 rounded-lg border border-rose-100 dark:border-rose-500/20">
+                  <p className="text-[10px] font-bold text-rose-500/70 dark:text-rose-400/70 uppercase tracking-wider mb-1">CVaR (95%)</p>
+                  <p className="text-sm font-bold text-rose-700 dark:text-rose-400">{formatCurrency(mc.cvar95)}</p>
+                  <p className="text-[10px] text-rose-500/50 dark:text-rose-400/40 mt-0.5">Expected tail loss</p>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                  <p className="text-[10px] font-bold text-slate-500/70 dark:text-slate-400/70 uppercase tracking-wider mb-1">Skewness</p>
+                  <p className={`text-sm font-bold ${mc.skewness > 0 ? 'text-teal-700 dark:text-teal-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                    {mc.skewness > 0 ? '+' : ''}{mc.skewness.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-slate-500/50 dark:text-slate-400/40 mt-0.5">
+                    {mc.skewness > 0.5 ? 'Right-skewed (upside)' : mc.skewness < -0.5 ? 'Left-skewed (downside)' : 'Near-symmetric'}
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                  <p className="text-[10px] font-bold text-slate-500/70 dark:text-slate-400/70 uppercase tracking-wider mb-1">Tail Risk</p>
+                  <p className={`text-sm font-bold ${mc.kurtosis > 1 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {mc.kurtosis > 0 ? '+' : ''}{mc.kurtosis.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-slate-500/50 dark:text-slate-400/40 mt-0.5">
+                    {mc.kurtosis > 2 ? 'Heavy tails' : mc.kurtosis > 0 ? 'Moderate tails' : 'Normal-like'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Key Sensitivities - Top 3 Drivers (centered-origin correlation bars) */}
             {topDrivers.length > 0 && (
               <div>
