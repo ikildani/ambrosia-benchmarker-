@@ -10,6 +10,7 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -209,7 +210,7 @@ export default function PreclinicalValuationPage() {
             </p>
 
             <p>
-              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset of 2,500+ transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
+              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset of {DEAL_STATS.TOTAL_DEALS} transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
             </p>
 
             <h2 id="preclinical-baselines">Preclinical Baselines by Therapeutic Area</h2>

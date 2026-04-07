@@ -3,26 +3,26 @@
 /**
  * Buyer-Specific Deal Valuation Panel
  *
- * Renders inside the rNPV & Deal Valuation section. Allows the user to select
- * a partner from the match list and see a side-by-side comparison of what that
- * specific buyer would pay versus a generic buyer, based on the strategic
- * premium computed by the buyer-specific valuation engine.
+ * Shows a multi-partner comparison: Generic buyer + up to 3 selected partners
+ * side-by-side. Auto-selects the top 2 partners on mount. Users can toggle
+ * partners on/off to compare different buyer scenarios.
  *
  * Gated behind Pro/Report tier — free users see a blurred preview with upgrade CTA.
  *
  * @module components/results/BuyerSpecificPanel
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Target,
   Lock,
-  ChevronDown,
   TrendingUp,
   Shield,
   Clock,
   Zap,
   Building2,
+  Check,
+  ChevronDown,
 } from 'lucide-react';
 import type { DealWaterfall, RNPVResult } from '@/lib/financial/types';
 import {
@@ -64,9 +64,11 @@ export interface BuyerSpecificPanelProps {
   onUpgrade?: () => void;
   /** Callback to trigger single-report purchase */
   onBuyReport?: () => void;
-  /** Callback when a buyer-specific valuation is computed — used to capture for PDF */
-  onValuationComputed?: (valuation: BuyerSpecificValuation | null) => void;
+  /** Callback when buyer-specific valuations are computed — used to capture for PDF */
+  onValuationComputed?: (valuations: BuyerSpecificValuation[] | null) => void;
 }
+
+const MAX_SELECTED = 3;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -90,6 +92,13 @@ const leverageLabel: Record<string, string> = {
   limited: 'LIMITED',
 };
 
+// Buyer column accent colors (cycle for up to 3 buyers)
+const BUYER_ACCENTS = [
+  { border: 'border-teal-600/30', bg: 'bg-teal-900/20', text: 'text-teal-400', textSub: 'text-teal-500/70', badge: 'bg-teal-500/10', bar: '#0EA5A5' },
+  { border: 'border-violet-600/30', bg: 'bg-violet-900/20', text: 'text-violet-400', textSub: 'text-violet-500/70', badge: 'bg-violet-500/10', bar: '#8B5CF6' },
+  { border: 'border-amber-600/30', bg: 'bg-amber-900/20', text: 'text-amber-400', textSub: 'text-amber-500/70', badge: 'bg-amber-500/10', bar: '#F59E0B' },
+];
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -103,34 +112,46 @@ export default function BuyerSpecificPanel({
   onBuyReport,
   onValuationComputed,
 }: BuyerSpecificPanelProps) {
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const hasAccess = tier === 'pro' || tier === 'report';
 
-  // Include all partners — those with intent data get full premium analysis,
-  // those without get a basic match-score-only premium
   const eligiblePartners = useMemo(
     () => partnerMatches.filter(p => p.match_score > 0),
     [partnerMatches],
   );
 
-  const selectedPartner = useMemo(
-    () => eligiblePartners.find(p => p.company_id === selectedPartnerId) ?? null,
-    [eligiblePartners, selectedPartnerId],
-  );
-
-  // Compute buyer-specific valuation when a partner is selected
-  const valuation: BuyerSpecificValuation | null = useMemo(() => {
-    if (!selectedPartner) {
-      onValuationComputed?.(null);
-      return null;
+  // Auto-select top 2 partners on mount
+  useEffect(() => {
+    if (eligiblePartners.length > 0 && selectedIds.length === 0) {
+      const top = eligiblePartners.slice(0, Math.min(2, eligiblePartners.length));
+      setSelectedIds(top.map(p => p.company_id));
     }
-    const profile = buildBuyerProfileFromMatch(selectedPartner);
-    const result = calculateBuyerSpecificValuation(profile, dealWaterfall, rnpvResult);
-    onValuationComputed?.(result);
-    return result;
-  }, [selectedPartner, dealWaterfall, rnpvResult, onValuationComputed]);
+    // Only run on mount / when partners first load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eligiblePartners.length]);
+
+  // Compute valuations for all selected partners
+  const valuations: BuyerSpecificValuation[] = useMemo(() => {
+    const results: BuyerSpecificValuation[] = [];
+    for (const id of selectedIds) {
+      const partner = eligiblePartners.find(p => p.company_id === id);
+      if (!partner) continue;
+      const profile = buildBuyerProfileFromMatch(partner);
+      results.push(calculateBuyerSpecificValuation(profile, dealWaterfall, rnpvResult));
+    }
+    onValuationComputed?.(results.length > 0 ? results : null);
+    return results;
+  }, [selectedIds, eligiblePartners, dealWaterfall, rnpvResult, onValuationComputed]);
+
+  const togglePartner = (id: string) => {
+    setSelectedIds(prev => {
+      if (prev.includes(id)) return prev.filter(x => x !== id);
+      if (prev.length >= MAX_SELECTED) return prev; // cap at 3
+      return [...prev, id];
+    });
+  };
 
   // ── Locked overlay for free tier ──
   if (!hasAccess) {
@@ -180,6 +201,12 @@ export default function BuyerSpecificPanel({
     );
   }
 
+  // Reference generic values from the first valuation (all share the same generic baseline)
+  const generic = valuations[0] ? {
+    dealValue: valuations[0].genericDealValue,
+    upfront: valuations[0].genericUpfront,
+  } : null;
+
   return (
     <div className="mt-6 bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
       {/* Header with partner selector */}
@@ -187,50 +214,67 @@ export default function BuyerSpecificPanel({
         <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-teal-400" />
           <h3 className="text-sm font-semibold text-slate-200">Buyer-Specific Valuation</h3>
+          {valuations.length > 0 && (
+            <span className="text-[10px] text-slate-500 font-mono">
+              {valuations.length} buyer{valuations.length !== 1 ? 's' : ''} selected
+            </span>
+          )}
         </div>
 
-        {/* Partner Selector Dropdown */}
+        {/* Partner Multi-Select Dropdown */}
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors min-w-[200px]"
           >
-            {selectedPartner ? (
-              <span className="flex items-center gap-2 truncate">
-                <Building2 className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                <span className="truncate">{selectedPartner.company_name}</span>
-                <span className="text-teal-400 font-mono flex-shrink-0">{selectedPartner.match_score}%</span>
-              </span>
-            ) : (
-              <span className="text-slate-500">Select a partner...</span>
-            )}
-            <ChevronDown className={`w-3 h-3 text-slate-500 flex-shrink-0 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <span className="text-slate-400">
+              {selectedIds.length === 0
+                ? 'Select partners...'
+                : `${selectedIds.length} of ${eligiblePartners.length} selected`}
+            </span>
+            <ChevronDown className={`w-3 h-3 text-slate-500 flex-shrink-0 transition-transform ml-auto ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 z-20 w-72 max-h-64 overflow-y-auto bg-slate-800 border border-slate-600 rounded-lg shadow-xl">
-              {eligiblePartners.map(partner => (
-                <button
-                  key={partner.company_id}
-                  onClick={() => {
-                    setSelectedPartnerId(partner.company_id);
-                    setDropdownOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-slate-700/60 transition-colors ${
-                    partner.company_id === selectedPartnerId ? 'bg-slate-700/40' : ''
-                  }`}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Building2 className="w-3 h-3 text-slate-500 flex-shrink-0" />
-                    <span className="text-slate-300 truncate">{partner.company_name}</span>
-                  </span>
-                  <span className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <span className="text-teal-400 font-mono">{partner.match_score}%</span>
-                    <span className="text-slate-500">|</span>
-                    <span className="text-amber-400 font-mono">{partner.pharma_intent?.intentScore ?? 0}</span>
-                  </span>
-                </button>
-              ))}
+            <div className="absolute right-0 top-full mt-1 z-20 w-80 max-h-64 overflow-y-auto bg-slate-800 border border-slate-600 rounded-lg shadow-xl">
+              <div className="px-3 py-2 border-b border-slate-700">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider">Select up to {MAX_SELECTED} partners to compare</p>
+              </div>
+              {eligiblePartners.map(partner => {
+                const isSelected = selectedIds.includes(partner.company_id);
+                const isDisabled = !isSelected && selectedIds.length >= MAX_SELECTED;
+                return (
+                  <button
+                    key={partner.company_id}
+                    onClick={() => {
+                      if (!isDisabled) togglePartner(partner.company_id);
+                    }}
+                    disabled={isDisabled}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors ${
+                      isSelected
+                        ? 'bg-teal-900/30'
+                        : isDisabled
+                          ? 'opacity-40 cursor-not-allowed'
+                          : 'hover:bg-slate-700/60'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                        isSelected ? 'bg-teal-600 border-teal-500' : 'border-slate-600'
+                      }`}>
+                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <Building2 className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                      <span className="text-slate-300 truncate">{partner.company_name}</span>
+                    </span>
+                    <span className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      <span className="text-teal-400 font-mono">{partner.match_score}%</span>
+                      <span className="text-slate-500">|</span>
+                      <span className="text-amber-400 font-mono">{partner.pharma_intent?.intentScore ?? 0}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -238,15 +282,15 @@ export default function BuyerSpecificPanel({
 
       {/* Content */}
       <div className="px-5 py-4">
-        {!valuation ? (
+        {valuations.length === 0 ? (
           <div className="text-center py-8">
             <Target className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-            <p className="text-sm text-slate-500">Select a partner above to see their buyer-specific valuation.</p>
+            <p className="text-sm text-slate-500">Select partners above to compare buyer-specific valuations.</p>
           </div>
         ) : (
           <div className="space-y-5">
-            {/* Side-by-side value comparison */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* ── Multi-Buyer Comparison Grid ── */}
+            <div className={`grid gap-3`} style={{ gridTemplateColumns: `1fr repeat(${valuations.length}, 1fr)` }}>
               {/* Generic Buyer Card */}
               <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4">
                 <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-3">Generic Buyer</p>
@@ -254,139 +298,239 @@ export default function BuyerSpecificPanel({
                   <div>
                     <p className="text-[10px] text-slate-500">Deal Value</p>
                     <p className="text-lg font-semibold text-slate-300 font-mono">
-                      {fmt(valuation.genericDealValue.median)}
+                      {generic ? fmt(generic.dealValue.median) : '—'}
                     </p>
-                    <p className="text-[10px] text-slate-600 font-mono">
-                      {fmt(valuation.genericDealValue.low)} – {fmt(valuation.genericDealValue.high)}
-                    </p>
+                    {generic && (
+                      <p className="text-[10px] text-slate-600 font-mono">
+                        {fmt(generic.dealValue.low)} – {fmt(generic.dealValue.high)}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-500">Upfront</p>
                     <p className="text-sm font-semibold text-slate-400 font-mono">
-                      {fmt(valuation.genericUpfront.median)}
+                      {generic ? fmt(generic.upfront.median) : '—'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Buyer-Specific Card */}
-              <div className="bg-teal-900/20 border border-teal-600/30 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] uppercase tracking-wider text-teal-400 truncate max-w-[60%]">
-                    {valuation.buyer.companyName}
-                  </p>
-                  <span className="text-[10px] font-mono text-teal-400 bg-teal-500/10 px-1.5 py-0.5 rounded">
-                    {valuation.buyer.matchScore}% fit
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-[10px] text-teal-500/70">Deal Value</p>
-                    <p className="text-lg font-semibold text-teal-300 font-mono">
-                      {fmt(valuation.buyerSpecificDealValue.median)}
-                    </p>
-                    <p className="text-[10px] text-teal-600/50 font-mono">
-                      {fmt(valuation.buyerSpecificDealValue.low)} – {fmt(valuation.buyerSpecificDealValue.high)}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] text-teal-500/70">Upfront</p>
-                      <p className="text-sm font-semibold text-teal-300 font-mono">
-                        {fmt(valuation.buyerUpfront.median)}
+              {/* Buyer-Specific Cards */}
+              {valuations.map((val, i) => {
+                const accent = BUYER_ACCENTS[i % BUYER_ACCENTS.length];
+                return (
+                  <div key={val.buyer.companyId} className={`${accent.bg} border ${accent.border} rounded-lg p-4`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className={`text-[10px] uppercase tracking-wider ${accent.text} truncate max-w-[60%]`}>
+                        {val.buyer.companyName}
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-teal-500/70">Premium</p>
-                      <p className="text-sm font-bold text-emerald-400 font-mono">
-                        +{valuation.strategicPremiumPercent.toFixed(0)}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Breakdown Bars */}
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-3">Premium Breakdown</p>
-              <div className="space-y-2.5">
-                {valuation.premiumBreakdown.map(factor => (
-                  <div key={factor.factor} className="group">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-slate-400">{factor.factor}</span>
-                      <span className="text-xs font-mono text-slate-300">
-                        +{factor.contribution.toFixed(0)}%
-                        <span className="text-slate-600 ml-1.5">
-                          ({factor.score}/100 &times; {factor.weight.toFixed(2)})
-                        </span>
+                      <span className={`text-[10px] font-mono ${accent.text} ${accent.badge} px-1.5 py-0.5 rounded`}>
+                        +{val.strategicPremiumPercent.toFixed(0)}%
                       </span>
                     </div>
-                    {/* Progress bar */}
-                    <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${Math.min((factor.contribution / 30) * 100, 100)}%`,
-                          background: factor.contribution >= 15
-                            ? 'linear-gradient(90deg, #0EA5A5, #34d399)'
-                            : factor.contribution >= 8
-                              ? 'linear-gradient(90deg, #0EA5A5, #0891B2)'
-                              : '#64748B',
-                        }}
-                      />
+                    <div className="space-y-2">
+                      <div>
+                        <p className={`text-[10px] ${accent.textSub}`}>Deal Value</p>
+                        <p className={`text-lg font-semibold ${accent.text} font-mono`}>
+                          {fmt(val.buyerSpecificDealValue.median)}
+                        </p>
+                        <p className="text-[10px] text-slate-600 font-mono">
+                          {fmt(val.buyerSpecificDealValue.low)} – {fmt(val.buyerSpecificDealValue.high)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className={`text-[10px] ${accent.textSub}`}>Upfront</p>
+                          <p className={`text-sm font-semibold ${accent.text} font-mono`}>
+                            {fmt(val.buyerUpfront.median)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    {/* Rationale on hover / always visible on mobile */}
-                    <p className="text-[10px] text-slate-600 mt-0.5 hidden group-hover:block">
-                      {factor.rationale}
-                    </p>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
 
-            {/* Negotiation Leverage + Timing */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Shield className="w-3 h-3 text-slate-500" />
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500">Negotiation Leverage</p>
+            {/* ── Comparison Table ── */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left py-2 px-2 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Metric</th>
+                    <th className="text-center py-2 px-2 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Generic</th>
+                    {valuations.map((val, i) => (
+                      <th key={val.buyer.companyId} className={`text-center py-2 px-2 text-[10px] uppercase tracking-wider font-semibold ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {val.buyer.companyName}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Deal Value</td>
+                    <td className="py-2 px-2 text-center text-slate-300 font-mono">{generic ? fmt(generic.dealValue.median) : '—'}</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center font-mono font-semibold ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {fmt(val.buyerSpecificDealValue.median)}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Upfront</td>
+                    <td className="py-2 px-2 text-center text-slate-300 font-mono">{generic ? fmt(generic.upfront.median) : '—'}</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center font-mono font-semibold ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {fmt(val.buyerUpfront.median)}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Premium</td>
+                    <td className="py-2 px-2 text-center text-slate-500 font-mono">—</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center font-mono font-bold ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        +{val.strategicPremiumPercent.toFixed(0)}%
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Match Score</td>
+                    <td className="py-2 px-2 text-center text-slate-500 font-mono">—</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center font-mono ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {val.buyer.matchScore}%
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Intent Score</td>
+                    <td className="py-2 px-2 text-center text-slate-500 font-mono">—</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center font-mono ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {val.buyer.intentScore}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Timing</td>
+                    <td className="py-2 px-2 text-center text-slate-500">—</td>
+                    {valuations.map((val, i) => (
+                      <td key={val.buyer.companyId} className={`py-2 px-2 text-center capitalize ${BUYER_ACCENTS[i % BUYER_ACCENTS.length].text}`}>
+                        {val.buyer.timing.replace('_', ' ')}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-2 text-slate-400">Leverage</td>
+                    <td className="py-2 px-2 text-center text-slate-500">—</td>
+                    {valuations.map(val => (
+                      <td key={val.buyer.companyId} className="py-2 px-2 text-center">
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded border ${leverageColor[val.negotiationLeverage]}`}>
+                          {leverageLabel[val.negotiationLeverage]}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Per-Buyer Details (Expandable) ── */}
+            {valuations.map((val, i) => {
+              const accent = BUYER_ACCENTS[i % BUYER_ACCENTS.length];
+              return (
+                <div key={val.buyer.companyId} className={`${accent.bg} border ${accent.border} rounded-lg overflow-hidden`}>
+                  {/* Buyer header */}
+                  <div className="px-4 py-3 border-b border-slate-700/30">
+                    <div className="flex items-center gap-2">
+                      <Building2 className={`w-3.5 h-3.5 ${accent.text}`} />
+                      <span className={`text-xs font-semibold ${accent.text}`}>{val.buyer.companyName}</span>
+                      <span className={`text-[10px] font-mono ${accent.text} ${accent.badge} px-1.5 py-0.5 rounded`}>
+                        +{val.strategicPremiumPercent.toFixed(0)}% premium
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-3 space-y-4">
+                    {/* Premium Breakdown Bars */}
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Premium Breakdown</p>
+                      <div className="space-y-2">
+                        {val.premiumBreakdown.map(factor => (
+                          <div key={factor.factor} className="group">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-[11px] text-slate-400">{factor.factor}</span>
+                              <span className="text-[11px] font-mono text-slate-300">
+                                +{factor.contribution.toFixed(0)}%
+                                <span className="text-slate-600 ml-1.5">
+                                  ({factor.score}/100 &times; {factor.weight.toFixed(2)})
+                                </span>
+                              </span>
+                            </div>
+                            <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${Math.min((factor.contribution / 30) * 100, 100)}%`,
+                                  background: accent.bar,
+                                }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-600 mt-0.5 hidden group-hover:block">
+                              {factor.rationale}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Timing + Upfront Premium row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-2.5">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500">Upfront Premium</p>
+                        </div>
+                        <p className={`text-sm font-semibold ${accent.text} font-mono`}>
+                          +{fmt(val.upfrontPremium)}
+                        </p>
+                        <p className="text-[10px] text-slate-600">vs generic</p>
+                      </div>
+                      <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-2.5">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <Shield className="w-3 h-3 text-slate-500" />
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500">Leverage</p>
+                        </div>
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded border ${leverageColor[val.negotiationLeverage]}`}>
+                          {leverageLabel[val.negotiationLeverage]}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Timing Advantage */}
+                    {val.timingAdvantage && (
+                      <div className="bg-slate-800/20 border border-slate-700/20 rounded-lg p-2.5">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Zap className="w-3 h-3 text-amber-500" />
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500">Timing Advantage</p>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">{val.timingAdvantage}</p>
+                      </div>
+                    )}
+
+                    {/* Narrative */}
+                    <div className={`${accent.bg} border ${accent.border} rounded-lg p-2.5`}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <TrendingUp className={`w-3 h-3 ${accent.text}`} />
+                        <p className={`text-[10px] uppercase tracking-wider ${accent.textSub}`}>Analysis</p>
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed italic">{val.narrative}</p>
+                    </div>
+                  </div>
                 </div>
-                <span
-                  className={`inline-block px-2 py-0.5 text-xs font-bold rounded border ${leverageColor[valuation.negotiationLeverage]}`}
-                >
-                  {leverageLabel[valuation.negotiationLeverage]}
-                </span>
-              </div>
-              <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Clock className="w-3 h-3 text-slate-500" />
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500">Upfront Premium</p>
-                </div>
-                <p className="text-sm font-semibold text-teal-300 font-mono">
-                  +{fmt(valuation.upfrontPremium)}
-                </p>
-                <p className="text-[10px] text-slate-600">vs generic upfront</p>
-              </div>
-            </div>
-
-            {/* Timing Advantage */}
-            <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Zap className="w-3 h-3 text-amber-500" />
-                <p className="text-[10px] uppercase tracking-wider text-slate-500">Timing Advantage</p>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{valuation.timingAdvantage}</p>
-            </div>
-
-            {/* Full Narrative */}
-            <div className="bg-teal-950/20 border border-teal-800/20 rounded-lg p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <TrendingUp className="w-3 h-3 text-teal-500" />
-                <p className="text-[10px] uppercase tracking-wider text-teal-600">Analysis</p>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed italic">{valuation.narrative}</p>
-            </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -408,7 +552,7 @@ function PlaceholderContent() {
         </div>
         <div className="w-40 h-7 bg-slate-700 rounded-lg" />
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4">
           <div className="w-24 h-3 bg-slate-600 rounded mb-3" />
           <div className="w-16 h-6 bg-slate-600 rounded mb-2" />
@@ -418,6 +562,11 @@ function PlaceholderContent() {
           <div className="w-28 h-3 bg-teal-800/40 rounded mb-3" />
           <div className="w-16 h-6 bg-teal-800/40 rounded mb-2" />
           <div className="w-20 h-3 bg-teal-900/30 rounded" />
+        </div>
+        <div className="bg-violet-900/20 border border-violet-600/30 rounded-lg p-4">
+          <div className="w-28 h-3 bg-violet-800/40 rounded mb-3" />
+          <div className="w-16 h-6 bg-violet-800/40 rounded mb-2" />
+          <div className="w-20 h-3 bg-violet-900/30 rounded" />
         </div>
       </div>
       <div className="space-y-3">

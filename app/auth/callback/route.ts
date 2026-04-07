@@ -20,13 +20,6 @@ export async function GET(request: NextRequest) {
   const error_description = requestUrl.searchParams.get('error_description');
   const next = requestUrl.searchParams.get('next') || '/';
 
-  console.log('[Auth Callback] Received request:', {
-    hasCode: !!code,
-    type,
-    error_description,
-    // DO NOT log full URL - contains sensitive auth code
-  });
-
   // Handle error from Supabase (e.g., expired link, invalid redirect)
   if (error_description) {
     const errorCode = requestUrl.searchParams.get('error') || 'unknown';
@@ -63,8 +56,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(errorUrl);
     }
 
-    console.log('[Auth Callback] Session created successfully for user:', data.user?.email);
-
     // If this was email verification, update the user profile
     if (type === 'signup' || type === 'email') {
       const { data: { user } } = await supabase.auth.getUser();
@@ -80,8 +71,6 @@ export async function GET(request: NextRequest) {
         if (updateError) {
           console.error('[Auth Callback] Profile update error:', updateError);
         } else {
-          console.log('[Auth Callback] Email verified for user:', user.email);
-
           // Notify admin of new verified signup
           const { data: profile } = await supabase
             .from('user_profiles')
@@ -142,6 +131,5 @@ export async function GET(request: NextRequest) {
   }
 
   // No code provided - redirect to home (prevents manual navigation to callback)
-  console.log('[Auth Callback] No code provided, redirecting to home');
   return NextResponse.redirect(new URL('/', requestUrl.origin));
 }

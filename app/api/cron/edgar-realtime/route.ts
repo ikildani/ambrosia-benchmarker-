@@ -75,8 +75,6 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
     const searchUrl = `${SEC_SEARCH_URL}?q=%228-K%22&forms=8-K&dateRange=custom&startdt=${today}&enddt=${today}`;
 
-    console.log(`[edgar-realtime] Searching for 8-K filings on ${today}...`);
-
     const searchResponse = await fetch(searchUrl, {
       headers: { 'User-Agent': USER_AGENT },
       signal: AbortSignal.timeout(15_000),
@@ -100,12 +98,10 @@ export async function GET(request: NextRequest) {
     const searchData = await searchResponse.json();
     const hits = searchData.hits?.hits || searchData.filings || [];
     fetched = hits.length;
-    console.log(`[edgar-realtime] Found ${fetched} 8-K filings for ${today}`);
 
     // Process each filing (time-budgeted)
     for (const hit of hits) {
       if (isTimeBudgetExceeded(startTime, TIME_BUDGET)) {
-        console.log('[edgar-realtime] Time budget exceeded, stopping');
         break;
       }
 
@@ -179,7 +175,6 @@ export async function GET(request: NextRequest) {
         if (deal && deal.confidence_score >= 75) {
           // Validate company names
           if (!deal.licensor?.trim() || !deal.licensee?.trim()) {
-            console.warn(`[edgar-realtime] Deal missing licensor or licensee, skipping`);
             continue;
           }
 
@@ -195,9 +190,6 @@ export async function GET(request: NextRequest) {
 
           if (duplicateDeal) {
             skippedDuplicate++;
-            console.log(
-              `[edgar-realtime] Duplicate: ${deal.licensor} + ${deal.licensee} already exists`
-            );
             continue;
           }
 
@@ -268,9 +260,6 @@ export async function GET(request: NextRequest) {
             }
           } else {
             inserted++;
-            console.log(
-              `[edgar-realtime] Inserted: ${deal.licensor} -> ${deal.licensee} (${deal.asset_name || deal.modality})`
-            );
 
             // High-value deal alert: > $100M
             if (deal.total_deal_value_usd && deal.total_deal_value_usd > 100_000_000) {
@@ -314,10 +303,6 @@ export async function GET(request: NextRequest) {
         highValueAlerts,
       },
     });
-
-    console.log(
-      `[edgar-realtime] Complete: ${fetched} fetched, ${processed} processed, ${inserted} inserted, ${skippedKeyword} skipped (no keywords), ${skippedDuplicate} skipped (duplicates)`
-    );
 
     return NextResponse.json({
       success: true,

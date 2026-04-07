@@ -32,17 +32,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    console.log('[IntentCalibration] Starting weight calibration from historical deals...');
-
     const result = await calibrateIntentWeights(supabase);
-
-    console.log('[IntentCalibration] Calibration complete:', {
-      sampleSize: result.sampleSize,
-      positiveSamples: result.positiveSamples,
-      negativeSamples: result.negativeSamples,
-      accuracyEstimate: result.accuracyEstimate,
-      weights: result.weights,
-    });
 
     // Store results in the calibration table
     const { error: insertError } = await supabase
@@ -67,8 +57,6 @@ export async function GET(request: NextRequest) {
         result,
       });
     }
-
-    console.log('[IntentCalibration] Results stored in intent_calibration_results table');
 
     return NextResponse.json({
       success: true,

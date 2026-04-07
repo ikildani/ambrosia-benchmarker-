@@ -34,13 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting monthly benchmark calibration cron...');
     const result = await runBenchmarkCalibration(supabase);
-
-    console.log(
-      `Benchmark calibration cron complete: ${result.phaseBaselinesUpdated} baselines, ` +
-      `${result.modalityMultipliersUpdated} multipliers, ${result.errors.length} errors`
-    );
 
     return NextResponse.json({
       success: true,

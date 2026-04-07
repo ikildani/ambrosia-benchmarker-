@@ -174,7 +174,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
         name: 'How many companies should I approach for a licensing deal?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Data from 2,500+ transactions suggests approaching 8-15 companies for initial conversations, with the goal of advancing 3-5 to term sheet stage. Fewer than 3 serious bidders weakens your negotiating position; more than 15 initial contacts creates process management overhead without proportional benefit. The key is targeting the right 8-15, not casting a wide net.',
+          text: `Data from ${DEAL_STATS.TOTAL_DEALS} transactions suggests approaching 8-15 companies for initial conversations, with the goal of advancing 3-5 to term sheet stage. Fewer than 3 serious bidders weakens your negotiating position; more than 15 initial contacts creates process management overhead without proportional benefit. The key is targeting the right 8-15, not casting a wide net.`,
         },
       },
       {
@@ -389,7 +389,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
 
           <InsightCTA
             variant="mid"
-            heading="Screen 850+ Companies for Your Asset"
+            heading={`Screen ${DEAL_STATS.TOTAL_COMPANIES} Companies for Your Asset`}
             description={`The Partner Matching engine scores ${DEAL_STATS.TOTAL_COMPANIES} companies on pipeline gaps, deal velocity, patent cliffs, and 5 other factors. Pro subscribers get full access to partner intelligence and Pharma Intent Scores.`}
           />
 

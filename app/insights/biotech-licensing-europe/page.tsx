@@ -10,6 +10,7 @@ import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -191,7 +192,7 @@ export default function BiotechLicensingEuropePage() {
             </p>
 
             <p>
-              This analysis draws on <strong className="text-blue-700">2,500+ comparable biopharma transactions</strong> from 2020 through early 2026, with a specific focus on how territory scope affects <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link>, total deal value, milestone structures, and <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty economics</Link>. Whether you are a European biotech founder preparing for your first licensing conversation or a BD professional benchmarking a regional deal, this data provides the quantitative foundation you need.
+              This analysis draws on <strong className="text-blue-700">{DEAL_STATS.TOTAL_DEALS} comparable biopharma transactions</strong> from 2020 through early 2026, with a specific focus on how territory scope affects <Link href="/glossary/upfront-payment" className="text-teal-600 font-medium hover:text-teal-700">upfront payments</Link>, total deal value, milestone structures, and <Link href="/insights/pharma-licensing-royalty-rates" className="text-teal-600 font-medium hover:text-teal-700">royalty economics</Link>. Whether you are a European biotech founder preparing for your first licensing conversation or a BD professional benchmarking a regional deal, this data provides the quantitative foundation you need.
             </p>
 
             <h2 id="territory-economics">Territory Economics: How Geography Shapes Deal Value</h2>

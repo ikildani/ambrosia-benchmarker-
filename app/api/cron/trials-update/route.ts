@@ -34,10 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting clinical trials update (batched)...');
     const result = await runWeeklyIngestion(supabase, { batchSize: 30 });
-
-    console.log(`Clinical trials update complete. Companies: ${result.companies}, Trials: ${result.trials}, Batch: ${result.batch_info.processed}/${result.batch_info.total}, Errors: ${result.errors.length}`);
 
     return NextResponse.json({
       success: true,

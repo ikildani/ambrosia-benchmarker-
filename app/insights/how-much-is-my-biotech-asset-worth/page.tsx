@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     'biotech deal value calculator',
   ],
   openGraph: {
-    title: 'How Much Is My Biotech Asset Worth? — Data from 2,500+ Deals',
+    title: `How Much Is My Biotech Asset Worth? — Data from ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'A Phase 2 oncology asset is worth $800M-$2.5B in total deal value. See phase-by-phase benchmarks from real transactions.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'How Much Is My Biotech Asset Worth?',
-    description: 'Phase-by-phase biotech asset valuation benchmarks from 2,500+ real transactions.',
+    description: `Phase-by-phase biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
@@ -154,7 +154,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide',
-    description: 'Biotech asset valuation benchmarks from 2,500+ real transactions. Phase-by-phase deal values, the 5 factors that determine value, and how to increase your asset price before partnering.',
+    description: `Biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions. Phase-by-phase deal values, the 5 factors that determine value, and how to increase your asset price before partnering.`,
     author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
     publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',

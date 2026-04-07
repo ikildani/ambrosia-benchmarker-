@@ -46,18 +46,10 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     // Tier 1: XBRL annual revenue for all companies
-    console.log('[revenue-cron] Tier 1: XBRL revenue update...');
     const xbrlResult = await runXBRLRevenueUpdate(supabase);
-    console.log(
-      `[revenue-cron] Tier 1 complete: ${xbrlResult.updated} updated, ${xbrlResult.skipped_anomalies} anomalies`
-    );
 
     // Tier 2: Product-level revenue extraction for top 20
-    console.log('[revenue-cron] Tier 2: Product revenue extraction (top 20)...');
     const productResult = await runProductRevenueExtraction(supabase, { topCompanies: 20 });
-    console.log(
-      `[revenue-cron] Tier 2 complete: ${productResult.products_extracted} products from ${productResult.companies_processed} companies`
-    );
 
     return NextResponse.json({
       success: true,

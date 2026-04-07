@@ -164,14 +164,12 @@ async function fetchCTGovTrials(
     });
 
     if (!res.ok) {
-      console.warn(`[seo-suggestions] CT.gov ${res.status} for ${conditionQuery}`);
       return 0;
     }
 
     const data = await res.json();
     return data.totalCount || 0;
   } catch (err) {
-    console.warn(`[seo-suggestions] CT.gov fetch error:`, err instanceof Error ? err.message : 'unknown');
     return 0;
   }
 }
@@ -656,7 +654,6 @@ async function getLowPerformingInsightPages(): Promise<LowPerformingPage[]> {
 
     return results.sort((a, b) => b.impressions - a.impressions).slice(0, 3);
   } catch (err) {
-    console.warn('[seo-suggestions] GSC check failed:', err instanceof Error ? err.message : 'unknown');
     return [];
   }
 }
@@ -669,7 +666,6 @@ async function sendSlackNotification(
 ): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log('[seo-suggestions] SLACK_WEBHOOK_URL not configured, skipping notification');
     return;
   }
 
@@ -754,8 +750,6 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   try {
-    console.log('[seo-suggestions] Starting weekly content suggestion run');
-
     // 2. Query deals database in parallel
     const [trendingTAs, trendingModalities, megaDeals, phaseActivity] = await Promise.all([
       getTrendingTAs(supabase),
@@ -764,25 +758,19 @@ export async function GET(request: NextRequest) {
       getPhaseActivity(supabase),
     ]);
 
-    console.log(`[seo-suggestions] Deals data: ${trendingTAs.length} TAs, ${trendingModalities.length} modalities, ${megaDeals.length} mega-deals`);
-
     // 3. Query ClinicalTrials.gov (sequential with rate limiting)
     const clinicalTrends = await getClinicalTrialTrends();
-    console.log(`[seo-suggestions] Clinical trials data: ${clinicalTrends.length} TAs queried`);
 
     // 4. Generate suggestions
     const suggestions = generateSuggestions(trendingTAs, trendingModalities, megaDeals, phaseActivity, clinicalTrends);
-    console.log(`[seo-suggestions] Generated ${suggestions.length} suggestions`);
 
     // 5. Check GSC for low-performing pages
     const lowPerformingPages = await getLowPerformingInsightPages();
-    console.log(`[seo-suggestions] Found ${lowPerformingPages.length} low-performing pages to update`);
 
     // 6. Send Slack notification
     await sendSlackNotification(suggestions, lowPerformingPages);
 
     const durationMs = Date.now() - startTime;
-    console.log(`[seo-suggestions] Completed in ${durationMs}ms`);
 
     return NextResponse.json({
       success: true,

@@ -34,20 +34,15 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const currentYear = new Date().getFullYear();
 
-    console.log(`Starting NIH RePORTER funding update (FY${currentYear - 1}-${currentYear})...`);
-
     let nihResult = { projects_found: 0, projects_inserted: 0, total_funding_usd: 0, errors: [] as string[] };
     try {
       nihResult = await runNIHReporterIngestion(supabase, {
         fiscalYears: [currentYear, currentYear - 1],
         maxPerSearch: 50,
       });
-      console.log(`NIH: ${nihResult.projects_inserted} projects inserted, $${(nihResult.total_funding_usd / 1e6).toFixed(1)}M funding`);
     } catch (error) {
       console.error('NIH RePORTER ingestion error:', error);
     }
-
-    console.log('Funding update complete.');
 
     return NextResponse.json({
       success: true,

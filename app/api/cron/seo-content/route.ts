@@ -168,7 +168,6 @@ export async function GET(request: NextRequest) {
       // Time budget safety: leave ~60s per remaining article
       const remainingTime = 780_000 - (Date.now() - startTime);
       if (remainingTime < 70_000) {
-        console.log(`[seo-content] Time budget low, stopping at ${i}/${ARTICLES_PER_RUN}`);
         break;
       }
 
@@ -176,11 +175,8 @@ export async function GET(request: NextRequest) {
         // Pick next topic (skips already-generated ones)
         const topic = await getNextTopic(supabase);
         if (!topic) {
-          console.log('[seo-content] All topics exhausted');
           break;
         }
-
-        console.log(`[seo-content] [${i + 1}/${ARTICLES_PER_RUN}] Generating: ${topic.topicKey}`);
 
         // Build prompt params
         const phaseData = getPhaseData(topic.phase);
@@ -233,10 +229,8 @@ export async function GET(request: NextRequest) {
           topicKey: topic.topicKey,
         });
 
-        console.log(`[seo-content] [${i + 1}/${ARTICLES_PER_RUN}] Published "${blogContent.title}"`);
       } catch (articleErr) {
         const msg = articleErr instanceof Error ? articleErr.message : String(articleErr);
-        console.error(`[seo-content] Article ${i + 1} failed: ${msg}`);
         errors.push(`Article ${i + 1}: ${msg}`);
         // Continue with next article
       }
@@ -263,7 +257,6 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
-    console.log(`[seo-content] Done: ${published.length}/${ARTICLES_PER_RUN} published in ${durationMs}ms`);
 
     return NextResponse.json({
       success: true,

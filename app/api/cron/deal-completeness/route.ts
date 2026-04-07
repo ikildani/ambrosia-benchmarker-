@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic';
 async function postToSlack(attachments: object[], text: string): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log('[Slack] SLACK_WEBHOOK_URL not configured, skipping notification');
     return;
   }
 

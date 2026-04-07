@@ -44,7 +44,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'PERPLEXITY_API_KEY not configured' }, { status: 500 });
     }
 
-    console.log('Starting FTC pre-merger ingestion...');
     const result = await runFTCIngestion(supabase, anthropicApiKey, perplexityApiKey);
 
     return NextResponse.json({

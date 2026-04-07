@@ -10,6 +10,7 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
@@ -541,7 +542,7 @@ export default function BiopharmaDealValuationMethodsPage() {
           <InsightCTA
             variant="bottom"
             heading="Valuation Starts With Data"
-            description="Our calculator anchors your deal valuation with comparable transaction benchmarks from 2,500+ real biopharma deals — the comps layer that every valuation needs."
+            description={`Our calculator anchors your deal valuation with comparable transaction benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma deals — the comps layer that every valuation needs.`}
           />
         </article>
       </main>

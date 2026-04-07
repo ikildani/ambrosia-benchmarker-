@@ -10,6 +10,7 @@ import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -193,7 +194,7 @@ export default function OutLicensingAsiaPacificPage() {
             </p>
 
             <p>
-              For biotech companies structuring APAC licensing strategies — whether as a Western company seeking regional partners or as an APAC-based company looking to out-license globally — territory economics vary dramatically by country. This analysis draws on <strong className="text-blue-700">2,500+ comparable biopharma transactions</strong> from 2020 through Q1 2026 to quantify APAC territory value, identify optimal partnership structures, and benchmark against real deal data. For context on how APAC territory economics compare to <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European deal dynamics</Link>, see our dedicated Europe analysis.
+              For biotech companies structuring APAC licensing strategies — whether as a Western company seeking regional partners or as an APAC-based company looking to out-license globally — territory economics vary dramatically by country. This analysis draws on <strong className="text-blue-700">{DEAL_STATS.TOTAL_DEALS} comparable biopharma transactions</strong> from 2020 through Q1 2026 to quantify APAC territory value, identify optimal partnership structures, and benchmark against real deal data. For context on how APAC territory economics compare to <Link href="/insights/biotech-licensing-europe" className="text-teal-600 font-medium hover:text-teal-700">European deal dynamics</Link>, see our dedicated Europe analysis.
             </p>
 
             <h2 id="apac-territory-economics">APAC Territory Economics</h2>

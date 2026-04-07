@@ -380,7 +380,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron-onboarding-drip');
-    console.error('[Onboarding Drip] Error:', error);
     return NextResponse.json({ error: 'Onboarding drip cron failed' }, { status: 500 });
   }
 }

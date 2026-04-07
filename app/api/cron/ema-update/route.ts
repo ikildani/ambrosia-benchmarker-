@@ -35,10 +35,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting EMA medicines update...');
     const result = await runEMAIngestion(supabase);
-
-    console.log(`EMA update complete. Processed: ${result.processed}, Inserted: ${result.inserted}, Enriched: ${result.enriched}, Errors: ${result.errors.length}`);
 
     return NextResponse.json({
       success: true,

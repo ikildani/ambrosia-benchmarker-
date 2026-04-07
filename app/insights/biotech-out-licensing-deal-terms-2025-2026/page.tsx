@@ -10,6 +10,7 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -18,7 +19,7 @@ const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculato
 
 export const metadata: Metadata = {
   title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows | Ambrosia Ventures',
-  description: 'Analysis of 2,500+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures across all major therapeutic areas.',
+  description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures across all major therapeutic areas.`,
   keywords: [
     'biotech out-licensing deal terms 2025',
     'biotech licensing deal structure',
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
-    description: '2,500+ deals analyzed. Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.',
+    description: `${DEAL_STATS.TOTAL_DEALS} deals analyzed. Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.`,
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
     images: [{ url: '/api/og?title=Out-Licensing%20Deal%20Terms%202025%E2%80%932026&subtitle=What%20the%20Data%20Shows&type=insight', width: 1200, height: 630 }],
@@ -61,7 +62,7 @@ export default function BiotechOutLicensingPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
-    description: 'Analysis of 2,500+ biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures.',
+    description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures.`,
     author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
     publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
@@ -165,7 +166,7 @@ export default function BiotechOutLicensingPage() {
             </nav>
             <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report · March 2026</p>
             <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows</h1>
-            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">What 2,500+ biopharma transactions reveal about deal structure, upfronts, milestones, and royalties across 5 deal types and 12 therapeutic areas.</p>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">What {DEAL_STATS.TOTAL_DEALS} biopharma transactions reveal about deal structure, upfronts, milestones, and royalties across 5 deal types and 12 therapeutic areas.</p>
           </div>
         </header>
 
@@ -247,7 +248,7 @@ export default function BiotechOutLicensingPage() {
             freeRows={5}
             ctaText="Model any deal type — Free calculator"
             ctaHref="/calculator"
-            footnote="Source: Ambrosia Benchmarker, 2,500+ transactions 2020-2026."
+            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
           />
         </div>
 
@@ -524,7 +525,7 @@ export default function BiotechOutLicensingPage() {
               {
                 href: '/insights/pharma-licensing-royalty-rates',
                 title: 'Pharma Licensing Royalty Rates',
-                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 2,500+ transactions.',
+                description: `Benchmark royalty rates by phase, therapeutic area, and modality from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
                 badge: 'Data Report',
               },
               {
@@ -559,7 +560,7 @@ export default function BiotechOutLicensingPage() {
         <InsightCTA
           variant="bottom"
           heading="Model Your Deal Structure"
-          description="Compare licensing, co-development, option, and collaboration economics for your specific asset — powered by 2,500+ real transactions."
+          description={`Compare licensing, co-development, option, and collaboration economics for your specific asset — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
       <SiteFooter />

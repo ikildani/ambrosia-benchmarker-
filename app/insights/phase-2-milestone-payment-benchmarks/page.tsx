@@ -10,6 +10,7 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -496,7 +497,7 @@ export default function Phase2MilestoneBenchmarksPage() {
               {
                 href: '/insights/pharma-licensing-royalty-rates',
                 title: 'Pharma Licensing Royalty Rates',
-                description: 'Benchmark royalty rates by phase, therapeutic area, and modality from 2,500+ transactions.',
+                description: `Benchmark royalty rates by phase, therapeutic area, and modality from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
                 badge: 'Data Report',
               },
               {

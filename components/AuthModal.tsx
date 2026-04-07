@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useAuthForm } from './auth/useAuthForm';
@@ -98,8 +99,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
         {/* Header */}
         <div className="px-8 pt-8 pb-2">
           <div className="flex items-center justify-between mb-6">
-            <img src="/logo-white.png" alt="Ambrosia Ventures" className="h-7 w-auto hidden dark:block" />
-            <img src="/logo-color.png" alt="Ambrosia Ventures" className="h-7 w-auto dark:hidden" />
+            <Image src="/logo-white.png" alt="Ambrosia Ventures" width={134} height={28} className="h-7 w-auto hidden dark:block" />
+            <Image src="/logo-color.png" alt="Ambrosia Ventures" width={134} height={28} className="h-7 w-auto dark:hidden" />
             <button
               onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all"

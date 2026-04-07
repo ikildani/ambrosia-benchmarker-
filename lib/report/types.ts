@@ -64,6 +64,7 @@ export interface PDFReportData {
   competitiveDynamics?: CompetitiveDynamicsResult;
   realOptions?: RealOptionsResult;
   buyerSpecificValuation?: BuyerSpecificValuation;
+  buyerSpecificValuations?: BuyerSpecificValuation[];
 }
 
 export interface TocEntry {

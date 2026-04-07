@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
     const candidates = await findOptimizationCandidates(supabase);
 
     if (candidates.length === 0) {
-      console.log('[ctr-optimize] No optimization candidates found');
       await logCronRun(supabase, 'ctr-optimize', {
         processed: 0,
         parameters: { status: 'no_candidates' },
@@ -57,15 +56,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'No candidates found', optimized: 0 });
     }
 
-    console.log(`[ctr-optimize] Found ${candidates.length} candidates`);
-
     // 3. Optimize each candidate
     const results: OptimizationResult[] = [];
     const errors: string[] = [];
 
     for (const candidate of candidates) {
       if (isTimeBudgetExceeded(startTime, 250_000)) {
-        console.warn('[ctr-optimize] Time budget exceeded, stopping');
         break;
       }
 
@@ -73,7 +69,6 @@ export async function GET(request: NextRequest) {
         const result = await optimizePage(candidate);
         await applyOptimization(supabase, result);
         results.push(result);
-        console.log(`[ctr-optimize] Optimized: ${candidate.pagePath}`);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         errors.push(`${candidate.pagePath}: ${msg}`);
@@ -125,7 +120,6 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
-    console.log(`[ctr-optimize] Done: ${results.length} optimized in ${durationMs}ms`);
 
     return NextResponse.json({
       success: true,

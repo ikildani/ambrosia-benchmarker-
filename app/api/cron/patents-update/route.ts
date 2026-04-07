@@ -33,20 +33,15 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting patent ingestion (USPTO PatentsView)...');
-
     let patentResult = { patents_found: 0, patents_inserted: 0, errors: [] as string[] };
     try {
       patentResult = await runPatentIngestion(supabase, {
         daysBack: 30,
         maxPerAssignee: 25,
       });
-      console.log(`Patents: ${patentResult.patents_inserted} patents inserted`);
     } catch (error) {
       console.error('Patent ingestion error:', error);
     }
-
-    console.log('Patent update complete.');
 
     return NextResponse.json({
       success: true,

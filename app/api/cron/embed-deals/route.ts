@@ -50,8 +50,6 @@ export async function GET(request: NextRequest) {
     .is('embedding', null)
     .neq('therapeutic_area', 'other');
 
-  console.log(`[embed-deals] ${unembedded} deals need embedding`);
-
   const result = await embedUnprocessedDeals(supabase, perplexityApiKey, {
     limit: 200,
     timeBudgetMs: 250_000,
@@ -63,8 +61,6 @@ export async function GET(request: NextRequest) {
     inserted: result.processed,
     errors: result.errors > 0 ? [`${result.errors} embedding failures`] : [],
   });
-
-  console.log(`[embed-deals] Done: ${result.processed} embedded, ${result.errors} errors, ${(unembedded || 0) - result.processed} remaining`);
 
   return NextResponse.json({
     success: true,

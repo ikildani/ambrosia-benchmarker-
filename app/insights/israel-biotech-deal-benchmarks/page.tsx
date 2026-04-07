@@ -10,6 +10,7 @@ import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -197,7 +198,7 @@ export default function IsraelBiotechDealBenchmarksPage() {
             </p>
 
             <p>
-              This analysis draws on <strong className="text-blue-700">2,500+ comparable biopharma transactions</strong> from 2020 through Q1 2026, with specific focus on Israeli-originated assets, Israel-US partnership structures, and academic technology transfer patterns from Israel's leading research institutions. For a broader view of how these benchmarks compare globally, see our <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing deal terms</Link> analysis.
+              This analysis draws on <strong className="text-blue-700">{DEAL_STATS.TOTAL_DEALS} comparable biopharma transactions</strong> from 2020 through Q1 2026, with specific focus on Israeli-originated assets, Israel-US partnership structures, and academic technology transfer patterns from Israel's leading research institutions. For a broader view of how these benchmarks compare globally, see our <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">global out-licensing deal terms</Link> analysis.
             </p>
 
             <h2 id="israeli-deal-economics">Israeli Biotech Deal Economics: Phase-Based Benchmarks</h2>

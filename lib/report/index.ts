@@ -43,7 +43,7 @@ export function generateReportHTML(data: PDFReportData): string {
   const hasScenarioComparison = !!data.scenarioComparison;
   const hasDealWaterfall = !!data.dealWaterfall;
   const hasAdvancedAnalytics = !!data.realOptions || !!data.competitiveDynamics || !!data.lifecycleExtensions;
-  const hasBuyerSpecific = !!data.buyerSpecificValuation;
+  const hasBuyerSpecific = !!data.buyerSpecificValuation || (data.buyerSpecificValuations && data.buyerSpecificValuations.length > 0);
 
   // Build TOC entries with correct page numbers
   const tocEntries: TocEntry[] = [];
@@ -70,7 +70,7 @@ export function generateReportHTML(data: PDFReportData): string {
     if (hasScenarioComparison) toc('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value');
     if (hasDealWaterfall) toc('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation');
     if (hasAdvancedAnalytics) toc('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions');
-    if (hasBuyerSpecific) toc('Buyer-Specific Valuation', 'Strategic premium analysis for selected partner');
+    if (hasBuyerSpecific) toc('Buyer-Specific Valuation', 'Strategic premium analysis across matched partners');
   }
   toc('Methodology', 'Model design, data sources, and disclaimer');
 

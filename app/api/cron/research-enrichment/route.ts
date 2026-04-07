@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   // Step 1: FDA Breakthrough Therapy designations
-  console.log('[research-enrichment] Step 1: FDA Breakthrough Therapy designations...');
   let btdResult = { fetched: 0, stored: 0, enriched_deals: 0, errors: [] as string[] };
   try {
     btdResult = await runFDABreakthroughIngestion(supabase, perplexityKey);
@@ -49,7 +48,6 @@ export async function GET(request: NextRequest) {
   // Step 2: Semantic Scholar publications (if time permits)
   let scholarResult = { queries_run: 0, papers_found: 0, papers_stored: 0, errors: [] as string[] };
   if (Date.now() - startTime < 200_000) {
-    console.log('[research-enrichment] Step 2: Semantic Scholar publications...');
     try {
       scholarResult = await runSemanticScholarIngestion(supabase, {
         maxPerTA: 5,
@@ -68,7 +66,6 @@ export async function GET(request: NextRequest) {
   });
 
   const durationMs = Date.now() - startTime;
-  console.log(`[research-enrichment] Done in ${(durationMs / 1000).toFixed(1)}s`);
 
   return NextResponse.json({
     success: true,

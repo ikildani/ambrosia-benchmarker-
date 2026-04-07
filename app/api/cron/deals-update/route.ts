@@ -178,12 +178,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 1: Run SEC EDGAR ingestion for past 7 days
-    console.log('Starting weekly deals update...');
-    console.log('Step 1: SEC EDGAR ingestion...');
     const edgarResult = await runDailyIngestion(supabase, anthropicApiKey, 7);
 
     // Step 1b: Run press release ingestion (time-budgeted)
-    console.log('Step 1b: Press release ingestion...');
     let pressResult = { deals_inserted: 0, errors: [] as string[] };
     const pressTimeBudget = Math.max(60_000, TIME_BUDGET - (Date.now() - startTime) - 30_000);
     try {
@@ -191,25 +188,21 @@ export async function GET(request: NextRequest) {
         maxArticlesPerSource: 10,
         timeBudgetMs: pressTimeBudget,
       });
-      console.log(`Press releases: ${pressResult.deals_inserted} deals inserted`);
-    } catch (error) {
-      console.error('Press release ingestion error (non-fatal):', error);
+    } catch {
+      // Press release ingestion error (non-fatal)
     }
 
     // Step 1c: Run OpenFDA approvals ingestion (last 14 days) — fast, no AI
-    console.log('Step 1c: OpenFDA approvals ingestion...');
     let fdaResult = { inserted: 0, errors: [] as string[] };
     if (Date.now() - startTime < TIME_BUDGET) {
       try {
         fdaResult = await runOpenFDAIngestion(supabase, { daysBack: 14 });
-        console.log(`OpenFDA: ${fdaResult.inserted} approvals inserted`);
-      } catch (error) {
-        console.error('OpenFDA ingestion error (non-fatal):', error);
+      } catch {
+        // OpenFDA ingestion error (non-fatal)
       }
     }
 
     // Step 2: Backfill therapeutic_area on all deals with expanded mapping
-    console.log('Step 2: Backfilling therapeutic_area (expanded mapping)...');
     const backfillErrors: string[] = [];
 
     for (const [indicationCategory, therapeuticArea] of Object.entries(THERAPEUTIC_AREA_MAP)) {
@@ -235,7 +228,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 3: Get current deal counts by all therapeutic areas
-    console.log('Step 3: Counting deals by therapeutic area...');
     const { count: totalDeals } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true });
@@ -252,7 +244,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 5: Link deals to companies by name matching
-    console.log('Step 5: Linking deals to companies...');
     let linkedLicensees = 0;
     let linkedLicensors = 0;
 
@@ -314,10 +305,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`Linked ${linkedLicensees} licensee IDs + ${linkedLicensors} licensor IDs`);
-
     // Step 6: Recalculate deal stats for all affected companies
-    console.log('Step 6: Recalculating company deal stats...');
     const affectedCompanyIds = new Set<string>();
 
     // Collect all company IDs that were just linked
@@ -339,12 +327,9 @@ export async function GET(request: NextRequest) {
       const { error: rpcError } = await supabase.rpc('update_company_deal_stats', { p_company_id: companyId });
       if (!rpcError) statsUpdated++;
     }
-    console.log(`Recalculated deal stats for ${statsUpdated}/${affectedCompanyIds.size} companies`);
-
     // Step 7: Auto-promote companies with real deal activity
     // Companies discovered by pipelines start with actively_acquiring=false.
     // Promote them when they have enough signal to be useful in partner matching.
-    console.log('Step 7: Auto-promoting companies with deal activity...');
     let promoted = 0;
 
     const { data: promotionCandidates } = await supabase
@@ -363,7 +348,6 @@ export async function GET(request: NextRequest) {
 
       if (!promoteError) {
         promoted = promoteIds.length;
-        console.log(`Auto-promoted ${promoted} companies: ${promotionCandidates.map((c: any) => c.name).join(', ')}`);
       }
     }
 
@@ -371,8 +355,6 @@ export async function GET(request: NextRequest) {
       .filter(([, v]) => v && v > 0)
       .map(([k, v]) => `${k}: ${v}`)
       .join(', ');
-
-    console.log(`Weekly deals update complete. ${countsSummary}`);
 
     // Track overall health — flag if ALL sources failed
     const totalInserted = (edgarResult.deals || 0) + (pressResult.deals_inserted || 0) + (fdaResult.inserted || 0);

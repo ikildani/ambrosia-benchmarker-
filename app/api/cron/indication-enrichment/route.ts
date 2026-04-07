@@ -242,7 +242,6 @@ async function searchTrials(searchTerm: string): Promise<{
     });
 
     if (!res.ok) {
-      console.warn(`[IndicationEnrichment] CT API ${res.status} for "${searchTerm}"`);
       return { totalCount: 0, companies: [], conditions: [] };
     }
 
@@ -349,7 +348,6 @@ async function scanTA(config: TAConfig): Promise<TAScanResult> {
 async function sendSlackNotification(results: TAScanResult[]): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log('[IndicationEnrichment] SLACK_WEBHOOK_URL not set, skipping notification');
     return;
   }
 
@@ -467,17 +465,13 @@ export async function GET(request: NextRequest) {
   }
 
   const startTime = Date.now();
-  console.log('[IndicationEnrichment] Starting weekly indication scan...');
-
   try {
     // Scan all 12 TAs sequentially (rate-limited API)
     const results: TAScanResult[] = [];
 
     for (const config of TA_CONFIGS) {
-      console.log(`[IndicationEnrichment] Scanning ${config.label}...`);
       const result = await scanTA(config);
       results.push(result);
-      console.log(`[IndicationEnrichment] ${config.label}: ${result.suggestions.length} suggestions, ${result.errors.length} errors`);
     }
 
     // Send Slack notification
@@ -486,8 +480,6 @@ export async function GET(request: NextRequest) {
     const totalSuggestions = results.reduce((s, r) => s + r.suggestions.length, 0);
     const totalErrors = results.reduce((s, r) => s + r.errors.length, 0);
     const durationMs = Date.now() - startTime;
-
-    console.log(`[IndicationEnrichment] Complete: ${totalSuggestions} suggestions, ${totalErrors} errors, ${durationMs}ms`);
 
     return NextResponse.json({
       success: true,

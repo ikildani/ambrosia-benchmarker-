@@ -35,12 +35,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting company enrichment cron...');
     const result = await runCompanyEnrichment(supabase);
-
-    console.log(
-      `Company enrichment cron complete: ${result.companies_processed} processed, ${result.stats_updated} stats updated, ${result.appetite_updated} appetite updated, ${result.errors.length} errors`
-    );
 
     return NextResponse.json({
       success: true,

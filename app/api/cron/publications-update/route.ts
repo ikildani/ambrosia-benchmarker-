@@ -35,29 +35,21 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    console.log('Starting publications update (PubMed + bioRxiv/medRxiv)...');
-
     // Step 1: PubMed peer-reviewed publications
-    console.log('Step 1: PubMed ingestion...');
     let pubmedResult = { articles_found: 0, articles_inserted: 0, errors: [] as string[] };
     try {
       pubmedResult = await runPubMedIngestion(supabase, { daysBack: 7, maxPerQuery: 50 });
-      console.log(`PubMed: ${pubmedResult.articles_inserted} articles inserted`);
-    } catch (error) {
-      console.error('PubMed ingestion error (non-fatal):', error);
+    } catch {
+      // PubMed ingestion error (non-fatal)
     }
 
     // Step 2: bioRxiv/medRxiv preprints
-    console.log('Step 2: bioRxiv/medRxiv ingestion...');
     let biorxivResult = { preprints_found: 0, preprints_inserted: 0, errors: [] as string[] };
     try {
       biorxivResult = await runBioRxivIngestion(supabase, { daysBack: 7, maxPerServer: 100 });
-      console.log(`bioRxiv: ${biorxivResult.preprints_inserted} preprints inserted`);
-    } catch (error) {
-      console.error('bioRxiv ingestion error (non-fatal):', error);
+    } catch {
+      // bioRxiv ingestion error (non-fatal)
     }
-
-    console.log('Publications update complete.');
 
     // Log to ingestion audit trail
     await logCronRun(supabase, 'publications_update', {

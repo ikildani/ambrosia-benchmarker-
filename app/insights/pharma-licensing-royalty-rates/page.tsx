@@ -10,6 +10,7 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Pharma Licensing Royalty Rates: 3% to 25% — What Drives the Spread',
-    description: 'Benchmark royalty data by phase, modality, and TA from 2,500+ biopharma deals. Includes real disclosed terms from BridgeBio/Astellas, Alnylam/Roche, and more.',
+    description: `Benchmark royalty data by phase, modality, and TA from ${DEAL_STATS.TOTAL_DEALS} biopharma deals. Includes real disclosed terms from BridgeBio/Astellas, Alnylam/Roche, and more.`,
     type: 'article',
     url: PAGE_URL,
     images: [{ url: `/api/og?title=${encodeURIComponent('Pharma Licensing Royalty Rates')}&subtitle=${encodeURIComponent('Benchmark Data by Phase, Modality & TA')}&type=insight`, width: 1200, height: 630 }],
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Pharma Licensing Royalty Rates: 3% to 25%',
-    description: 'Benchmark royalty data by phase and modality from 2,500+ biopharma deals.',
+    description: `Benchmark royalty data by phase and modality from ${DEAL_STATS.TOTAL_DEALS} biopharma deals.`,
   },
   alternates: {
     canonical: PAGE_URL,
@@ -107,7 +108,7 @@ export default function PharmaLicensingRoyaltyRatesPage() {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Pharma Licensing Royalty Rate Benchmarks by Phase, Modality & Therapeutic Area',
-    description: 'Royalty rate benchmark data for biopharma licensing deals across 7 development phases and 8 drug modalities, derived from 2,500+ transactions (2018-2026).',
+    description: `Royalty rate benchmark data for biopharma licensing deals across 7 development phases and 8 drug modalities, derived from ${DEAL_STATS.TOTAL_DEALS} transactions (2018-2026).`,
     url: PAGE_URL,
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     datePublished: '2026-03-24',
@@ -184,7 +185,7 @@ export default function PharmaLicensingRoyaltyRatesPage() {
             </nav>
             <p className="text-[11px] font-semibold text-teal-600 uppercase tracking-[0.25em] mb-6">Data Report &middot; March 2026</p>
             <h1 className="text-4xl sm:text-[3.5rem] font-bold text-slate-900 leading-[1.05] tracking-tight mb-4">Pharma Licensing Royalty Rates: Benchmark Data by Phase, Modality & Therapeutic Area</h1>
-            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Royalties range from 3% at discovery to 25% for approved assets. We break down what drives the spread across 2,500+ biopharma deals.</p>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">Royalties range from 3% at discovery to 25% for approved assets. We break down what drives the spread across {DEAL_STATS.TOTAL_DEALS} biopharma deals.</p>
             <div className="flex items-center gap-8 mt-8 pt-8 border-t border-slate-100">
               <div><p className="text-2xl font-bold text-slate-900">3%-25%</p><p className="text-xs text-slate-400 uppercase tracking-wide">Full royalty range</p></div>
               <div><p className="text-2xl font-bold text-slate-900">7</p><p className="text-xs text-slate-400 uppercase tracking-wide">Phases benchmarked</p></div>
@@ -250,7 +251,7 @@ export default function PharmaLicensingRoyaltyRatesPage() {
               freeRows={4}
               ctaText="Unlock all phase benchmarks — Pro subscription"
               ctaHref="/#pricing"
-              footnote="Source: Ambrosia Ventures analysis of 2,500+ biopharma licensing deals (2018-2026). Royalty ranges represent observed 25th-75th percentile."
+              footnote={`Source: Ambrosia Ventures analysis of ${DEAL_STATS.TOTAL_DEALS} biopharma licensing deals (2018-2026). Royalty ranges represent observed 25th-75th percentile.`}
             />
 
             <PhaseUpfrontChart
@@ -331,7 +332,7 @@ export default function PharmaLicensingRoyaltyRatesPage() {
             <InsightCTA
               variant="mid"
               heading="Model Your Asset's Royalty Range"
-              description="Input your phase, modality, and therapeutic area to see benchmark royalty rates from 2,500+ comparable transactions."
+              description={`Input your phase, modality, and therapeutic area to see benchmark royalty rates from ${DEAL_STATS.TOTAL_DEALS} comparable transactions.`}
             />
 
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="adc" />
@@ -510,7 +511,7 @@ export default function PharmaLicensingRoyaltyRatesPage() {
           <InsightCTA
             variant="bottom"
             heading="Benchmark Your Royalty Terms"
-            description="Model royalty rates, upfronts, and milestones for your specific asset and therapeutic area — powered by 2,500+ real transactions."
+            description={`Model royalty rates, upfronts, and milestones for your specific asset and therapeutic area — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
           />
         </article>
       </main>

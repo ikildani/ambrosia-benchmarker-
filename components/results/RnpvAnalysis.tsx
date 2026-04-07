@@ -103,12 +103,22 @@ export default function RnpvAnalysis({
     // answer that's always N/A for early-stage because 5% PoS makes revenue tiny.
     let paybackYear: number | null = null;
     let cumulativeCF = 0;
+    let prevCF = 0;
     for (const cf of rnpvResult.cashFlows) {
+      prevCF = cumulativeCF;
       cumulativeCF += cf.presentValue;
-      if (cumulativeCF > 0 && paybackYear === null) paybackYear = cf.year;
+      if (cumulativeCF > 0 && paybackYear === null) {
+        if (prevCF < 0 && cf.presentValue !== 0) {
+          // Linear interpolation for fractional year precision
+          const fraction = -prevCF / cf.presentValue;
+          paybackYear = Math.round(((cf.year - 1) + fraction) * 10) / 10;
+        } else {
+          paybackYear = cf.year;
+        }
+      }
     }
+    const paybackPeriod = paybackYear !== null ? `${paybackYear}y` : 'N/A';
     const currentYear = new Date().getFullYear();
-    const paybackPeriod = paybackYear !== null ? `${paybackYear - currentYear}y` : 'N/A';
 
     const totalInvestment = rnpvResult.cashFlows
       .filter(cf => cf.netCashFlow < 0)

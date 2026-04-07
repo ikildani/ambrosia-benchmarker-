@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllInsightSlugs, getInsightBySlug } from '@/lib/insightPages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export async function generateStaticParams() {
   return getAllInsightSlugs().map((slug) => ({ slug }));
@@ -163,7 +164,7 @@ export default async function InsightPage({
       <section className="border-t border-slate-800 py-12 text-center">
         <div className="mx-auto max-w-2xl px-6">
           <p className="text-slate-500 text-sm mb-4">
-            Benchmarks powered by 2,500+ real biopharma licensing deals
+            Benchmarks powered by {DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals
           </p>
           <Link
             href="/calculator"

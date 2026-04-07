@@ -38,11 +38,8 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   try {
-    console.log('[gsc-sync] Starting daily GSC data sync...');
-
     const gsc = new GSCClient();
     if (!gsc.isConfigured()) {
-      console.warn('[gsc-sync] GSC client not configured — skipping sync');
       await logCronRun(supabase, 'gsc-sync', {
         processed: 0,
         parameters: { status: 'not_configured' },
@@ -53,7 +50,6 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
 
     // 2. Pull performance data (28 days)
-    console.log('[gsc-sync] Fetching performance data...');
     const performanceData = await gsc.getPerformanceData(28);
 
     await supabase.from('seo_metrics').upsert(
@@ -84,10 +80,7 @@ export async function GET(request: NextRequest) {
       { onConflict: 'metric_date,metric_type' }
     );
 
-    console.log(`[gsc-sync] Performance: ${performanceData.length} rows stored`);
-
     // 3. Get indexed page count
-    console.log('[gsc-sync] Fetching indexed page count...');
     const indexedCount = await gsc.getIndexedPageCount();
 
     await supabase.from('seo_metrics').upsert(
@@ -102,10 +95,7 @@ export async function GET(request: NextRequest) {
       { onConflict: 'metric_date,metric_type' }
     );
 
-    console.log(`[gsc-sync] Coverage: ${indexedCount} indexed pages`);
-
     // 4. Submit sitemap
-    console.log('[gsc-sync] Submitting sitemap...');
     await gsc.submitSitemap('https://calculator.ambrosiaventures.co/sitemap.xml');
 
     // 5. Compare indexed count vs yesterday — alert if dropped by >5%
@@ -127,9 +117,6 @@ export async function GET(request: NextRequest) {
 
       if (dropPercent > 5) {
         coverageDropAlert = true;
-        console.warn(
-          `[gsc-sync] Coverage drop detected: ${previousCount} → ${indexedCount} (-${dropPercent.toFixed(1)}%)`
-        );
         await sendCoverageDropAlert(previousCount, indexedCount, dropPercent);
       }
     }
@@ -243,7 +230,6 @@ async function sendCoverageDropAlert(
 ) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.warn('[gsc-sync] SLACK_WEBHOOK_URL not configured — skipping alert');
     return;
   }
 

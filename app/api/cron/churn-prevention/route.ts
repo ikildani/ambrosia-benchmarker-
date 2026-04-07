@@ -336,7 +336,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron-churn-prevention');
-    console.error('[Churn Prevention] Error:', error);
     return NextResponse.json({ error: 'Churn prevention cron failed' }, { status: 500 });
   }
 }

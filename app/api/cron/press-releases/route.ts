@@ -42,8 +42,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
     }
 
-    console.log('Starting daily press release ingestion...');
-
     const result = await runPressReleaseIngestion(supabase, anthropicApiKey, {
       maxArticlesPerSource: 15,
       timeBudgetMs: 250_000, // 250s safe margin for 300s Vercel limit
@@ -53,8 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Post-processing: reclassify 'other' deals and log
     if (result.deals_inserted > 0) {
-      const reclassified = await reclassifyOtherDeals(supabase);
-      if (reclassified > 0) console.log(`Reclassified ${reclassified} 'other' deals`);
+      await reclassifyOtherDeals(supabase);
 
       // Alert on high-value deals ($500M+)
       const { data: newBigDeals } = await supabase
@@ -85,8 +82,6 @@ export async function GET(request: NextRequest) {
       inserted: result.deals_inserted,
       errors: result.errors,
     });
-
-    console.log(`Press release ingestion complete in ${(durationMs / 1000).toFixed(1)}s: ${result.deals_inserted} deals inserted from ${result.sources_checked} sources`);
 
     return NextResponse.json({
       success: true,

@@ -44,8 +44,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    console.log('[IntentSnapshots] Starting weekly intent score snapshots...');
-
     // 1. Fetch top 100 companies by data_quality_score
     const { data: companies, error: compError } = await supabase
       .from('companies')
@@ -156,12 +154,8 @@ export async function GET(request: NextRequest) {
           });
 
           snapshotCount++;
-        } catch (err) {
+        } catch {
           errorCount++;
-          console.warn(
-            `[IntentSnapshots] Error scoring ${company.name} for ${combo.modality}/${combo.indication}:`,
-            err instanceof Error ? err.message : err
-          );
         }
       }
     }
@@ -185,10 +179,6 @@ export async function GET(request: NextRequest) {
         }
       }
     }
-
-    console.log(
-      `[IntentSnapshots] Complete: ${snapshotCount} snapshots stored, ${errorCount} errors, ${companies.length} companies`
-    );
 
     return NextResponse.json({
       success: true,

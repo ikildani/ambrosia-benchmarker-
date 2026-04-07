@@ -84,8 +84,6 @@ export async function GET(request: NextRequest) {
   }
 
   const search = DEAL_SEARCHES[searchIndex];
-  console.log(`[cron-backfill] Processing ${search.type} deals, page ${page}...`);
-
   // Search SEC EDGAR
   const params = new URLSearchParams({
     q: search.query,
@@ -128,7 +126,6 @@ export async function GET(request: NextRequest) {
     if (hits.length === 0) {
       result.nextSearchIndex = searchIndex + 1;
       result.nextPage = 0;
-      console.log(`[cron-backfill] No more results for ${search.type}, moving to next search type`);
     }
 
     for (const hit of hits) {
@@ -299,13 +296,10 @@ export async function GET(request: NextRequest) {
       for (const companyId of companyIds) {
         try { await supabase.rpc('update_company_deal_stats', { p_company_id: companyId }); } catch {}
       }
-      console.log(`[cron-backfill] Updated stats for ${companyIds.size} companies`);
     } catch {
-      console.error('[cron-backfill] Company stats update failed (non-fatal)');
+      // Company stats update failed (non-fatal)
     }
   }
-
-  console.log(`[cron-backfill] Done: ${result.inserted} inserted, next: ${DEAL_SEARCHES[result.nextSearchIndex]?.type || 'restart'} p${result.nextPage}`);
 
   return NextResponse.json({ success: true, ...result });
 }

@@ -174,7 +174,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'What is the best biopharma deal benchmarking tool in 2026?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (2,000+ verified transactions minimum), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with 2,500+ deals, 12 TAs, 8 calculation engines, and weekly data updates.',
+          text: `The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (2,000+ verified transactions minimum), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with ${DEAL_STATS.TOTAL_DEALS} deals, 12 TAs, 8 calculation engines, and weekly data updates.`,
         },
       },
       {

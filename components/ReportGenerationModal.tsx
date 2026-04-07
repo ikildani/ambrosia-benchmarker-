@@ -48,6 +48,7 @@ interface ReportGenerationModalProps {
   onDownloadComplete: () => void;
   format: 'pdf' | 'excel';
   buyerSpecificValuation?: any;
+  buyerSpecificValuations?: any[];
 }
 
 function delay(ms: number): Promise<void> {
@@ -95,6 +96,7 @@ export default function ReportGenerationModal({
   onDownloadComplete,
   format,
   buyerSpecificValuation,
+  buyerSpecificValuations,
 }: ReportGenerationModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>('idle');
   const [completedSteps, setCompletedSteps] = useState<Set<ModalStep>>(new Set());
@@ -123,8 +125,8 @@ export default function ReportGenerationModal({
 
   // Stable refs for props used inside the pipeline effect — prevents
   // dependency changes from triggering cleanup (which sets abortRef=true).
-  const propsRef = useRef({ result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose, buyerSpecificValuation });
-  propsRef.current = { result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose, buyerSpecificValuation };
+  const propsRef = useRef({ result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose, buyerSpecificValuation, buyerSpecificValuations });
+  propsRef.current = { result, fullInputs, partnerMatches, existingMemo, reportId, userId, userEmail, labels, format, onMemoGenerated, onDownloadComplete, onClose, buyerSpecificValuation, buyerSpecificValuations };
 
   const steps = format === 'pdf' ? PDF_STEPS : EXCEL_STEPS;
 
@@ -327,6 +329,7 @@ export default function ReportGenerationModal({
           competitiveDynamics: fm.competitiveDynamics,
           realOptions: fm.realOptions,
           buyerSpecificValuation: p.buyerSpecificValuation || undefined,
+          buyerSpecificValuations: p.buyerSpecificValuations || undefined,
         };
         pdfDataRef.current = pdfData;
 

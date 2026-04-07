@@ -39,15 +39,8 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   try {
-    console.log('[seo-health] Starting weekly sitemap health check...');
-
     // 2. Validate sitemap
     const healthResult = await validateSitemap('https://calculator.ambrosiaventures.co', 75);
-
-    console.log(
-      `[seo-health] Checked ${healthResult.checked}/${healthResult.totalUrls} URLs — ` +
-        `${healthResult.healthy} healthy, ${healthResult.issues.length} issues`
-    );
 
     // 3. Auto-resolve issues
     const resolved: string[] = [];

@@ -38,8 +38,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
-    console.log('Starting weekly digest generation...');
-
     // Step 1: Generate the weekly snapshot
     const snapshot = await generateWeeklySnapshot(supabase);
     if (!snapshot) {
@@ -78,11 +76,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (allEmails.size === 0) {
-      console.log('No eligible recipients found, skipping digest sends');
       return NextResponse.json({ success: true, snapshot_id: snapshot.id, emails_sent: 0 });
     }
-
-    console.log(`Digest recipients: ${allEmails.size} total (${(proUsers || []).length} Pro, ${(dripCompleted || []).length} drip-completed)`);
 
     // Filter out Pro users who opted out of weekly digest
     const proUserIds = (proUsers || []).map((u) => u.id);
@@ -105,7 +100,6 @@ export async function GET(request: NextRequest) {
     }
 
     const eligibleUsers = Array.from(allEmails.values());
-    console.log(`Sending digest to ${eligibleUsers.length} recipients`);
 
     // Step 3: Send emails in batches
     let emailsSent = 0;
@@ -190,8 +184,6 @@ export async function GET(request: NextRequest) {
           { onConflict: 'user_id' }
         );
     }
-
-    console.log(`Weekly digest complete: ${emailsSent} sent, ${emailErrors} errors`);
 
     return NextResponse.json({
       success: true,

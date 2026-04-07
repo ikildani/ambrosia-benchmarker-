@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Licensing vs Acquisition Deal Terms — 2026 Data',
-    description: 'Upfront %, milestones, royalties, timelines. Side-by-side from 2,500+ real deals.',
+    description: `Upfront %, milestones, royalties, timelines. Side-by-side from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',

@@ -93,13 +93,10 @@ export async function GET(request: NextRequest) {
 
   try {
     // 2. Fetch competitor content from RSS feeds
-    console.log('[competitor-intel] Fetching RSS feeds...');
     const allEntries = await fetchCompetitorContent();
-    console.log(`[competitor-intel] Fetched ${allEntries.length} entries total`);
 
     // 3. Filter out already-seen entries
     const newEntries = await filterNewEntries(supabase, allEntries);
-    console.log(`[competitor-intel] ${newEntries.length} new entries after dedup`);
 
     if (newEntries.length === 0) {
       await logCronRun(supabase, 'competitor-intel', {
@@ -112,9 +109,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Analyze via Claude
-    console.log('[competitor-intel] Analyzing with Claude...');
     const analyzed = await analyzeCompetitorContent(newEntries);
-    console.log(`[competitor-intel] ${analyzed.length} entries with relevance > 0.3`);
 
     // 5. Insert all analyzed entries into competitor_content
     const errors: string[] = [];
@@ -193,9 +188,6 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
-    console.log(
-      `[competitor-intel] Done: ${inserted} stored, ${highRelevance.length} high-relevance in ${durationMs}ms`
-    );
 
     return NextResponse.json({
       success: true,

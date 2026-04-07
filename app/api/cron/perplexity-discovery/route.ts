@@ -83,8 +83,6 @@ export async function GET(request: NextRequest) {
   // Always include mega-deals sweep to catch large deals across all TAs
   const currentTAs = rotationTAs.includes('_mega_deals') ? rotationTAs : [...rotationTAs, '_mega_deals'];
 
-  console.log(`[perplexity] Run ${currentIndex}/${TA_ROTATION.length}: ${currentTAs.join(', ')}`);
-
   const result = await runPerplexityDealDiscovery(supabase, perplexityApiKey, anthropicApiKey, {
     therapeuticAreas: currentTAs,
     maxQueriesPerTA: 2,
@@ -93,9 +91,8 @@ export async function GET(request: NextRequest) {
 
   // Post-processing
   if (result.deals_inserted > 0) {
-    const reclassified = await reclassifyOtherDeals(supabase);
-    const statsUpdated = await updateCompanyStats(supabase, result.deals_inserted * 2);
-    console.log(`[perplexity] Post-processing: ${reclassified} reclassified, ${statsUpdated} company stats updated`);
+    await reclassifyOtherDeals(supabase);
+    await updateCompanyStats(supabase, result.deals_inserted * 2);
 
     // Alert on high-value deals (any source type from this run)
     const { data: newBigDeals } = await supabase
@@ -137,8 +134,6 @@ export async function GET(request: NextRequest) {
     completed_at: new Date().toISOString(),
     notes: String(currentIndex), // Cursor for rotation tracking
   });
-
-  console.log(`[perplexity] Done: ${result.deals_discovered} discovered, ${result.deals_inserted} inserted`);
 
   return NextResponse.json({
     success: true,

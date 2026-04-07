@@ -86,10 +86,7 @@ export async function GET(request: NextRequest) {
       .not('therapeutic_area', 'like', '_%');
 
     if (verifiedDeals) {
-      const updateResult = await updateDealCountIfChanged(verifiedDeals);
-      if (updateResult.updated) {
-        console.log(`[Daily Stats] Deal count updated: ${updateResult.previousDisplay} → ${updateResult.newDisplay}`);
-      }
+      await updateDealCountIfChanged(verifiedDeals);
     }
 
     await notifyDailyStats({
