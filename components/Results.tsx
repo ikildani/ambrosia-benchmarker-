@@ -36,6 +36,9 @@ const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr
 const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const IndexDrugComparison = dynamic(() => import('./results/IndexDrugComparison'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const DealStructureToggle = dynamic(() => import('./results/DealStructureToggle'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const AssetReadinessScore = dynamic(() => import('./results/AssetReadinessScore'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -1665,6 +1668,21 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
+            {hasFullAccess && fullInputs && financialModel.rnpv && (
+              <FinancialErrorBoundary fallbackTitle="Index Drug Comparison unavailable">
+                <IndexDrugComparison
+                  modelPeakSalesM={financialModel.rnpv.cashFlows?.length > 0
+                    ? Math.max(...financialModel.rnpv.cashFlows.filter(cf => cf.revenue > 0).map(cf => cf.revenue), 0)
+                    : 0}
+                  therapeuticArea={fullInputs.therapeuticArea}
+                  indication={fullInputs.indication}
+                  modality={fullInputs.modality}
+                  tier={tier || 'free'}
+                  onUpgrade={onUpgrade}
+                  onBuyReport={onBuyReport}
+                />
+              </FinancialErrorBoundary>
+            )}
             <FinancialErrorBoundary fallbackTitle="Market Size Analysis unavailable">
               <MarketSizePanel
                 marketSize={financialModel.marketSize ?? undefined}
@@ -1731,6 +1749,22 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               />
             </FinancialErrorBoundary>
           </div>
+        )}
+
+        {/* Asset Readiness Score (Pro/Report) */}
+        {hasFullAccess && fullInputs && (
+          <FinancialErrorBoundary fallbackTitle="Asset Readiness Score unavailable">
+            <AssetReadinessScore
+              dataQuality={fullInputs.dataQuality}
+              competitivePosition={fullInputs.competitivePosition}
+              biomarkerStatus={fullInputs.biomarker}
+              phase={fullInputs.phase}
+              regulatoryDesignations={fullInputs.regulatoryDesignations}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+          </FinancialErrorBoundary>
         )}
 
         {/* Negotiation Insight - Pro Feature */}
@@ -1808,6 +1842,20 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             currentInputs={inputs}
             currentLabels={labels}
           />
+        )}
+
+        {/* Deal Structure Toggle (Pro/Report) */}
+        {hasFullAccess && financialModel && fullInputs && (
+          <FinancialErrorBoundary fallbackTitle="Deal Structure Toggle unavailable">
+            <DealStructureToggle
+              baseRNPV={financialModel.rnpv.riskAdjustedNPV}
+              phase={fullInputs.phase}
+              dealType={fullInputs.dealType || 'licensing'}
+              tier={tier || 'free'}
+              onUpgrade={onUpgrade}
+              onBuyReport={onBuyReport}
+            />
+          </FinancialErrorBoundary>
         )}
 
         {/* Compare with Previous - History-based comparison */}
