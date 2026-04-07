@@ -1055,6 +1055,27 @@ export const DATA_QUALITY_CONFIDENCE_MULTIPLIER: Record<string, number> = {
   preclinical_only: 1.60,
 };
 
+/**
+ * Data quality impact on phase duration.
+ * Better data enables faster, smaller trials → shorter development timelines.
+ * Worse data requires larger confirmatory trials → extended timelines.
+ *
+ * Applied as a multiplier to Phase 3 duration.
+ * Source: Tufts CSDD analysis of trial size vs data quality at Phase 2 entry.
+ */
+export const DATA_QUALITY_TIMELINE_MULTIPLIER: Record<string, number> = {
+  /** Pivotal-ready data: smaller Phase 3, potentially single-arm → 20% shorter */
+  pivotalReady: 0.80,
+  /** Strong Phase 2: standard Phase 3 design */
+  strongPhase2: 0.90,
+  /** Promising: standard timelines */
+  promising: 1.00,
+  /** Mixed: larger Phase 3 needed for statistical power → 20% longer */
+  mixed: 1.20,
+  /** Limited: may require additional Phase 2 work before Phase 3 → 30% longer */
+  limited: 1.30,
+};
+
 // ---------------------------------------------------------------------------
 // Discount Rate Defaults
 // ---------------------------------------------------------------------------

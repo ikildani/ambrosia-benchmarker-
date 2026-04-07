@@ -30,6 +30,19 @@ export { validateRNPVInput, safeValidateRNPVInput, RNPVInputSchema, MonteCarloIn
 // Calibration
 export { CALIBRATION_DEALS, runCalibrationBacktest } from './calibration';
 
+// Index drug benchmarking (Nirav Jhaveri feedback — April 2026)
+export {
+  INDEX_DRUG_DATABASE,
+  findIndexDrug,
+  getIndexDrugsForTA,
+  checkPeakSalesRealism,
+  getGenericEntrenchmentMultiplier,
+  checkEpidemiologyDataSufficiency,
+  MANUFACTURING_WACC_PREMIUM,
+  MARKET_ACCESS_DELAY_MONTHS,
+} from './index-drugs';
+export type { IndexDrug } from './index-drugs';
+
 // Types (re-export everything for consumer convenience)
 export type {
   RNPVInput,
