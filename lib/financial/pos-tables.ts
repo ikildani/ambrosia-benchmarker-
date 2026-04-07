@@ -599,31 +599,42 @@ export const MAX_REGULATORY_UPLIFT = 1.50;
  * 'regulatory' includes NDA/BLA filing, FDA review (standard or priority),
  * advisory committee, and approval -- typically 1.0-1.5 years.
  *
- * Source: Tufts CSDD Phase duration analysis; FDA review timelines;
- * BIO/Informa dataset 2011-2020.
+ * Source: Tufts CSDD Phase duration analysis; IntuitionLabs/ICON 2025
+ * survey (P1: 33.1mo, P2: 37.9mo, P3: 45.1mo mean across all TAs);
+ * FDA review timelines 2024; BIO/Informa dataset.
+ *
+ * Calibration note (April 2026):
+ * Updated using 2025 mean phase durations as baseline, then adjusted
+ * per TA. Values represent median durations for successful programs
+ * (shorter than mean since failed programs drag on longer).
+ * Key changes: neurology P3 extended (slow endpoints, large trials),
+ * metabolic P3 extended (large outcomes trials for GLP-1/MASH),
+ * rare disease shortened (smaller populations, regulatory flexibility).
  */
 export const PHASE_DURATION: Record<string, Record<string, number>> = {
+  // 2025 baseline (IntuitionLabs/ICON/Tufts): P1 mean 2.8yr, P2 3.2yr, P3 3.8yr
+  // Values below are median for successful programs (~20% shorter than mean)
   oncology: {
     discovery: 3.0,
     preclinical: 2.0,
-    phase1: 1.5,
-    phase1_2: 2.5,
-    phase2: 2.5,
+    phase1: 1.8,   // Up: expansion cohorts + dose-optimization extending P1
+    phase1_2: 2.8,
+    phase2: 2.5,   // Biomarker-selected populations keep P2 efficient
     phase2_3: 3.5,
-    phase3: 3.0,
+    phase3: 3.2,   // Up from 3.0: more comparator arms, combination trials
     nda_filed: 1.0,
     regulatory: 1.0,
   },
   neurology: {
     discovery: 3.5,
     preclinical: 2.5,
-    phase1: 1.5,
+    phase1: 1.8,
     phase1_2: 3.0,
-    phase2: 3.0,
+    phase2: 3.2,   // Up: slow cognitive endpoints, high placebo response
     phase2_3: 4.0,
-    phase3: 3.5,
+    phase3: 4.0,   // Up from 3.5: large trials, 18-24mo endpoints (ADAS-Cog, CDR-SB)
     nda_filed: 1.5,
-    regulatory: 1.5,
+    regulatory: 1.2, // Down from 1.5: FDA more engaged post-Alzheimer's accelerated approvals
   },
   immunology: {
     discovery: 3.0,
@@ -643,9 +654,9 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
     phase1_2: 2.5,
     phase2: 2.5,
     phase2_3: 4.0,
-    phase3: 3.5,
+    phase3: 4.0,   // Up from 3.5: large CV outcomes trials required for GLP-1/obesity
     nda_filed: 1.0,
-    regulatory: 1.0,
+    regulatory: 0.8, // Priority review for obesity drugs (6-month PDUFA)
   },
   cardiovascular: {
     discovery: 3.0,
@@ -654,9 +665,9 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
     phase1_2: 3.0,
     phase2: 3.0,
     phase2_3: 4.5,
-    phase3: 4.0,
+    phase3: 4.5,   // Up from 4.0: large CVOTs (10K+ patients, event-driven endpoints)
     nda_filed: 1.5,
-    regulatory: 1.5,
+    regulatory: 1.2, // Down from 1.5: priority review for some CV drugs
   },
   infectiousDisease: {
     discovery: 2.0,
@@ -667,7 +678,7 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
     phase2_3: 3.0,
     phase3: 2.5,
     nda_filed: 1.0,
-    regulatory: 1.0,
+    regulatory: 0.8, // Faster regulatory for AMR/pandemic priority
   },
   ophthalmology: {
     discovery: 3.0,
