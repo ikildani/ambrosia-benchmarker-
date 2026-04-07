@@ -67,7 +67,7 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     category: 'clinical',
     adjustments: [
       { parameter: 'peakSales', operation: 'multiply', value: 0.15, rationale: 'Potential salvage value in biomarker-selected subgroup' },
-      { parameter: 'pos', operation: 'set', value: 0.20, rationale: 'Low probability of rescue study success' },
+      { parameter: 'pos', operation: 'multiply', value: 0.15, rationale: 'Low probability of rescue study success — 85% reduction from base PoS' },
       { parameter: 'timeToMarket', operation: 'add', value: 3.0, rationale: 'Additional 3 years for rescue study if pursued' },
     ],
   },
@@ -588,18 +588,22 @@ export function runCompoundScenarios(
     // Apply the compound scenario
     let result = applyScenario(baseInput, baseResult, compoundTemplate);
 
-    // Apply non-linear interaction multipliers on top
+    // Apply non-linear interaction multipliers on top.
+    // These make the scenario WORSE (for downside) or BETTER (for upside).
+    // We apply them to the IMPACT DELTA (not the absolute rNPV) to ensure
+    // that a negative scenario always gets more negative, not less.
     const ix = pair.interactionMultipliers;
     if (ix.peakSalesMultiplier || ix.posMultiplier || ix.timeAdjustment) {
-      const compoundedRNPV = result.adjustedRNPV *
-        (ix.peakSalesMultiplier || 1.0) *
-        (ix.posMultiplier || 1.0);
+      // Amplify the impact delta by the interaction factor
+      const interactionFactor = (ix.peakSalesMultiplier || 1.0) * (ix.posMultiplier || 1.0);
+      const amplifiedDelta = result.impactDelta * (1.0 + (1.0 - interactionFactor));
+      const compoundedRNPV = baseResult.riskAdjustedNPV + amplifiedDelta;
 
       result = {
         ...result,
         adjustedRNPV: Math.round(compoundedRNPV),
-        impactDelta: Math.round(compoundedRNPV - baseResult.riskAdjustedNPV),
-        impactPercent: Math.round(((compoundedRNPV - baseResult.riskAdjustedNPV) / Math.abs(baseResult.riskAdjustedNPV || 1)) * 100),
+        impactDelta: Math.round(amplifiedDelta),
+        impactPercent: Math.round((amplifiedDelta / Math.abs(baseResult.riskAdjustedNPV || 1)) * 100),
         narrative: pair.narrative,
         scenario: compoundTemplate,
       };
