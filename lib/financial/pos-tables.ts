@@ -358,8 +358,8 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   mab: 1.08,
   /** ADCs -- PTRS 53% vs 41% oncology avg (ZS 2024). 15 FDA-approved. Premium modality. */
   adc: 1.20,
-  /** Bispecific antibodies -- complex manufacturing, novel mechanisms */
-  bispecific: 0.80,
+  /** Bispecific antibodies -- 4 new approvals in 2024 (tarlatamab, zanidatamab, zenocutuzumab, odronextamab). Still complex manufacturing but accelerating class. */
+  bispecific: 0.95,  // Up from 0.80: 4 new approvals in 2024 validates the platform. Still below mAb baseline due to CMC complexity.
   /** T-cell engagers (BiTE, etc.) -- cytokine release syndrome risk */
   tCellEngager: 0.78,
   /** Peptides -- good oral bioavailability advances, established PK */
@@ -755,7 +755,9 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
  *
  * Source: DiMasi et al., J Health Econ (2016), inflation-adjusted to 2025 USD
  * (~35% uplift from 2016 baseline); Tufts CSDD cost surveys; Deloitte
- * biopharma R&D benchmarking 2024; IQVIA Global Trends in R&D 2024.
+ * "Measuring the return from pharmaceutical innovation" 2025 ($2.23B/asset);
+ * IQVIA Global Trends in R&D 2024; per-patient costs $113K-$137K (2025 data).
+ * Oncology premium: 30-40% above TA average (IQVIA 2025).
  *
  * Calibration note (April 2026):
  * Costs updated with ~35% inflation adjustment from 2016 baselines.
