@@ -430,6 +430,50 @@ export function getReportStyles(): string {
        PRINT & SCREEN
        ======================================== */
 
+    /* ========================================
+       PAGE BREAK CONTROL — Prevent mid-element breaks
+       ======================================== */
+
+    .card, .card-sm, .card-highlight, .card-amber, .card-navy,
+    .kpi-card, .callout, .callout-amber, .disclaimer-box {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .data-table {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .grid-2, .grid-3, .grid-4 {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .section-title, .section-title-lg {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .chart-container {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Keep section titles attached to their content */
+    h1, h2, h3, h4, h5, h6 {
+      page-break-after: avoid;
+      break-after: avoid;
+      orphans: 3;
+      widows: 3;
+    }
+
+    /* Prevent single orphan lines */
+    p {
+      orphans: 2;
+      widows: 2;
+    }
+
     @media print {
       body { background: white; }
       .report-page { box-shadow: none; }
