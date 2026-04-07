@@ -283,27 +283,36 @@ export default function ReportGenerationModal({
           return;
         }
 
-        // Step 2: Race memo + playbook against a 8s deadline
-        // If they're ready, great. If not, proceed without them — PDF still generates.
+        // Step 2: Wait for memo + playbook with generous timeout
+        // Haiku is fast (3-8s typically), but we give up to 20s to ensure coverage.
+        // This is still 3-4x faster than the old Sonnet flow (30-60s).
         setCurrentStep('generating_memo');
         let memo = p.existingMemo;
         let playbook: NegotiationPlaybook | null = null;
 
-        const MEMO_DEADLINE_MS = 8000;
-        const deadline = <T,>(promise: Promise<T | null>, ms: number): Promise<T | null> =>
-          Promise.race([promise, new Promise<null>(r => setTimeout(() => r(null), ms))]);
-
         if (!memo && memoPromise) {
-          const fetchedMemo = await deadline(memoPromise, MEMO_DEADLINE_MS);
-          if (fetchedMemo) {
-            memo = fetchedMemo;
-            p.onMemoGenerated(memo);
+          try {
+            const fetchedMemo = await Promise.race([
+              memoPromise,
+              new Promise<null>(r => setTimeout(() => r(null), 20000)),
+            ]);
+            if (fetchedMemo) {
+              memo = fetchedMemo;
+              p.onMemoGenerated(memo);
+            }
+          } catch {
+            // Memo failed — continue without it
           }
-          // If memo didn't arrive in time, PDF generates without it — not a blocker
         }
         if (playbookPromise) {
-          // Playbook gets whatever time remains from the deadline (at least 2s)
-          playbook = await deadline(playbookPromise, 2000);
+          try {
+            playbook = await Promise.race([
+              playbookPromise,
+              new Promise<null>(r => setTimeout(() => r(null), 20000)),
+            ]);
+          } catch {
+            // Playbook failed — continue without it
+          }
         }
         if (abortRef.current) return;
         markComplete('generating_memo');
