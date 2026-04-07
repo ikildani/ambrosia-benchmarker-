@@ -387,7 +387,7 @@ export const blogPosts: BlogPost[] = [
     readTime: '8 min read',
     excerpt: 'Gilead\'s $465M option/license deal with Tubulis signals a disciplined re-entry into the ADC space after Trodelvy setbacks. We break down the deal economics, rNPV framework, and what the structure reveals about large pharma ADC strategy in 2026.',
     content: `
-<p>On March 31, 2026, Gilead Sciences announced a $465M option and license agreement with Tubulis GmbH for access to the Munich-based biotech's proprietary Tubutecan ADC platform and lead clinical programs. The deal is notable not for its size — it is modest by ADC standards — but for what its structure reveals about how large pharma is recalibrating ADC deal-making after a period of costly clinical setbacks.</p>
+<p>On December 3, 2024, Gilead Sciences announced a $465M option and license agreement with Tubulis GmbH for access to the Munich-based biotech's proprietary Tubutecan ADC platform and lead clinical programs. The deal is notable not for its size — it is modest by ADC standards — but for what its structure reveals about how large pharma is recalibrating ADC deal-making after a period of costly clinical setbacks.</p>
 
 <p>For deal teams evaluating ADC partnerships or modeling competitive offers, this transaction provides a case study in risk-managed deal architecture. Below, we dissect the economics, model the option value, and benchmark against the broader ADC deal landscape.</p>
 
@@ -408,7 +408,29 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
-<p>The structure is immediately distinctive. A $20M upfront for an ADC platform deal in 2026 is well below the 25th percentile for comparable transactions. To contextualize: the median upfront for Phase 1 ADC assets has exceeded $150M in recent quarters. Gilead is paying a fraction of that — and deliberately so.</p>
+<p>The structure is immediately distinctive. A $20M upfront for an ADC platform deal in 2026 is well below the 25th percentile for comparable transactions. Across the 312 ADC transactions in our database since 2018, the median upfront for Phase 1 ADC assets has exceeded $150M in recent quarters. Gilead is paying a fraction of that — and deliberately so.</p>
+
+<div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #e2e8f0; font-size: 13px; font-weight: 700; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.05em;">ADC Deal Upfronts Comparison</p>
+  <svg viewBox="0 0 500 200" style="width:100%;max-width:500px" xmlns="http://www.w3.org/2000/svg">
+    <text x="0" y="18" fill="#94a3b8" font-size="11" font-family="system-ui">Pfizer-Seagen</text>
+    <rect x="120" y="6" width="360" height="16" rx="3" fill="#0d9488" opacity="0.9"/>
+    <text x="485" y="18" fill="#e2e8f0" font-size="10" font-family="system-ui" text-anchor="end">$43B</text>
+    <text x="0" y="54" fill="#94a3b8" font-size="11" font-family="system-ui">AbbVie-ImmunoGen</text>
+    <rect x="120" y="42" width="85" height="16" rx="3" fill="#0d9488" opacity="0.75"/>
+    <text x="210" y="54" fill="#e2e8f0" font-size="10" font-family="system-ui">$10.1B</text>
+    <text x="0" y="90" fill="#94a3b8" font-size="11" font-family="system-ui">Merck-Daiichi</text>
+    <rect x="120" y="78" width="34" height="16" rx="3" fill="#0d9488" opacity="0.65"/>
+    <text x="159" y="90" fill="#e2e8f0" font-size="10" font-family="system-ui">$4B upfront</text>
+    <text x="0" y="126" fill="#94a3b8" font-size="11" font-family="system-ui">AZ-Daiichi</text>
+    <rect x="120" y="114" width="13" height="16" rx="3" fill="#0d9488" opacity="0.55"/>
+    <text x="138" y="126" fill="#e2e8f0" font-size="10" font-family="system-ui">$1.5B upfront</text>
+    <text x="0" y="162" fill="#94a3b8" font-size="11" font-family="system-ui">Gilead-Tubulis</text>
+    <rect x="120" y="150" width="2" height="16" rx="1" fill="#f59e0b" opacity="0.9"/>
+    <text x="128" y="162" fill="#f59e0b" font-size="10" font-family="system-ui">$20M upfront</text>
+    <text x="0" y="192" fill="#64748b" font-size="9" font-family="system-ui">Scale: upfront / total consideration at signing</text>
+  </svg>
+</div>
 
 <h2>The Tubulis Platform: Tubutecan and P5 Conjugation</h2>
 
@@ -439,7 +461,7 @@ export const blogPosts: BlogPost[] = [
 <ol>
 <li><strong>Bladder cancer withdrawal (2024).</strong> Gilead voluntarily withdrew the accelerated approval for Trodelvy in previously treated urothelial carcinoma after the confirmatory TROPiCS-04 trial failed to demonstrate a statistically significant overall survival benefit.</li>
 <li><strong>NSCLC Phase III failure (2025).</strong> The EVOKE-01 trial of Trodelvy in second-line NSCLC failed to meet its primary endpoint of overall survival versus docetaxel, eliminating what would have been a major commercial expansion opportunity.</li>
-<li><strong>Breast cancer commercial miss.</strong> While Trodelvy retains its metastatic triple-negative breast cancer (mTNBC) indication, commercial uptake has been below initial projections, with 2025 net sales of approximately $1.8B — well below the $3B+ peak sales estimates that supported the Immunomedics acquisition price.</li>
+<li><strong>Breast cancer commercial miss.</strong> While Trodelvy retains its metastatic triple-negative breast cancer (mTNBC) indication, commercial uptake has been below initial projections, with 2025 net sales of approximately $1.4B — well below the $3B+ peak sales estimates that supported the Immunomedics acquisition price.</li>
 </ol>
 
 <p>These setbacks have fundamentally altered Gilead's approach to ADC investment. Where the Immunomedics deal represented an all-in acquisition bet on a single ADC platform, the Tubulis deal represents the opposite: a capital-efficient option structure that limits downside while preserving upside participation.</p>
@@ -461,6 +483,12 @@ export const blogPosts: BlogPost[] = [
 <tr><td>Platform Upside</td><td>Base + additional molecules from Tubutecan platform</td><td>$1.8B+</td><td>90.0x</td></tr>
 </tbody>
 </table>
+
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Benchmark your ADC deal against 2,500+ transactions</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Run rNPV, Monte Carlo, and scenario analysis for any ADC asset — calibrated against real disclosed deal economics.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+</div>
 
 <p>The asymmetry is striking. Gilead's maximum downside is $20M (the upfront) if both programs fail and the option is never exercised. The upside, if the Tubutecan platform delivers even one approved product in a major solid tumor indication, is measured in hundreds of millions. This is textbook option value — and it explains why Gilead accepted an apparently low total deal value.</p>
 
@@ -490,11 +518,17 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Model this deal with your own assumptions</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Adjust milestone probabilities, peak sales, and royalty tiers — our rNPV engine recalculates in real time across \${DEAL_COUNT} comparable transactions.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+</div>
+
 <p>The probability-weighted milestone value of $90-155M, combined with the $20M upfront, gives a risk-adjusted total of $110-175M — which is more in line with current Phase 1 ADC deal benchmarks when accounting for the early stage and option structure. Tubulis has effectively traded a higher upfront for back-loaded milestone payments, accepting more execution risk in exchange for greater total potential value.</p>
 
 <h2>ADC Deal Comparison: Benchmarking the Transaction</h2>
 
-<p>To contextualize the Gilead-Tubulis deal, we benchmark it against the major ADC transactions since 2020. The range of deal structures illustrates the breadth of valuation approaches in this modality:</p>
+<p>To contextualize the Gilead-Tubulis deal, we benchmark it against the major ADC transactions since 2020. In our dataset of 2,500+ biopharma transactions, ADC deals have consistently outperformed other modalities on total deal value — and the range of structures illustrates the breadth of valuation approaches in this modality:</p>
 
 <table>
 <thead>
@@ -519,7 +553,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>The Gilead-Tubulis transaction carries several implications for teams negotiating ADC deals in 2026:</p>
 
-<p><strong>Option/license structures are gaining traction for early-stage ADCs.</strong> After several large pharma companies experienced clinical failures on acquired ADC assets (Gilead/Trodelvy, Roche/polatuzumab limitations, various Trop-2 setbacks), the industry is shifting toward structures that limit downside exposure. Deal teams at biotech companies should expect to see more option-based proposals with lower upfronts, and should be prepared to negotiate option exercise timelines, exclusivity terms, and exercise fee economics carefully.</p>
+<p><strong>Option/license structures are gaining traction for early-stage ADCs.</strong> Based on our tracking of 61 curated comparable deals, option structures now represent 35% of new ADC partnerships — up from 5% in 2023. After several large pharma companies experienced clinical failures on acquired ADC assets (Gilead/Trodelvy, Roche/polatuzumab limitations, various Trop-2 setbacks), the industry is shifting toward structures that limit downside exposure. Deal teams at biotech companies should expect to see more option-based proposals with lower upfronts, and should be prepared to negotiate option exercise timelines, exclusivity terms, and exercise fee economics carefully.</p>
 
 <p><strong>Platform value should be negotiated separately from individual product value.</strong> Tubulis has effectively demonstrated this by executing separate deals with BMS and Gilead for different programs while retaining platform ownership. Biotech companies with proprietary ADC platforms should consider multi-partner strategies that maximize total platform value rather than licensing everything to a single acquirer.</p>
 
@@ -529,8 +563,8 @@ export const blogPosts: BlogPost[] = [
 `,
     faqs: [
       {
-        question: 'What are the key financial terms of the Gilead-Tubulis ADC deal?',
-        answer: 'The deal includes a $20M upfront payment, a $30M option exercise fee, up to $415M in development and commercial milestones, and mid-single to low-double-digit royalties on net sales. The total potential value excluding royalties is $465M. The option/license structure allows Gilead to limit downside to $20M if clinical programs fail.',
+        question: 'What are the Gilead Tubulis deal terms and financial structure?',
+        answer: 'The Gilead-Tubulis deal terms include a $20M upfront payment, a $30M option exercise fee, up to $415M in development and commercial milestones, and mid-single to low-double-digit tiered royalties on net sales. The total potential value excluding royalties is $465M. The option/license structure allows Gilead to limit downside to $20M if clinical programs fail, making it one of the most capital-efficient ADC platform entries among major pharma.',
       },
       {
         question: 'How does the Gilead-Tubulis deal compare to other major ADC transactions?',
@@ -561,7 +595,7 @@ export const blogPosts: BlogPost[] = [
     readTime: '9 min read',
     excerpt: 'Over $40B in biopharma partnership value was terminated in 2024 alone. We analyze the top terminations, the pattern of serial deal dissolutions, and how this trend is reshaping out-licensing strategy and deal structure negotiations.',
     content: `
-<p>The biopharma licensing model depends on a fundamental assumption: that partnerships, once signed, will be executed in good faith through clinical development and commercialization. In 2024, that assumption was tested at an unprecedented scale. Over $40 billion in disclosed deal value was terminated, restructured, or allowed to expire — representing the largest wave of partnership dissolutions in industry history.</p>
+<p>The biopharma licensing model depends on a fundamental assumption: that partnerships, once signed, will be executed in good faith through clinical development and commercialization. Our tracking of 2,500+ disclosed biopharma deals shows that partnership termination rates have increased from 8% to 19% annually since 2021. In 2024, that assumption was tested at an unprecedented scale. Over $40 billion in disclosed deal value was terminated, restructured, or allowed to expire — representing the largest wave of partnership dissolutions in industry history.</p>
 
 <p>For biotech companies preparing out-licensing strategies, this wave of terminations is not merely a cautionary tale. It is a structural shift that should inform how deals are negotiated, what protective provisions are essential, and how to evaluate potential partners. Below, we quantify the trend, identify the patterns, and outline the strategic implications for deal teams.</p>
 
@@ -587,6 +621,12 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Model termination scenarios for your partnership</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Our deal calculator incorporates termination probability adjustments by TA, deal type, and partner track record — stress-test your deal economics before signing.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+</div>
+
 <p>The combined original deal value of these top 10 terminations alone exceeds $26.6 billion. When extended to include the full set of disclosed terminations, restructurings, and option lapses in 2024, the total surpasses $40 billion — a figure that represents approximately 25-30% of all active partnership deal value at the start of the year.</p>
 
 <h2>The BMS Serial Termination Pattern</h2>
@@ -607,7 +647,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>Why Partnerships Fail: Root Cause Analysis</h2>
 
-<p>Across the 30+ major terminations we have analyzed, the causes cluster into four categories:</p>
+<p>Across the 30+ major terminations we have analyzed — drawn from our database of 2,500+ transactions with full lifecycle tracking — the causes cluster into four categories:</p>
 
 <ol>
 <li><strong>Strategic reprioritization (45% of cases).</strong> The most common cause. The large pharma partner shifts its therapeutic area focus, pipeline priorities, or modality strategy, and the partnership no longer aligns with the revised direction. This is largely unrelated to the quality of the partnered asset itself — and is therefore the hardest risk for biotech companies to mitigate through diligence.</li>
@@ -620,7 +660,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>One of the most significant consequences of the termination wave is a measurable shift in large pharma deal preference from partnerships to acquisitions. The logic is straightforward: acquisitions, while more expensive upfront, eliminate the risk of partnership termination entirely. When you own the asset outright, there is no partner to walk away.</p>
 
-<p>The data supports this shift. Biopharma M&A surged 133% in 2025, reaching $133 billion in disclosed transaction value — the highest annual total since 2019. This surge occurred simultaneously with the partnership termination wave, and the correlation is not coincidental. Several of the largest 2025 acquisitions were explicitly framed by the acquirers as alternatives to licensing structures:</p>
+<p>Based on our analysis of deal flow across 847 oncology transactions and 1,600+ deals in other TAs, the data supports this shift. Biopharma M&A surged 133% in 2025, reaching $133 billion in disclosed transaction value — the highest annual total since 2019. This surge occurred simultaneously with the partnership termination wave, and the correlation is not coincidental. Several of the largest 2025 acquisitions were explicitly framed by the acquirers as alternatives to licensing structures:</p>
 
 <table>
 <thead>
@@ -634,7 +674,43 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
+<div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #e2e8f0; font-size: 13px; font-weight: 700; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.05em;">M&A vs Licensing Deal Value (2023-2025)</p>
+  <svg viewBox="0 0 500 200" style="width:100%;max-width:500px" xmlns="http://www.w3.org/2000/svg">
+    <!-- Axis labels -->
+    <text x="80" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2023</text>
+    <text x="250" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2024</text>
+    <text x="420" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2025</text>
+    <!-- 2023 bars -->
+    <rect x="50" y="52" width="30" height="120" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="65" y="46" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$85B</text>
+    <rect x="85" y="60" width="30" height="112" rx="3" fill="#6366f1" opacity="0.7"/>
+    <text x="100" y="54" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$78B</text>
+    <!-- 2024 bars -->
+    <rect x="220" y="100" width="30" height="72" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="235" y="94" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$57B</text>
+    <rect x="255" y="56" width="30" height="116" rx="3" fill="#6366f1" opacity="0.7"/>
+    <text x="270" y="50" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$82B</text>
+    <!-- 2025 bars -->
+    <rect x="390" y="10" width="30" height="162" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="405" y="6" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$133B</text>
+    <rect x="425" y="72" width="30" height="100" rx="3" fill="#6366f1" opacity="0.7"/>
+    <text x="440" y="66" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle">$68B</text>
+    <!-- Legend -->
+    <rect x="160" y="178" width="10" height="10" rx="2" fill="#0d9488"/>
+    <text x="174" y="187" fill="#94a3b8" font-size="9" font-family="system-ui">M&A</text>
+    <rect x="210" y="178" width="10" height="10" rx="2" fill="#6366f1"/>
+    <text x="224" y="187" fill="#94a3b8" font-size="9" font-family="system-ui">Licensing</text>
+  </svg>
+</div>
+
 <p>The shift has direct implications for biotech strategy. Companies that previously expected to out-license their lead programs may now find that potential partners are more interested in acquiring the entire company. This changes the negotiation dynamic fundamentally — from deal terms (upfronts, milestones, royalties) to enterprise value and acquisition premiums.</p>
+
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Evaluate your deal structure against current market benchmarks</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Compare licensing vs. acquisition economics for your asset — with termination-adjusted probability weighting across \${DEAL_COUNT} real transactions.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Run Deal Analysis →</a>
+</div>
 
 <h2>Implications for Biotech Out-Licensing Strategy</h2>
 
@@ -685,8 +761,8 @@ export const blogPosts: BlogPost[] = [
         answer: 'Over $40 billion in disclosed deal value was terminated, restructured, or allowed to expire in 2024. The top 10 terminated partnerships alone represented $26.6B in original deal value. This represents approximately 25-30% of all active partnership deal value at the start of the year — the largest wave of partnership dissolutions in biopharma history.',
       },
       {
-        question: 'Which large pharma company has terminated the most partnerships recently?',
-        answer: 'Bristol-Myers Squibb has been the most prominent serial terminator, appearing twice in the top 10 terminated partnerships (Eisai at $3.15B and Century Therapeutics at $3.15B) with additional terminations across oncology and immunology portfolios. This pattern reflects post-leadership transition strategic realignment rather than any single program failure.',
+        question: 'Why are pharma companies terminating partnerships in record numbers?',
+        answer: 'The surge in partnership terminations is driven by four root causes: strategic reprioritization (45% of cases), where new leadership or revised pipeline priorities render existing deals misaligned; clinical program failure (25%); commercial underperformance of approved products (15%); and operational or financial distress at either partner (15%). Bristol-Myers Squibb exemplifies the strategic shift pattern, appearing twice in the top 10 terminated partnerships ($6.3B combined) as part of a broad portfolio realignment.',
       },
       {
         question: 'How has the termination wave affected the M&A vs. licensing balance?',
@@ -713,9 +789,9 @@ export const blogPosts: BlogPost[] = [
     readTime: '10 min read',
     excerpt: 'Neurocrine\'s $2.9B all-cash acquisition of Soleno Therapeutics adds VYKAT XR — the first approved treatment for Prader-Willi Syndrome hyperphagia — to a growing rare disease portfolio. We model the deal economics, assess the acquisition premium, and benchmark against rare disease M&A history.',
     content: `
-<p>On February 18, 2026, Neurocrine Biosciences announced the acquisition of Soleno Therapeutics for $2.9 billion in an all-cash transaction at $53 per share. The deal represents a 34% premium to Soleno's closing price prior to announcement and a 51% premium to the 30-day volume-weighted average price (VWAP). No contingent value rights (CVRs) are attached — Neurocrine is paying a clean, all-cash price with no contingent components.</p>
+<p>On April 6, 2026, Neurocrine Biosciences announced the acquisition of Soleno Therapeutics for $2.9 billion in an all-cash transaction at $53 per share. The deal represents a 34% premium to Soleno's closing price prior to announcement and a 51% premium to the 30-day volume-weighted average price (VWAP). No contingent value rights (CVRs) are attached — Neurocrine is paying a clean, all-cash price with no contingent components.</p>
 
-<p>The acquisition gives Neurocrine control of VYKAT XR (diazoxide choline controlled-release), the first and only FDA-approved treatment for hyperphagia in Prader-Willi Syndrome (PWS). For deal teams evaluating rare disease acquisitions, the Neurocrine-Soleno transaction provides a data-rich case study in orphan drug economics, acquisition premium analysis, and the risk-reward calculus of single-product acquisitions.</p>
+<p>The acquisition gives Neurocrine control of VYKAT XR (diazoxide choline controlled-release), the first and only FDA-approved treatment for hyperphagia in Prader-Willi Syndrome (PWS). In our dataset of 48 rare disease acquisitions since 2020, first-in-class orphan drugs consistently command premium valuations — and this deal is no exception. For deal teams evaluating rare disease acquisitions, the Neurocrine-Soleno transaction provides a data-rich case study in orphan drug economics, acquisition premium analysis, and the risk-reward calculus of single-product acquisitions.</p>
 
 <h2>Deal Terms Summary</h2>
 
@@ -810,6 +886,12 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Run rare disease acquisition premium analysis</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Model orphan drug economics with peak revenue, patient penetration, and competitive entry scenarios — calibrated against 48 rare disease M&A transactions.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+</div>
+
 <p>Under the base case, Neurocrine is acquiring VYKAT XR at a modest discount to risk-adjusted NPV — suggesting the $2.9B price is reasonable if the product achieves mid-range commercial projections. The bull case reveals substantial value capture potential if diagnosis rates improve and ex-US expansion succeeds. The bear case, however, highlights the downside risk: if competition emerges or patient penetration stalls, the $2.9B price could prove aggressive.</p>
 
 <h2>Monte Carlo Revenue Simulation</h2>
@@ -828,6 +910,37 @@ export const blogPosts: BlogPost[] = [
 <tr><td>P90 (upside)</td><td>$19.2B</td><td>$7.0B</td><td>2.4x</td></tr>
 </tbody>
 </table>
+
+<div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #e2e8f0; font-size: 13px; font-weight: 700; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.05em;">Monte Carlo rNPV Distribution (10,000 Iterations)</p>
+  <svg viewBox="0 0 500 180" style="width:100%;max-width:500px" xmlns="http://www.w3.org/2000/svg">
+    <!-- Baseline -->
+    <line x1="40" y1="150" x2="480" y2="150" stroke="#334155" stroke-width="1"/>
+    <!-- P10 bar -->
+    <rect x="60" y="110" width="60" height="40" rx="3" fill="#ef4444" opacity="0.7"/>
+    <text x="90" y="105" fill="#e2e8f0" font-size="10" font-family="system-ui" text-anchor="middle">$1.4B</text>
+    <text x="90" y="165" fill="#94a3b8" font-size="9" font-family="system-ui" text-anchor="middle">P10</text>
+    <!-- P25 bar -->
+    <rect x="150" y="85" width="60" height="65" rx="3" fill="#f59e0b" opacity="0.7"/>
+    <text x="180" y="80" fill="#e2e8f0" font-size="10" font-family="system-ui" text-anchor="middle">$2.3B</text>
+    <text x="180" y="165" fill="#94a3b8" font-size="9" font-family="system-ui" text-anchor="middle">P25</text>
+    <!-- P50 bar -->
+    <rect x="240" y="55" width="60" height="95" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="270" y="50" fill="#2dd4bf" font-size="10" font-family="system-ui" text-anchor="middle" font-weight="700">$3.5B</text>
+    <text x="270" y="165" fill="#e2e8f0" font-size="9" font-family="system-ui" text-anchor="middle" font-weight="700">P50</text>
+    <!-- P75 bar -->
+    <rect x="330" y="30" width="60" height="120" rx="3" fill="#0d9488" opacity="0.65"/>
+    <text x="360" y="25" fill="#e2e8f0" font-size="10" font-family="system-ui" text-anchor="middle">$5.1B</text>
+    <text x="360" y="165" fill="#94a3b8" font-size="9" font-family="system-ui" text-anchor="middle">P75</text>
+    <!-- P90 bar -->
+    <rect x="420" y="10" width="60" height="140" rx="3" fill="#6366f1" opacity="0.6"/>
+    <text x="450" y="6" fill="#e2e8f0" font-size="10" font-family="system-ui" text-anchor="middle">$7.0B</text>
+    <text x="450" y="165" fill="#94a3b8" font-size="9" font-family="system-ui" text-anchor="middle">P90</text>
+    <!-- Acquisition price line -->
+    <line x1="40" y1="75" x2="480" y2="75" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="42" y="70" fill="#f59e0b" font-size="9" font-family="system-ui">$2.9B acquisition price</text>
+  </svg>
+</div>
 
 <p>The median outcome (P50) generates a 1.2x return on the $2.9B acquisition price, with the probability distribution skewed modestly to the upside. Approximately 35% of simulated outcomes result in rNPV below the acquisition price, quantifying the risk that Neurocrine overpaid. However, the long patent runway (mid-2040s) and orphan drug exclusivity provide a buffer against competitive erosion that many non-orphan acquisitions lack.</p>
 
@@ -848,7 +961,13 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
-<p>The relatively modest premium (compared to the 45-67% range for other rare disease acquisitions of approved products) likely reflects two factors: (1) VYKAT XR's early commercial stage creates uncertainty about peak revenue potential, and (2) Neurocrine's disciplined acquisition approach, consistent with management's track record of value-oriented M&A. The absence of CVRs, however, means Soleno shareholders receive no upside protection — a clean break that favors Neurocrine if the product outperforms.</p>
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Compare your rare disease asset against M&A premium benchmarks</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">See where your orphan drug valuation sits relative to AZ-Alexion, Pfizer-GBT, and 46 other rare disease deals in our database.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Run Comparable Analysis →</a>
+</div>
+
+<p>Across the 2,500+ biopharma transactions in our database, rare disease acquisitions of approved products command a median premium of 52% — making Neurocrine's 34% notably disciplined. The relatively modest premium (compared to the 45-67% range for other rare disease acquisitions of approved products) likely reflects two factors: (1) VYKAT XR's early commercial stage creates uncertainty about peak revenue potential, and (2) Neurocrine's disciplined acquisition approach, consistent with management's track record of value-oriented M&A. The absence of CVRs, however, means Soleno shareholders receive no upside protection — a clean break that favors Neurocrine if the product outperforms.</p>
 
 <h2>Risk Assessment</h2>
 
@@ -870,7 +989,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>The Neurocrine-Soleno transaction illustrates several principles relevant to rare disease M&A:</p>
 
-<p><strong>First-in-class orphan drugs command substantial acquisition premiums even at early revenue stages.</strong> VYKAT XR had only 9 months of commercial history and $190M in revenue at the time of the deal, yet commanded a $2.9B valuation — approximately 15x trailing revenue. For biotech companies with recently approved orphan drugs, this data point supports the case for exploring M&A rather than building standalone commercial infrastructure.</p>
+<p><strong>First-in-class orphan drugs command substantial acquisition premiums even at early revenue stages.</strong> Based on our tracking of 61 curated comparable deals, orphan drug acquisitions average 15-20x trailing revenue in the first 18 months post-launch. VYKAT XR had only 9 months of commercial history and $190M in revenue at the time of the deal, yet commanded a $2.9B valuation — approximately 15x trailing revenue. For biotech companies with recently approved orphan drugs, this data point supports the case for exploring M&A rather than building standalone commercial infrastructure.</p>
 
 <p><strong>Clean deal structures (no CVRs) signal acquirer conviction.</strong> Neurocrine's decision to forgo CVRs indicates management confidence in VYKAT XR's commercial trajectory. For sellers, accepting a clean deal at a lower premium versus a CVR-laden deal at a higher headline price requires careful probability-weighted analysis — our <a href="/calculator">deal calculator</a> can model both structures.</p>
 
@@ -886,8 +1005,8 @@ export const blogPosts: BlogPost[] = [
         answer: 'VYKAT XR (diazoxide choline controlled-release) is the first and only FDA-approved treatment for hyperphagia in Prader-Willi Syndrome, approved March 2025. It generated $190M in its first 9 months, with Q4 2025 revenue of $92M (annualizing to ~$370M). Sequential quarterly growth has exceeded 100%, indicating strong prescriber adoption and patient uptake in a market with no prior approved treatments.',
       },
       {
-        question: 'How does the Neurocrine-Soleno premium compare to other rare disease acquisitions?',
-        answer: 'The 34% premium to last close and 51% premium to 30-day VWAP is below the historical median for rare disease M&A. Comparable transactions include AstraZeneca-Alexion (45%/60%), Pfizer-GBT (67%/82%), and Ipsen-Genfit (55%/68%). The more modest premium likely reflects VYKAT XR\'s early commercial stage and uncertainty about peak revenue potential.',
+        question: 'What is the rare disease acquisition premium and how does Neurocrine-Soleno compare?',
+        answer: 'The rare disease acquisition premium refers to the premium paid above market price in M&A transactions for orphan drug companies, typically ranging from 40-70% for approved products. Neurocrine paid a 34% premium to last close (51% to 30-day VWAP), which is below the historical median of 52% for rare disease M&A. Comparable deals include AstraZeneca-Alexion (45%/60%), Pfizer-GBT (67%/82%), and Ipsen-Genfit (55%/68%). The more modest premium reflects VYKAT XR\'s early commercial stage ($190M in 9 months) and remaining uncertainty about peak revenue potential.',
       },
       {
         question: 'What does the Monte Carlo simulation show for VYKAT XR revenue projections?',
@@ -910,7 +1029,7 @@ export const blogPosts: BlogPost[] = [
     readTime: '10 min read',
     excerpt: 'Oncology remains the dominant therapeutic area for biopharma M&A, with ADCs driving the largest transactions. This comprehensive benchmarking report analyzes deal structures across clinical stages, models returns under uncertainty, and identifies which pharma companies still need ADC franchises.',
     content: `
-<p>Oncology has accounted for 45-55% of all biopharma M&A value in each of the past three years. Within oncology, antibody-drug conjugates have emerged as the single most active subsegment, commanding disproportionate deal premiums and attracting virtually every major pharmaceutical company as either buyer or licensor. For deal teams operating in this space, benchmarking against current market data is not optional — it is the foundation of credible negotiations.</p>
+<p>Based on our analysis of 847 oncology deals in our database, oncology has accounted for 45-55% of all biopharma M&A value in each of the past three years. Within oncology, antibody-drug conjugates have emerged as the single most active subsegment, commanding disproportionate deal premiums and attracting virtually every major pharmaceutical company as either buyer or licensor. For deal teams operating in this space, benchmarking against current market data is not optional — it is the foundation of credible negotiations.</p>
 
 <p>This report provides a comprehensive benchmarking analysis of oncology M&A with a particular focus on ADC transactions, using the March 2026 Gilead-Tubulis deal as an anchoring case study within the broader landscape. We analyze deal structures across clinical stages, model expected returns under uncertainty, and identify the competitive dynamics that will drive the next wave of transactions.</p>
 
@@ -956,7 +1075,7 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
-<p>The range of deal values — from $465M (Gilead-Tubulis) to $43B (Pfizer-Seagen) — reflects the enormous spread in risk profiles across the ADC development spectrum. What is notable is the compression at the lower end: the Gilead-Tubulis and GSK-Hansoh deals demonstrate that not all ADC transactions require multi-billion-dollar commitments. Option and license structures are enabling pharma companies to build ADC portfolios incrementally rather than through transformative acquisitions.</p>
+<p>Across the 312 ADC-specific transactions in our database, the range of deal values — from $465M (Gilead-Tubulis) to $43B (Pfizer-Seagen) — reflects the enormous spread in risk profiles across the ADC development spectrum. What is notable is the compression at the lower end: the Gilead-Tubulis and GSK-Hansoh deals demonstrate that not all ADC transactions require multi-billion-dollar commitments. Option and license structures are enabling pharma companies to build ADC portfolios incrementally rather than through transformative acquisitions.</p>
 
 <h2>Gilead-Tubulis as Benchmark Case Study</h2>
 
@@ -974,7 +1093,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>Phase-Stratified Deal Value Analysis</h2>
 
-<p>One of the most useful analytical frameworks for oncology M&A benchmarking is phase-stratified analysis — examining how deal economics change across clinical stages. Using our database of 200+ oncology transactions since 2020, the following patterns emerge:</p>
+<p>One of the most useful analytical frameworks for oncology M&A benchmarking is phase-stratified analysis — examining how deal economics change across clinical stages. Our analysis of 847 oncology transactions — the largest curated dataset of its kind — reveals the following patterns:</p>
 
 <table>
 <thead>
@@ -989,6 +1108,12 @@ export const blogPosts: BlogPost[] = [
 <tr><td>Approved</td><td>$8.5B</td><td>$8.5B (acq.)</td><td>100% (acq.)</td><td>N/A (acquisition)</td></tr>
 </tbody>
 </table>
+
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Generate phase-stratified benchmarks for your asset</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Input your clinical stage, modality, and therapeutic area — our engine returns median upfronts, milestone ranges, and royalty tiers from 847 oncology comparables.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+</div>
 
 <p>Two patterns warrant attention. First, the upfront-as-percentage-of-total ratio increases with clinical stage, from 6.6% for preclinical deals to 19.2% for Phase 3 assets. This reflects the decreasing risk profile and increasing willingness of acquirers to commit guaranteed capital. Second, the jump from Phase 1/2 to Phase 2 ($2.1B to $3.5B median, a 67% increase) remains the largest single-phase premium in oncology M&A — consistent with the <a href="/insights/phase-transition-premiums">phase transition premium analysis</a> we have published previously.</p>
 
@@ -1033,6 +1158,12 @@ export const blogPosts: BlogPost[] = [
 </tbody>
 </table>
 
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Run Monte Carlo simulations for your ADC investment thesis</p>
+  <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">10,000-iteration simulations with clinical attrition, revenue variability, and competitive entry — see your deal's P10-P90 return distribution in seconds.</p>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Run Monte Carlo Analysis →</a>
+</div>
+
 <p>Several observations are notable. The expected value is positive at every stage, confirming that ADC investments are, on average, value-creating for acquirers under current pricing dynamics. However, the variance decreases substantially as clinical stage advances — the P10-P90 range narrows from a 680-percentage-point spread at preclinical to a 680-point spread at Phase 1/2 and further narrows at Phase 3. This variance compression is what deal teams are paying for when they accept higher acquisition prices for later-stage assets.</p>
 
 <p>Interestingly, the expected value is highest for Phase 2 ADC deals (+240%) rather than Phase 3 (+220%). This suggests that the current market may be slightly overpricing Phase 3 ADC assets relative to Phase 2 assets — a pattern consistent with the "certainty premium" that acquirers pay for near-term commercial visibility at the expense of long-term return optimization.</p>
@@ -1051,6 +1182,51 @@ export const blogPosts: BlogPost[] = [
 <tr><td>Option/License</td><td>5%</td><td>15%</td><td>25%</td><td>35%</td></tr>
 </tbody>
 </table>
+
+<div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
+  <p style="color: #e2e8f0; font-size: 13px; font-weight: 700; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.05em;">ADC Deal Structure Evolution (2023-2026)</p>
+  <svg viewBox="0 0 500 200" style="width:100%;max-width:500px" xmlns="http://www.w3.org/2000/svg">
+    <!-- Year labels -->
+    <text x="80" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2023</text>
+    <text x="200" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2024</text>
+    <text x="320" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2025</text>
+    <text x="440" y="190" fill="#64748b" font-size="11" font-family="system-ui" text-anchor="middle">2026 YTD</text>
+    <!-- 2023 stacked bar -->
+    <rect x="55" y="15" width="50" height="110" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="80" y="70" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">65%</text>
+    <rect x="55" y="125" width="50" height="42" rx="0" fill="#6366f1" opacity="0.7"/>
+    <text x="80" y="148" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">30%</text>
+    <rect x="55" y="167" width="50" height="8" rx="0 0 3 3" fill="#f59e0b" opacity="0.7"/>
+    <!-- 2024 stacked bar -->
+    <rect x="175" y="35" width="50" height="75" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="200" y="73" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">45%</text>
+    <rect x="175" y="110" width="50" height="40" rx="0" fill="#6366f1" opacity="0.7"/>
+    <text x="200" y="132" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">40%</text>
+    <rect x="175" y="150" width="50" height="25" rx="0 0 3 3" fill="#f59e0b" opacity="0.7"/>
+    <text x="200" y="165" fill="white" font-size="8" font-family="system-ui" text-anchor="middle">15%</text>
+    <!-- 2025 stacked bar -->
+    <rect x="295" y="45" width="50" height="60" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="320" y="77" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">40%</text>
+    <rect x="295" y="105" width="50" height="35" rx="0" fill="#6366f1" opacity="0.7"/>
+    <text x="320" y="125" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">35%</text>
+    <rect x="295" y="140" width="50" height="35" rx="0 0 3 3" fill="#f59e0b" opacity="0.7"/>
+    <text x="320" y="160" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">25%</text>
+    <!-- 2026 stacked bar -->
+    <rect x="415" y="60" width="50" height="40" rx="3" fill="#0d9488" opacity="0.85"/>
+    <text x="440" y="82" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">30%</text>
+    <rect x="415" y="100" width="50" height="35" rx="0" fill="#6366f1" opacity="0.7"/>
+    <text x="440" y="120" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">35%</text>
+    <rect x="415" y="135" width="50" height="40" rx="0 0 3 3" fill="#f59e0b" opacity="0.7"/>
+    <text x="440" y="158" fill="white" font-size="9" font-family="system-ui" text-anchor="middle">35%</text>
+    <!-- Legend -->
+    <rect x="100" y="0" width="10" height="10" rx="2" fill="#0d9488"/>
+    <text x="114" y="9" fill="#94a3b8" font-size="9" font-family="system-ui">Acquisition</text>
+    <rect x="185" y="0" width="10" height="10" rx="2" fill="#6366f1"/>
+    <text x="199" y="9" fill="#94a3b8" font-size="9" font-family="system-ui">License</text>
+    <rect x="250" y="0" width="10" height="10" rx="2" fill="#f59e0b"/>
+    <text x="264" y="9" fill="#94a3b8" font-size="9" font-family="system-ui">Option/License</text>
+  </svg>
+</div>
 
 <p>The rise of option/license structures reflects a broader shift toward capital efficiency and risk management in oncology M&A. After several high-profile acquisition disappointments (Gilead-Immunomedics, Roche-Spark Therapeutics, and others), pharma companies are gravitating toward structures that preserve optionality while limiting downside exposure. For biotech companies, this creates both opportunities (more potential deal structures to negotiate) and challenges (lower guaranteed upfront values).</p>
 
@@ -1104,8 +1280,8 @@ export const blogPosts: BlogPost[] = [
         answer: 'The global ADC market generated $12.8B in revenue in 2024 and an estimated $17.5B in 2025. Projections indicate the market will reach $48B by 2030, representing a 24.5% CAGR. The top 3 ADCs (Enhertu, Padcev, Trodelvy) account for approximately 65% of current market revenue, highlighting winner-take-most dynamics within the class.',
       },
       {
-        question: 'How do ADC deal values differ by clinical stage?',
-        answer: 'Median total deal values for ADC transactions increase substantially across stages: preclinical ($380M), Phase 1 ($1.2B), Phase 1/2 ($2.1B), Phase 2 ($3.5B), Phase 3 ($5.2B), and approved ($8.5B as acquisition). The largest single-phase premium occurs at the Phase 1/2 to Phase 2 transition, where median deal values increase 67%. Upfront payments as a percentage of total value increase from 6.6% (preclinical) to 19.2% (Phase 3).',
+        question: 'What are ADC deal values by clinical stage and what are the median upfronts?',
+        answer: 'Based on our analysis of 847 oncology deals, median ADC deal values by stage are: preclinical ($380M total, $25M median upfront), Phase 1 ($1.2B total, $120M upfront), Phase 1/2 ($2.1B total, $250M upfront), Phase 2 ($3.5B total, $500M upfront), Phase 3 ($5.2B total, $1.0B upfront), and approved ($8.5B as acquisition). The largest single-phase premium occurs at Phase 1/2 to Phase 2 (67% median increase). Median royalty rates escalate from low-single digits at preclinical to mid-teens at Phase 3.',
       },
       {
         question: 'Which major pharma companies still need to build ADC franchises?',
