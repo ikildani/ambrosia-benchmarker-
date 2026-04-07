@@ -18,6 +18,8 @@ import {
   PHASE_DURATION,
   PHASE_COSTS,
   REVENUE_CURVE,
+  REVENUE_CURVE_OVERRIDES,
+  COMPETITIVE_SHARE_TA_MULTIPLIER,
   COGS_BY_MODALITY_CATEGORY,
   SGA_BY_LIFECYCLE_STAGE,
 } from './pos-tables';
@@ -476,6 +478,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     currentIdx,
     durations,
     modality,
+    therapeuticArea,
   );
 
   // 6. Calculate NPV from cash flows
@@ -562,8 +565,8 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote}`,
     `Years to market: ${yearsToMarket.toFixed(1)} years`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M (adj. for data quality; competitive position applied upstream)`,
-    `Revenue ramp: ${REVENUE_CURVE.rampUpYears}yr ramp, ${REVENUE_CURVE.peakDurationYears}yr peak, ${(REVENUE_CURVE.declineRate * 100).toFixed(0)}% annual decline`,
-    `LOE: ${REVENUE_CURVE.loeYearsAfterApproval} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`,
+    `Revenue ramp: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.rampUpYears ?? REVENUE_CURVE.rampUpYears)}yr ramp, ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.peakDurationYears ?? REVENUE_CURVE.peakDurationYears)}yr peak, ${((REVENUE_CURVE_OVERRIDES[therapeuticArea]?.declineRate ?? REVENUE_CURVE.declineRate) * 100).toFixed(0)}% annual decline`,
+    `LOE: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval)} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`,
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
     `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
   ];
@@ -599,9 +602,15 @@ function projectCashFlows(
   currentPhaseIdx: number,
   durations: Record<string, number>,
   modality: string,
+  therapeuticArea: string,
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
-  const { rampUpYears, peakDurationYears, declineRate, loeYearsAfterApproval } = REVENUE_CURVE;
+  // Use TA-specific revenue curve overrides if available (e.g., rare disease gets extended LOE)
+  const taOverrides = REVENUE_CURVE_OVERRIDES[therapeuticArea] || {};
+  const rampUpYears = taOverrides.rampUpYears ?? REVENUE_CURVE.rampUpYears;
+  const peakDurationYears = taOverrides.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
+  const declineRate = taOverrides.declineRate ?? REVENUE_CURVE.declineRate;
+  const loeYearsAfterApproval = taOverrides.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
   // Use modality-dependent generic erosion instead of the flat 80% constant
   const genericErosion = getGenericErosionRate(modality);
   const totalYears = Math.ceil(yearsToMarket) + loeYearsAfterApproval + 5; // +5 for post-LOE tail

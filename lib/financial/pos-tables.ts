@@ -944,6 +944,37 @@ export const REVENUE_CURVE = {
 } as const;
 
 /**
+ * TA-specific overrides to REVENUE_CURVE defaults.
+ *
+ * Rare disease: orphan exclusivity extends LOE to 14 years (7yr orphan + patent),
+ * slower ramp (specialist prescribers), longer peak (captive market), less decline.
+ *
+ * Oncology: faster ramp (SOC urgency), shorter peak (competition), higher decline.
+ *
+ * Source: EvaluatePharma lifecycle analysis by TA; FDA orphan exclusivity data.
+ */
+export const REVENUE_CURVE_OVERRIDES: Record<string, Partial<{ rampUpYears: number; peakDurationYears: number; declineRate: number; genericErosion: number; loeYearsAfterApproval: number }>> = {
+  rareDisease: {
+    rampUpYears: 3,             // Faster: small patient population, specialist prescribers, high urgency
+    peakDurationYears: 8,       // Longer: captive market, fewer competitors
+    declineRate: 0.08,          // Slower: less competitive erosion in rare disease
+    loeYearsAfterApproval: 14,  // 7yr orphan exclusivity + patent = ~14yr effective exclusivity
+  },
+  hematology: {
+    peakDurationYears: 7,       // Longer than oncology average (fewer competitors)
+    loeYearsAfterApproval: 13,  // CAR-T/cell therapy exclusivity slightly longer
+  },
+  oncology: {
+    declineRate: 0.18,          // Faster decline: high competition, new SOC
+  },
+  metabolic: {
+    rampUpYears: 3,             // GLP-1 class: explosive uptake
+    peakDurationYears: 8,       // Long patent life, massive TAM
+    loeYearsAfterApproval: 13,  // Extended by device delivery + formulation patents
+  },
+};
+
+/**
  * Revenue ramp-up schedule as fraction of peak sales.
  * Index 0 = launch year, index 3 = peak year.
  */
@@ -979,6 +1010,26 @@ export const COMPETITIVE_SHARE_ADJUSTMENT: Record<string, number> = {
   behind: 0.75,
   /** 5+ competitors approved or in late-stage -- significant share pressure */
   crowded: 0.55,
+};
+
+/**
+ * TA-specific competitive share multipliers.
+ * Applied ON TOP of the global COMPETITIVE_SHARE_ADJUSTMENT.
+ *
+ * Rare disease first-in-class captures 60-80% of market (vs. 25-50% oncology)
+ * because orphan markets have fewer competitors and higher patient loyalty.
+ * Even "crowded" rare disease markets have 2-3 drugs, not 10+.
+ *
+ * Source: EvaluatePharma orphan drug market share analysis; IQVIA rare disease
+ * commercial benchmarks.
+ */
+export const COMPETITIVE_SHARE_TA_MULTIPLIER: Record<string, number> = {
+  rareDisease: 1.35,        // Orphan markets: fewer competitors, higher loyalty, captive market
+  hematology: 1.15,         // Strong biomarker selection → more predictable market capture
+  dermatology: 1.10,        // Visible endpoints → clearer differentiation, slightly higher share
+  oncology: 0.95,           // Most competitive TA → slight downward pressure
+  gastroenterology: 1.05,   // Moderate competition in IBD
+  // All other TAs: 1.00 (no adjustment)
 };
 
 // ---------------------------------------------------------------------------
