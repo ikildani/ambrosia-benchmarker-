@@ -44,14 +44,15 @@ export const metadata: Metadata = {
 const comparison = [
   { feature: 'Calculations', free: '3 total', pro: 'Unlimited' },
   { feature: 'Deal term estimates', free: 'Basic ranges', pro: 'Full breakdown with comparables' },
-  { feature: 'rNPV analysis', free: false, pro: 'Phase-specific PoS across 12 TAs' },
-  { feature: 'Monte Carlo simulation', free: false, pro: '10,000 iterations with P10-P90' },
-  { feature: 'Partner matching', free: '3 basic matches', pro: '10 matches with intent scoring' },
-  { feature: 'Buyer-specific valuation', free: false, pro: 'Multi-partner comparison' },
-  { feature: 'Scenario comparison', free: false, pro: 'Bear / Base / Bull side-by-side' },
+  { feature: 'rNPV analysis', free: false, pro: 'TA-specific curves + index drug validation' },
+  { feature: 'Monte Carlo simulation', free: false, pro: 'VaR, CVaR, skewness, kurtosis (P10-P90)' },
+  { feature: 'Partner matching', free: '3 basic matches', pro: '10 matches with 10-factor intent scoring' },
+  { feature: 'Buyer-specific valuation', free: false, pro: 'Multi-partner comparison (up to 3 buyers)' },
+  { feature: 'Scenario comparison', free: false, pro: 'Bear/Base/Bull + compound scenarios' },
   { feature: 'Real options valuation', free: false, pro: 'CRR binomial lattice' },
-  { feature: 'Competitive dynamics', free: false, pro: 'Revenue erosion modeling' },
+  { feature: 'Competitive dynamics', free: false, pro: 'Revenue erosion + market access delay' },
   { feature: 'Sensitivity analysis', free: 'Top 3 only', pro: 'All parameters, tornado chart' },
+  { feature: 'Peak sales validation', free: false, pro: 'Sanity check vs 40+ index drugs' },
   { feature: 'PDF & Excel export', free: false, pro: '20-page reports + workbooks' },
   { feature: 'Share links', free: false, pro: 'Branded dark-theme pages' },
 ];
@@ -210,6 +211,34 @@ export default function ProPage() {
                     </svg>
                   </div>
 
+                  {/* Risk metrics row */}
+                  <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-slate-800/20 rounded-lg border border-slate-700/30 mb-4">
+                    <div className="text-center">
+                      <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">VaR (95%)</p>
+                      <p className="text-xs font-bold font-mono text-rose-400">-$42M</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">CVaR (95%)</p>
+                      <p className="text-xs font-bold font-mono text-rose-400">-$78M</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">Skewness</p>
+                      <p className="text-xs font-bold font-mono text-teal-400">+0.84</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">Tail Risk</p>
+                      <p className="text-xs font-bold font-mono text-amber-400">Moderate</p>
+                    </div>
+                  </div>
+
+                  {/* Index drug check */}
+                  <div className="flex items-center gap-2 p-2.5 bg-emerald-500/5 rounded-lg border border-emerald-500/10 mb-2.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <span className="text-[10px] text-slate-400">Peak sales vs index:</span>
+                    <span className="text-[10px] text-white font-medium">Padcev ($4.2B)</span>
+                    <span className="text-[10px] text-emerald-400 font-mono ml-auto">32% of index — credible</span>
+                  </div>
+
                   {/* Partner match preview */}
                   <div className="flex items-center gap-2 p-2.5 bg-slate-800/20 rounded-lg border border-slate-700/30">
                     <Users className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
@@ -247,7 +276,7 @@ export default function ProPage() {
                   Model three scenarios simultaneously with different PoS, peak sales, and discount rate assumptions. See the probability-weighted expected value across all outcomes.
                 </p>
                 <ul className="space-y-2">
-                  {['Scenario-specific rNPV with custom assumptions', 'Probability-weighted expected value', 'Implied deal ranges for each case', 'One-click PDF export for deal committee'].map(item => (
+                  {['Scenario-specific rNPV with custom assumptions', 'Compound scenarios — CRL + competitor launch, pricing squeeze + early generics', 'Probability-weighted expected value across all outcomes', 'Tornado chart: top 5 risks and top 5 upsides, ranked by dollar impact'].map(item => (
                     <li key={item} className="flex items-start gap-2 text-sm text-slate-400">
                       <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
                       {item}
