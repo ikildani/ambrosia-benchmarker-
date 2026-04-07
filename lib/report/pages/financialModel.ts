@@ -213,6 +213,31 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
               <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-top: 2px;">Std. Deviation</div>
             </div>
           </div>
+
+          <!-- Risk Metrics: VaR / CVaR / Distribution Shape -->
+          ${mc.var95 !== undefined ? `
+          <div style="margin-top: 10px;">
+            <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Institutional Risk Metrics</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px;">
+              <div class="card-sm" style="text-align: center; border-top: 2px solid ${COLORS.rose};">
+                <div style="font-size: 12px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.var95)}</div>
+                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">VaR (95%)</div>
+              </div>
+              <div class="card-sm" style="text-align: center; border-top: 2px solid ${COLORS.rose};">
+                <div style="font-size: 12px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.cvar95)}</div>
+                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">CVaR (95%)</div>
+              </div>
+              <div class="card-sm" style="text-align: center; border-top: 2px solid ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">
+                <div style="font-size: 12px; font-weight: 800; color: ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">${mc.skewness > 0 ? '+' : ''}${mc.skewness.toFixed(2)}</div>
+                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Skewness</div>
+              </div>
+              <div class="card-sm" style="text-align: center; border-top: 2px solid ${mc.kurtosis > 1 ? COLORS.amber : COLORS.gray300};">
+                <div style="font-size: 12px; font-weight: 800; color: ${mc.kurtosis > 1 ? COLORS.amber : COLORS.navy};">${mc.kurtosis > 0 ? '+' : ''}${mc.kurtosis.toFixed(2)}</div>
+                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Tail Risk</div>
+              </div>
+            </div>
+          </div>
+          ` : ''}
         </div>
       </div>
       ` : ''}
