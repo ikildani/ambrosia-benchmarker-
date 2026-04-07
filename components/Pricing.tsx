@@ -163,15 +163,13 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
 
           <div className="text-center">
-            <button
+            <a
+              href="/report"
               className="inline-flex items-center justify-center px-10 py-3.5 rounded-xl font-bold text-base transition-all duration-200 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
-              onClick={() => {
-                document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
-              }}
             >
               Get Your Report
-            </button>
-            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">Available after running a free calculation</p>
+            </a>
+            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">Personalized deal intelligence in 60 seconds</p>
           </div>
         </div>
 
