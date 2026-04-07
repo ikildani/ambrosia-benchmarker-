@@ -205,11 +205,11 @@ export default function TornadoChart({ baseValue, sensitivities }: TornadoChartP
           {/* Legend */}
           <div className="flex items-center justify-center gap-4 mt-2 text-xs text-neutral-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-amber-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#f59e0b', opacity: 0.8 }} />
               Downside
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-teal-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#14b8a6', opacity: 0.8 }} />
               Upside
             </span>
             <span className="flex items-center gap-1.5">
