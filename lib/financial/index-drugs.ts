@@ -41,9 +41,9 @@ const ONCOLOGY_INDEX: IndexDrug[] = [
     name: 'Keytruda (pembrolizumab)',
     company: 'Merck',
     modality: 'mab',
-    peakSalesM: 25000,
+    peakSalesM: 32000,
     peakSalesYear: 2025,
-    currentSalesM: 25000,
+    currentSalesM: 32000,
     indication: 'lung_nsclc',
     therapeuticArea: 'oncology',
     genericCompetition: false,
@@ -237,9 +237,9 @@ const IMMUNOLOGY_INDEX: IndexDrug[] = [
     name: 'Dupixent (dupilumab)',
     company: 'Sanofi / Regeneron',
     modality: 'mab',
-    peakSalesM: 18000,
+    peakSalesM: 22000,
     peakSalesYear: 2028,
-    currentSalesM: 13500,
+    currentSalesM: 17800,  // 2025: $17.8B (+26% YoY)
     indication: 'atopic_dermatitis',
     therapeuticArea: 'immunology',
     genericCompetition: false,
@@ -283,9 +283,9 @@ const METABOLIC_INDEX: IndexDrug[] = [
     name: 'Ozempic/Wegovy (semaglutide)',
     company: 'Novo Nordisk',
     modality: 'glp1Agonist',
-    peakSalesM: 35000,
+    peakSalesM: 45000,
     peakSalesYear: 2028,
-    currentSalesM: 28000,
+    currentSalesM: 36190,  // 2025 full franchise (Ozempic $20.1B + Wegovy + Rybelsus)
     indication: 'obesity',
     therapeuticArea: 'metabolic',
     genericCompetition: false,
@@ -296,9 +296,9 @@ const METABOLIC_INDEX: IndexDrug[] = [
     name: 'Mounjaro/Zepbound (tirzepatide)',
     company: 'Eli Lilly',
     modality: 'glp1Agonist',
-    peakSalesM: 25000,
+    peakSalesM: 50000,
     peakSalesYear: 2029,
-    currentSalesM: 16000,
+    currentSalesM: 36510,  // 2025 combined Mounjaro + Zepbound
     indication: 'obesity',
     therapeuticArea: 'metabolic',
     genericCompetition: false,
@@ -643,6 +643,52 @@ const GASTROENTEROLOGY_INDEX: IndexDrug[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Women's Health
+// ---------------------------------------------------------------------------
+
+const WOMENS_HEALTH_INDEX: IndexDrug[] = [
+  {
+    name: 'Myrbetriq (mirabegron)',
+    company: 'Astellas',
+    modality: 'smallMolecule',
+    peakSalesM: 1800,
+    peakSalesYear: 2023,
+    currentSalesM: 1400,
+    indication: 'overactive_bladder',
+    therapeuticArea: 'womensHealth',
+    genericCompetition: false,
+    genericPriceDiscount: 0,
+    marketSizeM: 5000,
+  },
+  {
+    name: 'Oriahnn (elagolix/E2/NETA)',
+    company: 'AbbVie',
+    modality: 'gnrhAntagonist',
+    peakSalesM: 800,
+    peakSalesYear: 2025,
+    currentSalesM: 500,
+    indication: 'uterine_fibroids',
+    therapeuticArea: 'womensHealth',
+    genericCompetition: false,
+    genericPriceDiscount: 0,
+    marketSizeM: 3500,
+  },
+  {
+    name: 'Zurzuvae (zuranolone)',
+    company: 'Biogen / Sage',
+    modality: 'neuroactiveSteroid',
+    peakSalesM: 1500,
+    peakSalesYear: 2028,
+    currentSalesM: 200,
+    indication: 'postpartum_depression',
+    therapeuticArea: 'womensHealth',
+    genericCompetition: false,
+    genericPriceDiscount: 0,
+    marketSizeM: 4000,
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Combined Database + Lookup Functions
 // ---------------------------------------------------------------------------
 
@@ -658,6 +704,7 @@ export const INDEX_DRUG_DATABASE: IndexDrug[] = [
   ...OPHTHALMOLOGY_INDEX,
   ...DERMATOLOGY_INDEX,
   ...GASTROENTEROLOGY_INDEX,
+  ...WOMENS_HEALTH_INDEX,
 ];
 
 /**
