@@ -20,6 +20,7 @@ interface NegotiationPlaybookModalProps {
   userId?: string;
   userEmail?: string;
   reportId?: string;
+  cachedPlaybook?: NegotiationPlaybook | null;
 }
 
 // Section icon component
@@ -119,8 +120,9 @@ export default function NegotiationPlaybookModal({
   userId,
   userEmail,
   reportId,
+  cachedPlaybook,
 }: NegotiationPlaybookModalProps) {
-  const [playbook, setPlaybook] = useState<NegotiationPlaybook | null>(null);
+  const [playbook, setPlaybook] = useState<NegotiationPlaybook | null>(cachedPlaybook || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -184,10 +186,17 @@ export default function NegotiationPlaybookModal({
     }
   }, [isOpen, playbook, loading, generatePlaybook]);
 
-  // Reset state when modal closes
+  // Update from cached playbook if it arrives after mount
+  useEffect(() => {
+    if (cachedPlaybook && !playbook) {
+      setPlaybook(cachedPlaybook);
+    }
+  }, [cachedPlaybook, playbook]);
+
+  // Reset state when modal closes (keep cached if available)
   useEffect(() => {
     if (!isOpen) {
-      setPlaybook(null);
+      setPlaybook(cachedPlaybook || null);
       setError(null);
       setCopied(false);
     }

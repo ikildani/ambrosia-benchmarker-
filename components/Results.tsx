@@ -593,6 +593,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [buyerSpecificValuations, setBuyerSpecificValuations] = useState<any>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showPlaybookModal, setShowPlaybookModal] = useState(false);
+  const [cachedPlaybook, setCachedPlaybook] = useState<import('@/lib/ai/playbook-generator').NegotiationPlaybook | null>(null);
   const [emailForResults, setEmailForResults] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
@@ -648,9 +649,41 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       }
     };
 
-    // Start after 500ms (let the UI render first)
-    const timer = setTimeout(() => pregenMemo(), 500);
-    return () => clearTimeout(timer);
+    // Pre-generate playbook in background too
+    const pregenPlaybook = async (retries = 2) => {
+      if (!inputs) return;
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const res = await fetch('/api/playbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId || undefined,
+              email: userEmail || undefined,
+              inputs: { modality: fullInputs.modality, phase: fullInputs.phase, indication: fullInputs.indication, territory: fullInputs.territory },
+              results: { terms: result.terms, tieredRoyalties: result.tieredRoyalties, dealRecommendation: result.dealRecommendation, negotiationInsight: result.negotiationInsight, modifiers: result.modifiers },
+              labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
+            }),
+            keepalive: true,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.playbook) {
+              setCachedPlaybook(data.playbook);
+              return;
+            }
+          }
+          if (attempt < retries) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        } catch {
+          if (attempt < retries) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        }
+      }
+    };
+
+    // Start memo at 500ms, playbook at 1000ms (stagger to avoid contention)
+    const memoTimer = setTimeout(() => pregenMemo(), 500);
+    const playbookTimer = setTimeout(() => pregenPlaybook(), 1000);
+    return () => { clearTimeout(memoTimer); clearTimeout(playbookTimer); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasFullAccess, fullInputs]);
 
@@ -1660,6 +1693,20 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 )}
               </>
             )}
+            {/* Deal Structure Toggle — right after deal waterfall for natural flow */}
+            {hasFullAccess && fullInputs && financialModel.rnpv && (
+              <FinancialErrorBoundary fallbackTitle="Deal Structure Toggle unavailable">
+                <DealStructureToggle
+                  baseRNPV={financialModel.rnpv.riskAdjustedNPV}
+                  phase={fullInputs.phase}
+                  dealType={fullInputs.dealType || 'licensing'}
+                  tier={tier || 'free'}
+                  onUpgrade={onUpgrade}
+                  onBuyReport={onBuyReport}
+                />
+              </FinancialErrorBoundary>
+            )}
+
             <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
               <MonteCarloResults
                 monteCarloResult={financialModel.monteCarlo}
@@ -1844,19 +1891,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           />
         )}
 
-        {/* Deal Structure Toggle (Pro/Report) */}
-        {hasFullAccess && financialModel && fullInputs && (
-          <FinancialErrorBoundary fallbackTitle="Deal Structure Toggle unavailable">
-            <DealStructureToggle
-              baseRNPV={financialModel.rnpv.riskAdjustedNPV}
-              phase={fullInputs.phase}
-              dealType={fullInputs.dealType || 'licensing'}
-              tier={tier || 'free'}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-          </FinancialErrorBoundary>
-        )}
+        {/* Deal Structure Toggle moved up — now after deal waterfall/buyer-specific */}
 
         {/* Compare with Previous - History-based comparison */}
         <div ref={comparisonRef}>
@@ -1903,6 +1938,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             userId={userId}
             userEmail={userEmail}
             reportId={reportId}
+            cachedPlaybook={cachedPlaybook}
           />
         )}
 
