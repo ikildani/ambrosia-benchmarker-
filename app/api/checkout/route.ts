@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
         line_items: [{ price: reportPriceId, quantity: 1 }],
         success_url: `${appUrl}/calculator?report=${reportPurchase.id}&success=true${body.shareToken ? `&token=${body.shareToken}` : ''}`,
         cancel_url: `${appUrl}/calculator?canceled=true`,
+        allow_promotion_codes: true,
         metadata: {
           product: 'deal-report',
           report_purchase_id: reportPurchase.id,
