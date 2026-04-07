@@ -79,8 +79,8 @@ const reportModules = [
     icon: Calculator,
     title: 'rNPV & Deal Valuation',
     subtitle: 'Probability-weighted asset value',
-    description: 'Risk-adjusted NPV with phase-specific PoS across 12 therapeutic areas, TA-specific revenue curves (orphan exclusivity for rare disease, GLP-1 ramp for metabolic), bear/base/bull scenario comparison, and real options valuation via CRR binomial lattice. Calibrated against 2014-2026 clinical data.',
-    highlight: 'TA-specific curves + real options',
+    description: 'Risk-adjusted NPV with phase-specific PoS across 12 therapeutic areas, TA-specific revenue curves (orphan exclusivity for rare disease, GLP-1 ramp for metabolic), bear/base/bull scenario comparison, real options valuation via CRR binomial lattice, and peak sales sanity check against 40+ index drugs (Keytruda, Ozempic, Dupixent, Trikafta). Manufacturing WACC premiums for gene therapy, CAR-T, and ADC. Market access delay modeling by TA.',
+    highlight: 'Index drug validation + real options',
     color: 'sky',
   },
   {
