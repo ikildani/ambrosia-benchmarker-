@@ -61,6 +61,20 @@ const guides = [
     readTime: '13 min read',
     tags: ['M&A', 'Licensing', 'Strategy', 'Case Studies'],
   },
+  {
+    slug: 'biopharma-licensing-benchmarks',
+    title: 'Biopharma Licensing Benchmarks 2026: Data From 2,500+ Deals',
+    description: 'Comprehensive benchmarks for upfront payments, milestones, and royalties by phase, modality, and therapeutic area — based on 2,500+ disclosed transactions.',
+    readTime: '14 min read',
+    tags: ['Benchmarks', 'Deal Terms', 'Data', '2026'],
+  },
+  {
+    slug: 'life-sciences-deal-calculator-guide',
+    title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties',
+    description: 'How to use the Ambrosia deal calculator to model rNPV, Monte Carlo, partner matching, and buyer-specific valuations across 12 TAs and 23+ modalities.',
+    readTime: '10 min read',
+    tags: ['Calculator', 'Tutorial', 'rNPV', 'Monte Carlo'],
+  },
 ];
 
 export default function GuidesPage() {

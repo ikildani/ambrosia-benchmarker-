@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     'phase transition probabilities',
     'Monte Carlo biotech',
     'drug development NPV',
+    'rNPV calculator',
+    'risk adjusted NPV pharma',
+    'biotech drug valuation model',
+    'probability of success pharma',
   ],
   openGraph: {
     title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide',
@@ -60,7 +64,7 @@ export default function RnpvBiotechValuationPage() {
       logo: { '@type': 'ImageObject', url: `${baseUrl}/logo.png` },
     },
     datePublished: '2026-03-20',
-    dateModified: '2026-03-20',
+    dateModified: '2026-04-07',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${baseUrl}/guides/rnpv-biotech-valuation`,
@@ -186,6 +190,129 @@ export default function RnpvBiotechValuationPage() {
 
             <p className="text-slate-600 leading-relaxed">
               Adjustment factors can increase or decrease base PoS rates. Biomarker-selected populations, breakthrough therapy designation, prior positive Phase 2 data, and experienced sponsor teams all support upward adjustments. Novel targets without biological validation, complex trial designs, and prior failures in the indication warrant downward adjustments.
+            </p>
+
+            {/* PoS Data Table by Therapeutic Area */}
+            <h3 className="text-xl font-bold text-slate-900 mt-10 mb-4" id="pos-by-therapeutic-area">
+              Cumulative Probability of Success by Therapeutic Area (Phase 1 to Approval)
+            </h3>
+
+            <p className="text-slate-600 leading-relaxed mb-4">
+              The table below shows cumulative PoS rates from Phase 1 through approval, drawn from our engine&apos;s calibration against 2,500+ real biopharma transactions. These rates reflect the compounding effect of all phase transitions and are the inputs that drive our rNPV calculations.
+            </p>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Therapeutic Area</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Cumulative PoS</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Key Driver</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr><td className="py-2.5 px-4 text-slate-700">Oncology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~8%</td><td className="py-2.5 px-4 text-slate-500">High Phase 2 attrition, complex endpoints</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Neurology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~6%</td><td className="py-2.5 px-4 text-slate-500">CNS penetration, subjective endpoints</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Immunology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~12%</td><td className="py-2.5 px-4 text-slate-500">Validated targets, biomarker-driven trials</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Rare Disease</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~15%</td><td className="py-2.5 px-4 text-slate-500">Orphan incentives, smaller trials, unmet need</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Cardiovascular</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~9%</td><td className="py-2.5 px-4 text-slate-500">Large outcome trials, high Phase 3 cost</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Metabolic</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~11%</td><td className="py-2.5 px-4 text-slate-500">Clear biomarkers (HbA1c, LDL), established pathways</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Infectious Disease</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~14%</td><td className="py-2.5 px-4 text-slate-500">Objective endpoints, shorter trials</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Hematology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~13%</td><td className="py-2.5 px-4 text-slate-500">Measurable blood markers, accelerated pathways</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Ophthalmology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~11%</td><td className="py-2.5 px-4 text-slate-500">Functional endpoints, local delivery challenges</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Dermatology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~13%</td><td className="py-2.5 px-4 text-slate-500">Visible endpoints, topical delivery advantages</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Gastroenterology</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~10%</td><td className="py-2.5 px-4 text-slate-500">Heterogeneous patient populations</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Women&apos;s Health</td><td className="py-2.5 px-4 text-center font-medium text-slate-900">~12%</td><td className="py-2.5 px-4 text-slate-500">Underserved indications, regulatory tailwinds</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-xs text-slate-400 mb-6">
+              Source: Ambrosia Ventures engine calibration, 2,500+ transactions analyzed as of April 2026. Rates represent all-comers averages; individual asset PoS varies by modality, biomarker selection, and sponsor experience.
+            </p>
+
+            {/* Inline CTA after PoS section */}
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 my-8">
+              <p className="text-slate-900 font-semibold text-lg mb-2">Run rNPV analysis on your asset</p>
+              <p className="text-slate-600 mb-4">
+                Our engine covers 12 therapeutic areas and 23+ modalities, calibrated against 2,500+ real transactions. Get probability-weighted valuations, Monte Carlo distributions, and deal benchmarks in seconds.
+              </p>
+              <Link href="/calculator" className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors text-sm">
+                Start rNPV Analysis
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </Link>
+            </div>
+
+            {/* How our rNPV engine works */}
+            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="how-our-engine-works">
+              How Our rNPV Engine Works
+            </h2>
+
+            <p className="text-slate-600 leading-relaxed">
+              Unlike spreadsheet-based rNPV models that require hours of manual setup, our engine processes 10 sequential analytical models in under 400ms to produce institutional-grade valuations:
+            </p>
+
+            <ol className="list-decimal pl-6 space-y-2 text-slate-600 my-4">
+              <li><strong>Market sizing</strong> -- epidemiology-driven TAM/SAM/SOM with S-curve adoption modeling</li>
+              <li><strong>rNPV calculation</strong> -- phase-specific PoS rates calibrated by TA, modality, and biomarker status</li>
+              <li><strong>Monte Carlo simulation</strong> -- 10,000 iterations sampling peak sales, PoS, pricing, and timeline distributions</li>
+              <li><strong>Scenario planning</strong> -- base, upside, and downside cases with probability weighting</li>
+              <li><strong>Deal waterfall</strong> -- upfront, milestones, and royalty allocation benchmarked against comparable transactions</li>
+              <li><strong>Competitive dynamics</strong> -- pipeline analysis and market share impact modeling</li>
+              <li><strong>Real options valuation</strong> -- CRR lattice model capturing indication expansion and strategic optionality</li>
+              <li><strong>Lifecycle extensions</strong> -- formulation changes, new indications, and pediatric exclusivity</li>
+              <li><strong>Buyer-specific valuation</strong> -- adjusted for acquirer synergies, portfolio fit, and strategic premium</li>
+              <li><strong>Tornado sensitivity</strong> -- identifies the 2-3 variables driving 80%+ of valuation variance</li>
+            </ol>
+
+            <p className="text-slate-600 leading-relaxed">
+              Each model feeds into the next, producing a comprehensive valuation package that would take an analyst 2-3 days to build manually. The output includes downloadable PDF reports and Excel models for board presentations and partner discussions.
+            </p>
+
+            {/* rNPV vs DCF vs Comparable Transactions */}
+            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="rnpv-vs-dcf-vs-comps">
+              rNPV vs. DCF vs. Comparable Transactions
+            </h2>
+
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Each valuation method has a role in biopharma. The choice depends on the asset&apos;s stage, data availability, and the decision context.
+            </p>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Method</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Best For</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Limitations</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">When to Use</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">rNPV</td>
+                    <td className="py-2.5 px-4 text-slate-600">Development-stage assets with quantifiable clinical risk</td>
+                    <td className="py-2.5 px-4 text-slate-500">Requires PoS estimates; single point output without Monte Carlo</td>
+                    <td className="py-2.5 px-4 text-slate-600">Licensing deals, Phase 1-3 assets, portfolio prioritization</td>
+                  </tr>
+                  <tr className="bg-slate-50/50">
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Standard DCF</td>
+                    <td className="py-2.5 px-4 text-slate-600">Approved products with visible revenue streams</td>
+                    <td className="py-2.5 px-4 text-slate-500">Overstates pre-approval assets by ignoring clinical attrition</td>
+                    <td className="py-2.5 px-4 text-slate-600">Commercial-stage M&A, approved product acquisitions</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Comparable Transactions</td>
+                    <td className="py-2.5 px-4 text-slate-600">Quick benchmarking and sanity-checking modeled values</td>
+                    <td className="py-2.5 px-4 text-slate-500">Depends on finding truly comparable deals; backward-looking</td>
+                    <td className="py-2.5 px-4 text-slate-600">Deal term validation, board-level framing, negotiation anchoring</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-slate-600 leading-relaxed">
+              Best practice is to triangulate: use rNPV as the primary valuation framework, validate against comparable transactions from our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link> of 2,500+ deals, and supplement with DCF for commercial-stage assets. Our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">calculator</Link> produces all three perspectives in a single analysis.
             </p>
 
             {/* Section 3 */}

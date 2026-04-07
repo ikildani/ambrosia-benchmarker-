@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     'royalty rate benchmarks',
     'biopharma licensing negotiation',
     'pharma deal royalties',
+    'pharma royalty rates benchmark',
+    'biotech licensing royalty rates',
+    'pharma royalty rate by phase',
+    'biopharma royalty benchmarks 2026',
   ],
   openGraph: {
     title: 'How to Negotiate Pharma Licensing Royalty Rates',
@@ -60,7 +64,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
       logo: { '@type': 'ImageObject', url: `${baseUrl}/logo.png` },
     },
     datePublished: '2026-03-20',
-    dateModified: '2026-03-20',
+    dateModified: '2026-04-07',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${baseUrl}/guides/negotiate-pharma-royalty-rates`,
@@ -141,6 +145,74 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             <p className="text-slate-600 leading-relaxed">
               This guide provides a structured approach to negotiating <Link href="/glossary/royalty-rate" className="text-teal-600 font-medium hover:text-teal-700">royalty rates</Link> that are both competitive and defensible, drawing on market data and negotiation principles used by top-tier BD teams.
             </p>
+
+            <div className="flex items-center gap-2 py-3 px-4 bg-slate-50 border border-slate-200 rounded-lg my-6 text-sm text-slate-600">
+              <svg className="w-5 h-5 text-teal-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>All benchmarks below are derived from analysis of <strong>2,500+ biopharma transactions</strong> in the Ambrosia Ventures database, updated April 2026.</span>
+            </div>
+
+            {/* Royalty Rates by Phase */}
+            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="royalty-rates-by-phase">
+              Royalty Rates by Clinical Phase
+            </h2>
+
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Clinical phase is the single strongest predictor of royalty rates. Each phase transition de-risks the asset and shifts value toward the licensor. The table below shows observed ranges and medians from our deal database.
+            </p>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Clinical Phase</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Royalty Range</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Median</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Commentary</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr><td className="py-2.5 px-4 text-slate-700">Preclinical</td><td className="py-2.5 px-4 text-center text-slate-900">2-4%</td><td className="py-2.5 px-4 text-center font-medium text-teal-700">3%</td><td className="py-2.5 px-4 text-slate-500">High risk, unvalidated; royalties offset by large milestone packages</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Phase 1</td><td className="py-2.5 px-4 text-center text-slate-900">3-6%</td><td className="py-2.5 px-4 text-center font-medium text-teal-700">4.5%</td><td className="py-2.5 px-4 text-slate-500">Safety data available; efficacy still unproven</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Phase 2</td><td className="py-2.5 px-4 text-center text-slate-900">5-9%</td><td className="py-2.5 px-4 text-center font-medium text-teal-700">7%</td><td className="py-2.5 px-4 text-slate-500">Proof-of-concept data; competitive bidding common</td></tr>
+                  <tr className="bg-slate-50/50"><td className="py-2.5 px-4 text-slate-700">Phase 3</td><td className="py-2.5 px-4 text-center text-slate-900">8-14%</td><td className="py-2.5 px-4 text-center font-medium text-teal-700">11%</td><td className="py-2.5 px-4 text-slate-500">Pivotal data de-risks; licensee paying for near-term revenue</td></tr>
+                  <tr><td className="py-2.5 px-4 text-slate-700">Approved</td><td className="py-2.5 px-4 text-center text-slate-900">12-22%</td><td className="py-2.5 px-4 text-center font-medium text-teal-700">16%</td><td className="py-2.5 px-4 text-slate-500">Commercial product; royalty reflects proven revenue stream</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-xs text-slate-400 mb-6">
+              Source: Ambrosia Ventures deal database, 2,500+ transactions as of April 2026. Ranges represent 25th-75th percentile; outliers in oncology and rare disease can exceed upper bounds.
+            </p>
+
+            {/* Royalty Rates by Modality */}
+            <h3 className="text-xl font-bold text-slate-900 mt-10 mb-4" id="royalty-rates-by-modality">
+              Royalty Rates by Modality
+            </h3>
+
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Modality increasingly influences royalty rates as novel platforms command premiums over traditional small molecules. The following ranges represent typical Phase 2+ deals:
+            </p>
+
+            <ul className="list-disc pl-6 space-y-2 text-slate-600 mb-6">
+              <li><strong>ADCs (antibody-drug conjugates):</strong> Mid-teens to low-20s. ADCs command premium royalties due to complex manufacturing, strong IP moats, and demonstrated clinical differentiation in oncology.</li>
+              <li><strong>Small molecules:</strong> Low-to-mid teens. The most benchmarked modality with deep comparable data. Generic erosion risk at patent expiry limits upper-tier rates.</li>
+              <li><strong>Monoclonal antibodies (mAbs):</strong> Mid-single digits to low-double digits. Biosimilar exposure is growing, but brand loyalty and switching costs support rates above small molecules at equivalent phases.</li>
+              <li><strong>Gene therapy:</strong> High-single digits to mid-teens. One-time curative therapies present unique royalty economics; some deals use profit-sharing models instead of traditional royalties.</li>
+              <li><strong>Cell therapy (CAR-T, TCR):</strong> Mid-single to low-double digits. Manufacturing complexity and autologous vs. allogeneic differences create wide royalty variation within the modality.</li>
+              <li><strong>RNA therapeutics (siRNA, mRNA, ASO):</strong> Low-to-mid teens. Platform value and multi-indication potential support above-average rates for validated targets.</li>
+            </ul>
+
+            {/* Inline CTA */}
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 my-8">
+              <p className="text-slate-900 font-semibold text-lg mb-2">See royalty benchmarks for your specific deal</p>
+              <p className="text-slate-600 mb-4">
+                Our calculator generates royalty benchmarks tailored to your phase, modality, and therapeutic area -- calibrated against 2,500+ real transactions across 12 TAs and 23+ modalities.
+              </p>
+              <Link href="/calculator" className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors text-sm">
+                Get Your Royalty Benchmark
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </Link>
+            </div>
 
             {/* Section 1 */}
             <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="tiered-royalties">
