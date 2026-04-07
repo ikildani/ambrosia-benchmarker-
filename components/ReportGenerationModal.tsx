@@ -252,7 +252,7 @@ export default function ReportGenerationModal({
           });
         }
 
-        await delay(p.format === 'excel' ? 100 : 300);
+        await delay(p.format === 'excel' ? 50 : 100);
         if (abortRef.current) return;
         markComplete('analyzing');
 
@@ -283,21 +283,27 @@ export default function ReportGenerationModal({
           return;
         }
 
-        // Step 2: Await the memo + playbook that were already fetching in parallel
+        // Step 2: Race memo + playbook against a 8s deadline
+        // If they're ready, great. If not, proceed without them — PDF still generates.
         setCurrentStep('generating_memo');
         let memo = p.existingMemo;
         let playbook: NegotiationPlaybook | null = null;
+
+        const MEMO_DEADLINE_MS = 8000;
+        const deadline = <T,>(promise: Promise<T | null>, ms: number): Promise<T | null> =>
+          Promise.race([promise, new Promise<null>(r => setTimeout(() => r(null), ms))]);
+
         if (!memo && memoPromise) {
-          const fetchedMemo = await memoPromise;
+          const fetchedMemo = await deadline(memoPromise, MEMO_DEADLINE_MS);
           if (fetchedMemo) {
             memo = fetchedMemo;
             p.onMemoGenerated(memo);
-          } else {
-            setCanSkipMemo(true);
           }
+          // If memo didn't arrive in time, PDF generates without it — not a blocker
         }
         if (playbookPromise) {
-          playbook = await playbookPromise;
+          // Playbook gets whatever time remains from the deadline (at least 2s)
+          playbook = await deadline(playbookPromise, 2000);
         }
         if (abortRef.current) return;
         markComplete('generating_memo');
@@ -339,7 +345,6 @@ export default function ReportGenerationModal({
         if (hiddenContainerRef.current) {
           hiddenContainerRef.current.innerHTML = html;
         }
-        await delay(100);
         if (abortRef.current) return;
         markComplete('compiling');
 
@@ -352,7 +357,7 @@ export default function ReportGenerationModal({
           };
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
 
           try {
             const serverRes = await fetch('/api/report/generate', {
