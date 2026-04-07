@@ -257,7 +257,7 @@ export default function ReportPage() {
             {[
               { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals', sub: 'SEC 8-K + FTC + press' },
               { value: DEAL_STATS.TOTAL_COMPANIES, label: 'Companies Profiled', sub: 'AI-scored partner matching' },
-              { value: '8', label: 'Analysis Engines', sub: 'rNPV, Monte Carlo, + more' },
+              { value: '14', label: 'Analysis Engines', sub: 'rNPV, Monte Carlo, VaR/CVaR, + more' },
               { value: 'Daily', label: 'Data Refresh', sub: 'Automated pipeline' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
@@ -374,17 +374,105 @@ export default function ReportPage() {
                   </div>
                 </div>
 
-                {/* Fade overlay at bottom */}
+                {/* rNPV + Monte Carlo row */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4">
+                    <div className="text-[9px] font-bold text-sky-400/60 tracking-wider uppercase mb-3">rNPV Valuation</div>
+                    <div className="grid grid-cols-4 gap-2 mb-3">
+                      {[
+                        { label: 'rNPV', value: '$312M', color: 'text-teal-400' },
+                        { label: 'PoS', value: '24.3%', color: 'text-white' },
+                        { label: 'Return', value: '18.4%', color: 'text-white' },
+                        { label: 'Payback', value: '10.7y', color: 'text-white' },
+                      ].map(kpi => (
+                        <div key={kpi.label} className="text-center">
+                          <div className="text-[8px] text-slate-600 uppercase">{kpi.label}</div>
+                          <div className={`text-xs font-bold font-mono ${kpi.color}`}>{kpi.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px]">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500/60" />
+                      <span className="text-slate-600">Index: Padcev ($4.2B) — 32% of index, credible</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4">
+                    <div className="text-[9px] font-bold text-rose-400/60 tracking-wider uppercase mb-2">Monte Carlo · Risk Metrics</div>
+                    <div className="grid grid-cols-4 gap-2 mb-2">
+                      {[
+                        { label: 'VaR 95%', value: '-$42M', color: 'text-rose-400' },
+                        { label: 'CVaR', value: '-$78M', color: 'text-rose-400' },
+                        { label: 'Skew', value: '+0.84', color: 'text-teal-400' },
+                        { label: 'Tail', value: 'Mod.', color: 'text-amber-400' },
+                      ].map(m => (
+                        <div key={m.label} className="text-center">
+                          <div className="text-[8px] text-slate-600 uppercase">{m.label}</div>
+                          <div className={`text-xs font-bold font-mono ${m.color}`}>{m.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-[9px]">
+                      <span className="text-slate-600">10,000 iterations</span>
+                      <span className="text-teal-400/60 font-mono">87% Prob NPV &gt; 0</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buyer-specific + Tornado preview */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4">
+                    <div className="text-[9px] font-bold text-indigo-400/60 tracking-wider uppercase mb-3">Buyer-Specific Valuation</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <div className="text-[8px] text-slate-600 uppercase">Generic</div>
+                        <div className="text-xs font-bold font-mono text-slate-400">$245M</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[8px] text-teal-500 uppercase">AstraZeneca</div>
+                        <div className="text-xs font-bold font-mono text-teal-400">$340M</div>
+                        <div className="text-[8px] text-teal-600">+39%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[8px] text-violet-500 uppercase">Novartis</div>
+                        <div className="text-xs font-bold font-mono text-violet-400">$295M</div>
+                        <div className="text-[8px] text-violet-600">+20%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4">
+                    <div className="text-[9px] font-bold text-amber-400/60 tracking-wider uppercase mb-2">Tornado · Top Risks &amp; Upsides</div>
+                    <div className="space-y-1.5">
+                      {[
+                        { label: 'Peak Sales', risk: 35, upside: 42 },
+                        { label: 'PoS Phase 3', risk: 28, upside: 18 },
+                        { label: 'Competitor', risk: 22, upside: 8 },
+                      ].map(row => (
+                        <div key={row.label} className="flex items-center gap-2">
+                          <span className="text-[8px] text-slate-600 w-14 text-right truncate">{row.label}</span>
+                          <div className="flex-1 flex items-center h-3">
+                            <div className="flex-1 flex justify-end"><div className="h-full bg-rose-500/30 rounded-l" style={{ width: `${row.risk}%` }} /></div>
+                            <div className="w-[1px] h-full bg-slate-700 mx-0.5" />
+                            <div className="flex-1"><div className="h-full bg-emerald-500/30 rounded-r" style={{ width: `${row.upside}%` }} /></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fade overlay */}
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0c1220]/60 to-[#0c1220] z-10 flex items-end justify-center pb-2">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06]">
                       <Lock className="w-3.5 h-3.5 text-teal-400/60" />
-                      <span className="text-[11px] text-slate-400 font-medium">Partner matching, sensitivity analysis, negotiation playbook &amp; more below</span>
+                      <span className="text-[11px] text-slate-400 font-medium">Scenario comparison, real options, lifecycle extensions, negotiation playbook &amp; more</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 opacity-30">
-                    <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4 h-24" />
-                    <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4 h-24" />
+                  <div className="grid grid-cols-2 gap-3 opacity-20">
+                    <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4 h-20" />
+                    <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg p-4 h-20" />
                   </div>
                 </div>
               </div>
@@ -397,7 +485,7 @@ export default function ReportPage() {
       <section className="relative py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="max-w-2xl mb-14">
-            <p className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-4">Eight Analysis Modules</p>
+            <p className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-4">Eight Core Analysis Modules</p>
             <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
               Everything you need for a deal committee presentation
             </h2>
@@ -456,7 +544,7 @@ export default function ReportPage() {
                 icon: FlaskConical,
                 title: 'Define your asset',
                 desc: 'Select therapeutic area, modality, development phase, deal type, and indication. Four dropdowns — takes 30 seconds.',
-                detail: 'Free, no account required',
+                detail: 'Free account — 3 calculations',
               },
               {
                 step: '02',
