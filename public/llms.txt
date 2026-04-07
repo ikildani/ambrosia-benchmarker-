@@ -98,7 +98,7 @@ Typical deal structures from the platform's database:
 
 ## Pricing
 
-- Free: 5 calculations per month, basic deal term ranges
+- Free: 3 calculations (account required), basic deal term estimates
 - Pro: $299/month — unlimited calculations, rNPV, Monte Carlo, partner matching, PDF/Excel export
 - Report: $499 one-time — full deal intelligence report with all engines, buyer-specific valuation, negotiation playbook
 

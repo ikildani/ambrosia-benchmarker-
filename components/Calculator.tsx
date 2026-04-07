@@ -774,7 +774,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           )}
 
           <p className="text-center text-xs text-neutral-500 mt-4">
-            Free — 5 calculations per month with headline estimates
+            Free account — 3 calculations with deal term estimates. <a href="/pricing" class="underline hover:text-teal-400 transition-colors">Upgrade to Pro</a> for unlimited access, rNPV, Monte Carlo, and partner matching.
           </p>
         </div>
       </div>
