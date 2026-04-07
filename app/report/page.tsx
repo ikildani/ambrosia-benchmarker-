@@ -639,11 +639,12 @@ export default function ReportPage() {
                 {[
                   'Deal terms benchmark (upfronts, milestones, royalties)',
                   'Comparable transactions analysis',
-                  'AI-scored partner matching + Pharma Intent Score (850+ companies)',
-                  'rNPV & deal valuation modeling',
-                  'Buyer-specific valuation per counterparty',
+                  'AI-scored partner matching + 10-factor Pharma Intent Score',
+                  'rNPV with peak sales validation vs 40+ index drugs',
+                  'Multi-buyer valuation — what 3 specific acquirers would pay',
+                  'Monte Carlo (10K iterations) + VaR/CVaR risk metrics',
+                  'Tornado chart + compound scenario modeling',
                   'Competitive landscape & pipeline mapping',
-                  'Monte Carlo sensitivity & tornado analysis',
                   'Negotiation playbook with leverage analysis',
                   'Board-ready PDF + structured Excel export',
                 ].map((item) => (
@@ -661,6 +662,18 @@ export default function ReportPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ SOCIAL PROOF ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <section className="relative py-16 border-y border-white/[0.04] bg-[#0a0e1a]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-sm text-slate-500 mb-6">Trusted by deal teams at</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+            {['Insilico Medicine', 'Opus Genetics', 'Novartis'].map(name => (
+              <span key={name} className="text-lg font-bold text-white/20 tracking-tight">{name}</span>
+            ))}
           </div>
         </div>
       </section>
