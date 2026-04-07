@@ -548,8 +548,16 @@ export const BIOMARKER_POS_UPLIFT = {
  * higher approval rates, though causality is debated (selection effect:
  * better drugs tend to get designations).
  *
- * Source: FDA CDER annual reports; Darrow et al., NEJM 2020; EMA PRIME
- * outcomes reports.
+ * Source: FDA CDER annual reports 2021-2026; Darrow et al., NEJM 2020;
+ * EMA PRIME outcomes reports; FDA accelerated approval withdrawal
+ * analysis 2023-2024.
+ *
+ * Calibration note (April 2026):
+ * - Accelerated approval reduced from 1.25→1.15 due to multiple FDA
+ *   withdrawals in 2023-2024 (Aduhelm, Makena, danicopan) and stricter
+ *   confirmatory trial requirements under FDORA.
+ * - Breakthrough maintained at 1.20 — still the strongest signal.
+ * - RMAT (Regenerative Medicine Advanced Therapy) added for cell/gene.
  *
  * When multiple designations are present, effects are multiplicative but
  * capped at 1.5x total to avoid unrealistic PoS inflation.
@@ -561,10 +569,12 @@ export const REGULATORY_POS_UPLIFT = {
   fastTrack: 1.10,
   /** Orphan Drug -- smaller populations, lower regulatory bar, higher PoS */
   orphan: 1.15,
-  /** FDA Accelerated Approval pathway eligibility */
-  acceleratedApproval: 1.25,
+  /** FDA Accelerated Approval -- reduced from 1.25 post-2023 FDA withdrawal wave (FDORA) */
+  acceleratedApproval: 1.15,
   /** EMA PRIME (Priority Medicines) -- EU equivalent of breakthrough */
   prime: 1.10,
+  /** FDA RMAT (Regenerative Medicine Advanced Therapy) -- for cell/gene therapies */
+  rmat: 1.15,
 } as const;
 
 /**
@@ -681,6 +691,50 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
     nda_filed: 1.0,
     regulatory: 1.0,
   },
+  rareDisease: {
+    discovery: 3.0,
+    preclinical: 2.5,
+    phase1: 1.5,
+    phase1_2: 2.0,
+    phase2: 2.0,
+    phase2_3: 2.5,
+    phase3: 2.5,   // Smaller trials, faster enrollment in rare populations
+    nda_filed: 1.0,
+    regulatory: 0.8, // Priority review + orphan expedited pathways
+  },
+  hematology: {
+    discovery: 3.0,
+    preclinical: 2.0,
+    phase1: 1.5,
+    phase1_2: 2.5,
+    phase2: 2.5,
+    phase2_3: 3.0,
+    phase3: 3.0,
+    nda_filed: 1.0,
+    regulatory: 1.0,
+  },
+  dermatology: {
+    discovery: 3.0,
+    preclinical: 2.0,
+    phase1: 1.5,
+    phase1_2: 2.0,
+    phase2: 2.0,
+    phase2_3: 3.0,
+    phase3: 2.5,   // Visible endpoints, faster readouts
+    nda_filed: 1.0,
+    regulatory: 1.0,
+  },
+  gastroenterology: {
+    discovery: 3.0,
+    preclinical: 2.0,
+    phase1: 1.5,
+    phase1_2: 2.5,
+    phase2: 2.5,
+    phase2_3: 3.5,
+    phase3: 3.0,   // IBD trials require endoscopic + clinical endpoints
+    nda_filed: 1.0,
+    regulatory: 1.0,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -699,97 +753,148 @@ export const PHASE_DURATION: Record<string, Record<string, number>> = {
  * enrichment. Cardiovascular Phase 3 costs are highest ($250M) due to
  * mandatory large CVOTs with thousands of patients and years of follow-up.
  *
- * Source: DiMasi et al., J Health Econ (2016), inflation-adjusted;
- * Tufts CSDD cost surveys; Deloitte biopharma R&D benchmarking.
+ * Source: DiMasi et al., J Health Econ (2016), inflation-adjusted to 2025 USD
+ * (~35% uplift from 2016 baseline); Tufts CSDD cost surveys; Deloitte
+ * biopharma R&D benchmarking 2024; IQVIA Global Trends in R&D 2024.
+ *
+ * Calibration note (April 2026):
+ * Costs updated with ~35% inflation adjustment from 2016 baselines.
+ * Oncology P3 costs remain moderate (biomarker enrichment enables smaller trials).
+ * Cardiovascular P3 costs highest (large CVOTs with outcomes endpoints).
+ * Cell/gene therapy costs added (high manufacturing + logistics).
  */
 export const PHASE_COSTS: Record<string, Record<string, number>> = {
   oncology: {
-    discovery: 8,
-    preclinical: 15,
-    phase1: 25,
-    phase1_2: 45,
-    phase2: 50,
-    phase2_3: 120,
-    phase3: 150,
-    nda_filed: 5,
-    regulatory: 5,
-  },
-  neurology: {
     discovery: 10,
     preclinical: 20,
-    phase1: 30,
-    phase1_2: 55,
-    phase2: 60,
-    phase2_3: 150,
+    phase1: 35,
+    phase1_2: 60,
+    phase2: 70,
+    phase2_3: 160,
     phase3: 200,
-    nda_filed: 5,
-    regulatory: 5,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  neurology: {
+    discovery: 12,
+    preclinical: 25,
+    phase1: 40,
+    phase1_2: 75,
+    phase2: 80,
+    phase2_3: 200,
+    phase3: 270,
+    nda_filed: 7,
+    regulatory: 7,
   },
   immunology: {
+    discovery: 10,
+    preclinical: 20,
+    phase1: 35,
+    phase1_2: 55,
+    phase2: 60,
+    phase2_3: 135,
+    phase3: 160,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  metabolic: {
+    discovery: 10,
+    preclinical: 20,
+    phase1: 35,
+    phase1_2: 60,
+    phase2: 70,
+    phase2_3: 190,
+    phase3: 240,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  cardiovascular: {
+    discovery: 12,
+    preclinical: 25,
+    phase1: 40,
+    phase1_2: 75,
+    phase2: 80,
+    phase2_3: 240,
+    phase3: 340,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  infectiousDisease: {
+    discovery: 7,
+    preclinical: 14,
+    phase1: 27,
+    phase1_2: 40,
+    phase2: 48,
+    phase2_3: 110,
+    phase3: 135,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  ophthalmology: {
     discovery: 8,
-    preclinical: 15,
+    preclinical: 16,
+    phase1: 27,
+    phase1_2: 48,
+    phase2: 55,
+    phase2_3: 95,
+    phase3: 110,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  womensHealth: {
+    discovery: 7,
+    preclinical: 14,
+    phase1: 27,
+    phase1_2: 40,
+    phase2: 48,
+    phase2_3: 100,
+    phase3: 120,
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  rareDisease: {
+    discovery: 8,
+    preclinical: 18,
+    phase1: 30,
+    phase1_2: 50,
+    phase2: 55,
+    phase2_3: 90,
+    phase3: 110,  // Smaller trials but higher per-patient costs (rare populations)
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  hematology: {
+    discovery: 10,
+    preclinical: 22,
+    phase1: 40,
+    phase1_2: 70,
+    phase2: 75,
+    phase2_3: 150,
+    phase3: 190,  // CAR-T manufacturing + logistics add significant cost
+    nda_filed: 7,
+    regulatory: 7,
+  },
+  dermatology: {
+    discovery: 7,
+    preclinical: 14,
     phase1: 25,
     phase1_2: 40,
     phase2: 45,
-    phase2_3: 100,
-    phase3: 120,
-    nda_filed: 5,
-    regulatory: 5,
+    phase2_3: 90,
+    phase3: 110,
+    nda_filed: 7,
+    regulatory: 7,
   },
-  metabolic: {
+  gastroenterology: {
     discovery: 8,
-    preclinical: 15,
-    phase1: 25,
+    preclinical: 16,
+    phase1: 28,
     phase1_2: 45,
-    phase2: 50,
-    phase2_3: 140,
-    phase3: 180,
-    nda_filed: 5,
-    regulatory: 5,
-  },
-  cardiovascular: {
-    discovery: 10,
-    preclinical: 20,
-    phase1: 30,
-    phase1_2: 55,
-    phase2: 60,
-    phase2_3: 180,
-    phase3: 250,
-    nda_filed: 5,
-    regulatory: 5,
-  },
-  infectiousDisease: {
-    discovery: 5,
-    preclinical: 10,
-    phase1: 20,
-    phase1_2: 30,
-    phase2: 35,
-    phase2_3: 80,
-    phase3: 100,
-    nda_filed: 5,
-    regulatory: 5,
-  },
-  ophthalmology: {
-    discovery: 6,
-    preclinical: 12,
-    phase1: 20,
-    phase1_2: 35,
-    phase2: 40,
-    phase2_3: 70,
-    phase3: 80,
-    nda_filed: 5,
-    regulatory: 5,
-  },
-  womensHealth: {
-    discovery: 5,
-    preclinical: 10,
-    phase1: 20,
-    phase1_2: 30,
-    phase2: 35,
-    phase2_3: 75,
-    phase3: 90,
-    nda_filed: 5,
-    regulatory: 5,
+    phase2: 55,
+    phase2_3: 110,
+    phase3: 140,
+    nda_filed: 7,
+    regulatory: 7,
   },
 };
 
