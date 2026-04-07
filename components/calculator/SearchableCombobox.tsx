@@ -375,9 +375,10 @@ function SearchableComboboxInner<T extends string>({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: flipUp ? 8 : -8 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className={`absolute left-0 right-0 z-40 bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-600 rounded-xl shadow-lg overflow-hidden ${
+            className={`absolute left-0 right-0 z-[100] bg-white dark:bg-slate-800 border border-neutral-200 dark:border-slate-600 rounded-xl shadow-2xl overflow-hidden ${
               flipUp ? 'bottom-full mb-1 origin-bottom' : 'top-full mt-1 origin-top'
             }`}
+            style={{ maxHeight: flipUp ? undefined : 'min(420px, calc(100vh - 200px))' }}
           >
             {/* Search */}
             <div className="p-2 border-b border-neutral-100 dark:border-slate-700">
