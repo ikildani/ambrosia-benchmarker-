@@ -446,94 +446,7 @@ function getIndicationCategory(indication: string): string | null {
   return map[indication] ?? null;
 }
 
-// Methodology Section component
-function MethodologySection() {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  return (
-    <div className="mt-6 sm:mt-8">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-navy-50 to-slate-50 dark:from-slate-700 dark:to-slate-800 rounded-xl border border-navy-200 dark:border-slate-600 hover:border-navy-300 dark:hover:border-slate-500 transition-all"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-600 to-navy-700 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <span className="font-semibold text-navy-800 dark:text-white">How We Calculate This</span>
-        </div>
-        <motion.svg
-          className="w-5 h-5 text-navy-500 dark:text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </motion.svg>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            key="methodology"
-            initial={prefersReducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            style={{ overflow: 'hidden' }}
-          >
-          <div className="mt-3 p-5 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg font-bold text-navy-800 dark:text-white">Powered by</span>
-            <span className="text-lg font-bold text-teal-600 dark:text-teal-400">Ambrosia Ventures</span>
-          </div>
-
-          <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 leading-relaxed">
-            These estimates are generated using Ambrosia Ventures&apos; proprietary benchmarking model,
-            developed from our team&apos;s deep expertise in life sciences M&A and licensing transactions.
-          </p>
-
-          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Our Model Analyzes</h5>
-          <ul className="space-y-2 mb-4">
-            {[
-              'Publicly disclosed deal terms (SEC filings, press releases)',
-              'Industry benchmark reports and market intelligence',
-              'Recent transaction activity and emerging trends'
-            ].map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-neutral-600 dark:text-slate-300">
-                <svg className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {item}
-              </li>
-            ))}
-          </ul>
-
-          <p className="text-sm text-neutral-600 dark:text-slate-300 mb-4 leading-relaxed">
-            The algorithm weighs multiple factors including development phase, therapeutic modality,
-            indication, territory scope, competitive landscape, and clinical data quality to generate
-            customized ranges specific to your asset profile.
-          </p>
-
-          <div className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-200 dark:border-slate-600/30">
-            <p className="text-xs text-slate-600 dark:text-slate-300">
-              Benchmark ranges reflect the market distribution across {DEAL_STATS.TOTAL_DEALS} comparable transactions.
-              Individual deal outcomes depend on asset-specific factors, competitive dynamics, and negotiation leverage.{' '}
-              <a href="/methodology" className="text-teal-600 hover:text-teal-700 underline">Learn more about our methodology</a>
-            </p>
-          </div>
-        </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+// MethodologySection consolidated into ResultsDisclaimer component
 
 export function ResultsSkeleton() {
   return (
@@ -2014,8 +1927,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
-        {/* Methodology Section */}
-        <MethodologySection />
+        {/* Methodology Section — consolidated into ResultsDisclaimer component */}
 
         {/* Data Freshness Indicator */}
         <div className="mt-6 text-center">
