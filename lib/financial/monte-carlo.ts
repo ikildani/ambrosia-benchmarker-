@@ -726,6 +726,35 @@ export function runMonteCarlo(
     bull: { p50: scenarioP50s[2], weight: phaseConfigs[2].weight },
   };
 
+  // ----- Risk metrics (VaR, CVaR, skewness, kurtosis) -------------------
+
+  // VaR_95 = P5 (5th percentile). "What's the worst 95% of the time?"
+  const var95 = p5;
+
+  // CVaR_95 = mean of bottom 5%. "If things go wrong, how wrong?"
+  const tailCutoff = Math.max(1, Math.floor(iterations * 0.05));
+  let tailSum = 0;
+  for (let i = 0; i < tailCutoff; i++) {
+    tailSum += sorted[i];
+  }
+  const cvar95 = r1(tailSum / tailCutoff);
+
+  // Skewness (Fisher's): positive = right-skewed (pharma early-stage typical)
+  let m3 = 0;
+  for (let i = 0; i < iterations; i++) {
+    m3 += Math.pow(npvResults[i] - mean, 3);
+  }
+  m3 /= iterations;
+  const skewness = stdDev > 0 ? r1(m3 / Math.pow(stdDev, 3) * 100) / 100 : 0;
+
+  // Excess kurtosis: > 0 = fatter tails than normal
+  let m4 = 0;
+  for (let i = 0; i < iterations; i++) {
+    m4 += Math.pow(npvResults[i] - mean, 4);
+  }
+  m4 /= iterations;
+  const kurtosis = stdDev > 0 ? r1((m4 / Math.pow(stdDev, 4) - 3) * 100) / 100 : 0;
+
   // ----- Assemble result ------------------------------------------------
 
   return {
@@ -754,5 +783,10 @@ export function runMonteCarlo(
     keyDriverSensitivity,
 
     scenario_breakdown,
+
+    var95,
+    cvar95,
+    skewness,
+    kurtosis,
   };
 }

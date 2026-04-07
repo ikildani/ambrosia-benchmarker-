@@ -502,6 +502,38 @@ export interface MonteCarloResult {
     base: { p50: number; weight: number };
     bull: { p50: number; weight: number };
   };
+
+  /**
+   * Value-at-Risk (VaR) at 95% confidence.
+   * = P5 of the distribution. Answers: "What's the worst outcome
+   * we'd expect 95% of the time?"
+   */
+  var95: number;
+
+  /**
+   * Conditional Value-at-Risk (CVaR) at 95% confidence.
+   * = Mean of the bottom 5% of outcomes. Answers: "If things go
+   * really wrong, how wrong on average?"
+   * Always ≤ VaR_95 (deeper into the tail).
+   */
+  cvar95: number;
+
+  /**
+   * Skewness of the distribution.
+   * Positive = right-skewed (more upside than downside probability).
+   * Negative = left-skewed (fat left tail, downside-heavy).
+   * Pharma rNPV distributions are typically right-skewed for early-stage
+   * (many small losses + rare big wins) and symmetric for late-stage.
+   */
+  skewness: number;
+
+  /**
+   * Kurtosis of the distribution (excess kurtosis, 0 = normal).
+   * > 0 = fatter tails than normal (more extreme outcomes).
+   * Pharma distributions typically show excess kurtosis of 1-4
+   * due to the binary nature of clinical trial outcomes.
+   */
+  kurtosis: number;
 }
 
 // ---------------------------------------------------------------------------

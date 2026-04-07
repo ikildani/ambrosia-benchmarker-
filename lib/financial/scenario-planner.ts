@@ -429,8 +429,13 @@ export function runAllScenarios(
     ? SCENARIO_TEMPLATES.filter(t => categories.includes(t.category))
     : SCENARIO_TEMPLATES;
 
-  return templates
-    .map(template => applyScenario(baseInput, baseResult, template))
+  const individual = templates
+    .map(template => applyScenario(baseInput, baseResult, template));
+
+  // Add compound scenarios (non-linear interaction between scenario pairs)
+  const compound = runCompoundScenarios(baseInput, baseResult);
+
+  return [...individual, ...compound]
     .sort((a, b) => a.impactDelta - b.impactDelta); // worst scenarios first
 }
 
@@ -503,6 +508,107 @@ export function getDefensiveAnalysis(
     walkAwayThreshold,
     narrative,
   };
+}
+
+/**
+ * Compound scenario pairs: when two bad (or good) things happen together,
+ * the combined impact is WORSE than the sum of parts.
+ *
+ * Institutional practice: regulatory delay + competitor entry is more
+ * damaging than either alone because the delay lets the competitor
+ * establish market position before your launch.
+ *
+ * Each pair defines interaction multipliers on top of the combined
+ * individual adjustments (non-linear compounding).
+ */
+const COMPOUND_SCENARIO_PAIRS: Array<{
+  scenario1: string;
+  scenario2: string;
+  interactionMultipliers: { peakSalesMultiplier?: number; posMultiplier?: number; timeAdjustment?: number };
+  name: string;
+  narrative: string;
+}> = [
+  {
+    scenario1: 'regulatory_delay_crl',
+    scenario2: 'competitor_approved_first',
+    interactionMultipliers: { peakSalesMultiplier: 0.80, timeAdjustment: 0.5 },
+    name: 'CRL + Competitor Launch',
+    narrative: 'Regulatory delay compounds with competitor entry — competitor establishes market position during your delay, reducing your peak share beyond the sum of individual impacts.',
+  },
+  {
+    scenario1: 'phase3_failure',
+    scenario2: 'subgroup_rescue',
+    interactionMultipliers: { posMultiplier: 0.70, peakSalesMultiplier: 0.50, timeAdjustment: 2.0 },
+    name: 'Phase 3 Failure + Subgroup Rescue',
+    narrative: 'Failed pivotal but subgroup shows benefit — narrower label, extended timeline, and lower peak sales than either scenario suggests independently.',
+  },
+  {
+    scenario1: 'pricing_pressure',
+    scenario2: 'generic_entry_early',
+    interactionMultipliers: { peakSalesMultiplier: 0.75 },
+    name: 'Pricing Squeeze + Early Generic Entry',
+    narrative: 'Government pricing pressure coincides with early generic/biosimilar entry — revenue tail collapses faster than either scenario alone.',
+  },
+  {
+    scenario1: 'best_in_class_data',
+    scenario2: 'indication_expansion',
+    interactionMultipliers: { peakSalesMultiplier: 1.15, posMultiplier: 1.10 },
+    name: 'Best-in-Class + Label Expansion',
+    narrative: 'Superior data accelerates label expansion plans — regulatory precedent from first indication de-risks second, creating compound upside.',
+  },
+];
+
+/**
+ * Run compound scenarios: pairs of events that interact non-linearly.
+ * Returns additional scenario results beyond the individual templates.
+ */
+export function runCompoundScenarios(
+  baseInput: RNPVInput,
+  baseResult: RNPVResult,
+): ScenarioResult[] {
+  const compoundResults: ScenarioResult[] = [];
+
+  for (const pair of COMPOUND_SCENARIO_PAIRS) {
+    const s1 = SCENARIO_TEMPLATES.find(t => t.id === pair.scenario1);
+    const s2 = SCENARIO_TEMPLATES.find(t => t.id === pair.scenario2);
+    if (!s1 || !s2) continue;
+
+    // Merge adjustments from both scenarios
+    const mergedAdjustments = [...s1.adjustments, ...s2.adjustments];
+
+    // Create compound template with interaction effects
+    const compoundTemplate: ScenarioTemplate = {
+      id: `compound_${pair.scenario1}_${pair.scenario2}`,
+      name: pair.name,
+      description: pair.narrative,
+      category: s1.category,
+      adjustments: mergedAdjustments,
+    };
+
+    // Apply the compound scenario
+    let result = applyScenario(baseInput, baseResult, compoundTemplate);
+
+    // Apply non-linear interaction multipliers on top
+    const ix = pair.interactionMultipliers;
+    if (ix.peakSalesMultiplier || ix.posMultiplier || ix.timeAdjustment) {
+      const compoundedRNPV = result.adjustedRNPV *
+        (ix.peakSalesMultiplier || 1.0) *
+        (ix.posMultiplier || 1.0);
+
+      result = {
+        ...result,
+        adjustedRNPV: Math.round(compoundedRNPV),
+        impactDelta: Math.round(compoundedRNPV - baseResult.riskAdjustedNPV),
+        impactPercent: Math.round(((compoundedRNPV - baseResult.riskAdjustedNPV) / Math.abs(baseResult.riskAdjustedNPV || 1)) * 100),
+        narrative: pair.narrative,
+        scenario: compoundTemplate,
+      };
+    }
+
+    compoundResults.push(result);
+  }
+
+  return compoundResults.sort((a, b) => a.impactDelta - b.impactDelta);
 }
 
 function generateScenarioNarrative(
