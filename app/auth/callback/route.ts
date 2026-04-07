@@ -119,6 +119,49 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Link existing report purchases to this user by email
+    // Handles: user buys report as anonymous → later signs up → gets their purchase linked
+    if (data.user?.email) {
+      const userEmail = data.user.email.toLowerCase();
+      const userId = data.user.id;
+      try {
+        // Find completed report purchases with matching email but no user_id
+        const { data: unlinkedPurchases } = await supabase
+          .from('report_purchases')
+          .select('id')
+          .eq('email', userEmail)
+          .eq('status', 'completed')
+          .is('user_id', null);
+
+        if (unlinkedPurchases && unlinkedPurchases.length > 0) {
+          // Link purchases to this user
+          await supabase
+            .from('report_purchases')
+            .update({ user_id: userId })
+            .eq('email', userEmail)
+            .eq('status', 'completed')
+            .is('user_id', null);
+
+          // Upgrade to report tier (unless already pro)
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('tier')
+            .eq('id', userId)
+            .single();
+
+          if (profile && profile.tier !== 'pro') {
+            await supabase
+              .from('user_profiles')
+              .update({ tier: 'report', updated_at: new Date().toISOString() })
+              .eq('id', userId);
+          }
+          console.log(`[Auth Callback] Linked ${unlinkedPurchases.length} report purchase(s) to ${userEmail}`);
+        }
+      } catch (err) {
+        console.error('[Auth Callback] Error linking report purchases:', err);
+      }
+    }
+
     // Redirect to the app with success message
     const successUrl = new URL('/', requestUrl.origin);
     successUrl.searchParams.set('verified', 'true');

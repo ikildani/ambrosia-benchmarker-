@@ -70,12 +70,15 @@ export async function POST(request: NextRequest) {
         if (session.metadata?.product === 'deal-report') {
           const reportPurchaseId = session.metadata.report_purchase_id;
           const reportUserId = session.metadata.user_id;
+          // Stripe always collects email at checkout — capture it
+          const customerEmail = session.customer_details?.email || session.customer_email || null;
 
           if (reportPurchaseId) {
             const { error: reportError } = await supabase
               .from('report_purchases')
               .update({
                 status: 'completed',
+                email: customerEmail,
                 stripe_session_id: session.id,
                 stripe_payment_intent_id: session.payment_intent as string,
                 purchased_at: new Date().toISOString(),
@@ -85,23 +88,34 @@ export async function POST(request: NextRequest) {
             if (reportError) {
               console.error('Failed to update report purchase:', reportError);
             } else {
-              console.log('Report purchase completed:', reportPurchaseId);
+              console.log('Report purchase completed:', reportPurchaseId, 'email:', customerEmail);
             }
 
             // Upgrade user to 'report' tier (unless already 'pro')
-            if (reportUserId) {
+            // Try by user_id first, then fall back to email match
+            let upgradedUserId = reportUserId;
+            if (!upgradedUserId && customerEmail) {
+              const { data: profileByEmail } = await supabase
+                .from('user_profiles')
+                .select('id, tier')
+                .eq('email', customerEmail)
+                .single();
+              if (profileByEmail) upgradedUserId = profileByEmail.id;
+            }
+
+            if (upgradedUserId) {
               const { data: existingProfile } = await supabase
                 .from('user_profiles')
                 .select('tier')
-                .eq('id', reportUserId)
+                .eq('id', upgradedUserId)
                 .single();
 
               if (existingProfile && existingProfile.tier !== 'pro') {
                 await supabase
                   .from('user_profiles')
                   .update({ tier: 'report', updated_at: new Date().toISOString() })
-                  .eq('id', reportUserId);
-                console.log('User upgraded to report tier:', reportUserId);
+                  .eq('id', upgradedUserId);
+                console.log('User upgraded to report tier:', upgradedUserId);
               }
             }
 
