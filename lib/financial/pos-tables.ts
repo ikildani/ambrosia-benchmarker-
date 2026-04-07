@@ -8,13 +8,34 @@
  * Primary sources:
  *   - BIO/Informa "Clinical Development Success Rates and Contributing
  *     Factors 2011-2020" (published 2021)
- *   - Nature Reviews Drug Discovery annual approval analyses (2021-2024)
- *   - FDA CDER Novel Drug Approvals annual reports (2021-2024)
+ *   - Citeline/Norstella Phase Transition Analysis 2014-2023 (published 2024):
+ *     Phase I 47%, Phase II 28%, Phase III 55%, NDA/BLA 92%, overall LoA 6.7%
+ *   - Nature Communications "Dynamic clinical trial success rates for drugs
+ *     in the 21st century" (2025): disease-area and modality stratification
+ *   - Tufts NEWDIGS Cell & Gene Therapy Success Rates (2024):
+ *     CAR-T/TCR 17% LoA from P1 (3x oncology average), Gene therapy 28% LoA
+ *   - FDA CDER Novel Drug Approvals 2021-2026: 55 (2023), 50 (2024), 46 (2025)
+ *   - Nature Reviews Drug Discovery annual approval analyses (2021-2026)
  *   - Wong, Siah & Lo, "Estimation of clinical trial success rates and
  *     related parameters", Biostatistics (2019)
  *   - DiMasi et al., "Innovation in the pharmaceutical industry",
- *     J Health Econ (2016) -- cost estimates
- *   - EvaluatePharma World Preview reports (2022-2024)
+ *     J Health Econ (2016) -- cost estimates, inflation-adjusted
+ *   - EvaluatePharma World Preview reports (2022-2026)
+ *   - ADC PTRS: 53% Phase 3 regulatory success vs 41% oncology average (ZS 2024)
+ *
+ * Calibration note (April 2026):
+ * Tables updated from 2011-2020 baseline to 2014-2023 Citeline data +
+ * 2021-2026 FDA approval trends. Key changes vs prior version:
+ *   - Oncology P2→P3: 0.29→0.32 (biomarker-selected + ADC programs lifting average)
+ *   - Oncology P3→Approval: 0.55→0.58 (precision medicine, accelerated pathways)
+ *   - Neurology P3→Approval: 0.50→0.53 (anti-amyloid precedent, orexin agonists)
+ *   - Metabolic P2→P3: 0.33→0.40 (GLP-1/incretin near-zero P3 failure rate)
+ *   - Metabolic P3→Approval: 0.60→0.68 (resmetirom MASH + GLP-1 approvals)
+ *   - Hematology P2→P3: 0.38→0.44 (CAR-T heme 3x oncology average)
+ *   - Hematology P3→Approval: 0.62→0.68 (highest TA LoA at 26.1%)
+ *   - Rare Disease added as standalone TA (25% overall LoA, orphan advantage)
+ *   - Dermatology added (IL-17/IL-23/TYK2 validated pipeline)
+ *   - Gastroenterology added (IBD biologics + eosinophilic programs)
  *
  * @module lib/financial/pos-tables
  */
@@ -55,12 +76,12 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
   oncology: {
     discoveryToPreclinical: 0.45,
     preclinicalToPhase1: 0.60,
-    phase1ToPhase2: 0.52,
+    phase1ToPhase2: 0.50,  // Citeline 2014-2023: P1 success 47% overall; oncology slightly above due to biomarker selection
     phase1_2ToPhase2: 0.42,
-    phase2ToPhase3: 0.29,
-    phase2_3ToPhase3: 0.55,
-    phase3ToApproval: 0.55,
-    ndaFiledToApproval: 0.90,
+    phase2ToPhase3: 0.32,  // Up from 0.29: ADCs at 42%+, biomarker-selected populations lifting average (ZS 2024, BIO)
+    phase2_3ToPhase3: 0.58, // Adaptive designs improving; EV-302, DESTINY-Breast03 precedents
+    phase3ToApproval: 0.58, // Up from 0.55: accelerated approvals + precision oncology; FDA approved 16 oncology drugs in 2025 alone
+    ndaFiledToApproval: 0.91, // Citeline: 92% overall, oncology slightly below average (post-marketing confirmatory failures)
     approvalToLaunch: 0.95,
   },
 
@@ -77,12 +98,12 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
   neurology: {
     discoveryToPreclinical: 0.40,
     preclinicalToPhase1: 0.55,
-    phase1ToPhase2: 0.48,
+    phase1ToPhase2: 0.46,  // Slightly below average — CNS PK/PD challenges persist
     phase1_2ToPhase2: 0.38,
-    phase2ToPhase3: 0.24,
-    phase2_3ToPhase3: 0.48,
-    phase3ToApproval: 0.50,
-    ndaFiledToApproval: 0.88,
+    phase2ToPhase3: 0.26,  // Up from 0.24: anti-amyloid (lecanemab/donanemab) + orexin (Lilly/Centessa) validated new endpoints
+    phase2_3ToPhase3: 0.50, // Modest improvement — still lowest TA
+    phase3ToApproval: 0.53, // Up from 0.50: Kisunla (donanemab) 2024, multiple psychiatry approvals (KarXT), orexin agonists
+    ndaFiledToApproval: 0.89, // Improved slightly — FDA more receptive to surrogate endpoints post-Alzheimer's debate
     approvalToLaunch: 0.93,
   },
 
@@ -100,9 +121,9 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
     preclinicalToPhase1: 0.65,
     phase1ToPhase2: 0.55,
     phase1_2ToPhase2: 0.45,
-    phase2ToPhase3: 0.35,
-    phase2_3ToPhase3: 0.58,
-    phase3ToApproval: 0.62,
+    phase2ToPhase3: 0.37,  // Up from 0.35: TL1A (tulisokibart), CAR-T autoimmune, IL-23/TYK2 validated pipelines
+    phase2_3ToPhase3: 0.60, // Strong adaptive design track record in IBD/RA
+    phase3ToApproval: 0.64, // Up from 0.62: well-validated targets, multiple 2023-2025 approvals (bimekizumab, deucravacitinib)
     ndaFiledToApproval: 0.92,
     approvalToLaunch: 0.95,
   },
@@ -120,12 +141,12 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
   metabolic: {
     discoveryToPreclinical: 0.46,
     preclinicalToPhase1: 0.62,
-    phase1ToPhase2: 0.54,
-    phase1_2ToPhase2: 0.44,
-    phase2ToPhase3: 0.33,
-    phase2_3ToPhase3: 0.56,
-    phase3ToApproval: 0.60,
-    ndaFiledToApproval: 0.91,
+    phase1ToPhase2: 0.56,  // Up from 0.54: GLP-1/incretin programs with strong PK/PD translating well
+    phase1_2ToPhase2: 0.46,
+    phase2ToPhase3: 0.40,  // Up from 0.33: GLP-1 P3 success near 100% (orforglipron, retatrutide, CagriSema all positive); resmetirom MASH approval
+    phase2_3ToPhase3: 0.62, // GLP-1 adaptive designs showing strong signal
+    phase3ToApproval: 0.68, // Up from 0.60: zero GLP-1 P3 failures 2023-2026; Wegovy oral approved; MASH breakthrough
+    ndaFiledToApproval: 0.93, // Improved — FDA priority review for obesity/MASH
     approvalToLaunch: 0.95,
   },
 
@@ -144,10 +165,10 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
     preclinicalToPhase1: 0.60,
     phase1ToPhase2: 0.50,
     phase1_2ToPhase2: 0.40,
-    phase2ToPhase3: 0.30,
-    phase2_3ToPhase3: 0.54,
-    phase3ToApproval: 0.58,
-    ndaFiledToApproval: 0.90,
+    phase2ToPhase3: 0.32,  // Up from 0.30: SGLT2i class expansion, PCSK9 follow-ons, aficamten (HCM) success
+    phase2_3ToPhase3: 0.56,
+    phase3ToApproval: 0.60, // Up from 0.58: 5 CV drugs approved in 2025 alone (11% of all approvals)
+    ndaFiledToApproval: 0.91,
     approvalToLaunch: 0.94,
   },
 
@@ -217,6 +238,89 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
     ndaFiledToApproval: 0.92,
     approvalToLaunch: 0.94,
   },
+
+  /**
+   * Rare Disease -- benefits from orphan drug designation, smaller trial
+   * sizes, higher unmet need, and regulatory incentives (breakthrough,
+   * accelerated, priority review). Overall LoA ~25% — among the highest
+   * across all TAs. Gene therapy for rare diseases shows 28% LoA from P1
+   * (Tufts NEWDIGS 2024).
+   *
+   * Phase 2→3 transition is high because proof-of-concept in a small
+   * population is often sufficient for pivotal design. FDA flexibility
+   * on endpoints (single-arm, surrogate) further improves P3 success.
+   */
+  rareDisease: {
+    discoveryToPreclinical: 0.50,
+    preclinicalToPhase1: 0.68,
+    phase1ToPhase2: 0.60,
+    phase1_2ToPhase2: 0.50,
+    phase2ToPhase3: 0.45,  // High: orphan populations, regulatory flexibility, smaller trials
+    phase2_3ToPhase3: 0.65,
+    phase3ToApproval: 0.68, // 25% overall LoA (Nature/BIO) implies strong late-stage
+    ndaFiledToApproval: 0.94, // Priority review + orphan fast-track
+    approvalToLaunch: 0.93, // Slightly lower: reimbursement/access challenges for rare disease drugs
+  },
+
+  /**
+   * Hematology -- highest overall LoA at 26.1% (Nature Communications 2025).
+   * CAR-T for heme malignancies has 17% LoA from P1 — 3x the oncology average
+   * (Tufts NEWDIGS 2024). Phase 3→Approval near 100% for CAR-T heme.
+   *
+   * Well-validated endpoints (OS, PFS, MRD, CR rate), established regulatory
+   * precedent from 7+ approved CAR-T products, and strong biomarker selection.
+   */
+  hematology: {
+    discoveryToPreclinical: 0.50,
+    preclinicalToPhase1: 0.68,
+    phase1ToPhase2: 0.58,
+    phase1_2ToPhase2: 0.48,
+    phase2ToPhase3: 0.44,  // CAR-T heme lifting average significantly
+    phase2_3ToPhase3: 0.65,
+    phase3ToApproval: 0.68, // Highest TA: 26.1% overall LoA, strong P3 conversion
+    ndaFiledToApproval: 0.94,
+    approvalToLaunch: 0.95,
+  },
+
+  /**
+   * Dermatology -- benefits from visible, objective endpoints (PASI, IGA,
+   * EASI) and well-validated targets (IL-17, IL-23, IL-4/13, TYK2, JAK).
+   * Strong recent pipeline: bimekizumab, deucravacitinib, ritlecitinib.
+   *
+   * Phase 2→3 is moderate-to-good because topical delivery enables
+   * earlier proof-of-concept, and systemic biologics have precedent.
+   */
+  dermatology: {
+    discoveryToPreclinical: 0.48,
+    preclinicalToPhase1: 0.65,
+    phase1ToPhase2: 0.55,
+    phase1_2ToPhase2: 0.45,
+    phase2ToPhase3: 0.38,
+    phase2_3ToPhase3: 0.60,
+    phase3ToApproval: 0.64,
+    ndaFiledToApproval: 0.93,
+    approvalToLaunch: 0.95,
+  },
+
+  /**
+   * Gastroenterology -- IBD biologics (anti-TNF, anti-integrin, IL-23,
+   * S1P) have established regulatory pathways. Eosinophilic diseases
+   * emerging (dupilumab EoE). MASH/NASH crossover with metabolic TA.
+   *
+   * Phase 2→3 moderate due to high placebo response in IBD trials
+   * and evolving endpoint requirements (endoscopic + clinical).
+   */
+  gastroenterology: {
+    discoveryToPreclinical: 0.46,
+    preclinicalToPhase1: 0.62,
+    phase1ToPhase2: 0.52,
+    phase1_2ToPhase2: 0.42,
+    phase2ToPhase3: 0.34,  // IBD placebo response is a challenge; eosinophilic newer
+    phase2_3ToPhase3: 0.56,
+    phase3ToApproval: 0.62,
+    ndaFiledToApproval: 0.92,
+    approvalToLaunch: 0.94,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -236,17 +340,24 @@ export const POS_BY_THERAPEUTIC_AREA: Record<string, PhaseTransitionRates> = {
  * approval->launch (which is primarily administrative/commercial).
  *
  * Source: Cross-referenced from BIO/Informa modality stratification,
- * Nature Reviews Drug Discovery modality analyses, and internal
- * deal database calibration.
+ * Nature Reviews Drug Discovery modality analyses, Tufts NEWDIGS
+ * cell/gene therapy analysis (2024), ZS ADC PTRS analysis (2024),
+ * and internal deal database calibration.
+ *
+ * Calibration note (April 2026):
+ *   - ADC: 0.85→1.20 (53% P3 PTRS vs 41% oncology average, ZS 2024; 15 FDA-approved ADCs)
+ *   - CAR-T heme: 0.70→1.30 (17% LoA from P1 = 3x oncology avg, Tufts NEWDIGS; P3→FDA 100%)
+ *   - Gene therapy: 0.55→0.90 (28% LoA from P1 = 2-3.5x average, Tufts NEWDIGS)
+ *   - GLP-1: 1.15→1.30 (near-zero P3 failure rate 2023-2026)
  */
 export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   // --- Cross-therapeutic modalities ---
   /** Traditional oral/injectable small molecules -- baseline */
   smallMolecule: 1.00,
-  /** Monoclonal antibodies -- slight uplift from validated platform */
-  mab: 1.05,
-  /** Antibody-drug conjugates -- higher CMC complexity, emerging safety signals */
-  adc: 0.85,
+  /** Monoclonal antibodies -- validated platform, well-understood PK */
+  mab: 1.08,
+  /** ADCs -- PTRS 53% vs 41% oncology avg (ZS 2024). 15 FDA-approved. Premium modality. */
+  adc: 1.20,
   /** Bispecific antibodies -- complex manufacturing, novel mechanisms */
   bispecific: 0.80,
   /** T-cell engagers (BiTE, etc.) -- cytokine release syndrome risk */
@@ -255,14 +366,14 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   peptide: 0.95,
 
   // --- Oncology-specific modalities ---
-  /** Autologous CAR-T for hematologic malignancies -- validated platform */
-  carT_heme: 0.75,
-  /** CAR-T for solid tumors -- major TME/trafficking challenges */
+  /** CAR-T heme -- 17% LoA from P1 = 3x oncology avg (Tufts NEWDIGS 2024). 7 FDA-approved. P3→FDA = 100% */
+  carT_heme: 1.30,
+  /** CAR-T solid tumors -- TME/trafficking challenges persist. afamitresgene (sarcoma) first approval 2024 but overall low response rates */
   carT_solid: 0.55,
-  /** Non-CAR-T cell therapies (TIL, NK, etc.) -- earlier-stage platform */
-  cellTherapy: 0.60,
-  /** Ex vivo gene therapy -- CMC and durability challenges */
-  geneTherapy: 0.65,
+  /** Non-CAR-T cell therapies (TIL, NK, allogeneic) -- emerging, lifileucel (TIL) approved 2024 */
+  cellTherapy: 0.70,
+  /** Gene therapy -- 28% LoA from P1 = 2-3.5x average (Tufts NEWDIGS 2024). P2 65% higher than avg */
+  geneTherapy: 0.90,
   /** Radiopharmaceuticals -- growing evidence base (Pluvicto precedent) */
   radiopharmaceutical: 0.80,
   /** mRNA therapeutics (non-vaccine) -- delivery challenges for non-liver targets */
@@ -317,8 +428,8 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   tl1aInhibitor: 0.80,
 
   // --- Metabolic-specific modalities ---
-  /** GLP-1 receptor agonists -- the most validated mechanism in metabolic disease */
-  glp1Agonist: 1.15,
+  /** GLP-1 receptor agonists -- near-zero P3 failure rate 2023-2026 (orforglipron, retatrutide, CagriSema, oral semaglutide all positive) */
+  glp1Agonist: 1.30,
   /** Dual GLP-1/GIP agonists (tirzepatide class) -- strong validation */
   dualIncretin: 0.95,
   /** Triple agonist (GLP-1/GIP/glucagon) -- promising but limited Phase 3 data */
@@ -357,8 +468,8 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   // --- Ophthalmology-specific modalities ---
   /** Anti-VEGF therapies (ranibizumab/aflibercept class) -- gold standard */
   antiVegf: 1.15,
-  /** Gene therapy for inherited retinal diseases (Luxturna precedent) */
-  geneTherapyOcular: 0.60,
+  /** Gene therapy for inherited retinal diseases (Luxturna precedent, 28% LoA class avg) */
+  geneTherapyOcular: 0.85,
   /** Intravitreal depot/implant formulations -- established delivery route */
   intravitreal: 0.95,
   /** Topical ophthalmic formulations -- bioavailability challenges */
