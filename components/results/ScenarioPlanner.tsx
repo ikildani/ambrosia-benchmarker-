@@ -137,6 +137,61 @@ export default function ScenarioPlanner({
             }
           >
             {/* -------------------------------------------------------------- */}
+            {/* Tornado Impact Summary — Top 5 risks + Top 5 upsides          */}
+            {/* -------------------------------------------------------------- */}
+            {sortedScenarios.length >= 4 && (() => {
+              const topRisks = sortedScenarios.filter(s => s.impactDelta < 0).slice(0, 5);
+              const topUpsides = sortedScenarios.filter(s => s.impactDelta > 0).slice(-5).reverse();
+              const maxImpact = Math.max(
+                ...topRisks.map(s => Math.abs(s.impactPercent)),
+                ...topUpsides.map(s => Math.abs(s.impactPercent)),
+                1,
+              );
+
+              return (
+                <div className="mb-5 p-3 sm:p-4 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-200 dark:border-slate-600">
+                  <h5 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Scenario Impact Tornado</h5>
+                  <div className="space-y-1.5">
+                    {topRisks.map(s => (
+                      <div key={s.scenario.id} className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 w-28 sm:w-36 truncate text-right flex-shrink-0">{s.scenario.name}</span>
+                        <div className="flex-1 flex justify-end">
+                          <div
+                            className="h-4 bg-gradient-to-l from-red-500 to-red-300 rounded-l-sm"
+                            style={{ width: `${Math.max((Math.abs(s.impactPercent) / maxImpact) * 100, 3)}%` }}
+                          />
+                        </div>
+                        <div className="flex-1" />
+                        <span className="text-[10px] font-bold text-red-600 dark:text-red-400 w-12 flex-shrink-0">{s.impactPercent.toFixed(0)}%</span>
+                      </div>
+                    ))}
+                    {/* Center divider */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-28 sm:w-36 flex-shrink-0" />
+                      <div className="flex-1 h-px bg-slate-300 dark:bg-slate-500" />
+                      <div className="text-[9px] text-slate-400 dark:text-slate-500 font-bold px-1">BASE</div>
+                      <div className="flex-1 h-px bg-slate-300 dark:bg-slate-500" />
+                      <span className="w-12 flex-shrink-0" />
+                    </div>
+                    {topUpsides.map(s => (
+                      <div key={s.scenario.id} className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 w-28 sm:w-36 truncate text-right flex-shrink-0">{s.scenario.name}</span>
+                        <div className="flex-1" />
+                        <div className="flex-1 flex justify-start">
+                          <div
+                            className="h-4 bg-gradient-to-r from-green-300 to-green-500 rounded-r-sm"
+                            style={{ width: `${Math.max((Math.abs(s.impactPercent) / maxImpact) * 100, 3)}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold text-green-600 dark:text-green-400 w-12 flex-shrink-0">+{s.impactPercent.toFixed(0)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* -------------------------------------------------------------- */}
             {/* Scenario Cards Grid                                            */}
             {/* -------------------------------------------------------------- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
@@ -147,21 +202,32 @@ export default function ScenarioPlanner({
                   CATEGORY_COLORS[sr.scenario.category] ??
                   'bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300';
 
+                const isCompound = sr.scenario.id.startsWith('compound_');
+
                 return (
                   <div
                     key={sr.scenario.id}
                     className={`p-3 rounded-lg border transition-all hover:shadow-soft hover:-translate-y-0.5 cursor-default ${
-                      isNegative
+                      isCompound
+                        ? 'border-purple-300 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-500/5 ring-1 ring-purple-200 dark:ring-purple-500/20'
+                        : isNegative
                         ? 'border-red-200 dark:border-red-500/20 bg-red-50/50 dark:bg-red-500/5'
                         : 'border-green-200 dark:border-green-500/20 bg-green-50/50 dark:bg-green-500/5'
                     }`}
                   >
                     {/* Category chip at TOP */}
-                    <span
-                      className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 ${categoryColor}`}
-                    >
-                      {sr.scenario.category}
-                    </span>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span
+                        className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${categoryColor}`}
+                      >
+                        {sr.scenario.category}
+                      </span>
+                      {isCompound && (
+                        <span className="inline-block px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300">
+                          COMPOUND
+                        </span>
+                      )}
+                    </div>
 
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h6 className="text-xs font-semibold text-navy-800 dark:text-white leading-tight">
