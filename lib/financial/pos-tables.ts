@@ -482,6 +482,34 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   hormoneTherapy: 1.10,
   /** Neuroactive steroids (brexanolone/zuranolone class) -- emerging */
   neuroactiveSteroid: 0.75,
+
+  // --- Missing modalities added April 2026 ---
+  /** Anti-TL1A antibodies (tulisokibart, PRA023) -- emerging IBD/fibrosis target, strong P2 data */
+  antiTl1a: 0.85,
+  /** Bispecific antibodies for heme (glofitamab, epcoritamab) -- validated class, 2 approved */
+  bispecificHeme: 1.10,
+  /** BTK inhibitors (ibrutinib, acalabrutinib class) -- well-validated in heme */
+  btki: 1.15,
+  /** Enzyme replacement therapy (ERT) -- validated platform for LSDs */
+  enzymeReplacement: 1.10,
+  /** Gene editing (CRISPR, base editing) -- Casgevy approved 2023, emerging platform */
+  geneEditing: 0.75,
+  /** Gene therapy for rare diseases -- 28% LoA from P1, Tufts NEWDIGS 2024 */
+  geneTherapyRare: 0.95,
+  /** Gut-selective integrin antagonists (vedolizumab class) -- well-validated IBD target */
+  gutSelectiveIntegrin: 1.05,
+  /** IL-13 inhibitors (tralokinumab) -- validated in atopic dermatitis */
+  il13Inhibitor: 1.05,
+  /** IL-17 inhibitors (secukinumab, ixekizumab, bimekizumab) -- best-in-class derm */
+  il17Inhibitor: 1.15,
+  /** IL-23 for GI (guselkumab, risankizumab in IBD) -- strong P3 data */
+  il23GI: 1.05,
+  /** JAK inhibitors for dermatology (ritlecitinib, baricitinib) -- validated class */
+  jakInhibitorDerm: 1.08,
+  /** Substrate reduction therapy (eliglustat class) -- validated for Gaucher/Fabry */
+  substrateReduction: 1.05,
+  /** Topical biologics (emerging class) -- early platform, delivery challenges */
+  topicalBiologic: 0.60,
 };
 
 // ---------------------------------------------------------------------------
