@@ -201,6 +201,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Pro plan page
+  staticPages.push({
+    url: `${baseUrl}/pro`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.9,
+  });
+
   // Companies index page
   staticPages.push({
     url: `${baseUrl}/companies`,

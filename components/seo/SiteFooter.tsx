@@ -3,6 +3,7 @@ import Link from 'next/link';
 const footerLinks = {
   Product: [
     { label: 'Deal Calculator', href: '/calculator' },
+    { label: 'Pro Plan', href: '/pro' },
     { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Deal Pulse', href: '/pulse' },
     { label: 'Companies', href: '/companies' },
