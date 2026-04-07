@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const assetDesc = [modality, indication, phase].filter(Boolean).join(' · ');
     const companyStr = company || 'Unknown company';
 
-    // Track view in database for accurate counting
+    // Track view in database — AWAIT the insert so count is accurate
     const supabase = createServiceClient();
     await supabase.from('events').insert({
       event_type: 'share_view',
@@ -54,17 +54,20 @@ export async function POST(request: NextRequest) {
         ip: ip.slice(0, 6) + '***', // Partially anonymize
         referrer: referrer?.slice(0, 200),
       },
-    }).catch(() => {}); // Non-blocking
+    });
 
-    // Count total views for this token
-    const { count: viewCount } = await supabase
-      .from('events')
-      .select('id', { count: 'exact', head: true })
-      .eq('event_type', 'share_view')
-      .eq('event_data->>token', token)
-      .catch(() => ({ count: 1 })) as { count: number | null };
-
-    const totalViews = viewCount || 1;
+    // Count total views for this token (after insert, so this view is included)
+    let totalViews = 1;
+    try {
+      const { count } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_type', 'share_view')
+        .filter('event_data->>token', 'eq', token);
+      totalViews = count || 1;
+    } catch {
+      totalViews = 1;
+    }
 
     // Send Slack notification with accurate view count
     const webhookUrl = process.env.SLACK_DEAL_ALERTS_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
