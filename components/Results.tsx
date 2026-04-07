@@ -1330,7 +1330,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <MetricCard
             title={dtl?.devMilestoneLabel || 'Development Milestones'}
             icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>}
-            value={formatRange(terms.devMilestones)} expected={formatCurrency(terms.devMilestones.median)} expectedColor="text-neutral-700"
+            value={formatRange(terms.devMilestones)} expected={formatCurrency(terms.devMilestones.median)} expectedColor="text-cyan-600 dark:text-cyan-400"
             badge={metricBadges.devMilestones.label} badgeColor={metricBadges.devMilestones.color}
             progressWidth={getBarWidth(terms.devMilestones.median, maxTotalValue)} progressColor="bg-gradient-to-r from-cyan-500 to-cyan-400"
             drillDown={drillDown?.devMilestones} isExpanded={expandedCard === 'devMilestones'} onToggle={() => toggleCard('devMilestones')} canExpand={true}
@@ -1352,7 +1352,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <MetricCard
             title={dtl?.regMilestoneLabel || 'Regulatory Milestones'}
             icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
-            value={formatRange(terms.regMilestones)} expected={formatCurrency(terms.regMilestones.median)} expectedColor="text-neutral-700"
+            value={formatRange(terms.regMilestones)} expected={formatCurrency(terms.regMilestones.median)} expectedColor="text-cyan-600 dark:text-cyan-400"
             badge={metricBadges.regMilestones.label} badgeColor={metricBadges.regMilestones.color}
             progressWidth={getBarWidth(terms.regMilestones.median, maxTotalValue)} progressColor="bg-gradient-to-r from-teal-500 to-teal-400"
             drillDown={drillDown?.regMilestones} isExpanded={expandedCard === 'regMilestones'} onToggle={() => toggleCard('regMilestones')} canExpand={true}
@@ -1374,7 +1374,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <MetricCard
             title={dtl?.commMilestoneLabel || 'Commercial Milestones'}
             icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
-            value={formatRange(terms.commMilestones)} expected={formatCurrency(terms.commMilestones.median)} expectedColor="text-neutral-700"
+            value={formatRange(terms.commMilestones)} expected={formatCurrency(terms.commMilestones.median)} expectedColor="text-cyan-600 dark:text-cyan-400"
             badge={metricBadges.commMilestones.label} badgeColor={metricBadges.commMilestones.color}
             progressWidth={getBarWidth(terms.commMilestones.median, maxTotalValue)} progressColor="bg-gradient-to-r from-cyan-500 to-cyan-400"
             drillDown={drillDown?.commMilestones} isExpanded={expandedCard === 'commMilestones'} onToggle={() => toggleCard('commMilestones')} canExpand={true}
