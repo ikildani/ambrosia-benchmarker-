@@ -605,6 +605,52 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [hasHistory, setHasHistory] = useState(false);
   const comparisonRef = useRef<HTMLDivElement>(null);
 
+  // Pre-generate memo + playbook in background as soon as results load (Pro/Report only)
+  // This way they're cached before the user clicks "Download Report"
+  const pregenStartedRef = useRef(false);
+  useEffect(() => {
+    if (pregenStartedRef.current) return;
+    if (!hasFullAccess || !fullInputs || dealMemo) return;
+    pregenStartedRef.current = true;
+
+    // Fire and forget — results stored in state via setDealMemo
+    const pregenMemo = async (retries = 2) => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const res = await fetch('/api/deal-memo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reportId: reportId || undefined,
+              userId: userId || undefined,
+              email: userEmail || undefined,
+              inputs: fullInputs,
+              results: result,
+              labels: { phase: labels.phase, modality: labels.modality, indication: labels.indication },
+            }),
+            keepalive: true,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.memo || data.executive_summary) {
+              setDealMemo(data.memo || data);
+              return;
+            }
+          }
+          // Retry on failure
+          if (attempt < retries) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        } catch {
+          if (attempt < retries) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        }
+      }
+    };
+
+    // Start after 500ms (let the UI render first)
+    const timer = setTimeout(() => pregenMemo(), 500);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasFullAccess, fullInputs]);
+
   // Financial modeling state
   const [financialModel, setFinancialModel] = useState<FinancialModelResult | null>(null);
   const [serverData, setServerData] = useState<{ competitiveLandscape?: CompetitiveLandscape; dealFlowForecast?: DealFlowForecast }>({});

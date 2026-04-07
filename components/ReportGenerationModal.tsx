@@ -291,27 +291,65 @@ export default function ReportGenerationModal({
         let playbook: NegotiationPlaybook | null = null;
 
         if (!memo && memoPromise) {
-          try {
-            const fetchedMemo = await Promise.race([
-              memoPromise,
-              new Promise<null>(r => setTimeout(() => r(null), 20000)),
-            ]);
-            if (fetchedMemo) {
-              memo = fetchedMemo;
-              p.onMemoGenerated(memo);
+          // Try the in-flight request first, then auto-retry once on failure
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const source = attempt === 0 ? memoPromise : fetch('/api/deal-memo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  reportId: p.reportId || undefined,
+                  userId: p.userId || undefined,
+                  email: p.userEmail || undefined,
+                  inputs: p.fullInputs,
+                  results: p.result,
+                  labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
+                }),
+                keepalive: true,
+              }).then(async r => r.ok ? ((await r.json()).memo || null) as DealMemo | null : null).catch(() => null);
+
+              const fetchedMemo = await Promise.race([
+                source,
+                new Promise<null>(r => setTimeout(() => r(null), 15000)),
+              ]);
+              if (fetchedMemo) {
+                memo = fetchedMemo;
+                p.onMemoGenerated(memo);
+                break;
+              }
+              // First attempt failed/timed out — retry
+            } catch {
+              // Retry on next iteration
             }
-          } catch {
-            // Memo failed — continue without it
           }
         }
         if (playbookPromise) {
-          try {
-            playbook = await Promise.race([
-              playbookPromise,
-              new Promise<null>(r => setTimeout(() => r(null), 20000)),
-            ]);
-          } catch {
-            // Playbook failed — continue without it
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const source = attempt === 0 ? playbookPromise : fetch('/api/playbook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: p.userId || undefined,
+                  email: p.userEmail || undefined,
+                  inputs: { modality: p.fullInputs.modality, phase: p.fullInputs.phase, indication: p.fullInputs.indication, territory: p.fullInputs.territory },
+                  results: { terms: p.result.terms, tieredRoyalties: p.result.tieredRoyalties, dealRecommendation: p.result.dealRecommendation, negotiationInsight: p.result.negotiationInsight, modifiers: p.result.modifiers },
+                  labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
+                }),
+                keepalive: true,
+              }).then(async r => r.ok ? ((await r.json()).playbook || null) as NegotiationPlaybook | null : null).catch(() => null);
+
+              const fetchedPlaybook = await Promise.race([
+                source,
+                new Promise<null>(r => setTimeout(() => r(null), 15000)),
+              ]);
+              if (fetchedPlaybook) {
+                playbook = fetchedPlaybook;
+                break;
+              }
+            } catch {
+              // Retry
+            }
           }
         }
         if (abortRef.current) return;
