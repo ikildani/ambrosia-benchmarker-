@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}?session_id={CHECKOUT_SESSION_ID}&success=true`,
+      success_url: `${appUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}?canceled=true`,
       billing_address_collection: 'required',
       tax_id_collection: { enabled: true },

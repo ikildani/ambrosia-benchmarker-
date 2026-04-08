@@ -52,6 +52,9 @@ import MetricCard from './results/MetricCard';
 import DrillDownPanel from './results/DrillDownPanel';
 import DealMemoSection from './results/DealMemoSection';
 import ResultsDisclaimer from './results/ResultsDisclaimer';
+const ResultsTour = dynamic(() => import('./ResultsTour'), { ssr: false });
+import { TOUR_STEP_IDS } from './ResultsTour';
+import { shouldShowResultsTour } from '@/lib/tour';
 import { runFinancialModel, type FinancialModelResult } from '@/lib/financial/run-financial-model';
 import type { CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
 import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity';
@@ -519,8 +522,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [compareItem, setCompareItem] = useState<CalculationHistoryItem | null>(null);
   const [showHistoryPicker, setShowHistoryPicker] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
   const comparisonRef = useRef<HTMLDivElement>(null);
+
+  // Auto-launch results tour for Pro/Report users who haven't seen it
+  useEffect(() => {
+    if (!hasFullAccess) return;
+    const timer = setTimeout(() => {
+      if (shouldShowResultsTour()) setShowTour(true);
+    }, 1500); // Give sections time to render
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Pre-generate memo + playbook in background as soon as results load (Pro/Report only)
   // This way they're cached before the user clicks "Download Report"
@@ -1201,7 +1215,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Terms Grid — visible when email captured or authenticated */}
-        <div className={`grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7 ${!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro ? 'hidden' : ''}`}>
+        <div id={TOUR_STEP_IDS.DEAL_TERMS} className={`grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7 ${!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro ? 'hidden' : ''}`}>
           {/* Upfront Payment */}
           <MetricCard
             title={dtl?.upfrontLabel || 'Upfront Payment'}
@@ -1465,6 +1479,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         })()}
 
         {/* Interactive Charts Section */}
+        <div id={TOUR_STEP_IDS.WATERFALL}>
         <ChartSection
           terms={terms}
           tieredRoyalties={tieredRoyalties}
@@ -1473,6 +1488,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           onUpgrade={onUpgrade}
           dealTypeLabels={dealTypeLabels}
         />
+        </div>
 
         {/* Market Urgency - Patent Cliff Signal */}
         {partnerMatches.length > 0 && (
@@ -1509,6 +1525,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Sensitivity Analysis */}
         {fullInputs && onApplyNewInputs && (
+          <div id={TOUR_STEP_IDS.SENSITIVITY}>
           <FinancialErrorBoundary fallbackTitle="Sensitivity Analysis unavailable">
             <SensitivityAnalysis
               currentInputs={fullInputs}
@@ -1519,6 +1536,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               onBuyReport={onBuyReport}
             />
           </FinancialErrorBoundary>
+          </div>
         )}
 
         {/* Tornado Sensitivity Chart (dollar-impact) */}
@@ -1566,6 +1584,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* Financial Modeling — World-Class Tier */}
         {financialModel && (
           <>
+            <div id={TOUR_STEP_IDS.RNPV}>
             <FinancialErrorBoundary fallbackTitle="rNPV Analysis unavailable">
               <RnpvAnalysis
                 rnpvResult={financialModel.rnpv}
@@ -1580,9 +1599,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 realOptions={financialModel.realOptions}
               />
             </FinancialErrorBoundary>
+            </div>
             {/* Buyer-Specific Valuation */}
             {financialModel.dealWaterfall && (
-              <>
+              <div id={TOUR_STEP_IDS.BUYER_SPECIFIC}>
                 {partnerMatches.length > 0 ? (
                   <BuyerSpecificPanel
                     partnerMatches={partnerMatches as any}
@@ -1604,10 +1624,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
             {/* Deal Structure Toggle — right after deal waterfall for natural flow */}
             {hasFullAccess && fullInputs && financialModel.rnpv && (
+              <div id={TOUR_STEP_IDS.DEAL_STRUCTURE}>
               <FinancialErrorBoundary fallbackTitle="Deal Structure Toggle unavailable">
                 <DealStructureToggle
                   baseRNPV={financialModel.rnpv.riskAdjustedNPV}
@@ -1618,8 +1639,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   onBuyReport={onBuyReport}
                 />
               </FinancialErrorBoundary>
+              </div>
             )}
 
+            <div id={TOUR_STEP_IDS.MONTE_CARLO}>
             <FinancialErrorBoundary fallbackTitle="Monte Carlo Analysis unavailable">
               <MonteCarloResults
                 monteCarloResult={financialModel.monteCarlo}
@@ -1628,7 +1651,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
+            </div>
             {hasFullAccess && fullInputs && financialModel.rnpv && (
+              <div id={TOUR_STEP_IDS.INDEX_DRUGS}>
               <FinancialErrorBoundary fallbackTitle="Index Drug Comparison unavailable">
                 <IndexDrugComparison
                   modelPeakSalesM={financialModel.rnpv.cashFlows?.length > 0
@@ -1642,7 +1667,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   onBuyReport={onBuyReport}
                 />
               </FinancialErrorBoundary>
+              </div>
             )}
+            <div id={TOUR_STEP_IDS.MARKET_SIZE}>
             <FinancialErrorBoundary fallbackTitle="Market Size Analysis unavailable">
               <MarketSizePanel
                 marketSize={financialModel.marketSize ?? undefined}
@@ -1651,6 +1678,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
+            </div>
+            <div id={TOUR_STEP_IDS.SCENARIO_PLANNER}>
             <FinancialErrorBoundary fallbackTitle="Scenario Analysis unavailable">
               <ScenarioPlanner
                 scenarios={financialModel.scenarios}
@@ -1660,6 +1689,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
+            </div>
+            <div id={TOUR_STEP_IDS.COMPETITIVE}>
             <FinancialErrorBoundary fallbackTitle="Competitive Landscape unavailable">
               <CompetitiveLandscapePanel
                 landscape={serverData.competitiveLandscape}
@@ -1668,6 +1699,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
+            </div>
             <FinancialErrorBoundary fallbackTitle="Deal Flow Forecast unavailable">
               <DealFlowForecastPanel
                 forecast={serverData.dealFlowForecast}
@@ -1680,6 +1712,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* AI Deal Memo */}
+        <div id={TOUR_STEP_IDS.AI_TOOLS}>
         <FinancialErrorBoundary fallbackTitle="Deal Memo unavailable">
           <DealMemoSection
             hasFullAccess={hasFullAccess}
@@ -1690,10 +1723,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onBuyReport={onBuyReport}
           />
         </FinancialErrorBoundary>
+        </div>
 
         {/* Partner Matches */}
         {inputs && (
-          <div className="mb-4 sm:mb-6">
+          <div id={TOUR_STEP_IDS.PARTNER_MATCHES} className="mb-4 sm:mb-6">
             <FinancialErrorBoundary fallbackTitle="Partner Matches unavailable">
               <PartnerMatchesContainer
                 modality={inputs.modality}
@@ -1713,6 +1747,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* Asset Readiness Score (Pro/Report) */}
         {hasFullAccess && fullInputs && (
+          <div id={TOUR_STEP_IDS.ASSET_READINESS}>
           <FinancialErrorBoundary fallbackTitle="Asset Readiness Score unavailable">
             <AssetReadinessScore
               dataQuality={fullInputs.dataQuality}
@@ -1725,6 +1760,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               onBuyReport={onBuyReport}
             />
           </FinancialErrorBoundary>
+          </div>
         )}
 
         {/* Negotiation Insight - Pro Feature */}
@@ -1945,6 +1981,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* World-Class Disclaimer */}
         <ResultsDisclaimer />
       </div>
+
+      {/* Results Tour — guided walkthrough for Pro/Report users */}
+      <ResultsTour
+        isOpen={showTour}
+        onClose={() => setShowTour(false)}
+        onComplete={() => setShowTour(false)}
+      />
     </div>
   );
 }
