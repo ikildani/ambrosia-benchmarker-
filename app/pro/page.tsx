@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import ProCheckoutButton from '@/components/ProCheckoutButton';
 import {
   Zap, BarChart3, LineChart, GitBranch, Layers, Network,
   TrendingUp, Repeat, Users, Search, Brain, Activity,
@@ -138,12 +139,10 @@ export default function ProPage() {
 
                 {/* CTAs */}
                 <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <Link
-                    href="/calculator#pricing"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-400 transition-all text-base shadow-lg shadow-teal-500/25 hover:-translate-y-0.5"
-                  >
-                    Start Pro <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <ProCheckoutButton
+                    billingInterval="monthly"
+                    className="px-7 py-3.5 bg-teal-500 text-white text-base shadow-lg shadow-teal-500/25 hover:bg-teal-400 hover:-translate-y-0.5"
+                  />
                   <Link
                     href="/calculator"
                     className="inline-flex items-center gap-2 px-7 py-3.5 text-slate-300 font-medium rounded-xl hover:text-white hover:bg-white/5 transition-all border border-white/10"
@@ -543,12 +542,10 @@ export default function ProPage() {
                 <span className="text-3xl font-bold text-white">{PRICING.PRO_MONTHLY}</span>
                 <p className="text-sm text-slate-500 mt-1">or {PRICING.PRO_ANNUAL_MONTHLY} annually</p>
               </div>
-              <Link
-                href="/calculator#pricing"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-teal-500 text-white font-semibold rounded-xl hover:bg-teal-400 transition-all text-lg shadow-lg shadow-teal-500/25 hover:-translate-y-0.5"
-              >
-                Start Pro <ArrowRight className="w-5 h-5" />
-              </Link>
+              <ProCheckoutButton
+                billingInterval="monthly"
+                className="px-8 py-4 bg-teal-500 text-white text-lg shadow-lg shadow-teal-500/25 hover:bg-teal-400 hover:-translate-y-0.5"
+              />
             </div>
             <p className="mt-6 text-sm text-slate-600">Cancel anytime. No contracts.</p>
           </div>
