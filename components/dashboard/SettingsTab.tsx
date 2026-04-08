@@ -4,6 +4,102 @@ import { type CalculationHistoryItem } from '@/lib/history';
 import { PRICING } from '@/lib/config/constants';
 import { captureClientError } from '@/lib/sentry-client';
 import AppearanceSettings from './AppearanceSettings';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+
+function PasswordChangeSection() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+    if (!isSupabaseConfigured()) {
+      toast.error('Auth service unavailable.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password updated successfully.');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setIsOpen(false);
+      }
+    } catch (err) {
+      toast.error('Failed to update password. Please try again.');
+      captureClientError(err, 'SettingsTab', { context: 'Password change failed' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+            <svg className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Security</h3>
+        </div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          {isOpen ? 'Cancel' : 'Change Password'}
+        </button>
+      </div>
+      {isOpen && (
+        <div className="mt-4 space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              className="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter new password"
+              className="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            onClick={handleChangePassword}
+            disabled={saving || !newPassword || !confirmPassword}
+            className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-slate-800 dark:bg-slate-600 text-white hover:bg-slate-700 dark:hover:bg-slate-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Updating...' : 'Update Password'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface AvatarGradient {
   id: string;
@@ -350,12 +446,31 @@ const SettingsTab = React.memo(function SettingsTab({
                 <p className="text-sm text-slate-500 dark:text-slate-400">{tier === 'pro' ? `${PRICING.PRO_MONTHLY} • Billed monthly` : tier === 'report' ? 'One-time report purchase' : 'Free forever'}</p>
               </div>
             </div>
-            {tier === 'free' && (
+            {tier === 'free' ? (
               <button
                 onClick={onUpgrade}
                 className="px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10"
               >
                 Upgrade Now
+              </button>
+            ) : tier === 'pro' && (
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/billing/portal', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.url) {
+                      window.location.href = data.url;
+                    } else {
+                      toast.error('Unable to open billing portal. Please try again.');
+                    }
+                  } catch {
+                    toast.error('Connection error. Please try again.');
+                  }
+                }}
+                className="px-5 py-2.5 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              >
+                Manage Subscription
               </button>
             )}
           </div>
@@ -374,6 +489,9 @@ const SettingsTab = React.memo(function SettingsTab({
           ))}
         </div>
       </div>
+
+      {/* Security */}
+      <PasswordChangeSection />
 
       {/* Email Preferences */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
