@@ -30,6 +30,10 @@ function PasswordChangeSection() {
     setSaving(true);
     try {
       const supabase = createClient();
+      if (!supabase) {
+        toast.error('Auth service unavailable.');
+        return;
+      }
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
         toast.error(error.message);
