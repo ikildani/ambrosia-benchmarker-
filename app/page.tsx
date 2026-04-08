@@ -12,7 +12,8 @@ import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 import HeroProductPreview from '@/components/landing/HeroProductPreview';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { Check, ArrowRight } from 'lucide-react';
 
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
@@ -755,6 +756,71 @@ export default function Home() {
                 <div className="text-neutral-400 text-xs">{source.desc}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Plans Overview */}
+      <section className="py-20 px-4 bg-[#080d16] border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-3">Choose Your Plan</h2>
+            <p className="text-slate-400 max-w-xl mx-auto">One report for a single deal, or unlimited access for your entire pipeline.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Report */}
+            <Link
+              href="/report"
+              className="group relative bg-[#0d1420] border border-white/[0.06] rounded-2xl p-8 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 rounded-full border border-violet-500/20">One-Time</span>
+                <span className="text-2xl font-bold text-white font-mono">{PRICING.REPORT_PRICE}</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Deal Intelligence Report</h3>
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">20-page PDF + Excel for a single deal. Comparable transactions, partner matching, negotiation playbook.</p>
+              <ul className="space-y-2 mb-6">
+                {['rNPV with index drug validation', 'Multi-buyer valuation', 'Monte Carlo + VaR/CVaR', 'Negotiation playbook'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                    <Check className="w-3.5 h-3.5 text-violet-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
+                View report details <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+
+            {/* Pro */}
+            <Link
+              href="/pro"
+              className="group relative bg-gradient-to-b from-teal-500/[0.04] to-[#0d1420] border border-teal-500/20 rounded-2xl p-8 hover:border-teal-500/40 transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#080d16] bg-teal-500 rounded-full">Most Popular</span>
+              </div>
+              <div className="flex items-center justify-between mb-6">
+                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 rounded-full border border-teal-500/20">Subscription</span>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-white font-mono">{PRICING.PRO_PRICE}</span>
+                  <span className="text-xs text-slate-500">/mo</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Pro — Unlimited Access</h3>
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">Unlimited calculations, all 14 engines, partner matching, and export. For teams running multiple deals.</p>
+              <ul className="space-y-2 mb-6">
+                {['Everything in Report, unlimited', 'Buyer-specific valuation (3 partners)', 'Pharma Intent Score (10-factor)', 'Tornado + compound scenarios'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                    <Check className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-400 group-hover:text-teal-300 transition-colors">
+                View Pro details <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
           </div>
         </div>
       </section>
