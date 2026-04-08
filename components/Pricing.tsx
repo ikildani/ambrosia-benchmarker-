@@ -256,7 +256,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <span className="text-teal-300 text-xs font-semibold flex-1">1 Month Free</span>
+                      <span className="text-teal-300 text-xs font-semibold flex-1">7-Day Free Trial</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); clearPromo(); }}
                         className="text-teal-400/50 hover:text-teal-300"
