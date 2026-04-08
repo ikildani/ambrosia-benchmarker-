@@ -101,10 +101,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create a billing portal session
+    // Create a portal configuration with cancellation enabled
+    const portalConfig = await stripe.billingPortal.configurations.create({
+      business_profile: {
+        headline: 'Ambrosia Ventures, LLC — Manage Your Subscription',
+      },
+      features: {
+        subscription_cancel: {
+          enabled: true,
+          mode: 'at_period_end',
+          cancellation_reason: {
+            enabled: true,
+            options: ['too_expensive', 'missing_features', 'switched_service', 'unused', 'other'],
+          },
+        },
+        subscription_update: {
+          enabled: false,
+        },
+        payment_method_update: {
+          enabled: true,
+        },
+        invoice_history: {
+          enabled: true,
+        },
+        customer_update: {
+          enabled: true,
+          allowed_updates: ['email', 'name'],
+        },
+      },
+    });
+
+    // Create a billing portal session with explicit configuration
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
       return_url: `${appUrl}/dashboard`,
+      configuration: portalConfig.id,
     });
 
     return NextResponse.json({ url: portalSession.url });
