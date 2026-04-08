@@ -761,7 +761,7 @@ export default function Home() {
       </section>
 
       {/* Plans Overview */}
-      <section className="py-20 px-4 bg-[#080d16] border-t border-white/5">
+      <section id="pricing" className="py-20 px-4 bg-[#080d16] border-t border-white/5 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-3">Choose Your Plan</h2>
