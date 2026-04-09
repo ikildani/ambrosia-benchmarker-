@@ -2274,29 +2274,60 @@ export function findIndexDrug(
   therapeuticArea: string,
   indication?: string,
   modality?: string,
+  modelPeakSalesM?: number,
 ): IndexDrug | null {
-  // First try exact indication match
+  // First try exact indication + modality match
+  if (indication && modality) {
+    const exactMatch = INDEX_DRUG_DATABASE.find(
+      d => d.indication === indication && d.modality === modality && d.therapeuticArea === therapeuticArea
+    );
+    if (exactMatch) return exactMatch;
+  }
+
+  // Then try exact indication match
   if (indication) {
-    const indicationMatch = INDEX_DRUG_DATABASE.find(
+    const indicationMatches = INDEX_DRUG_DATABASE.filter(
       d => d.indication === indication && d.therapeuticArea === therapeuticArea
     );
-    if (indicationMatch) return indicationMatch;
+    if (indicationMatches.length > 0) {
+      // If we have a model peak sales estimate, pick the closest match by peak sales
+      if (modelPeakSalesM && modelPeakSalesM > 0) {
+        return indicationMatches.sort(
+          (a, b) => Math.abs(a.peakSalesM - modelPeakSalesM) - Math.abs(b.peakSalesM - modelPeakSalesM)
+        )[0];
+      }
+      return indicationMatches[0];
+    }
   }
 
-  // Then try modality match within TA
+  // Then try modality match within TA — pick closest by peak sales
   if (modality) {
-    const modalityMatch = INDEX_DRUG_DATABASE.find(
+    const modalityMatches = INDEX_DRUG_DATABASE.filter(
       d => d.modality === modality && d.therapeuticArea === therapeuticArea
     );
-    if (modalityMatch) return modalityMatch;
+    if (modalityMatches.length > 0) {
+      if (modelPeakSalesM && modelPeakSalesM > 0) {
+        return modalityMatches.sort(
+          (a, b) => Math.abs(a.peakSalesM - modelPeakSalesM) - Math.abs(b.peakSalesM - modelPeakSalesM)
+        )[0];
+      }
+      return modalityMatches[0];
+    }
   }
 
-  // Fall back to top drug in TA by peak sales
-  const taMatches = INDEX_DRUG_DATABASE
-    .filter(d => d.therapeuticArea === therapeuticArea)
-    .sort((a, b) => b.peakSalesM - a.peakSalesM);
+  // Fall back to closest drug in TA by peak sales (not the biggest)
+  const taMatches = INDEX_DRUG_DATABASE.filter(d => d.therapeuticArea === therapeuticArea);
+  if (taMatches.length === 0) return null;
 
-  return taMatches[0] || null;
+  if (modelPeakSalesM && modelPeakSalesM > 0) {
+    return taMatches.sort(
+      (a, b) => Math.abs(a.peakSalesM - modelPeakSalesM) - Math.abs(b.peakSalesM - modelPeakSalesM)
+    )[0];
+  }
+
+  // If no model estimate, pick the median drug (not the blockbuster)
+  const sorted = taMatches.sort((a, b) => a.peakSalesM - b.peakSalesM);
+  return sorted[Math.floor(sorted.length / 2)];
 }
 
 /**
@@ -2323,7 +2354,7 @@ export function checkPeakSalesRealism(
   confidence: 'high' | 'moderate' | 'low' | 'warning';
   narrative: string;
 } {
-  const indexDrug = findIndexDrug(therapeuticArea, indication, modality);
+  const indexDrug = findIndexDrug(therapeuticArea, indication, modality, modelPeakSalesM);
 
   if (!indexDrug) {
     return {
