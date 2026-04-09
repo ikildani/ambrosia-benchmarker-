@@ -53,7 +53,7 @@ const comparison = [
   { feature: 'Real options valuation', free: false, pro: 'CRR binomial lattice' },
   { feature: 'Competitive dynamics', free: false, pro: 'Revenue erosion + market access delay' },
   { feature: 'Sensitivity analysis', free: 'Top 3 only', pro: 'All parameters, tornado chart' },
-  { feature: 'Peak sales validation', free: false, pro: 'Sanity check vs 40+ index drugs' },
+  { feature: 'Peak sales validation', free: false, pro: 'Sanity check vs 164 index drugs' },
   { feature: 'PDF & Excel export', free: false, pro: '20-page reports + workbooks' },
   { feature: 'Share links', free: false, pro: 'Branded dark-theme pages' },
 ];
