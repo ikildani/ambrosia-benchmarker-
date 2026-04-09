@@ -134,8 +134,14 @@ export async function POST(request: NextRequest) {
     if (promoCode) {
       const normalizedCode = promoCode.trim().toUpperCase();
 
-      // AMBROSIA code: 7-day free trial — one use per user
+      // AMBROSIA code: 7-day free trial — one use per user, expires April 30 2026
       if (normalizedCode === 'AMBROSIA') {
+        // Check expiration
+        const expiresAt = new Date('2026-04-30T23:59:59Z');
+        if (new Date() > expiresAt) {
+          return apiError('This promo code has expired.', 400);
+        }
+
         // Check if this user/email has already used the AMBROSIA code
         const supabase = createServiceClient();
         const checkEmail = customerEmail?.toLowerCase();
