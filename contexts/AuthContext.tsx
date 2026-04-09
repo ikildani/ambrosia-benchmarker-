@@ -305,8 +305,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         });
 
+        // Re-check tier from database when user returns to the tab
+        // Handles: user pays in Stripe tab, comes back — tier should update without sign-out
+        const handleVisibilityChange = () => {
+          if (document.visibilityState !== 'visible') return;
+          supabase.auth.getSession().then(({ data: { session: freshSession } }) => {
+            if (!freshSession?.user) return;
+            const uid = freshSession.user.id;
+            const uemail = freshSession.user.email;
+            if (uemail && isProEmailClient(uemail)) return; // Already pro via allowlist
+            supabase.from('user_profiles')
+              .select('tier')
+              .eq('id', uid)
+              .single()
+              .then(({ data: profile, error: tierErr }) => {
+                if (!tierErr && profile?.tier && profile.tier !== 'free') {
+                  setTierState(profile.tier as 'pro' | 'report');
+                  localStorage.setItem('user_tier', profile.tier);
+                }
+              });
+          });
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
           subscription.unsubscribe();
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
       }
     }
