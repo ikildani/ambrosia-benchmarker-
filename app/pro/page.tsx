@@ -56,6 +56,8 @@ const comparison = [
   { feature: 'Peak sales validation', free: false, pro: 'Sanity check vs 164 index drugs' },
   { feature: 'PDF & Excel export', free: false, pro: '20-page reports + workbooks' },
   { feature: 'Share links', free: false, pro: 'Branded dark-theme pages' },
+  { feature: 'Company profiles (850+)', free: 'Names & types only', pro: 'Full deal history, pipeline, patent cliffs' },
+  { feature: 'Market Pulse (weekly)', free: false, pro: 'Deal activity, benchmarks, trend analysis' },
 ];
 
 const faqs = [
@@ -439,6 +441,162 @@ export default function ProPage() {
                   <span className="text-[11px] text-slate-400 font-medium text-center">{e.label}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            BEYOND THE CALCULATOR — Company Intelligence + Market Pulse
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 border-t border-white/[0.04]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-5">
+                <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Pro Exclusive</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white">Beyond the Calculator</h2>
+              <p className="mt-3 text-slate-500 max-w-2xl mx-auto">Pro unlocks two intelligence platforms that keep you ahead of the market between calculations.</p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Company Intelligence */}
+              <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-teal-500/20 transition-all">
+                {/* Mock screenshot */}
+                <div className="relative h-56 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(13,148,136,0.12),transparent)]" />
+                  {/* Simulated company cards */}
+                  <div className="absolute inset-4 grid grid-cols-3 gap-2 opacity-80">
+                    {['Pfizer', 'Roche', 'Novartis', 'AbbVie', 'Merck', 'BMS'].map((name, i) => (
+                      <div key={name} className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-2.5" style={{ animationDelay: `${i * 100}ms` }}>
+                        <div className="w-6 h-6 rounded-md bg-teal-500/15 border border-teal-500/20 flex items-center justify-center mb-1.5">
+                          <Building2 className="w-3 h-3 text-teal-500" />
+                        </div>
+                        <p className="text-[9px] font-semibold text-slate-300">{name}</p>
+                        <p className="text-[8px] text-slate-600 mt-0.5">Large Pharma</p>
+                        <div className="flex items-center gap-1 mt-1.5">
+                          <div className="h-0.5 flex-1 bg-teal-500/30 rounded-full" />
+                          <span className="text-[7px] text-teal-500 font-mono">{Math.floor(Math.random() * 20 + 5)} deals</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0d1420] to-transparent" />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-teal-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Company Intelligence</h3>
+                      <p className="text-xs text-slate-500">/companies</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                    Deep profiles on 850+ biopharma companies. Deal history, active clinical trials, pipeline by indication, patent cliffs, acquisition appetite, and competitive peer analysis.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'Deal financials & history',
+                      'Pipeline by phase',
+                      'Patent cliff timelines',
+                      'Acquisition appetite',
+                      'Competitive peer mapping',
+                      '10-factor intent scoring',
+                    ].map(f => (
+                      <div key={f} className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                        <Check className="w-3 h-3 text-teal-500 flex-shrink-0" />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href="/companies"
+                    className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors"
+                  >
+                    Explore companies <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Market Pulse */}
+              <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-indigo-500/20 transition-all">
+                {/* Mock screenshot */}
+                <div className="relative h-56 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(99,102,241,0.12),transparent)]" />
+                  {/* Simulated pulse dashboard */}
+                  <div className="absolute inset-4 space-y-2 opacity-80">
+                    {/* Stat row */}
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { label: 'Deals This Week', val: '23' },
+                        { label: 'New Announced', val: '8' },
+                        { label: 'Avg Upfront', val: '$142M' },
+                        { label: 'Median Upfront', val: '$85M' },
+                      ].map(s => (
+                        <div key={s.label} className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-2 text-center">
+                          <p className="text-[10px] font-bold text-white">{s.val}</p>
+                          <p className="text-[7px] text-slate-600 mt-0.5">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Deal feed mock */}
+                    {[
+                      { deal: 'Pfizer / Biotech-X', mod: 'ADC', phase: 'Phase 2' },
+                      { deal: 'Roche / GeneThera', mod: 'Gene Therapy', phase: 'Phase 1' },
+                      { deal: 'Novartis / ImmunoRx', mod: 'Bispecific', phase: 'Phase 3' },
+                      { deal: 'AbbVie / NeuroCo', mod: 'Small Molecule', phase: 'Phase 2' },
+                    ].map((d, i) => (
+                      <div key={i} className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-lg px-2.5 py-1.5">
+                        <div className="w-1 h-4 rounded-full bg-indigo-500/40" />
+                        <div className="flex-1">
+                          <p className="text-[9px] font-semibold text-slate-300">{d.deal}</p>
+                          <p className="text-[7px] text-slate-600">{d.mod} &middot; {d.phase}</p>
+                        </div>
+                        <div className="text-[8px] font-mono text-indigo-400">$***M</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0d1420] to-transparent" />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Market Pulse</h3>
+                      <p className="text-xs text-slate-500">/pulse</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                    Weekly intelligence snapshots delivered every Monday. Deal activity, benchmark shifts, modality heatmaps, therapeutic area trends, and historical sparklines — so you know what moved before your next meeting.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'Weekly deal activity feed',
+                      'Benchmark trend sparklines',
+                      'Modality heatmaps',
+                      'TA breakdown & shifts',
+                      'Average & median upfronts',
+                      'Board-ready market context',
+                    ].map(f => (
+                      <div key={f} className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                        <Check className="w-3 h-3 text-indigo-500 flex-shrink-0" />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href="/pulse"
+                    className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    View market pulse <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
