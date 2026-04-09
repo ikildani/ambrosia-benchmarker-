@@ -448,153 +448,425 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             BEYOND THE CALCULATOR — Company Intelligence + Market Pulse
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-14">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-5">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes btc-fade-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes btc-fade-up-2 {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes btc-pulse-glow {
+            0%, 100% { box-shadow: 0 0 8px rgba(13,148,136,0.15); }
+            50% { box-shadow: 0 0 20px rgba(13,148,136,0.3); }
+          }
+          @keyframes btc-pulse-glow-indigo {
+            0%, 100% { box-shadow: 0 0 8px rgba(99,102,241,0.15); }
+            50% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+          }
+          @keyframes btc-border-shimmer {
+            0% { border-color: rgba(13,148,136,0.1); }
+            50% { border-color: rgba(13,148,136,0.3); }
+            100% { border-color: rgba(13,148,136,0.1); }
+          }
+          @keyframes btc-border-shimmer-indigo {
+            0% { border-color: rgba(99,102,241,0.1); }
+            50% { border-color: rgba(99,102,241,0.3); }
+            100% { border-color: rgba(99,102,241,0.1); }
+          }
+          @keyframes btc-bar-grow {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+          }
+          @keyframes btc-number-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+          .btc-card-teal {
+            transition: all 0.3s ease;
+          }
+          .btc-card-teal:hover {
+            border-color: rgba(13,148,136,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(13,148,136,0.12), 0 0 0 1px rgba(13,148,136,0.15);
+          }
+          .btc-card-indigo {
+            transition: all 0.3s ease;
+          }
+          .btc-card-indigo:hover {
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(99,102,241,0.15);
+          }
+          .btc-stagger-1 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.1s; }
+          .btc-stagger-2 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.2s; }
+          .btc-stagger-3 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.3s; }
+          .btc-stagger-4 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.4s; }
+          .btc-stagger-5 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.5s; }
+          .btc-stagger-6 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.15s; }
+          .btc-stagger-7 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.25s; }
+          .btc-stagger-8 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.35s; }
+          .btc-stagger-9 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.45s; }
+          .btc-metric-live {
+            animation: btc-number-pulse 3s ease-in-out infinite;
+          }
+          .btc-bar-animate {
+            transform-origin: left;
+            animation: btc-bar-grow 1s ease both;
+          }
+          .btc-bar-animate-d1 { animation-delay: 0.2s; }
+          .btc-bar-animate-d2 { animation-delay: 0.35s; }
+          .btc-bar-animate-d3 { animation-delay: 0.5s; }
+          .btc-bar-animate-d4 { animation-delay: 0.65s; }
+        `}} />
+        <section className="py-24 px-4 border-t border-white/[0.04] relative overflow-hidden">
+          {/* Background effects */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_20%_50%,rgba(13,148,136,0.06),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_50%,rgba(99,102,241,0.06),transparent)]" />
+
+          <div className="relative max-w-6xl mx-auto">
+            {/* Section header */}
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] mb-6">
                 <Activity className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Pro Exclusive</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pro Exclusive Intelligence</span>
               </div>
-              <h2 className="text-3xl font-bold text-white">Beyond the Calculator</h2>
-              <p className="mt-3 text-slate-500 max-w-2xl mx-auto">Pro unlocks two intelligence platforms that keep you ahead of the market between calculations.</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15]">
+                Your Edge Between<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400">Board Meetings</span>
+              </h2>
+              <p className="mt-5 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                Two intelligence platforms that monitor 850+ companies and every deal that moves — so you walk into every meeting knowing what changed.
+              </p>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Company Intelligence */}
-              <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-teal-500/20 transition-all">
-                {/* Mock screenshot */}
-                <div className="relative h-56 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(13,148,136,0.12),transparent)]" />
-                  {/* Simulated company cards */}
-                  <div className="absolute inset-4 grid grid-cols-3 gap-2 opacity-80">
-                    {['Pfizer', 'Roche', 'Novartis', 'AbbVie', 'Merck', 'BMS'].map((name, i) => (
-                      <div key={name} className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-2.5" style={{ animationDelay: `${i * 100}ms` }}>
-                        <div className="w-6 h-6 rounded-md bg-teal-500/15 border border-teal-500/20 flex items-center justify-center mb-1.5">
-                          <Building2 className="w-3 h-3 text-teal-500" />
-                        </div>
-                        <p className="text-[9px] font-semibold text-slate-300">{name}</p>
-                        <p className="text-[8px] text-slate-600 mt-0.5">Large Pharma</p>
-                        <div className="flex items-center gap-1 mt-1.5">
-                          <div className="h-0.5 flex-1 bg-teal-500/30 rounded-full" />
-                          <span className="text-[7px] text-teal-500 font-mono">{Math.floor(Math.random() * 20 + 5)} deals</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Overlay gradient */}
-                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0d1420] to-transparent" />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-teal-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Company Intelligence</h3>
-                      <p className="text-xs text-slate-500">/companies</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                    Deep profiles on 850+ biopharma companies. Deal history, active clinical trials, pipeline by indication, patent cliffs, acquisition appetite, and competitive peer analysis.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      'Deal financials & history',
-                      'Pipeline by phase',
-                      'Patent cliff timelines',
-                      'Acquisition appetite',
-                      'Competitive peer mapping',
-                      '10-factor intent scoring',
-                    ].map(f => (
-                      <div key={f} className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                        <Check className="w-3 h-3 text-teal-500 flex-shrink-0" />
-                        {f}
-                      </div>
-                    ))}
-                  </div>
-                  <Link
-                    href="/companies"
-                    className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors"
-                  >
-                    Explore companies <ArrowRight className="w-3 h-3" />
-                  </Link>
-                </div>
-              </div>
+            {/* ── Company Intelligence ── */}
+            <div className="btc-card-teal bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden mb-8">
+              <div className="grid lg:grid-cols-2">
+                {/* Left: Detailed company profile mockup */}
+                <div className="relative p-5 sm:p-6 bg-gradient-to-br from-[#0a1018] to-[#0d1420] overflow-hidden min-h-[420px]">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_30%_20%,rgba(13,148,136,0.08),transparent)]" />
 
-              {/* Market Pulse */}
-              <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-indigo-500/20 transition-all">
-                {/* Mock screenshot */}
-                <div className="relative h-56 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(99,102,241,0.12),transparent)]" />
-                  {/* Simulated pulse dashboard */}
-                  <div className="absolute inset-4 space-y-2 opacity-80">
-                    {/* Stat row */}
-                    <div className="grid grid-cols-4 gap-2">
+                  {/* Floating badges */}
+                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
+                    <div className="btc-stagger-1 px-2.5 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-sm" style={{ animation: 'btc-fade-up 0.6s ease both, btc-border-shimmer 3s ease-in-out infinite' }}>
+                      <span className="text-[10px] font-semibold text-teal-400">850+ companies tracked</span>
+                    </div>
+                    <div className="btc-stagger-2 px-2.5 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-sm">
+                      <span className="text-[10px] font-semibold text-teal-400">Updated weekly</span>
+                    </div>
+                  </div>
+
+                  {/* Simulated company profile */}
+                  <div className="relative z-[1]">
+                    {/* Company header */}
+                    <div className="flex items-start gap-3 mb-4 btc-stagger-1">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/25 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-teal-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">AstraZeneca plc</h4>
+                        <p className="text-[10px] text-slate-500">Large Pharma &middot; Cambridge, UK &middot; NASDAQ: AZN</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="px-1.5 py-0.5 text-[8px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 rounded">Active Acquirer</span>
+                          <span className="px-1.5 py-0.5 text-[8px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/15 rounded">Patent Cliff 2028</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Key metrics row */}
+                    <div className="grid grid-cols-4 gap-2 mb-4 btc-stagger-2">
                       {[
-                        { label: 'Deals This Week', val: '23' },
-                        { label: 'New Announced', val: '8' },
-                        { label: 'Avg Upfront', val: '$142M' },
-                        { label: 'Median Upfront', val: '$85M' },
-                      ].map(s => (
-                        <div key={s.label} className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-2 text-center">
-                          <p className="text-[10px] font-bold text-white">{s.val}</p>
-                          <p className="text-[7px] text-slate-600 mt-0.5">{s.label}</p>
+                        { label: 'Deals (3yr)', value: '24', color: 'text-teal-400' },
+                        { label: 'Intent Score', value: '78', color: 'text-amber-400' },
+                        { label: 'Acq. Appetite', value: 'High', color: 'text-emerald-400' },
+                        { label: 'Rev at Risk', value: '$18B', color: 'text-rose-400' },
+                      ].map(m => (
+                        <div key={m.label} className="p-2 bg-white/[0.03] border border-white/[0.06] rounded-lg text-center">
+                          <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">{m.label}</p>
+                          <p className={`text-sm font-bold font-mono ${m.color} btc-metric-live`}>{m.value}</p>
                         </div>
                       ))}
                     </div>
-                    {/* Deal feed mock */}
-                    {[
-                      { deal: 'Pfizer / Biotech-X', mod: 'ADC', phase: 'Phase 2' },
-                      { deal: 'Roche / GeneThera', mod: 'Gene Therapy', phase: 'Phase 1' },
-                      { deal: 'Novartis / ImmunoRx', mod: 'Bispecific', phase: 'Phase 3' },
-                      { deal: 'AbbVie / NeuroCo', mod: 'Small Molecule', phase: 'Phase 2' },
-                    ].map((d, i) => (
-                      <div key={i} className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-lg px-2.5 py-1.5">
-                        <div className="w-1 h-4 rounded-full bg-indigo-500/40" />
-                        <div className="flex-1">
-                          <p className="text-[9px] font-semibold text-slate-300">{d.deal}</p>
-                          <p className="text-[7px] text-slate-600">{d.mod} &middot; {d.phase}</p>
-                        </div>
-                        <div className="text-[8px] font-mono text-indigo-400">$***M</div>
+
+                    {/* Deal activity sparkline */}
+                    <div className="mb-4 p-3 bg-white/[0.02] border border-white/[0.05] rounded-lg btc-stagger-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Deal Activity (12 months)</span>
+                        <span className="text-[9px] font-mono text-teal-400">24 deals</span>
                       </div>
-                    ))}
+                      <svg viewBox="0 0 280 40" className="w-full" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                          <linearGradient id="btc-spark-grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="rgb(13,148,136)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="rgb(13,148,136)" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M0,32 L23,28 L47,30 L70,22 L93,18 L117,24 L140,14 L163,10 L187,16 L210,8 L233,12 L256,4 L280,6" fill="none" stroke="rgb(13,148,136)" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M0,32 L23,28 L47,30 L70,22 L93,18 L117,24 L140,14 L163,10 L187,16 L210,8 L233,12 L256,4 L280,6 L280,40 L0,40Z" fill="url(#btc-spark-grad)" />
+                        {/* Data points */}
+                        {[[0,32],[70,22],[140,14],[210,8],[280,6]].map(([cx,cy], i) => (
+                          <circle key={i} cx={cx} cy={cy} r="2.5" fill="#0d1420" stroke="rgb(13,148,136)" strokeWidth="1.5" />
+                        ))}
+                      </svg>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[8px] text-slate-600">Apr 2025</span>
+                        <span className="text-[8px] text-slate-600">Apr 2026</span>
+                      </div>
+                    </div>
+
+                    {/* Pipeline phase bars */}
+                    <div className="mb-4 btc-stagger-4">
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Pipeline by Phase</p>
+                      <div className="space-y-1.5">
+                        {[
+                          { phase: 'Phase 3', count: 14, pct: 85, color: 'bg-teal-500' },
+                          { phase: 'Phase 2', count: 22, pct: 100, color: 'bg-cyan-500' },
+                          { phase: 'Phase 1', count: 18, pct: 72, color: 'bg-indigo-500' },
+                          { phase: 'Preclinical', count: 31, pct: 65, color: 'bg-violet-500/60' },
+                        ].map((p, i) => (
+                          <div key={p.phase} className="flex items-center gap-2">
+                            <span className="text-[9px] text-slate-500 w-16 text-right font-mono">{p.phase}</span>
+                            <div className="flex-1 h-2 bg-white/[0.03] rounded-full overflow-hidden">
+                              <div className={`h-full ${p.color} rounded-full btc-bar-animate btc-bar-animate-d${i + 1}`} style={{ width: `${p.pct}%` }} />
+                            </div>
+                            <span className="text-[9px] text-slate-500 font-mono w-6">{p.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Active modalities */}
+                    <div className="btc-stagger-5">
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Active Modalities</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['ADC', 'Bispecific', 'Small Molecule', 'mRNA', 'Cell Therapy', 'Gene Therapy'].map(mod => (
+                          <span key={mod} className="px-2 py-0.5 text-[9px] font-medium text-teal-300 bg-teal-500/8 border border-teal-500/15 rounded-full">
+                            {mod}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0d1420] to-transparent" />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-indigo-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Market Pulse</h3>
-                      <p className="text-xs text-slate-500">/pulse</p>
-                    </div>
+
+                {/* Right: Copy */}
+                <div className="p-8 lg:p-10 flex flex-col justify-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 w-fit">
+                    <Building2 className="w-3 h-3 text-teal-400" />
+                    <span className="text-xs text-teal-300 font-medium">Company Intelligence</span>
                   </div>
-                  <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                    Weekly intelligence snapshots delivered every Monday. Deal activity, benchmark shifts, modality heatmaps, therapeutic area trends, and historical sparklines — so you know what moved before your next meeting.
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">
+                    Know every buyer before<br className="hidden sm:block" /> they know themselves
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    Deep profiles on 850+ biopharma companies updated weekly. Patent cliff pressure, pipeline gaps, acquisition appetite, and deal velocity -- the signals that predict who transacts next.
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
+
+                  <div className="space-y-3 mb-8">
                     {[
-                      'Weekly deal activity feed',
-                      'Benchmark trend sparklines',
-                      'Modality heatmaps',
-                      'TA breakdown & shifts',
-                      'Average & median upfronts',
-                      'Board-ready market context',
+                      { title: 'Deal financials and history', sub: 'Every licensing, acquisition, and collaboration with disclosed terms' },
+                      { title: 'Patent cliff timelines', sub: 'Revenue-at-risk analysis with LOE dates and biosimilar exposure' },
+                      { title: 'Pipeline gap detection', sub: 'Active ClinicalTrials.gov monitoring across all phases and TAs' },
+                      { title: 'Acquisition appetite scoring', sub: 'Composite signal from deal velocity, cash reserves, and pipeline depth' },
+                      { title: '10-factor Pharma Intent Score', sub: 'Predictive model calibrated against 378 historical transactions' },
+                      { title: 'Competitive peer mapping', sub: 'Side-by-side comparison of pipeline overlap and strategic positioning' },
                     ].map(f => (
-                      <div key={f} className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                        <Check className="w-3 h-3 text-indigo-500 flex-shrink-0" />
-                        {f}
+                      <div key={f.title} className="flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm text-slate-200 font-medium">{f.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{f.sub}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
+
+                  <Link
+                    href="/companies"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors group/link w-fit"
+                  >
+                    Explore company profiles <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Market Pulse ── */}
+            <div className="btc-card-indigo bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden">
+              <div className="grid lg:grid-cols-2">
+                {/* Left: Copy */}
+                <div className="p-8 lg:p-10 flex flex-col justify-center order-2 lg:order-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-5 w-fit">
+                    <Activity className="w-3 h-3 text-indigo-400" />
+                    <span className="text-xs text-indigo-300 font-medium">Market Pulse</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">
+                    Intelligence that does not<br className="hidden sm:block" /> sleep between Mondays
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    Weekly market snapshots with deal activity, benchmark shifts, and modality trends. Walk into every meeting knowing exactly what moved, what it means, and what comes next.
+                  </p>
+
+                  <div className="space-y-3 mb-8">
+                    {[
+                      { title: 'Live deal activity feed', sub: 'Every announced transaction with terms, modality, phase, and TA classification' },
+                      { title: 'Benchmark trend analysis', sub: '12-month upfront and total deal value trends by modality and phase' },
+                      { title: 'Modality heatmaps', sub: 'Visual grid showing where capital is concentrating across deal types' },
+                      { title: 'TA breakdown and shifts', sub: 'Week-over-week changes in deal volume and value by therapeutic area' },
+                      { title: 'Historical sparklines', sub: 'Inline trend visualization for every key metric and benchmark' },
+                      { title: 'Board-ready market context', sub: 'Exportable insights formatted for deal committee presentations' },
+                    ].map(f => (
+                      <div key={f.title} className="flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm text-slate-200 font-medium">{f.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{f.sub}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   <Link
                     href="/pulse"
-                    className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors group/link w-fit"
                   >
-                    View market pulse <ArrowRight className="w-3 h-3" />
+                    View market pulse <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" />
                   </Link>
+                </div>
+
+                {/* Right: Pulse dashboard mockup */}
+                <div className="relative p-5 sm:p-6 bg-gradient-to-br from-[#0a1018] to-[#0d1420] overflow-hidden min-h-[420px] order-1 lg:order-2">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_20%,rgba(99,102,241,0.08),transparent)]" />
+
+                  {/* Floating badges */}
+                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
+                    <div className="btc-stagger-6 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full backdrop-blur-sm" style={{ animation: 'btc-fade-up-2 0.6s ease both, btc-border-shimmer-indigo 3s ease-in-out infinite' }}>
+                      <span className="text-[10px] font-semibold text-indigo-400">12-month history</span>
+                    </div>
+                    <div className="btc-stagger-7 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full backdrop-blur-sm">
+                      <span className="text-[10px] font-semibold text-indigo-400">Every Monday 6AM UTC</span>
+                    </div>
+                  </div>
+
+                  <div className="relative z-[1]">
+                    {/* Week header */}
+                    <div className="flex items-center gap-2 mb-4 btc-stagger-6">
+                      <div className="w-2 h-2 rounded-full bg-indigo-500" style={{ animation: 'btc-pulse-glow-indigo 2s ease-in-out infinite' }} />
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Week of April 7, 2026</span>
+                    </div>
+
+                    {/* KPI cards */}
+                    <div className="grid grid-cols-4 gap-2 mb-4 btc-stagger-7">
+                      {[
+                        { label: 'Deals', value: '23', delta: '+5', up: true },
+                        { label: 'Announced', value: '8', delta: '+2', up: true },
+                        { label: 'Avg Upfront', value: '$142M', delta: '+$18M', up: true },
+                        { label: 'Median', value: '$85M', delta: '-$4M', up: false },
+                      ].map(kpi => (
+                        <div key={kpi.label} className="p-2 bg-white/[0.03] border border-white/[0.06] rounded-lg text-center">
+                          <p className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">{kpi.label}</p>
+                          <p className="text-sm font-bold font-mono text-white btc-metric-live">{kpi.value}</p>
+                          <p className={`text-[8px] font-mono ${kpi.up ? 'text-emerald-400' : 'text-rose-400'}`}>{kpi.delta} WoW</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Deal trend line chart */}
+                    <div className="mb-4 p-3 bg-white/[0.02] border border-white/[0.05] rounded-lg btc-stagger-8">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Weekly Deal Volume</span>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-0.5 bg-indigo-500 rounded-full" />
+                            <span className="text-[8px] text-slate-600">2026</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-0.5 bg-slate-600 rounded-full" />
+                            <span className="text-[8px] text-slate-600">2025</span>
+                          </div>
+                        </div>
+                      </div>
+                      <svg viewBox="0 0 280 60" className="w-full" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                          <linearGradient id="btc-pulse-grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="rgb(99,102,241)" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="rgb(99,102,241)" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {/* Grid lines */}
+                        {[15,30,45].map(y => (
+                          <line key={y} x1="0" y1={y} x2="280" y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+                        ))}
+                        {/* 2025 line (prior year) */}
+                        <path d="M0,38 L23,42 L47,36 L70,40 L93,34 L117,38 L140,32 L163,36 L187,30 L210,34 L233,28 L256,32 L280,26" fill="none" stroke="rgba(100,116,139,0.4)" strokeWidth="1" strokeDasharray="3 3" />
+                        {/* 2026 line (current) */}
+                        <path d="M0,44 L23,38 L47,42 L70,32 L93,28 L117,34 L140,22 L163,18 L187,24 L210,14 L233,18 L256,10 L280,8" fill="none" stroke="rgb(99,102,241)" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M0,44 L23,38 L47,42 L70,32 L93,28 L117,34 L140,22 L163,18 L187,24 L210,14 L233,18 L256,10 L280,8 L280,60 L0,60Z" fill="url(#btc-pulse-grad)" />
+                        {/* Latest data point */}
+                        <circle cx="280" cy="8" r="3" fill="#0d1420" stroke="rgb(99,102,241)" strokeWidth="1.5" />
+                        <circle cx="280" cy="8" r="1.5" fill="rgb(99,102,241)" />
+                      </svg>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[8px] text-slate-600">Jan</span>
+                        <span className="text-[8px] text-slate-600">Apr</span>
+                        <span className="text-[8px] text-slate-600">Jul</span>
+                        <span className="text-[8px] text-slate-600">Oct</span>
+                      </div>
+                    </div>
+
+                    {/* Deal activity feed */}
+                    <div className="mb-4 btc-stagger-8">
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Latest Deals</p>
+                      <div className="space-y-1.5">
+                        {[
+                          { parties: 'Pfizer / Vanguard Biotech', mod: 'ADC', phase: 'Phase 2', value: '$2.1B', ta: 'Oncology' },
+                          { parties: 'Roche / NeuralPath', mod: 'Bispecific Ab', phase: 'Phase 1', value: '$840M', ta: 'Neurology' },
+                          { parties: 'Novartis / CellGenix', mod: 'Cell Therapy', phase: 'Phase 3', value: '$3.4B', ta: 'Hematology' },
+                          { parties: 'AbbVie / MetaboRx', mod: 'Small Molecule', phase: 'Phase 2', value: '$1.2B', ta: 'Metabolic' },
+                        ].map((d, i) => (
+                          <div key={i} className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/[0.05] rounded-lg">
+                            <div className="w-1 h-5 rounded-full bg-indigo-500/50 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[9px] font-semibold text-slate-300 truncate">{d.parties}</p>
+                              <p className="text-[8px] text-slate-600">{d.mod} &middot; {d.phase} &middot; {d.ta}</p>
+                            </div>
+                            <span className="text-[10px] font-bold font-mono text-indigo-400 flex-shrink-0">{d.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Modality heatmap */}
+                    <div className="btc-stagger-9">
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Modality Heatmap (Deal Count)</p>
+                      <div className="grid grid-cols-6 gap-1">
+                        {[
+                          { mod: 'ADC', heat: 0.9 },
+                          { mod: 'mAb', heat: 0.7 },
+                          { mod: 'SM', heat: 0.6 },
+                          { mod: 'Gene', heat: 0.5 },
+                          { mod: 'Cell', heat: 0.8 },
+                          { mod: 'RNA', heat: 0.4 },
+                          { mod: 'Bisp', heat: 0.85 },
+                          { mod: 'PDC', heat: 0.3 },
+                          { mod: 'mRNA', heat: 0.55 },
+                          { mod: 'PROTAC', heat: 0.45 },
+                          { mod: 'RNAi', heat: 0.35 },
+                          { mod: 'Other', heat: 0.2 },
+                        ].map(cell => (
+                          <div
+                            key={cell.mod}
+                            className="p-1.5 rounded text-center border border-white/[0.03]"
+                            style={{ backgroundColor: `rgba(99,102,241,${cell.heat * 0.25})` }}
+                          >
+                            <p className="text-[7px] font-semibold text-slate-400">{cell.mod}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
