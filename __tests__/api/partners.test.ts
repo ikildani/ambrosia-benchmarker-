@@ -58,7 +58,7 @@ describe('/api/partners/match', () => {
             { category: 'modality', reason: 'ADC modality match', strength: 'strong' },
             { category: 'indication', reason: 'Lung cancer indication match', strength: 'moderate' },
           ],
-          score_breakdown: { modality: 30, indication: 25, phase: 15, activity: 10, strategic: 0, territory: 5, quality: 0, total: 85 },
+          score_breakdown: { modality: 30, indication: 25, phase: 15, activity: 10, strategic: 0, territory: 5, quality: 0, dealType: 0, total: 85 },
           modalities_active: ['adc', 'bispecific'],
           modalities_primary: ['adc'],
           indications_active: ['lung_nsclc'],
@@ -87,7 +87,7 @@ describe('/api/partners/match', () => {
           match_reasons: [
             { category: 'modality', reason: 'ADC modality match', strength: 'strong' },
           ],
-          score_breakdown: { modality: 30, indication: 15, phase: 12, activity: 10, strategic: 0, territory: 5, quality: 0, total: 72 },
+          score_breakdown: { modality: 30, indication: 15, phase: 12, activity: 10, strategic: 0, territory: 5, quality: 0, dealType: 0, total: 72 },
           modalities_active: ['adc'],
           modalities_primary: ['adc'],
           indications_active: ['breast_tnbc'],
@@ -116,7 +116,7 @@ describe('/api/partners/match', () => {
           match_reasons: [
             { category: 'indication', reason: 'Lung cancer indication match', strength: 'moderate' },
           ],
-          score_breakdown: { modality: 10, indication: 25, phase: 15, activity: 10, strategic: 0, territory: 5, quality: 0, total: 65 },
+          score_breakdown: { modality: 10, indication: 25, phase: 15, activity: 10, strategic: 0, territory: 5, quality: 0, dealType: 0, total: 65 },
           modalities_active: ['smallMolecule'],
           modalities_primary: ['smallMolecule'],
           indications_active: ['lung_nsclc'],
