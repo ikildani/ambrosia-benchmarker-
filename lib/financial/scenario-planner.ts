@@ -56,8 +56,11 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
     description: 'Asset fails to meet primary endpoint in Phase 2. Residual value from platform/data only.',
     category: 'clinical',
     adjustments: [
-      { parameter: 'peakSales', operation: 'multiply', value: 0.0, rationale: 'No commercial revenue from failed asset' },
-      { parameter: 'pos', operation: 'set', value: 0.0, rationale: 'Program terminated after Phase 2 miss' },
+      // Use a tiny (non-zero) peakSales and PoS so that the engine produces a
+      // near-zero revenue PV while still booking the full cost PV, yielding a
+      // realistically negative rNPV reflecting sunk R&D rather than ~$0.
+      { parameter: 'peakSales', operation: 'multiply', value: 0.001, rationale: 'No commercial revenue from failed asset' },
+      { parameter: 'pos', operation: 'set', value: 0.001, rationale: 'Program terminated after Phase 2 miss — sunk R&D realized' },
     ],
   },
   {
@@ -469,14 +472,30 @@ export function getDefensiveAnalysis(
   }));
   weightedResults.sort((a, b) => a.adjustedRNPV - b.adjustedRNPV);
   const totalWeight = weightedResults.reduce((s, r) => s + r.weight, 0);
-  let cumulativeWeight = 0;
+  // Linear interpolation between adjacent cumulative-weight points to find
+  // the true weighted 10th percentile. Previously we returned the rNPV of
+  // the first scenario whose cumulative weight crossed 0.10, which for
+  // concentrated distributions over-indexed on the single worst scenario.
+  const P10 = 0.10;
   let defensiveFloor = weightedResults[0]?.adjustedRNPV || 0;
+  let prevCumulative = 0;
+  let prevRNPV = weightedResults[0]?.adjustedRNPV || 0;
+  let cumulativeWeight = 0;
   for (const wr of weightedResults) {
     cumulativeWeight += wr.weight / totalWeight;
-    if (cumulativeWeight >= 0.10) {
-      defensiveFloor = wr.adjustedRNPV;
+    if (cumulativeWeight >= P10) {
+      // Interpolate between (prevCumulative, prevRNPV) and (cumulativeWeight, wr.adjustedRNPV).
+      const span = cumulativeWeight - prevCumulative;
+      if (span > 0) {
+        const t = (P10 - prevCumulative) / span;
+        defensiveFloor = prevRNPV + t * (wr.adjustedRNPV - prevRNPV);
+      } else {
+        defensiveFloor = wr.adjustedRNPV;
+      }
       break;
     }
+    prevCumulative = cumulativeWeight;
+    prevRNPV = wr.adjustedRNPV;
   }
 
   // Walk-away threshold: phase-adjusted minimum acceptable deal value
@@ -590,13 +609,25 @@ export function runCompoundScenarios(
 
     // Apply non-linear interaction multipliers on top.
     // These make the scenario WORSE (for downside) or BETTER (for upside).
-    // We apply them to the IMPACT DELTA (not the absolute rNPV) to ensure
-    // that a negative scenario always gets more negative, not less.
+    // We apply them DIRECTIONALLY to the IMPACT DELTA so downside deltas get
+    // more negative and upside deltas get more positive.
     const ix = pair.interactionMultipliers;
     if (ix.peakSalesMultiplier || ix.posMultiplier || ix.timeAdjustment) {
-      // Amplify the impact delta by the interaction factor
-      const interactionFactor = (ix.peakSalesMultiplier || 1.0) * (ix.posMultiplier || 1.0);
-      const amplifiedDelta = result.impactDelta * (1.0 + (1.0 - interactionFactor));
+      // Combined multiplicative interaction factor across all three drivers.
+      // timeAdjustment is expressed in years; convert to a NPV-impact proxy
+      // via ~5% per year (typical discount-rate order of magnitude) so that
+      // a 1-year delay dampens value by ~5% in the interaction factor.
+      const timeImpactPerYear = 0.05;
+      const timeFactor = ix.timeAdjustment ? (1 - ix.timeAdjustment * timeImpactPerYear) : 1.0;
+      const interactionFactor = (ix.peakSalesMultiplier || 1.0)
+        * (ix.posMultiplier || 1.0)
+        * timeFactor;
+      // Directional amplification: upside deltas scale by the factor directly,
+      // downside deltas scale by the reflected factor (2 - factor) so that
+      // a factor < 1.0 (bad things pile up) makes negative deltas MORE negative.
+      const amplifiedDelta = result.impactDelta >= 0
+        ? result.impactDelta * interactionFactor
+        : result.impactDelta * (2 - interactionFactor);
       const compoundedRNPV = baseResult.riskAdjustedNPV + amplifiedDelta;
 
       result = {

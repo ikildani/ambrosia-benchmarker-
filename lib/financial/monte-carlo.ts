@@ -497,7 +497,7 @@ export function runMonteCarlo(
     guardedInput.phase = 'phase2' as typeof guardedInput.phase;
   }
   if (guardedInput.discountRate != null) {
-    guardedInput.discountRate = Math.max(0.01, Math.min(0.40, guardedInput.discountRate));
+    guardedInput.discountRate = Math.max(0.01, Math.min(0.30, guardedInput.discountRate));
   }
   guardedInput.peakSalesEstimate = {
     low: Math.max(0, Math.min(1_000_000, guardedInput.peakSalesEstimate.low)),
@@ -597,9 +597,12 @@ export function runMonteCarlo(
 
     // Transform correlated normals to target distributions,
     // now centered on scenario-adjusted parameters:
-    // 1. PoS: correlated normal shift around scenario-adjusted base
-    const posShift = corr[0] * (input.posVariation ?? 0.20) * scenarioPoS;
-    const sPoS = Math.max(0.001, Math.min(0.999, scenarioPoS + posShift));
+    // 1. PoS: correlated normal shift around scenario-adjusted base.
+    // posVariation is an ABSOLUTE perturbation (e.g. 0.20 = ±20pp), so we do
+    // NOT multiply by scenarioPoS. Previously scaling by basePoS collapsed
+    // early-stage distributions (±1.6pp at 8% basePoS instead of ±20pp).
+    const posShift = corr[0] * (input.posVariation ?? 0.20);
+    const sPoS = Math.max(0.001, Math.min(0.99, scenarioPoS + posShift));
 
     // 2. Peak Sales: lognormal with scenario-adjusted center
     const peakShift = corr[1] * scenarioPsSigma;

@@ -81,90 +81,90 @@ const POS_MODIFIERS: Record<string, Partial<Record<string, number>>> = {
   symptomatic: { phase2ToPhase3: 1.10, phase3ToApproval: 1.05 },
 
   // Line of therapy
-  firstLine: { phase2_3: 1.10, phase3_approval: 1.15 },
-  thirdLinePlus: { phase2_3: 0.85, phase3_approval: 0.80 },
+  firstLine: { phase2ToPhase3: 1.10, phase3ToApproval: 1.15 },
+  thirdLinePlus: { phase2ToPhase3: 0.85, phase3ToApproval: 0.80 },
 
   // Combination potential
-  strongCombination: { phase2_3: 1.10, phase3_approval: 1.08 },
-  standaloneLimited: { phase2_3: 0.90, phase3_approval: 0.92 },
+  strongCombination: { phase2ToPhase3: 1.10, phase3ToApproval: 1.08 },
+  standaloneLimited: { phase2ToPhase3: 0.90, phase3ToApproval: 0.92 },
 
   // Neurology BBB penetration
-  bbb_proven: { phase1_2: 1.15, phase2_3: 1.20 },
-  bbb_unproven: { phase1_2: 0.75, phase2_3: 0.70 },
-  bbb_promising: { phase1_2: 0.95, phase2_3: 0.90 },
-  rapid_progressive_disease: { phase2_3: 1.15, phase3_approval: 1.10 },
-  episodic_disease: { phase2_3: 0.90 },
+  bbb_proven: { phase1ToPhase2: 1.15, phase2ToPhase3: 1.20 },
+  bbb_unproven: { phase1ToPhase2: 0.75, phase2ToPhase3: 0.70 },
+  bbb_promising: { phase1ToPhase2: 0.95, phase2ToPhase3: 0.90 },
+  rapid_progressive_disease: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  episodic_disease: { phase2ToPhase3: 0.90 },
 
   // Immunology
-  curative_intent: { phase2_3: 0.80, phase3_approval: 0.85 },
-  chronic_treatment: { phase2_3: 1.10, phase3_approval: 1.10 },
-  narrow_target: { phase2_3: 1.10 },
-  broad_immunosuppression: { phase2_3: 0.85 },
-  severe_refractory_disease: { phase2_3: 1.15, phase3_approval: 1.10 },
-  mild_moderate_disease: { phase2_3: 0.90 },
+  curative_intent: { phase2ToPhase3: 0.80, phase3ToApproval: 0.85 },
+  chronic_treatment: { phase2ToPhase3: 1.10, phase3ToApproval: 1.10 },
+  narrow_target: { phase2ToPhase3: 1.10 },
+  broad_immunosuppression: { phase2ToPhase3: 0.85 },
+  severe_refractory_disease: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  mild_moderate_disease: { phase2ToPhase3: 0.90 },
 
   // Metabolic
-  superior_wl_efficacy: { phase2_3: 1.20, phase3_approval: 1.15 },
-  modest_wl_efficacy: { phase2_3: 0.80, phase3_approval: 0.85 },
-  oral_route: { phase2_3: 1.15 },
-  implantable_route: { phase2_3: 0.85 },
-  cardiometabolic_benefit: { phase2_3: 1.10, phase3_approval: 1.10 },
-  novel_mechanism: { phase2_3: 0.90, phase3_approval: 0.85 },
+  superior_wl_efficacy: { phase2ToPhase3: 1.20, phase3ToApproval: 1.15 },
+  modest_wl_efficacy: { phase2ToPhase3: 0.80, phase3ToApproval: 0.85 },
+  oral_route: { phase2ToPhase3: 1.15 },
+  implantable_route: { phase2ToPhase3: 0.85 },
+  cardiometabolic_benefit: { phase2ToPhase3: 1.10, phase3ToApproval: 1.10 },
+  novel_mechanism: { phase2ToPhase3: 0.90, phase3ToApproval: 0.85 },
 
   // Cardiovascular
-  cv_mortality_reduction: { phase3_approval: 1.25 },
-  cv_symptom_improvement: { phase3_approval: 0.85 },
-  cv_mace_endpoint: { phase2_3: 0.90, phase3_approval: 1.15 },
-  cv_surrogate_endpoint: { phase2_3: 1.10, phase3_approval: 0.90 },
-  cv_high_risk_population: { phase2_3: 1.10 },
-  cv_primary_prevention: { phase2_3: 0.85 },
+  cv_mortality_reduction: { phase3ToApproval: 1.25 },
+  cv_symptom_improvement: { phase3ToApproval: 0.85 },
+  cv_mace_endpoint: { phase2ToPhase3: 0.90, phase3ToApproval: 1.15 },
+  cv_surrogate_endpoint: { phase2ToPhase3: 1.10, phase3ToApproval: 0.90 },
+  cv_high_risk_population: { phase2ToPhase3: 1.10 },
+  cv_primary_prevention: { phase2ToPhase3: 0.85 },
 
   // Infectious Disease
-  id_novel_target: { phase2_3: 1.15, phase3_approval: 1.10 },
-  id_broad_spectrum: { phase2_3: 0.90 },
-  id_chronic_infection: { phase2_3: 0.90, phase3_approval: 0.95 },
-  id_acute_infection: { phase2_3: 1.10 },
-  id_who_urgent: { phase2_3: 1.15, phase3_approval: 1.20 },
+  id_novel_target: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  id_broad_spectrum: { phase2ToPhase3: 0.90 },
+  id_chronic_infection: { phase2ToPhase3: 0.90, phase3ToApproval: 0.95 },
+  id_acute_infection: { phase2ToPhase3: 1.10 },
+  id_who_urgent: { phase2ToPhase3: 1.15, phase3ToApproval: 1.20 },
 
   // Ophthalmology
-  ophtho_one_time: { phase2_3: 1.20 },
-  ophtho_chronic_injection: { phase2_3: 0.90 },
-  ophtho_topical: { phase2_3: 1.10 },
-  ophtho_vision_threatening: { phase2_3: 1.15, phase3_approval: 1.10 },
-  ophtho_symptom_relief: { phase2_3: 0.90 },
-  ophtho_extended_durability: { phase2_3: 1.10 },
+  ophtho_one_time: { phase2ToPhase3: 1.20 },
+  ophtho_chronic_injection: { phase2ToPhase3: 0.90 },
+  ophtho_topical: { phase2ToPhase3: 1.10 },
+  ophtho_vision_threatening: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  ophtho_symptom_relief: { phase2ToPhase3: 0.90 },
+  ophtho_extended_durability: { phase2ToPhase3: 1.10 },
 
   // Women's Health
-  wh_no_approved_therapy: { phase2_3: 1.20, phase3_approval: 1.15 },
-  wh_well_served: { phase2_3: 0.85 },
-  wh_pregnancy_complexity: { phase2_3: 0.80, phase3_approval: 0.85 },
+  wh_no_approved_therapy: { phase2ToPhase3: 1.20, phase3ToApproval: 1.15 },
+  wh_well_served: { phase2ToPhase3: 0.85 },
+  wh_pregnancy_complexity: { phase2ToPhase3: 0.80, phase3ToApproval: 0.85 },
 
   // Rare Disease
-  rd_ultra_rare: { phase2_3: 1.25, phase3_approval: 1.20 },
-  rd_broader_rare: { phase2_3: 1.05 },
-  rd_monogenic: { phase2_3: 1.15, phase3_approval: 1.10 },
-  rd_unknown_genetic: { phase2_3: 0.80 },
+  rd_ultra_rare: { phase2ToPhase3: 1.25, phase3ToApproval: 1.20 },
+  rd_broader_rare: { phase2ToPhase3: 1.05 },
+  rd_monogenic: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  rd_unknown_genetic: { phase2ToPhase3: 0.80 },
 
   // Hematology
-  heme_mrd_endpoint: { phase2_3: 1.15, phase3_approval: 1.10 },
-  heme_survival_endpoint: { phase2_3: 0.90, phase3_approval: 0.95 },
-  heme_transplant_eligible: { phase2_3: 1.10 },
-  heme_post_transplant: { phase2_3: 0.85 },
+  heme_mrd_endpoint: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  heme_survival_endpoint: { phase2ToPhase3: 0.90, phase3ToApproval: 0.95 },
+  heme_transplant_eligible: { phase2ToPhase3: 1.10 },
+  heme_post_transplant: { phase2ToPhase3: 0.85 },
 
   // Dermatology
-  derm_severe_refractory: { phase2_3: 1.10, phase3_approval: 1.05 },
-  derm_mild: { phase2_3: 0.90 },
-  derm_chronic_relapsing: { phase2_3: 1.05 },
-  derm_topical_only: { phase2_3: 1.10 },
-  derm_systemic: { phase2_3: 0.95 },
+  derm_severe_refractory: { phase2ToPhase3: 1.10, phase3ToApproval: 1.05 },
+  derm_mild: { phase2ToPhase3: 0.90 },
+  derm_chronic_relapsing: { phase2ToPhase3: 1.05 },
+  derm_topical_only: { phase2ToPhase3: 1.10 },
+  derm_systemic: { phase2ToPhase3: 0.95 },
 
   // Gastroenterology
-  gi_endoscopic_remission: { phase2_3: 1.15, phase3_approval: 1.10 },
-  gi_clinical_only: { phase2_3: 0.90 },
-  gi_biologic_naive: { phase2_3: 1.10 },
-  gi_multi_biologic_exposed: { phase2_3: 0.80 },
-  gi_upper_gi: { phase2_3: 0.95 },
-  gi_colonic: { phase2_3: 1.05 },
+  gi_endoscopic_remission: { phase2ToPhase3: 1.15, phase3ToApproval: 1.10 },
+  gi_clinical_only: { phase2ToPhase3: 0.90 },
+  gi_biologic_naive: { phase2ToPhase3: 1.10 },
+  gi_multi_biologic_exposed: { phase2ToPhase3: 0.80 },
+  gi_upper_gi: { phase2ToPhase3: 0.95 },
+  gi_colonic: { phase2ToPhase3: 1.05 },
 };
 
 /** Maximum total PoS modifier deviation from base (±40%) */
@@ -360,7 +360,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const VALID_PHASES = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
   const guardedPhase = VALID_PHASES.includes(input.phase) ? input.phase : 'phase2';
   const guardedDiscountRate = input.discountRate != null
-    ? Math.max(0.01, Math.min(0.40, input.discountRate))
+    ? Math.max(0.01, Math.min(0.30, input.discountRate))
     : input.discountRate;
   const guardedPeakSales = {
     low: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.low)),
@@ -385,7 +385,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Add manufacturing complexity WACC premium for technically challenging modalities
   const baseDiscountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
   const mfgPremium = MANUFACTURING_WACC_PREMIUM[modality] || 0;
-  const discountRate = Math.min(0.30, baseDiscountRate + mfgPremium);
+  // Cap the combined rate at 35% (not 30%) so that the manufacturing WACC
+  // premium isn't silently dropped for high-risk combos where the base rate
+  // already sits at the 30% TA/phase ceiling from getDefaultDiscountRate.
+  const discountRate = Math.min(0.35, baseDiscountRate + mfgPremium);
 
   // 2. Calculate cumulative PoS from current phase
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
@@ -451,11 +454,34 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const phaseTransitions: RNPVResult['phaseTransitions'] = [];
   let runningCumProb = 1.0;
 
+  // Build a mapping from pathway phase name to the transition that represents
+  // *completing* that phase. For combined-phase starts (phase1_2, phase2_3),
+  // the transitions array from getCumulativePoS has extra entries for the
+  // combined-phase entry step, so a naive transitions[i] index is misaligned
+  // with pathway[i]. The mapping below resolves by matching phase substrings.
+  const pathwayPhaseToTransition: Record<string, typeof transitions[number] | undefined> = {};
+  const matchers: Record<string, (label: string) => boolean> = {
+    discovery: (l) => l.includes('Discovery'),
+    preclinical: (l) => l.includes('Preclinical'),
+    phase1: (l) => /Phase 1\b/.test(l) && !l.includes('Phase 1/2'),
+    phase1_2: (l) => l.includes('Phase 1/2'),
+    phase2: (l) => /Phase 2\b/.test(l) && !l.includes('Phase 2/3') && l.includes('Phase 3'),
+    phase2_3: (l) => l.includes('Phase 2/3'),
+    phase3: (l) => l.includes('Phase 3') && l.includes('Approval'),
+    nda_filed: (l) => l.includes('Approval') && l.includes('Launch'),
+  };
+  for (const pName of pathway) {
+    const matcher = matchers[pName];
+    if (matcher) {
+      pathwayPhaseToTransition[pName] = transitions.find(t => matcher(t.phase));
+    }
+  }
+
   for (let i = 0; i < pathway.length; i++) {
     const phaseName = pathway[i];
     const duration = durations[phaseName] || 2.0;
     const cost = costs[phaseName] || 30;
-    const transition = transitions[i];
+    const transition = pathwayPhaseToTransition[phaseName];
 
     if (transition) {
       runningCumProb = transition.cumulativeProb;
@@ -556,7 +582,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     if (denominator > 0.01) { // safety guard
       const terminalPV = (terminalRevenue / denominator);
       // Discount from the terminal year back to present, and risk-adjust
-      const terminalYear = lastRevenueCF.year || cashFlows.length;
+      const terminalYear = lastRevenueCF.year ?? cashFlows.length;
       const terminalDF = 1 / Math.pow(1 + discountRate, terminalYear);
       terminalValue = terminalPV * terminalDF * cumulativePoS;
     }
@@ -571,6 +597,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Upfront % depends on both phase and deal type.
   // Deal-type overrides (acquisition, option, etc.) take precedence over phase-based ratios.
   const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
+  // Total deal value as a fraction of rNPV is phase-stratified. Earlier phases
+  // command a lower fraction due to higher risk premium. The median matches
+  // getPhaseDealToRNPVRatio(phase); low/high are +/- 15pp around it (clamped).
+  const phaseTotalDealMedian = getPhaseDealToRNPVRatio(phase);
+  const phaseTotalDealLow = Math.max(0.10, phaseTotalDealMedian - 0.15);
+  const phaseTotalDealHigh = Math.min(1.10, phaseTotalDealMedian + 0.20);
   const impliedDealValue = {
     upfront: {
       low: riskAdjustedNPV * upfrontPercent.low,
@@ -578,9 +610,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       high: riskAdjustedNPV * upfrontPercent.high,
     },
     totalDeal: {
-      low: riskAdjustedNPV * 0.40,
-      median: riskAdjustedNPV * 0.55,
-      high: riskAdjustedNPV * 0.75,
+      low: riskAdjustedNPV * phaseTotalDealLow,
+      median: riskAdjustedNPV * phaseTotalDealMedian,
+      high: riskAdjustedNPV * phaseTotalDealHigh,
     },
   };
 
@@ -678,18 +710,29 @@ function projectCashFlows(
     return startIdx >= 0 ? standard.slice(startIdx) : ['phase1', 'phase2', 'phase3', 'nda_filed'];
   })();
 
+  // Compute the raw (unadjusted) sum of pathway durations so we can scale
+  // the R&D schedule to match the adjusted yearsToMarket. Without this scaling,
+  // the R&D schedule would end at the raw sum (ignoring data-quality timeline
+  // multiplier, market-access delay, and timeToMarketAdjustment), potentially
+  // overlapping commercial revenue if yearsToMarket was compressed.
+  const rawYearsToMarket = rdPathway.reduce((sum, p) => sum + (durations[p] || 2.0), 0);
+  const rdTimelineScale = rawYearsToMarket > 0 ? yearsToMarket / rawYearsToMarket : 1.0;
+
   let rdYearsSoFar = 0;
   const rdSchedule: { startYear: number; endYear: number; annualCost: number }[] = [];
   for (const phaseName of rdPathway) {
-    const dur = durations[phaseName] || 2.0;
+    const rawDur = durations[phaseName] || 2.0;
+    const scaledDur = rawDur * rdTimelineScale;
     const totalCost = phaseCosts[phaseName] || 0;
-    const annualCost = dur > 0 ? totalCost / dur : 0;
+    // Divide totalCost by the SCALED duration so the total spend stays constant
+    // while the annual burn rate adjusts to the compressed/expanded timeline.
+    const annualCost = scaledDur > 0 ? totalCost / scaledDur : 0;
     rdSchedule.push({
       startYear: rdYearsSoFar,
-      endYear: rdYearsSoFar + dur,
+      endYear: rdYearsSoFar + scaledDur,
       annualCost,
     });
-    rdYearsSoFar += dur;
+    rdYearsSoFar += scaledDur;
   }
 
   const launchYear = Math.ceil(yearsToMarket);
@@ -710,9 +753,14 @@ function projectCashFlows(
         const declineYears = yearsSinceLaunch - rampUpYears - peakDurationYears;
         revenue = peakSales * Math.pow(1 - declineRate, declineYears);
       } else {
-        // Post-LOE: sharp generic erosion
+        // Post-LOE: sharp generic erosion applied to the revenue level
+        // *immediately before* LOE (not raw peakSales). Without this, a
+        // drug that declined from $1B peak → $600M by LOE would incorrectly
+        // jump back up to $1B × (1 - erosion) on LOE day.
+        const declineYearsAtLoe = Math.max(0, loeYearsAfterApproval - rampUpYears - peakDurationYears);
+        const preLoeRevenue = peakSales * Math.pow(1 - declineRate, declineYearsAtLoe);
         const postLoeYears = yearsSinceLaunch - loeYearsAfterApproval;
-        revenue = peakSales * (1 - genericErosion) * Math.pow(0.85, postLoeYears);
+        revenue = preLoeRevenue * (1 - genericErosion) * Math.pow(0.85, postLoeYears);
       }
     }
 
@@ -756,8 +804,17 @@ function projectCashFlows(
     const discountFactor = 1 / Math.pow(1 + discountRate, year);
     const presentValue = netCashFlow * discountFactor;
 
-    // Risk-adjusted: probability of reaching this year's cash flows
-    // During development: PoS-weighted; post-launch: full cumulative PoS
+    // Risk-adjusted: probability of reaching this year's cash flows.
+    //
+    // Methodology note: we apply a single year-specific PoS to NET cash flow
+    // (revenue - costs). Pre-launch years use getPartialPoS (sigmoidal ramp
+    // from ~1.0 early to cumulativePoS at launch), which naturally captures
+    // the fact that if a program fails early (e.g. Phase 2 miss), Phase 3
+    // R&D spend never happens. Post-launch years use the full cumulativePoS
+    // for both revenue and ongoing SG&A/COGS, which slightly under-weights
+    // committed post-launch costs but keeps revenue and operating cost
+    // risk-weighting symmetric. This matches the simplified rNPV convention
+    // used in most published industry valuations.
     const yearPoS = yearsSinceLaunch >= 0 ? cumulativePoS : getPartialPoS(year, launchYear, cumulativePoS);
     const riskAdjustedPV = presentValue * yearPoS;
 
@@ -836,6 +893,9 @@ function getGenericErosionRate(modality: string): number {
  */
 function getPartialPoS(year: number, launchYear: number, fullPoS: number): number {
   if (launchYear <= 0) return fullPoS;
+  // Year 0 is before any risk is realized; all planned R&D costs are "certain"
+  // in the sense that you haven't had an opportunity to fail yet.
+  if (year === 0) return 1.0;
   // Step function: the PoS for a given development year is the
   // cumulative probability of having passed all prior go/no-go gates.
   // We approximate this as: PoS improves in jumps at ~25%, ~50%, ~75% of timeline

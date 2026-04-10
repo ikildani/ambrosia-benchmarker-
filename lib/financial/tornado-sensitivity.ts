@@ -76,11 +76,6 @@ export function computeTornadoSensitivities(
   const baseResult = calculateRNPV(baseInput);
   const baseValue = baseResult.riskAdjustedNPV; // $M
 
-  // For negative/zero rNPV, still generate sensitivities using absolute value
-  // This allows users to see which factors most impact their asset's value
-  const effectiveBase = baseValue <= 0 ? Math.max(Math.abs(baseValue), 1) : baseValue;
-  const isNegativeBase = baseValue <= 0;
-
   const sensitivities: TornadoSensitivity[] = [];
 
   // Helper: run rNPV with overrides and return the riskAdjustedNPV
@@ -93,17 +88,18 @@ export function computeTornadoSensitivities(
     }
   }
 
-  // 1. Probability of Success (+/-20% from base cumulative PoS)
-  // Approximate by scaling peak sales by PoS ratio (since rNPV = PoS * NPV)
+  // 1. Probability of Success (+/-20% absolute from base cumulative PoS)
+  // Rerun the engine via posMultiplier so the effect flows through cashflow
+  // risk-weighting non-linearly (rather than a closed-form PoS ratio).
   const basePoS = baseResult.cumulativePoS;
   const posLow = Math.max(0.01, basePoS - 0.20);
   const posHigh = Math.min(0.99, basePoS + 0.20);
-  const posLowValue = baseValue * (posLow / basePoS);
-  const posHighValue = baseValue * (posHigh / basePoS);
+  const posLowMult = basePoS > 0 ? posLow / basePoS : 1.0;
+  const posHighMult = basePoS > 0 ? posHigh / basePoS : 1.0;
   sensitivities.push({
     factor: 'Probability of Success',
-    lowValue: posLowValue,
-    highValue: posHighValue,
+    lowValue: runWithOverride({ posMultiplier: posLowMult }),
+    highValue: runWithOverride({ posMultiplier: posHighMult }),
     lowLabel: `PoS ${(posLow * 100).toFixed(0)}%`,
     highLabel: `PoS ${(posHigh * 100).toFixed(0)}%`,
   });
@@ -141,18 +137,12 @@ export function computeTornadoSensitivities(
     highLabel: `WACC ${(discountLow * 100).toFixed(0)}%`,
   });
 
-  // 4. Time to Market (+/-1.5 years) — approximate via discount effect
-  // Adding years increases discounting, subtracting years reduces it
-  // Use discount factor ratio: (1/(1+r)^deltaYears) as scaling factor
-  const r = baseDiscount;
-  const extraYearsDown = 1.5;
-  const extraYearsUp = 1.5;
-  const timeLowValue = baseValue * Math.pow(1 / (1 + r), extraYearsDown);
-  const timeHighValue = baseValue * Math.pow(1 + r, extraYearsUp * 0.3); // less aggressive for time savings
+  // 4. Time to Market (+/-1.5 years) — rerun engine with timeToMarketAdjustment
+  // so discounting, R&D burn schedule, and LOE tail all shift consistently.
   sensitivities.push({
     factor: 'Time to Market',
-    lowValue: timeLowValue,
-    highValue: Math.min(timeHighValue, baseValue * 1.25), // cap upside
+    lowValue: runWithOverride({ timeToMarketAdjustment: 1.5 }),
+    highValue: runWithOverride({ timeToMarketAdjustment: -1.5 }),
     lowLabel: '+1.5yr delay',
     highLabel: '-1.5yr faster',
   });
