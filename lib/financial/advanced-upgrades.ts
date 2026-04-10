@@ -117,8 +117,12 @@ export function calculateCompetitiveDynamics(
   input: RNPVInput,
   baseResult: RNPVResult,
 ): CompetitiveDynamicsResult {
-  const currentYear = new Date().getFullYear();
-  const launchYear = currentYear + Math.ceil(baseResult.yearsToMarket);
+  // cashFlows[i].year uses project-relative years (0 = today, N = end of forecast),
+  // so launchYear must also be project-relative to match. Previously this was
+  // `currentYear + yearsToMarket` which produced absolute calendar years (e.g., 2035)
+  // that never matched any cashFlow year, causing ALL competitors to silently
+  // deactivate and competitive erosion to always show 0%.
+  const launchYear = Math.ceil(baseResult.yearsToMarket);
 
   // --- 1. Generate competitor timeline from competitive position ---
   const position = input.competitivePosition || 'racing';
