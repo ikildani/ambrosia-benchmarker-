@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Lock, Shield, ChevronRight } from 'lucide-react';
+import { Lock, Shield, ChevronRight, ClipboardCheck } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -19,6 +19,8 @@ interface AssetReadinessScoreProps {
     prime: boolean;
   };
   tier: string;
+  dealType?: string;
+  modality?: string;
   onUpgrade?: () => void;
   onBuyReport?: () => void;
 }
@@ -60,6 +62,112 @@ const PHASE_SCORES: Record<string, number> = {
   phase1: 30,
   preclinical: 10,
 };
+
+// ---------------------------------------------------------------------------
+// Deal-type specific scoring (acquisition only)
+// ---------------------------------------------------------------------------
+
+// Earlier stage assets imply more pipeline-adjacent optionality for an
+// acquirer (the company isn't betting everything on a single pivotal readout).
+// Later-stage assets are typically more "lead asset" concentrated.
+const PIPELINE_DEPTH_PROXY_SCORES: Record<string, number> = {
+  preclinical: 85,
+  phase1: 80,
+  phase1_2: 75,
+  phase2: 65,
+  phase2_3: 55,
+  phase3: 45,
+  approved: 40,
+};
+
+// Platform modalities (gene therapy, ADC, CAR-T, mRNA, etc.) carry outsized
+// acquisition appeal because they unlock future programs. Single-asset
+// small molecules score lower.
+const MODALITY_PLATFORM_SCORES: Record<string, number> = {
+  geneTherapy: 95,
+  gene_therapy: 95,
+  cellTherapy: 95,
+  cell_therapy: 95,
+  carT: 95,
+  car_t: 95,
+  adc: 90,
+  mRNA: 90,
+  mrna: 90,
+  rnai: 85,
+  antisense: 80,
+  bispecific: 80,
+  proteinDegrader: 80,
+  protein_degrader: 80,
+  peptide: 55,
+  biologic: 65,
+  antibody: 65,
+  smallMolecule: 40,
+  small_molecule: 40,
+  vaccine: 70,
+};
+
+// ---------------------------------------------------------------------------
+// Additional considerations (non-scored checklist items)
+// ---------------------------------------------------------------------------
+
+interface ConsiderationItem {
+  title: string;
+  detail: string;
+}
+
+const ACQUISITION_CONSIDERATIONS: ConsiderationItem[] = [
+  {
+    title: 'Cap table cleanliness',
+    detail: 'Single founder or tight investor group is easier to close than a fragmented cap table with dozens of SAFEs or note holders.',
+  },
+  {
+    title: 'IP ownership',
+    detail: 'Confirm IP is fully owned — no upstream university licenses, no third-party royalty stacks, no co-ownership disputes.',
+  },
+  {
+    title: 'Management retention plan',
+    detail: 'Acquirers typically require founder/key scientist retention packages (1–3 year vesting, earnouts, or advisory roles).',
+  },
+  {
+    title: 'Manufacturing transferability',
+    detail: 'In-house GMP manufacturing is a premium asset; heavy CMO dependence raises transfer risk and diligence cost.',
+  },
+  {
+    title: 'Tax structure',
+    detail: 'Delaware C-corp with clean 83(b) elections is the preferred structure. LLC or foreign entities add deal friction.',
+  },
+  {
+    title: 'Employee retention risk',
+    detail: 'Identify flight-risk key employees and plan stay bonuses. Acquirers will ask for a "key person" analysis in diligence.',
+  },
+  {
+    title: 'Pipeline depth & platform value',
+    detail: 'Acquirers pay premium for platforms (multiple shots on goal). A single lead asset caps the strategic multiple.',
+  },
+];
+
+const CODEVELOPMENT_CONSIDERATIONS: ConsiderationItem[] = [
+  {
+    title: 'Complementary capabilities',
+    detail: 'Map which functions each party brings (discovery, clinical ops, manufacturing, commercial) — overlaps create friction.',
+  },
+  {
+    title: 'Geographic split potential',
+    detail: 'Decide early whether to split territories (US/ex-US) or co-promote globally. Geographic splits simplify governance.',
+  },
+  {
+    title: 'Cost-sharing infrastructure',
+    detail: 'Both parties need systems to track and reconcile shared R&D spend — typically 50/50 or 60/40 with true-ups.',
+  },
+  {
+    title: 'Joint steering committee experience',
+    detail: 'JSC governance requires clear escalation paths, dispute resolution, and decision rights (especially on go/no-go).',
+  },
+  {
+    title: 'Comparable deal alignment',
+    detail: 'Benchmark against structurally similar co-dev deals (not straight licensing comps) — profit splits are the key term.',
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Factor definitions
@@ -131,6 +239,8 @@ function getRecommendation(factors: Factor[]): string {
     biomarkerStatus: 'Invest in biomarker validation studies to demonstrate patient selection capability. Validated biomarkers can increase PoS by 15-25%.',
     phase: 'Advance development stage to de-risk the asset. Each phase transition significantly increases partner interest and deal valuation.',
     regulatoryDesignations: 'Pursue regulatory designations (Breakthrough, Fast Track, Orphan) to signal FDA engagement and accelerate review timelines.',
+    pipelineDepth: 'Build pipeline depth beyond the lead asset. Acquirers pay strategic premiums for platforms with multiple shots on goal, not single-asset companies.',
+    modalityPlatform: 'Emphasize platform extensibility. Even for a single-asset deal, articulating a clear "next 3 programs" roadmap materially lifts acquisition multiples.',
   };
 
   return recommendations[weakest.key] || 'Continue executing on your clinical development plan to strengthen the overall asset profile.';
@@ -147,10 +257,34 @@ export default function AssetReadinessScore({
   phase,
   regulatoryDesignations,
   tier,
+  dealType,
+  modality,
   onUpgrade,
   onBuyReport,
 }: AssetReadinessScoreProps) {
   const hasAccess = tier === 'pro' || tier === 'report';
+
+  const normalizedDealType = (dealType || 'licensing').toLowerCase();
+  const isAcquisition = normalizedDealType === 'acquisition';
+  const isCoDev = normalizedDealType === 'codevelopment' || normalizedDealType === 'co-development' || normalizedDealType === 'co_development';
+
+  const readinessLabel = isAcquisition
+    ? 'Acquisition readiness assessment'
+    : isCoDev
+      ? 'Co-development readiness assessment'
+      : 'Partnering/licensing readiness assessment';
+
+  const considerationsTitle = isAcquisition
+    ? 'Additional considerations for acquisition'
+    : isCoDev
+      ? 'Additional considerations for co-development'
+      : null;
+
+  const considerations = isAcquisition
+    ? ACQUISITION_CONSIDERATIONS
+    : isCoDev
+      ? CODEVELOPMENT_CONSIDERATIONS
+      : [];
 
   const { overallScore, factors, badge, recommendation } = useMemo(() => {
     // Compute individual factor scores
@@ -210,6 +344,33 @@ export default function AssetReadinessScore({
       },
     ];
 
+    // Acquisition-specific scored factors: pipeline depth proxy + modality platform value.
+    // These are added on top of the licensing factors so acquisitions get a richer score.
+    if (isAcquisition) {
+      const pipelineDepthScore = PIPELINE_DEPTH_PROXY_SCORES[phase] ?? 50;
+      const modalityKey = (modality || '').toString();
+      const platformScore = MODALITY_PLATFORM_SCORES[modalityKey] ?? 50;
+
+      factorsList.push(
+        {
+          key: 'pipelineDepth',
+          label: 'Pipeline Depth (proxy)',
+          weight: 10,
+          score: pipelineDepthScore,
+          color: 'text-fuchsia-600 dark:text-fuchsia-400',
+          bgColor: 'bg-fuchsia-500 dark:bg-fuchsia-400',
+        },
+        {
+          key: 'modalityPlatform',
+          label: 'Modality Platform Value',
+          weight: 10,
+          score: platformScore,
+          color: 'text-rose-600 dark:text-rose-400',
+          bgColor: 'bg-rose-500 dark:bg-rose-400',
+        },
+      );
+    }
+
     // Weighted average
     const totalWeight = factorsList.reduce((sum, f) => sum + f.weight, 0);
     const weighted = factorsList.reduce((sum, f) => sum + f.score * f.weight, 0);
@@ -221,7 +382,7 @@ export default function AssetReadinessScore({
       badge: scoreBadge(overall),
       recommendation: getRecommendation(factorsList),
     };
-  }, [dataQuality, competitivePosition, biomarkerStatus, phase, regulatoryDesignations]);
+  }, [dataQuality, competitivePosition, biomarkerStatus, phase, regulatoryDesignations, isAcquisition, modality]);
 
   // Find the weakest factor for the narrative
   const weakest = useMemo(() => {
@@ -247,7 +408,7 @@ export default function AssetReadinessScore({
                   Asset Readiness Score
                 </h4>
                 <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">
-                  Partnering/licensing readiness assessment
+                  {readinessLabel}
                 </p>
               </div>
             </div>
@@ -304,7 +465,7 @@ export default function AssetReadinessScore({
             </div>
 
             {/* Factor Detail Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-5">
+            <div className={`grid grid-cols-2 sm:grid-cols-3 ${isAcquisition ? 'lg:grid-cols-7' : 'lg:grid-cols-5'} gap-2 mb-5`}>
               {factors.map((factor) => (
                 <div
                   key={factor.key}
@@ -365,6 +526,41 @@ export default function AssetReadinessScore({
                 </div>
               </div>
             </div>
+
+            {/* Additional (non-scored) considerations — deal-type specific */}
+            {considerationsTitle && considerations.length > 0 && (
+              <div className="mt-4 p-4 rounded-lg border border-dashed border-amber-300 dark:border-amber-500/40 bg-amber-50/60 dark:bg-amber-500/5">
+                <div className="flex items-start gap-2 mb-3">
+                  <ClipboardCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                      {considerationsTitle}
+                    </h5>
+                    <p className="text-[11px] text-amber-700/80 dark:text-amber-300/70 mt-0.5">
+                      Not scored — these are items you should validate manually during diligence. They materially affect deal outcomes but can&apos;t be assessed from calculator inputs alone.
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {considerations.map((item) => (
+                    <li
+                      key={item.title}
+                      className="flex items-start gap-2 p-2 rounded-md bg-white/60 dark:bg-slate-800/40 border border-amber-200/60 dark:border-amber-500/20"
+                    >
+                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                          {item.title}
+                        </p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Pro Gate Overlay */}

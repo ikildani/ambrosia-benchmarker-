@@ -110,6 +110,12 @@ const WEIGHTS = {
 
   // Regulatory designation match (max 5 points) - company priorities align with designations
   regulatory_match: 5,
+
+  // Deal type alignment (max 20 points) - does company's historical deal structure
+  // match what the user is seeking (licensing vs acquisition vs co-development)?
+  // Weighted high because a licensing-only prospect mis-ranked against an
+  // acquirer-focused company leads to wasted outreach cycles.
+  dealTypeAlignment: 20,
 };
 
 // Modality adjacency map - related modalities that indicate interest
@@ -401,6 +407,12 @@ export interface MatchInput {
     orphan?: boolean;
     prime?: boolean;
   };
+  /**
+   * Desired deal structure (e.g. 'licensing', 'acquisition', 'codevelopment',
+   * 'option', 'collaboration'). Used to filter and weight partner matches by
+   * each company's historical deal structure preference.
+   */
+  dealType?: string;
 }
 
 export interface PartnerMatch {
@@ -443,7 +455,7 @@ export interface PartnerMatch {
 }
 
 export interface MatchReason {
-  category: 'modality' | 'indication' | 'phase' | 'activity' | 'territory' | 'strategic' | 'deal_size' | 'regulatory';
+  category: 'modality' | 'indication' | 'phase' | 'activity' | 'territory' | 'strategic' | 'deal_size' | 'regulatory' | 'deal_type';
   reason: string;
   strength: 'strong' | 'moderate' | 'weak';
 }
@@ -456,6 +468,7 @@ export interface ScoreBreakdown {
   strategic: number;
   territory: number;
   quality: number;
+  dealType: number;
   total: number;
 }
 
@@ -477,11 +490,15 @@ export async function findPartnerMatches(
   options: FindPartnerMatchesOptions = {}
 ): Promise<MatchResult> {
   const { limit = 50, includeEnhancedBreakdown = false } = options;
-  // Fetch all actively acquiring companies with good data
+  // Fetch companies that are either actively acquiring OR have closed at least
+  // one deal in the last 12 months. This ensures licensing-active companies
+  // (which may not be flagged as "actively_acquiring") are included so we can
+  // match users seeking licensing / co-development deals rather than outright
+  // acquisitions.
   const { data: companies, error } = await supabase
     .from('companies')
     .select('*')
-    .eq('actively_acquiring', true)
+    .or('actively_acquiring.eq.true,deals_last_12mo.gte.1')
     .gte('data_quality_score', 20)
     .order('deals_last_12mo', { ascending: false })
     .limit(500);
@@ -502,6 +519,16 @@ export async function findPartnerMatches(
 
   // Score each company
   const scoredMatches: PartnerMatch[] = [];
+
+  // Pre-fetch each company's preferred deal structure from recent deal history.
+  // We use this to filter and weight matches by deal-type alignment BEFORE
+  // ranking, so e.g. a user seeking a licensing deal gets licensing-active
+  // companies ranked above pure acquirers. Wrapped in try/catch so a database
+  // hiccup (or an unmocked test query) falls back to neutral scoring.
+  const dealTypePrefsMap = await buildDealTypePreferenceMap(
+    supabase,
+    (companies as CompanyProfile[]).map((c) => c.id),
+  );
 
   // Pre-fetch deals for all companies if enhanced breakdown is needed
   // This is more efficient than fetching per-company
@@ -615,7 +642,12 @@ export async function findPartnerMatches(
   }
 
   for (const company of companies as CompanyProfile[]) {
-    const { score, breakdown, reasons } = calculateMatchScore(company, input);
+    const preferredDealStructure = dealTypePrefsMap.get(company.id);
+    const { score, breakdown, reasons } = calculateMatchScore(
+      company,
+      input,
+      preferredDealStructure,
+    );
 
     // Apply quick watch-out penalties to all companies before filtering
     const quickWatchOuts = calculateQuickWatchOuts(company, input);
@@ -721,9 +753,152 @@ export async function findPartnerMatches(
   };
 }
 
+// Deal types considered "licensing-style" (i.e. not outright acquisitions)
+const LICENSING_DEAL_TYPES = new Set([
+  'licensing',
+  'license',
+  'collaboration',
+  'codevelopment',
+  'co_development',
+  'co-development',
+  'option',
+]);
+
+/**
+ * Derive each company's historical deal-structure preference from their
+ * recent deals. Returns a Map<company_id, 'licensing' | 'acquisition' | 'mixed'>.
+ *
+ * Mirrors the logic used in getDealHistoryCrossReference (preferred_deal_structure)
+ * so partner matching and deal-history anchoring stay consistent.
+ *
+ * Wrapped in try/catch: if the query fails (or returns nothing), the map
+ * will simply be empty and scoring falls back to neutral (no boost, no penalty).
+ */
+async function buildDealTypePreferenceMap(
+  supabase: SupabaseClient,
+  companyIds: string[],
+): Promise<Map<string, DealHistorySummary['preferred_deal_structure']>> {
+  const result = new Map<string, DealHistorySummary['preferred_deal_structure']>();
+  if (companyIds.length === 0) return result;
+
+  try {
+    // Pull last ~36 months of deals so the preference reflects recent behavior
+    const thirtySixMonthsAgo = new Date(
+      Date.now() - 36 * 30 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const { data, error } = await supabase
+      .from('deals')
+      .select('licensor_id, licensee_id, deal_type, announced_date')
+      .or(
+        `licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`,
+      )
+      .gte('announced_date', thirtySixMonthsAgo)
+      .order('announced_date', { ascending: false })
+      .limit(2000);
+
+    if (error || !data) return result;
+
+    // Tally licensing vs acquisition deals per company
+    const tallies = new Map<string, { licensing: number; acquisition: number }>();
+    for (const deal of data as Array<{
+      licensor_id?: string;
+      licensee_id?: string;
+      deal_type?: string | null;
+    }>) {
+      const dealType = (deal.deal_type || '').toLowerCase();
+      if (!dealType) continue;
+      const isAcquisition = dealType === 'acquisition' || dealType === 'buyout';
+      const isLicensing = LICENSING_DEAL_TYPES.has(dealType);
+      if (!isAcquisition && !isLicensing) continue;
+
+      for (const id of [deal.licensor_id, deal.licensee_id]) {
+        if (!id || !companyIds.includes(id)) continue;
+        const tally = tallies.get(id) || { licensing: 0, acquisition: 0 };
+        if (isAcquisition) tally.acquisition += 1;
+        else tally.licensing += 1;
+        tallies.set(id, tally);
+      }
+    }
+
+    for (const [id, tally] of tallies.entries()) {
+      if (tally.acquisition === 0 && tally.licensing === 0) continue;
+      if (tally.acquisition > tally.licensing) result.set(id, 'acquisition');
+      else if (tally.licensing > tally.acquisition) result.set(id, 'licensing');
+      else result.set(id, 'mixed');
+    }
+  } catch (err) {
+    console.warn(
+      '[PartnerMatching] Non-blocking: failed to pre-fetch deal-type preferences:',
+      err,
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Score how well a company's historical deal structure matches the user's
+ * desired deal type (licensing, acquisition, codevelopment, etc.).
+ *
+ * Full weight for exact or compatible matches; heavy penalty for strong
+ * mismatches (e.g. user wants licensing but company only does acquisitions)
+ * so those companies drop below better-aligned partners in ranking.
+ */
+function scoreDealTypeAlignment(
+  preferred: DealHistorySummary['preferred_deal_structure'] | undefined,
+  userDealType: string | undefined,
+  weight: number,
+): { score: number; signals: string[] } {
+  // No user-selected deal type → neutral (half weight, no signal)
+  if (!userDealType) return { score: weight * 0.5, signals: [] };
+
+  // No known deal history → neutral (can't penalize, can't reward)
+  if (!preferred) return { score: weight * 0.5, signals: [] };
+
+  const signals: string[] = [];
+
+  // Exact match: full points
+  if (
+    preferred === userDealType ||
+    (preferred === 'mixed' && ['licensing', 'codevelopment'].includes(userDealType))
+  ) {
+    signals.push(`Active in ${userDealType} deals`);
+    return { score: weight, signals };
+  }
+
+  // Strong mismatch: licensing requested but company only does acquisitions
+  if (userDealType === 'licensing' && preferred === 'acquisition') {
+    signals.push('Prefers acquisitions over licensing');
+    return { score: weight * 0.2, signals };
+  }
+
+  // Strong mismatch: acquisition requested but company only does licensing
+  if (userDealType === 'acquisition' && preferred === 'licensing') {
+    signals.push('Prefers licensing over acquisitions');
+    return { score: weight * 0.2, signals };
+  }
+
+  // Co-development requested
+  if (userDealType === 'codevelopment') {
+    if (preferred === 'mixed') {
+      return { score: weight * 0.8, signals: ['Mixed deal history supports co-dev'] };
+    }
+    if (preferred === 'licensing') return { score: weight * 0.7, signals: [] };
+    return { score: weight * 0.4, signals: ['Limited co-development history'] };
+  }
+
+  // Mixed preference matches everything reasonably well
+  if (preferred === 'mixed') return { score: weight * 0.85, signals: [] };
+
+  // Default: partial match
+  return { score: weight * 0.5, signals: [] };
+}
+
 function calculateMatchScore(
   company: CompanyProfile,
-  input: MatchInput
+  input: MatchInput,
+  preferredDealStructure?: DealHistorySummary['preferred_deal_structure'],
 ): { score: number; breakdown: ScoreBreakdown; reasons: MatchReason[] } {
   const breakdown: ScoreBreakdown = {
     modality: 0,
@@ -733,6 +908,7 @@ function calculateMatchScore(
     strategic: 0,
     territory: 0,
     quality: 0,
+    dealType: 0,
     total: 0,
   };
   const reasons: MatchReason[] = [];
@@ -1113,6 +1289,27 @@ function calculateMatchScore(
     }
   }
 
+  // 9. DEAL TYPE ALIGNMENT
+  // Rank companies by whether their historical deal structure matches what
+  // the user is actually looking for (licensing vs acquisition vs co-dev).
+  const dealTypeResult = scoreDealTypeAlignment(
+    preferredDealStructure,
+    input.dealType,
+    WEIGHTS.dealTypeAlignment,
+  );
+  breakdown.dealType = dealTypeResult.score;
+  for (const signal of dealTypeResult.signals) {
+    reasons.push({
+      category: 'deal_type',
+      reason: signal,
+      strength: dealTypeResult.score >= WEIGHTS.dealTypeAlignment * 0.75
+        ? 'strong'
+        : dealTypeResult.score >= WEIGHTS.dealTypeAlignment * 0.4
+          ? 'moderate'
+          : 'weak',
+    });
+  }
+
   // Calculate total
   breakdown.total = Object.values(breakdown).reduce((sum, val) => sum + val, 0) - breakdown.total;
 
@@ -1130,7 +1327,8 @@ function calculateMatchScore(
     WEIGHTS.actively_acquiring +
     WEIGHTS.company_capacity +
     WEIGHTS.deal_size_match +
-    WEIGHTS.regulatory_match;
+    WEIGHTS.regulatory_match +
+    WEIGHTS.dealTypeAlignment;
 
   const normalizedScore = Math.min(100, Math.round((breakdown.total / maxPossibleScore) * 100));
 
