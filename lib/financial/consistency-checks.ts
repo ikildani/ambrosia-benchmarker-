@@ -18,6 +18,23 @@ import type {
 } from './types';
 import type { InvariantViolation } from './invariants';
 
+/**
+ * Expected upfront / totalDeal band by deal type (fixed 2026-04-06).
+ *
+ * These band widths intentionally add some slack around the engine's own
+ * midpoints so natural risk-adjustment, phase interpolation, and rounding
+ * don't trip the check. A ratio outside the band almost always indicates a
+ * deal-type mismatch (e.g., acquisition numbers computed with licensing
+ * percentages, which was the bug that motivated this check).
+ */
+const UPFRONT_TO_TOTAL_BANDS: Record<string, { low: number; high: number }> = {
+  acquisition:    { low: 0.65, high: 0.98 }, // target 70-95%, +/- slack
+  licensing:      { low: 0.05, high: 0.50 }, // target 15-40%, +/- slack
+  codevelopment:  { low: 0.10, high: 0.40 },
+  option:         { low: 0.02, high: 0.25 },
+  collaboration:  { low: 0.05, high: 0.35 },
+};
+
 function v(
   severity: InvariantViolation['severity'],
   rule: string,
@@ -47,11 +64,47 @@ export function checkCrossEngineConsistency(
   scenarios: ScenarioComparisonResult,
   dealWaterfall: DealWaterfall,
   buyerGenericMedian?: number,
+  dealType?: string,
 ): InvariantViolation[] {
   const out: InvariantViolation[] = [];
 
   const mainRnpv = rnpv.riskAdjustedNPV;
   const mainDealMedian = rnpv.impliedDealValue?.totalDeal?.median;
+  const mainUpfrontMedian = rnpv.impliedDealValue?.upfront?.median;
+
+  // 0. CRITICAL: upfront / totalDeal ratio must match deal type band.
+  // Detects the classic "acquisition math with licensing percentages" bug
+  // where upfront and totalDeal use different denominators.
+  if (
+    dealType &&
+    typeof mainUpfrontMedian === 'number' &&
+    typeof mainDealMedian === 'number' &&
+    Number.isFinite(mainUpfrontMedian) &&
+    Number.isFinite(mainDealMedian) &&
+    mainDealMedian > 0.01
+  ) {
+    const band = UPFRONT_TO_TOTAL_BANDS[dealType];
+    if (band) {
+      const ratio = mainUpfrontMedian / mainDealMedian;
+      if (ratio < band.low || ratio > band.high) {
+        out.push(
+          v('critical', 'consistency.upfront_to_total_ratio',
+            `[${dealType}] upfront/totalDeal ratio ${(ratio * 100).toFixed(1)}% is outside expected band ${(band.low * 100).toFixed(0)}-${(band.high * 100).toFixed(0)}%. ` +
+            `upfront=$${mainUpfrontMedian.toFixed(0)}M totalDeal=$${mainDealMedian.toFixed(0)}M. ` +
+            `This usually indicates a deal-type mismatch (e.g., acquisition terms computed with licensing percentages).`,
+            { dealType, ratio, upfront: mainUpfrontMedian, totalDeal: mainDealMedian, band }),
+        );
+      }
+      // Extra guardrail: upfront must never exceed totalDeal
+      if (mainUpfrontMedian > mainDealMedian * 1.01) {
+        out.push(
+          v('critical', 'consistency.upfront_exceeds_total',
+            `[${dealType}] upfront median $${mainUpfrontMedian.toFixed(0)}M exceeds totalDeal median $${mainDealMedian.toFixed(0)}M — mathematically impossible.`,
+            { dealType, upfront: mainUpfrontMedian, totalDeal: mainDealMedian }),
+        );
+      }
+    }
+  }
 
   // 1. CRITICAL: Main rNPV within 15% of MC P50
   const mcP50 = monteCarlo.percentiles?.p50;
@@ -140,6 +193,7 @@ export function checkCrossEngineConsistencyFromTornado(
   scenarios: ScenarioComparisonResult,
   dealWaterfall: DealWaterfall,
   buyerGenericMedian?: number,
+  dealType?: string,
 ): InvariantViolation[] {
   // The tornado engine computes its own baseline internally; we don't see it
   // from the outside. Pass undefined so the baseline check is skipped unless
@@ -152,5 +206,6 @@ export function checkCrossEngineConsistencyFromTornado(
     scenarios,
     dealWaterfall,
     buyerGenericMedian,
+    dealType,
   );
 }

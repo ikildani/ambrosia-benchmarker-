@@ -246,6 +246,7 @@ export function runFinancialModel(
       scenarioComparison,
       dealWaterfall,
       undefined, // buyer-specific generic not computed in this orchestrator
+      inputs.dealType, // enables deal-type ratio check (fixed 2026-04-06)
     );
     const allViolations = [...scenarioViolations, ...consistencyViolations];
     if (allViolations.some(v => v.severity === 'critical')) {

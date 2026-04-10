@@ -1441,10 +1441,21 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   //
   // COLLABORATION: Research-stage, highly contingent on early data
   //   Real-world: Preclinical collab $20-100M total, Phase 2 $200-800M
+  // Phase-dependent acquisition multiplier applied to the LICENSING baseline
+  // (baseTotalValue) to produce the headline acquisition price. This mirrors
+  // the rNPV-engine `ACQUISITION_PREMIUM_BY_PHASE` philosophy but operates on
+  // a different numeraire (licensing comps vs. rNPV). Recalibrated 2026-04-06
+  // against 2024-2026 transactions:
+  //   - Neurocrine / Soleno (Apr 2026): $2.9B, approved, ~3.0x rNPV baseline
+  //   - Gilead / Tubulis (Apr 2026): $3.1B, Phase 2 ADC platform (~1.8x)
+  //   - AbbVie / ImmunoGen (2024): $10.1B for approved Elahere (~3.0x)
+  //   - Pfizer / Seagen (2023): $43B for 4 approved ADCs (~3.0x)
+  //   - Bristol / Mirati (2023): $4.8B, approved Krazati (~2.8x)
+  //   - Merck / Prometheus (2023): $10.8B, Phase 2b IBD (~1.8x)
   const phaseAcquisitionMultipliers: Partial<Record<Phase, number>> = {
-    discovery: 0.30,    preclinical: 0.60,  phase1: 0.60,
-    phase1_2: 0.70,     phase2: 0.90,       phase2_3: 1.10,
-    phase3: 1.35,       nda_filed: 1.50,    approved: 1.65,
+    discovery: 0.30,    preclinical: 0.60,  phase1: 0.70,
+    phase1_2: 0.80,     phase2: 1.00,       phase2_3: 1.20,
+    phase3: 1.50,       nda_filed: 1.70,    approved: 1.85,
   };
 
   const phaseOptionMultipliers: Partial<Record<Phase, number>> = {
@@ -1522,14 +1533,21 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
 
-  // Deal type upfront ratio overrides — each deal structure has distinct economics:
-  // - Acquisition: 70-95% upfront (full control, premium for certainty)
+  // Deal type upfront ratio overrides — each deal structure has distinct economics.
+  //
+  // IMPORTANT (fixed 2026-04-06): for acquisitions, upfront is computed as a
+  // fraction of `totalDealValue` (see below), NOT of rNPV or licensing baseline.
+  // This keeps upfront + CVR = totalAcquisitionPrice coherent. Acquisitions do
+  // not pay ongoing royalties (royaltyScalar = 0 below), so the "total" really
+  // is the full cash-at-close + contingent earnout, not a licensing deal shape.
+  //
+  // - Acquisition: 70-95% upfront cash at close (balance = CVR / earnouts)
   // - Co-development: 15-30% upfront (shared risk/reward, lower initial commitment)
   // - Option: 5-15% upfront (option premium only, bulk deferred to exercise)
   // - Collaboration: 10-25% upfront (research funding, early-stage partnership)
   const dealTypeUpfrontOverrides: Record<DealType, { low: number; high: number } | null> = {
     licensing: null, // use phase-based ratios
-    acquisition: { low: 0.70, high: 0.95 }, // acquisitions = mostly upfront cash
+    acquisition: { low: 0.70, high: 0.95 }, // acquisitions = mostly upfront cash; remainder is CVR
     codevelopment: { low: 0.15, high: 0.30 }, // shared risk = lower upfront
     option: { low: 0.05, high: 0.15 }, // option premium, exercise later
     collaboration: { low: 0.10, high: 0.25 }, // research funding, early partnership

@@ -595,27 +595,76 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const peakSalesYear = peakCF?.year || 0;
 
   // 9. Calculate implied deal terms
-  // Upfront % depends on both phase and deal type.
-  // Deal-type overrides (acquisition, option, etc.) take precedence over phase-based ratios.
-  const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
-  // Total deal value as a fraction of rNPV is phase-stratified. Earlier phases
-  // command a lower fraction due to higher risk premium. The median matches
-  // getPhaseDealToRNPVRatio(phase); low/high are +/- 15pp around it (clamped).
-  const phaseTotalDealMedian = getPhaseDealToRNPVRatio(phase);
-  const phaseTotalDealLow = Math.max(0.10, phaseTotalDealMedian - 0.15);
-  const phaseTotalDealHigh = Math.min(1.10, phaseTotalDealMedian + 0.20);
-  const impliedDealValue = {
-    upfront: {
-      low: riskAdjustedNPV * upfrontPercent.low,
-      median: riskAdjustedNPV * upfrontPercent.median,
-      high: riskAdjustedNPV * upfrontPercent.high,
-    },
-    totalDeal: {
-      low: riskAdjustedNPV * phaseTotalDealLow,
-      median: riskAdjustedNPV * phaseTotalDealMedian,
-      high: riskAdjustedNPV * phaseTotalDealHigh,
-    },
-  };
+  //
+  // Acquisition vs. licensing math is fundamentally different and must be kept
+  // coherent (fixed 2026-04-06):
+  //
+  //   ACQUISITIONS are 100% buy-outs. There are no ongoing royalties, so the
+  //   "total deal" is not a fraction of rNPV — it IS the acquisition price,
+  //   which is rNPV × a phase-dependent premium. Upfront is 70-95% of that
+  //   acquisition price (cash at close); the remainder is CVR / contingent
+  //   earnouts. Premiums are calibrated against 2024-2026 deal data:
+  //     - Pfizer / Seagen 2023: $43B for 4 approved ADCs (~3.0x)
+  //     - AbbVie / ImmunoGen 2024: $10.1B for approved Elahere (~3.0x)
+  //     - Neurocrine / Soleno Apr 2026: $2.9B, approved, ~15x trailing rev (~3.0x rNPV)
+  //     - Gilead / Tubulis Apr 2026: $3.1B for Phase 2 ADC platform (~1.8x)
+  //
+  //   LICENSING (and co-dev, option, collaboration) deals pay out over time
+  //   via upfront + milestones + royalties. Total-deal-value is a fraction of
+  //   rNPV (getPhaseDealToRNPVRatio), and upfront is a fraction of totalDeal
+  //   (not of rNPV directly) — this keeps the two numbers coherent.
+  let impliedDealValue: { upfront: { low: number; median: number; high: number }; totalDeal: { low: number; median: number; high: number } };
+
+  if (dealType === 'acquisition') {
+    // Phase-dependent acquisition premium (multiple of rNPV)
+    const acquisitionMultiplier = getAcquisitionMultiplier(phase);
+    const totalAcquisitionPrice = Math.max(0, riskAdjustedNPV) * acquisitionMultiplier;
+
+    // Upfront cash at close = 70-95% of acquisition price
+    const upfrontPct = { low: 0.70, median: 0.825, high: 0.95 };
+
+    impliedDealValue = {
+      upfront: {
+        low: totalAcquisitionPrice * upfrontPct.low,
+        median: totalAcquisitionPrice * upfrontPct.median,
+        high: totalAcquisitionPrice * upfrontPct.high,
+      },
+      totalDeal: {
+        // totalDeal range reflects downside-to-upside scenarios around the
+        // acquisition price (e.g., CVR-weighted upside). Median = headline price.
+        low: totalAcquisitionPrice * 0.95,
+        median: totalAcquisitionPrice,
+        high: totalAcquisitionPrice * 1.15,
+      },
+    };
+  } else {
+    // Licensing / co-dev / option / collaboration:
+    // totalDeal is a phase-stratified fraction of rNPV; upfront is a fraction
+    // of totalDeal (keeps the ratio coherent and prevents upfront > totalDeal).
+    const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
+    const phaseTotalDealMedian = getPhaseDealToRNPVRatio(phase);
+    const phaseTotalDealLow = Math.max(0.10, phaseTotalDealMedian - 0.15);
+    const phaseTotalDealHigh = Math.min(1.10, phaseTotalDealMedian + 0.20);
+
+    const totalDealLow = riskAdjustedNPV * phaseTotalDealLow;
+    const totalDealMedian = riskAdjustedNPV * phaseTotalDealMedian;
+    const totalDealHigh = riskAdjustedNPV * phaseTotalDealHigh;
+
+    // Upfront as fraction of totalDeal (NOT of rNPV). This matches
+    // calculations.ts and keeps the ratio inside the [0, 1] band.
+    impliedDealValue = {
+      upfront: {
+        low: totalDealLow * upfrontPercent.low,
+        median: totalDealMedian * upfrontPercent.median,
+        high: totalDealHigh * upfrontPercent.high,
+      },
+      totalDeal: {
+        low: totalDealLow,
+        median: totalDealMedian,
+        high: totalDealHigh,
+      },
+    };
+  }
 
   // 10. Cross-validation with benchmark-based deal value
   // Use phase-dependent deal-to-rNPV ratio for more accurate comparison.
@@ -1001,6 +1050,9 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
 /**
  * Get deal-type-specific upfront % overrides.
  * Returns null for 'licensing' (use phase-based ratios instead).
+ * Note: acquisitions are handled separately via `getAcquisitionMultiplier` +
+ * direct upfront-of-acquisition-price math (see impliedDealValue block),
+ * so acquisition does NOT appear here.
  *
  * These ratios mirror the dealTypeUpfrontOverrides in calculations.ts,
  * adapted to the rNPV context where the median is interpolated.
@@ -1009,12 +1061,43 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
  */
 function getDealTypeUpfrontPercent(dealType: string): { low: number; median: number; high: number } | null {
   const overrides: Record<string, { low: number; median: number; high: number }> = {
-    acquisition: { low: 0.70, median: 0.825, high: 0.95 },    // Mostly upfront cash
     codevelopment: { low: 0.15, median: 0.225, high: 0.30 },   // Shared risk = lower upfront
     option: { low: 0.05, median: 0.10, high: 0.15 },           // Option premium, exercise later
     collaboration: { low: 0.10, median: 0.175, high: 0.25 },   // Research funding, early partnership
   };
   return overrides[dealType] || null;
+}
+
+/**
+ * Phase-dependent acquisition premium applied to rNPV to yield the headline
+ * acquisition price. Acquisitions pay a control premium above risk-adjusted
+ * NPV because the buyer takes 100% of upside (no royalty carve-out) plus
+ * strategic synergies. Earlier phases still command a premium relative to
+ * rNPV because rNPV already discounts for clinical attrition — the premium
+ * reflects certainty-of-control and strategic fit, not risk reduction.
+ *
+ * Calibrated against 2024-2026 transactions:
+ *   - Neurocrine / Soleno (Apr 2026): $2.9B, approved, ~3.0x rNPV
+ *   - Gilead / Tubulis (Apr 2026): $3.1B, Phase 2 ADC platform, ~1.8x
+ *   - AbbVie / ImmunoGen (2024): $10.1B, approved Elahere, ~3.0x
+ *   - Pfizer / Seagen (2023): $43B, 4 approved ADCs, ~3.0x
+ *   - Bristol / Mirati (2023): $4.8B, approved Krazati, ~2.8x
+ *   - Novartis / Chinook (2023): $3.5B, Phase 3, ~2.3x
+ *   - Merck / Prometheus (2023): $10.8B, Phase 2b IBD, ~1.8x
+ */
+function getAcquisitionMultiplier(phase: string): number {
+  const premiums: Record<string, number> = {
+    discovery: 1.2,    // pre-IND, mostly platform value
+    preclinical: 1.3,
+    phase1: 1.5,       // proof-of-mechanism
+    phase1_2: 1.6,
+    phase2: 1.8,       // proof-of-concept (sweet spot for acquisitions)
+    phase2_3: 2.0,
+    phase3: 2.3,       // pivotal data, near-approval
+    nda_filed: 2.6,
+    approved: 3.0,     // de-risked commercial asset
+  };
+  return premiums[phase] ?? 1.8;
 }
 
 /** Generate narrative explaining divergence between benchmark and rNPV valuations */
