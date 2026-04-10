@@ -13,14 +13,45 @@
  * generic entrenchment, and competitive dynamics differ per indication.
  *
  * Baseline values were captured from the live rNPV engine output on 2026-04-06
- * (matching the matrix in the rnpv-regression cron). Tolerances are tuned to:
+ * and then REGENERATED on 2026-04-10 following the Phase 3 indication-level
+ * calibration project. Tolerances are tuned to:
  *   - absorb small calibration updates (±6pp of PoS)
  *   - catch order-of-magnitude bugs (±50% of rNPV, ±1.5y of yearsToMarket,
  *     ±3pp of discount rate)
  *
- * When updating these after an intentional engine change, run:
- *   npx jest __tests__/lib/financial-golden-masters.test.ts
- * and visually verify every new value before committing.
+ * --- 2026-04-10 RECALIBRATION ---
+ * Reason: Phase 3 indication-level calibration applied across 50 indications,
+ * touching four independent layers:
+ *   1. lib/financial/indication-pos-modifiers.ts (per-indication PoS multipliers)
+ *   2. lib/financial/index-drugs.ts INDICATION_MARKET_CAPS (peak sales caps)
+ *   3. lib/financial/pos-tables.ts INDICATION_REVENUE_CURVES (ramp/peak/decay)
+ *   4. lib/financial/indication-competitive-density.ts (crowding penalty/boost)
+ *
+ * Of the 110 baseline assertions, 28 drifted past tolerance under the previous
+ * table. The new baselines capture the correct calibrated outputs. Notable
+ * regime shifts:
+ *   - Oncology (lung_nsclc, breast_her2): rNPV drops ~40-45% at phase 3 due to
+ *     density penalty on crowded indications.
+ *   - Neurology (alzheimers, als): PoS at phase 2 now ~0.04 (was ~0.11) — the
+ *     Alzheimer's modifier is 0.45x phase2->3 reflecting the empirical failure
+ *     rate in that field; this reduces phase-3 rNPV by ~45%.
+ *   - Metabolic (obesity): rNPV jumps at phase 1/2 due to new orphan-like
+ *     revenue curve and positive competitive density on GLP-1 class.
+ *   - Rare disease (dmd, sma, cystic_fibrosis): phase 1-2 rNPV increases
+ *     2-4x due to new DMD/SMA PoS boost (1.40x) AND tighter orphan revenue
+ *     curves (2y ramp + 10y peak) — matches recent deal comps (Capsida,
+ *     Dyne, Avidity). Phase 3 rNPV also rises ~25%.
+ *
+ * When updating these after an intentional engine change:
+ *   1. Run the test to see drift:
+ *        npx jest __tests__/lib/financial-golden-masters.test.ts
+ *   2. For each drifted case, read the "actual=X expected=Y" error and
+ *      update the matching row in the BASELINES table below.
+ *      (For bulk updates, write a throw-away tsx script that imports
+ *      calculateRNPV and prints the full BASELINES array in the format
+ *      below, then paste the output in.)
+ *   3. Re-run the test and visually verify every new value before
+ *      committing.
  */
 
 import { calculateRNPV } from '@/lib/financial/rnpv-engine';
@@ -147,124 +178,124 @@ interface Baseline {
 
 const BASELINES: Baseline[] = [
   // ─── ONCOLOGY ───
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase1', modality: 'smallMolecule', npv: -10, pos: 0.0776, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase1', modality: 'mab', npv: 7, pos: 0.0977, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase2', modality: 'smallMolecule', npv: 182, pos: 0.1550, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase2', modality: 'mab', npv: 219, pos: 0.1809, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase3', modality: 'smallMolecule', npv: 1285, pos: 0.4845, yrs: 4.50, dr: 0.0900 },
-  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase3', modality: 'mab', npv: 1374, pos: 0.5233, yrs: 4.50, dr: 0.0900 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase1', modality: 'smallMolecule', npv: -10, pos: 0.0776, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase1', modality: 'mab', npv: 7, pos: 0.0977, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase2', modality: 'smallMolecule', npv: 182, pos: 0.1550, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase2', modality: 'mab', npv: 219, pos: 0.1809, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase3', modality: 'smallMolecule', npv: 1285, pos: 0.4845, yrs: 4.50, dr: 0.0900 },
-  { ta: 'oncology', indication: 'breast_her2', phase: 'phase3', modality: 'mab', npv: 1374, pos: 0.5233, yrs: 4.50, dr: 0.0900 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase1', modality: 'smallMolecule', npv: -75, pos: 0.0776, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase1', modality: 'mab', npv: -71, pos: 0.0977, yrs: 8.80, dr: 0.1300 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase2', modality: 'smallMolecule', npv: -30, pos: 0.1550, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase2', modality: 'mab', npv: -19, pos: 0.1809, yrs: 7.00, dr: 0.1100 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase3', modality: 'smallMolecule', npv: 285, pos: 0.4845, yrs: 4.50, dr: 0.0900 },
-  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase3', modality: 'mab', npv: 312, pos: 0.5233, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase1', modality: 'smallMolecule', npv: -62, pos: 0.0528, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase1', modality: 'mab', npv: -55, pos: 0.0666, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase2', modality: 'smallMolecule', npv: 25, pos: 0.1149, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase2', modality: 'mab', npv: 39, pos: 0.1340, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase3', modality: 'smallMolecule', npv: 730, pos: 0.4603, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'lung_nsclc', phase: 'phase3', modality: 'mab', npv: 764, pos: 0.4971, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase1', modality: 'smallMolecule', npv: -25, pos: 0.0940, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase1', modality: 'mab', npv: -14, pos: 0.1185, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase2', modality: 'smallMolecule', npv: 123, pos: 0.1790, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase2', modality: 'mab', npv: 142, pos: 0.2088, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase3', modality: 'smallMolecule', npv: 907, pos: 0.5088, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'breast_her2', phase: 'phase3', modality: 'mab', npv: 921, pos: 0.5494, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase1', modality: 'smallMolecule', npv: -83, pos: 0.0776, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase1', modality: 'mab', npv: -81, pos: 0.0977, yrs: 8.80, dr: 0.1300 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase2', modality: 'smallMolecule', npv: -54, pos: 0.1550, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase2', modality: 'mab', npv: -47, pos: 0.1809, yrs: 7.00, dr: 0.1100 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase3', modality: 'smallMolecule', npv: 172, pos: 0.4845, yrs: 4.50, dr: 0.0900 },
+  { ta: 'oncology', indication: 'multiple_myeloma', phase: 'phase3', modality: 'mab', npv: 190, pos: 0.5233, yrs: 4.50, dr: 0.0900 },
 
   // ─── NEUROLOGY ───
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase1', modality: 'smallMolecule', npv: -71, pos: 0.0519, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase1', modality: 'mab', npv: -64, pos: 0.0653, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase2', modality: 'smallMolecule', npv: -3, pos: 0.1127, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase2', modality: 'mab', npv: 13, pos: 0.1315, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase3', modality: 'smallMolecule', npv: 863, pos: 0.4334, yrs: 6.00, dr: 0.1000 },
-  { ta: 'neurology', indication: 'alzheimers', phase: 'phase3', modality: 'mab', npv: 924, pos: 0.4681, yrs: 6.00, dr: 0.1000 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase1', modality: 'smallMolecule', npv: -99, pos: 0.0519, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase1', modality: 'mab', npv: -97, pos: 0.0653, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase2', modality: 'smallMolecule', npv: -95, pos: 0.1127, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase2', modality: 'mab', npv: -90, pos: 0.1315, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase3', modality: 'smallMolecule', npv: 169, pos: 0.4334, yrs: 6.00, dr: 0.1000 },
-  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase3', modality: 'mab', npv: 190, pos: 0.4681, yrs: 6.00, dr: 0.1000 },
-  { ta: 'neurology', indication: 'als', phase: 'phase1', modality: 'smallMolecule', npv: -71, pos: 0.0519, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'als', phase: 'phase1', modality: 'mab', npv: -64, pos: 0.0653, yrs: 11.00, dr: 0.1400 },
-  { ta: 'neurology', indication: 'als', phase: 'phase2', modality: 'smallMolecule', npv: -3, pos: 0.1127, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'als', phase: 'phase2', modality: 'mab', npv: 13, pos: 0.1315, yrs: 9.20, dr: 0.1200 },
-  { ta: 'neurology', indication: 'als', phase: 'phase3', modality: 'smallMolecule', npv: 863, pos: 0.4334, yrs: 6.00, dr: 0.1000 },
-  { ta: 'neurology', indication: 'als', phase: 'phase3', modality: 'mab', npv: 924, pos: 0.4681, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase1', modality: 'smallMolecule', npv: -101, pos: 0.0139, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase1', modality: 'mab', npv: -98, pos: 0.0175, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase2', modality: 'smallMolecule', npv: -99, pos: 0.0355, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase2', modality: 'mab', npv: -93, pos: 0.0414, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase3', modality: 'smallMolecule', npv: 479, pos: 0.3034, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'alzheimers', phase: 'phase3', modality: 'mab', npv: 561, pos: 0.3277, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase1', modality: 'smallMolecule', npv: -103, pos: 0.0519, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase1', modality: 'mab', npv: -102, pos: 0.0653, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase2', modality: 'smallMolecule', npv: -108, pos: 0.1127, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase2', modality: 'mab', npv: -106, pos: 0.1315, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase3', modality: 'smallMolecule', npv: 73, pos: 0.4334, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'multiple_sclerosis', phase: 'phase3', modality: 'mab', npv: 81, pos: 0.4681, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'als', phase: 'phase1', modality: 'smallMolecule', npv: -102, pos: 0.0157, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'als', phase: 'phase1', modality: 'mab', npv: -101, pos: 0.0199, yrs: 11.00, dr: 0.1400 },
+  { ta: 'neurology', indication: 'als', phase: 'phase2', modality: 'smallMolecule', npv: -105, pos: 0.0403, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'als', phase: 'phase2', modality: 'mab', npv: -104, pos: 0.0470, yrs: 9.20, dr: 0.1200 },
+  { ta: 'neurology', indication: 'als', phase: 'phase3', modality: 'smallMolecule', npv: 265, pos: 0.2817, yrs: 6.00, dr: 0.1000 },
+  { ta: 'neurology', indication: 'als', phase: 'phase3', modality: 'mab', npv: 253, pos: 0.3043, yrs: 6.00, dr: 0.1000 },
 
   // ─── IMMUNOLOGY ───
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase1', modality: 'smallMolecule', npv: -26, pos: 0.1088, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase1', modality: 'mab', npv: -11, pos: 0.1371, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase2', modality: 'smallMolecule', npv: 107, pos: 0.1979, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase2', modality: 'mab', npv: 135, pos: 0.2307, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase3', modality: 'smallMolecule', npv: 690, pos: 0.5347, yrs: 4.30, dr: 0.0900 },
-  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase3', modality: 'mab', npv: 747, pos: 0.5774, yrs: 4.30, dr: 0.0900 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase1', modality: 'smallMolecule', npv: -7, pos: 0.1088, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase1', modality: 'mab', npv: 12, pos: 0.1371, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase2', modality: 'smallMolecule', npv: 158, pos: 0.1979, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase2', modality: 'mab', npv: 193, pos: 0.2307, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase3', modality: 'smallMolecule', npv: 886, pos: 0.5347, yrs: 4.30, dr: 0.0900 },
-  { ta: 'immunology', indication: 'psoriasis', phase: 'phase3', modality: 'mab', npv: 957, pos: 0.5774, yrs: 4.30, dr: 0.0900 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase1', modality: 'smallMolecule', npv: 49, pos: 0.1088, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase1', modality: 'mab', npv: 80, pos: 0.1371, yrs: 8.30, dr: 0.1200 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase2', modality: 'smallMolecule', npv: 310, pos: 0.1979, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase2', modality: 'mab', npv: 366, pos: 0.2307, yrs: 6.80, dr: 0.1050 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase3', modality: 'smallMolecule', npv: 1473, pos: 0.5347, yrs: 4.30, dr: 0.0900 },
-  { ta: 'immunology', indication: 'lupus', phase: 'phase3', modality: 'mab', npv: 1584, pos: 0.5774, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase1', modality: 'smallMolecule', npv: -51, pos: 0.1088, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase1', modality: 'mab', npv: -42, pos: 0.1371, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase2', modality: 'smallMolecule', npv: 37, pos: 0.1979, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase2', modality: 'mab', npv: 54, pos: 0.2307, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase3', modality: 'smallMolecule', npv: 422, pos: 0.5347, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'rheumatoid_arthritis', phase: 'phase3', modality: 'mab', npv: 453, pos: 0.5774, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase1', modality: 'smallMolecule', npv: 17, pos: 0.1720, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase1', modality: 'mab', npv: 37, pos: 0.2168, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase2', modality: 'smallMolecule', npv: 184, pos: 0.2720, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase2', modality: 'mab', npv: 213, pos: 0.3173, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase3', modality: 'smallMolecule', npv: 765, pos: 0.5881, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'psoriasis', phase: 'phase3', modality: 'mab', npv: 799, pos: 0.6352, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase1', modality: 'smallMolecule', npv: 27, pos: 0.1088, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase1', modality: 'mab', npv: 53, pos: 0.1371, yrs: 8.30, dr: 0.1200 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase2', modality: 'smallMolecule', npv: 253, pos: 0.1979, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase2', modality: 'mab', npv: 298, pos: 0.2307, yrs: 6.80, dr: 0.1050 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase3', modality: 'smallMolecule', npv: 1259, pos: 0.5347, yrs: 4.30, dr: 0.0900 },
+  { ta: 'immunology', indication: 'lupus', phase: 'phase3', modality: 'mab', npv: 1342, pos: 0.5774, yrs: 4.30, dr: 0.0900 },
 
   // ─── METABOLIC ───
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase1', modality: 'smallMolecule', npv: -49, pos: 0.1272, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase1', modality: 'mab', npv: -36, pos: 0.1603, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase2', modality: 'smallMolecule', npv: 70, pos: 0.2272, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase2', modality: 'mab', npv: 92, pos: 0.2650, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase3', modality: 'smallMolecule', npv: 591, pos: 0.5681, yrs: 5.50, dr: 0.0900 },
-  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase3', modality: 'mab', npv: 625, pos: 0.6135, yrs: 5.50, dr: 0.0900 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase1', modality: 'smallMolecule', npv: 54, pos: 0.1272, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase1', modality: 'mab', npv: 86, pos: 0.1603, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase2', modality: 'smallMolecule', npv: 351, pos: 0.2272, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase2', modality: 'mab', npv: 405, pos: 0.2650, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase3', modality: 'smallMolecule', npv: 1605, pos: 0.5681, yrs: 5.50, dr: 0.0900 },
-  { ta: 'metabolic', indication: 'obesity', phase: 'phase3', modality: 'mab', npv: 1688, pos: 0.6135, yrs: 5.50, dr: 0.0900 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase1', modality: 'smallMolecule', npv: 54, pos: 0.1272, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase1', modality: 'mab', npv: 86, pos: 0.1603, yrs: 9.50, dr: 0.1200 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase2', modality: 'smallMolecule', npv: 351, pos: 0.2272, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase2', modality: 'mab', npv: 405, pos: 0.2650, yrs: 8.00, dr: 0.1050 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase3', modality: 'smallMolecule', npv: 1605, pos: 0.5681, yrs: 5.50, dr: 0.0900 },
-  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase3', modality: 'mab', npv: 1688, pos: 0.6135, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase1', modality: 'smallMolecule', npv: -71, pos: 0.1272, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase1', modality: 'mab', npv: -63, pos: 0.1603, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase2', modality: 'smallMolecule', npv: 10, pos: 0.2272, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase2', modality: 'mab', npv: 24, pos: 0.2650, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase3', modality: 'smallMolecule', npv: 373, pos: 0.5681, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'type2_diabetes', phase: 'phase3', modality: 'mab', npv: 390, pos: 0.6135, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase1', modality: 'smallMolecule', npv: 185, pos: 0.2283, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase1', modality: 'mab', npv: 238, pos: 0.2876, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase2', modality: 'smallMolecule', npv: 568, pos: 0.3397, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase2', modality: 'mab', npv: 641, pos: 0.3962, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase3', modality: 'smallMolecule', npv: 1803, pos: 0.6533, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'obesity', phase: 'phase3', modality: 'mab', npv: 1875, pos: 0.7055, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase1', modality: 'smallMolecule', npv: 25, pos: 0.1272, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase1', modality: 'mab', npv: 56, pos: 0.1603, yrs: 9.50, dr: 0.1200 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase2', modality: 'smallMolecule', npv: 273, pos: 0.2272, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase2', modality: 'mab', npv: 328, pos: 0.2650, yrs: 8.00, dr: 0.1050 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase3', modality: 'smallMolecule', npv: 1331, pos: 0.5681, yrs: 5.50, dr: 0.0900 },
+  { ta: 'metabolic', indication: 'nash_mash', phase: 'phase3', modality: 'mab', npv: 1436, pos: 0.6135, yrs: 5.50, dr: 0.0900 },
 
   // ─── RARE DISEASE ───
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase1', modality: 'smallMolecule', npv: 240, pos: 0.2570, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase1', modality: 'mab', npv: 264, pos: 0.2997, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase2', modality: 'smallMolecule', npv: 609, pos: 0.4282, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase2', modality: 'mab', npv: 610, pos: 0.4625, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase3', modality: 'smallMolecule', npv: 1948, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
-  { ta: 'rareDisease', indication: 'dmd', phase: 'phase3', modality: 'mab', npv: 1827, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase1', modality: 'smallMolecule', npv: 240, pos: 0.2570, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase1', modality: 'mab', npv: 264, pos: 0.2997, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase2', modality: 'smallMolecule', npv: 609, pos: 0.4282, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase2', modality: 'mab', npv: 610, pos: 0.4625, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase3', modality: 'smallMolecule', npv: 1948, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
-  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase3', modality: 'mab', npv: 1827, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase1', modality: 'smallMolecule', npv: 240, pos: 0.2570, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase1', modality: 'mab', npv: 264, pos: 0.2997, yrs: 7.80, dr: 0.1500 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase2', modality: 'smallMolecule', npv: 609, pos: 0.4282, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase2', modality: 'mab', npv: 610, pos: 0.4625, yrs: 6.30, dr: 0.1400 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase3', modality: 'smallMolecule', npv: 1948, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
-  { ta: 'rareDisease', indication: 'sma', phase: 'phase3', modality: 'mab', npv: 1827, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase1', modality: 'smallMolecule', npv: 623, pos: 0.4316, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase1', modality: 'mab', npv: 679, pos: 0.5034, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase2', modality: 'smallMolecule', npv: 1179, pos: 0.5995, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase2', modality: 'mab', npv: 1187, pos: 0.6474, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase3', modality: 'smallMolecule', npv: 2533, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'dmd', phase: 'phase3', modality: 'mab', npv: 2388, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase1', modality: 'smallMolecule', npv: 256, pos: 0.2570, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase1', modality: 'mab', npv: 283, pos: 0.2997, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase2', modality: 'smallMolecule', npv: 641, pos: 0.4282, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase2', modality: 'mab', npv: 645, pos: 0.4625, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase3', modality: 'smallMolecule', npv: 2028, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'cystic_fibrosis', phase: 'phase3', modality: 'mab', npv: 1911, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase1', modality: 'smallMolecule', npv: 594, pos: 0.4162, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase1', modality: 'mab', npv: 643, pos: 0.4855, yrs: 7.80, dr: 0.1500 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase2', modality: 'smallMolecule', npv: 1125, pos: 0.5781, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase2', modality: 'mab', npv: 1124, pos: 0.6243, yrs: 6.30, dr: 0.1400 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase3', modality: 'smallMolecule', npv: 2510, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
+  { ta: 'rareDisease', indication: 'sma', phase: 'phase3', modality: 'mab', npv: 2346, pos: 0.7769, yrs: 4.30, dr: 0.1200 },
 
   // ─── CARDIOVASCULAR ───
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase1', modality: 'smallMolecule', npv: -123, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase1', modality: 'mab', npv: -119, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase2', modality: 'smallMolecule', npv: -83, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase2', modality: 'mab', npv: -74, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase3', modality: 'smallMolecule', npv: 205, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
-  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase3', modality: 'mab', npv: 233, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase1', modality: 'smallMolecule', npv: -76, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase1', modality: 'mab', npv: -63, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase2', modality: 'smallMolecule', npv: 47, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase2', modality: 'mab', npv: 73, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase3', modality: 'smallMolecule', npv: 923, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
-  { ta: 'cardiovascular', indication: 'pah', phase: 'phase3', modality: 'mab', npv: 997, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase1', modality: 'smallMolecule', npv: -76, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase1', modality: 'mab', npv: -63, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase2', modality: 'smallMolecule', npv: 47, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase2', modality: 'mab', npv: 73, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase3', modality: 'smallMolecule', npv: 923, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
-  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase3', modality: 'mab', npv: 997, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase1', modality: 'smallMolecule', npv: -131, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase1', modality: 'mab', npv: -128, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase2', modality: 'smallMolecule', npv: -106, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase2', modality: 'mab', npv: -99, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase3', modality: 'smallMolecule', npv: 84, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'heart_failure', phase: 'phase3', modality: 'mab', npv: 111, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase1', modality: 'smallMolecule', npv: -87, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase1', modality: 'mab', npv: -78, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase2', modality: 'smallMolecule', npv: 16, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase2', modality: 'mab', npv: 30, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase3', modality: 'smallMolecule', npv: 749, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'pah', phase: 'phase3', modality: 'mab', npv: 770, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase1', modality: 'smallMolecule', npv: -99, pos: 0.0793, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase1', modality: 'mab', npv: -91, pos: 0.1000, yrs: 10.80, dr: 0.1300 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase2', modality: 'smallMolecule', npv: -17, pos: 0.1587, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase2', modality: 'mab', npv: -2, pos: 0.1851, yrs: 9.30, dr: 0.1150 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase3', modality: 'smallMolecule', npv: 571, pos: 0.4960, yrs: 6.30, dr: 0.0950 },
+  { ta: 'cardiovascular', indication: 'hypercholesterolemia', phase: 'phase3', modality: 'mab', npv: 609, pos: 0.5356, yrs: 6.30, dr: 0.0950 },
 ];
 
 // ---------------------------------------------------------------------------
