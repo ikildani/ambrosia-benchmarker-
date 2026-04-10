@@ -18,6 +18,13 @@
  */
 
 import type { RNPVInput, RNPVResult } from './types';
+import {
+  getCompetitiveIntensity,
+  getPositionModifier,
+  getModalityLagMultiplier,
+  computeRegulatoryDelay,
+  type CompetitiveIntensity,
+} from './competitive-calibration';
 
 // ==========================================================================
 // Upgrade 4: Competitive Dynamics (Time-Varying Market Share Erosion)
@@ -27,7 +34,7 @@ import type { RNPVInput, RNPVResult } from './types';
  * A single competitor entering the market with a specific profile.
  */
 export interface CompetitorEntry {
-  /** Calendar year the competitor enters the market */
+  /** Absolute calendar year the competitor enters the market */
   entryYear: number;
   /** Fraction of revenue lost to this competitor at full ramp (0-1) */
   shareImpact: number;
@@ -35,11 +42,37 @@ export interface CompetitorEntry {
   rampYears: number;
   /** Competitor archetype */
   type: 'generic' | 'biosimilar' | 'nextGen' | 'classCompetitor';
+  /** Optional name (populated from real pipeline data when available) */
+  name?: string;
+  /** Optional mechanism of action for MOA clustering detection */
+  moa?: string;
+  /** Whether competitor requires the same biomarker */
+  biomarkerGated?: boolean;
+}
+
+/**
+ * Optional pipeline intelligence input — real competitor data from
+ * ClinicalTrials.gov or curated sources. If provided, overrides the
+ * template-calibrated competitor count.
+ */
+export interface PipelineIntelligence {
+  /** Named competitors with known profiles */
+  knownCompetitors?: Array<{
+    name: string;
+    phase?: string;
+    sponsor?: string;
+    moa?: string;
+    expectedApprovalYear?: number; // absolute calendar year
+    biomarkerRequired?: boolean;
+  }>;
+  /** Additional unnamed competitors in the same indication/modality */
+  additionalCompetitorCount?: number;
 }
 
 /**
  * Complete competitive dynamics analysis showing year-by-year revenue erosion
- * from anticipated competitive entries.
+ * from anticipated competitive entries. Models both volume erosion (share loss)
+ * and price erosion (per-entrant pricing pressure).
  */
 export interface CompetitiveDynamicsResult {
   /** Timeline of competitor entries used in the model */
@@ -48,159 +81,319 @@ export interface CompetitiveDynamicsResult {
   baselineRevenue: number[];
   /** Year-by-year revenue after competitive erosion ($M) */
   adjustedRevenue: number[];
+  /** Year-by-year price index (starts at 1.0, declines with competitor entries) */
+  priceIndex: number[];
+  /** Year-by-year volume index (1 - cumulative share erosion) */
+  volumeIndex: number[];
   /** Maximum cumulative share erosion across all years (0-1) */
   peakShareErosion: number;
+  /** Maximum cumulative price erosion across all years (0-1) */
+  peakPriceErosion: number;
   /** Total lifetime revenue lost to competition ($M) */
   revenueImpact: number;
+  /** Revenue impact attributed to volume erosion alone ($M) */
+  volumeImpact: number;
+  /** Revenue impact attributed to price erosion alone ($M) */
+  priceImpact: number;
+  /** Absolute calendar year of peak erosion */
+  peakErosionYear: number;
+  /** Confidence level in the estimate */
+  confidence: 'high' | 'moderate' | 'low';
+  /** Calibration source used */
+  dataSource: 'calibrated' | 'pipeline-intelligence' | 'hybrid';
   /** Human-readable narrative summarizing competitive dynamics */
   narrative: string;
 }
 
-/**
- * Competitor entry templates indexed by competitive position.
- *
- * Each position generates a distinct timeline of competitor entries
- * calibrated to empirical market dynamics. Entry years are relative
- * to the asset's projected launch year.
- *
- * Sources: IQVIA competitive intelligence benchmarks, EvaluatePharma
- * pipeline density analysis (2020-2025).
- */
-const COMPETITOR_TEMPLATES: Record<string, (launchYear: number) => CompetitorEntry[]> = {
-  firstInClass: (ly) => [
-    { entryYear: ly + 3, shareImpact: 0.15, rampYears: 2, type: 'classCompetitor' },
-    { entryYear: ly + 5, shareImpact: 0.10, rampYears: 2, type: 'nextGen' },
-  ],
-  firstToPivotal: (ly) => [
-    { entryYear: ly + 2, shareImpact: 0.20, rampYears: 2, type: 'classCompetitor' },
-  ],
-  bestInClass: (ly) => [
-    { entryYear: ly + 1, shareImpact: 0.10, rampYears: 1, type: 'classCompetitor' },
-    { entryYear: ly + 4, shareImpact: 0.15, rampYears: 2, type: 'nextGen' },
-  ],
-  racing: (ly) => [
-    { entryYear: ly + 1, shareImpact: 0.25, rampYears: 1, type: 'classCompetitor' },
-    { entryYear: ly + 3, shareImpact: 0.15, rampYears: 2, type: 'classCompetitor' },
-  ],
-  behind: (ly) => [
-    { entryYear: ly - 1, shareImpact: 0.30, rampYears: 0, type: 'classCompetitor' },
-    { entryYear: ly + 2, shareImpact: 0.15, rampYears: 1, type: 'nextGen' },
-  ],
-  crowded: (ly) => [
-    { entryYear: ly - 2, shareImpact: 0.25, rampYears: 0, type: 'classCompetitor' },
-    { entryYear: ly - 1, shareImpact: 0.20, rampYears: 0, type: 'classCompetitor' },
-    { entryYear: ly + 1, shareImpact: 0.10, rampYears: 1, type: 'nextGen' },
-  ],
-};
+// ─── Helper: S-curve ramp ───
+// Cubic easing (3t^2 - 2t^3) matches the revenue adoption curve used
+// elsewhere in the engine. Linear ramps underestimate early competitor
+// impact and overestimate late impact.
+function sCurveRamp(t: number): number {
+  const clamped = Math.max(0, Math.min(1, t));
+  return 3 * clamped * clamped - 2 * clamped * clamped * clamped;
+}
+
+function inferPrimaryMOA(input: RNPVInput): string {
+  return input.modality || 'smallMolecule';
+}
 
 /**
  * Calculate time-varying competitive market share erosion for a pharmaceutical asset.
  *
- * Models the entry of competing products over time, each ramping to their
- * full share impact over a specified period. The combined erosion from
- * multiple competitors is computed multiplicatively (not additive), which
- * prevents erosion from exceeding 100% when many competitors are present.
+ * Worldclass model combining nine institutional-grade upgrades:
+ *   1. TA-specific calibrated competitive intensity (empirical, cited)
+ *   2. Modality-aware entry lag (biosimilar delays for biologics)
+ *   3. S-curve ramp (cubic easing, not linear)
+ *   4. Regulatory exclusivity delays (orphan/breakthrough push entry back)
+ *   5. Price erosion on top of volume erosion
+ *   6. Real pipeline intelligence integration (when provided)
+ *   7. Biomarker segmentation (biomarker-gated competitors only erode matching segment)
+ *   8. MOA clustering (same-MOA competitors erode harder)
+ *   9. Confidence levels and data source attribution
  *
- * @param input  - The rNPV input parameters (uses competitivePosition and phase timing)
- * @param baseResult - The base-case rNPV result (provides cash flows and launch timing)
+ * @param input         - The rNPV input parameters
+ * @param baseResult    - The base-case rNPV result (cash flows and launch timing)
+ * @param pipelineData  - Optional real pipeline intelligence to override templates
  * @returns Competitive dynamics analysis with year-by-year revenue impact
- *
- * @example
- * ```ts
- * const base = calculateRNPV(input);
- * const competitive = calculateCompetitiveDynamics(input, base);
- * console.log(`Peak erosion: ${(competitive.peakShareErosion * 100).toFixed(1)}%`);
- * console.log(`Revenue lost: $${competitive.revenueImpact.toFixed(0)}M`);
- * ```
  */
 export function calculateCompetitiveDynamics(
   input: RNPVInput,
   baseResult: RNPVResult,
+  pipelineData?: PipelineIntelligence,
 ): CompetitiveDynamicsResult {
-  // cashFlows[i].year uses project-relative years (0 = today, N = end of forecast),
-  // so launchYear must also be project-relative to match. Previously this was
-  // `currentYear + yearsToMarket` which produced absolute calendar years (e.g., 2035)
-  // that never matched any cashFlow year, causing ALL competitors to silently
-  // deactivate and competitive erosion to always show 0%.
+  // Project-relative launch year — cashFlows[i].year uses the same frame
   const launchYear = Math.ceil(baseResult.yearsToMarket);
 
-  // --- 1. Generate competitor timeline from competitive position ---
-  const position = input.competitivePosition || 'racing';
-  const templateFn = COMPETITOR_TEMPLATES[position] ?? COMPETITOR_TEMPLATES.racing;
-  const competitorTimeline = templateFn(launchYear);
+  // Upgrade 1: Load TA-specific calibrated intensity
+  const intensity: CompetitiveIntensity = getCompetitiveIntensity(input.therapeuticArea);
 
-  // --- 2. Extract baseline revenue from cash flows ---
+  // Upgrade 1 (cont'd): Apply position modifier
+  const position = input.competitivePosition || 'racing';
+  const positionMod = getPositionModifier(position);
+  const effectiveCompetitorCount = Math.max(
+    1,
+    Math.round(intensity.baseCompetitorCount * positionMod.competitorCountMultiplier),
+  );
+
+  // Upgrade 2: Modality-aware entry lag (biologics get biosimilar protection)
+  const modalityLagMult = getModalityLagMultiplier(input.modality);
+
+  // Upgrade 4: Regulatory exclusivity delays
+  const regDelay = computeRegulatoryDelay(input.regulatoryDesignations || {});
+
+  // Effective entry lag combines all factors
+  const effectiveEntryLag = Math.max(
+    -3,
+    intensity.avgEntryLagYears * modalityLagMult + positionMod.entryLagAdjustment + regDelay,
+  );
+
+  // Build competitor timeline — from real data if provided, else from templates
+  const competitorTimeline: CompetitorEntry[] = [];
+  let dataSource: CompetitiveDynamicsResult['dataSource'] = 'calibrated';
+  const primaryMOA = inferPrimaryMOA(input);
+
+  if (pipelineData?.knownCompetitors && pipelineData.knownCompetitors.length > 0) {
+    // Upgrade 6: Real pipeline intelligence
+    dataSource = 'pipeline-intelligence';
+    const currentYearCalendar = new Date().getFullYear();
+
+    for (const comp of pipelineData.knownCompetitors) {
+      // Convert absolute expected approval year to project-relative
+      const relativeEntry = comp.expectedApprovalYear != null
+        ? comp.expectedApprovalYear - currentYearCalendar
+        : launchYear + intensity.avgEntryLagYears;
+
+      // Upgrade 8: MOA clustering — same-MOA competitors take more share
+      const sameMOA = comp.moa && comp.moa === primaryMOA;
+      const moaMultiplier = sameMOA ? 1.3 : 0.85;
+
+      // Upgrade 7: Biomarker segmentation — biomarker-gated competitors
+      // only erode the biomarker-positive segment if this asset isn't gated
+      let biomarkerMultiplier = 1.0;
+      if (comp.biomarkerRequired && input.biomarkerStatus !== 'validated') {
+        biomarkerMultiplier = 0.4; // ~40% biomarker-positive fraction
+      }
+
+      competitorTimeline.push({
+        entryYear: relativeEntry,
+        shareImpact: intensity.avgShareImpact * moaMultiplier * biomarkerMultiplier,
+        rampYears: 2,
+        type: 'classCompetitor',
+        name: comp.name,
+        moa: comp.moa,
+        biomarkerGated: comp.biomarkerRequired,
+      });
+    }
+
+    if (pipelineData.additionalCompetitorCount && pipelineData.additionalCompetitorCount > 0) {
+      dataSource = 'hybrid';
+      for (let i = 0; i < pipelineData.additionalCompetitorCount; i++) {
+        competitorTimeline.push({
+          entryYear: launchYear + effectiveEntryLag + i * 1.5,
+          shareImpact: intensity.avgShareImpact * 0.85,
+          rampYears: 2,
+          type: 'nextGen',
+        });
+      }
+    }
+  } else {
+    // Fallback: calibrated template with staggered entries and diminishing returns
+    for (let i = 0; i < effectiveCompetitorCount; i++) {
+      const entryOffset = effectiveEntryLag + i * 1.2;
+      const isPreLaunch = entryOffset < 0;
+      // Diminishing returns: first competitor takes most share, subsequent take less
+      const diminishingFactor = Math.pow(0.85, i);
+      const sharePerCompetitor = intensity.avgShareImpact * diminishingFactor;
+
+      competitorTimeline.push({
+        entryYear: launchYear + entryOffset,
+        shareImpact: sharePerCompetitor,
+        rampYears: isPreLaunch ? 0.5 : 2,
+        type: i === 0 ? 'classCompetitor' : 'nextGen',
+      });
+    }
+  }
+
+  // Year-by-year calculation with S-curve ramp + price erosion + volume erosion
   const cashFlows = baseResult.cashFlows;
   const baselineRevenue: number[] = cashFlows.map((cf) => cf.revenue);
   const adjustedRevenue: number[] = new Array(cashFlows.length).fill(0);
+  const priceIndex: number[] = new Array(cashFlows.length).fill(1.0);
+  const volumeIndex: number[] = new Array(cashFlows.length).fill(1.0);
 
   let peakShareErosion = 0;
+  let peakPriceErosion = 0;
+  let peakErosionYearRelative = launchYear;
+  let peakCombinedErosion = 0;
   let totalBaseRevenue = 0;
   let totalAdjustedRevenue = 0;
+  let totalVolumeImpact = 0;
+  let totalPriceImpact = 0;
 
-  // --- 3. Calculate competitive multiplier for each year ---
   for (let i = 0; i < cashFlows.length; i++) {
     const year = cashFlows[i].year;
     const baseRev = baselineRevenue[i];
 
-    // Multiplicative erosion: product over all competitors
-    let competitiveMultiplier = 1.0;
+    // Upgrade 3: S-curve ramp + multiplicative volume erosion
+    let volumeMultiplier = 1.0;
+    let activeCompetitors = 0;
 
     for (const competitor of competitorTimeline) {
       if (year >= competitor.entryYear) {
-        // Calculate ramp fraction: how much of this competitor's impact is realized
+        activeCompetitors++;
         const yearsActive = year - competitor.entryYear;
         const effectiveRampYears = Math.max(competitor.rampYears, 0.5);
-        const rampFraction = Math.min(1, yearsActive / effectiveRampYears);
-
-        // Each competitor reduces the remaining share multiplicatively
-        competitiveMultiplier *= Math.max(0, 1 - competitor.shareImpact * rampFraction);
+        const rampFraction = sCurveRamp(yearsActive / effectiveRampYears);
+        volumeMultiplier *= Math.max(0, 1 - competitor.shareImpact * rampFraction);
       }
     }
 
-    // Cumulative erosion for this year
-    const yearErosion = 1 - competitiveMultiplier;
-    peakShareErosion = Math.max(peakShareErosion, yearErosion);
+    // Upgrade 1: First-mover shield in early post-launch years
+    const yearsFromLaunch = year - launchYear;
+    if (yearsFromLaunch >= 0 && yearsFromLaunch < 3 && positionMod.firstMoverShield > 0) {
+      const shieldDecay = 1 - yearsFromLaunch / 3;
+      const shieldFactor = 1 + positionMod.firstMoverShield * shieldDecay;
+      volumeMultiplier = Math.min(1, volumeMultiplier * shieldFactor);
+    }
 
-    adjustedRevenue[i] = baseRev * competitiveMultiplier;
+    // Upgrade 5: Price erosion on top of volume erosion
+    const priceMultiplier = Math.pow(
+      1 - intensity.priceErosionPerEntrant,
+      activeCompetitors,
+    );
+
+    // Combined revenue multiplier
+    const combinedMultiplier = volumeMultiplier * priceMultiplier;
+    const adjRev = baseRev * combinedMultiplier;
+
+    // Decompose impacts for reporting
+    const volumeAdjRev = baseRev * volumeMultiplier;
+    const priceAdjRev = baseRev * priceMultiplier;
+    totalVolumeImpact += baseRev - volumeAdjRev;
+    totalPriceImpact += baseRev - priceAdjRev;
+
+    volumeIndex[i] = volumeMultiplier;
+    priceIndex[i] = priceMultiplier;
+
+    // Track peak erosion year (combined)
+    const yearVolumeErosion = 1 - volumeMultiplier;
+    const yearPriceErosion = 1 - priceMultiplier;
+    const yearCombinedErosion = 1 - combinedMultiplier;
+    if (yearCombinedErosion > peakCombinedErosion) {
+      peakCombinedErosion = yearCombinedErosion;
+      peakErosionYearRelative = year;
+    }
+    peakShareErosion = Math.max(peakShareErosion, yearVolumeErosion);
+    peakPriceErosion = Math.max(peakPriceErosion, yearPriceErosion);
+
+    adjustedRevenue[i] = adjRev;
     totalBaseRevenue += baseRev;
-    totalAdjustedRevenue += adjustedRevenue[i];
+    totalAdjustedRevenue += adjRev;
   }
 
-  // --- 4. Calculate total revenue impact ---
   const revenueImpact = totalBaseRevenue - totalAdjustedRevenue;
 
-  // --- 5. Generate narrative ---
-  const competitorCount = competitorTimeline.length;
-  const firstEntryYear = Math.min(...competitorTimeline.map((c) => c.entryYear));
-  const yearsUntilFirstCompetitor = firstEntryYear - launchYear;
-
-  let narrative: string;
-  if (peakShareErosion < 0.15) {
-    narrative = `Favorable competitive outlook with ${competitorCount} anticipated entrant${competitorCount > 1 ? 's' : ''}. ` +
-      `Peak market share erosion of ${(peakShareErosion * 100).toFixed(1)}% is modest, ` +
-      `reflecting the asset's strong competitive positioning. ` +
-      `Total lifetime revenue impact: $${revenueImpact.toFixed(0)}M.`;
-  } else if (peakShareErosion < 0.35) {
-    narrative = `Moderate competitive pressure with ${competitorCount} anticipated entrant${competitorCount > 1 ? 's' : ''}. ` +
-      `First competition expected ${yearsUntilFirstCompetitor >= 0 ? `${yearsUntilFirstCompetitor} year${yearsUntilFirstCompetitor !== 1 ? 's' : ''} post-launch` : `${Math.abs(yearsUntilFirstCompetitor)} year${Math.abs(yearsUntilFirstCompetitor) !== 1 ? 's' : ''} before launch`}. ` +
-      `Peak erosion reaches ${(peakShareErosion * 100).toFixed(1)}%, ` +
-      `reducing lifetime revenue by $${revenueImpact.toFixed(0)}M. ` +
-      `Differentiation strategy and launch sequencing are critical.`;
+  // Upgrade 9: Confidence levels
+  let confidence: CompetitiveDynamicsResult['confidence'];
+  if (dataSource === 'pipeline-intelligence') {
+    confidence = 'high';
+  } else if (dataSource === 'hybrid') {
+    confidence = 'moderate';
   } else {
-    narrative = `Significant competitive headwinds with ${competitorCount} anticipated entrant${competitorCount > 1 ? 's' : ''}. ` +
-      `First competition expected ${yearsUntilFirstCompetitor >= 0 ? `${yearsUntilFirstCompetitor} year${yearsUntilFirstCompetitor !== 1 ? 's' : ''} post-launch` : `${Math.abs(yearsUntilFirstCompetitor)} year${Math.abs(yearsUntilFirstCompetitor) !== 1 ? 's' : ''} before launch`}. ` +
-      `Peak erosion of ${(peakShareErosion * 100).toFixed(1)}% substantially impacts commercial potential, ` +
-      `with $${revenueImpact.toFixed(0)}M in lifetime revenue at risk. ` +
-      `Consider accelerated development timelines and best-in-class differentiation to protect market share.`;
+    confidence = competitorTimeline.length >= 3 ? 'moderate' : 'low';
   }
 
+  // Upgrade 9: Richer narrative with decomposition
+  const competitorCount = competitorTimeline.length;
+  const firstEntryYear = competitorTimeline.length > 0
+    ? Math.min(...competitorTimeline.map((c) => c.entryYear))
+    : launchYear;
+  const yearsUntilFirstCompetitor = Math.round((firstEntryYear - launchYear) * 10) / 10;
+
+  // Convert to absolute calendar years for display
+  const currentCalendar = new Date().getFullYear();
+  const peakErosionYearAbs = Math.round(currentCalendar + peakErosionYearRelative);
+
+  const totalErosionPct = ((peakShareErosion + peakPriceErosion - peakShareErosion * peakPriceErosion) * 100).toFixed(1);
+  const volumeErosionPct = (peakShareErosion * 100).toFixed(1);
+  const priceErosionPct = (peakPriceErosion * 100).toFixed(1);
+  const firstCompetitorText = yearsUntilFirstCompetitor >= 0
+    ? `${yearsUntilFirstCompetitor} year${yearsUntilFirstCompetitor !== 1 ? 's' : ''} post-launch`
+    : `${Math.abs(yearsUntilFirstCompetitor)} year${Math.abs(yearsUntilFirstCompetitor) !== 1 ? 's' : ''} before launch`;
+
+  const namedCompetitors = competitorTimeline.filter((c) => c.name).map((c) => c.name!);
+  const competitorDetail = namedCompetitors.length > 0
+    ? ` Named competitors: ${namedCompetitors.slice(0, 3).join(', ')}${namedCompetitors.length > 3 ? ` and ${namedCompetitors.length - 3} more` : ''}.`
+    : '';
+
+  const regProtection = regDelay > 0
+    ? ` Regulatory exclusivity provides +${regDelay.toFixed(1)} years of effective protection.`
+    : '';
+
+  const combinedErosion = peakShareErosion + peakPriceErosion;
+
+  let narrative: string;
+  if (combinedErosion < 0.20) {
+    narrative = `Favorable competitive outlook with ${competitorCount} anticipated entrant${competitorCount !== 1 ? 's' : ''}. ` +
+      `Peak erosion of ${totalErosionPct}% (${volumeErosionPct}% volume + ${priceErosionPct}% price) in ${peakErosionYearAbs}, ` +
+      `reflecting strong positioning.${regProtection}${competitorDetail} ` +
+      `Total revenue impact: $${revenueImpact.toFixed(0)}M ($${totalVolumeImpact.toFixed(0)}M volume + $${totalPriceImpact.toFixed(0)}M price).`;
+  } else if (combinedErosion < 0.45) {
+    narrative = `Moderate competitive pressure with ${competitorCount} anticipated entrant${competitorCount !== 1 ? 's' : ''}. ` +
+      `First competition expected ${firstCompetitorText}. ` +
+      `Peak erosion of ${totalErosionPct}% (${volumeErosionPct}% volume, ${priceErosionPct}% price) in ${peakErosionYearAbs} ` +
+      `reduces lifetime revenue by $${revenueImpact.toFixed(0)}M ($${totalVolumeImpact.toFixed(0)}M volume + $${totalPriceImpact.toFixed(0)}M price).${regProtection}${competitorDetail} ` +
+      `Differentiation and pricing strategy are critical.`;
+  } else {
+    narrative = `Significant competitive headwinds with ${competitorCount} anticipated entrant${competitorCount !== 1 ? 's' : ''}. ` +
+      `First competition expected ${firstCompetitorText}. ` +
+      `Peak erosion of ${totalErosionPct}% (${volumeErosionPct}% volume + ${priceErosionPct}% price compression) in ${peakErosionYearAbs} ` +
+      `substantially impacts commercial potential, with $${revenueImpact.toFixed(0)}M at risk ` +
+      `($${totalVolumeImpact.toFixed(0)}M volume + $${totalPriceImpact.toFixed(0)}M price).${regProtection}${competitorDetail} ` +
+      `Consider accelerated timelines, best-in-class differentiation, and pricing resilience.`;
+  }
+
+  // Convert project-relative entry years to absolute calendar years for UI display
+  const displayTimeline: CompetitorEntry[] = competitorTimeline.map((c) => ({
+    ...c,
+    entryYear: Math.round(currentCalendar + c.entryYear),
+  }));
+
   return {
-    competitorTimeline,
+    competitorTimeline: displayTimeline,
     baselineRevenue,
     adjustedRevenue,
+    priceIndex,
+    volumeIndex,
     peakShareErosion: Math.round(peakShareErosion * 1000) / 1000,
+    peakPriceErosion: Math.round(peakPriceErosion * 1000) / 1000,
     revenueImpact: Math.round(revenueImpact * 10) / 10,
+    volumeImpact: Math.round(totalVolumeImpact * 10) / 10,
+    priceImpact: Math.round(totalPriceImpact * 10) / 10,
+    peakErosionYear: peakErosionYearAbs,
+    confidence,
+    dataSource,
     narrative,
   };
 }

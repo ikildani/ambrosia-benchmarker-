@@ -545,6 +545,7 @@ export default function RnpvAnalysis({
                       </p>
                     )}
 
+                    {/* Top row: Competitors, Peak Erosion (combined), $ Impact */}
                     <div className="grid grid-cols-3 gap-3 mb-3">
                       <div className="p-2 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                         <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Competitors</p>
@@ -552,9 +553,10 @@ export default function RnpvAnalysis({
                       </div>
                       <div className="p-2 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                         <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Peak Erosion</p>
-                        <p className={`text-base font-bold font-mono ${competitiveDynamics.peakShareErosion > 0.25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                          {(competitiveDynamics.peakShareErosion * 100).toFixed(1)}%
+                        <p className={`text-base font-bold font-mono ${(competitiveDynamics.peakShareErosion + competitiveDynamics.peakPriceErosion) > 0.25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                          {((competitiveDynamics.peakShareErosion + competitiveDynamics.peakPriceErosion - competitiveDynamics.peakShareErosion * competitiveDynamics.peakPriceErosion) * 100).toFixed(1)}%
                         </p>
+                        <p className="text-[8px] text-slate-400 mt-0.5">in {competitiveDynamics.peakErosionYear}</p>
                       </div>
                       <div className="p-2 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                         <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">$ Impact</p>
@@ -562,17 +564,51 @@ export default function RnpvAnalysis({
                       </div>
                     </div>
 
+                    {/* Second row: Volume vs Price decomposition */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                        <p className="text-[10px] font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-0.5">Volume Erosion</p>
+                        <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">
+                          {(competitiveDynamics.peakShareErosion * 100).toFixed(1)}% <span className="text-[10px] text-slate-500">·</span> -{fmt(competitiveDynamics.volumeImpact)}
+                        </p>
+                      </div>
+                      <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                        <p className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-0.5">Price Erosion</p>
+                        <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">
+                          {(competitiveDynamics.peakPriceErosion * 100).toFixed(1)}% <span className="text-[10px] text-slate-500">·</span> -{fmt(competitiveDynamics.priceImpact)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Confidence + data source badge */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                        competitiveDynamics.confidence === 'high' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400' :
+                        competitiveDynamics.confidence === 'moderate' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' :
+                        'bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
+                      }`}>
+                        {competitiveDynamics.confidence} confidence
+                      </span>
+                      <span className="text-[9px] text-slate-500 dark:text-slate-400">
+                        {competitiveDynamics.dataSource === 'pipeline-intelligence' ? 'Real pipeline data' :
+                         competitiveDynamics.dataSource === 'hybrid' ? 'Pipeline + calibrated' :
+                         'TA-calibrated model'}
+                      </span>
+                    </div>
+
                     {/* Competitor timeline entries */}
                     <div className="space-y-1.5">
                       {competitiveDynamics.competitorTimeline.map((comp, i) => (
                         <div key={i} className="flex items-center gap-3 text-xs">
-                          <span className="w-10 font-mono font-bold text-slate-600 dark:text-slate-300">{comp.entryYear}</span>
+                          <span className="w-12 font-mono font-bold text-slate-600 dark:text-slate-300">{comp.entryYear}</span>
                           <div className={`px-2 py-0.5 rounded text-[9px] font-bold ${
                             comp.type === 'generic' ? 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400' :
                             comp.type === 'nextGen' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                            comp.type === 'biosimilar' ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400' :
                             'bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
                           }`}>{comp.type.replace(/([A-Z])/g, ' $1').trim()}</div>
-                          <span className="text-slate-500 dark:text-slate-400">{(comp.shareImpact * 100).toFixed(0)}% impact · {comp.rampYears > 0 ? `${comp.rampYears}y ramp` : 'immediate'}</span>
+                          {comp.name && <span className="text-slate-700 dark:text-slate-200 font-semibold">{comp.name}</span>}
+                          <span className="text-slate-500 dark:text-slate-400 ml-auto">{(comp.shareImpact * 100).toFixed(0)}% impact · {comp.rampYears > 0 ? `${comp.rampYears}y ramp` : 'immediate'}</span>
                         </div>
                       ))}
                     </div>

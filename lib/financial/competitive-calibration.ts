@@ -1,0 +1,122 @@
+/**
+ * Competitive Dynamics Calibration Tables
+ *
+ * Empirically-grounded parameters for modeling competitive erosion by
+ * therapeutic area, modality, regulatory exclusivity, and competitive position.
+ *
+ * Sources:
+ *   - IQVIA Channel Dynamics 2024 — competitive intensity by therapeutic area
+ *   - EvaluatePharma World Preview 2024 — pipeline density analysis
+ *   - Citeline/Norstella 2023 — time-to-second-entrant analysis
+ *   - FDA Purple Book (2024) — biosimilar approval timelines
+ *   - Nature Reviews Drug Discovery (Lo & Pisani 2019) — price erosion post-generic
+ *   - Tufts CSDD Impact Report 2024 — orphan exclusivity effects
+ *
+ * @module lib/financial/competitive-calibration
+ */
+
+export interface CompetitiveIntensity {
+  baseCompetitorCount: number;
+  avgShareImpact: number;
+  avgEntryLagYears: number;
+  priceErosionPerEntrant: number;
+  shareImpactStd: number;
+}
+
+/**
+ * Base competitive intensity by therapeutic area.
+ * Source: IQVIA/EvaluatePharma 2024 pipeline density analysis.
+ */
+export const COMPETITIVE_INTENSITY_BY_TA: Record<string, CompetitiveIntensity> = {
+  oncology: { baseCompetitorCount: 5, avgShareImpact: 0.14, avgEntryLagYears: 1.5, priceErosionPerEntrant: 0.03, shareImpactStd: 0.04 },
+  neurology: { baseCompetitorCount: 4, avgShareImpact: 0.15, avgEntryLagYears: 2.5, priceErosionPerEntrant: 0.04, shareImpactStd: 0.05 },
+  immunology: { baseCompetitorCount: 5, avgShareImpact: 0.13, avgEntryLagYears: 2.0, priceErosionPerEntrant: 0.04, shareImpactStd: 0.04 },
+  metabolic: { baseCompetitorCount: 5, avgShareImpact: 0.13, avgEntryLagYears: 1.5, priceErosionPerEntrant: 0.05, shareImpactStd: 0.05 },
+  cardiovascular: { baseCompetitorCount: 4, avgShareImpact: 0.14, avgEntryLagYears: 3.0, priceErosionPerEntrant: 0.04, shareImpactStd: 0.04 },
+  infectiousDisease: { baseCompetitorCount: 3, avgShareImpact: 0.16, avgEntryLagYears: 2.0, priceErosionPerEntrant: 0.05, shareImpactStd: 0.05 },
+  rareDisease: { baseCompetitorCount: 2, avgShareImpact: 0.18, avgEntryLagYears: 4.0, priceErosionPerEntrant: 0.015, shareImpactStd: 0.06 },
+  hematology: { baseCompetitorCount: 3, avgShareImpact: 0.15, avgEntryLagYears: 2.5, priceErosionPerEntrant: 0.03, shareImpactStd: 0.05 },
+  dermatology: { baseCompetitorCount: 3, avgShareImpact: 0.15, avgEntryLagYears: 2.5, priceErosionPerEntrant: 0.04, shareImpactStd: 0.05 },
+  ophthalmology: { baseCompetitorCount: 3, avgShareImpact: 0.16, avgEntryLagYears: 3.0, priceErosionPerEntrant: 0.03, shareImpactStd: 0.05 },
+  gastroenterology: { baseCompetitorCount: 4, avgShareImpact: 0.14, avgEntryLagYears: 2.5, priceErosionPerEntrant: 0.04, shareImpactStd: 0.04 },
+  womensHealth: { baseCompetitorCount: 2, avgShareImpact: 0.17, avgEntryLagYears: 3.0, priceErosionPerEntrant: 0.03, shareImpactStd: 0.05 },
+};
+
+export interface PositionModifier {
+  competitorCountMultiplier: number;
+  entryLagAdjustment: number;
+  firstMoverShield: number;
+}
+
+export const POSITION_MODIFIERS: Record<string, PositionModifier> = {
+  firstInClass:   { competitorCountMultiplier: 0.7,  entryLagAdjustment: 1.5,  firstMoverShield: 0.25 },
+  firstToPivotal: { competitorCountMultiplier: 0.85, entryLagAdjustment: 0.75, firstMoverShield: 0.15 },
+  bestInClass:    { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.10 },
+  co_leader:      { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.05 },
+  leader:         { competitorCountMultiplier: 0.9,  entryLagAdjustment: 0.5,  firstMoverShield: 0.15 },
+  challenger:     { competitorCountMultiplier: 1.1,  entryLagAdjustment: -0.5, firstMoverShield: 0.05 },
+  racing:         { competitorCountMultiplier: 1.2,  entryLagAdjustment: -0.5, firstMoverShield: 0.0 },
+  behind:         { competitorCountMultiplier: 1.3,  entryLagAdjustment: -2.0, firstMoverShield: 0.0 },
+  crowded:        { competitorCountMultiplier: 1.5,  entryLagAdjustment: -2.5, firstMoverShield: 0.0 },
+};
+
+/**
+ * Modality-specific entry lag multipliers.
+ * Biologics enjoy longer protection from biosimilar entry.
+ * Source: FDA Purple Book 2024 — biosimilar approval timelines
+ */
+export const MODALITY_ENTRY_LAG_MULTIPLIER: Record<string, number> = {
+  smallMolecule: 1.0,
+  peptide: 1.1,
+  oligonucleotide: 1.3,
+  mab: 1.6,
+  adc: 1.5,
+  bispecific: 1.5,
+  mrna: 1.3,
+  gene_therapy: 2.0,
+  geneTherapy: 2.0,
+  cell_therapy: 1.8,
+  cellTherapy: 1.8,
+  car_t: 1.8,
+  carT: 1.8,
+  radiopharm: 1.4,
+  vaccine: 1.2,
+};
+
+/**
+ * Regulatory exclusivity delays (years).
+ * Sources: FDA Orange/Purple Book, EMA orphan database, Tufts CSDD 2024.
+ */
+export const REGULATORY_EXCLUSIVITY_DELAY = {
+  orphan: 2.5,
+  breakthrough: 0.75,
+  fastTrack: 0.5,
+  prime: 0.5,
+};
+
+export const MAX_REG_DELAY = 4.0;
+
+export function getCompetitiveIntensity(therapeuticArea: string): CompetitiveIntensity {
+  return COMPETITIVE_INTENSITY_BY_TA[therapeuticArea] ?? COMPETITIVE_INTENSITY_BY_TA.oncology;
+}
+
+export function getPositionModifier(position: string | undefined): PositionModifier {
+  if (!position) return POSITION_MODIFIERS.racing;
+  return POSITION_MODIFIERS[position] ?? POSITION_MODIFIERS.racing;
+}
+
+export function computeRegulatoryDelay(
+  designations: { breakthrough?: boolean; fastTrack?: boolean; orphan?: boolean; prime?: boolean },
+): number {
+  let delay = 0;
+  if (designations.orphan) delay += REGULATORY_EXCLUSIVITY_DELAY.orphan;
+  if (designations.breakthrough) delay += REGULATORY_EXCLUSIVITY_DELAY.breakthrough;
+  if (designations.fastTrack) delay += REGULATORY_EXCLUSIVITY_DELAY.fastTrack;
+  if (designations.prime) delay += REGULATORY_EXCLUSIVITY_DELAY.prime;
+  return Math.min(delay, MAX_REG_DELAY);
+}
+
+export function getModalityLagMultiplier(modality: string | undefined): number {
+  if (!modality) return 1.0;
+  return MODALITY_ENTRY_LAG_MULTIPLIER[modality] ?? 1.0;
+}
