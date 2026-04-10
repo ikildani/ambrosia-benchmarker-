@@ -183,6 +183,7 @@ export function runFinancialModel(
   inputs: CalculationInput,
   result: CalculationResult,
   epidemiologyDataset?: Record<string, { prevalencePerMillion: number; incidencePerMillion: number; diagnosedPercent: number; treatedPercent: number; drugEligiblePercent: number; annualCostOfTherapy: number; peakSalesRangeM?: { low: number; median: number; high: number }; sources: string[] }>,
+  pipelineData?: import('./advanced-upgrades').PipelineIntelligence,
 ): FinancialModelResult {
   // Step 1: Market size estimation (if epi data available)
   let marketSize: MarketSizeEstimate | null = null;
@@ -231,7 +232,9 @@ export function runFinancialModel(
   const lifecycleExtensions = calculateLifecycleExtensions(rnpvInput, rnpv);
 
   // Step 9: Competitive Dynamics — time-varying market share erosion
-  const competitiveDynamics = calculateCompetitiveDynamics(rnpvInput, rnpv);
+  // When pipelineData is provided, real competitor data from ClinicalTrials.gov
+  // overrides the calibrated templates for grade A+ accuracy.
+  const competitiveDynamics = calculateCompetitiveDynamics(rnpvInput, rnpv, pipelineData);
 
   // Step 10: Real Options Overlay — compound optionality via binomial lattice
   const realOptions = calculateRealOptions(rnpvInput, rnpv, monteCarlo);

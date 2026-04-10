@@ -23,6 +23,7 @@ import {
   getPositionModifier,
   getModalityLagMultiplier,
   computeRegulatoryDelay,
+  getTerritorialEntryLag,
   type CompetitiveIntensity,
 } from './competitive-calibration';
 
@@ -101,6 +102,25 @@ export interface CompetitiveDynamicsResult {
   confidence: 'high' | 'moderate' | 'low';
   /** Calibration source used */
   dataSource: 'calibrated' | 'pipeline-intelligence' | 'hybrid';
+
+  // ─── Upgrade: Monte Carlo uncertainty bands ───
+  /** P10 (optimistic) revenue impact from stochastic share-impact sampling ($M) */
+  revenueImpactP10?: number;
+  /** P90 (pessimistic) revenue impact from stochastic share-impact sampling ($M) */
+  revenueImpactP90?: number;
+  /** P10 peak erosion (best case) */
+  peakErosionP10?: number;
+  /** P90 peak erosion (worst case) */
+  peakErosionP90?: number;
+
+  // ─── Upgrade: Territorial differentiation ───
+  /** Effective entry lag added by territory scope (years) */
+  territorialLagYears?: number;
+
+  // ─── Upgrade: Competitive response modeling ───
+  /** Additional price erosion from competitor defensive reactions post-launch */
+  competitorResponseImpact?: number;
+
   /** Human-readable narrative summarizing competitive dynamics */
   narrative: string;
 }
@@ -116,6 +136,50 @@ function sCurveRamp(t: number): number {
 
 function inferPrimaryMOA(input: RNPVInput): string {
   return input.modality || 'smallMolecule';
+}
+
+// ─── Helper: Seeded pseudo-random (mulberry32) ───
+// Used for Monte Carlo sampling of share impact distributions so that
+// the same input produces the same P10/P90 bands (reproducibility).
+function mulberry32(seed: number): () => number {
+  let a = seed;
+  return function () {
+    a |= 0;
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ─── Helper: Box-Muller transform for normal sampling ───
+function sampleNormal(rng: () => number, mean: number, stdDev: number): number {
+  const u1 = Math.max(rng(), 1e-10);
+  const u2 = rng();
+  const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+  return mean + z0 * stdDev;
+}
+
+// ─── Competitive response modeling ───
+// After your launch, competitors react: price cuts, label expansion attempts,
+// promotional spending increases. This is captured as additional price erosion
+// concentrated in the first 3 years post-launch (the "response window").
+//
+// Source: IQVIA Channel Dynamics 2024, McKinsey pharma competitive response analysis.
+function computeCompetitorResponseImpact(
+  year: number,
+  launchYear: number,
+  activeCompetitors: number,
+  intensity: CompetitiveIntensity,
+): number {
+  const yearsFromLaunch = year - launchYear;
+  // Response only occurs in first 3 years post-launch and scales with competitor count
+  if (yearsFromLaunch < 0 || yearsFromLaunch >= 3) return 0;
+  if (activeCompetitors === 0) return 0;
+  // Responses decay over time (competitors settle into equilibrium)
+  const responseDecay = 1 - yearsFromLaunch / 3;
+  // Additional 1.5% price erosion per active competitor during response window
+  return 0.015 * activeCompetitors * responseDecay * (intensity.priceErosionPerEntrant / 0.03);
 }
 
 /**
@@ -162,10 +226,15 @@ export function calculateCompetitiveDynamics(
   // Upgrade 4: Regulatory exclusivity delays
   const regDelay = computeRegulatoryDelay(input.regulatoryDesignations || {});
 
+  // Upgrade 10: Territorial differentiation
+  // Global deals see effective weighted-average entry lag; territory-specific
+  // deals see the single-territory lag.
+  const territorialLag = getTerritorialEntryLag(input.territory);
+
   // Effective entry lag combines all factors
   const effectiveEntryLag = Math.max(
     -3,
-    intensity.avgEntryLagYears * modalityLagMult + positionMod.entryLagAdjustment + regDelay,
+    intensity.avgEntryLagYears * modalityLagMult + positionMod.entryLagAdjustment + regDelay + territorialLag,
   );
 
   // Build competitor timeline — from real data if provided, else from templates
@@ -250,6 +319,7 @@ export function calculateCompetitiveDynamics(
   let totalAdjustedRevenue = 0;
   let totalVolumeImpact = 0;
   let totalPriceImpact = 0;
+  let totalCompetitorResponseImpact = 0;
 
   for (let i = 0; i < cashFlows.length; i++) {
     const year = cashFlows[i].year;
@@ -278,10 +348,17 @@ export function calculateCompetitiveDynamics(
     }
 
     // Upgrade 5: Price erosion on top of volume erosion
-    const priceMultiplier = Math.pow(
+    const basePriceErosion = Math.pow(
       1 - intensity.priceErosionPerEntrant,
       activeCompetitors,
     );
+
+    // Upgrade 11: Competitive response modeling
+    // Competitors react to your launch with defensive pricing and label expansion.
+    // Additional price erosion concentrated in first 3 years post-launch.
+    const responseImpact = computeCompetitorResponseImpact(year, launchYear, activeCompetitors, intensity);
+    const priceMultiplier = basePriceErosion * (1 - responseImpact);
+    totalCompetitorResponseImpact += baseRev * basePriceErosion * responseImpact;
 
     // Combined revenue multiplier
     const combinedMultiplier = volumeMultiplier * priceMultiplier;
@@ -313,6 +390,76 @@ export function calculateCompetitiveDynamics(
   }
 
   const revenueImpact = totalBaseRevenue - totalAdjustedRevenue;
+
+  // Upgrade 12: Monte Carlo uncertainty bands (P10/P90)
+  // Resample share impacts from normal distribution around calibrated mean/std
+  // and compute the spread in total revenue impact. Seeded RNG for reproducibility.
+  const MC_ITERATIONS = 200;
+  const mcSeed = Math.round(
+    totalBaseRevenue * 1000 +
+    competitorTimeline.length * 17 +
+    launchYear * 31,
+  ) & 0x7FFFFFFF;
+  const mcRng = mulberry32(mcSeed);
+  const mcImpacts: number[] = [];
+  const mcPeakErosions: number[] = [];
+
+  for (let iter = 0; iter < MC_ITERATIONS; iter++) {
+    let mcTotalAdjusted = 0;
+    let mcPeakErosion = 0;
+
+    // Resample each competitor's share impact
+    const resampledCompetitors = competitorTimeline.map((c) => ({
+      ...c,
+      shareImpact: Math.max(0, Math.min(1, sampleNormal(mcRng, c.shareImpact, intensity.shareImpactStd))),
+    }));
+
+    for (let i = 0; i < cashFlows.length; i++) {
+      const year = cashFlows[i].year;
+      const baseRev = baselineRevenue[i];
+
+      let vMult = 1.0;
+      let activeCount = 0;
+      for (const comp of resampledCompetitors) {
+        if (year >= comp.entryYear) {
+          activeCount++;
+          const yearsActive = year - comp.entryYear;
+          const rampYears = Math.max(comp.rampYears, 0.5);
+          const rampFrac = sCurveRamp(yearsActive / rampYears);
+          vMult *= Math.max(0, 1 - comp.shareImpact * rampFrac);
+        }
+      }
+
+      // Apply first-mover shield (same as main calc)
+      const yrsFromLaunch = year - launchYear;
+      if (yrsFromLaunch >= 0 && yrsFromLaunch < 3 && positionMod.firstMoverShield > 0) {
+        const decay = 1 - yrsFromLaunch / 3;
+        vMult = Math.min(1, vMult * (1 + positionMod.firstMoverShield * decay));
+      }
+
+      const pMult = Math.pow(1 - intensity.priceErosionPerEntrant, activeCount);
+      const responseImpact = computeCompetitorResponseImpact(year, launchYear, activeCount, intensity);
+      const effectivePMult = pMult * (1 - responseImpact);
+      const combined = vMult * effectivePMult;
+
+      mcTotalAdjusted += baseRev * combined;
+      const yearErosion = 1 - combined;
+      if (yearErosion > mcPeakErosion) mcPeakErosion = yearErosion;
+    }
+
+    mcImpacts.push(totalBaseRevenue - mcTotalAdjusted);
+    mcPeakErosions.push(mcPeakErosion);
+  }
+
+  // Sort and extract P10/P90 percentiles
+  mcImpacts.sort((a, b) => a - b);
+  mcPeakErosions.sort((a, b) => a - b);
+  const p10Idx = Math.floor(MC_ITERATIONS * 0.10);
+  const p90Idx = Math.floor(MC_ITERATIONS * 0.90);
+  const revenueImpactP10 = mcImpacts[p10Idx]; // optimistic (low impact)
+  const revenueImpactP90 = mcImpacts[p90Idx]; // pessimistic (high impact)
+  const peakErosionP10 = mcPeakErosions[p10Idx];
+  const peakErosionP90 = mcPeakErosions[p90Idx];
 
   // Upgrade 9: Confidence levels
   let confidence: CompetitiveDynamicsResult['confidence'];
@@ -394,6 +541,15 @@ export function calculateCompetitiveDynamics(
     peakErosionYear: peakErosionYearAbs,
     confidence,
     dataSource,
+    // Upgrade 12: Monte Carlo uncertainty bands
+    revenueImpactP10: Math.round(revenueImpactP10 * 10) / 10,
+    revenueImpactP90: Math.round(revenueImpactP90 * 10) / 10,
+    peakErosionP10: Math.round(peakErosionP10 * 1000) / 1000,
+    peakErosionP90: Math.round(peakErosionP90 * 1000) / 1000,
+    // Upgrade 10: Territorial differentiation
+    territorialLagYears: Math.round(territorialLag * 10) / 10,
+    // Upgrade 11: Competitive response modeling
+    competitorResponseImpact: Math.round(totalCompetitorResponseImpact * 10) / 10,
     narrative,
   };
 }

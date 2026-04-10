@@ -693,12 +693,47 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   // Run financial modeling pipeline (rNPV, Monte Carlo, scenarios, FX)
   useEffect(() => {
     if (!fullInputs || !result) return;
+    let cancelled = false;
     try {
+      // Initial synchronous run with template-based competitive dynamics
       const fm = runFinancialModel(fullInputs, result, epiData.indications);
       setFinancialModel(fm);
+
+      // Async upgrade: fetch real pipeline competitors and re-run the model
+      // so the competitive dynamics section uses live ClinicalTrials.gov data
+      // instead of calibrated templates. Non-blocking — initial render shows
+      // template results, then upgrades when pipeline data arrives.
+      const launchYearAbs = new Date().getFullYear() + Math.ceil(fm.rnpv.yearsToMarket);
+      fetch('/api/pipeline-competitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          therapeuticArea: fullInputs.therapeuticArea,
+          indication: fullInputs.indication,
+          modality: fullInputs.modality,
+          phase: fullInputs.phase,
+          launchYear: launchYearAbs,
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((payload) => {
+          if (cancelled) return;
+          if (payload?.data?.knownCompetitors?.length > 0) {
+            // Re-run with real pipeline intelligence
+            const upgradedFm = runFinancialModel(
+              fullInputs,
+              result,
+              epiData.indications,
+              payload.data,
+            );
+            if (!cancelled) setFinancialModel(upgradedFm);
+          }
+        })
+        .catch(() => { /* silent fallback — keep template results */ });
     } catch (err) {
       captureClientError(err, 'Results', { context: 'FinancialModel pipeline error' });
     }
+    return () => { cancelled = true; };
   }, [fullInputs, result]);
 
   // Fetch server-side financial data (competitive landscape, deal flow forecast)

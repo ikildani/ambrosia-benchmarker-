@@ -96,6 +96,52 @@ export const REGULATORY_EXCLUSIVITY_DELAY = {
 
 export const MAX_REG_DELAY = 4.0;
 
+/**
+ * Territorial entry lag adjustments (years added to competitor entry time).
+ *
+ * Competitors enter US first (largest market, fastest FDA pathway), then EU,
+ * then Japan/China/ROW. A US-only deal sees faster competitive entry;
+ * a global deal sees an effective weighted average lag.
+ *
+ * Source: IQVIA global launch analytics 2024 — median US→EU lag is ~1 year,
+ * US→Japan ~2 years, US→China ~1.5 years.
+ */
+export const TERRITORIAL_ENTRY_LAG: Record<string, number> = {
+  us: 0.0,
+  eu: 1.0,
+  japan: 2.0,
+  china: 1.5,
+  row: 2.5, // rest of world
+};
+
+/**
+ * Global territory weights for computing effective entry lag.
+ * Based on typical global pharma revenue distribution: US ~45%, EU ~25%, Japan ~10%, China ~10%, ROW ~10%.
+ */
+export const GLOBAL_TERRITORY_WEIGHTS = {
+  us: 0.45,
+  eu: 0.25,
+  japan: 0.10,
+  china: 0.10,
+  row: 0.10,
+} as const;
+
+/**
+ * Compute effective territorial entry lag for a given territory scope.
+ * For 'global', returns the revenue-weighted average across all territories.
+ */
+export function getTerritorialEntryLag(territory: string | undefined): number {
+  if (!territory) return 0;
+  const t = territory.toLowerCase();
+  if (t === 'global' || t === 'ww' || t === 'worldwide') {
+    return Object.entries(GLOBAL_TERRITORY_WEIGHTS).reduce(
+      (sum, [terr, weight]) => sum + (TERRITORIAL_ENTRY_LAG[terr] ?? 0) * weight,
+      0,
+    );
+  }
+  return TERRITORIAL_ENTRY_LAG[t] ?? 0;
+}
+
 export function getCompetitiveIntensity(therapeuticArea: string): CompetitiveIntensity {
   return COMPETITIVE_INTENSITY_BY_TA[therapeuticArea] ?? COMPETITIVE_INTENSITY_BY_TA.oncology;
 }

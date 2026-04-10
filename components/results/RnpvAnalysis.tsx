@@ -580,8 +580,8 @@ export default function RnpvAnalysis({
                       </div>
                     </div>
 
-                    {/* Confidence + data source badge */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* Confidence + data source badge + territorial/response info */}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
                         competitiveDynamics.confidence === 'high' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400' :
                         competitiveDynamics.confidence === 'moderate' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' :
@@ -590,11 +590,38 @@ export default function RnpvAnalysis({
                         {competitiveDynamics.confidence} confidence
                       </span>
                       <span className="text-[9px] text-slate-500 dark:text-slate-400">
-                        {competitiveDynamics.dataSource === 'pipeline-intelligence' ? 'Real pipeline data' :
-                         competitiveDynamics.dataSource === 'hybrid' ? 'Pipeline + calibrated' :
-                         'TA-calibrated model'}
+                        {competitiveDynamics.dataSource === 'pipeline-intelligence' ? '● Real pipeline data' :
+                         competitiveDynamics.dataSource === 'hybrid' ? '● Pipeline + calibrated' :
+                         '○ TA-calibrated model'}
                       </span>
+                      {competitiveDynamics.territorialLagYears != null && competitiveDynamics.territorialLagYears > 0 && (
+                        <span className="text-[9px] text-slate-500 dark:text-slate-400">
+                          · +{competitiveDynamics.territorialLagYears.toFixed(1)}y territorial lag
+                        </span>
+                      )}
+                      {competitiveDynamics.competitorResponseImpact != null && competitiveDynamics.competitorResponseImpact > 1 && (
+                        <span className="text-[9px] text-slate-500 dark:text-slate-400">
+                          · -{fmt(competitiveDynamics.competitorResponseImpact)} competitor response
+                        </span>
+                      )}
                     </div>
+
+                    {/* Monte Carlo uncertainty bands */}
+                    {competitiveDynamics.revenueImpactP10 != null && competitiveDynamics.revenueImpactP90 != null && (
+                      <div className="mb-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Uncertainty Bands (P10 – P90)</p>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-green-600 dark:text-green-400 font-mono font-semibold">-{fmt(competitiveDynamics.revenueImpactP10)}</span>
+                          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full relative">
+                            <div className="absolute inset-y-0 left-0 right-0 bg-gradient-to-r from-green-400 via-amber-400 to-red-400 rounded-full opacity-60"></div>
+                          </div>
+                          <span className="text-red-600 dark:text-red-400 font-mono font-semibold">-{fmt(competitiveDynamics.revenueImpactP90)}</span>
+                        </div>
+                        <p className="text-[8px] text-slate-400 mt-1">
+                          P10 erosion: {((competitiveDynamics.peakErosionP10 ?? 0) * 100).toFixed(1)}% · P90: {((competitiveDynamics.peakErosionP90 ?? 0) * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    )}
 
                     {/* Competitor timeline entries */}
                     <div className="space-y-1.5">
