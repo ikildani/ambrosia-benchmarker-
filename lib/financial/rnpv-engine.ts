@@ -427,19 +427,35 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     : modifiedPoS;
 
   // 3. Calculate years to market from current phase
+  // Determine which clinical pathway to follow based on current phase.
+  // Combined phases (phase1_2, phase2_3) are ALTERNATIVE pathways, not sequential
+  // steps. A drug follows ONE of: standard (P1→P2→P3), combined-early (P1/2→P3),
+  // or combined-late (P2/3). Iterating PHASE_ORDER linearly double-counts them.
   const durations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
   const costs = PHASE_COSTS[therapeuticArea] || PHASE_COSTS.oncology;
   const currentIdx = phaseIndex(phase);
+
+  // Build the actual sequential pathway based on the starting phase
+  const pathway: string[] = (() => {
+    if (phase === 'phase1_2') return ['phase1_2', 'phase3', 'nda_filed'];
+    if (phase === 'phase2_3') return ['phase2_3', 'nda_filed'];
+    if (phase === 'nda_filed') return ['nda_filed'];
+    if (phase === 'approved') return [];
+    // Standard pathway: discovery → preclinical → phase1 → phase2 → phase3 → nda_filed
+    const standard = ['discovery', 'preclinical', 'phase1', 'phase2', 'phase3', 'nda_filed'];
+    const startIdx = standard.indexOf(phase);
+    return startIdx >= 0 ? standard.slice(startIdx) : ['phase1', 'phase2', 'phase3', 'nda_filed'];
+  })();
 
   let yearsToMarket = 0;
   const phaseTransitions: RNPVResult['phaseTransitions'] = [];
   let runningCumProb = 1.0;
 
-  for (let i = currentIdx; i < PHASE_ORDER.length; i++) {
-    const phaseName = PHASE_ORDER[i];
+  for (let i = 0; i < pathway.length; i++) {
+    const phaseName = pathway[i];
     const duration = durations[phaseName] || 2.0;
     const cost = costs[phaseName] || 30;
-    const transition = transitions[i - currentIdx];
+    const transition = transitions[i];
 
     if (transition) {
       runningCumProb = transition.cumulativeProb;
@@ -453,12 +469,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       costEstimate: cost,
     });
 
-    if (phaseName !== 'approved') {
-      yearsToMarket += duration;
-    }
+    yearsToMarket += duration;
   }
-  // Add regulatory review time
-  yearsToMarket += durations.regulatory || 1.0;
+  // Note: nda_filed duration represents the full regulatory review period.
+  // Previously the code also added durations.regulatory here, which double-counted
+  // the review time. Removed to align with nda_filed = regulatory review window.
 
   // Apply data-quality-driven timeline adjustment (Nirav Jhaveri feedback)
   // Better data → faster Phase 3 (smaller trial). Worse data → longer Phase 3.
