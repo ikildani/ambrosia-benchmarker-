@@ -615,6 +615,16 @@ export interface MarketSizeEstimate {
 
   /** Published sources for market size assumptions */
   sources: string[];
+
+  /**
+   * True when territory or epidemiology data fell back to a default
+   * (global population / generic rare-disease profile). UI should flag
+   * the estimate as "estimated from default data" when this is true.
+   */
+  usedFallback?: boolean;
+
+  /** List of fields that were filled from defaults */
+  fallbackReasons?: string[];
 }
 
 // ---------------------------------------------------------------------------
