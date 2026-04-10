@@ -18,7 +18,7 @@ import {
 export const metadata: Metadata = {
   title: 'Portfolio License | The Deal Intelligence Layer for Biotech & Pharma VCs | Ambrosia Ventures',
   description:
-    'Multi-seat Pro access plus 16 fund-level capabilities for biotech and pharma VC firms. Admin dashboard, quarterly portfolio reports, white-label deliverables, dedicated analyst hours, and an enterprise infrastructure layer. From $1,200/mo for 5 seats.',
+    'Multi-seat Pro access plus 16 fund-level capabilities for biotech and pharma VC firms. Admin dashboard, quarterly portfolio reports, white-label deliverables, dedicated analyst hours, and an enterprise infrastructure layer. From $30,000/yr for 5 seats.',
   keywords: [
     'biotech VC portfolio platform',
     'pharma VC deal intelligence',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Portfolio License | The Deal Intelligence Layer for Biotech & Pharma VCs',
     description:
-      '16 fund-level capabilities for biotech and pharma VCs. Admin dashboard, white-label reports, dedicated analyst hours, cross-portfolio partner matching, and enterprise infrastructure — from $14,400/yr.',
+      '16 fund-level capabilities for biotech and pharma VCs. Admin dashboard, white-label reports, dedicated analyst hours, cross-portfolio partner matching, and enterprise infrastructure — from $30,000/yr.',
     type: 'website',
     url: 'https://calculator.ambrosiaventures.co/portfolio',
     siteName: 'Ambrosia Ventures',
@@ -82,7 +82,7 @@ const tierComparison: Array<{ feature: string; pro: string | boolean; growth: st
   { feature: 'Slack & Teams Integration',                    pro: false, growth: true, scale: true, enterprise: true },
 
   // Concierge Service
-  { feature: 'Dedicated Analyst Hours',                      pro: false, growth: '4 hrs/mo', scale: '10 hrs/mo', enterprise: '20 hrs/mo', group: 'Concierge Service' },
+  { feature: 'Dedicated Analyst Hours',                      pro: false, growth: '2 hrs/mo', scale: '5 hrs/mo', enterprise: '10 hrs/mo + named', group: 'Concierge Service' },
   { feature: 'Portfolio Co Office Hours',                    pro: false, growth: true, scale: true, enterprise: true },
   { feature: 'Annual Customer Summit',                       pro: false, growth: true, scale: true, enterprise: true },
   { feature: 'Quarterly Strategy Call (Managing Partner)',   pro: false, growth: false, scale: false, enterprise: true },
@@ -229,10 +229,10 @@ const onboardingSteps = [
 ];
 
 const roiAnchors = [
-  { label: '9 hours of outside counsel at a top life sciences law firm', cost: '~$13,500' },
-  { label: '1 day of strategy consulting from a healthcare practice', cost: '~$15,000' },
-  { label: '1 quarterly outside valuation engagement', cost: '~$15,000' },
-  { label: 'Catering budget for one annual LP meeting', cost: '~$15,000' },
+  { label: 'One BD analyst FTE (fully loaded annual cost)',                    cost: '~$240,000' },
+  { label: 'One operating partner (fully loaded annual cost)',                 cost: '~$600,000' },
+  { label: 'One annual Cortellis enterprise subscription',                     cost: '~$120,000+' },
+  { label: 'Outside counsel for a single complex licensing deal',              cost: '~$75–100,000' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -701,8 +701,8 @@ export default function PortfolioPage() {
                 annual={PORTFOLIO_PRICING.GROWTH_ANNUAL}
                 perSeat={PORTFOLIO_PRICING.GROWTH_PER_SEAT}
                 extraSeat={PORTFOLIO_PRICING.GROWTH_EXTRA_SEAT}
-                analystHours="4 hours/month"
-                description="Built for Fund I–II biotech VCs. Equip your first 5 portfolio companies for less than the cost of one outside counsel engagement."
+                analystHours={PORTFOLIO_PRICING.GROWTH_ANALYST_HOURS}
+                description="Built for Fund I–II biotech VCs. Equip your first 5 portfolio companies for less than 10% of an analyst FTE."
                 highlight={false}
               />
 
@@ -714,8 +714,8 @@ export default function PortfolioPage() {
                 annual={PORTFOLIO_PRICING.SCALE_ANNUAL}
                 perSeat={PORTFOLIO_PRICING.SCALE_PER_SEAT}
                 extraSeat={PORTFOLIO_PRICING.SCALE_EXTRA_SEAT}
-                analystHours="10 hours/month"
-                description="For mid-stage funds actively coordinating partnering across 8–12 portfolio companies."
+                analystHours={PORTFOLIO_PRICING.SCALE_ANALYST_HOURS}
+                description="For mid-stage funds actively coordinating partnering across 8–12 portfolio companies. The institutional standard."
                 highlight={true}
               />
 
@@ -727,8 +727,8 @@ export default function PortfolioPage() {
                 annual={PORTFOLIO_PRICING.ENTERPRISE_ANNUAL}
                 perSeat={PORTFOLIO_PRICING.ENTERPRISE_PER_SEAT}
                 extraSeat={PORTFOLIO_PRICING.ENTERPRISE_EXTRA_SEAT}
-                analystHours="20 hours/month + named analyst"
-                description="For institutional funds with deep portfolios. Includes quarterly Managing Partner strategy call and 15% advisory preferred rates."
+                analystHours={PORTFOLIO_PRICING.ENTERPRISE_ANALYST_HOURS}
+                description="For institutional funds and pharma CVCs with deep portfolios. Includes quarterly Managing Partner strategy call and 15% advisory preferred rates."
                 highlight={false}
                 enterpriseExtras
               />
@@ -757,7 +757,7 @@ export default function PortfolioPage() {
                 milestone payment.
               </h2>
               <p className="mt-5 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                The Scale tier costs $24,000/year. A single Phase 2 licensing deal upfront ranges from $30M to $80M.
+                The Scale tier costs $60,000/year. A single Phase 2 licensing deal carries $200–500M in total deal value across upfront, milestones, and royalties.
                 The math is unkind to anyone choosing the alternative.
               </p>
             </div>
@@ -766,10 +766,10 @@ export default function PortfolioPage() {
             <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden mb-10">
               <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
                 {[
-                  { label: 'Annual cost (Scale tier, 10 seats)',                    value: '$24,000',     color: 'text-white' },
-                  { label: 'Average Phase 2 upfront payment',                       value: '$30–80M',     color: 'text-white' },
-                  { label: 'Improvement needed to break even',                      value: '0.03–0.08%',  color: 'text-amber-400' },
-                  { label: 'Realistic upfront improvement with better benchmarks',  value: '$1–5M+',      color: 'text-emerald-400' },
+                  { label: 'Annual cost (Scale tier, 10 seats)',                            value: '$60,000',      color: 'text-white' },
+                  { label: 'Average Phase 2 total deal value (incl. milestones)',           value: '$200–500M',    color: 'text-white' },
+                  { label: 'Improvement needed to break even',                              value: '0.012–0.030%', color: 'text-amber-400' },
+                  { label: 'Realistic deal optimization with better benchmarks',            value: '$5–20M+',      color: 'text-emerald-400' },
                 ].map(row => (
                   <div key={row.label} className="p-6 sm:p-8">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{row.label}</p>
@@ -781,7 +781,7 @@ export default function PortfolioPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-1">Implied ROI</p>
-                    <p className="text-4xl sm:text-5xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300">42–208x</p>
+                    <p className="text-4xl sm:text-5xl font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300">83–333x</p>
                   </div>
                   <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
                     Doesn&apos;t account for reduced outside counsel hours
@@ -793,7 +793,7 @@ export default function PortfolioPage() {
 
             {/* Comparison anchoring */}
             <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl p-8">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">What $14,400/year is also less than</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">What $60,000/year is also less than</p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {roiAnchors.map(a => (
                   <div key={a.label} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.05] rounded-lg">
@@ -803,8 +803,8 @@ export default function PortfolioPage() {
                 ))}
               </div>
               <p className="text-xs text-slate-600 mt-5 leading-relaxed">
-                Total embedded value at the Scale tier: ~$90–95K/year (platform + analyst hours + curated content + customer summit access).
-                <span className="text-slate-400"> A ~4x value multiple before counting any deal upside.</span>
+                Replaces a category of spending biotech VCs already make — at less than half the price of comparable enterprise platforms (Cortellis, Evaluate Pharma, Capital IQ),
+                <span className="text-slate-400"> with deeper deal-mechanics specialization than any of them.</span>
               </p>
             </div>
           </div>

@@ -16,32 +16,37 @@ export const PRICING = {
   REPORT_LABEL: 'Deal Report',
 } as const;
 
-// Portfolio License — multi-seat enterprise tier for VC firms and corporate venture arms.
+// Portfolio License — multi-seat enterprise tier for biotech and pharma VC firms.
 // All tiers require annual billing. Sales-led — no self-serve checkout.
+// Pricing calibrated against comparable enterprise platforms (Cortellis, Evaluate Pharma,
+// Capital IQ) and biotech VC procurement benchmarks. See project-portfolio-license-framework.md.
 export const PORTFOLIO_PRICING = {
   GROWTH_SEATS: 5,
-  GROWTH_MONTHLY: '$1,200',
-  GROWTH_MONTHLY_NUM: 1200,
-  GROWTH_ANNUAL: '$14,400',
-  GROWTH_ANNUAL_NUM: 14400,
-  GROWTH_PER_SEAT: '$240',
-  GROWTH_EXTRA_SEAT: '$200',
+  GROWTH_MONTHLY: '$2,500',
+  GROWTH_MONTHLY_NUM: 2500,
+  GROWTH_ANNUAL: '$30,000',
+  GROWTH_ANNUAL_NUM: 30000,
+  GROWTH_PER_SEAT: '$500',
+  GROWTH_EXTRA_SEAT: '$450',
+  GROWTH_ANALYST_HOURS: '2 hours/month',
 
   SCALE_SEATS: 10,
-  SCALE_MONTHLY: '$2,000',
-  SCALE_MONTHLY_NUM: 2000,
-  SCALE_ANNUAL: '$24,000',
-  SCALE_ANNUAL_NUM: 24000,
-  SCALE_PER_SEAT: '$200',
-  SCALE_EXTRA_SEAT: '$175',
+  SCALE_MONTHLY: '$5,000',
+  SCALE_MONTHLY_NUM: 5000,
+  SCALE_ANNUAL: '$60,000',
+  SCALE_ANNUAL_NUM: 60000,
+  SCALE_PER_SEAT: '$500',
+  SCALE_EXTRA_SEAT: '$400',
+  SCALE_ANALYST_HOURS: '5 hours/month',
 
   ENTERPRISE_SEATS: '15+',
-  ENTERPRISE_MONTHLY: '$2,500',
-  ENTERPRISE_MONTHLY_NUM: 2500,
-  ENTERPRISE_ANNUAL: '$30,000',
-  ENTERPRISE_ANNUAL_NUM: 30000,
-  ENTERPRISE_PER_SEAT: '$167',
-  ENTERPRISE_EXTRA_SEAT: '$150',
+  ENTERPRISE_MONTHLY: '$10,000',
+  ENTERPRISE_MONTHLY_NUM: 10000,
+  ENTERPRISE_ANNUAL: '$120,000',
+  ENTERPRISE_ANNUAL_NUM: 120000,
+  ENTERPRISE_PER_SEAT: '$667',
+  ENTERPRISE_EXTRA_SEAT: '$350',
+  ENTERPRISE_ANALYST_HOURS: '10 hours/month + named analyst',
 } as const;
 
 export const PORTFOLIO_DEMO_URL =
