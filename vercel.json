@@ -23,6 +23,10 @@
   },
   "crons": [
     {
+      "path": "/api/cron/rnpv-regression",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/cron/deal-backfill",
       "schedule": "0 1,7,13,19 * * *"
     },
