@@ -40,6 +40,8 @@
  * lookup is robust regardless of which TA pulled the slug.
  */
 
+import { getTier3CalibratedIndication } from './indication-tier3-calibration';
+
 export interface IndicationPoSModifier {
   /** Slug used in calculations.ts indicationOptions */
   indication: string;
@@ -699,15 +701,19 @@ export const INDICATION_POS_MODIFIERS: Record<string, IndicationPoSModifier> = {
 };
 
 /**
- * Look up a calibrated indication modifier by slug. Returns null if the
- * indication is not in the top-50 set, in which case the caller should fall
- * back to the TA-level base rate.
+ * Look up a calibrated indication modifier by slug. Tier 1 manual entries
+ * take precedence; otherwise falls back to Tier 3 automated calibration for
+ * any slug in the calculations.ts catalog; otherwise returns null so the
+ * caller falls back to the TA-level base rate.
  */
 export function getIndicationPoSModifier(
   indication: string | undefined | null,
 ): IndicationPoSModifier | null {
   if (!indication) return null;
-  return INDICATION_POS_MODIFIERS[indication] || null;
+  const tier1 = INDICATION_POS_MODIFIERS[indication];
+  if (tier1) return tier1;
+  const tier3 = getTier3CalibratedIndication(indication);
+  return tier3 ? tier3.posModifier : null;
 }
 
 /**

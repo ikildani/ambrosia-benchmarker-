@@ -18,6 +18,8 @@
  * @module lib/financial/index-drugs
  */
 
+import { getTier3CalibratedIndication } from './indication-tier3-calibration';
+
 export interface IndexDrug {
   name: string;
   company: string;
@@ -3203,10 +3205,15 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
 
 /**
  * Look up the TAM and max drug peak cap for a given indication.
- * Returns null if indication is not in the database.
+ * Tier 1 manual entries take precedence; otherwise falls back to Tier 3
+ * automated calibration for any slug in the calculations.ts catalog;
+ * otherwise returns null.
  */
 export function getIndicationMarketCap(indication: string): IndicationMarketCap | null {
-  return INDICATION_MARKET_CAPS[indication] || null;
+  const tier1 = INDICATION_MARKET_CAPS[indication];
+  if (tier1) return tier1;
+  const tier3 = getTier3CalibratedIndication(indication);
+  return tier3 ? tier3.marketCap : null;
 }
 
 /**

@@ -20,6 +20,7 @@ import type {
   DealWaterfall,
   ScenarioComparisonResult,
   LifecycleExtensionResult,
+  EnsembleResult,
 } from './types';
 import { calculateRNPV } from './rnpv-engine';
 import { runMonteCarlo } from './monte-carlo';
@@ -32,6 +33,7 @@ import { calculateCompetitiveDynamics, calculateRealOptions } from './advanced-u
 import type { CompetitiveDynamicsResult, RealOptionsResult } from './advanced-upgrades';
 import { checkCrossEngineConsistency } from './consistency-checks';
 import { assertInvariants, checkScenarioInvariants } from './invariants';
+import { calculateEnsembleValuation } from './ensemble-valuation';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -53,6 +55,8 @@ export interface FinancialModelResult {
   lifecycleExtensions: LifecycleExtensionResult;
   competitiveDynamics: CompetitiveDynamicsResult;
   realOptions: RealOptionsResult;
+  /** Tier 3 Item 7: blended valuation across rNPV / comparables / real options */
+  ensemble: EnsembleResult;
 }
 
 /**
@@ -239,6 +243,11 @@ export function runFinancialModel(
   // Step 10: Real Options Overlay — compound optionality via binomial lattice
   const realOptions = calculateRealOptions(rnpvInput, rnpv, monteCarlo);
 
+  // Step 11: Ensemble Valuation (Tier 3 Item 7) — inverse-variance blend of
+  // rNPV + comparable transactions + real options. Surfaces a single headline
+  // number that is robust to method-specific bias.
+  const ensemble = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, rnpvInput);
+
   // Layer 2: Cross-engine consistency checks — logs to Sentry, never throws.
   try {
     const scenarioViolations = checkScenarioInvariants(scenarioComparison);
@@ -298,6 +307,7 @@ export function runFinancialModel(
     lifecycleExtensions,
     competitiveDynamics,
     realOptions,
+    ensemble,
   };
 }
 

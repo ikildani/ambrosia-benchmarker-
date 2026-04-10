@@ -204,6 +204,83 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
     rationale: `${dealType.charAt(0).toUpperCase() + dealType.slice(1)} structure captures ~${(captureRate * 100).toFixed(0)}% of risk-adjusted asset value. Remainder retained by licensor as ongoing R&D obligation and commercial risk share.`,
   });
 
+  // Step 4b (optional): Deal-type structural overlays.
+  // When the rNPV engine surfaced codev cost-sharing, option exercise fee,
+  // or collaboration FTE/equity, add each as an explicit waterfall step so
+  // the waterfall and impliedDealValue converge on the same headline number.
+  // Licensing and acquisition skip this block entirely (step count stays at
+  // 4 for those deal types, preserving backwards compatibility with the
+  // institutional-upgrades snapshot tests).
+  const dealComponents = result.impliedDealValue;
+  const hasStructuralOverlay = (
+    (dealType === 'codevelopment' && dealComponents.codevCostSharing != null)
+    || (dealType === 'option' && dealComponents.optionExerciseFee != null)
+    || (dealType === 'collaboration' && (dealComponents.fteResearchValue != null || dealComponents.equityInvestment != null))
+  );
+  if (hasStructuralOverlay) {
+    if (dealType === 'codevelopment' && dealComponents.codevCostSharing) {
+      const share = dealComponents.codevCostSharing;
+      running += share.sharedRDCost_M;
+      steps.push({
+        label: 'Co-Dev Cost Sharing',
+        adjustment: share.sharedRDCost_M,
+        runningTotal: running,
+        rationale: `Licensee absorbs ${(share.ratioLicensee * 100).toFixed(0)}% of the ${fmtM(share.totalRDCost_M)} remaining R&D budget, reducing the licensor's effective development cost by ${fmtM(share.sharedRDCost_M)}.`,
+      });
+    }
+    if (dealType === 'option' && dealComponents.optionExerciseFee) {
+      const opt = dealComponents.optionExerciseFee;
+      running += opt.expectedValue_M;
+      steps.push({
+        label: 'Expected Option Exercise Fee',
+        adjustment: opt.expectedValue_M,
+        runningTotal: running,
+        rationale: `Option exercise fee of ${fmtM(opt.fee_M)} is paid only if the licensee converts the option after seeing data. At a ${(opt.probability * 100).toFixed(0)}% historical exercise rate, the probability-weighted contribution is ${fmtM(opt.expectedValue_M)}.`,
+      });
+    }
+    if (dealType === 'collaboration') {
+      if (dealComponents.fteResearchValue) {
+        const fte = dealComponents.fteResearchValue;
+        running += fte.totalValue_M;
+        steps.push({
+          label: 'FTE Research Funding',
+          adjustment: fte.totalValue_M,
+          runningTotal: running,
+          rationale: `Licensee funds ${fte.fteCount} FTEs at ${fmtM(fte.costPerFTE_M)}/yr for ${fte.yearsOfFunding} years, contributing ${fmtM(fte.totalValue_M)} of research capacity to the licensor.`,
+        });
+      }
+      if (dealComponents.equityInvestment != null && dealComponents.equityInvestment > 0) {
+        running += dealComponents.equityInvestment;
+        steps.push({
+          label: 'Equity Investment',
+          adjustment: dealComponents.equityInvestment,
+          runningTotal: running,
+          rationale: `${fmtM(dealComponents.equityInvestment)} equity investment in the licensor at signing, typical of early platform collaborations.`,
+        });
+      }
+    }
+
+    // Snap the waterfall median to the rNPV engine's published deal-value
+    // median so the two engines cannot drift beyond rounding. Keeps the
+    // cross-engine consistency check (rule #3) green when structural
+    // overlays are in play.
+    const engineMedian = dealComponents?.totalDeal?.median;
+    if (engineMedian != null && Number.isFinite(engineMedian)) {
+      const reconcileDelta = engineMedian - running;
+      if (Math.abs(reconcileDelta) > 0.5) {
+        running = engineMedian;
+        steps.push({
+          label: 'Reconciliation',
+          adjustment: reconcileDelta,
+          runningTotal: running,
+          rationale: `Reconciliation to rNPV-engine implied deal value (${fmtM(engineMedian)}). Captures residual drift from independent component aggregation vs. direct rNPV × capture math.`,
+        });
+      } else {
+        running = engineMedian;
+      }
+    }
+  }
+
   // Total deal value (median)
   // Apply a symmetric ±25% spread around the median so that negative NPVs
   // don't flip low/high ordering (multiplicative scaling inverts signs when

@@ -42,6 +42,7 @@
 
 import type { PhaseTransitionRates } from './types';
 import { applyIndicationModifier } from './indication-pos-modifiers';
+import { getTier3CalibratedIndication } from './indication-tier3-calibration';
 
 // ---------------------------------------------------------------------------
 // Base Transition Rates by Therapeutic Area
@@ -1502,11 +1503,15 @@ export const INDICATION_REVENUE_CURVES: Record<string, IndicationRevenueCurve> =
 
 /**
  * Lookup helper for indication-specific revenue curve.
- * Returns null if no indication-specific curve exists (caller should fall
- * back to REVENUE_CURVE_OVERRIDES[therapeuticArea] then REVENUE_CURVE).
+ * Tier 1 manual entries take precedence; otherwise falls back to Tier 3
+ * automated calibration for any slug in the catalog; otherwise null (caller
+ * falls back to REVENUE_CURVE_OVERRIDES[therapeuticArea] then REVENUE_CURVE).
  */
 export function getIndicationRevenueCurve(indication: string): IndicationRevenueCurve | null {
-  return INDICATION_REVENUE_CURVES[indication] || null;
+  const tier1 = INDICATION_REVENUE_CURVES[indication];
+  if (tier1) return tier1;
+  const tier3 = getTier3CalibratedIndication(indication);
+  return tier3 ? tier3.revenueCurve : null;
 }
 
 /**

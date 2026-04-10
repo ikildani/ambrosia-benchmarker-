@@ -339,12 +339,21 @@ export function calculateCompetitiveDynamics(
       }
     }
 
-    // Upgrade 1: First-mover shield in early post-launch years
+    // Upgrade 1: First-mover shield — decays over 8 years for firstInClass/bestInClass
+    // (empirically calibrated from Keytruda, Dupixent, Ozempic dominance patterns).
+    // Previous 3-year decay was too aggressive — dominant leaders maintain share
+    // through habit formation, biomarker selection, and label breadth well beyond
+    // the first 3 post-launch years.
     const yearsFromLaunch = year - launchYear;
-    if (yearsFromLaunch >= 0 && yearsFromLaunch < 3 && positionMod.firstMoverShield > 0) {
-      const shieldDecay = 1 - yearsFromLaunch / 3;
-      const shieldFactor = 1 + positionMod.firstMoverShield * shieldDecay;
-      volumeMultiplier = Math.min(1, volumeMultiplier * shieldFactor);
+    const shieldWindow = 8; // Extended from 3 to match observed dominance decay
+    if (yearsFromLaunch >= 0 && yearsFromLaunch < shieldWindow && positionMod.firstMoverShield > 0) {
+      const shieldDecay = 1 - yearsFromLaunch / shieldWindow;
+      // Shield REDUCES volume erosion rather than ADDING to volume
+      // Apply as a multiplier that floors the erosion
+      const shieldStrength = positionMod.firstMoverShield * shieldDecay;
+      const erosion = 1 - volumeMultiplier;
+      const protectedErosion = erosion * (1 - shieldStrength);
+      volumeMultiplier = 1 - protectedErosion;
     }
 
     // Upgrade 5: Price erosion on top of volume erosion
