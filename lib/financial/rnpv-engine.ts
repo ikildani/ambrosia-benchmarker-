@@ -636,7 +636,8 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
 
   // 9. Calculate implied deal terms
   // Upfront % depends on both phase and deal type.
-  // Deal-type overrides (acquisition, option, etc.) take precedence over phase-based ratios.
+  // Deal-type overrides (acquisition, option, codev, collaboration) take
+  // precedence over phase-based ratios.
   const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
   // Total deal value as a fraction of rNPV is phase-stratified. Earlier phases
   // command a lower fraction due to higher risk premium. The median matches
@@ -644,18 +645,202 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const phaseTotalDealMedian = getPhaseDealToRNPVRatio(phase);
   const phaseTotalDealLow = Math.max(0.10, phaseTotalDealMedian - 0.15);
   const phaseTotalDealHigh = Math.min(1.10, phaseTotalDealMedian + 0.20);
-  const impliedDealValue = {
+
+  // Base totalDeal ranges (may be reshaped below for deal-type-specific
+  // structural components). These are the "pure licensing" baselines that
+  // every deal type starts from.
+  const baseTotalDealLow = riskAdjustedNPV * phaseTotalDealLow;
+  const baseTotalDealMedian = riskAdjustedNPV * phaseTotalDealMedian;
+  const baseTotalDealHigh = riskAdjustedNPV * phaseTotalDealHigh;
+
+  const impliedDealValue: RNPVResult['impliedDealValue'] = {
     upfront: {
       low: riskAdjustedNPV * upfrontPercent.low,
       median: riskAdjustedNPV * upfrontPercent.median,
       high: riskAdjustedNPV * upfrontPercent.high,
     },
     totalDeal: {
-      low: riskAdjustedNPV * phaseTotalDealLow,
-      median: riskAdjustedNPV * phaseTotalDealMedian,
-      high: riskAdjustedNPV * phaseTotalDealHigh,
+      low: baseTotalDealLow,
+      median: baseTotalDealMedian,
+      high: baseTotalDealHigh,
     },
   };
+
+  // -------------------------------------------------------------------------
+  // Deal-type-specific structural overlays (codev, option, collaboration)
+  //
+  // The three non-acquisition, non-plain-licensing deal types have structural
+  // components that the base licensing math doesn't capture:
+  //   - Co-development: shared R&D spend reduces effective licensor cost and
+  //     therefore boosts the effective total deal value.
+  //   - Option: the exercise fee is contingent on conversion and is modelled
+  //     as a probability-weighted expected value added to the total.
+  //   - Collaboration: FTE research funding and equity investment are direct
+  //     cash-in that augment the deal value beyond a plain rNPV fraction.
+  //
+  // Each branch (a) reshapes upfront/total if appropriate and (b) populates
+  // a structured sub-field on impliedDealValue so the UI and report can show
+  // the buyer economics line-by-line.
+  // -------------------------------------------------------------------------
+
+  if (dealType === 'codevelopment') {
+    // Total remaining R&D cost from current phase through launch.
+    // This uses the same pathway the cash-flow projection uses and therefore
+    // stays consistent with the engine's R&D burn schedule.
+    const rdPathwayForSharing = pathway.filter(p => (costs[p] ?? 0) > 0);
+    const totalRDCost = rdPathwayForSharing.reduce((sum, p) => sum + (costs[p] ?? 0), 0);
+
+    // Cost-sharing ratio: default 50/50. Clamp to a sane band.
+    const licenseeShare = Math.max(0, Math.min(0.9, input.costSharingRatio ?? 0.5));
+    const sharedRDSavings = totalRDCost * licenseeShare;
+
+    // Apply the savings as additional value to the licensor. Savings scale with
+    // the probability of actually executing the program (cumPoS) — if the asset
+    // fails early, the cost-share benefit is only partially realized.
+    const expectedSavings = sharedRDSavings * Math.max(cumulativePoS, 0.25);
+
+    // Codev totalDeal: use |rNPV| × phase ratio + expected cost-share savings.
+    // Using the absolute value preserves a sensible headline number for
+    // negative-rNPV early-stage assets (where the cost-share benefit itself
+    // can exceed the standalone rNPV).
+    const codevBaseLow = Math.abs(riskAdjustedNPV) * phaseTotalDealLow;
+    const codevBaseMedian = Math.abs(riskAdjustedNPV) * phaseTotalDealMedian;
+    const codevBaseHigh = Math.abs(riskAdjustedNPV) * phaseTotalDealHigh;
+    impliedDealValue.totalDeal = {
+      low: codevBaseLow + expectedSavings * 0.85,
+      median: codevBaseMedian + expectedSavings,
+      high: codevBaseHigh + expectedSavings * 1.15,
+    };
+
+    // Upfront tightens toward the lower end of the codev band because the
+    // licensee "pays" in ongoing R&D rather than cash at close. Ranges are
+    // kept internally consistent against the reshaped totalDeal.
+    impliedDealValue.upfront = {
+      low: impliedDealValue.totalDeal.low * upfrontPercent.low,
+      median: impliedDealValue.totalDeal.median * upfrontPercent.median,
+      high: impliedDealValue.totalDeal.high * upfrontPercent.high,
+    };
+
+    impliedDealValue.codevCostSharing = {
+      totalRDCost_M: Math.round(totalRDCost),
+      ratioLicensee: licenseeShare,
+      sharedRDCost_M: Math.round(expectedSavings),
+    };
+  } else if (dealType === 'option') {
+    // Option deals pay a small upfront + a contingent exercise fee. We model
+    // the exercise fee as a probability-weighted expected value.
+    //
+    // Default fee: 10% of |rNPV| (approximates 1× the option upfront). The
+    // |·| keeps the fee non-zero even for early-stage assets with negative
+    // risk-adjusted NPV — the fee is a contractual obligation that doesn't
+    // depend on the licensor's balance sheet, so collapsing it to zero when
+    // rNPV is negative would understate the deal's headline value.
+    const defaultFee = Math.abs(riskAdjustedNPV) * 0.10;
+    const exerciseFee = input.optionExerciseFee != null && input.optionExerciseFee >= 0
+      ? input.optionExerciseFee
+      : defaultFee;
+
+    // Historical exercise probability: 50% for Phase 1 option deals (BIO
+    // 2024–2026 analysis). Use a phase-scaled value so later-phase options
+    // (rarer, but data-rich) exercise more often.
+    const exerciseProbability = getOptionExerciseProbability(phase);
+    const expectedExerciseFee = exerciseFee * exerciseProbability;
+
+    // Rebuild totalDeal around upfront + expected exercise fee + phase-based
+    // milestones. Anchor on |rNPV| × 0.40 so negative-rNPV early-stage
+    // options still surface a meaningful headline number; then add the
+    // expected exercise fee.
+    const OPTION_BASE_CAPTURE = 0.40;
+    const optionBase = Math.abs(riskAdjustedNPV) * OPTION_BASE_CAPTURE;
+    const optionTotalMedian = optionBase + expectedExerciseFee;
+    // Symmetric ±20% range around the median.
+    const optionTotalLow = optionTotalMedian * 0.80;
+    const optionTotalHigh = optionTotalMedian * 1.20;
+
+    impliedDealValue.totalDeal = {
+      low: optionTotalLow,
+      median: optionTotalMedian,
+      high: optionTotalHigh,
+    };
+
+    // Re-anchor option upfront on the reshaped totalDeal so the upfront
+    // range never bleeds above total. Option upfront is 5–15% of totalDeal.
+    impliedDealValue.upfront = {
+      low: impliedDealValue.totalDeal.low * upfrontPercent.low,
+      median: impliedDealValue.totalDeal.median * upfrontPercent.median,
+      high: impliedDealValue.totalDeal.high * upfrontPercent.high,
+    };
+
+    impliedDealValue.optionExerciseFee = {
+      fee_M: Math.round(exerciseFee),
+      probability: exerciseProbability,
+      expectedValue_M: Math.round(expectedExerciseFee),
+    };
+  } else if (dealType === 'collaboration') {
+    // Collaboration deals often include FTE research funding and/or an equity
+    // investment. Both are direct cash components that flow to the licensor
+    // on top of the base rNPV-derived deal value.
+    const fte = input.fteFunding;
+    const fteValue = fte && fte.fteCount > 0 && fte.costPerFTE_M > 0 && fte.yearsOfFunding > 0
+      ? fte.fteCount * fte.costPerFTE_M * fte.yearsOfFunding
+      : 0;
+    const equityValue = input.equityInvestment != null && input.equityInvestment > 0
+      ? input.equityInvestment
+      : 0;
+
+    // Collaboration capture baseline: |rNPV| × 0.30 (early-stage, value-share
+    // heavy on downstream milestones). Add FTE + equity on top. |·| keeps the
+    // headline non-zero for negative-rNPV preclinical assets where the deal
+    // is predominantly research funding.
+    const COLLAB_BASE_CAPTURE = 0.30;
+    const collabBase = Math.abs(riskAdjustedNPV) * COLLAB_BASE_CAPTURE;
+    const collabTotalMedian = collabBase + fteValue + equityValue;
+    const collabTotalLow = collabTotalMedian * 0.80;
+    const collabTotalHigh = collabTotalMedian * 1.20;
+
+    impliedDealValue.totalDeal = {
+      low: collabTotalLow,
+      median: collabTotalMedian,
+      high: collabTotalHigh,
+    };
+
+    // Re-anchor collaboration upfront on the reshaped totalDeal. Collab
+    // upfront is 10–25% of totalDeal.
+    impliedDealValue.upfront = {
+      low: impliedDealValue.totalDeal.low * upfrontPercent.low,
+      median: impliedDealValue.totalDeal.median * upfrontPercent.median,
+      high: impliedDealValue.totalDeal.high * upfrontPercent.high,
+    };
+
+    if (fteValue > 0 && fte) {
+      impliedDealValue.fteResearchValue = {
+        fteCount: fte.fteCount,
+        costPerFTE_M: fte.costPerFTE_M,
+        yearsOfFunding: fte.yearsOfFunding,
+        totalValue_M: Math.round(fteValue),
+      };
+    }
+    if (equityValue > 0) {
+      impliedDealValue.equityInvestment = Math.round(equityValue);
+    }
+  }
+
+  // Post-branch invariant: upfront.high ≤ totalDeal.high (and median/low).
+  // Ranges can drift if a user supplies extreme inputs (e.g., a $1B equity
+  // investment) that push totalDeal beyond the upfront cap. Clamp upfront
+  // down rather than flipping the ordering.
+  impliedDealValue.upfront.low = Math.min(
+    impliedDealValue.upfront.low,
+    impliedDealValue.totalDeal.low,
+  );
+  impliedDealValue.upfront.median = Math.min(
+    impliedDealValue.upfront.median,
+    impliedDealValue.totalDeal.median,
+  );
+  impliedDealValue.upfront.high = Math.min(
+    impliedDealValue.upfront.high,
+    impliedDealValue.totalDeal.high,
+  );
 
   // 10. Cross-validation with benchmark-based deal value
   // Use phase-dependent deal-to-rNPV ratio for more accurate comparison.
@@ -723,6 +908,18 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     impliedDealValue: {
       upfront: roundRange(impliedDealValue.upfront),
       totalDeal: roundRange(impliedDealValue.totalDeal),
+      ...(impliedDealValue.codevCostSharing
+        ? { codevCostSharing: impliedDealValue.codevCostSharing }
+        : {}),
+      ...(impliedDealValue.optionExerciseFee
+        ? { optionExerciseFee: impliedDealValue.optionExerciseFee }
+        : {}),
+      ...(impliedDealValue.fteResearchValue
+        ? { fteResearchValue: impliedDealValue.fteResearchValue }
+        : {}),
+      ...(impliedDealValue.equityInvestment != null
+        ? { equityInvestment: impliedDealValue.equityInvestment }
+        : {}),
     },
     crossValidation,
     discountRate,
@@ -1079,6 +1276,31 @@ function getDealTypeUpfrontPercent(dealType: string): { low: number; median: num
     collaboration: { low: 0.10, median: 0.175, high: 0.25 },   // Research funding, early partnership
   };
   return overrides[dealType] || null;
+}
+
+/**
+ * Historical probability an option deal converts to a full license.
+ *
+ * Source: BIO 2024–2026 option-deal analysis. ~50% exercise rate for Phase 1
+ * ADC / platform options; later-phase options (rare but data-rich) exercise
+ * more often because the data supporting the decision is less ambiguous.
+ *
+ * These values are intentionally conservative — the probability is capped at
+ * 0.75 because even Phase 3 assets fail at the CRL stage.
+ */
+function getOptionExerciseProbability(phase: string): number {
+  const probs: Record<string, number> = {
+    discovery: 0.25,
+    preclinical: 0.35,
+    phase1: 0.50,
+    phase1_2: 0.55,
+    phase2: 0.60,
+    phase2_3: 0.65,
+    phase3: 0.70,
+    nda_filed: 0.75,
+    approved: 0.75,
+  };
+  return probs[phase] ?? 0.50;
 }
 
 /** Generate narrative explaining divergence between benchmark and rNPV valuations */

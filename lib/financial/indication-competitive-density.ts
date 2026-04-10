@@ -8,6 +8,8 @@
  * EvaluatePharma 2025, FDA approval database.
  */
 
+import { getTier3CalibratedIndication } from './indication-tier3-calibration';
+
 export interface IndicationCompetitiveDensity {
   indication: string;
   ta: string;
@@ -618,10 +620,15 @@ export const COMPETITIVE_DENSITY: Record<string, IndicationCompetitiveDensity> =
 
 /**
  * Look up competitive density for a specific indication.
+ * Tier 1 manual entries take precedence; otherwise falls back to Tier 3
+ * automated calibration for any slug in the catalog; otherwise null.
  */
 export function getCompetitiveDensity(indication: string): IndicationCompetitiveDensity | null {
   if (!indication) return null;
-  return COMPETITIVE_DENSITY[indication] || null;
+  const tier1 = COMPETITIVE_DENSITY[indication];
+  if (tier1) return tier1;
+  const tier3 = getTier3CalibratedIndication(indication);
+  return tier3 ? tier3.competitiveDensity : null;
 }
 
 /**

@@ -123,6 +123,64 @@ export interface RNPVInput {
    */
   dealType?: string;
 
+  // =========================================================================
+  // Deal-type-specific structural components
+  // =========================================================================
+  // These fields surface the economic machinery that makes co-development,
+  // option, and collaboration deals structurally different from a plain
+  // license. They are optional; sensible defaults are applied by the engine
+  // when the corresponding dealType is selected.
+
+  /**
+   * Co-development cost sharing: fraction of R&D costs the LICENSEE (partner)
+   * bears. 0.5 = classic 50/50 split. 0.6 = licensee bears 60% (buyer-led
+   * codev). Only used when dealType === 'codevelopment'.
+   *
+   * Source: BMS/Acceleron, Roche/Genentech historical co-development
+   * agreements. 50/50 is the modal split; 60/40 occurs when the larger
+   * partner pays up for tighter strategic control.
+   *
+   * Default: 0.5 for codev deals, undefined otherwise.
+   */
+  costSharingRatio?: number;
+
+  /**
+   * Option exercise fee paid IF the licensee exercises the option after
+   * seeing data. Typical range: 1–2× the option upfront. Only used when
+   * dealType === 'option'.
+   *
+   * Source: Gilead/Tubulis Dec 2024 ($20M upfront + $30M option exercise +
+   * $415M milestones), plus BIO 2024–2026 option deal analysis.
+   *
+   * Default: 10% of rNPV (approximates 1× the option upfront).
+   */
+  optionExerciseFee?: number;
+
+  /**
+   * Collaboration FTE funding: research-capacity payments typical in early
+   * platform collaborations. Only used when dealType === 'collaboration'.
+   *
+   * Source: Genmab, Schrödinger, Exscientia multi-target research deals.
+   * Common range $0.5M–$2M per FTE per year over 3–5 years.
+   */
+  fteFunding?: {
+    /** Number of full-time equivalents funded by the licensee */
+    fteCount: number;
+    /** Fully loaded cost per FTE per year in $M (typ. 0.5–2.0) */
+    costPerFTE_M: number;
+    /** Years of funding committed (typ. 3–5) */
+    yearsOfFunding: number;
+  };
+
+  /**
+   * Equity investment component of the deal in $M. The licensee takes an
+   * equity stake in the licensor at signing. Only used when
+   * dealType === 'collaboration'.
+   *
+   * Source: AbbVie/Genmab 2022, BMS/Repare, Pfizer/Arvinas 2021.
+   */
+  equityInvestment?: number;
+
   /**
    * Override for the weighted-average cost of capital.
    * If not provided, defaults to ~10-12% depending on phase and risk profile.
@@ -345,10 +403,69 @@ export interface RNPVResult {
    * Implied deal terms derived from the rNPV.
    * Upfront is typically 15-40% of rNPV for early-stage; total deal
    * includes milestones and is typically 60-100% of rNPV.
+   *
+   * Deal-type-specific structural components are surfaced when the
+   * dealType input triggers them (codev cost-sharing, option exercise
+   * fee, collaboration FTE funding / equity). These are additive value
+   * components already rolled into totalDeal, but broken out so the UI
+   * and report can explain where the headline number comes from.
    */
   impliedDealValue: {
     upfront: { low: number; median: number; high: number };
     totalDeal: { low: number; median: number; high: number };
+
+    /**
+     * Co-development cost sharing component. Populated only for
+     * dealType === 'codevelopment'. Represents the R&D spend the
+     * licensee absorbs on the licensor's behalf — an in-kind contribution
+     * that flows through the deal economics as avoided licensor cost.
+     */
+    codevCostSharing?: {
+      /** Total remaining R&D ($M) from current phase through launch */
+      totalRDCost_M: number;
+      /** Licensee's share (0-1) */
+      ratioLicensee: number;
+      /** Licensee's absorbed R&D spend in $M (= totalRDCost × ratio) */
+      sharedRDCost_M: number;
+    };
+
+    /**
+     * Option exercise fee component. Populated only for
+     * dealType === 'option'. The exercise fee is only paid if the
+     * licensee elects to convert the option into a full license after
+     * seeing data, so we report both the nominal fee and the expected
+     * (probability-weighted) value.
+     */
+    optionExerciseFee?: {
+      /** Nominal exercise fee if option is converted ($M) */
+      fee_M: number;
+      /** Historical probability of exercise (0-1) */
+      probability: number;
+      /** Probability-weighted expected contribution to deal value ($M) */
+      expectedValue_M: number;
+    };
+
+    /**
+     * Collaboration FTE research-funding component. Populated only for
+     * dealType === 'collaboration' when fteFunding is provided (or
+     * inferred by default).
+     */
+    fteResearchValue?: {
+      /** Number of FTEs funded */
+      fteCount: number;
+      /** Cost per FTE per year ($M) */
+      costPerFTE_M: number;
+      /** Years of funding committed */
+      yearsOfFunding: number;
+      /** Total absorbed research cost in $M */
+      totalValue_M: number;
+    };
+
+    /**
+     * Equity investment in the licensor in $M. Populated only for
+     * dealType === 'collaboration' when equityInvestment is provided.
+     */
+    equityInvestment?: number;
   };
 
   /**
@@ -1052,4 +1169,175 @@ export interface LifecycleExtensionResult {
   extendedRNPV: number;
   incrementalValue: number;
   incrementalPercent: number;
+}
+
+// ---------------------------------------------------------------------------
+// Ensemble Valuation (Item 7 — Tier 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * One method's contribution to the inverse-variance-weighted ensemble.
+ * Three methods are blended: rNPV, comparable transactions, and real options.
+ */
+export interface EnsembleMethod {
+  /** Method label rendered in the UI */
+  name: 'rNPV' | 'Comparable Transactions' | 'Real Options';
+  /** Central estimate from this method ($M) */
+  value: number;
+  /** Variance estimate ($M²). Infinity → method excluded from blend. */
+  variance: number;
+  /** Normalized weight in the ensemble (0..1, all weights sum to 1) */
+  weight: number;
+  /** For comparables: number of deals in the matched group */
+  sampleSize?: number;
+  /** Confidence in this method's estimate */
+  confidence: 'high' | 'medium' | 'low';
+  /** Short narrative explaining how this method derived its value */
+  rationale: string;
+}
+
+/**
+ * Output of the ensemble valuation engine. The headline `ensembleValue` is
+ * the inverse-variance-weighted blend of all three methods.
+ */
+export interface EnsembleResult {
+  /** Headline blended value ($M) — `Σ(value_i × w_i)` */
+  ensembleValue: number;
+  /** Standard error of the ensemble = sqrt(1 / Σ(1/var_i)) ($M) */
+  ensembleStdDev: number;
+  /** All three methods with their weights and rationales */
+  methods: EnsembleMethod[];
+  /** max(values) − min(values) across methods ($M) */
+  spread: number;
+  /**
+   * Qualitative agreement assessment:
+   *   tight    → spread / median < 0.20 (methods converge)
+   *   moderate → spread / median in [0.20, 0.50)
+   *   wide     → spread / median ≥ 0.50 (review assumptions)
+   */
+  agreement: 'tight' | 'moderate' | 'wide';
+  /** True when at least one method had to fall back (sparse comps, etc.) */
+  fallbackUsed: boolean;
+  /** Plain-English summary of the blend and any caveats */
+  narrative: string;
+}
+
+// ---------------------------------------------------------------------------
+// Deal Structure Optimizer (Item 8 — Tier 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Licensor preference profile — drives the secondary sort that picks between
+ * deal types of similar headline value. Inferred from `companyType` if absent.
+ */
+export interface LicensorPreferenceProfile {
+  /** 0..1 — weight on cash now vs. future upside (higher = prefer upfront-heavy) */
+  cashNowWeight: number;
+  /** 0..1 — weight on risk aversion (higher = prefer guaranteed cash over option value) */
+  riskAversionWeight: number;
+}
+
+/**
+ * One row in the deal-structure ranking table. Each row represents the
+ * counterfactual: "what would this asset look like as a $dealType deal?"
+ */
+export interface DealStructureOption {
+  dealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  /** Headline deal value to licensor ($M) — uses rNPV implied total deal median */
+  dealValue: number;
+  /** Implied upfront payment ($M) for this structure */
+  upfrontMedian: number;
+  /** Implied total deal value ($M) for this structure */
+  totalDealMedian: number;
+  /** Score after applying licensor preference modifiers — used for sorting */
+  preferenceAdjustedScore: number;
+  /** Percent change vs. user's currently selected dealType (positive = better) */
+  pctVsBaseline: number;
+  /** Final rank (1 = best) after preference adjustment */
+  rank: number;
+  /** 1-2 sentence explanation of why this rank */
+  rationale: string;
+}
+
+/**
+ * Output of the deal structure optimizer. Surfaces a recommendation only when
+ * the top alternative is materially better than the user's current selection.
+ */
+export interface DealOptimizerResult {
+  userSelectedDealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  userSelectedDealValue: number;
+  /** All 5 deal types ranked best → worst */
+  rankings: DealStructureOption[];
+  /** Top alternative (or null if user is already on the best option) */
+  topAlternative: DealStructureOption | null;
+  /**
+   * Strength of the recommendation:
+   *   strong   → alternative > 40% better
+   *   moderate → 20–40% better
+   *   weak     → < 20% better (not surfaced in UI)
+   *   none     → user is already on the best option
+   */
+  recommendationStrength: 'strong' | 'moderate' | 'weak' | 'none';
+  /** Recommendation copy for the UI banner — null when strength is weak/none */
+  recommendation: string | null;
+  /** Resolved licensor preference profile (the one actually used for scoring) */
+  preferenceProfile: LicensorPreferenceProfile;
+}
+
+// ---------------------------------------------------------------------------
+// Counterparty Premiums (Item 9 — Tier 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Historical premium that a specific buyer pays vs. comparable deals.
+ * Computed by `computeCounterpartyPremiums` from the deals + companies tables
+ * and refreshed quarterly via `app/api/cron/counterparty-calibration`.
+ */
+export interface CounterpartyPremium {
+  /** UUID of the buyer in the companies table */
+  companyId: string;
+  /** Display name */
+  companyName: string;
+  /**
+   * Multiplicative premium vs. comparable median.
+   * - 1.00 = pays the median
+   * - 1.25 = pays 25% above median (e.g., AbbVie historically)
+   * - 0.95 = pays 5% below median (e.g., Gilead post-Immunomedics)
+   *
+   * Always clamped to [0.7, 1.5] — anything outside is suspect.
+   */
+  premiumMultiplier: number;
+  /** Number of disclosed deals used in the calculation */
+  sampleSize: number;
+  /**
+   * Confidence level:
+   *   high   → n ≥ 10 disclosed deals
+   *   medium → 5 ≤ n ≤ 9
+   *   low    → 3 ≤ n ≤ 4 (premium applied at 50% weight)
+   */
+  confidence: 'high' | 'medium' | 'low';
+  /**
+   * Per-TA breakdowns (only TAs with n ≥ 3 included). Used for context-aware
+   * lookups when the buyer's premium varies by therapeutic area.
+   */
+  byTherapeuticArea: Record<string, { premium: number; n: number }>;
+  /** Per-phase breakdowns (n ≥ 3 only) */
+  byPhase: Record<string, { premium: number; n: number }>;
+  /** ISO date of the calculation run */
+  asOfDate: string;
+  /** Free-text notes about how this premium was computed */
+  calculationNotes: string;
+}
+
+/**
+ * Result of a counterparty premium lookup. Wraps the multiplier with metadata
+ * so callers can decide whether to apply it (low-confidence premiums are
+ * typically ignored or down-weighted).
+ */
+export interface CounterpartyPremiumLookup {
+  /** The multiplier to apply to deal value (1.0 = no adjustment) */
+  multiplier: number;
+  confidence: 'high' | 'medium' | 'low';
+  /** Provenance: 'company_wide' | 'ta_specific' | 'phase_specific' | 'no_history' */
+  source: string;
 }

@@ -368,6 +368,20 @@ export interface CalculationInput {
   giSegment?: GISegment;
   biologicExperience?: BiologicExperience;
   endoscopicEndpoint?: EndoscopicEndpoint;
+
+  // Deal-type-specific structural inputs (mirror RNPVInput).
+  // Co-development: licensee's share of the remaining R&D budget (0–1). Default 0.5.
+  costSharingRatio?: number;
+  // Option: exercise fee in $M, paid only if the licensee converts the option.
+  optionExerciseFee?: number;
+  // Collaboration: FTE research funding. Typical 5–30 FTEs at $0.5–2M/yr over 3–5 years.
+  fteFunding?: {
+    fteCount: number;
+    costPerFTE_M: number;
+    yearsOfFunding: number;
+  };
+  // Collaboration: equity investment by the licensee in $M.
+  equityInvestment?: number;
 }
 
 // Drill-down data for expanded metric views
@@ -431,6 +445,20 @@ export interface CalculationResult {
   drillDown: DrillDownCollection;
   phase: Phase;
   milestoneExplanation?: string;
+
+  /**
+   * Deal-type-specific structural components (co-dev cost sharing, option
+   * exercise fee, collaboration FTE / equity). Populated only when the
+   * chosen dealType has structural components beyond plain upfront/milestones.
+   * These are additive value rolled into terms.totalDealValue but surfaced
+   * separately for explainability.
+   */
+  dealStructureComponents?: {
+    codevCostSharing?: { totalRDCost_M: number; ratioLicensee: number; sharedRDCost_M: number };
+    optionExerciseFee?: { fee_M: number; probability: number; expectedValue_M: number };
+    fteResearchValue?: { fteCount: number; costPerFTE_M: number; yearsOfFunding: number; totalValue_M: number };
+    equityInvestment?: number;
+  };
 
   // Output guardrail warnings (auto-populated)
   warnings?: GuardrailWarning[];
@@ -1522,6 +1550,100 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
 
+  // --------------------------------------------------------------------------
+  // Deal-type structural overlays (co-dev cost sharing, option exercise fee,
+  // collaboration FTE + equity). These mirror the rnpv-engine overlays so the
+  // two engines converge on the same headline number. Overlay adjustments are
+  // applied BEFORE upfront allocation so the upfront/milestone math sees the
+  // reshaped total.
+  // --------------------------------------------------------------------------
+  let codevCostSharing: { totalRDCost_M: number; ratioLicensee: number; sharedRDCost_M: number } | null = null;
+  let optionExerciseFeeBreakdown: { fee_M: number; probability: number; expectedValue_M: number } | null = null;
+  let fteResearchBreakdown: { fteCount: number; costPerFTE_M: number; yearsOfFunding: number; totalValue_M: number } | null = null;
+  let equityInvestmentValue: number | null = null;
+
+  // Rough phase-by-phase remaining R&D cost ($M) used for co-dev cost sharing.
+  // These are TA-averaged approximations of PHASE_COSTS in lib/financial/pos-tables.ts;
+  // the rnpv-engine uses the TA-specific values directly, but this engine only
+  // needs a ballpark to scale the cost-share benefit.
+  const CALC_PHASE_COST_APPROX: Record<string, number> = {
+    discovery: 10,
+    preclinical: 20,
+    phase1: 35,
+    phase1_2: 60,
+    phase2: 70,
+    phase2_3: 160,
+    phase3: 220,
+    nda_filed: 7,
+    approved: 0,
+  };
+  const phaseOrderForCostSum = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed'];
+  const phaseIdxForCost = phaseOrderForCostSum.indexOf(input.phase);
+  const remainingRDCost = phaseIdxForCost >= 0
+    ? phaseOrderForCostSum.slice(phaseIdxForCost).reduce((sum, p) => sum + (CALC_PHASE_COST_APPROX[p] || 0), 0)
+    : 160;
+
+  if (dealType === 'codevelopment') {
+    const licenseeShare = Math.max(0, Math.min(0.9, input.costSharingRatio ?? 0.5));
+    const sharedRDSavings = remainingRDCost * licenseeShare;
+    // Dampened realization (0.7×) because this engine doesn't have cumulative PoS;
+    // 0.7 approximates a mid-phase PoS.
+    const expectedSavings = sharedRDSavings * 0.70;
+    totalDealValue.low = Math.round(totalDealValue.low + expectedSavings * 0.85);
+    totalDealValue.median = Math.round(totalDealValue.median + expectedSavings);
+    totalDealValue.high = Math.round(totalDealValue.high + expectedSavings * 1.15);
+    codevCostSharing = {
+      totalRDCost_M: Math.round(remainingRDCost),
+      ratioLicensee: licenseeShare,
+      sharedRDCost_M: Math.round(expectedSavings),
+    };
+  } else if (dealType === 'option') {
+    // Default exercise fee: 10% of current median total deal value.
+    const defaultFee = totalDealValue.median * 0.10;
+    const exerciseFee = input.optionExerciseFee != null && input.optionExerciseFee >= 0
+      ? input.optionExerciseFee
+      : defaultFee;
+    const optionProbs: Record<string, number> = {
+      discovery: 0.25, preclinical: 0.35, phase1: 0.50, phase1_2: 0.55,
+      phase2: 0.60, phase2_3: 0.65, phase3: 0.70, nda_filed: 0.75, approved: 0.75,
+    };
+    const probability = optionProbs[input.phase] ?? 0.50;
+    const expectedFee = exerciseFee * probability;
+    totalDealValue.low = Math.round(totalDealValue.low + expectedFee * 0.85);
+    totalDealValue.median = Math.round(totalDealValue.median + expectedFee);
+    totalDealValue.high = Math.round(totalDealValue.high + expectedFee * 1.15);
+    optionExerciseFeeBreakdown = {
+      fee_M: Math.round(exerciseFee),
+      probability,
+      expectedValue_M: Math.round(expectedFee),
+    };
+  } else if (dealType === 'collaboration') {
+    const fte = input.fteFunding;
+    const fteValue = fte && fte.fteCount > 0 && fte.costPerFTE_M > 0 && fte.yearsOfFunding > 0
+      ? fte.fteCount * fte.costPerFTE_M * fte.yearsOfFunding
+      : 0;
+    const equityValue = input.equityInvestment != null && input.equityInvestment > 0
+      ? input.equityInvestment
+      : 0;
+    const addedValue = fteValue + equityValue;
+    if (addedValue > 0) {
+      totalDealValue.low = Math.round(totalDealValue.low + addedValue * 0.90);
+      totalDealValue.median = Math.round(totalDealValue.median + addedValue);
+      totalDealValue.high = Math.round(totalDealValue.high + addedValue * 1.10);
+    }
+    if (fteValue > 0 && fte) {
+      fteResearchBreakdown = {
+        fteCount: fte.fteCount,
+        costPerFTE_M: fte.costPerFTE_M,
+        yearsOfFunding: fte.yearsOfFunding,
+        totalValue_M: Math.round(fteValue),
+      };
+    }
+    if (equityValue > 0) {
+      equityInvestmentValue = Math.round(equityValue);
+    }
+  }
+
   // Deal type upfront ratio overrides — each deal structure has distinct economics:
   // - Acquisition: 70-95% upfront (full control, premium for certainty)
   // - Co-development: 15-30% upfront (shared risk/reward, lower initial commitment)
@@ -1714,6 +1836,16 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     dealTypeLabels,
     drillDown,
     phase: input.phase,
+    ...((codevCostSharing || optionExerciseFeeBreakdown || fteResearchBreakdown || equityInvestmentValue != null)
+      ? {
+          dealStructureComponents: {
+            ...(codevCostSharing ? { codevCostSharing } : {}),
+            ...(optionExerciseFeeBreakdown ? { optionExerciseFee: optionExerciseFeeBreakdown } : {}),
+            ...(fteResearchBreakdown ? { fteResearchValue: fteResearchBreakdown } : {}),
+            ...(equityInvestmentValue != null ? { equityInvestment: equityInvestmentValue } : {}),
+          },
+        }
+      : {}),
     ...(isNeurology ? {
       milestoneExplanation: generateNeuroMilestoneExplanation(input.phase, recommendedUpfrontPercent)
     } : {}),

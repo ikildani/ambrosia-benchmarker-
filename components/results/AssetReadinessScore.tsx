@@ -169,6 +169,56 @@ const CODEVELOPMENT_CONSIDERATIONS: ConsiderationItem[] = [
   },
 ];
 
+const OPTION_CONSIDERATIONS: ConsiderationItem[] = [
+  {
+    title: 'Clear exercise trigger event',
+    detail: 'Define exactly what data event triggers the option exercise — Phase 1b readout, Phase 2a interim, biomarker validation. Vague triggers create disputes.',
+  },
+  {
+    title: 'Data inflection point within 24-month window',
+    detail: 'Option deals fail when the trigger data slips outside the window. Confirm trial enrollment and readout timelines are realistic.',
+  },
+  {
+    title: 'Capital runway sufficient to reach trigger',
+    detail: 'If you run out of cash before the option exercise event, the deal collapses. Need 18+ months of runway from option signing to data readout.',
+  },
+  {
+    title: 'Regulatory pathway clarified',
+    detail: 'Breakthrough/Fast Track designations make option deals more valuable because they accelerate the data timeline and de-risk regulatory.',
+  },
+  {
+    title: 'Exit timing aligned with licensee evaluation',
+    detail: 'Licensee needs time to evaluate and exercise. Build 60-90 day decision window into the exercise mechanic.',
+  },
+];
+
+const COLLABORATION_CONSIDERATIONS: ConsiderationItem[] = [
+  {
+    title: 'Complementary capabilities',
+    detail: 'Collaborations work when each party brings something the other lacks (discovery platform, target ID, biology expertise, validation infrastructure).',
+  },
+  {
+    title: 'FTE allocation capacity',
+    detail: 'Collaborations typically fund 5-20 FTEs. Confirm the licensor has team capacity and the right people aren\'t already over-committed.',
+  },
+  {
+    title: 'JSC governance experience',
+    detail: 'Joint steering committees need clear decision rights, escalation paths, and meeting cadence. Inexperienced teams burn cycles on process.',
+  },
+  {
+    title: 'Cost-sharing financial infrastructure',
+    detail: 'Collaborations require ongoing shared budgeting, milestone tracking, and reporting. Lightweight startups often lack the systems.',
+  },
+  {
+    title: 'Joint IP allocation framework',
+    detail: 'Collaborations generate shared IP. Define ownership rules upfront — background IP, foreground IP, and joint IP each need clear allocation.',
+  },
+  {
+    title: 'Long-term research strategy alignment',
+    detail: 'Collaborations are 3-5 year commitments. Confirm both parties\' research roadmaps align beyond the first milestone, not just the deal terms.',
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Factor definitions
 // ---------------------------------------------------------------------------
@@ -267,24 +317,38 @@ export default function AssetReadinessScore({
   const normalizedDealType = (dealType || 'licensing').toLowerCase();
   const isAcquisition = normalizedDealType === 'acquisition';
   const isCoDev = normalizedDealType === 'codevelopment' || normalizedDealType === 'co-development' || normalizedDealType === 'co_development';
+  const isOption = normalizedDealType === 'option';
+  const isCollaboration = normalizedDealType === 'collaboration';
 
   const readinessLabel = isAcquisition
     ? 'Acquisition readiness assessment'
     : isCoDev
       ? 'Co-development readiness assessment'
-      : 'Partnering/licensing readiness assessment';
+      : isOption
+        ? 'Option deal readiness assessment'
+        : isCollaboration
+          ? 'Collaboration readiness assessment'
+          : 'Partnering/licensing readiness assessment';
 
   const considerationsTitle = isAcquisition
     ? 'Additional considerations for acquisition'
     : isCoDev
       ? 'Additional considerations for co-development'
-      : null;
+      : isOption
+        ? 'Additional considerations for option deal'
+        : isCollaboration
+          ? 'Additional considerations for collaboration'
+          : null;
 
   const considerations = isAcquisition
     ? ACQUISITION_CONSIDERATIONS
     : isCoDev
       ? CODEVELOPMENT_CONSIDERATIONS
-      : [];
+      : isOption
+        ? OPTION_CONSIDERATIONS
+        : isCollaboration
+          ? COLLABORATION_CONSIDERATIONS
+          : [];
 
   const { overallScore, factors, badge, recommendation } = useMemo(() => {
     // Compute individual factor scores

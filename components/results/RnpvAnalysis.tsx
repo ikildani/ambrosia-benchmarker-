@@ -449,6 +449,75 @@ export default function RnpvAnalysis({
                         </div>
                       ))}
                     </div>
+
+                    {/* Deal-type-specific structural components
+                        (co-dev cost sharing, option exercise fee,
+                        collaboration FTE / equity). Shown only when the
+                        rNPV engine surfaced any of these fields. */}
+                    {(rnpvResult.impliedDealValue.codevCostSharing
+                      || rnpvResult.impliedDealValue.optionExerciseFee
+                      || rnpvResult.impliedDealValue.fteResearchValue
+                      || rnpvResult.impliedDealValue.equityInvestment != null) && (
+                      <div className="mt-4 p-3 bg-teal-50/40 dark:bg-teal-500/5 rounded-lg border border-teal-100 dark:border-teal-500/20">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 mb-2">
+                          Deal Structure Components
+                        </p>
+                        <div className="space-y-2">
+                          {rnpvResult.impliedDealValue.codevCostSharing && (
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Co-Dev Cost Sharing</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  Licensee absorbs {(rnpvResult.impliedDealValue.codevCostSharing.ratioLicensee * 100).toFixed(0)}% of {fmt(rnpvResult.impliedDealValue.codevCostSharing.totalRDCost_M)} remaining R&amp;D
+                                </p>
+                              </div>
+                              <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">
+                                {fmt(rnpvResult.impliedDealValue.codevCostSharing.sharedRDCost_M)}
+                              </p>
+                            </div>
+                          )}
+                          {rnpvResult.impliedDealValue.optionExerciseFee && (
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Option Exercise Fee</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  {fmt(rnpvResult.impliedDealValue.optionExerciseFee.fee_M)} nominal × {(rnpvResult.impliedDealValue.optionExerciseFee.probability * 100).toFixed(0)}% exercise probability
+                                </p>
+                              </div>
+                              <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">
+                                {fmt(rnpvResult.impliedDealValue.optionExerciseFee.expectedValue_M)}
+                              </p>
+                            </div>
+                          )}
+                          {rnpvResult.impliedDealValue.fteResearchValue && (
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">FTE Research Funding</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  {rnpvResult.impliedDealValue.fteResearchValue.fteCount} FTEs × {fmt(rnpvResult.impliedDealValue.fteResearchValue.costPerFTE_M)}/yr × {rnpvResult.impliedDealValue.fteResearchValue.yearsOfFunding}y
+                                </p>
+                              </div>
+                              <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">
+                                {fmt(rnpvResult.impliedDealValue.fteResearchValue.totalValue_M)}
+                              </p>
+                            </div>
+                          )}
+                          {rnpvResult.impliedDealValue.equityInvestment != null && rnpvResult.impliedDealValue.equityInvestment > 0 && (
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Equity Investment</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  Licensee takes equity stake in licensor at signing
+                                </p>
+                              </div>
+                              <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">
+                                {fmt(rnpvResult.impliedDealValue.equityInvestment)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
