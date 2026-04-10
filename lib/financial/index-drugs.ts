@@ -32,6 +32,15 @@ export interface IndexDrug {
   genericCompetition: boolean; // Are there generics/biosimilars competing?
   genericPriceDiscount: number; // 0-1, e.g., 0.90 = generics are 90% cheaper
   marketSizeM: number;       // Total addressable market for this indication ($M)
+  /**
+   * Optional year-by-year realized revenue (year → $M).
+   * When present, RWE tuning (lib/financial/rwe-tuning.ts) can backtest the
+   * model's full launch curve against actual trajectory rather than peak only.
+   * Backfilled opportunistically from EvaluatePharma / 10-K disclosures.
+   */
+  revenueByYear?: Record<number, number>;
+  /** Year of FDA approval — used by RWE tuning to align retrospective inputs. */
+  approvalYear?: number;
 }
 
 // ---------------------------------------------------------------------------

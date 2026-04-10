@@ -1341,3 +1341,112 @@ export interface CounterpartyPremiumLookup {
   /** Provenance: 'company_wide' | 'ta_specific' | 'phase_specific' | 'no_history' */
   source: string;
 }
+
+// ---------------------------------------------------------------------------
+// RWE Tuning (Item 10 — Tier 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Single drug backtest record. Compares the rNPV engine's projected peak
+ * sales (run with as-of-approval inputs) against the actual realized peak.
+ */
+export interface DrugBacktest {
+  drugName: string;
+  company: string;
+  therapeuticArea: string;
+  modality: string;
+  indication: string;
+  /** Actual peak sales from real-world data ($M) */
+  actualPeakM: number;
+  /** Model's projected peak sales when run retrospectively ($M) */
+  modelPeakM: number;
+  /** Signed percent error: (model - actual) / actual */
+  errorPct: number;
+  /** Absolute error in $M */
+  errorAbsM: number;
+  /** Notes (e.g., "skipped: missing peak", "biosimilar entry not modeled") */
+  notes: string;
+}
+
+/**
+ * Aggregated bias for a slice (TA, modality, or phase). Used to identify
+ * systematic over/under-shoots that can be corrected via tuning deltas.
+ */
+export interface BiasAggregate {
+  /** Group label (e.g., "oncology", "mab", "approved") */
+  group: string;
+  /** Which dimension this slice represents */
+  groupType: 'therapeutic_area' | 'modality' | 'phase';
+  /** Mean signed error: positive = model overshoots, negative = undershoots */
+  meanError: number;
+  /** Median signed error */
+  medianError: number;
+  /** Root-mean-squared error in $M */
+  rmseM: number;
+  /** Number of drugs in the slice */
+  sampleSize: number;
+  /**
+   * Recommended multiplicative adjustment to apply to the slice's peak sales
+   * cap. Always within ±15% of 1.0 — bounded to prevent runaway feedback.
+   */
+  recommendedAdjustment: number;
+}
+
+/**
+ * A bounded tuning delta proposed by the RWE engine. The cron writes these
+ * to `rwe_pending_deltas` for review; if `RWE_AUTO_APPLY=true` and held-out
+ * validation passes, they are promoted to `rwe_active_overrides`.
+ */
+export interface TuningDelta {
+  /** Dotted parameter path (e.g., "PEAK_SALES_CAP.oncology.median") */
+  parameter: string;
+  /** Current value at the time of the proposal */
+  currentValue: number;
+  /** Proposed new value (always within ±15% of currentValue) */
+  proposedValue: number;
+  /**
+   * Expected reduction in $M RMSE if applied, computed by replaying the
+   * backtest with the proposed value substituted in.
+   */
+  expectedErrorReduction: number;
+  /** Free-text rationale for why this change should reduce bias */
+  rationale: string;
+}
+
+/**
+ * Full output of a single RWE tuning run. Persisted to the
+ * `rwe_tuning_results` table by the weekly cron.
+ */
+export interface RWETuningResult {
+  /** ISO date the run executed */
+  asOfDate: string;
+  /** Total drugs analyzed (with usable peak data) */
+  totalDrugsAnalyzed: number;
+  /** Drugs skipped due to missing peak/year/etc. */
+  drugsSkipped: number;
+  /** Per-drug backtest rows */
+  backtests: DrugBacktest[];
+  /** Aggregated bias by therapeutic area */
+  biasByTA: BiasAggregate[];
+  /** Aggregated bias by modality */
+  biasByModality: BiasAggregate[];
+  /** Aggregated bias by phase (always "approved" for index drugs but kept for symmetry) */
+  biasByPhase: BiasAggregate[];
+  /** Mean signed error across all drugs (positive = systematic overshoot) */
+  overallMeanError: number;
+  /** Mean absolute percentage error across all drugs */
+  overallMape: number;
+  /** Root-mean-squared error in $M across all drugs */
+  overallRmse: number;
+  /** Bounded tuning deltas proposed by this run */
+  proposedTuningDeltas: TuningDelta[];
+  /** True when overall RMSE jumped >20% vs. previous run (drift alert) */
+  driftAlert: boolean;
+  /** Held-out validation result (when computed) */
+  holdoutValidation?: {
+    sampleSize: number;
+    holdoutRmse: number;
+    fullRmse: number;
+    deltasAcceptedAfterValidation: number;
+  };
+}
