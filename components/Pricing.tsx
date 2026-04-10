@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import Link from 'next/link';
+import { PRICING, DEAL_STATS, PORTFOLIO_PRICING } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { generatePricingSchema } from '@/lib/seo/structured-data';
 import { captureClientError } from '@/lib/sentry-client';
@@ -364,20 +365,31 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
         </div>
 
-        {/* Enterprise CTA */}
+        {/* Portfolio License CTA — multi-seat for VC firms */}
         <div className="text-center">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-4 sm:p-6 bg-neutral-50 dark:bg-slate-800 rounded-xl sm:rounded-2xl border border-neutral-200 dark:border-slate-700">
-            <div className="text-center sm:text-left">
-              <p className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base">Need enterprise features or custom analysis?</p>
-              <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400">Get tailored solutions for your organization</p>
+          <Link
+            href="/portfolio"
+            className="group inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-5 p-4 sm:p-6 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/40 rounded-xl sm:rounded-2xl border border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-400 dark:hover:border-indigo-400/60 hover:shadow-lg hover:shadow-indigo-500/10 transition-all"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="hidden sm:flex w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 items-center justify-center shadow-md shadow-indigo-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+              </div>
+              <div className="text-center sm:text-left">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <p className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base">Running a fund? Equip every portfolio company.</p>
+                  <span className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 rounded-full border border-indigo-500/20">New</span>
+                </div>
+                <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 mt-0.5">
+                  Portfolio License — multi-seat access from {PORTFOLIO_PRICING.GROWTH_PER_SEAT}/seat/mo + fund-level intelligence
+                </p>
+              </div>
             </div>
-            <a
-              href="mailto:info@ambrosiaventures.co?subject=Enterprise%20Inquiry"
-              className="btn-secondary whitespace-nowrap"
-            >
-              Contact Sales
-            </a>
-          </div>
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg shadow-md shadow-indigo-500/25 group-hover:shadow-indigo-500/40 group-hover:-translate-y-0.5 transition-all whitespace-nowrap">
+              Explore Portfolio
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </Link>
         </div>
 
         {/* Stats */}

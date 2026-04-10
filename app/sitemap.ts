@@ -209,6 +209,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  // Portfolio License page (multi-seat enterprise tier for VC firms)
+  staticPages.push({
+    url: `${baseUrl}/portfolio`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.9,
+  });
+
   // Companies index page
   staticPages.push({
     url: `${baseUrl}/companies`,
