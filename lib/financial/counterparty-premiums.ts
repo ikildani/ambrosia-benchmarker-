@@ -134,7 +134,9 @@ function hasUsableValue(deal: DealRow): boolean {
  *   2. Same therapeutic_area + same phase ±1 → if n ≥ widenedPeerN, use it.
  *   3. Otherwise return null (skip this deal — not enough peers).
  *
- * The buyer's own deal is excluded from the peer pool.
+ * Critical: the peer pool excludes ALL deals from the same buyer, not just
+ * the same deal id. Otherwise a buyer's own pricing pollutes the "comparable
+ * median" they're being compared against, collapsing their premium to ~1.0.
  */
 export function findPeerMedian(
   target: DealRow,
@@ -145,9 +147,12 @@ export function findPeerMedian(
   if (targetDBPhase === 'unknown') return null;
   const phaseWindow = new Set(phaseWindowDB(targetDBPhase, 1));
 
+  const isSameBuyer = (d: DealRow): boolean =>
+    d.licensee_id !== null && d.licensee_id === target.licensee_id;
+
   // Strict: same indication_category
   const strictPeers = allDeals.filter(d => {
-    if (d.id === target.id) return false;
+    if (isSameBuyer(d)) return false;
     if (!hasUsableValue(d)) return false;
     if (d.indication_category !== target.indication_category) return false;
     if (!d.indication_category) return false;
@@ -162,7 +167,7 @@ export function findPeerMedian(
   // Widened: same therapeutic_area
   if (target.therapeutic_area) {
     const widenedPeers = allDeals.filter(d => {
-      if (d.id === target.id) return false;
+      if (isSameBuyer(d)) return false;
       if (!hasUsableValue(d)) return false;
       if (d.therapeutic_area !== target.therapeutic_area) return false;
       const dbPhase = normalizePhaseForDB(d.phase_at_signing);
