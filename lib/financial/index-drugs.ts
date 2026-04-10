@@ -2339,22 +2339,168 @@ export function getIndexDrugsForTA(therapeuticArea: string): IndexDrug[] {
     .sort((a, b) => b.peakSalesM - a.peakSalesM);
 }
 
+// ---------------------------------------------------------------------------
+// Top Comparable Scoring
+// ---------------------------------------------------------------------------
+
+export interface ComparableResult {
+  drug: IndexDrug;
+  score: number;
+  matchReasons: string[];
+}
+
+/**
+ * Find the top 3 closest comparable drugs using a weighted scoring system.
+ * Scoring:
+ *   - Exact indication match: +50 points
+ *   - Same modality: +30 points
+ *   - Same TA: +10 points (baseline)
+ *   - Peak sales proximity: +10 × (1 - |log(model/drug)| / 3), clamped 0-10
+ *   - Recency bonus: +5 if peakSalesYear >= 2020
+ */
+export function findTopComparables(
+  therapeuticArea: string,
+  modelPeakSalesM: number,
+  indication?: string,
+  modality?: string,
+): ComparableResult[] {
+  const taDrugs = INDEX_DRUG_DATABASE.filter(d => d.therapeuticArea === therapeuticArea);
+  if (taDrugs.length === 0) return [];
+
+  const scored: ComparableResult[] = taDrugs.map(drug => {
+    let score = 10; // baseline TA match
+    const matchReasons: string[] = ['Same therapeutic area'];
+
+    // Exact indication match
+    if (indication && drug.indication === indication) {
+      score += 50;
+      matchReasons.push('Indication match');
+    }
+
+    // Same modality
+    if (modality && drug.modality === modality) {
+      score += 30;
+      matchReasons.push('Modality match');
+    }
+
+    // Peak sales proximity (log-scale)
+    if (modelPeakSalesM > 0 && drug.peakSalesM > 0) {
+      const logDiff = Math.abs(Math.log(modelPeakSalesM / drug.peakSalesM));
+      const proximityScore = Math.max(0, Math.min(10, 10 * (1 - logDiff / 3)));
+      score += proximityScore;
+      if (proximityScore >= 7) {
+        matchReasons.push('Close peak sales');
+      } else if (proximityScore >= 4) {
+        matchReasons.push('Similar peak sales range');
+      }
+    }
+
+    // Recency bonus
+    if (drug.peakSalesYear >= 2020) {
+      score += 5;
+      matchReasons.push('Modern comparable');
+    }
+
+    return { drug, score, matchReasons };
+  });
+
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+}
+
+// ---------------------------------------------------------------------------
+// Phase-Adjusted Confidence
+// ---------------------------------------------------------------------------
+
+export interface PhaseAdjustedConfidence {
+  originalConfidence: 'high' | 'moderate' | 'low' | 'warning';
+  adjustedConfidence: 'high' | 'moderate' | 'low' | 'warning';
+  wasAdjusted: boolean;
+  phaseNarrative: string;
+}
+
+const CONFIDENCE_LEVELS: Array<'high' | 'moderate' | 'low' | 'warning'> = ['high', 'moderate', 'low', 'warning'];
+
+/**
+ * Adjust confidence based on the asset's clinical phase.
+ * - Preclinical/Phase 1: downgrade one level (projections are speculative)
+ * - Phase 2: keep as-is
+ * - Phase 3/Approved: can upgrade one level (more data supports the projection)
+ */
+export function getPhaseAdjustedConfidence(
+  baseConfidence: 'high' | 'moderate' | 'low' | 'warning',
+  phase?: string,
+): PhaseAdjustedConfidence {
+  if (!phase) {
+    return {
+      originalConfidence: baseConfidence,
+      adjustedConfidence: baseConfidence,
+      wasAdjusted: false,
+      phaseNarrative: '',
+    };
+  }
+
+  const normalized = phase.toLowerCase().replace(/[\s/-]/g, '');
+  const idx = CONFIDENCE_LEVELS.indexOf(baseConfidence);
+
+  // Preclinical or Phase 1 — downgrade
+  if (normalized === 'preclinical' || normalized === 'phase1') {
+    const downgraded = CONFIDENCE_LEVELS[Math.min(idx + 1, CONFIDENCE_LEVELS.length - 1)];
+    return {
+      originalConfidence: baseConfidence,
+      adjustedConfidence: downgraded,
+      wasAdjusted: downgraded !== baseConfidence,
+      phaseNarrative: `Confidence adjusted downward for ${phase} asset. Peak sales projections at this stage are inherently speculative with limited clinical data to support commercial assumptions.`,
+    };
+  }
+
+  // Phase 3 or Approved — upgrade
+  if (normalized === 'phase3' || normalized === 'approved' || normalized === 'phase23' || normalized === 'phase2/3') {
+    const upgraded = CONFIDENCE_LEVELS[Math.max(idx - 1, 0)];
+    return {
+      originalConfidence: baseConfidence,
+      adjustedConfidence: upgraded,
+      wasAdjusted: upgraded !== baseConfidence,
+      phaseNarrative: `Confidence adjusted upward for ${phase} asset. Late-stage or approved assets have sufficient clinical and commercial data to support peak sales projections.`,
+    };
+  }
+
+  // Phase 2, Phase 1/2, or anything else — keep as-is
+  return {
+    originalConfidence: baseConfidence,
+    adjustedConfidence: baseConfidence,
+    wasAdjusted: false,
+    phaseNarrative: '',
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Peak Sales Realism Check (updated with top comparables + phase adjustment)
+// ---------------------------------------------------------------------------
+
 /**
  * Compute the peak sales sanity check.
  * Returns the index ratio (model / index drug) and a confidence assessment.
+ * Now also returns top 3 comparables and optional phase-adjusted confidence.
  */
 export function checkPeakSalesRealism(
   modelPeakSalesM: number,
   therapeuticArea: string,
   indication?: string,
   modality?: string,
+  phase?: string,
 ): {
   indexDrug: IndexDrug | null;
   indexRatio: number;        // model / index (>1.0 means model exceeds market leader)
   confidence: 'high' | 'moderate' | 'low' | 'warning';
   narrative: string;
+  topComparables: ComparableResult[];
+  phaseAdjustedConfidence?: PhaseAdjustedConfidence;
 } {
   const indexDrug = findIndexDrug(therapeuticArea, indication, modality, modelPeakSalesM);
+
+  const topComparables = findTopComparables(therapeuticArea, modelPeakSalesM, indication, modality);
 
   if (!indexDrug) {
     return {
@@ -2362,6 +2508,8 @@ export function checkPeakSalesRealism(
       indexRatio: 0,
       confidence: 'low',
       narrative: 'No comparable index drug found for this indication. Peak sales estimate relies entirely on bottom-up epidemiology model.',
+      topComparables,
+      phaseAdjustedConfidence: phase ? getPhaseAdjustedConfidence('low', phase) : undefined,
     };
   }
 
@@ -2387,7 +2535,9 @@ export function checkPeakSalesRealism(
     narrative = `Model estimate ($${modelPeakSalesM.toFixed(0)}M) is ${indexRatio.toFixed(1)}x the current market leader (${indexDrug.name}: $${indexDrug.peakSalesM.toLocaleString()}M). This exceeds any observed peak sales in this indication. Investors and pharma partners will challenge this projection.`;
   }
 
-  return { indexDrug, indexRatio, confidence, narrative };
+  const phaseAdjustedConfidence = phase ? getPhaseAdjustedConfidence(confidence, phase) : undefined;
+
+  return { indexDrug, indexRatio, confidence, narrative, topComparables, phaseAdjustedConfidence };
 }
 
 /**

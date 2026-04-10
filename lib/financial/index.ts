@@ -36,12 +36,14 @@ export {
   findIndexDrug,
   getIndexDrugsForTA,
   checkPeakSalesRealism,
+  findTopComparables,
+  getPhaseAdjustedConfidence,
   getGenericEntrenchmentMultiplier,
   checkEpidemiologyDataSufficiency,
   MANUFACTURING_WACC_PREMIUM,
   MARKET_ACCESS_DELAY_MONTHS,
 } from './index-drugs';
-export type { IndexDrug } from './index-drugs';
+export type { IndexDrug, ComparableResult, PhaseAdjustedConfidence } from './index-drugs';
 
 // Types (re-export everything for consumer convenience)
 export type {

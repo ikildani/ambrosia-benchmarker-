@@ -1662,6 +1662,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   therapeuticArea={fullInputs.therapeuticArea}
                   indication={fullInputs.indication}
                   modality={fullInputs.modality}
+                  phase={fullInputs.phase}
                   tier={tier || 'free'}
                   onUpgrade={onUpgrade}
                   onBuyReport={onBuyReport}
