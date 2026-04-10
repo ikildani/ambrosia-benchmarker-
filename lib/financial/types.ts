@@ -377,6 +377,22 @@ export interface RNPVResult {
    * Example: "Phase 2->3 PoS adjusted +20% for breakthrough designation"
    */
   modelAssumptions: string[];
+
+  /**
+   * Result of the indication TAM ceiling check against the user's peak sales
+   * assumption. Populated only when the indication maps to INDICATION_MARKET_CAPS.
+   *   - severity 'critical' means the model hard-capped peak sales to 80% of TAM.
+   *   - severity 'warning' means the assumption exceeds the market leader's peak
+   *     but was not capped.
+   *   - ok: true means the assumption is within realistic bounds.
+   */
+  peakSalesCeilingCheck?: {
+    ok: boolean;
+    severity?: 'warning' | 'critical';
+    ceiling?: number;
+    tam?: number;
+    message?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------

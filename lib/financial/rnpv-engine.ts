@@ -19,6 +19,7 @@ import {
   PHASE_COSTS,
   REVENUE_CURVE,
   REVENUE_CURVE_OVERRIDES,
+  INDICATION_REVENUE_CURVES,
   COMPETITIVE_SHARE_TA_MULTIPLIER,
   COGS_BY_MODALITY_CATEGORY,
   SGA_BY_LIFECYCLE_STAGE,
@@ -28,10 +29,12 @@ import {
   MANUFACTURING_WACC_PREMIUM,
   MARKET_ACCESS_DELAY_MONTHS,
   checkPeakSalesRealism,
+  checkPeakSalesCeiling,
   getGenericEntrenchmentMultiplier,
 } from './index-drugs';
 import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
 import { checkRNPVInvariants, assertInvariants } from './invariants';
+import { getCompetitiveDensity } from './indication-competitive-density';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -380,7 +383,29 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   } = input;
   const dealType = input.dealType || 'licensing';
   const phase = guardedPhase as typeof input.phase;
-  const peakSalesEstimate = guardedPeakSales;
+
+  // Indication TAM ceiling check — hard cap when user peak sales exceed 80% of
+  // the total global TAM for the indication (impossible for any single drug),
+  // soft warn when they exceed the realistic single-drug market-leader peak.
+  // Applied BEFORE data-quality/generic multipliers so the cap reflects the
+  // user's raw assumption vs the reality of the market.
+  const ceilingCheck = input.indication
+    ? checkPeakSalesCeiling(guardedPeakSales.median, input.indication)
+    : { ok: true as const };
+  const peakSalesEstimate = (() => {
+    if (ceilingCheck.ok || ceilingCheck.severity !== 'critical' || ceilingCheck.ceiling == null) {
+      return guardedPeakSales;
+    }
+    // Critical: hard-cap the median at 80% of TAM; scale low/high proportionally
+    // so the range keeps its shape but collapses under the ceiling.
+    const originalMedian = guardedPeakSales.median || 1;
+    const scale = ceilingCheck.ceiling / originalMedian;
+    return {
+      low: guardedPeakSales.low * scale,
+      median: ceilingCheck.ceiling,
+      high: guardedPeakSales.high * scale,
+    };
+  })();
 
   // 1. Get discount rate (use guarded value, or compute from TA + territory + company type + deal type)
   // Add manufacturing complexity WACC premium for technically challenging modalities
@@ -392,12 +417,16 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const discountRate = Math.min(0.35, baseDiscountRate + mfgPremium);
 
   // 2. Calculate cumulative PoS from current phase
+  // Pass the indication so getCumulativePoS can apply indication-specific
+  // modifiers from /lib/financial/indication-pos-modifiers.ts (top-50
+  // calibrated set). Non-calibrated indications fall back to TA-level rates.
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
     phase,
     therapeuticArea,
     modality,
     input.biomarkerStatus || 'unselected',
     regulatoryDesignations,
+    input.indication,
   );
 
   // 2b. Apply indication-specific PoS modifiers
@@ -543,6 +572,16 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // 4c. Peak sales sanity check against index drug (Nirav Jhaveri feedback)
   const peakSalesCheck = checkPeakSalesRealism(adjustedPeakSales.median, therapeuticArea, input.indication, modality);
 
+  // 4d. Indication-specific competitive density adjustment
+  // Crowded indications (HER2 breast, MS, RA) penalize peak sales penetration;
+  // under-served indications (SCI, Huntington's) get a boost.
+  const competitiveDensity = getCompetitiveDensity(input.indication);
+  if (competitiveDensity) {
+    adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
+    adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
+    adjustedPeakSales.high = adjustedPeakSales.high / competitiveDensity.penetrationMultiplier;
+  }
+
   // 5. Project cash flows using median peak sales
   const cashFlows = projectCashFlows(
     adjustedPeakSales.median,
@@ -555,6 +594,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     modality,
     therapeuticArea,
     pathway, // Pass pathway so R&D cost schedule uses sequential phases, not PHASE_ORDER linear sum
+    input.indication, // Indication-specific revenue curve lookup (takes precedence over TA override)
   );
 
   // 6. Calculate NPV from cash flows
@@ -648,8 +688,26 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     `Years to market: ${yearsToMarket.toFixed(1)} years${accessDelay > 0 ? ` (incl. ${accessDelay}mo market access lag)` : ''}${timelineMultiplier !== 1.0 ? ` (data quality: ${dataQuality} → ${timelineMultiplier > 1 ? '+' : ''}${((timelineMultiplier - 1) * 100).toFixed(0)}% P3 duration)` : ''}`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M${genericMultiplier < 1.0 ? ` (×${genericMultiplier.toFixed(2)} generic entrenchment penalty)` : ''}`,
     ...(peakSalesCheck.indexDrug ? [`Index drug: ${peakSalesCheck.indexDrug.name} at $${peakSalesCheck.indexDrug.peakSalesM.toLocaleString()}M — model is ${(peakSalesCheck.indexRatio * 100).toFixed(0)}% of index (${peakSalesCheck.confidence})`] : []),
-    `Revenue ramp: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.rampUpYears ?? REVENUE_CURVE.rampUpYears)}yr ramp, ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.peakDurationYears ?? REVENUE_CURVE.peakDurationYears)}yr peak, ${((REVENUE_CURVE_OVERRIDES[therapeuticArea]?.declineRate ?? REVENUE_CURVE.declineRate) * 100).toFixed(0)}% annual decline`,
-    `LOE: ${(REVENUE_CURVE_OVERRIDES[therapeuticArea]?.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval)} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`,
+    ...(!ceilingCheck.ok && ceilingCheck.severity === 'critical'
+      ? [`CRITICAL TAM ceiling: ${ceilingCheck.message} Hard-capped to $${(ceilingCheck.ceiling ?? 0).toLocaleString()}M (80% of $${(ceilingCheck.tam ?? 0).toLocaleString()}M TAM).`]
+      : []),
+    ...(!ceilingCheck.ok && ceilingCheck.severity === 'warning'
+      ? [`WARNING TAM ceiling: ${ceilingCheck.message} Not capped, but this exceeds the market leader's peak.`]
+      : []),
+    ...(competitiveDensity ? [`Competitive density: ${competitiveDensity.approvedDrugs} approved drugs, ${competitiveDensity.activeTrials} active trials → ${competitiveDensity.penetrationMultiplier}x penetration multiplier`] : []),
+    (() => {
+      const ic = input.indication ? INDICATION_REVENUE_CURVES[input.indication] : undefined;
+      const r = ic?.rampUpYears ?? REVENUE_CURVE_OVERRIDES[therapeuticArea]?.rampUpYears ?? REVENUE_CURVE.rampUpYears;
+      const p = ic?.peakDurationYears ?? REVENUE_CURVE_OVERRIDES[therapeuticArea]?.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
+      const d = ic?.declineRate ?? REVENUE_CURVE_OVERRIDES[therapeuticArea]?.declineRate ?? REVENUE_CURVE.declineRate;
+      const src = ic ? ` [${input.indication}-specific: ${ic.source}]` : '';
+      return `Revenue ramp: ${r}yr ramp, ${p}yr peak, ${(d * 100).toFixed(0)}% annual decline${src}`;
+    })(),
+    (() => {
+      const ic = input.indication ? INDICATION_REVENUE_CURVES[input.indication] : undefined;
+      const loe = ic?.loeYearsAfterApproval ?? REVENUE_CURVE_OVERRIDES[therapeuticArea]?.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
+      return `LOE: ${loe} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`;
+    })(),
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
     `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
   ];
@@ -670,6 +728,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     discountRate,
     terminalValue: Math.round(terminalValue),
     modelAssumptions,
+    peakSalesCeilingCheck: ceilingCheck.ok ? { ok: true } : ceilingCheck,
   };
 
   // Layer 1: Mathematical invariants — log to Sentry but never throw.
@@ -708,14 +767,19 @@ function projectCashFlows(
   modality: string,
   therapeuticArea: string,
   pathway?: string[],
+  indication?: string,
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
-  // Use TA-specific revenue curve overrides if available (e.g., rare disease gets extended LOE)
+  // Resolve revenue curve parameters with the following precedence:
+  //   1. INDICATION_REVENUE_CURVES[indication] — most specific, real launch data
+  //   2. REVENUE_CURVE_OVERRIDES[therapeuticArea] — TA-level override
+  //   3. REVENUE_CURVE — default
+  const indicationCurve = indication ? INDICATION_REVENUE_CURVES[indication] : undefined;
   const taOverrides = REVENUE_CURVE_OVERRIDES[therapeuticArea] || {};
-  const rampUpYears = taOverrides.rampUpYears ?? REVENUE_CURVE.rampUpYears;
-  const peakDurationYears = taOverrides.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
-  const declineRate = taOverrides.declineRate ?? REVENUE_CURVE.declineRate;
-  const loeYearsAfterApproval = taOverrides.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
+  const rampUpYears = indicationCurve?.rampUpYears ?? taOverrides.rampUpYears ?? REVENUE_CURVE.rampUpYears;
+  const peakDurationYears = indicationCurve?.peakDurationYears ?? taOverrides.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
+  const declineRate = indicationCurve?.declineRate ?? taOverrides.declineRate ?? REVENUE_CURVE.declineRate;
+  const loeYearsAfterApproval = indicationCurve?.loeYearsAfterApproval ?? taOverrides.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
   // Use modality-dependent generic erosion instead of the flat 80% constant
   const genericErosion = getGenericErosionRate(modality);
   const totalYears = Math.ceil(yearsToMarket) + loeYearsAfterApproval + 5; // +5 for post-LOE tail

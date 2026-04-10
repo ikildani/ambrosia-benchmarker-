@@ -41,6 +41,7 @@
  */
 
 import type { PhaseTransitionRates } from './types';
+import { applyIndicationModifier } from './indication-pos-modifiers';
 
 // ---------------------------------------------------------------------------
 // Base Transition Rates by Therapeutic Area
@@ -975,6 +976,540 @@ export const REVENUE_CURVE_OVERRIDES: Record<string, Partial<{ rampUpYears: numb
 };
 
 /**
+ * Indication-Specific Revenue Curves
+ *
+ * Per-indication revenue projection parameters. Override TA-level curves
+ * when more specific data is available. Sources include actual launch
+ * trajectories from 2024-2026 launches (Leqembi, Wegovy, Mounjaro, Trikafta,
+ * Skyclarys, Rezdiffra, Dupixent, Ozempic, etc.).
+ *
+ * rampUpYears: Years from launch to peak
+ * peakDurationYears: Years at peak before decline
+ * declineRate: Annual decline post-peak (before LOE)
+ * loeYearsAfterApproval: Years until loss of exclusivity
+ *
+ * Lookup precedence (in rnpv-engine projectCashFlows):
+ *   1. INDICATION_REVENUE_CURVES[input.indication]
+ *   2. REVENUE_CURVE_OVERRIDES[input.therapeuticArea]
+ *   3. REVENUE_CURVE (default)
+ */
+export interface IndicationRevenueCurve {
+  indication: string;
+  ta: string;
+  rampUpYears: number;
+  peakDurationYears: number;
+  declineRate: number;
+  loeYearsAfterApproval: number;
+  source: string;
+  notes?: string;
+}
+
+export const INDICATION_REVENUE_CURVES: Record<string, IndicationRevenueCurve> = {
+  // --------------------------------------------------------------------------
+  // Oncology (12)
+  // --------------------------------------------------------------------------
+  lung_nsclc: {
+    indication: 'lung_nsclc',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 4,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Keytruda NSCLC launch trajectory 2015-2024 (peak $32B, 6y ramp)',
+    notes: 'Slow adoption due to biomarker stratification (PD-L1) and sequential line use',
+  },
+  breast_her2: {
+    indication: 'breast_her2',
+    ta: 'oncology',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 13,
+    source: 'Herceptin → Enhertu trajectory (DESTINY-Breast 2024 label expansions)',
+  },
+  breast_tnbc: {
+    indication: 'breast_tnbc',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 4,
+    declineRate: 0.25,
+    loeYearsAfterApproval: 12,
+    source: 'Trodelvy TNBC launch 2020-2025 (slower than HER2+ subset)',
+  },
+  melanoma: {
+    indication: 'melanoma',
+    ta: 'oncology',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Keytruda + Opdivo competitive dynamics 2014-2024',
+  },
+  colorectal: {
+    indication: 'colorectal',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 4,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Avastin/Erbitux historical; slow due to FOLFOX/FOLFIRI SOC entrenchment',
+  },
+  prostate: {
+    indication: 'prostate',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Xtandi/Zytiga 2012-2024 long ramp; androgen pathway durability',
+  },
+  pancreatic: {
+    indication: 'pancreatic',
+    ta: 'oncology',
+    rampUpYears: 6,
+    peakDurationYears: 3,
+    declineRate: 0.30,
+    loeYearsAfterApproval: 11,
+    source: 'Folfirinox/Abraxane SOC entrenchment; historical slow uptake',
+    notes: 'Short peak due to poor outcomes, rapid trial-of-new-SOC churn',
+  },
+  ovarian: {
+    indication: 'ovarian',
+    ta: 'oncology',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'PARP class (Lynparza, Zejula) fast adoption 2017-2024 in BRCA+ setting',
+  },
+  head_neck: {
+    indication: 'head_neck',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 4,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Keytruda HNSCC (KEYNOTE-048) 2019-2024 typical oncology curve',
+  },
+  multiple_myeloma: {
+    indication: 'multiple_myeloma',
+    ta: 'oncology',
+    rampUpYears: 4,
+    peakDurationYears: 7,
+    declineRate: 0.15,
+    loeYearsAfterApproval: 13,
+    source: 'Revlimid/Darzalex combination durability (Rd, DRd, DKd); long multi-line use',
+    notes: 'Extended peak from combination backbones across lines 1-5+',
+  },
+  dlbcl: {
+    indication: 'dlbcl',
+    ta: 'oncology',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Rituxan legacy + Polivy/Epkinly new entrants 2019-2024',
+  },
+  aml: {
+    indication: 'aml',
+    ta: 'oncology',
+    rampUpYears: 5,
+    peakDurationYears: 4,
+    declineRate: 0.25,
+    loeYearsAfterApproval: 12,
+    source: 'Venclexta AML (2018) + FLT3 inhibitors; fragmented mutation-stratified market',
+  },
+
+  // --------------------------------------------------------------------------
+  // Neurology (8)
+  // --------------------------------------------------------------------------
+  alzheimers: {
+    indication: 'alzheimers',
+    ta: 'neurology',
+    rampUpYears: 6,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 12,
+    source: 'Leqembi launch 2023-2026 case study (infrastructure, PET/MRI screening bottleneck)',
+    notes: 'Slowest neurology ramp — requires IV infusion, ARIA monitoring, specialist network',
+  },
+  parkinsons: {
+    indication: 'parkinsons',
+    ta: 'neurology',
+    rampUpYears: 5,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Movement disorder specialist adoption pattern; Nourianz/Gocovri 2019-2024',
+  },
+  multiple_sclerosis: {
+    indication: 'multiple_sclerosis',
+    ta: 'neurology',
+    rampUpYears: 4,
+    peakDurationYears: 7,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Ocrevus 2017-2024 (4y to peak $6B); Tysabri historical analog',
+  },
+  als: {
+    indication: 'als',
+    ta: 'neurology',
+    rampUpYears: 2,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 14,
+    source: 'Radicava/Relyvrio launch 2017-2024; orphan designation',
+    notes: 'Small market saturates fast; 14y LOE from orphan exclusivity',
+  },
+  epilepsy: {
+    indication: 'epilepsy',
+    ta: 'neurology',
+    rampUpYears: 5,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Xcopri (cenobamate) 2020-2024; slow due to AED generic pressure',
+  },
+  depression: {
+    indication: 'depression',
+    ta: 'neurology',
+    rampUpYears: 3,
+    peakDurationYears: 4,
+    declineRate: 0.30,
+    loeYearsAfterApproval: 11,
+    source: 'Spravato 2019-2024; Auvelity 2022-2024 fast primary-care uptake',
+    notes: 'Fast adoption followed by rapid SSRI/SNRI generic pressure',
+  },
+  schizophrenia: {
+    indication: 'schizophrenia',
+    ta: 'neurology',
+    rampUpYears: 5,
+    peakDurationYears: 5,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Long-acting injectables (Invega Sustenna/Hafyera, Cobenfy 2024) slow formulary path',
+  },
+  migraine: {
+    indication: 'migraine',
+    ta: 'neurology',
+    rampUpYears: 3,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'CGRP class (Aimovig, Emgality, Ajovy, Nurtec) 2018-2024 rapid class adoption',
+  },
+
+  // --------------------------------------------------------------------------
+  // Immunology (7)
+  // --------------------------------------------------------------------------
+  rheumatoid_arthritis: {
+    indication: 'rheumatoid_arthritis',
+    ta: 'immunology',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Humira RA launch 2003 + JAK class (Rinvoq, Xeljanz) 2018-2024',
+  },
+  psoriasis: {
+    indication: 'psoriasis',
+    ta: 'immunology',
+    rampUpYears: 3,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 12,
+    source: 'Skyrizi/Otezla/Tremfya 2019-2024 — fast IL-23 class adoption',
+  },
+  atopic_dermatitis: {
+    indication: 'atopic_dermatitis',
+    ta: 'immunology',
+    rampUpYears: 3,
+    peakDurationYears: 7,
+    declineRate: 0.15,
+    loeYearsAfterApproval: 13,
+    source: 'Dupixent 2017-2024 — extreme ramp, $12B by year 6, multi-indication expansion',
+    notes: 'Highest-velocity immunology launch on record',
+  },
+  lupus: {
+    indication: 'lupus',
+    ta: 'immunology',
+    rampUpYears: 5,
+    peakDurationYears: 5,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Saphnelo 2021-2024; Benlysta historical slow ramp',
+  },
+  ibd_uc: {
+    indication: 'ibd_uc',
+    ta: 'immunology',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Stelara/Entyvio UC 2014-2024; Rinvoq UC 2022',
+  },
+  ibd_cd: {
+    indication: 'ibd_cd',
+    ta: 'immunology',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Stelara Crohn\'s 2016-2024; Skyrizi CD 2022-2024',
+  },
+  asthma: {
+    indication: 'asthma',
+    ta: 'immunology',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Dupixent asthma (2018), Nucala, Tezspire 2021-2024; split inhaler/biologic market',
+  },
+
+  // --------------------------------------------------------------------------
+  // Metabolic (5)
+  // --------------------------------------------------------------------------
+  type2_diabetes: {
+    indication: 'type2_diabetes',
+    ta: 'metabolic',
+    rampUpYears: 3,
+    peakDurationYears: 7,
+    declineRate: 0.15,
+    loeYearsAfterApproval: 13,
+    source: 'Ozempic/Mounjaro GLP-1 class 2018-2025 explosive ramp',
+  },
+  obesity: {
+    indication: 'obesity',
+    ta: 'metabolic',
+    rampUpYears: 2,
+    peakDurationYears: 8,
+    declineRate: 0.12,
+    loeYearsAfterApproval: 13,
+    source: 'Wegovy 2021-2024 (2y to peak demand); Zepbound 2023-2025',
+    notes: 'Fastest ramp in industry history — demand >> supply',
+  },
+  nash_mash: {
+    indication: 'nash_mash',
+    ta: 'metabolic',
+    rampUpYears: 5,
+    peakDurationYears: 5,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 12,
+    source: 'Rezdiffra (Madrigal) 2024 launch — slow uptake due to biopsy screening requirement',
+  },
+  dyslipidemia: {
+    indication: 'dyslipidemia',
+    ta: 'metabolic',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.25,
+    loeYearsAfterApproval: 11,
+    source: 'PCSK9 class (Repatha/Praluent) 2015-2024; heavy statin generic competition',
+  },
+  cardiometabolic: {
+    indication: 'cardiometabolic',
+    ta: 'metabolic',
+    rampUpYears: 4,
+    peakDurationYears: 5,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Blended cardiometabolic curve; mid-range metabolic assumptions',
+  },
+
+  // --------------------------------------------------------------------------
+  // Rare Disease (8)
+  // --------------------------------------------------------------------------
+  dmd: {
+    indication: 'dmd',
+    ta: 'rareDisease',
+    rampUpYears: 2,
+    peakDurationYears: 10,
+    declineRate: 0.05,
+    loeYearsAfterApproval: 14,
+    source: 'Sarepta Exondys/Vyondys/Amondys + Elevidys 2023-2025; specialist channel',
+    notes: 'Orphan exclusivity + specialist concentration = longest peak in rare disease',
+  },
+  cystic_fibrosis: {
+    indication: 'cystic_fibrosis',
+    ta: 'rareDisease',
+    rampUpYears: 2,
+    peakDurationYears: 10,
+    declineRate: 0.05,
+    loeYearsAfterApproval: 14,
+    source: 'Trikafta/Kaftrio 2019-2025 (2y to peak, $9B+ plateau)',
+    notes: 'Near-monopoly Vertex franchise; captures 90%+ eligible population',
+  },
+  sma: {
+    indication: 'sma',
+    ta: 'rareDisease',
+    rampUpYears: 2,
+    peakDurationYears: 9,
+    declineRate: 0.08,
+    loeYearsAfterApproval: 14,
+    source: 'Spinraza 2016-2024; Zolgensma 2019-2024; Evrysdi 2020-2024',
+  },
+  hae: {
+    indication: 'hae',
+    ta: 'rareDisease',
+    rampUpYears: 2,
+    peakDurationYears: 8,
+    declineRate: 0.10,
+    loeYearsAfterApproval: 13,
+    source: 'Takhzyro 2018-2024; Orladeyo 2020-2024 specialist HAE channel',
+  },
+  spinal_cord_injury: {
+    indication: 'spinal_cord_injury',
+    ta: 'rareDisease',
+    rampUpYears: 3,
+    peakDurationYears: 7,
+    declineRate: 0.10,
+    loeYearsAfterApproval: 14,
+    source: 'Tiny rehab market; slow academic center adoption',
+  },
+  friedreichs_ataxia: {
+    indication: 'friedreichs_ataxia',
+    ta: 'rareDisease',
+    rampUpYears: 3,
+    peakDurationYears: 8,
+    declineRate: 0.08,
+    loeYearsAfterApproval: 14,
+    source: 'Skyclarys (Reata/Biogen) 2023-2025 — first approved therapy, orphan exclusivity',
+  },
+  huntingtons: {
+    indication: 'huntingtons',
+    ta: 'rareDisease',
+    rampUpYears: 3,
+    peakDurationYears: 8,
+    declineRate: 0.10,
+    loeYearsAfterApproval: 14,
+    source: 'Austedo HD 2017-2024; specialist neurology centers',
+  },
+  wilson_disease: {
+    indication: 'wilson_disease',
+    ta: 'rareDisease',
+    rampUpYears: 2,
+    peakDurationYears: 9,
+    declineRate: 0.05,
+    loeYearsAfterApproval: 14,
+    source: 'Syprine/Cuprimine historical; tiny chronic population, stable franchise',
+  },
+
+  // --------------------------------------------------------------------------
+  // Cardiovascular (5)
+  // --------------------------------------------------------------------------
+  heart_failure: {
+    indication: 'heart_failure',
+    ta: 'cardiovascular',
+    rampUpYears: 5,
+    peakDurationYears: 6,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Entresto 2015-2024 slow ramp despite clear guideline inclusion',
+  },
+  pah: {
+    indication: 'pah',
+    ta: 'cardiovascular',
+    rampUpYears: 3,
+    peakDurationYears: 7,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Winrevair (Merck/Acceleron) 2024 launch; Uptravi historical',
+    notes: 'Specialist PAH channel accelerates uptake',
+  },
+  hypercholesterolemia: {
+    indication: 'hypercholesterolemia',
+    ta: 'cardiovascular',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.22,
+    loeYearsAfterApproval: 12,
+    source: 'Leqvio 2021-2024; Repatha 2015-2024 (statin overhang)',
+  },
+  atrial_fibrillation: {
+    indication: 'atrial_fibrillation',
+    ta: 'cardiovascular',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 12,
+    source: 'DOAC class (Eliquis, Xarelto) 2011-2024 rapid class conversion from warfarin',
+  },
+  atherosclerosis: {
+    indication: 'atherosclerosis',
+    ta: 'cardiovascular',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Mid-range CV blend; lipid-modifying + anti-inflammatory context',
+  },
+
+  // --------------------------------------------------------------------------
+  // Infectious Disease (3)
+  // --------------------------------------------------------------------------
+  hiv: {
+    indication: 'hiv',
+    ta: 'infectiousDisease',
+    rampUpYears: 4,
+    peakDurationYears: 8,
+    declineRate: 0.15,
+    loeYearsAfterApproval: 12,
+    source: 'Gilead Biktarvy 2018-2024 ($11B peak); long durability from treatment adherence',
+  },
+  hepatitis_b: {
+    indication: 'hepatitis_b',
+    ta: 'infectiousDisease',
+    rampUpYears: 5,
+    peakDurationYears: 6,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 12,
+    source: 'Vemlidy 2016-2024; slow guideline-driven adoption',
+  },
+  bacterial_infection: {
+    indication: 'bacterial_infection',
+    ta: 'infectiousDisease',
+    rampUpYears: 3,
+    peakDurationYears: 4,
+    declineRate: 0.30,
+    loeYearsAfterApproval: 10,
+    source: 'Recarbrio/Zerbaxa/Xenleta 2019-2024; intense generic + stewardship pressure',
+    notes: 'Shortest LOE due to hospital formulary economics + generic competition',
+  },
+
+  // --------------------------------------------------------------------------
+  // Other (2)
+  // --------------------------------------------------------------------------
+  amd: {
+    indication: 'amd',
+    ta: 'ophthalmology',
+    rampUpYears: 4,
+    peakDurationYears: 7,
+    declineRate: 0.18,
+    loeYearsAfterApproval: 13,
+    source: 'Eylea/Lucentis 2012-2024 long peak; Vabysmo 2022-2024',
+  },
+  dry_eye: {
+    indication: 'dry_eye',
+    ta: 'ophthalmology',
+    rampUpYears: 4,
+    peakDurationYears: 6,
+    declineRate: 0.20,
+    loeYearsAfterApproval: 12,
+    source: 'Xiidra/Restasis 2016-2024; Tyrvaya 2021-2024 chronic disease ramp',
+  },
+};
+
+/**
+ * Lookup helper for indication-specific revenue curve.
+ * Returns null if no indication-specific curve exists (caller should fall
+ * back to REVENUE_CURVE_OVERRIDES[therapeuticArea] then REVENUE_CURVE).
+ */
+export function getIndicationRevenueCurve(indication: string): IndicationRevenueCurve | null {
+  return INDICATION_REVENUE_CURVES[indication] || null;
+}
+
+/**
  * Revenue ramp-up schedule as fraction of peak sales.
  * Index 0 = launch year, index 3 = peak year.
  */
@@ -1163,6 +1698,10 @@ const PHASE_START_INDEX: Record<string, number> = {
  * @param modality - Drug modality key (must match POS_MODALITY_ADJUSTMENT)
  * @param biomarkerStatus - 'selected' if validated biomarker is used, 'unselected' otherwise
  * @param regulatoryDesignations - Active regulatory designations
+ * @param indication - Optional indication slug. If provided and present in
+ *   INDICATION_POS_MODIFIERS, each base transition rate is multiplied by the
+ *   indication-specific modifier before any modality/biomarker/regulatory
+ *   uplift is applied. Non-calibrated indications fall back to TA base rates.
  *
  * @returns Object containing cumulative PoS and per-transition breakdown
  *
@@ -1173,9 +1712,10 @@ const PHASE_START_INDEX: Record<string, number> = {
  *   'oncology',
  *   'adc',
  *   'selected',
- *   { breakthrough: true, fastTrack: false, orphan: true, prime: false }
+ *   { breakthrough: true, fastTrack: false, orphan: true, prime: false },
+ *   'lung_nsclc',
  * );
- * // cumulativePoS ~ 0.12-0.18 depending on exact adjustments
+ * // cumulativePoS reflects NSCLC-specific attrition vs oncology mean
  * ```
  */
 export function getCumulativePoS(
@@ -1189,13 +1729,44 @@ export function getCumulativePoS(
     orphan: boolean;
     prime: boolean;
   },
+  indication?: string,
 ): {
   cumulativePoS: number;
   transitions: { phase: string; probability: number; cumulativeProb: number }[];
 } {
   // Resolve base rates -- fall back to oncology if TA not found
-  const baseRates =
+  const baseRatesRaw =
     POS_BY_THERAPEUTIC_AREA[therapeuticArea] ?? POS_BY_THERAPEUTIC_AREA.oncology;
+
+  // Apply indication-specific modifier (no-op if indication is missing or
+  // not calibrated). applyIndicationModifier clamps each transition into
+  // [0.01, 0.98]. This deliberately runs BEFORE modality / biomarker /
+  // regulatory uplifts so those still compose against indication-adjusted
+  // baselines, preserving existing TA-level fallback for non-calibrated
+  // indications.
+  const baseRates: PhaseTransitionRates = {
+    ...baseRatesRaw,
+    preclinicalToPhase1: applyIndicationModifier(
+      baseRatesRaw.preclinicalToPhase1,
+      indication,
+      'preclinicalToPhase1',
+    ),
+    phase1ToPhase2: applyIndicationModifier(
+      baseRatesRaw.phase1ToPhase2,
+      indication,
+      'phase1ToPhase2',
+    ),
+    phase2ToPhase3: applyIndicationModifier(
+      baseRatesRaw.phase2ToPhase3,
+      indication,
+      'phase2ToPhase3',
+    ),
+    phase3ToApproval: applyIndicationModifier(
+      baseRatesRaw.phase3ToApproval,
+      indication,
+      'phase3ToApproval',
+    ),
+  };
 
   // Resolve modality adjustment -- default to 1.0 (no adjustment)
   const modalityAdj = POS_MODALITY_ADJUSTMENT[modality] ?? 1.0;

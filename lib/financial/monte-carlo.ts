@@ -526,6 +526,7 @@ export function runMonteCarlo(
     rnpv.modality,
     rnpv.biomarkerStatus || 'unselected',
     rnpv.regulatoryDesignations,
+    rnpv.indication,
   );
   const basePoS = posResult.cumulativePoS;
   const posVariation = input.posVariation ?? 0.20;

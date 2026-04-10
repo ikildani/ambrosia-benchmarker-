@@ -162,6 +162,7 @@ function buildDataBackedRiskFactors(
     inputs.modality,
     'unselected',
     inputs.regulatoryDesignations,
+    inputs.indication,
   );
   const failureRate = ((1 - posResult.cumulativePoS) * 100).toFixed(0);
   risks.push(

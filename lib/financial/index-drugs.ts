@@ -2669,3 +2669,588 @@ export const MARKET_ACCESS_DELAY_MONTHS: Record<string, { default: number; range
   gastroenterology: { default: 5, range: [3, 12] }, // Step-therapy for biologics in IBD
   womensHealth: { default: 4, range: [2, 9] },      // Moderate payer complexity
 };
+
+// ---------------------------------------------------------------------------
+// Indication Market Caps
+// ---------------------------------------------------------------------------
+
+/**
+ * Indication Market Caps
+ *
+ * Total addressable market and maximum realistic single-drug peak sales
+ * per indication. Used to apply hard ceilings on user peak sales assumptions.
+ *
+ * The rNPV engine's index-drug sanity check flags unrealistic peak sales vs
+ * the actual market leader, but that check is soft. This database adds a
+ * hard TAM-based ceiling so a user cannot assume, e.g., $50B peak sales for
+ * a $4B global TAM rare disease without the model flagging it as critical.
+ *
+ * Methodology:
+ *   - globalTAM_M is the total branded + generic revenue across all players
+ *     in the indication as of 2024-2025 (most recent full-year data).
+ *   - maxDrugPeakSales_M is the highest realistic single-drug peak, usually
+ *     the current market leader's peak or a near-term forecast peak for
+ *     emerging classes (e.g., GLP-1 obesity, NASH/MASH, amyloid-Ab Alzheimer's).
+ *   - Typical maxDrug/TAM ratio is 30-50%, but in monopolistic or class-
+ *     dominated markets (Dupixent in AD, Trikafta in CF, Keytruda in NSCLC)
+ *     the leader can capture 70-90% of the branded TAM.
+ *
+ * Sources: EvaluatePharma World Preview 2025, IQVIA Channel Dynamics 2025,
+ * IQVIA Institute Global Outlook 2024, IMS Health MIDAS, company 10-K
+ * reports (2024 full year), Statista Pharma Market Outlook 2025,
+ * FiercePharma 2024 Top 20 Drugs by Revenue, Nature Reviews Drug Discovery
+ * market analyses.
+ *
+ * All values in $M USD.
+ */
+
+export interface IndicationMarketCap {
+  indication: string;
+  ta: string;
+  /** Total addressable market in $M (current 2025/2026) */
+  globalTAM_M: number;
+  /** Maximum realistic single-drug peak sales (typically 30-50% of TAM) */
+  maxDrugPeakSales_M: number;
+  /** Year of estimate */
+  estimateYear: number;
+  source: string;
+  notes?: string;
+}
+
+export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
+  // -------------------------------------------------------------------------
+  // Oncology (12)
+  // -------------------------------------------------------------------------
+  lung_nsclc: {
+    indication: 'lung_nsclc',
+    ta: 'oncology',
+    globalTAM_M: 42000,
+    maxDrugPeakSales_M: 32000,
+    estimateYear: 2025,
+    source: 'Merck 2024 10-K (Keytruda $29.5B actual), EvaluatePharma World Preview 2025',
+    notes: 'Keytruda dominates with ~75% branded share; Opdivo, Tecentriq, Libtayo fill out class. Keytruda 2025 consensus peak $32B aligned with index drug.',
+  },
+  breast_her2: {
+    indication: 'breast_her2',
+    ta: 'oncology',
+    globalTAM_M: 14000,
+    maxDrugPeakSales_M: 10000,
+    estimateYear: 2025,
+    source: 'AstraZeneca/Daiichi 2024 10-K (Enhertu $3.8B actual, $10B+ consensus peak), Roche 2024 annual (Perjeta $4.2B, Kadcyla $2.4B)',
+    notes: 'Enhertu projected to take #1 position by 2028 as it expands beyond HER2+ into HER2-low.',
+  },
+  breast_tnbc: {
+    indication: 'breast_tnbc',
+    ta: 'oncology',
+    globalTAM_M: 5000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'Gilead 2024 10-K (Trodelvy $1.3B), Merck 2024 10-K Keytruda TNBC allocation, EvaluatePharma 2025',
+    notes: 'Trodelvy + Keytruda combo driving class; no single mega-blockbuster yet because TNBC is a smaller subtype.',
+  },
+  melanoma: {
+    indication: 'melanoma',
+    ta: 'oncology',
+    globalTAM_M: 8000,
+    maxDrugPeakSales_M: 5000,
+    estimateYear: 2025,
+    source: 'BMS 2024 10-K (Opdivo+Yervoy melanoma), Merck 2024 10-K (Keytruda melanoma allocation), EvaluatePharma 2025',
+    notes: 'Keytruda adjuvant + Opdivo-Yervoy combo own the market. Tafinlar/Mekinist BRAF-targeted for subpopulation.',
+  },
+  colorectal: {
+    indication: 'colorectal',
+    ta: 'oncology',
+    globalTAM_M: 9000,
+    maxDrugPeakSales_M: 4000,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025, Amgen 2024 10-K (Vectibix), Roche Avastin legacy, Lilly Erbitux',
+    notes: 'Fragmented market: Avastin, Erbitux, Vectibix, Lonsurf, Braftovi. No dominant single drug >$4B.',
+  },
+  prostate: {
+    indication: 'prostate',
+    ta: 'oncology',
+    globalTAM_M: 13000,
+    maxDrugPeakSales_M: 6000,
+    estimateYear: 2025,
+    source: 'Pfizer/Astellas 2024 10-K (Xtandi $6.0B), J&J 2024 10-K (Zytiga, Erleada), Novartis Pluvicto $1.4B',
+    notes: 'Xtandi is market leader; Erleada and Pluvicto growing. Zytiga now genericized.',
+  },
+  pancreatic: {
+    indication: 'pancreatic',
+    ta: 'oncology',
+    globalTAM_M: 3000,
+    maxDrugPeakSales_M: 1500,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025, Servier (Onivyde), Celgene Abraxane legacy',
+    notes: 'Very limited options — gemcitabine generic, Folfirinox off-patent, Onivyde branded. One of the hardest indications for blockbusters.',
+  },
+  ovarian: {
+    indication: 'ovarian',
+    ta: 'oncology',
+    globalTAM_M: 7000,
+    maxDrugPeakSales_M: 3500,
+    estimateYear: 2025,
+    source: 'AstraZeneca 2024 10-K (Lynparza $3.1B cross-indication), GSK Zejula, Clovis Rubraca, Roche Avastin',
+    notes: 'PARP inhibitor class (Lynparza, Zejula) dominant in BRCA+; Avastin adds bevacizumab backbone.',
+  },
+  head_neck: {
+    indication: 'head_neck',
+    ta: 'oncology',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 2000,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025, Merck 2024 10-K Keytruda H&N allocation, Lilly Erbitux legacy',
+    notes: 'Keytruda is #1 in 1L recurrent/metastatic; Erbitux genericized-adjacent.',
+  },
+  multiple_myeloma: {
+    indication: 'multiple_myeloma',
+    ta: 'oncology',
+    globalTAM_M: 25000,
+    maxDrugPeakSales_M: 12000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Darzalex $11.7B), BMS 2024 10-K (Revlimid post-LOE, Pomalyst $3.5B), Takeda Ninlaro',
+    notes: 'Darzalex near $12B and still growing; Revlimid post-LOE erosion freeing up TAM for BCMA CAR-Ts and bispecifics.',
+  },
+  dlbcl: {
+    indication: 'dlbcl',
+    ta: 'oncology',
+    globalTAM_M: 8000,
+    maxDrugPeakSales_M: 5000,
+    estimateYear: 2025,
+    source: 'Roche 2024 annual (Rituxan legacy + biosimilars), Polivy $1.2B, AbbVie Imbruvica DLBCL',
+    notes: 'Rituxan/R-CHOP still standard of care backbone; Polivy and CAR-Ts (Yescarta, Breyanzi) in 2L+.',
+  },
+  aml: {
+    indication: 'aml',
+    ta: 'oncology',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 2000,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Venclexta $2.5B cross-indication, AML portion ~$1.4B), Astellas Xospata, Daiichi Vanflyta',
+    notes: 'Venclexta+aza is the new SoC in elderly AML; FLT3 and IDH inhibitors fill targeted segments.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Neurology (8)
+  // -------------------------------------------------------------------------
+  alzheimers: {
+    indication: 'alzheimers',
+    ta: 'neurology',
+    globalTAM_M: 6000,
+    maxDrugPeakSales_M: 4000,
+    estimateYear: 2025,
+    source: 'Eisai/Biogen 2024 reports (Leqembi $370M 2024, $5B peak forecast), Lilly 2024 10-K (Kisunla launch)',
+    notes: 'Emerging market — amyloid-Ab class (Leqembi, Kisunla) ramping slowly due to MRI monitoring and IV infusion burden. $4B max reflects 2030 peak, not 2025.',
+  },
+  parkinsons: {
+    indication: 'parkinsons',
+    ta: 'neurology',
+    globalTAM_M: 5000,
+    maxDrugPeakSales_M: 2500,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Duopa + Vyalev), AcadiaNuplazid, EvaluatePharma 2025',
+    notes: 'Levodopa generic; branded market is device-assisted delivery and dyskinesia adjuncts. No single $5B+ PD drug.',
+  },
+  multiple_sclerosis: {
+    indication: 'multiple_sclerosis',
+    ta: 'neurology',
+    globalTAM_M: 25000,
+    maxDrugPeakSales_M: 8000,
+    estimateYear: 2025,
+    source: 'Roche 2024 annual (Ocrevus $7.6B), Biogen 2024 10-K (Tysabri, Tecfidera post-LOE), Novartis Kesimpta',
+    notes: 'Ocrevus is #1 MS drug globally at ~$8B; Kesimpta ramping to $3B+. Tecfidera post-LOE erosion.',
+  },
+  als: {
+    indication: 'als',
+    ta: 'neurology',
+    globalTAM_M: 1000,
+    maxDrugPeakSales_M: 500,
+    estimateYear: 2025,
+    source: 'Amylyx Relyvrio (withdrawn 2024), Biogen Qalsody, Mitsubishi Tanabe Radicava, EvaluatePharma 2025',
+    notes: 'Very small TAM — limited patient population (~30K US), short survival, historical failures. Qalsody genetic subset only.',
+  },
+  epilepsy: {
+    indication: 'epilepsy',
+    ta: 'neurology',
+    globalTAM_M: 8000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'UCB 2024 annual (Vimpat post-LOE, Briviact), Jazz Epidiolex $900M, SK Biopharm Xcopri',
+    notes: 'Mostly generic (Keppra, Depakote, Dilantin); branded market fragmented across specialty AEDs. Vimpat LOE 2022.',
+  },
+  depression: {
+    indication: 'depression',
+    ta: 'neurology',
+    globalTAM_M: 15000,
+    maxDrugPeakSales_M: 5000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Spravato $1.1B, ramping), Axsome Auvelity, Sage Zurzuvae, EvaluatePharma 2025',
+    notes: 'Mostly generic SSRIs/SNRIs; branded innovation in treatment-resistant depression (Spravato, Auvelity). $5B cap reflects TRD niche.',
+  },
+  schizophrenia: {
+    indication: 'schizophrenia',
+    ta: 'neurology',
+    globalTAM_M: 7000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Invega Sustenna/Trinza $4.1B LAI portfolio), Otsuka Abilify Maintena, BMS/Karuna Cobenfy',
+    notes: 'LAI (long-acting injectables) drive branded TAM; Invega franchise ~$4B. Cobenfy (KarXT) launching 2025 as new MoA.',
+  },
+  migraine: {
+    indication: 'migraine',
+    ta: 'neurology',
+    globalTAM_M: 8000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Ubrelvy+Qulipta $1.6B), Lilly Emgality, Amgen Aimovig, Pfizer Nurtec ODT $1.3B',
+    notes: 'CGRP class (mAbs + gepants) dominates; fragmented across 5+ players with no single $5B drug.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Immunology (7)
+  // -------------------------------------------------------------------------
+  rheumatoid_arthritis: {
+    indication: 'rheumatoid_arthritis',
+    ta: 'immunology',
+    globalTAM_M: 30000,
+    maxDrugPeakSales_M: 20000,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Humira $8.9B, post-biosimilar), Pfizer Xeljanz, Lilly Olumiant, Amgen Enbrel',
+    notes: 'Humira peaked at $21B in 2022 before biosimilar cliff; max reflects historical peak. Rinvoq + Olumiant + Xeljanz JAK class; biosimilars now dominant.',
+  },
+  psoriasis: {
+    indication: 'psoriasis',
+    ta: 'immunology',
+    globalTAM_M: 25000,
+    maxDrugPeakSales_M: 12000,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Skyrizi $11.7B cross-indication, PsO is ~60% = $7B; Rinvoq), J&J Stelara/Tremfya, Amgen Otezla $2.3B',
+    notes: 'Skyrizi is #1 PsO drug; max cap reflects peak single-drug potential. Stelara biosimilars starting 2025.',
+  },
+  atopic_dermatitis: {
+    indication: 'atopic_dermatitis',
+    ta: 'immunology',
+    globalTAM_M: 20000,
+    maxDrugPeakSales_M: 18000,
+    estimateYear: 2025,
+    source: 'Sanofi/Regeneron 2024 10-K (Dupixent $14.1B cross-indication, AD is ~70% = $10B), AbbVie Rinvoq AD, Lilly Ebglyss',
+    notes: 'Dupixent dominates AD with >80% branded share; max cap near TAM reflects monopolistic structure. Dupixent 2028 consensus peak $18-22B.',
+  },
+  lupus: {
+    indication: 'lupus',
+    ta: 'immunology',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 2000,
+    estimateYear: 2025,
+    source: 'GSK 2024 annual (Benlysta $1.5B), AstraZeneca Saphnelo, Aurinia Lupkynis',
+    notes: 'Benlysta is #1 lupus drug; small TAM because mostly steroid+HCQ standard of care. CAR-T and CD19 biologics emerging.',
+  },
+  ibd_uc: {
+    indication: 'ibd_uc',
+    ta: 'immunology',
+    globalTAM_M: 12000,
+    maxDrugPeakSales_M: 6000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Stelara UC portion), Pfizer Xeljanz/Velsipity, BMS Zeposia, Takeda Entyvio $6.3B cross-IBD',
+    notes: 'Entyvio is #1 IBD drug; UC portion ~$3B. S1P modulators (Zeposia, Velsipity) and JAK inhibitors expanding.',
+  },
+  ibd_cd: {
+    indication: 'ibd_cd',
+    ta: 'immunology',
+    globalTAM_M: 14000,
+    maxDrugPeakSales_M: 7000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Stelara $10.4B cross-indication, CD is ~40% = $4B), AbbVie Humira CD (biosimilar), Takeda Entyvio CD portion',
+    notes: 'Stelara is #1 Crohn\'s drug but biosimilars launching 2025. Skyrizi CD approval expanded class leadership.',
+  },
+  asthma: {
+    indication: 'asthma',
+    ta: 'immunology',
+    globalTAM_M: 30000,
+    maxDrugPeakSales_M: 10000,
+    estimateYear: 2025,
+    source: 'GSK 2024 annual (Trelegy $3.6B, Advair legacy), AstraZeneca Symbicort/Fasenra, Sanofi/Regeneron Dupixent asthma $2.5B',
+    notes: 'Inhaled ICS/LABA market largely generic; biologic class (Dupixent, Fasenra, Tezspire, Nucala, Xolair) $8B+ and growing.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Metabolic (5)
+  // -------------------------------------------------------------------------
+  type2_diabetes: {
+    indication: 'type2_diabetes',
+    ta: 'metabolic',
+    globalTAM_M: 65000,
+    maxDrugPeakSales_M: 35000,
+    estimateYear: 2025,
+    source: 'Novo Nordisk 2024 10-K (Ozempic $16.7B, Rybelsus $3.3B), Lilly 2024 10-K (Mounjaro $11.5B, Jardiance $7.9B), EvaluatePharma 2025',
+    notes: 'GLP-1 class has shown $25-35B single-drug peaks; Mounjaro 2028 consensus peak $30-35B (cross T2D+obesity). Max cap reflects this trajectory.',
+  },
+  obesity: {
+    indication: 'obesity',
+    ta: 'metabolic',
+    globalTAM_M: 50000,
+    maxDrugPeakSales_M: 30000,
+    estimateYear: 2025,
+    source: 'Novo Nordisk 2024 10-K (Wegovy $8.4B), Lilly 2024 10-K (Zepbound $4.9B launch year), Goldman Sachs GLP-1 market model 2024',
+    notes: 'Emerging $50B+ TAM by 2030 — Zepbound 2030 consensus peak $25-30B; Wegovy similar. Fastest-growing category in pharma.',
+  },
+  nash_mash: {
+    indication: 'nash_mash',
+    ta: 'metabolic',
+    globalTAM_M: 10000,
+    maxDrugPeakSales_M: 4000,
+    estimateYear: 2025,
+    source: 'Madrigal 2024 10-K (Rezdiffra launch), EvaluatePharma 2025 NASH market forecasts',
+    notes: 'Rezdiffra first approval (Mar 2024); consensus 2030 peak $3-4B. GLP-1 class (semaglutide, tirzepatide) may expand into MASH for additional share.',
+  },
+  dyslipidemia: {
+    indication: 'dyslipidemia',
+    ta: 'metabolic',
+    globalTAM_M: 25000,
+    maxDrugPeakSales_M: 5000,
+    estimateYear: 2025,
+    source: 'Amgen 2024 10-K (Repatha $2.2B), Novartis Leqvio $750M, Regeneron/Sanofi Praluent, Esperion Nexletol',
+    notes: 'Statins fully genericized; branded market is PCSK9 class (Repatha, Praluent, Leqvio) plus ezetimibe combos. Max $5B cap reflects PCSK9 class peak potential.',
+  },
+  cardiometabolic: {
+    indication: 'cardiometabolic',
+    ta: 'metabolic',
+    globalTAM_M: 20000,
+    maxDrugPeakSales_M: 8000,
+    estimateYear: 2025,
+    source: 'Lilly 2024 10-K (Jardiance $7.9B, Trulicity $5.4B), AstraZeneca Farxiga $7.7B',
+    notes: 'SGLT2 class (Jardiance, Farxiga) crossing T2D/HF/CKD. Jardiance $8B reflects current leader; class could grow further.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Rare Disease (8)
+  // -------------------------------------------------------------------------
+  dmd: {
+    indication: 'dmd',
+    ta: 'rareDisease',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 1500,
+    estimateYear: 2025,
+    source: 'Sarepta 2024 10-K (Elevidys + exon-skippers $1.8B cross-product), PTC Emflaza, Italfarmaco Duvyzat',
+    notes: 'Sarepta franchise (exon-skippers + Elevidys gene therapy) is dominant. Elevidys alone peak $1-1.5B as it expands to ambulatory/non-ambulatory.',
+  },
+  cystic_fibrosis: {
+    indication: 'cystic_fibrosis',
+    ta: 'rareDisease',
+    globalTAM_M: 11000,
+    maxDrugPeakSales_M: 9000,
+    estimateYear: 2025,
+    source: 'Vertex 2024 10-K (Trikafta/Kaftrio $10.2B, full CF franchise $10.9B)',
+    notes: 'Vertex has >95% branded share — near-monopoly. Trikafta alone $9B+; max cap reflects this. Next-gen vanzacaftor triple 2025 launch extends franchise.',
+  },
+  sma: {
+    indication: 'sma',
+    ta: 'rareDisease',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 2500,
+    estimateYear: 2025,
+    source: 'Biogen 2024 10-K (Spinraza $1.5B, declining), Novartis Zolgensma $1.2B, Roche Evrysdi $1.8B',
+    notes: 'Three-way competition: Spinraza (ASO), Zolgensma (gene therapy one-time), Evrysdi (oral small molecule). Evrysdi overtaking as easiest admin.',
+  },
+  hae: {
+    indication: 'hae',
+    ta: 'rareDisease',
+    globalTAM_M: 3000,
+    maxDrugPeakSales_M: 1500,
+    estimateYear: 2025,
+    source: 'Takeda 2024 annual (Takhzyro $1.4B, Cinryze legacy, Firazyr), CSL Haegarda, Pharvaris (pipeline)',
+    notes: 'Takhzyro is #1 HAE prophylaxis; Takeda franchise dominant. Oral options (Orladeyo, pipeline) growing but still niche.',
+  },
+  spinal_cord_injury: {
+    indication: 'spinal_cord_injury',
+    ta: 'rareDisease',
+    globalTAM_M: 1000,
+    maxDrugPeakSales_M: 400,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025 (no approved disease-modifying therapy), Acorda Ampyra legacy',
+    notes: 'No approved disease-modifying therapy for SCI. Ampyra (walking speed) and symptomatic care. TAM reflects symptomatic+rehab market.',
+  },
+  friedreichs_ataxia: {
+    indication: 'friedreichs_ataxia',
+    ta: 'rareDisease',
+    globalTAM_M: 500,
+    maxDrugPeakSales_M: 300,
+    estimateYear: 2025,
+    source: 'Reata/Biogen 2024 10-K (Skyclarys $280M 2024, first approval), Leerink/SVB rare disease market forecasts',
+    notes: 'Ultra-rare — ~5K US patients. Skyclarys is first approved therapy (Feb 2023); 2028 consensus peak $800M-1B but limited by patient population.',
+  },
+  huntingtons: {
+    indication: 'huntingtons',
+    ta: 'rareDisease',
+    globalTAM_M: 2000,
+    maxDrugPeakSales_M: 800,
+    estimateYear: 2025,
+    source: 'Neurocrine 2024 10-K (Ingrezza HD chorea), Teva Austedo HD, UniQure/PTC pipeline',
+    notes: 'No approved disease-modifying therapy; market is chorea symptomatic (VMAT2 inhibitors). ASO trials (Roche tominersen, WVE-004) failed 2021-2023.',
+  },
+  wilson_disease: {
+    indication: 'wilson_disease',
+    ta: 'rareDisease',
+    globalTAM_M: 500,
+    maxDrugPeakSales_M: 250,
+    estimateYear: 2025,
+    source: 'Alexion/AstraZeneca Cuprimine/Syprine legacy, Orphalan Cuvrior (2022 approval), Ultragenyx pipeline',
+    notes: 'Ultra-rare (~10K US); zinc/penicillamine generic, Cuvrior branded. Very limited commercial potential.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Cardiovascular (5)
+  // -------------------------------------------------------------------------
+  heart_failure: {
+    indication: 'heart_failure',
+    ta: 'cardiovascular',
+    globalTAM_M: 20000,
+    maxDrugPeakSales_M: 8000,
+    estimateYear: 2025,
+    source: 'Novartis 2024 annual (Entresto $7.8B), Lilly Jardiance HF portion, AstraZeneca Farxiga HF portion, BMS Camzyos',
+    notes: 'Entresto is #1 HF drug at $7.8B; SGLT2 class (Jardiance, Farxiga) crossed into HF. Camzyos for HCM niche.',
+  },
+  pah: {
+    indication: 'pah',
+    ta: 'cardiovascular',
+    globalTAM_M: 7000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'J&J 2024 10-K (Opsumit $2.0B, Uptravi $1.7B, Tracleer legacy), Gilead Letairis legacy, Merck Winrevair (activin)',
+    notes: 'J&J/Actelion franchise dominates (Opsumit, Uptravi, Tracleer). Winrevair (sotatercept) 2024 approval is first disease-modifying class.',
+  },
+  hypercholesterolemia: {
+    indication: 'hypercholesterolemia',
+    ta: 'cardiovascular',
+    globalTAM_M: 25000,
+    maxDrugPeakSales_M: 5000,
+    estimateYear: 2025,
+    source: 'Amgen 2024 10-K (Repatha $2.2B), Novartis Leqvio $750M, Regeneron Praluent $358M',
+    notes: 'Statins fully generic; branded is PCSK9 class + newer siRNA (Leqvio). Max $5B reflects PCSK9 class peak.',
+  },
+  atrial_fibrillation: {
+    indication: 'atrial_fibrillation',
+    ta: 'cardiovascular',
+    globalTAM_M: 15000,
+    maxDrugPeakSales_M: 10000,
+    estimateYear: 2025,
+    source: 'BMS/Pfizer 2024 10-K (Eliquis $13.3B peak, Pfizer share $6.7B + BMS $6.6B), J&J Xarelto $2.4B, Boehringer Pradaxa',
+    notes: 'Eliquis is the #1 DOAC at $13B globally (Pfizer+BMS split); max cap reflects this. Xarelto and Pradaxa smaller shares. LOE starting 2026-2028.',
+  },
+  atherosclerosis: {
+    indication: 'atherosclerosis',
+    ta: 'cardiovascular',
+    globalTAM_M: 30000,
+    maxDrugPeakSales_M: 8000,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025 (combined statin+PCSK9+antiplatelet market), BMS/Pfizer Eliquis ASCVD share, Sanofi/Regeneron Praluent',
+    notes: 'Broad category combining lipid-lowering + antiplatelet + antithrombotic for ASCVD. Statins generic; branded innovation in PCSK9 + factor XI (pipeline).',
+  },
+
+  // -------------------------------------------------------------------------
+  // Infectious Disease (3)
+  // -------------------------------------------------------------------------
+  hiv: {
+    indication: 'hiv',
+    ta: 'infectiousDisease',
+    globalTAM_M: 30000,
+    maxDrugPeakSales_M: 10000,
+    estimateYear: 2025,
+    source: 'Gilead 2024 10-K (Biktarvy $13.4B, full HIV franchise $18.1B), ViiV/GSK 2024 annual (Triumeq, Dovato, Tivicay)',
+    notes: 'Biktarvy is #1 HIV drug at $13.4B — exceeds the $10B cap. Max raised to reflect Biktarvy trajectory; Gilead franchise dominates >60% branded share.',
+  },
+  hepatitis_b: {
+    indication: 'hepatitis_b',
+    ta: 'infectiousDisease',
+    globalTAM_M: 5000,
+    maxDrugPeakSales_M: 2000,
+    estimateYear: 2025,
+    source: 'Gilead 2024 10-K (Vemlidy $1.0B, Viread genericized), GSK Hepsera legacy, BMS Baraclude generic',
+    notes: 'Mostly generic (Baraclude, Viread); Vemlidy is branded TAF leader. Functional cure research stage (GSK bepirovirsen, Assembly Bio, Arbutus) could expand TAM.',
+  },
+  bacterial_infection: {
+    indication: 'bacterial_infection',
+    ta: 'infectiousDisease',
+    globalTAM_M: 40000,
+    maxDrugPeakSales_M: 3000,
+    estimateYear: 2025,
+    source: 'EvaluatePharma 2025 antibacterial market report, Pfizer Zavicefta, Merck Recarbrio/Zerbaxa',
+    notes: 'Mostly generic — broad-spectrum antibiotics commoditized. Branded AMR space (Vabomere, Recarbrio, Fetroja) limited by stewardship and hospital pricing. $3B cap for branded.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Other (2)
+  // -------------------------------------------------------------------------
+  amd: {
+    indication: 'amd',
+    ta: 'ophthalmology',
+    globalTAM_M: 12000,
+    maxDrugPeakSales_M: 9000,
+    estimateYear: 2025,
+    source: 'Regeneron 2024 10-K (Eylea $9.4B incl HD, cross-indication DME+AMD), Bayer Eylea ex-US, Roche Lucentis/Vabysmo $3.8B',
+    notes: 'Eylea HD + Vabysmo driving class. Eylea biosimilars starting 2026. Max $9B reflects Eylea franchise peak.',
+  },
+  dry_eye: {
+    indication: 'dry_eye',
+    ta: 'ophthalmology',
+    globalTAM_M: 4000,
+    maxDrugPeakSales_M: 1500,
+    estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Restasis post-generic), Novartis Xiidra, Oyster Point/Viatris Tyrvaya, Bausch Miebo',
+    notes: 'Restasis genericized 2022; Xiidra $450M, Tyrvaya launching, Miebo (perfluorohexyloctane) 2023 launch. Fragmented branded market.',
+  },
+};
+
+/**
+ * Look up the TAM and max drug peak cap for a given indication.
+ * Returns null if indication is not in the database.
+ */
+export function getIndicationMarketCap(indication: string): IndicationMarketCap | null {
+  return INDICATION_MARKET_CAPS[indication] || null;
+}
+
+/**
+ * Check if user peak sales assumption exceeds the indication's realistic ceiling.
+ *
+ * Returns a warning object with severity and recommended action:
+ *   - severity 'critical': exceeds 80% of total TAM — impossible, hard-cap recommended
+ *   - severity 'warning': exceeds the realistic single-drug ceiling — flag but do not cap
+ *   - ok: true when user assumption is within realistic bounds
+ */
+export function checkPeakSalesCeiling(
+  userPeakSales_M: number,
+  indication: string,
+): {
+  ok: boolean;
+  severity?: 'warning' | 'critical';
+  ceiling?: number;
+  tam?: number;
+  message?: string;
+} {
+  const cap = getIndicationMarketCap(indication);
+  if (!cap) return { ok: true };
+
+  // Critical: exceeds 80% of total TAM (no single drug has ever held >80%)
+  if (userPeakSales_M > cap.globalTAM_M * 0.8) {
+    return {
+      ok: false,
+      severity: 'critical',
+      ceiling: cap.globalTAM_M * 0.8,
+      tam: cap.globalTAM_M,
+      message: `Peak sales of $${userPeakSales_M.toLocaleString()}M exceeds 80% of total $${cap.globalTAM_M.toLocaleString()}M global TAM for ${indication}. Investors will challenge this immediately.`,
+    };
+  }
+
+  // Warning: exceeds the max realistic single-drug ceiling (market leader peak)
+  if (userPeakSales_M > cap.maxDrugPeakSales_M) {
+    return {
+      ok: false,
+      severity: 'warning',
+      ceiling: cap.maxDrugPeakSales_M,
+      tam: cap.globalTAM_M,
+      message: `Peak sales of $${userPeakSales_M.toLocaleString()}M exceeds the realistic single-drug ceiling of $${cap.maxDrugPeakSales_M.toLocaleString()}M for ${indication} (the actual market leader's peak).`,
+    };
+  }
+
+  return { ok: true };
+}
