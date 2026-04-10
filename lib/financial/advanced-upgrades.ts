@@ -235,6 +235,13 @@ export interface RealOptionsResult {
   latticeSteps: number;
   /** Human-readable narrative explaining the flexibility premium */
   narrative: string;
+  /**
+   * True when the base unadjusted NPV was negative and was floored to zero
+   * before seeding the lattice. When true, the option value represents the
+   * pure flexibility premium and callers should surface this to the UI as
+   * "deep out-of-the-money" so users know the static DCF disagrees.
+   */
+  underlyingFlooredToZero?: boolean;
 }
 
 /** Phase order for iteration through development stages */
@@ -245,11 +252,12 @@ const PHASE_ORDER = [
 
 /**
  * Map a phase string to its index in PHASE_ORDER.
- * Returns 0 (discovery) for unrecognized phases.
+ * Returns -1 for unrecognized phases so callers can detect the failure
+ * instead of silently collapsing unknown input to discovery.
  */
 function phaseIndex(phase: string): number {
   const idx = PHASE_ORDER.indexOf(phase as (typeof PHASE_ORDER)[number]);
-  return idx >= 0 ? idx : 0;
+  return idx;
 }
 
 /**
@@ -288,8 +296,22 @@ function buildCRRLattice(
   const discount = Math.exp(-rf * dt);
   const p = (Math.exp(rf * dt) - d) / (u - d);
 
-  // Clamp risk-neutral probability to valid range
-  const pUp = Math.max(0.001, Math.min(0.999, p));
+  // Clamp risk-neutral probability to valid range.
+  // If p falls outside (0, 1) the CRR inputs are degenerate (typically
+  // sigma too small vs rf*dt or vice versa); clamping keeps the lattice
+  // solvable but the result is no longer a true risk-neutral price, so
+  // surface a warning rather than silently returning.
+  let pUp = p;
+  if (p < 0.001 || p > 0.999) {
+    if (typeof console !== 'undefined') {
+      console.warn(
+        `[advanced-upgrades] CRR risk-neutral probability clamped: p=${p.toFixed(4)} ` +
+        `(sigma=${sigma.toFixed(3)}, rf=${rf.toFixed(3)}, dt=${dt.toFixed(3)}). ` +
+        `Option value will be approximate.`,
+      );
+    }
+    pUp = Math.max(0.001, Math.min(0.999, p));
+  }
 
   // --- Forward pass: build terminal asset values ---
   // Only need a 1D array; we overwrite in the backward pass.
@@ -426,22 +448,42 @@ export function calculateRealOptions(
   // Source: Trigeorgis & Reuer (2017) — "the underlying in a real option is the
   // gross project value BEFORE risk adjustment, since the option framework
   // prices risk through the volatility parameter."
-  const totalCashFlowPV = Math.max(baseResult.unadjustedNPV, 0);
+  const rawUnadjustedNPV = baseResult.unadjustedNPV;
+  const totalCashFlowPV = Math.max(rawUnadjustedNPV, 0);
+  const underlyingFlooredToZero = rawUnadjustedNPV < 0;
 
   // --- 5. Build compound option backwards ---
   // Start from the last phase and work back. Each phase's option value
   // becomes the underlying for the previous phase's option.
+  //
+  // Cost discounting: each phase's investment K is incurred at the phase
+  // GATE (i.e., after `yearsToGate` elapses from today). We therefore
+  // present-value K before plugging it into the lattice; using face-value K
+  // overstates the strike price for long-dated gates and undervalues deep-
+  // OTM options. (Trigeorgis 2017, §6.3)
   const optionValueByPhase: RealOptionsResult['optionValueByPhase'] = [];
 
   // The underlying for the final phase is the total unadjusted commercial value
   let downstreamValue = totalCashFlowPV;
 
+  // Build cumulative time-to-gate offsets so earlier phases carry shorter
+  // discount horizons than later phases.
+  const cumulativeTimeToGate: number[] = new Array(remainingPhases.length).fill(0);
+  let runningT = 0;
+  for (let i = 0; i < remainingPhases.length; i++) {
+    // Gate for phase i is reached after the phase's duration elapses
+    runningT += Math.max(remainingPhases[i].duration, 0.25);
+    cumulativeTimeToGate[i] = runningT;
+  }
+
   // Process phases in reverse order (last phase first)
   for (let i = remainingPhases.length - 1; i >= 0; i--) {
     const phase = remainingPhases[i];
     const S = downstreamValue;
-    const K = phase.cost;
     const T = Math.max(phase.duration, 0.25); // Floor at 3 months
+    const yearsToGate = cumulativeTimeToGate[i];
+    // Discount the strike (phase cost) to present using the risk-free rate.
+    const K = phase.cost / Math.pow(1 + rf, yearsToGate);
 
     // Price the option using CRR binomial lattice
     const optionValue = buildCRRLattice(S, K, T, sigma, rf, N);
@@ -510,6 +552,7 @@ export function calculateRealOptions(
     riskFreeRate: rf,
     latticeSteps: N,
     narrative,
+    underlyingFlooredToZero,
   };
 }
 
@@ -603,6 +646,27 @@ export function getEnhancedCorrelationMatrix(
     [   rhoPoSTime, rhoPeakTime, rhoRateTime, 1.00,      0.00       ],  // Time to Market
     [   0.00,      rhoPeakPrice, 0.00,       0.00,       1.00       ],  // Pricing
   ];
+
+  // Sanity check: enforce diagonal = 1 and off-diagonals ∈ [-1, 1].
+  // This is a minimal guardrail; Cholesky further downstream would throw on
+  // non-PSD matrices, but this catches hand-editing mistakes early and clamps
+  // out-of-range entries to avoid silent numerical blow-ups.
+  let clamped = false;
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i][i] !== 1.0) {
+      matrix[i][i] = 1.0;
+      clamped = true;
+    }
+    for (let j = 0; j < matrix[i].length; j++) {
+      if (i !== j && (matrix[i][j] < -1 || matrix[i][j] > 1)) {
+        matrix[i][j] = Math.max(-1, Math.min(1, matrix[i][j]));
+        clamped = true;
+      }
+    }
+  }
+  if (clamped && typeof console !== 'undefined') {
+    console.warn('[advanced-upgrades] Correlation matrix entries clamped to [-1, 1] / diag=1');
+  }
 
   return { matrix, labels };
 }

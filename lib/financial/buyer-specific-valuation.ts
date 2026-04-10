@@ -193,13 +193,24 @@ export function calculateBuyerSpecificValuation(
   genericWaterfall: DealWaterfall,
   rnpvResult: RNPVResult,
 ): BuyerSpecificValuation {
+  // ── 0. Clamp all input scores to valid [0, 100] range ──
+  // Upstream sources (partner-matching, pharma-intent) should already clamp,
+  // but we defend in depth here so a rogue >100 score can't blow the premium cap.
+  const clamp100 = (n: number): number =>
+    Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  const matchScore = clamp100(buyer.matchScore);
+  const intentScore = clamp100(buyer.intentScore);
+  const patentCliffPressure = clamp100(buyer.patentCliffPressure);
+  const pipelineGap = clamp100(buyer.pipelineGap);
+  const competitivePressure = clamp100(buyer.competitivePressure);
+
   // ── 1. Compute individual factor contributions ──
 
-  const portfolioFitContribution = (buyer.matchScore / 100) * FACTOR_WEIGHTS.portfolioFit;
-  const dealUrgencyContribution = (buyer.intentScore / 100) * FACTOR_WEIGHTS.dealUrgency;
-  const patentCliffContribution = (buyer.patentCliffPressure / 100) * FACTOR_WEIGHTS.patentCliff;
-  const pipelineGapContribution = (buyer.pipelineGap / 100) * FACTOR_WEIGHTS.pipelineGap;
-  const competitivePressureContribution = (buyer.competitivePressure / 100) * FACTOR_WEIGHTS.competitivePressure;
+  const portfolioFitContribution = (matchScore / 100) * FACTOR_WEIGHTS.portfolioFit;
+  const dealUrgencyContribution = (intentScore / 100) * FACTOR_WEIGHTS.dealUrgency;
+  const patentCliffContribution = (patentCliffPressure / 100) * FACTOR_WEIGHTS.patentCliff;
+  const pipelineGapContribution = (pipelineGap / 100) * FACTOR_WEIGHTS.pipelineGap;
+  const competitivePressureContribution = (competitivePressure / 100) * FACTOR_WEIGHTS.competitivePressure;
 
   // ── 2. Build premium breakdown for transparency ──
 
@@ -207,55 +218,55 @@ export function calculateBuyerSpecificValuation(
     {
       factor: 'Portfolio Fit',
       contribution: portfolioFitContribution * 100,
-      score: buyer.matchScore,
+      score: matchScore,
       weight: FACTOR_WEIGHTS.portfolioFit,
-      rationale: buyer.matchScore >= 80
+      rationale: matchScore >= 80
         ? `${buyer.companyName}'s active modality and indication focus aligns strongly with this asset, making it a high-priority strategic fit.`
-        : buyer.matchScore >= 50
+        : matchScore >= 50
           ? `Moderate portfolio alignment — ${buyer.companyName} has adjacent capabilities but this asset would extend their current focus.`
           : `Limited portfolio overlap — ${buyer.companyName} would need to build new capabilities around this asset.`,
     },
     {
       factor: 'Deal Urgency',
       contribution: dealUrgencyContribution * 100,
-      score: buyer.intentScore,
+      score: intentScore,
       weight: FACTOR_WEIGHTS.dealUrgency,
-      rationale: buyer.intentScore >= 70
-        ? `High acquisition intent (${buyer.intentScore}/100) with ${buyer.dealsLast12mo} deals in the last 12 months signals active BD engagement and willingness to move quickly.`
-        : buyer.intentScore >= 40
-          ? `Moderate deal intent (${buyer.intentScore}/100) — ${buyer.companyName} is selectively pursuing assets but not under acute pressure.`
-          : `Low deal intent (${buyer.intentScore}/100) — limited recent BD activity suggests a cautious acquisition stance.`,
+      rationale: intentScore >= 70
+        ? `High acquisition intent (${intentScore}/100) with ${buyer.dealsLast12mo} deals in the last 12 months signals active BD engagement and willingness to move quickly.`
+        : intentScore >= 40
+          ? `Moderate deal intent (${intentScore}/100) — ${buyer.companyName} is selectively pursuing assets but not under acute pressure.`
+          : `Low deal intent (${intentScore}/100) — limited recent BD activity suggests a cautious acquisition stance.`,
     },
     {
       factor: 'Patent Cliff Pressure',
       contribution: patentCliffContribution * 100,
-      score: buyer.patentCliffPressure,
+      score: patentCliffPressure,
       weight: FACTOR_WEIGHTS.patentCliff,
-      rationale: buyer.patentCliffPressure >= 70
+      rationale: patentCliffPressure >= 70
         ? `Significant revenue at risk from upcoming LOE events drives urgency to replenish the portfolio through in-licensing or acquisition.`
-        : buyer.patentCliffPressure >= 40
+        : patentCliffPressure >= 40
           ? `Moderate patent cliff exposure — some revenue replacement needed but no acute crisis.`
           : `Minimal patent cliff pressure — current portfolio has healthy exclusivity runway.`,
     },
     {
       factor: 'Pipeline Gap',
       contribution: pipelineGapContribution * 100,
-      score: buyer.pipelineGap,
+      score: pipelineGap,
       weight: FACTOR_WEIGHTS.pipelineGap,
-      rationale: buyer.pipelineGap >= 70
+      rationale: pipelineGap >= 70
         ? `${buyer.companyName} has a critical gap in late-stage pipeline assets for this therapeutic area, creating strong pull for external innovation.`
-        : buyer.pipelineGap >= 40
+        : pipelineGap >= 40
           ? `Some pipeline coverage but gaps remain — external assets would complement internal programs.`
           : `Well-stocked internal pipeline reduces the urgency to in-license in this space.`,
     },
     {
       factor: 'Competitive Pressure',
       contribution: competitivePressureContribution * 100,
-      score: buyer.competitivePressure,
+      score: competitivePressure,
       weight: FACTOR_WEIGHTS.competitivePressure,
-      rationale: buyer.competitivePressure >= 70
+      rationale: competitivePressure >= 70
         ? `Peer companies have recently signed deals in this space, creating competitive FOMO and upward pressure on valuations.`
-        : buyer.competitivePressure >= 40
+        : competitivePressure >= 40
           ? `Moderate competitive deal activity in the space — some urgency but not acute.`
           : `Limited peer deal activity — no competitive FOMO driving premiums.`,
     },
@@ -275,7 +286,12 @@ export function calculateBuyerSpecificValuation(
 
   // ── 4. Confidence adjustment ──
   // Low confidence (sparse data) = premium is halved. High confidence = full premium.
-  const confidenceAdjustedPremium = rawPremium * (0.5 + 0.5 * buyer.confidence);
+  // Clamp confidence to [0, 1] so an upstream model emitting >1 can't push the
+  // multiplier above 1.0 (which would inflate the premium beyond raw contribution).
+  const clampedConfidence = Number.isFinite(buyer.confidence)
+    ? Math.max(0, Math.min(1, buyer.confidence))
+    : 0;
+  const confidenceAdjustedPremium = rawPremium * (0.5 + 0.5 * clampedConfidence);
 
   // ── 5. Timing modifier ──
   const timingMultiplier = TIMING_MULTIPLIERS[buyer.timing] ?? 1.0;
@@ -403,7 +419,10 @@ function buildNarrative(
     return `${buyer.companyName} would likely transact near generic market terms (${fmtM(genericDeal.median)}). Their profile does not indicate material strategic urgency in this space, resulting in ${leverageText[leverage]}.`;
   }
 
-  return `${buyer.companyName} would likely pay a +${premiumPct.toFixed(0)}% strategic premium (${fmtM(buyerDeal.median)} vs ${fmtM(genericDeal.median)} generic), driven primarily by ${factorNames}. This reflects ${leverageText[leverage]}. ${buyer.confidence >= 0.7 ? 'High model confidence reinforces this estimate.' : 'Note: lower data availability means the premium estimate carries wider uncertainty.'}`;
+  const clampedConfidence = Number.isFinite(buyer.confidence)
+    ? Math.max(0, Math.min(1, buyer.confidence))
+    : 0;
+  return `${buyer.companyName} would likely pay a +${premiumPct.toFixed(0)}% strategic premium (${fmtM(buyerDeal.median)} vs ${fmtM(genericDeal.median)} generic), driven primarily by ${factorNames}. This reflects ${leverageText[leverage]}. ${clampedConfidence >= 0.7 ? 'High model confidence reinforces this estimate.' : 'Note: lower data availability means the premium estimate carries wider uncertainty.'}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -435,19 +454,27 @@ export function buildBuyerProfileFromMatch(match: {
   const intent = match.pharma_intent;
   const factors = intent?.factors ?? [];
 
+  // Defense-in-depth: clamp incoming scores to the documented [0, 100] range
+  // and confidence to [0, 1]. Upstream services should already do this, but a
+  // single out-of-range value here propagates directly into the premium cap.
+  const clamp100 = (n: number): number =>
+    Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  const clampConfidence = (n: number): number =>
+    Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+
   return {
     companyName: match.company_name,
     companyId: match.company_id,
-    matchScore: match.match_score,
-    intentScore: intent?.intentScore ?? 0,
+    matchScore: clamp100(match.match_score),
+    intentScore: clamp100(intent?.intentScore ?? 0),
     intentTier: intent?.intentTier ?? 'minimal',
     timing: intent?.timing ?? 'speculative',
-    confidence: intent?.confidence ?? 0.3,
+    confidence: clampConfidence(intent?.confidence ?? 0.3),
     dealsLast12mo: match.deals_last_12mo ?? 0,
-    patentCliffPressure: extractFactorScore(factors, 'patent_cliff'),
-    pipelineGap: extractFactorScore(factors, 'pipeline_gap'),
-    dealVelocity: extractFactorScore(factors, 'deal_velocity'),
-    competitivePressure: extractFactorScore(factors, 'competitive_pressure'),
+    patentCliffPressure: clamp100(extractFactorScore(factors, 'patent_cliff')),
+    pipelineGap: clamp100(extractFactorScore(factors, 'pipeline_gap')),
+    dealVelocity: clamp100(extractFactorScore(factors, 'deal_velocity')),
+    competitivePressure: clamp100(extractFactorScore(factors, 'competitive_pressure')),
     hqCountry: match.hq_country ?? undefined,
     companyType: match.company_type ?? undefined,
   };

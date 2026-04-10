@@ -37,6 +37,9 @@ import {
   getCumulativePoS,
 } from './pos-tables';
 
+// Layer 1: mathematical invariants
+import { checkMonteCarloInvariants, assertInvariants } from './invariants';
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -114,16 +117,22 @@ const SCENARIO_CONFIGS = getScenarioConfigs();
 
 /**
  * Select a scenario using weighted random sampling.
- * Returns the index into SCENARIO_CONFIGS.
+ * Returns the index into the provided scenarioConfigs array.
+ *
+ * The caller MUST pass the phase-calibrated configs so that selection
+ * probability and parameter shifts both use the same weights. Earlier
+ * versions used the module-level SCENARIO_CONFIGS (no phase) for selection
+ * while phaseConfigs was used for parameter shifts — causing a weight
+ * mismatch for early and late stage assets.
  */
-function sampleScenario(rng: () => number): number {
+function sampleScenario(rng: () => number, scenarioConfigs: ScenarioConfig[] = SCENARIO_CONFIGS): number {
   const u = rng();
   let cumWeight = 0;
-  for (let i = 0; i < SCENARIO_CONFIGS.length; i++) {
-    cumWeight += SCENARIO_CONFIGS[i].weight;
+  for (let i = 0; i < scenarioConfigs.length; i++) {
+    cumWeight += scenarioConfigs[i].weight;
     if (u < cumWeight) return i;
   }
-  return SCENARIO_CONFIGS.length - 1; // fallback to last (bull)
+  return scenarioConfigs.length - 1; // fallback to last (bull)
 }
 
 /** Ordered list of clinical phases used for rNPV progression.
@@ -565,8 +574,10 @@ export function runMonteCarlo(
 
   for (let i = 0; i < iterations; i++) {
     // --- Scenario weighting: sample which macro scenario applies ---
-    // Phase-calibrated: late-stage assets have tighter distributions
-    const scenarioIdx = sampleScenario(rng);
+    // Phase-calibrated: late-stage assets have tighter distributions.
+    // Pass phaseConfigs explicitly so selection probability matches the
+    // phase-specific weights used for parameter shifts.
+    const scenarioIdx = sampleScenario(rng, phaseConfigs);
     const scenario = phaseConfigs[scenarioIdx];
     scenarioAssignment[i] = scenarioIdx;
 
@@ -778,7 +789,7 @@ export function runMonteCarlo(
 
   // ----- Assemble result ------------------------------------------------
 
-  return {
+  const mcResult: MonteCarloResult = {
     iterations,
 
     percentiles: {
@@ -810,4 +821,22 @@ export function runMonteCarlo(
     skewness,
     kurtosis,
   };
+
+  // Layer 1: mathematical invariants — log to Sentry but never throw.
+  try {
+    const violations = checkMonteCarloInvariants(mcResult);
+    if (violations.some(v => v.severity === 'critical')) {
+      assertInvariants(violations, {
+        context: 'monte-carlo',
+        extra: {
+          phase: input.rnpvInput?.phase,
+          therapeuticArea: input.rnpvInput?.therapeuticArea,
+        },
+      });
+    }
+  } catch {
+    // Never break production calculations on invariant check failures.
+  }
+
+  return mcResult;
 }

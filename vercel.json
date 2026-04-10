@@ -27,6 +27,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/engine-static-scan",
+      "schedule": "30 6 * * *"
+    },
+    {
       "path": "/api/cron/deal-backfill",
       "schedule": "0 1,7,13,19 * * *"
     },
@@ -177,6 +181,10 @@
     {
       "path": "/api/cron/deal-data-health",
       "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/distribution-monitor",
+      "schedule": "0 7 * * *"
     }
   ]
 }

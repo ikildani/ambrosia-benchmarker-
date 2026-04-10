@@ -59,11 +59,11 @@ const TA_ADJACENCY: Record<string, string[]> = {
 
 // Phase preference by company type
 const PHASE_PREFERENCE: Record<string, { sweet: string[]; acceptable: string[]; dealType: string }> = {
-  large_pharma: { sweet: ['phase_3', 'approved', 'phase_2_3'], acceptable: ['phase_2'], dealType: 'acquisition' },
-  mid_pharma: { sweet: ['phase_2', 'phase_2_3', 'phase_3'], acceptable: ['phase_1_2', 'approved'], dealType: 'licensing' },
-  large_biotech: { sweet: ['phase_2', 'phase_1_2'], acceptable: ['preclinical', 'phase_3'], dealType: 'licensing' },
-  mid_biotech: { sweet: ['preclinical', 'phase_1', 'phase_1_2'], acceptable: ['phase_2'], dealType: 'codevelopment' },
-  specialty: { sweet: ['approved', 'phase_3'], acceptable: ['phase_2_3'], dealType: 'licensing' },
+  large_pharma: { sweet: ['phase3', 'approved', 'phase2_3'], acceptable: ['phase2'], dealType: 'acquisition' },
+  mid_pharma: { sweet: ['phase2', 'phase2_3', 'phase3'], acceptable: ['phase1_2', 'approved'], dealType: 'licensing' },
+  large_biotech: { sweet: ['phase2', 'phase1_2'], acceptable: ['preclinical', 'phase3'], dealType: 'licensing' },
+  mid_biotech: { sweet: ['preclinical', 'phase1', 'phase1_2'], acceptable: ['phase2'], dealType: 'codevelopment' },
+  specialty: { sweet: ['approved', 'phase3'], acceptable: ['phase2_3'], dealType: 'licensing' },
 };
 
 // ─── Types ───────────────────────────────────────────────
@@ -454,7 +454,15 @@ function scorePipelineGap(
   const exactActive = activeTrials.filter(t => matchesModality(t.modality, targetModality) && matchesIndication(t, targetIndication));
   const exactTerminated = terminatedTrials.filter(t => matchesModality(t.modality, targetModality) && matchesIndication(t, targetIndication));
   const indicationActive = activeTrials.filter(t => matchesIndication(t, targetIndication));
-  const lateStage = indicationActive.filter(t => t.phase && ['phase_2', 'phase_2_3', 'phase_3', 'phase_4'].some(p => (t.phase || '').includes(p)));
+  // Exact-match late-stage phases using canonical keys (phase2, phase2_3, phase3, phase4).
+  // Substring .includes() is unsafe here because "phase2" is a substring of "phase2_3",
+  // which would misclassify any "phase2_3" trial based on its parent prefix.
+  const LATE_STAGE_PHASES = new Set(['phase2', 'phase2_3', 'phase3', 'phase4']);
+  const lateStage = indicationActive.filter(t => {
+    if (!t.phase) return false;
+    const normalized = t.phase.toLowerCase().trim().replace(/\s+/g, '').replace(/\//g, '_').replace(/^phase_/, 'phase');
+    return LATE_STAGE_PHASES.has(normalized);
+  });
 
   let score: number;
   let evidence: string;
@@ -502,15 +510,23 @@ function scoreAlignment(
   const tMod = targetModality.toLowerCase();
   const tInd = targetIndication.toLowerCase();
 
-  // Modality fit
+  // Word-boundary aware substring match: require the term to be at least 4 chars
+  // long before accepting a substring hit, otherwise rely on exact match. This
+  // prevents "er" in "ertugliflozin" from matching "er" in "merck".
+  const boundedIncludes = (haystack: string, needle: string): boolean => {
+    if (!needle || needle.length < 4) return haystack === needle;
+    return haystack === needle || haystack.includes(needle) || needle.includes(haystack);
+  };
+
+  // Modality fit (all comparisons lowercased)
   let modalityFit = 0;
-  if (mods.some(m => m === tMod || m.includes(tMod) || tMod.includes(m))) modalityFit = 100;
+  if (mods.some(m => boundedIncludes(m, tMod))) modalityFit = 100;
   else if (mods.some(m => isAdjacentModality(m, targetModality))) modalityFit = 55;
   else if (mods.length > 0) modalityFit = 15;
 
-  // Indication fit
+  // Indication fit (all comparisons lowercased)
   let indicationFit = 0;
-  if (inds.some(i => i === tInd || i.includes(tInd) || tInd.includes(i))) indicationFit = 100;
+  if (inds.some(i => boundedIncludes(i, tInd))) indicationFit = 100;
   else if (inds.some(i => {
     const root = tInd.split('_')[0];
     return root.length > 3 && (i.includes(root) || root.includes(i.split('_')[0]));
@@ -691,8 +707,23 @@ function scorePortfolioBalance(
   ]);
 
   // Does the company have the target indication/modality?
-  const hasTargetInd = allIndications.has(targetIndication) || [...allIndications].some(i => i.toLowerCase().includes(targetIndication.toLowerCase()));
-  const hasTargetMod = allModalities.has(targetModality) || [...allModalities].some(m => m.toLowerCase().includes(targetModality.toLowerCase()));
+  // Require either exact match or substring match with a minimum length of 4,
+  // so that a 2-3 character code (e.g., 'ra' for rheumatoid arthritis) cannot
+  // false-positive against unrelated strings.
+  const normTI = targetIndication.toLowerCase();
+  const normTM = targetModality.toLowerCase();
+  const hasTargetInd =
+    allIndications.has(targetIndication) ||
+    [...allIndications].some(i => {
+      const li = i.toLowerCase();
+      return li === normTI || (normTI.length >= 4 && li.includes(normTI));
+    });
+  const hasTargetMod =
+    allModalities.has(targetModality) ||
+    [...allModalities].some(m => {
+      const lm = m.toLowerCase();
+      return lm === normTM || (normTM.length >= 4 && lm.includes(normTM));
+    });
 
   // Concentration: count deals in their TOP indication vs total
   const dealsByInd: Record<string, number> = {};
@@ -749,7 +780,20 @@ function matchesIndication(item: { indication_category?: string | null; indicati
   const t = target.toLowerCase();
   const c = (item.indication_category || '').toLowerCase();
   const s = (item.indication_specific || '').toLowerCase();
-  return c === t || s === t || c.includes(t) || s.includes(t) || (t.length > 3 && t.includes(c));
+  if (c === t || s === t) return true;
+  if (c && c.includes(t)) return true;
+  if (s && s.includes(t)) return true;
+  // Reverse containment (t.includes(c)) requires word-boundary matching for short
+  // category strings to avoid false positives like "alzheimers".includes("als").
+  if (c && t.length > 3) {
+    if (c.length <= 4) {
+      const wordBoundary = new RegExp(`(^|[^a-z0-9])${c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`);
+      if (wordBoundary.test(t)) return true;
+    } else if (t.includes(c)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function isAdjacentModality(mod: string, target: string): boolean {

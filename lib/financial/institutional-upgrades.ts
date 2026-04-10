@@ -92,6 +92,42 @@ const PHASE_ALLOCATION: Record<string, [number, number, number, number]> = {
   approved:     [0.50, 0.05, 0.30, 0.15],
 };
 
+/**
+ * Lifecycle management default parameters.
+ *
+ * These values model generic FDA/industry behavior when TA/modality-specific
+ * data is unavailable. Callers should override per-indication where the
+ * empirical evidence warrants it.
+ *
+ * Sources:
+ *   - FDA Orange Book statistics on supplemental NDA approvals
+ *   - PDUFA VII / PREA / BPCA statutory exclusivity provisions
+ *   - Nature Reviews Drug Discovery 2022 — Lifecycle management analysis
+ */
+const LIFECYCLE_DEFAULTS = {
+  /** Years between primary approval and a typical label expansion sNDA.
+   *  Source: FDA supplemental approval median lag 2015-2023. */
+  labelExpansionLagYears: 3,
+  /** Linear ramp years for label expansion revenue to reach peak.
+   *  Source: IQVIA launch curves for secondary indications. */
+  labelExpansionRampYears: 2,
+  /** Steady-state years at peak for label expansion revenue.
+   *  Bounded by composition-of-matter exclusivity (10 yr window). */
+  labelExpansionSteadyStateYears: 5,
+  /** Years of LOE delay granted under Pediatric Exclusivity (PREA/BPCA).
+   *  Source: 21 USC 355a — 6-month patent/exclusivity extension. */
+  pediatricExclusivityYears: 0.5,
+  /** Approximate years from approval to loss-of-exclusivity window.
+   *  Source: Composition-of-matter patents typical 10-12 yr remaining at launch. */
+  loeLagYears: 10,
+  /** Lag years for a combination approval post primary approval. */
+  combinationLagYears: 3,
+  /** Linear ramp years for combination approval revenue. */
+  combinationRampYears: 2,
+  /** Steady-state years at peak for combination approval. */
+  combinationSteadyStateYears: 5,
+} as const;
+
 // ---------------------------------------------------------------------------
 // Helper: format currency for narratives
 // ---------------------------------------------------------------------------
@@ -169,9 +205,18 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
   });
 
   // Total deal value (median)
+  // Apply a symmetric ±25% spread around the median so that negative NPVs
+  // don't flip low/high ordering (multiplicative scaling inverts signs when
+  // median < 0: totalMedian * 0.75 > totalMedian * 1.25).
   const totalMedian = running;
-  const totalLow = totalMedian * 0.75;
-  const totalHigh = totalMedian * 1.25;
+  const totalSpread = Math.abs(totalMedian) * 0.25;
+  let totalLow = totalMedian - totalSpread;
+  let totalHigh = totalMedian + totalSpread;
+  if (totalLow > totalHigh) {
+    const tmp = totalLow;
+    totalLow = totalHigh;
+    totalHigh = tmp;
+  }
 
   // Allocate into components based on phase
   const phase = input.phase;
@@ -192,28 +237,21 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
     `Allocated as: ${fmtM(upfrontMedian)} upfront, ${fmtM(devMedian)} in development milestones, ${fmtM(commMedian)} in commercial milestones, and ${fmtM(royaltyMedian)} in implied royalty-equivalent value.`,
   ].join(' ');
 
+  // Build symmetric ±25% ranges that preserve low ≤ median ≤ high
+  // regardless of sign (critical for negative-NPV edge cases).
+  const symmetricRange = (med: number) => {
+    const spread = Math.abs(med) * 0.25;
+    const lo = med - spread;
+    const hi = med + spread;
+    return lo <= hi ? { low: lo, median: med, high: hi } : { low: hi, median: med, high: lo };
+  };
+
   return {
     steps,
-    upfrontPayment: {
-      low: upfrontMedian * 0.75,
-      median: upfrontMedian,
-      high: upfrontMedian * 1.25,
-    },
-    developmentMilestones: {
-      low: devMedian * 0.75,
-      median: devMedian,
-      high: devMedian * 1.25,
-    },
-    commercialMilestones: {
-      low: commMedian * 0.75,
-      median: commMedian,
-      high: commMedian * 1.25,
-    },
-    royaltyRate: {
-      low: royaltyMedian * 0.75,
-      median: royaltyMedian,
-      high: royaltyMedian * 1.25,
-    },
+    upfrontPayment: symmetricRange(upfrontMedian),
+    developmentMilestones: symmetricRange(devMedian),
+    commercialMilestones: symmetricRange(commMedian),
+    royaltyRate: symmetricRange(royaltyMedian),
     totalDealValue: {
       low: totalLow,
       median: totalMedian,
@@ -261,7 +299,12 @@ export function generateScenarioComparison(
       median: input.peakSalesEstimate.median * (lateStage ? 0.75 : 0.60),
       high: input.peakSalesEstimate.high * (lateStage ? 0.75 : 0.60),
     },
-    discountRate: (input.discountRate ?? baseResult.discountRate) + (lateStage ? 0.015 : 0.02),
+    // Cap bear discount rate at 35% — above that, the DCF collapses to noise
+    // and the scenario loses interpretive value.
+    discountRate: Math.min(
+      0.35,
+      (input.discountRate ?? baseResult.discountRate) + (lateStage ? 0.015 : 0.02),
+    ),
     timeToMarketAdjustment: (input.timeToMarketAdjustment ?? 0) + (lateStage ? 0.5 : 1.5),
   };
   const bearResult = calculateRNPVFn(bearInput);
@@ -280,10 +323,16 @@ export function generateScenarioComparison(
   };
   const bullResult = calculateRNPVFn(bullInput);
 
-  // Weights
-  const bearWeight = 0.20;
+  // Scenario weights (symmetric: bear and bull each 25%, base 50%).
+  //
+  // Rationale: Asymmetric weighting (e.g., bear=0.20, bull=0.30) biases
+  // expected value upward relative to the base case, which understates
+  // downside risk. Symmetric weighting is the neutral prior; adjust
+  // explicitly per asset if there is empirical justification to favor
+  // one tail.
+  const bearWeight = 0.25;
   const baseWeight = 0.50;
-  const bullWeight = 0.30;
+  const bullWeight = 0.25;
 
   const expectedValue =
     bearWeight * bearResult.riskAdjustedNPV +
@@ -383,8 +432,9 @@ export function calculateLifecycleExtensions(
   const isOncology = input.therapeuticArea === 'oncology';
   const labelProb = isOncology ? 0.45 : 0.30;
   const labelIncrementalPct = isOncology ? 0.25 : 0.20;
-  const labelLag = 3;
-  const labelRamp = 2;
+  const labelLag = LIFECYCLE_DEFAULTS.labelExpansionLagYears;
+  const labelRamp = LIFECYCLE_DEFAULTS.labelExpansionRampYears;
+  const labelSteadyState = LIFECYCLE_DEFAULTS.labelExpansionSteadyStateYears;
 
   const labelIncrementalPeak = peakSalesMedian * labelIncrementalPct;
   // Discount incremental peak revenue from approval + lag, over ramp period
@@ -397,8 +447,8 @@ export function calculateLifecycleExtensions(
     const annualRevenue = labelIncrementalPeak * rampFraction;
     labelPV += annualRevenue / Math.pow(1 + discountRate, yearFromNow);
   }
-  // Add 5 years of steady-state post-ramp
-  for (let y = 0; y < 5; y++) {
+  // Steady-state years post-ramp (LIFECYCLE_DEFAULTS.labelExpansionSteadyStateYears)
+  for (let y = 0; y < labelSteadyState; y++) {
     const yearFromNow = labelStartYear + labelRamp + y;
     labelPV += labelIncrementalPeak / Math.pow(1 + discountRate, yearFromNow);
   }
@@ -419,11 +469,11 @@ export function calculateLifecycleExtensions(
 
   // --- Pediatric Exclusivity ---
   const pedProb = 0.80;
-  const pedExclusivityYears = 0.5;
-  // Value = half a year of peak sales preserved at LOE, probability-weighted
-  const pedValue = peakSalesMedian * 0.5 * pedProb;
-  // Discount to present from the LOE year (approximate: yearsToApproval + ~10 years of exclusivity)
-  const loeYear = yearsToApproval + 10;
+  const pedExclusivityYears = LIFECYCLE_DEFAULTS.pediatricExclusivityYears;
+  // Value = pediatric exclusivity years of peak sales preserved at LOE, probability-weighted
+  const pedValue = peakSalesMedian * pedExclusivityYears * pedProb;
+  // Discount to present from the LOE year
+  const loeYear = yearsToApproval + LIFECYCLE_DEFAULTS.loeLagYears;
   const pedPV = pedValue / Math.pow(1 + discountRate, loeYear);
   totalIncremental += pedPV;
 
@@ -434,16 +484,17 @@ export function calculateLifecycleExtensions(
     lagYearsFromApproval: 0,
     rampYears: 0,
     additionalExclusivityYears: pedExclusivityYears,
-    narrative: `Pediatric exclusivity (PREA/BPCA): ${(pedProb * 100).toFixed(0)}% probability of obtaining 6-month LOE delay. Preserves ${fmtM(peakSalesMedian * 0.5)} in revenue at patent cliff. Discounted PV: ${fmtM(pedPV)}.`,
+    narrative: `Pediatric exclusivity (PREA/BPCA): ${(pedProb * 100).toFixed(0)}% probability of obtaining ${(pedExclusivityYears * 12).toFixed(0)}-month LOE delay. Preserves ${fmtM(peakSalesMedian * pedExclusivityYears)} in revenue at patent cliff. Discounted PV: ${fmtM(pedPV)}.`,
   });
 
   // --- Combination Approval ---
   const comboPotential = input.combinationPotential;
-  if (comboPotential === 'strong' || comboPotential === 'moderate') {
+  if (comboPotential === 'strong' || comboPotential === 'some') {
     const comboProb = comboPotential === 'strong' ? 0.50 : 0.25;
     const comboIncrementalPct = comboPotential === 'strong' ? 0.20 : 0.12;
-    const comboLag = 3;
-    const comboRamp = 2;
+    const comboLag = LIFECYCLE_DEFAULTS.combinationLagYears;
+    const comboRamp = LIFECYCLE_DEFAULTS.combinationRampYears;
+    const comboSteadyState = LIFECYCLE_DEFAULTS.combinationSteadyStateYears;
 
     const comboIncrementalPeak = peakSalesMedian * comboIncrementalPct;
     const comboStartYear = yearsToApproval + comboLag;
@@ -454,7 +505,7 @@ export function calculateLifecycleExtensions(
       const annualRevenue = comboIncrementalPeak * rampFraction;
       comboPV += annualRevenue / Math.pow(1 + discountRate, yearFromNow);
     }
-    for (let y = 0; y < 5; y++) {
+    for (let y = 0; y < comboSteadyState; y++) {
       const yearFromNow = comboStartYear + comboRamp + y;
       comboPV += comboIncrementalPeak / Math.pow(1 + discountRate, yearFromNow);
     }
