@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       territory_scope,
       therapeutic_area,
       regulatory_designations,
+      dealType,
     } = parsed.data;
 
     // Determine user tier from verified sources (3 methods, in priority order)
@@ -139,6 +140,7 @@ export async function POST(request: NextRequest) {
       territory_scope: territory_scope || null,
       therapeutic_area: therapeutic_area || null,
       regulatory_designations: regulatory_designations || undefined,
+      dealType: dealType || undefined,
     };
 
     // Build options - include enhanced breakdown for Pro/Report tier

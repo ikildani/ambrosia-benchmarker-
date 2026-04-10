@@ -104,6 +104,9 @@ export const partnerMatchSchema = z.object({
     orphan: z.boolean().optional(),
     prime: z.boolean().optional(),
   }).optional().nullable(),
+  // Desired deal structure (licensing, acquisition, codevelopment, option, collaboration).
+  // Used to filter and weight partner matches by historical deal-type preference.
+  dealType: z.string().optional().nullable(),
   user_id: z.string().optional().nullable(),
   user_email: z.string().optional().nullable(),
   calculation_id: z.string().optional().nullable(),

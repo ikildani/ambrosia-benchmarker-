@@ -1757,6 +1757,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               phase={fullInputs.phase}
               regulatoryDesignations={fullInputs.regulatoryDesignations}
               tier={tier || 'free'}
+              dealType={fullInputs.dealType}
+              modality={fullInputs.modality}
               onUpgrade={onUpgrade}
               onBuyReport={onBuyReport}
             />
