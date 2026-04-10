@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateRNPV } from '@/lib/financial/rnpv-engine';
 import { runMonteCarlo } from '@/lib/financial/monte-carlo';
+import { runAllScenarios } from '@/lib/financial/scenario-planner';
 import type { RNPVInput } from '@/lib/financial/types';
 
 async function postSlackAlert(title: string, body: string): Promise<void> {
@@ -238,12 +239,83 @@ function runTest(test: typeof TESTS[number]): TestResult {
       }
     }
 
+    // ───── Structural invariants: these should NEVER fail ─────
+
     // Sanity checks
     if (!isFinite(rnpv)) failures.push('rNPV is not finite (NaN or Infinity)');
     if (!isFinite(yearsToMarket)) failures.push('yearsToMarket is not finite');
     if (result.cashFlows.length === 0) failures.push('cashFlows array is empty');
     if (result.cumulativePoS < 0 || result.cumulativePoS > 1) {
       failures.push(`cumulativePoS ${result.cumulativePoS} out of [0,1] range`);
+    }
+
+    // Forecast horizon sanity — totalYears = yearsToMarket + LOE + 5yr tail
+    // should not exceed ~35 years in any realistic scenario
+    if (result.cashFlows.length > 40) {
+      failures.push(`cashFlows array has ${result.cashFlows.length} years — should be ≤40`);
+    }
+
+    // Cash flows must cover from year 0 through at least launch year
+    const maxYear = Math.max(...result.cashFlows.map(cf => cf.year));
+    if (maxYear < Math.ceil(yearsToMarket)) {
+      failures.push(`cashFlows max year ${maxYear} < launch year ${Math.ceil(yearsToMarket)}`);
+    }
+
+    // ───── Cross-engine consistency: scenario planner ─────
+    try {
+      const scenarios = runAllScenarios(test.input, result);
+      if (!Array.isArray(scenarios) || scenarios.length === 0) {
+        failures.push('Scenario planner returned no scenarios');
+      } else {
+        // Phase 2/3 failure scenarios should produce meaningful rNPV drop (sunk cost)
+        const failureScenarios = scenarios.filter(s =>
+          s.scenario.id === 'phase2_failure' || s.scenario.id === 'phase3_failure'
+        );
+        for (const fs of failureScenarios) {
+          // For assets with meaningful positive base rNPV, failure should drop rNPV significantly
+          if (rnpv > 10 && fs.adjustedRNPV >= rnpv * 0.5) {
+            failures.push(
+              `${fs.scenario.id} adjusted rNPV $${fs.adjustedRNPV.toFixed(0)}M not meaningfully below base $${rnpv.toFixed(0)}M`
+            );
+          }
+          // Failure should never produce HIGHER rNPV than base
+          if (fs.adjustedRNPV > rnpv + 5) {
+            failures.push(
+              `${fs.scenario.id} adjusted rNPV $${fs.adjustedRNPV.toFixed(0)}M HIGHER than base $${rnpv.toFixed(0)}M (impossible)`
+            );
+          }
+        }
+
+        // All scenarios must have finite rNPV values
+        for (const s of scenarios) {
+          if (!isFinite(s.adjustedRNPV)) {
+            failures.push(`Scenario "${s.scenario.id}" has non-finite adjustedRNPV`);
+          }
+          if (!isFinite(s.impactDelta)) {
+            failures.push(`Scenario "${s.scenario.id}" has non-finite impactDelta`);
+          }
+        }
+      }
+    } catch (scenarioErr) {
+      failures.push(`Scenario planner threw: ${scenarioErr instanceof Error ? scenarioErr.message : String(scenarioErr)}`);
+    }
+
+    // ───── Monotonicity: PoS override should scale rNPV predictably ─────
+    // If we double the PoS, the rNPV should increase (for positive-rNPV assets)
+    if (rnpv > 10) {
+      try {
+        const doubledPoS = calculateRNPV({
+          ...test.input,
+          posMultiplier: 2.0,
+        });
+        if (doubledPoS.riskAdjustedNPV <= rnpv) {
+          failures.push(
+            `Doubling PoS multiplier did not increase rNPV: base=$${rnpv.toFixed(0)}M vs 2x PoS=$${doubledPoS.riskAdjustedNPV.toFixed(0)}M`
+          );
+        }
+      } catch (monErr) {
+        failures.push(`PoS monotonicity check threw: ${monErr instanceof Error ? monErr.message : String(monErr)}`);
+      }
     }
   } catch (err) {
     failures.push(`Test threw exception: ${err instanceof Error ? err.message : String(err)}`);
@@ -265,6 +337,79 @@ export async function GET(request: NextRequest) {
   const results: TestResult[] = [];
   for (const test of TESTS) {
     results.push(runTest(test));
+  }
+
+  // ───── Cross-phase monotonicity: later phases must have shorter timelines ─────
+  try {
+    const crossPhaseResult: TestResult = {
+      name: 'Cross-phase monotonicity',
+      passed: true,
+      details: [],
+      failures: [],
+    };
+
+    const basePhaseInput: Omit<RNPVInput, 'phase'> = {
+      therapeuticArea: 'oncology',
+      modality: 'smallMolecule',
+      indication: 'lung_nsclc',
+      dealType: 'licensing',
+      territory: 'global',
+      biomarkerStatus: 'unselected',
+      regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+      dataQuality: 'solid',
+      competitivePosition: 'co_leader',
+      peakSalesEstimate: { low: 500, median: 1200, high: 2500 },
+    };
+
+    const phaseOrder: Array<'preclinical' | 'phase1' | 'phase2' | 'phase3' | 'nda_filed'> = ['preclinical', 'phase1', 'phase2', 'phase3', 'nda_filed'];
+    const timelines: { phase: string; years: number }[] = [];
+
+    for (const phase of phaseOrder) {
+      try {
+        const r = calculateRNPV({ ...basePhaseInput, phase });
+        timelines.push({ phase, years: r.yearsToMarket });
+        crossPhaseResult.details.push(`${phase}: ${r.yearsToMarket.toFixed(1)}yr`);
+      } catch (e) {
+        crossPhaseResult.failures.push(`calculateRNPV threw for phase=${phase}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+
+    // Each later phase should have a STRICTLY shorter (or equal) timeline than the earlier one
+    for (let i = 1; i < timelines.length; i++) {
+      const prev = timelines[i - 1];
+      const curr = timelines[i];
+      if (curr.years > prev.years + 0.1) {
+        crossPhaseResult.failures.push(
+          `${curr.phase} (${curr.years.toFixed(1)}yr) longer than ${prev.phase} (${prev.years.toFixed(1)}yr) — monotonicity violated`
+        );
+      }
+    }
+
+    // Phase 1 should NEVER exceed 12 years to market for oncology
+    const phase1 = timelines.find(t => t.phase === 'phase1');
+    if (phase1 && phase1.years > 12) {
+      crossPhaseResult.failures.push(
+        `Phase 1 oncology ${phase1.years.toFixed(1)}yr exceeds 12yr upper bound — duration calculation bug`
+      );
+    }
+
+    // Phase 3 should NEVER exceed 5 years to market
+    const phase3 = timelines.find(t => t.phase === 'phase3');
+    if (phase3 && phase3.years > 5) {
+      crossPhaseResult.failures.push(
+        `Phase 3 oncology ${phase3.years.toFixed(1)}yr exceeds 5yr upper bound — duration calculation bug`
+      );
+    }
+
+    crossPhaseResult.passed = crossPhaseResult.failures.length === 0;
+    results.push(crossPhaseResult);
+  } catch (err) {
+    results.push({
+      name: 'Cross-phase monotonicity',
+      passed: false,
+      details: [],
+      failures: [`Check threw: ${err instanceof Error ? err.message : String(err)}`],
+    });
   }
 
   const passed = results.filter(r => r.passed).length;
