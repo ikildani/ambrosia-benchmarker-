@@ -529,10 +529,10 @@ const COMPOUND_SCENARIO_PAIRS: Array<{
   narrative: string;
 }> = [
   {
-    scenario1: 'regulatory_delay_crl',
-    scenario2: 'competitor_approved_first',
+    scenario1: 'regulatory_delay_12mo',
+    scenario2: 'competitor_approval',
     interactionMultipliers: { peakSalesMultiplier: 0.80, timeAdjustment: 0.5 },
-    name: 'CRL + Competitor Launch',
+    name: 'Regulatory Delay + Competitor Launch',
     narrative: 'Regulatory delay compounds with competitor entry — competitor establishes market position during your delay, reducing your peak share beyond the sum of individual impacts.',
   },
   {

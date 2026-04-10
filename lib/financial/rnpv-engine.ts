@@ -527,6 +527,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     durations,
     modality,
     therapeuticArea,
+    pathway, // Pass pathway so R&D cost schedule uses sequential phases, not PHASE_ORDER linear sum
   );
 
   // 6. Calculate NPV from cash flows
@@ -652,6 +653,7 @@ function projectCashFlows(
   durations: Record<string, number>,
   modality: string,
   therapeuticArea: string,
+  pathway?: string[],
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
   // Use TA-specific revenue curve overrides if available (e.g., rare disease gets extended LOE)
@@ -665,10 +667,20 @@ function projectCashFlows(
   const totalYears = Math.ceil(yearsToMarket) + loeYearsAfterApproval + 5; // +5 for post-LOE tail
 
   // R&D cost phase mapping (years spent in each remaining phase)
+  // Use the sequential pathway (same as duration calculation) — NOT linear PHASE_ORDER.
+  // Combined phases (phase1_2, phase2_3) are alternative pathways, not sequential steps.
+  // Iterating PHASE_ORDER linearly double-counts costs by summing phase1 + phase1_2 + phase2 + ...
+  const rdPathway = pathway ?? (() => {
+    // Fallback: reconstruct standard pathway from currentPhaseIdx
+    const standard = ['discovery', 'preclinical', 'phase1', 'phase2', 'phase3', 'nda_filed'];
+    const currentPhase = PHASE_ORDER[currentPhaseIdx];
+    const startIdx = standard.indexOf(currentPhase);
+    return startIdx >= 0 ? standard.slice(startIdx) : ['phase1', 'phase2', 'phase3', 'nda_filed'];
+  })();
+
   let rdYearsSoFar = 0;
   const rdSchedule: { startYear: number; endYear: number; annualCost: number }[] = [];
-  for (let i = currentPhaseIdx; i < PHASE_ORDER.length; i++) {
-    const phaseName = PHASE_ORDER[i];
+  for (const phaseName of rdPathway) {
     const dur = durations[phaseName] || 2.0;
     const totalCost = phaseCosts[phaseName] || 0;
     const annualCost = dur > 0 ? totalCost / dur : 0;

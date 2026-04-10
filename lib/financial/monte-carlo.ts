@@ -309,16 +309,25 @@ function computeIterationRNPV(
   const cumulativePoS = Math.max(0, Math.min(1, sampledPoS));
 
   // --- 2. Time to market -----------------------------------------------
-  // Sum remaining phase durations from pos-tables, then apply shift.
+  // Build sequential pathway from current phase (NOT linear PHASE_ORDER).
+  // Combined phases (phase1_2, phase2_3) are alternative pathways, not sequential steps.
+  const mcPathway: string[] = (() => {
+    if (input.phase === 'phase1_2') return ['phase1_2', 'phase3', 'nda_filed'];
+    if (input.phase === 'phase2_3') return ['phase2_3', 'nda_filed'];
+    if (input.phase === 'nda_filed') return ['nda_filed'];
+    if (input.phase === 'approved') return [];
+    const standard = ['discovery', 'preclinical', 'phase1', 'phase2', 'phase3', 'nda_filed'];
+    const sIdx = standard.indexOf(input.phase);
+    return sIdx >= 0 ? standard.slice(sIdx) : ['phase1', 'phase2', 'phase3', 'nda_filed'];
+  })();
+
   const taDurations = PHASE_DURATION[input.therapeuticArea] ?? PHASE_DURATION.oncology;
   let totalYearsToMarket = 0;
-  for (let i = startIdx; i < PHASE_ORDER.length - 1; i++) {
-    const phaseKey = PHASE_ORDER[i];
+  for (const phaseKey of mcPathway) {
     const duration = (taDurations as Record<string, number>)[phaseKey] ?? 1.5;
     totalYearsToMarket += duration;
   }
-  // Add regulatory review time
-  totalYearsToMarket += (taDurations as Record<string, number>)['regulatory'] ?? 1.0;
+  // Note: nda_filed already represents regulatory review; don't add durations.regulatory again.
   totalYearsToMarket = Math.max(0.5, totalYearsToMarket + sampledTimeShift);
 
   // --- 3. Project revenues using the standard pharma S-curve -----------
@@ -367,11 +376,22 @@ function computeIterationRNPV(
     taBaseRates.approvalToLaunch,
   ];
 
+  // Map pathway phase names to baseTransitionRates indices for PoS gating
+  const phaseRateMap: Record<string, number> = {
+    discovery: baseTransitionRates[0],
+    preclinical: baseTransitionRates[1],
+    phase1: baseTransitionRates[2],
+    phase1_2: baseTransitionRates[3],
+    phase2: baseTransitionRates[4],
+    phase2_3: baseTransitionRates[5],
+    phase3: baseTransitionRates[6],
+    nda_filed: baseTransitionRates[7],
+  };
+
   let discountedCosts = 0;
   let yearAccum = 0;
   let phasePoS = 1.0; // cumulative probability of reaching each phase
-  for (let i = startIdx; i < PHASE_ORDER.length; i++) {
-    const phaseKey = PHASE_ORDER[i];
+  for (const phaseKey of mcPathway) {
     const phaseCost = (taCosts as Record<string, number>)[phaseKey] ?? 0;
     const phaseDur = (taDurations as Record<string, number>)[phaseKey] ?? 1.5;
 
@@ -385,17 +405,13 @@ function computeIterationRNPV(
     }
     yearAccum += phaseDur;
 
-    // Update cumulative PoS for next phase
-    if (i < baseTransitionRates.length) {
-      phasePoS *= Math.max(0.01, Math.min(0.95, baseTransitionRates[i]));
+    // Update cumulative PoS for next phase in pathway
+    const rate = phaseRateMap[phaseKey];
+    if (rate != null) {
+      phasePoS *= Math.max(0.01, Math.min(0.95, rate));
     }
   }
-  // Add regulatory cost
-  const regCost = (taCosts as Record<string, number>)['regulatory'] ?? 5;
-  if (regCost > 0) {
-    const regDur = (taDurations as Record<string, number>)['regulatory'] ?? 1.0;
-    discountedCosts += (regCost * phasePoS) / Math.pow(1 + r, yearAccum + regDur);
-  }
+  // Note: nda_filed is the regulatory review window; don't add a separate regulatory cost.
 
   // --- 5. rNPV = PoS x discounted revenue - risk-adjusted costs -------
   return cumulativePoS * discountedRevenue - discountedCosts;
@@ -493,11 +509,13 @@ export function runMonteCarlo(
   // ----- Prepare distribution parameters --------------------------------
 
   // 1. PoS: beta distribution centred on base cumulative PoS
+  // Use the user's actual biomarker status so MC p50 aligns with the main rNPV engine
+  // (previously hardcoded 'unselected', causing systematic ~25% disagreement for biomarker-selected assets).
   const posResult = getCumulativePoS(
     rnpv.phase,
     rnpv.therapeuticArea,
     rnpv.modality,
-    'unselected',
+    rnpv.biomarkerStatus || 'unselected',
     rnpv.regulatoryDesignations,
   );
   const basePoS = posResult.cumulativePoS;
