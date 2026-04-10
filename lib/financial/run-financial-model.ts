@@ -30,6 +30,8 @@ import { DEFAULT_DISCOUNT_RATES, TERRITORY_RISK_PREMIUM } from './discount-rates
 import { buildDealWaterfall, generateScenarioComparison, calculateLifecycleExtensions } from './institutional-upgrades';
 import { calculateCompetitiveDynamics, calculateRealOptions } from './advanced-upgrades';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from './advanced-upgrades';
+import { checkCrossEngineConsistency } from './consistency-checks';
+import { assertInvariants, checkScenarioInvariants } from './invariants';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -234,6 +236,53 @@ export function runFinancialModel(
   // Step 10: Real Options Overlay — compound optionality via binomial lattice
   const realOptions = calculateRealOptions(rnpvInput, rnpv, monteCarlo);
 
+  // Layer 2: Cross-engine consistency checks — logs to Sentry, never throws.
+  try {
+    const scenarioViolations = checkScenarioInvariants(scenarioComparison);
+    const consistencyViolations = checkCrossEngineConsistency(
+      rnpv,
+      monteCarlo,
+      undefined, // tornado baseline not exposed from this orchestrator
+      scenarioComparison,
+      dealWaterfall,
+      undefined, // buyer-specific generic not computed in this orchestrator
+    );
+    const allViolations = [...scenarioViolations, ...consistencyViolations];
+    if (allViolations.some(v => v.severity === 'critical')) {
+      assertInvariants(allViolations, {
+        context: 'run-financial-model',
+        extra: {
+          phase: inputs.phase,
+          therapeuticArea: inputs.therapeuticArea,
+          modality: inputs.modality,
+          indication: inputs.indication,
+        },
+      });
+    }
+  } catch {
+    // Never break production runs on a consistency check failure.
+  }
+
+  // Layer 4: Fire-and-forget metric logging for distribution monitoring.
+  // Only runs on the server where the supabase service key is available.
+  // Fails silently — this must never impact the calculation result.
+  if (typeof window === 'undefined') {
+    void logCalculationMetric({
+      therapeuticArea: inputs.therapeuticArea,
+      modality: inputs.modality,
+      phase: inputs.phase,
+      indication: inputs.indication,
+      peakSales: rnpvInput.peakSalesEstimate?.median ?? 0,
+      rnpv: rnpv.riskAdjustedNPV,
+      unadjustedNpv: rnpv.unadjustedNPV,
+      monteCarloP50: monteCarlo.percentiles?.p50 ?? 0,
+      cumulativePoS: rnpv.cumulativePoS,
+      yearsToMarket: rnpv.yearsToMarket,
+      discountRate: rnpv.discountRate,
+      invariantViolations: 0,
+    });
+  }
+
   return {
     rnpv,
     monteCarlo,
@@ -247,4 +296,60 @@ export function runFinancialModel(
     competitiveDynamics,
     realOptions,
   };
+}
+
+/**
+ * Write a single calculation metric row to the calculation_metrics table.
+ *
+ * Fire-and-forget — caught errors are swallowed so the main calculation
+ * pipeline is never impacted. Only runs on server (has service role key).
+ */
+interface CalculationMetricPayload {
+  therapeuticArea: string;
+  modality: string;
+  phase: string;
+  indication: string;
+  peakSales: number;
+  rnpv: number;
+  unadjustedNpv: number;
+  monteCarloP50: number;
+  cumulativePoS: number;
+  yearsToMarket: number;
+  discountRate: number;
+  invariantViolations: number;
+}
+
+async function logCalculationMetric(payload: CalculationMetricPayload): Promise<void> {
+  try {
+    // Use direct Supabase REST API to avoid importing @/lib/supabase/server,
+    // which transitively pulls in next/headers and breaks client-side bundling.
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return;
+    await fetch(`${url}/rest/v1/calculation_metrics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        therapeutic_area: payload.therapeuticArea,
+        modality: payload.modality,
+        phase: payload.phase,
+        indication: payload.indication,
+        peak_sales: payload.peakSales,
+        rnpv: payload.rnpv,
+        unadjusted_npv: payload.unadjustedNpv,
+        monte_carlo_p50: payload.monteCarloP50,
+        cumulative_pos: payload.cumulativePoS,
+        years_to_market: payload.yearsToMarket,
+        discount_rate: payload.discountRate,
+        invariant_violations: payload.invariantViolations,
+      }),
+    });
+  } catch {
+    // Silently swallow — metric logging must never break calculations.
+  }
 }

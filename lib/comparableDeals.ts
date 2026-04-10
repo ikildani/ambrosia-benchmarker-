@@ -295,6 +295,8 @@ const MODALITY_CLASS: Record<string, string> = {
 };
 
 // TA adjacency map for related-TA scoring
+// TODO: Consolidate TA_ADJACENCY with pharma-intent.ts and partner-matching.ts
+//       to avoid maintaining three slightly-different copies of the same lookup.
 const TA_ADJACENCY: Record<string, string[]> = {
   immunology: ['gastroenterology', 'dermatology', 'rareDisease'],
   gastroenterology: ['immunology'],
@@ -309,19 +311,33 @@ const TA_ADJACENCY: Record<string, string[]> = {
 
 // Phase rank for distance scoring
 const PHASE_RANK: Record<string, number> = {
+  discovery: -0.5,
   preclinical: 0,
   phase1: 1,
-  'phase1/2': 1.5,
+  phase1_2: 1.5,
   phase2: 2,
-  'phase2/3': 2.5,
+  phase2_3: 2.5,
   phase3: 3,
+  nda_filed: 3.5,
   approved: 4,
 };
 
 function getPhaseRank(phase: string | undefined): number | null {
   if (!phase) return null;
-  const normalized = phase.toLowerCase().replace(/\s+/g, '');
+  // Normalize: lowercase, strip whitespace, convert slash to underscore so that
+  // legacy "Phase 1/2" style strings map to the canonical phase1_2 key.
+  const normalized = phase.toLowerCase().replace(/\s+/g, '').replace(/\//g, '_');
   return PHASE_RANK[normalized] ?? null;
+}
+
+/**
+ * Normalize a modality string for comparison: lowercase and strip
+ * underscores/hyphens so that "small_molecule", "small-molecule", and
+ * "smallMolecule" all compare equal.
+ */
+function normalizeModality(m: string | undefined): string {
+  if (!m) return '';
+  return m.toLowerCase().replace(/[_\-\s]/g, '');
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -357,12 +373,25 @@ export function scoreComparableDealsHedonic(
     .filter((v): v is number => v != null && v > 0)
     .sort((a, b) => a - b);
 
+  // IQR-based outlier threshold (more robust than mean ± 3σ for long-tailed
+  // deal value distributions). Using Q3 + 1.5 × IQR as the upper fence is
+  // the standard Tukey definition.
+  //
+  // Median is averaged for even-length arrays to avoid an off-by-one bias.
   let outlierThreshold = Infinity;
   if (values.length >= 5) {
-    const median = values[Math.floor(values.length / 2)];
-    const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const stdDev = Math.sqrt(values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length);
-    outlierThreshold = median + 3 * stdDev;
+    const pickQuantile = (arr: number[], q: number): number => {
+      if (arr.length === 0) return 0;
+      const pos = (arr.length - 1) * q;
+      const lo = Math.floor(pos);
+      const hi = Math.ceil(pos);
+      if (lo === hi) return arr[lo];
+      return arr[lo] + (arr[hi] - arr[lo]) * (pos - lo);
+    };
+    const q1 = pickQuantile(values, 0.25);
+    const q3 = pickQuantile(values, 0.75);
+    const iqr = q3 - q1;
+    outlierThreshold = q3 + 1.5 * iqr;
   }
 
   const scored = ALL_DEALS.map((deal, idx) => {
@@ -387,7 +416,9 @@ export function scoreComparableDealsHedonic(
     // --- Modality match ---
     let modalityScore = 0;
     const dealModalities = deal.modalities || [];
-    if (inputs.modality && dealModalities.includes(inputs.modality)) {
+    const normalizedInputModality = normalizeModality(inputs.modality);
+    const normalizedDealModalities = dealModalities.map(normalizeModality);
+    if (inputs.modality && normalizedDealModalities.includes(normalizedInputModality)) {
       modalityScore = 10;
       reasons.push('Exact modality match');
     } else if (inputs.modality && dealModalities.length > 0) {

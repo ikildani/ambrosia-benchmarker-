@@ -31,6 +31,7 @@ import {
   getGenericEntrenchmentMultiplier,
 } from './index-drugs';
 import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
+import { checkRNPVInvariants, assertInvariants } from './invariants';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -653,7 +654,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
   ];
 
-  return {
+  const rnpvResult: RNPVResult = {
     riskAdjustedNPV: Math.round(riskAdjustedNPV),
     unadjustedNPV: Math.round(unadjustedNPV),
     cumulativePoS,
@@ -670,6 +671,27 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     terminalValue: Math.round(terminalValue),
     modelAssumptions,
   };
+
+  // Layer 1: Mathematical invariants — log to Sentry but never throw.
+  // Catches silent bugs like the Phase 1 oncology duration duplication (8.5y→15.8y).
+  try {
+    const violations = checkRNPVInvariants(rnpvResult, input);
+    if (violations.some(v => v.severity === 'critical')) {
+      assertInvariants(violations, {
+        context: 'rnpv-engine',
+        extra: {
+          phase: input.phase,
+          therapeuticArea: input.therapeuticArea,
+          modality: input.modality,
+          indication: input.indication,
+        },
+      });
+    }
+  } catch {
+    // Never allow invariant checks to break production calculations.
+  }
+
+  return rnpvResult;
 }
 
 /**

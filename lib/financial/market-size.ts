@@ -52,7 +52,15 @@ export function estimateMarketSize(
   competitivePosition: string,
   epidemiologyData: EpidemiologyData,
 ): MarketSizeEstimate {
-  const territoryInfo = TERRITORY_DATA[territory] || TERRITORY_DATA.global;
+  const fallbackReasons: string[] = [];
+  let territoryInfo = TERRITORY_DATA[territory];
+  if (!territoryInfo) {
+    territoryInfo = TERRITORY_DATA.global;
+    fallbackReasons.push(`Unknown territory '${territory}' — defaulted to global population/pricing`);
+    if (typeof console !== 'undefined') {
+      console.warn(`[market-size] Unknown territory '${territory}', falling back to global`);
+    }
+  }
   const shareAssumption = MARKET_SHARE_BY_POSITION[competitivePosition] || MARKET_SHARE_BY_POSITION.racing;
 
   // Patient funnel calculation
@@ -71,17 +79,25 @@ export function estimateMarketSize(
   const adoptionCeiling = 0.70;
   const addressablePatients = Math.round(drugEligiblePatients * adoptionCeiling);
 
-  // TAM = all drug-eligible patients × annual cost
-  const tam = (drugEligiblePatients * annualRevenuePerPatient) / 1_000_000; // $M
+  // Standard TAM -> SAM -> SOM taxonomy:
+  //   TAM = all prevalent patients × price (full addressable universe,
+  //         before diagnosis/treatment/eligibility gating)
+  //   SAM = drug-eligible patients × price (the subset that a drug can
+  //         plausibly treat given current diagnosis/treatment pathways)
+  //   SOM = drug-eligible × adoption ceiling × market share × price
+  //         (the realistic obtainable slice after adoption and competition)
+  //
+  // Adoption ceiling (~70%) represents the upper bound on real-world uptake
+  // under ideal access conditions — it is applied at SOM, not at SAM.
+  const tam = (prevalentPatients * annualRevenuePerPatient) / 1_000_000; // $M
+  const sam = (drugEligiblePatients * annualRevenuePerPatient) / 1_000_000; // $M
+  const somBase = (addressablePatients * annualRevenuePerPatient) / 1_000_000; // $M
 
-  // SAM = addressable patients × annual cost (accounting for adoption)
-  const sam = (addressablePatients * annualRevenuePerPatient) / 1_000_000; // $M
-
-  // SOM = SAM × market share
+  // SOM = obtainable slice (adoption × competitive share)
   const som = {
-    low: sam * shareAssumption.low,
-    median: sam * shareAssumption.median,
-    high: sam * shareAssumption.high,
+    low: somBase * shareAssumption.low,
+    median: somBase * shareAssumption.median,
+    high: somBase * shareAssumption.high,
   };
 
   // Peak sales: prefer curated analyst consensus when available,
@@ -94,6 +110,16 @@ export function estimateMarketSize(
   const peakSales = epidemiologyData.peakSalesRangeM
     ? { ...epidemiologyData.peakSalesRangeM }
     : bottomUpPeakSales;
+
+  // Detect the generic rare-disease fallback profile (flag it for UI)
+  const isGenericEpiFallback =
+    epidemiologyData.sources.length === 1 &&
+    /specific epidemiology data not available/i.test(epidemiologyData.sources[0] ?? '');
+  if (isGenericEpiFallback) {
+    fallbackReasons.push(`Generic rare-disease epidemiology profile used for '${indication}'`);
+  }
+
+  const usedFallback = fallbackReasons.length > 0;
 
   return {
     indication,
@@ -113,6 +139,8 @@ export function estimateMarketSize(
     marketShareAssumption: shareAssumption,
     annualRevenuePerPatient: Math.round(annualRevenuePerPatient),
     sources: epidemiologyData.sources,
+    usedFallback,
+    fallbackReasons: usedFallback ? fallbackReasons : undefined,
   };
 }
 
@@ -126,6 +154,12 @@ export function getEpidemiologyData(
 ): EpidemiologyData {
   if (epidemiologyDataset[indication]) {
     return epidemiologyDataset[indication];
+  }
+
+  if (typeof console !== 'undefined') {
+    console.warn(
+      `[market-size] No epidemiology data for '${indication}', using generic rare-disease profile`,
+    );
   }
 
   // Fallback: generic rare disease profile
@@ -145,9 +179,12 @@ export function getEpidemiologyData(
  */
 export function formatPatientFunnel(estimate: MarketSizeEstimate): string {
   const f = estimate.patientFunnel;
+  const diagnosedPct = f.prevalentPatients > 0
+    ? (f.diagnosedPatients / f.prevalentPatients * 100).toFixed(0)
+    : '0';
   return [
     `${formatNumber(f.prevalentPatients)} prevalent patients`,
-    `${formatNumber(f.diagnosedPatients)} diagnosed (${(estimate.patientFunnel.diagnosedPatients / estimate.patientFunnel.prevalentPatients * 100).toFixed(0)}%)`,
+    `${formatNumber(f.diagnosedPatients)} diagnosed (${diagnosedPct}%)`,
     `${formatNumber(f.treatedPatients)} treated`,
     `${formatNumber(f.drugEligiblePatients)} drug-eligible`,
     `${formatNumber(f.addressablePatients)} addressable`,

@@ -202,7 +202,7 @@ const THERAPEUTIC_AREA_INDICATIONS: Record<string, string[]> = {
     'diabetic_retinopathy', 'uveitis', 'dry_eye', 'inherited_retinal'],
   'womensHealth': ['womens_health', 'endometriosis', 'uterine_fibroids', 'fertility',
     'menopause', 'preeclampsia', 'pcos', 'contraception', 'postpartum'],
-  'rare_disease': ['rare_disease', 'genetic_disorders', 'orphan', 'enzyme_deficiency',
+  'rareDisease': ['rare_disease', 'genetic_disorders', 'orphan', 'enzyme_deficiency',
     'lysosomal_storage', 'neuromuscular'],
   'hematology': ['hematology', 'blood_disorders', 'lymphoma', 'leukemia', 'myeloma',
     'hemophilia', 'sickle_cell'],
@@ -221,19 +221,30 @@ const TA_LABELS: Record<string, string> = {
   'infectiousDisease': 'Infectious Disease',
   'ophthalmology': 'Ophthalmology',
   'womensHealth': 'Women\'s Health',
-  'rare_disease': 'Rare Disease',
+  'rareDisease': 'Rare Disease',
   'hematology': 'Hematology',
   'dermatology': 'Dermatology',
   'gastroenterology': 'Gastroenterology',
 };
 
-// Phase ranking for comparison
+// Phase ranking for comparison.
+// Accepts both the user-facing camelCase form (phase1/phase2/phase3) and the
+// legacy snake_case form (phase_1/phase_2/phase_3) so existing tests and any
+// legacy deal data still resolve correctly.
 const PHASE_RANK: Record<string, number> = {
   'discovery': 0,
   'preclinical': 1,
+  'phase1': 2,
   'phase_1': 2,
+  'phase1_2': 2.5,
+  'phase_1_2': 2.5,
+  'phase2': 3,
   'phase_2': 3,
+  'phase2_3': 3.5,
+  'phase_2_3': 3.5,
+  'phase3': 4,
   'phase_3': 4,
+  'nda_filed': 4.5,
   'approved': 5,
 };
 
@@ -254,7 +265,7 @@ const TA_PRIORITY_KEYWORDS: Record<string, string[]> = {
   infectiousDisease: ['infectious', 'anti-infective', 'antiviral', 'antibiotic', 'antimicrobial', 'vaccine', 'pandemic', 'amr ', 'resistance'],
   ophthalmology: ['ophthalmology', 'ophthalmic', 'retinal', 'ocular', 'eye disease', 'macular', 'glaucoma', 'anti-vegf', 'vision'],
   womensHealth: ['women\'s health', 'gynecology', 'reproductive', 'fertility', 'endometriosis', 'uterine', 'menopause', 'contracepti', 'obstetric'],
-  rare_disease: ['rare disease', 'orphan drug', 'gene therapy', 'enzyme replacement', 'genetic', 'ultra-rare', 'rare pediatric'],
+  rareDisease: ['rare disease', 'orphan drug', 'gene therapy', 'enzyme replacement', 'genetic', 'ultra-rare', 'rare pediatric'],
   hematology: ['hematology', 'blood cancer', 'lymphoma', 'leukemia', 'myeloma', 'car-t', 'cell therapy', 'hemophilia', 'sickle cell'],
   dermatology: ['dermatology', 'skin', 'psoriasis', 'atopic dermatitis', 'eczema', 'il-17', 'il-13', 'jak inhibitor', 'topical'],
   gastroenterology: ['gastroenterology', 'gi', 'ibd', 'crohn', 'ulcerative colitis', 'tl1a', 'il-23', 'integrin', 'microbiome'],
@@ -941,8 +952,10 @@ function calculateMatchScore(
     ) {
       breakdown.territory = WEIGHTS.territory_partial;
     } else if (companyTerritories.length > 0 && !companyTerritories.includes('global')) {
-      // Territory mismatch: company has a territory focus that doesn't include user's territory
-      breakdown.territory = -5;
+      // Territory mismatch: company has a territory focus that doesn't include
+      // user's territory. Zero (no bonus) instead of a negative penalty so the
+      // total partner score cannot be driven below zero by unbounded subtraction.
+      breakdown.territory = 0;
     }
   }
 
@@ -972,12 +985,22 @@ function calculateMatchScore(
 
   // 8c. DEAL SIZE MATCHING
   // Estimate expected deal range from phase, then check if company's historical deal sizes align
+  // Accepts both camelCase (phase1/phase2) and legacy snake_case (phase_1/phase_2)
+  // so existing tests and legacy deal data continue to resolve.
   const dealSizeRanges: Record<string, [number, number]> = {
     discovery: [10_000_000, 200_000_000],
     preclinical: [10_000_000, 200_000_000],
+    phase1: [50_000_000, 500_000_000],
     phase_1: [50_000_000, 500_000_000],
+    phase1_2: [75_000_000, 750_000_000],
+    phase_1_2: [75_000_000, 750_000_000],
+    phase2: [100_000_000, 1_000_000_000],
     phase_2: [100_000_000, 1_000_000_000],
+    phase2_3: [150_000_000, 1_500_000_000],
+    phase_2_3: [150_000_000, 1_500_000_000],
+    phase3: [200_000_000, 2_000_000_000],
     phase_3: [200_000_000, 2_000_000_000],
+    nda_filed: [350_000_000, 3_500_000_000],
     approved: [500_000_000, 5_000_000_000],
   };
 

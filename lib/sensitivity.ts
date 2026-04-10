@@ -304,7 +304,7 @@ function computeParameterSensitivity(
   const baseTotalValue = baseResult.terms.totalDealValue.median;
   const baseUpfront = baseResult.terms.upfront.median;
 
-  const computedOptions: ParameterOption[] = options.map(opt => {
+  const computedOptions: (ParameterOption | null)[] = options.map(opt => {
     if (opt.value === currentValue) {
       return {
         value: opt.value,
@@ -323,35 +323,63 @@ function computeParameterSensitivity(
       const newTotalValue = modifiedResult.terms.totalDealValue.median;
       const newUpfront = modifiedResult.terms.upfront.median;
 
+      // Validation: if the variation produces EXACTLY the same output as the
+      // base case, the parameter lookup likely fell back to the default
+      // multiplier of 1.0 (i.e., the new value is invalid for the current
+      // indication/TA combination). Skip to avoid showing misleading zero
+      // deltas as legitimate sensitivity data.
+      if (
+        opt.value !== currentValue &&
+        newTotalValue === baseTotalValue &&
+        newUpfront === baseUpfront
+      ) {
+        if (typeof console !== 'undefined') {
+          console.warn(
+            `[sensitivity] Skipping ${String(parameterKey)}='${opt.value}' for ` +
+            `indication='${baseInputs.indication}', TA='${baseInputs.therapeuticArea}': ` +
+            `variation produced no change (likely invalid combination using fallback multiplier).`,
+          );
+        }
+        return null;
+      }
+
+      const denom = baseTotalValue !== 0 ? Math.abs(baseTotalValue) : 1;
       return {
         value: opt.value,
         label: opt.label,
         resultingUpfront: newUpfront,
         resultingTotalValue: newTotalValue,
         delta: newTotalValue - baseTotalValue,
-        deltaPercent: baseTotalValue > 0 ? ((newTotalValue - baseTotalValue) / baseTotalValue) * 100 : 0,
+        deltaPercent: ((newTotalValue - baseTotalValue) / denom) * 100,
       };
     } catch {
-      // If calculation fails for this option, treat as no change
-      return {
-        value: opt.value,
-        label: opt.label,
-        resultingUpfront: baseUpfront,
-        resultingTotalValue: baseTotalValue,
-        delta: 0,
-        deltaPercent: 0,
-      };
+      // If calculation fails for this option, skip instead of faking no-change
+      if (typeof console !== 'undefined') {
+        console.warn(
+          `[sensitivity] Calculation threw for ${String(parameterKey)}='${opt.value}', skipping`,
+        );
+      }
+      return null;
     }
   });
 
+  // Filter out skipped variations
+  const validOptions: ParameterOption[] = computedOptions.filter(
+    (o): o is ParameterOption => o !== null,
+  );
+  if (validOptions.length === 0) return null;
+
   // Calculate impact range
-  const deltas = computedOptions.map(o => o.delta);
+  const deltas = validOptions.map(o => o.delta);
   const maxPositive = Math.max(0, ...deltas);
   const maxNegative = Math.min(0, ...deltas);
   const impactRange = maxPositive - maxNegative;
 
-  // Determine impact level based on percentage range
-  const impactPercent = baseTotalValue > 0 ? (impactRange / baseTotalValue) * 100 : 0;
+  // Determine impact level based on percentage range.
+  // Use absolute base value in the denominator so a negative base rNPV still
+  // produces meaningful relative deltas instead of silently collapsing to 0%.
+  const impactDenom = baseTotalValue !== 0 ? Math.abs(baseTotalValue) : 1;
+  const impactPercent = (impactRange / impactDenom) * 100;
   const impactLevel: ImpactLevel =
     impactPercent > 100 ? 'VERY HIGH' :
     impactPercent > 30 ? 'HIGH' :
@@ -364,7 +392,7 @@ function computeParameterSensitivity(
     label: parameterLabels[parameterKey] || parameterKey,
     currentValue,
     currentLabel: currentOption?.label || currentValue,
-    options: computedOptions.sort((a, b) => b.resultingTotalValue - a.resultingTotalValue),
+    options: validOptions.sort((a, b) => b.resultingTotalValue - a.resultingTotalValue),
     maxPositiveDelta: maxPositive,
     maxNegativeDelta: maxNegative,
     impactRange,
@@ -1109,6 +1137,10 @@ export function computeSensitivityAnalysis(
     'dataQuality',
     'dealType',
     areaFirstParam,
+    // Line of therapy is a cross-TA pricing/positioning lever (1L vs 2L+ vs
+    // maintenance), not oncology-specific. Include unconditionally so all TAs
+    // surface sensitivity when the user toggles it.
+    ...(areaFirstParam !== 'lineOfTherapy' ? ['lineOfTherapy' as keyof CalculationInput] : []),
     // For acquisitions, royalties are 0% so biomarker/combination sensitivity is less relevant
     // but still included as they affect total deal value through milestone structure
     'biomarker',
