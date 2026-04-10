@@ -18,8 +18,12 @@ const COLORS = {
   cyan: '#06b6d4',
 };
 
-// Shared DT branding block
-function DTBranding({ accent = COLORS.tealBright }: { accent?: string }) {
+// Shared Ambrosia Ventures branding block — uses the real logo wordmark
+// The logo is fetched from production at render time so preview deployments
+// share the same canonical asset.
+function AmbrosiaBranding({ host }: { host: string }) {
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  const logoUrl = `${protocol}://${host}/logo-white.png`;
   return (
     <div
       style={{
@@ -28,30 +32,16 @@ function DTBranding({ accent = COLORS.tealBright }: { accent?: string }) {
         left: '60px',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
       }}
     >
-      <div
-        style={{
-          fontSize: '36px',
-          fontWeight: 900,
-          color: accent,
-          letterSpacing: '-1px',
-          lineHeight: 1,
-        }}
-      >
-        DT
-      </div>
-      <div
-        style={{
-          width: '1px',
-          height: '28px',
-          backgroundColor: COLORS.slateDark,
-        }}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={logoUrl}
+        alt="Ambrosia Ventures"
+        width={280}
+        height={58}
+        style={{ objectFit: 'contain' }}
       />
-      <span style={{ color: COLORS.slateLight, fontSize: '22px', fontWeight: 600 }}>
-        Ambrosia Ventures
-      </span>
     </div>
   );
 }
@@ -78,6 +68,9 @@ export async function GET(request: NextRequest) {
   const subtitle = searchParams.get('subtitle');
   const type = searchParams.get('type') || 'default';
   const stat = searchParams.get('stat');
+
+  // Resolve host so the logo image can be fetched from the right deployment
+  const host = request.headers.get('host') || 'calculator.ambrosiaventures.co';
 
   // --- Insight type: bold stat + title (for LinkedIn sharing) ---
   if (type === 'insight' && stat) {
@@ -108,7 +101,7 @@ export async function GET(request: NextRequest) {
               background: `radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 60%)`,
             }}
           />
-          <DTBranding accent={COLORS.amber} />
+          <AmbrosiaBranding host={host} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '28px' }}>
             <div
               style={{
@@ -192,7 +185,7 @@ export async function GET(request: NextRequest) {
               background: `radial-gradient(circle, ${scheme.accent}18 0%, transparent 70%)`,
             }}
           />
-          <DTBranding accent={scheme.highlight} />
+          <AmbrosiaBranding host={host} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px' }}>
             <h1
               style={{
@@ -235,8 +228,8 @@ export async function GET(request: NextRequest) {
           position: 'relative',
         }}
       >
-        {/* DT Branding — top left */}
-        <DTBranding />
+        {/* Ambrosia Ventures branding — top left */}
+        <AmbrosiaBranding host={host} />
 
         {/* Main content */}
         <div
