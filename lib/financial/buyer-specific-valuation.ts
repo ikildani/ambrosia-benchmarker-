@@ -17,7 +17,7 @@
  * @module lib/financial/buyer-specific-valuation
  */
 
-import type { DealWaterfall, RNPVResult } from './types';
+import type { DealWaterfall, RNPVResult, CounterpartyPremiumLookup } from './types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -104,6 +104,19 @@ export interface BuyerSpecificValuation {
   negotiationLeverage: 'strong' | 'moderate' | 'limited';
   /** Full narrative explanation of the buyer-specific premium */
   narrative: string;
+  /**
+   * Tier 3 Item 9: counterparty-specific historical premium adjustment.
+   * Populated only when a `counterpartyPremium` was passed to the calculator
+   * and its confidence was high enough to apply.
+   */
+  counterpartyAdjustment?: {
+    /** Premium fraction contributed (e.g., +0.20 for +20%) */
+    contribution: number;
+    /** Confidence level of the underlying premium calculation */
+    confidence: 'high' | 'medium' | 'low';
+    /** Provenance string from CounterpartyPremiumLookup */
+    source: string;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -183,15 +196,32 @@ export function extractFactorScore(
  * Premium is confidence-adjusted (sparse data = halved premium) and timing-
  * modified (imminent = 1.3x, speculative = 0.7x), then capped at +75%.
  *
- * @param buyer            - Profile of the specific buyer
- * @param genericWaterfall - Deal waterfall computed from the generic rNPV model
- * @param rnpvResult       - The underlying rNPV calculation result
+ * # Counterparty premium (Item 9, Tier 3)
+ *
+ * If `counterpartyPremium` is supplied, the buyer's historical premium vs.
+ * comparable medians is folded into the strategic premium fraction BEFORE
+ * the +75% cap is applied. This means the cap still holds — there is no way
+ * to bypass it via counterparty data.
+ *
+ * Confidence weighting:
+ *   - high   confidence → counterparty premium applied at 100%
+ *   - medium confidence → counterparty premium applied at 50%
+ *   - low    confidence → counterparty premium ignored entirely
+ *
+ * The function is fully backward-compatible: callers who don't pass a
+ * counterparty premium get identical behavior to the pre-Item-9 version.
+ *
+ * @param buyer              - Profile of the specific buyer
+ * @param genericWaterfall   - Deal waterfall computed from the generic rNPV model
+ * @param rnpvResult         - The underlying rNPV calculation result
+ * @param counterpartyPremium - Optional historical premium lookup for this buyer
  * @returns BuyerSpecificValuation with premium breakdown and narrative
  */
 export function calculateBuyerSpecificValuation(
   buyer: BuyerProfile,
   genericWaterfall: DealWaterfall,
   rnpvResult: RNPVResult,
+  counterpartyPremium?: CounterpartyPremiumLookup,
 ): BuyerSpecificValuation {
   // ── 0. Clamp all input scores to valid [0, 100] range ──
   // Upstream sources (partner-matching, pharma-intent) should already clamp,
@@ -297,8 +327,38 @@ export function calculateBuyerSpecificValuation(
   const timingMultiplier = TIMING_MULTIPLIERS[buyer.timing] ?? 1.0;
   const timingAdjustedPremium = confidenceAdjustedPremium * timingMultiplier;
 
+  // ── 5b. Counterparty premium adjustment (Item 9, Tier 3) ──
+  // Apply the buyer's historical deal premium as a contribution on the
+  // strategic premium fraction. AbbVie at 1.25 contributes +0.25; Gilead
+  // at 0.95 contributes -0.05. The contribution is confidence-weighted:
+  // medium = 50%, high = 100%, low = 0% (ignored entirely).
+  //
+  // Critical: this still passes through the +75% cap on the next line, so
+  // the institutional ceiling holds even for very generous buyers.
+  let premiumWithCounterparty = timingAdjustedPremium;
+  let counterpartyContribution = 0;
+  let counterpartyAdjustment: BuyerSpecificValuation['counterpartyAdjustment'];
+  if (
+    counterpartyPremium &&
+    Number.isFinite(counterpartyPremium.multiplier) &&
+    counterpartyPremium.confidence !== 'low'
+  ) {
+    const cpRaw = counterpartyPremium.multiplier - 1;
+    const cpWeight = counterpartyPremium.confidence === 'high' ? 1.0 : 0.5;
+    counterpartyContribution = cpRaw * cpWeight;
+    premiumWithCounterparty = timingAdjustedPremium + counterpartyContribution;
+    counterpartyAdjustment = {
+      contribution: counterpartyContribution,
+      confidence: counterpartyPremium.confidence,
+      source: counterpartyPremium.source,
+    };
+  }
+
   // ── 6. Cap at maximum premium ──
-  const cappedPremium = Math.min(timingAdjustedPremium, MAX_PREMIUM);
+  // Floor at -50% — even with counterparty data the buyer-specific value
+  // shouldn't drop below half of the generic median (would make negotiation
+  // numbers nonsensical).
+  const cappedPremium = Math.max(-0.5, Math.min(premiumWithCounterparty, MAX_PREMIUM));
   const strategicPremium = 1 + cappedPremium;
   const strategicPremiumPercent = cappedPremium * 100;
 
@@ -354,6 +414,7 @@ export function calculateBuyerSpecificValuation(
     timingAdvantage,
     negotiationLeverage,
     narrative,
+    ...(counterpartyAdjustment ? { counterpartyAdjustment } : {}),
   };
 }
 

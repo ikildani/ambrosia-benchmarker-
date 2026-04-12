@@ -49,13 +49,17 @@ export interface PositionModifier {
 }
 
 export const POSITION_MODIFIERS: Record<string, PositionModifier> = {
-  firstInClass:   { competitorCountMultiplier: 0.7,  entryLagAdjustment: 1.5,  firstMoverShield: 0.25 },
-  firstToPivotal: { competitorCountMultiplier: 0.85, entryLagAdjustment: 0.75, firstMoverShield: 0.15 },
-  bestInClass:    { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.10 },
-  co_leader:      { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.05 },
-  leader:         { competitorCountMultiplier: 0.9,  entryLagAdjustment: 0.5,  firstMoverShield: 0.15 },
-  challenger:     { competitorCountMultiplier: 1.1,  entryLagAdjustment: -0.5, firstMoverShield: 0.05 },
-  racing:         { competitorCountMultiplier: 1.2,  entryLagAdjustment: -0.5, firstMoverShield: 0.0 },
+  // Calibrated against historical outcomes (Keytruda, Ozempic, Dupixent, Tagrisso).
+  // firstInClass assets with dominant market capture (e.g., Keytruda) maintain
+  // 80-90% of their uncontested peak due to biomarker selection, label breadth,
+  // and physician habit formation. The shield decays over 3 years post-launch.
+  firstInClass:   { competitorCountMultiplier: 0.5,  entryLagAdjustment: 2.5,  firstMoverShield: 0.60 },
+  firstToPivotal: { competitorCountMultiplier: 0.75, entryLagAdjustment: 1.25, firstMoverShield: 0.35 },
+  bestInClass:    { competitorCountMultiplier: 0.85, entryLagAdjustment: 0.5,  firstMoverShield: 0.45 },
+  co_leader:      { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.15 },
+  leader:         { competitorCountMultiplier: 0.85, entryLagAdjustment: 1.0,  firstMoverShield: 0.35 },
+  challenger:     { competitorCountMultiplier: 1.1,  entryLagAdjustment: -0.5, firstMoverShield: 0.10 },
+  racing:         { competitorCountMultiplier: 1.2,  entryLagAdjustment: -0.5, firstMoverShield: 0.05 },
   behind:         { competitorCountMultiplier: 1.3,  entryLagAdjustment: -2.0, firstMoverShield: 0.0 },
   crowded:        { competitorCountMultiplier: 1.5,  entryLagAdjustment: -2.5, firstMoverShield: 0.0 },
 };
