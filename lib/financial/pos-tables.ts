@@ -43,6 +43,7 @@
 import type { PhaseTransitionRates } from './types';
 import { applyIndicationModifier } from './indication-pos-modifiers';
 import { getTier3CalibratedIndication } from './indication-tier3-calibration';
+import { getTimeWindowedPoS, type TimeWindow } from './pos-time-windows';
 
 // ---------------------------------------------------------------------------
 // Base Transition Rates by Therapeutic Area
@@ -1707,6 +1708,13 @@ const PHASE_START_INDEX: Record<string, number> = {
  *   INDICATION_POS_MODIFIERS, each base transition rate is multiplied by the
  *   indication-specific modifier before any modality/biomarker/regulatory
  *   uplift is applied. Non-calibrated indications fall back to TA base rates.
+ * @param timeWindow - Optional rolling time window for PoS calibration. When
+ *   provided AND the indication has time-windowed data in
+ *   TIME_WINDOWED_POS, the engine substitutes that cohort's absolute phase
+ *   transition rates for the TA baseline BEFORE applying any modality,
+ *   biomarker, or regulatory uplift — and bypasses the multiplicative
+ *   indication modifier layer (which would double-count). Indications
+ *   without time-windowed data fall back to the existing modifier logic.
  *
  * @returns Object containing cumulative PoS and per-transition breakdown
  *
@@ -1735,6 +1743,7 @@ export function getCumulativePoS(
     prime: boolean;
   },
   indication?: string,
+  timeWindow?: TimeWindow,
 ): {
   cumulativePoS: number;
   transitions: { phase: string; probability: number; cumulativeProb: number }[];
@@ -1743,35 +1752,57 @@ export function getCumulativePoS(
   const baseRatesRaw =
     POS_BY_THERAPEUTIC_AREA[therapeuticArea] ?? POS_BY_THERAPEUTIC_AREA.oncology;
 
-  // Apply indication-specific modifier (no-op if indication is missing or
-  // not calibrated). applyIndicationModifier clamps each transition into
-  // [0.01, 0.98]. This deliberately runs BEFORE modality / biomarker /
-  // regulatory uplifts so those still compose against indication-adjusted
-  // baselines, preserving existing TA-level fallback for non-calibrated
-  // indications.
-  const baseRates: PhaseTransitionRates = {
-    ...baseRatesRaw,
-    preclinicalToPhase1: applyIndicationModifier(
-      baseRatesRaw.preclinicalToPhase1,
-      indication,
-      'preclinicalToPhase1',
-    ),
-    phase1ToPhase2: applyIndicationModifier(
-      baseRatesRaw.phase1ToPhase2,
-      indication,
-      'phase1ToPhase2',
-    ),
-    phase2ToPhase3: applyIndicationModifier(
-      baseRatesRaw.phase2ToPhase3,
-      indication,
-      'phase2ToPhase3',
-    ),
-    phase3ToApproval: applyIndicationModifier(
-      baseRatesRaw.phase3ToApproval,
-      indication,
-      'phase3ToApproval',
-    ),
-  };
+  // Time-windowed override: opt-in only. Caller must explicitly pass a
+  // timeWindow (via RNPVInput.timeWindow or the TIER2_TIME_WINDOWED_POS
+  // flag in rnpv-engine.ts) to activate time-windowed cohort data. If the
+  // caller passes undefined, fall through to the existing multiplicative
+  // indication-modifier logic — preserves backward compatibility and golden
+  // master stability until the 100-deal backtest validates this change.
+  const windowed = indication && timeWindow
+    ? getTimeWindowedPoS(indication, timeWindow)
+    : null;
+
+  let baseRates: PhaseTransitionRates;
+
+  if (windowed) {
+    baseRates = {
+      ...baseRatesRaw,
+      preclinicalToPhase1: windowed.preclinicalToPhase1 ?? baseRatesRaw.preclinicalToPhase1,
+      phase1ToPhase2: windowed.phase1ToPhase2,
+      phase2ToPhase3: windowed.phase2ToPhase3,
+      phase3ToApproval: windowed.phase3ToApproval,
+    };
+  } else {
+    // Apply indication-specific modifier (no-op if indication is missing or
+    // not calibrated). applyIndicationModifier clamps each transition into
+    // [0.01, 0.98]. This deliberately runs BEFORE modality / biomarker /
+    // regulatory uplifts so those still compose against indication-adjusted
+    // baselines, preserving existing TA-level fallback for non-calibrated
+    // indications.
+    baseRates = {
+      ...baseRatesRaw,
+      preclinicalToPhase1: applyIndicationModifier(
+        baseRatesRaw.preclinicalToPhase1,
+        indication,
+        'preclinicalToPhase1',
+      ),
+      phase1ToPhase2: applyIndicationModifier(
+        baseRatesRaw.phase1ToPhase2,
+        indication,
+        'phase1ToPhase2',
+      ),
+      phase2ToPhase3: applyIndicationModifier(
+        baseRatesRaw.phase2ToPhase3,
+        indication,
+        'phase2ToPhase3',
+      ),
+      phase3ToApproval: applyIndicationModifier(
+        baseRatesRaw.phase3ToApproval,
+        indication,
+        'phase3ToApproval',
+      ),
+    };
+  }
 
   // Resolve modality adjustment -- default to 1.0 (no adjustment)
   const modalityAdj = POS_MODALITY_ADJUSTMENT[modality] ?? 1.0;

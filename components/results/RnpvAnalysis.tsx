@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Cell, ReferenceLine,
+  PieChart, Pie, Legend,
 } from 'recharts';
-import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sparkles, BarChart3 } from 'lucide-react';
+import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sparkles, BarChart3, Globe } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
 import { CHART_COLORS } from '@/lib/chartTheme';
 import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult } from '@/lib/financial/types';
@@ -203,6 +204,64 @@ export default function RnpvAnalysis({
       { name: 'Bull', rnpv: scenarioComparison.bull.rnpv, deal: scenarioComparison.bull.impliedDeal, fill: '#34d399' },
     ];
   }, [scenarioComparison]);
+
+  // ── Chart Data: Geographic Revenue Split ──
+  const geoChartData = useMemo(() => {
+    const gd = rnpvResult.geographicDecomposition;
+    if (!gd) return null;
+
+    // Color per geography — keyed to recharts palette for consistency
+    const geoColors: Record<string, string> = {
+      US: CHART_COLORS.teal500,
+      EU5: '#60a5fa',
+      Japan: '#f59e0b',
+      China: '#f87171',
+      RoW: '#a78bfa',
+    };
+
+    // Pie: peak-sales share by geography (use max point in each geo curve)
+    const pieData = gd.geographicSplits.map(split => {
+      const geoPeak = Math.max(0, ...(gd.byGeography[split.geography] || [0]));
+      return {
+        name: split.geography,
+        value: Math.round(geoPeak),
+        sharePct: split.globalShare * 100,
+        fill: geoColors[split.geography] || CHART_COLORS.slate400,
+      };
+    }).filter(d => d.value > 0);
+
+    // Stacked area: revenue by geography over time. Use cash flow years as
+    // x-axis so the chart lines up with the global revenue projection above.
+    const baseYear = rnpvResult.cashFlows[0]?.year ?? derived.currentYear;
+    const projectionYears = gd.totalRevenueByYear.length;
+    const stackedData: Array<Record<string, number>> = [];
+    for (let i = 0; i < projectionYears; i++) {
+      const row: Record<string, number> = {
+        year: baseYear + i,
+      };
+      for (const split of gd.geographicSplits) {
+        row[split.geography] = Math.round(gd.byGeography[split.geography]?.[i] ?? 0);
+      }
+      stackedData.push(row);
+    }
+    // Trim leading/trailing empty years to keep the chart compact
+    const firstNonZero = stackedData.findIndex(r =>
+      gd.geographicSplits.some(s => (r[s.geography] as number) > 0)
+    );
+    const lastNonZero = (() => {
+      for (let i = stackedData.length - 1; i >= 0; i--) {
+        if (gd.geographicSplits.some(s => (stackedData[i][s.geography] as number) > 0)) {
+          return i;
+        }
+      }
+      return stackedData.length - 1;
+    })();
+    const trimmed = firstNonZero >= 0
+      ? stackedData.slice(firstNonZero, lastNonZero + 1)
+      : stackedData;
+
+    return { pieData, stackedData: trimmed, geoColors };
+  }, [rnpvResult, derived.currentYear]);
 
   // ── Chart Data: Competitive Revenue Erosion ──
   const competitiveChartData = useMemo(() => {
@@ -754,6 +813,136 @@ export default function RnpvAnalysis({
                 )}
               </div>
             )}
+
+            {/* ═══ GEOGRAPHIC REVENUE SPLIT ═══ */}
+            {geoChartData && geoChartData.pieData.length > 0 && rnpvResult.geographicDecomposition && (() => {
+              const gd = rnpvResult.geographicDecomposition;
+              const peakTotal = geoChartData.pieData.reduce((s, p) => s + p.value, 0);
+              return (
+                <div className="mb-6">
+                  <SectionToggle
+                    id="geographic"
+                    icon={Globe}
+                    title="Geographic Revenue Split"
+                    badge={`${gd.geographicSplits.length} regions · ${fmt(gd.globalEquivalentPeakSales)} global peak`}
+                  />
+                  {expandedSections.has('geographic') && (
+                    <div className="mt-3">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                        {/* Pie: peak-sales share by geography */}
+                        <div className="p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg border border-slate-200 dark:border-slate-600">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 text-center">
+                            Peak Sales by Region
+                          </p>
+                          <div className="h-48">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={geoChartData.pieData}
+                                  dataKey="value"
+                                  nameKey="name"
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={38}
+                                  outerRadius={70}
+                                  paddingAngle={2}
+                                  label={(entry: any) => `${entry.name} ${((entry.value / Math.max(peakTotal, 1)) * 100).toFixed(0)}%`}
+                                  labelLine={false}
+                                >
+                                  {geoChartData.pieData.map((entry, i) => (
+                                    <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
+                                  ))}
+                                </Pie>
+                                <Tooltip content={({ active, payload }) => {
+                                  if (!active || !payload?.length) return null;
+                                  const d = payload[0]?.payload;
+                                  return (
+                                    <div className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 shadow-xl">
+                                      <p className="text-xs font-semibold text-white">{d?.name}</p>
+                                      <p className="text-xs font-mono text-teal-400">Peak: {fmt(d?.value)}</p>
+                                      <p className="text-[10px] text-slate-400">Share: {d?.sharePct?.toFixed(0)}%</p>
+                                    </div>
+                                  );
+                                }} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+
+                        {/* Stacked area: revenue by geography over time */}
+                        <div className="p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg border border-slate-200 dark:border-slate-600">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 text-center">
+                            Revenue Build by Region
+                          </p>
+                          <div className="h-48">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={geoChartData.stackedData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} strokeOpacity={0.3} />
+                                <XAxis dataKey="year" tick={{ fontSize: 9, fill: CHART_COLORS.axisLabel }} tickLine={false} axisLine={false} />
+                                <YAxis tick={{ fontSize: 9, fill: CHART_COLORS.axisLabel }} tickLine={false} axisLine={false} tickFormatter={fmt} width={48} />
+                                <Tooltip content={<ChartTooltipContent />} />
+                                <Legend wrapperStyle={{ fontSize: 9 }} iconType="circle" />
+                                {gd.geographicSplits.map(split => (
+                                  <Area
+                                    key={split.geography}
+                                    type="monotone"
+                                    dataKey={split.geography}
+                                    stackId="geo"
+                                    stroke={geoChartData.geoColors[split.geography]}
+                                    fill={geoChartData.geoColors[split.geography]}
+                                    fillOpacity={0.65}
+                                    name={split.geography}
+                                  />
+                                ))}
+                              </AreaChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Per-region detail grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-3">
+                        {gd.geographicSplits.map(split => (
+                          <div
+                            key={split.geography}
+                            className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700/40"
+                          >
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span
+                                className="w-2 h-2 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: geoChartData.geoColors[split.geography] }}
+                              />
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">{split.geography}</p>
+                            </div>
+                            <p className="text-sm font-bold font-mono text-navy-800 dark:text-white">
+                              {(split.globalShare * 100).toFixed(0)}% share
+                            </p>
+                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                              +{split.launchDelayYears}y delay
+                            </p>
+                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-mono">
+                              {(split.pricingMultiplier * 100).toFixed(0)}% of US price
+                            </p>
+                            {split.accessRiskPremium > 0 && (
+                              <p className="text-[9px] text-amber-600 dark:text-amber-400 font-mono">
+                                +{(split.accessRiskPremium * 100).toFixed(1)}pp access risk
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Regional rollouts assume US launches first; EU5 typically follows in 1-2 years (post-EMA), Japan 2-3 years (post-PMDA),
+                        and China 3-5 years (post-NMPA and NRDL negotiation). Ex-US pricing multipliers reflect payer pressure —
+                        EU5 HTA, Japanese NHI, and Chinese NRDL structurally discount versus US WAC. Access risk premiums
+                        compound into the discount rate for region-specific rNPV sensitivity work.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* ═══ CROSS-VALIDATION ═══ */}
             {cvBenchmark != null && (
