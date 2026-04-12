@@ -40,7 +40,8 @@ import {
   getCombinationDynamics,
 } from './combination-therapy';
 import { decomposeGeographicRevenue } from './geographic-revenue-curves';
-import { TIER2_FLAGS } from '@/lib/feature-flags';
+import { decomposeRisk } from './risk-decomposition';
+import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -416,7 +417,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // 1. Get discount rate (use guarded value, or compute from TA + territory + company type + deal type)
   // Add manufacturing complexity WACC premium for technically challenging modalities
   const baseDiscountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
-  const mfgPremium = MANUFACTURING_WACC_PREMIUM[modality] || 0;
+  // Internal flag: risk decomposer counterfactual runs strip this premium to
+  // measure the manufacturing bucket.
+  const mfgPremium = input.__internalFlags?.skipMfgPremium
+    ? 0
+    : (MANUFACTURING_WACC_PREMIUM[modality] || 0);
   // Cap the combined rate at 35% (not 30%) so that the manufacturing WACC
   // premium isn't silently dropped for high-risk combos where the base rate
   // already sits at the 30% TA/phase ceiling from getDefaultDiscountRate.
@@ -426,13 +431,22 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Pass the indication so getCumulativePoS can apply indication-specific
   // modifiers from /lib/financial/indication-pos-modifiers.ts (top-50
   // calibrated set). Non-calibrated indications fall back to TA-level rates.
+  //
+  // Internal flags: the risk decomposer strips regulatory designations (to
+  // measure the regulatory bucket) and/or forces clinical-only PoS (to
+  // measure the clinical bucket).
+  const regsForPoS = input.__internalFlags?.skipRegulatoryDesignations || input.__internalFlags?.clinicalOnlyPoS
+    ? { breakthrough: false, fastTrack: false, orphan: false, prime: false }
+    : regulatoryDesignations;
+  const indicationForPoS = input.__internalFlags?.clinicalOnlyPoS ? undefined : input.indication;
+  const biomarkerForPoS = input.__internalFlags?.clinicalOnlyPoS ? 'unselected' : (input.biomarkerStatus || 'unselected');
   const { cumulativePoS: rawCumulativePoS, transitions } = getCumulativePoS(
     phase,
     therapeuticArea,
     modality,
-    input.biomarkerStatus || 'unselected',
-    regulatoryDesignations,
-    input.indication,
+    biomarkerForPoS,
+    regsForPoS,
+    indicationForPoS,
     // Time-windowed PoS is opt-in: use the user-supplied window, or
     // 'most_recent' when the TIER2_TIME_WINDOWED_POS flag is on, or
     // undefined (falls back to existing multiplicative modifier logic).
@@ -552,7 +566,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   }
 
   // Apply market access delay (post-approval reimbursement lag)
-  const accessDelay = MARKET_ACCESS_DELAY_MONTHS[therapeuticArea]?.default || 0;
+  // Internal flag: risk decomposer skips this when measuring the commercial bucket.
+  const accessDelay = input.__internalFlags?.skipMarketAccessDelay
+    ? 0
+    : (MARKET_ACCESS_DELAY_MONTHS[therapeuticArea]?.default || 0);
   if (accessDelay > 0) {
     yearsToMarket += accessDelay / 12; // Convert months to years
   }
@@ -570,9 +587,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const dataQualityAdj = getDataQualityAdjustment(dataQuality);
 
   // 4b. Generic market entrenchment penalty (Nirav Jhaveri feedback)
-  // If entering a market where generics dominate, peak sales are penalized at launch
+  // If entering a market where generics dominate, peak sales are penalized at launch.
+  // Internal flag: risk decomposer neutralizes this when measuring the commercial bucket.
   const genericEntrenchment = getGenericEntrenchmentMultiplier(therapeuticArea, input.indication);
-  const genericMultiplier = genericEntrenchment.multiplier;
+  const genericMultiplier = input.__internalFlags?.skipGenericEntrenchment
+    ? 1.0
+    : genericEntrenchment.multiplier;
 
   const adjustedPeakSales = {
     low: peakSalesEstimate.low * dataQualityAdj * genericMultiplier,
@@ -586,7 +606,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // 4d. Indication-specific competitive density adjustment
   // Crowded indications (HER2 breast, MS, RA) penalize peak sales penetration;
   // under-served indications (SCI, Huntington's) get a boost.
-  const competitiveDensity = getCompetitiveDensity(input.indication);
+  // Internal flag: risk decomposer skips this when measuring the commercial bucket.
+  const competitiveDensity = input.__internalFlags?.skipCompetitiveDensity
+    ? null
+    : getCompetitiveDensity(input.indication);
   if (competitiveDensity) {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
@@ -1058,6 +1081,42 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     }
   } catch {
     // Never allow invariant checks to break production calculations.
+  }
+
+  // Tier 4 Item 11: Risk decomposition.
+  // Skipped when this call is itself a counterfactual run from the decomposer
+  // (flagged via __internalFlags.skipDecomposition) to prevent infinite recursion.
+  // Default off until the 100-deal backtest validates it — flag-gated.
+  if (
+    TIER4_FLAGS.riskDecomposition &&
+    !input.__internalFlags?.skipDecomposition
+  ) {
+    try {
+      rnpvResult.riskDecomposition = decomposeRisk(input, rnpvResult, calculateRNPV);
+      // Surface >10% reconciliation gaps as Sentry breadcrumbs so we can
+      // catch drift without breaking the calculation.
+      if (rnpvResult.riskDecomposition.reconciliationGap > 0.10) {
+        try {
+          const Sentry = require('@sentry/nextjs');
+          Sentry.addBreadcrumb?.({
+            category: 'engine.risk-decomposition',
+            level: 'warning',
+            message: `Risk decomposition reconciliation gap ${(rnpvResult.riskDecomposition.reconciliationGap * 100).toFixed(1)}% > 10%`,
+            data: {
+              phase: input.phase,
+              therapeuticArea: input.therapeuticArea,
+              modality: input.modality,
+              indication: input.indication,
+              total_M: rnpvResult.riskDecomposition.total_M,
+            },
+          });
+        } catch {
+          // Sentry is optional in test environments.
+        }
+      }
+    } catch {
+      // Decomposition is informational; never block the baseline result.
+    }
   }
 
   return rnpvResult;
