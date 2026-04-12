@@ -11,6 +11,8 @@
  */
 
 import type { Phase, TherapeuticArea, Modality } from '@/lib/calculations';
+import type { TimeWindow } from './pos-time-windows';
+import type { Geography, GeographicSplit } from './geographic-revenue-curves';
 
 // ---------------------------------------------------------------------------
 // Phase Transition Probabilities
@@ -209,6 +211,20 @@ export interface RNPVInput {
    */
   posMultiplier?: number;
 
+  /**
+   * Rolling time window for PoS calibration. When provided and time-windowed
+   * data exists for `indication`, the engine substitutes that cohort's
+   * absolute phase transition rates for the TA baseline before applying
+   * modality / biomarker / regulatory uplifts. This lets users compare e.g.
+   * "Alzheimer's PoS using 2014-2024 cohort" vs "2021-2024 most recent".
+   * Indications without time-windowed data ignore this field and fall back
+   * to the existing indication PoS modifier logic.
+   *
+   * Defaults to `'most_recent'` (which resolves to 2021-2024 if available,
+   * otherwise 2019-2024, otherwise 2014-2024).
+   */
+  timeWindow?: TimeWindow;
+
   // =========================================================================
   // TA-Specific Modifiers — wired from CalculationInput to drive PoS/valuation
   // =========================================================================
@@ -218,6 +234,18 @@ export interface RNPVInput {
 
   /** Combination potential: strong combo eligibility = higher value */
   combinationPotential?: string;
+
+  /**
+   * Combination therapy context — drives peak sales adjustment when the
+   * indication is typically used in combination regimens (oncology, HIV,
+   * some immunology). When omitted, the engine uses the default dynamics
+   * from `COMBINATION_BY_INDICATION`. Setting this to 'monotherapy' forces
+   * the engine to skip the combo discount — useful when the user asserts
+   * the asset will not be used in combination.
+   *
+   * See `/lib/financial/combination-therapy.ts` for the full model.
+   */
+  combinationContext?: import('./combination-therapy').CombinationContext;
 
   /** Treatment approach: disease-modifying vs symptomatic */
   treatmentApproach?: string;
@@ -509,6 +537,56 @@ export interface RNPVResult {
     ceiling?: number;
     tam?: number;
     message?: string;
+  };
+
+  /**
+   * Combination therapy adjustment applied to peak sales. Populated whenever
+   * the indication has an entry in COMBINATION_BY_INDICATION (regardless of
+   * whether the multiplier is <1.0). When the user sets
+   * `combinationContext: 'monotherapy'`, multiplier is 1.0 and rationale
+   * reflects the override.
+   *
+   * See `/lib/financial/combination-therapy.ts` for the full model.
+   */
+  combinationAdjustment?: {
+    /** Effective revenue multiplier applied to peak sales (0.25-1.0) */
+    multiplier: number;
+    /** The context used (monotherapy, combo with SoC, etc.) */
+    context: import('./combination-therapy').CombinationContext;
+    /** Fraction of patients receiving the drug in combination regimens */
+    comboFraction: number;
+    /** Fraction of combo regimen revenue attributable to this drug */
+    revenueShare: number;
+    /** Partner drug(s) (if any) */
+    partnerDrug?: string;
+    /** Dollar change in peak sales median ($M, negative = reduction) */
+    peakSalesDelta_M: number;
+    /** Original (pre-adjustment) peak sales median ($M) */
+    originalPeakSales_M: number;
+    /** Adjusted peak sales median ($M) */
+    adjustedPeakSales_M: number;
+    /** Human-readable rationale for the adjustment */
+    rationale: string;
+  };
+
+  /**
+   * Optional decomposition of global peak sales into per-geography revenue
+   * curves (US, EU5, Japan, China, RoW) with separate launch delays, ramp
+   * speeds, pricing multipliers, and access risk premiums.
+   *
+   * Only populated when the rNPV engine successfully resolves a therapeutic
+   * area to a geographic split table. The `totalRevenueByYear` schedule
+   * should reconcile to the global cash-flow revenue schedule within ~5%.
+   */
+  geographicDecomposition?: {
+    byGeography: Record<Geography, number[]>;
+    totalRevenueByYear: number[];
+    geographicSplits: GeographicSplit[];
+    /**
+     * The global peak sales number that was decomposed (post data-quality
+     * and competitive-density adjustments, pre-regional pricing).
+     */
+    globalEquivalentPeakSales: number;
   };
 }
 

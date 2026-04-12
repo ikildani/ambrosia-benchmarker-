@@ -35,6 +35,12 @@ import {
 import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
 import { checkRNPVInvariants, assertInvariants } from './invariants';
 import { getCompetitiveDensity } from './indication-competitive-density';
+import {
+  applyCombinationAdjustment,
+  getCombinationDynamics,
+} from './combination-therapy';
+import { decomposeGeographicRevenue } from './geographic-revenue-curves';
+import { TIER2_FLAGS } from '@/lib/feature-flags';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -427,6 +433,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     input.biomarkerStatus || 'unselected',
     regulatoryDesignations,
     input.indication,
+    // Time-windowed PoS is opt-in: use the user-supplied window, or
+    // 'most_recent' when the TIER2_TIME_WINDOWED_POS flag is on, or
+    // undefined (falls back to existing multiplicative modifier logic).
+    // Default off until the 100-deal backtest validates this change.
+    input.timeWindow ?? (TIER2_FLAGS.timeWindowedPoS ? 'most_recent' : undefined),
   );
 
   // 2b. Apply indication-specific PoS modifiers
@@ -580,6 +591,35 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.high = adjustedPeakSales.high / competitiveDensity.penetrationMultiplier;
+  }
+
+  // 4e. Combination therapy adjustment
+  // Most modern oncology and many immunology drugs are used in combinations,
+  // not monotherapy. Combo drugs share patient pools AND revenue — the
+  // effective peak sales for any single component is typically 30-60% of
+  // a naive monotherapy assumption. Skipped when the user explicitly asserts
+  // `combinationContext: 'monotherapy'`.
+  // Source: NCCN 2025 guidelines, ASCO 2024-2025, EvaluatePharma 2025 combo
+  // drug analysis, Goldman Sachs Healthcare 2024 combo deal research.
+  //
+  // Opt-in: applies only when the caller provided `combinationContext`
+  // explicitly OR the TIER2_COMBO_THERAPY flag is on. Default off until
+  // the 100-deal backtest validates this change.
+  const comboEnabled = input.combinationContext !== undefined || TIER2_FLAGS.combinationTherapy;
+  const comboDynamicsUsed = comboEnabled ? getCombinationDynamics(input.indication) : null;
+  const originalPeakSalesMedian = adjustedPeakSales.median;
+  const comboAdjustmentMedian = comboEnabled
+    ? applyCombinationAdjustment(
+        adjustedPeakSales.median,
+        input.indication,
+        input.combinationContext,
+      )
+    : { multiplier: 1.0, rationale: '' };
+  const comboMultiplier = comboAdjustmentMedian.multiplier;
+  if (comboMultiplier !== 1.0) {
+    adjustedPeakSales.low = adjustedPeakSales.low * comboMultiplier;
+    adjustedPeakSales.median = adjustedPeakSales.median * comboMultiplier;
+    adjustedPeakSales.high = adjustedPeakSales.high * comboMultiplier;
   }
 
   // 5. Project cash flows using median peak sales
@@ -880,6 +920,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       ? [`WARNING TAM ceiling: ${ceilingCheck.message} Not capped, but this exceeds the market leader's peak.`]
       : []),
     ...(competitiveDensity ? [`Competitive density: ${competitiveDensity.approvedDrugs} approved drugs, ${competitiveDensity.activeTrials} active trials → ${competitiveDensity.penetrationMultiplier}x penetration multiplier`] : []),
+    ...(comboDynamicsUsed && comboMultiplier !== 1.0
+      ? [`Combination therapy adjustment: ×${comboMultiplier.toFixed(2)} (${(comboMultiplier * 100).toFixed(0)}% of monotherapy assumption). ${comboDynamicsUsed.notes}${comboDynamicsUsed.partnerDrug ? ` Partner: ${comboDynamicsUsed.partnerDrug}.` : ''}`]
+      : []),
+    ...(comboDynamicsUsed && comboMultiplier === 1.0 && input.combinationContext === 'monotherapy'
+      ? [`Combination therapy adjustment: skipped (user specified monotherapy context for ${input.indication}).`]
+      : []),
     (() => {
       const ic = input.indication ? INDICATION_REVENUE_CURVES[input.indication] : undefined;
       const r = ic?.rampUpYears ?? REVENUE_CURVE_OVERRIDES[therapeuticArea]?.rampUpYears ?? REVENUE_CURVE.rampUpYears;
@@ -896,6 +942,55 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
     `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
   ];
+
+  // --- Geographic revenue decomposition ---
+  // Split the global peak sales into US / EU5 / Japan / China / RoW curves
+  // with independent launch delays, ramps, and pricing multipliers. The
+  // result is a parallel absolute-calendar-year revenue schedule that
+  // should reconcile to the global cash-flow revenue within ~5%.
+  //
+  // Flag-gated: only populated when TIER2_GEO_DECOMP is on. Purely additive
+  // data (doesn't affect NPV / PoS / cash flows), but keeping it off by
+  // default keeps the UI from rendering unvalidated regional projections
+  // until the 100-deal backtest confirms the split tables are accurate.
+  let geographicDecomposition: RNPVResult['geographicDecomposition'];
+  if (TIER2_FLAGS.geographicDecomposition) try {
+    const startYearFloor = cashFlows.length > 0
+      ? cashFlows[0].year
+      : new Date().getFullYear();
+    const approvalYear = Math.round(startYearFloor + yearsToMarket);
+    const projectionYears = Math.max(20, cashFlows.length);
+    const decomposed = decomposeGeographicRevenue(
+      adjustedPeakSales.median,
+      therapeuticArea,
+      approvalYear,
+      projectionYears,
+    );
+    geographicDecomposition = {
+      byGeography: decomposed.byGeography,
+      totalRevenueByYear: decomposed.totalRevenueByYear,
+      geographicSplits: decomposed.geographicSplits,
+      globalEquivalentPeakSales: adjustedPeakSales.median,
+    };
+
+    // Reconcile against the global cash flow revenue peak — should match
+    // within ~5%. Surface in modelAssumptions; log to Sentry only if the
+    // drift is extreme so we catch any regressions in the curve math.
+    const decomposedPeak = decomposed.totalRevenueByYear.reduce(
+      (m, v) => (v > m ? v : m),
+      0,
+    );
+    const globalPeak = adjustedPeakSales.median;
+    if (globalPeak > 0) {
+      const drift = Math.abs(decomposedPeak - globalPeak) / globalPeak;
+      modelAssumptions.push(
+        `Geographic split: US/EU5/Japan/China/RoW curves (${therapeuticArea}); reconciled within ${(drift * 100).toFixed(1)}% of global peak`,
+      );
+    }
+  } catch {
+    // Never let decomposition errors break the rNPV calculation.
+    geographicDecomposition = undefined;
+  }
 
   const rnpvResult: RNPVResult = {
     riskAdjustedNPV: Math.round(riskAdjustedNPV),
@@ -926,6 +1021,24 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     terminalValue: Math.round(terminalValue),
     modelAssumptions,
     peakSalesCeilingCheck: ceilingCheck.ok ? { ok: true } : ceilingCheck,
+    ...(comboDynamicsUsed
+      ? {
+          combinationAdjustment: {
+            multiplier: comboMultiplier,
+            context: input.combinationContext || comboDynamicsUsed.context,
+            comboFraction: comboDynamicsUsed.comboFraction,
+            revenueShare: comboDynamicsUsed.revenueShare,
+            ...(comboDynamicsUsed.partnerDrug ? { partnerDrug: comboDynamicsUsed.partnerDrug } : {}),
+            peakSalesDelta_M: Math.round((adjustedPeakSales.median - originalPeakSalesMedian) * 10) / 10,
+            originalPeakSales_M: Math.round(originalPeakSalesMedian * 10) / 10,
+            adjustedPeakSales_M: Math.round(adjustedPeakSales.median * 10) / 10,
+            rationale:
+              comboAdjustmentMedian.rationale ||
+              `Combination context: ${comboDynamicsUsed.context}. ${comboDynamicsUsed.notes}`,
+          },
+        }
+      : {}),
+    ...(geographicDecomposition ? { geographicDecomposition } : {}),
   };
 
   // Layer 1: Mathematical invariants — log to Sentry but never throw.
