@@ -232,6 +232,19 @@ export interface RNPVInput {
   /** Line of therapy: 1L commands premium, 3L+ faces more competition */
   lineOfTherapy?: string;
 
+  /**
+   * Mutation / biomarker subpopulation driver (Tier 4 item 13).
+   * Examples: 'krasG12C', 'krasG12D', 'egfrExon19', 'her2Mutated', 'gba1',
+   * 'lrrk2', 'apoe4', 'wildType'. Matches keys in SUBPOPULATION_MODIFIERS.
+   */
+  mutationStatus?: string;
+
+  /** Demographic subpopulation (Tier 4 item 13). */
+  demographicSubpop?: 'pediatric' | 'adult' | 'geriatric';
+
+  /** Clinical severity subpopulation (Tier 4 item 13). */
+  severityClass?: 'mild' | 'moderate' | 'severe';
+
   /** Combination potential: strong combo eligibility = higher value */
   combinationPotential?: string;
 

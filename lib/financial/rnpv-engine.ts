@@ -42,6 +42,7 @@ import {
 import { decomposeGeographicRevenue } from './geographic-revenue-curves';
 import { decomposeRisk } from './risk-decomposition';
 import { getDynamicWaccComponent } from './macro-factors';
+import { getSubpopulationModifier } from './subpopulation-modifiers';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 
 /**
@@ -611,6 +612,26 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const competitiveDensity = input.__internalFlags?.skipCompetitiveDensity
     ? null
     : getCompetitiveDensity(input.indication);
+
+  // 4d-subpop. Tier 4 Item 13: Patient subpopulation modifier.
+  // When the user specifies mutationStatus / demographicSubpop / severityClass
+  // (and the combination is in SUBPOPULATION_MODIFIERS), scale peak sales by
+  // the subpop's addressable-market multiplier. No-op when fields are omitted
+  // or no match exists. Flag-gated default off; backtest-validated in Stage 7.
+  const subpop = TIER4_FLAGS.subpopulation
+    ? getSubpopulationModifier(
+        input.indication,
+        input.mutationStatus,
+        input.lineOfTherapy,
+        input.demographicSubpop,
+        input.severityClass,
+      )
+    : { peakSalesMult: 1.0, posMult: 1.0, matchedKey: null, source: null };
+  if (subpop.peakSalesMult !== 1.0) {
+    adjustedPeakSales.low *= subpop.peakSalesMult;
+    adjustedPeakSales.median *= subpop.peakSalesMult;
+    adjustedPeakSales.high *= subpop.peakSalesMult;
+  }
   if (competitiveDensity) {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
@@ -944,6 +965,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       ? [`WARNING TAM ceiling: ${ceilingCheck.message} Not capped, but this exceeds the market leader's peak.`]
       : []),
     ...(competitiveDensity ? [`Competitive density: ${competitiveDensity.approvedDrugs} approved drugs, ${competitiveDensity.activeTrials} active trials → ${competitiveDensity.penetrationMultiplier}x penetration multiplier`] : []),
+    ...(subpop.matchedKey
+      ? [`Subpopulation: ${subpop.matchedKey} → peak ×${subpop.peakSalesMult.toFixed(2)}, PoS ×${subpop.posMult.toFixed(2)} (source: ${subpop.source})`]
+      : []),
     ...(comboDynamicsUsed && comboMultiplier !== 1.0
       ? [`Combination therapy adjustment: ×${comboMultiplier.toFixed(2)} (${(comboMultiplier * 100).toFixed(0)}% of monotherapy assumption). ${comboDynamicsUsed.notes}${comboDynamicsUsed.partnerDrug ? ` Partner: ${comboDynamicsUsed.partnerDrug}.` : ''}`]
       : []),
