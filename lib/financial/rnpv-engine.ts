@@ -43,6 +43,7 @@ import { decomposeGeographicRevenue } from './geographic-revenue-curves';
 import { decomposeRisk } from './risk-decomposition';
 import { getDynamicWaccComponent } from './macro-factors';
 import { getSubpopulationModifier } from './subpopulation-modifiers';
+import { getPatentCliffAdjustment } from './patent-cliffs';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 
 /**
@@ -632,6 +633,20 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     adjustedPeakSales.median *= subpop.peakSalesMult;
     adjustedPeakSales.high *= subpop.peakSalesMult;
   }
+
+  // 4d-cliff. Tier 4 Item 14: Patent cliff launch-timing adjustment.
+  // Compares the asset's projected launch year against the market leader's
+  // LOE + biosimilar dates. Pre-LOE launches face headwinds, post-biosimilar
+  // launches get tailwinds. Flag-gated default off.
+  const launchYear = new Date().getFullYear() + Math.round(yearsToMarket);
+  const patentCliff = TIER4_FLAGS.patentCliffs
+    ? getPatentCliffAdjustment(input.indication, launchYear)
+    : null;
+  if (patentCliff && patentCliff.multiplier !== 1.0) {
+    adjustedPeakSales.low *= patentCliff.multiplier;
+    adjustedPeakSales.median *= patentCliff.multiplier;
+    adjustedPeakSales.high *= patentCliff.multiplier;
+  }
   if (competitiveDensity) {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
@@ -968,6 +983,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     ...(subpop.matchedKey
       ? [`Subpopulation: ${subpop.matchedKey} → peak ×${subpop.peakSalesMult.toFixed(2)}, PoS ×${subpop.posMult.toFixed(2)} (source: ${subpop.source})`]
       : []),
+    ...(patentCliff && patentCliff.scenario !== 'noLeader'
+      ? [patentCliff.narrative]
+      : []),
     ...(comboDynamicsUsed && comboMultiplier !== 1.0
       ? [`Combination therapy adjustment: ×${comboMultiplier.toFixed(2)} (${(comboMultiplier * 100).toFixed(0)}% of monotherapy assumption). ${comboDynamicsUsed.notes}${comboDynamicsUsed.partnerDrug ? ` Partner: ${comboDynamicsUsed.partnerDrug}.` : ''}`]
       : []),
@@ -1087,6 +1105,18 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
         }
       : {}),
     ...(geographicDecomposition ? { geographicDecomposition } : {}),
+    ...(patentCliff && patentCliff.scenario !== 'noLeader' && patentCliff.leader
+      ? {
+          patentCliffAdjustment: {
+            multiplier: patentCliff.multiplier,
+            scenario: patentCliff.scenario,
+            narrative: patentCliff.narrative,
+            leaderDrug: patentCliff.leader.drug,
+            loeYear: patentCliff.leader.loeYear,
+            biosimilarYear: patentCliff.leader.biosimilarYear,
+          },
+        }
+      : {}),
   };
 
   // Layer 1: Mathematical invariants — log to Sentry but never throw.

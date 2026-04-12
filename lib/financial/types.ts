@@ -642,6 +642,20 @@ export interface RNPVResult {
    * of `unadjustedNPV - riskAdjustedNPV`; any residual is booked to `other`.
    */
   riskDecomposition?: RiskDecomposition;
+
+  /**
+   * Patent cliff adjustment metadata (Tier 4 item 14). Populated when
+   * TIER4_FLAGS.patentCliffs is on. Informational — the peak-sales
+   * multiplier has already been applied to cash flows.
+   */
+  patentCliffAdjustment?: {
+    multiplier: number;
+    scenario: string;
+    narrative: string;
+    leaderDrug?: string;
+    loeYear?: number;
+    biosimilarYear?: number;
+  };
 }
 
 // ---------------------------------------------------------------------------
