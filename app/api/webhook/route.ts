@@ -70,8 +70,9 @@ export async function POST(request: NextRequest) {
         if (session.metadata?.product === 'deal-report') {
           const reportPurchaseId = session.metadata.report_purchase_id;
           const reportUserId = session.metadata.user_id;
-          // Stripe always collects email at checkout — capture it
-          const customerEmail = session.customer_details?.email || session.customer_email || null;
+          // Stripe always collects email at checkout — capture it (normalized to lowercase
+          // so the .eq('email', …) lookup below matches our stored email convention).
+          const customerEmail = (session.customer_details?.email || session.customer_email || '').trim().toLowerCase() || null;
 
           if (reportPurchaseId) {
             const { error: reportError } = await supabase
@@ -150,7 +151,8 @@ export async function POST(request: NextRequest) {
         // --- SUBSCRIPTION PURCHASE ---
         // SECURITY: Use auth-verified userId from metadata first, then email as fallback.
         // This prevents user impersonation via email overlap.
-        const customerEmail = session.customer_email || session.customer_details?.email;
+        // Email normalized to lowercase so the fallback .eq('email', …) lookup matches.
+        const customerEmail = (session.customer_email || session.customer_details?.email || '').trim().toLowerCase() || null;
         const userId = session.metadata?.user_id;
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
@@ -328,7 +330,8 @@ export async function POST(request: NextRequest) {
         console.log('Payment succeeded:', invoice.id);
 
         const invoiceCustomerId = invoice.customer as string;
-        const invoiceEmail = invoice.customer_email;
+        // Normalized to lowercase so the .eq('email', …) lookup matches stored emails.
+        const invoiceEmail = invoice.customer_email ? invoice.customer_email.trim().toLowerCase() : null;
         const invoiceSubId = (invoice as unknown as { subscription: string | null }).subscription;
 
         // Safety net: ensure paying users are Pro regardless of how the subscription was created.

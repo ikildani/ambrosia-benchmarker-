@@ -183,57 +183,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
         }, 5000);
 
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          clearTimeout(sessionTimeout);
-          if (session?.user) {
-            const supabaseUser = session.user;
-            const userName = supabaseUser.user_metadata?.name ||
-                           supabaseUser.user_metadata?.full_name ||
-                           supabaseUser.email?.split('@')[0] ||
-                           'User';
+        // Async IIFE so we can AWAIT the tier DB query before dropping isLoading.
+        // Without the await, isLoading flips false while tier is still 'free' (initial),
+        // and the calculator page briefly renders the "Upgrade to Pro" banner for pro users
+        // who just signed in (their localStorage user_tier hint was cleared on sign-out).
+        (async () => {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            clearTimeout(sessionTimeout);
 
-            // Sync Supabase session to our auth context
-            const newUser: User = {
-              id: supabaseUser.id,
-              email: supabaseUser.email || '',
-              name: userName,
-              company: supabaseUser.user_metadata?.company,
-              createdAt: supabaseUser.created_at,
-            };
+            if (session?.user) {
+              const supabaseUser = session.user;
+              const userName = supabaseUser.user_metadata?.name ||
+                             supabaseUser.user_metadata?.full_name ||
+                             supabaseUser.email?.split('@')[0] ||
+                             'User';
 
-            setIsAuthenticated(true);
-            setUser(newUser);
-            localStorage.setItem('is_authenticated', 'true');
-            localStorage.setItem('user_data', JSON.stringify(newUser));
+              // Sync Supabase session to our auth context
+              const newUser: User = {
+                id: supabaseUser.id,
+                email: supabaseUser.email || '',
+                name: userName,
+                company: supabaseUser.user_metadata?.company,
+                createdAt: supabaseUser.created_at,
+              };
 
-            // Check tier: email allowlist first, then database
-            if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
-              setTierState('pro');
-              localStorage.setItem('user_tier', 'pro');
-            } else {
-              // Query actual tier from database (Stripe webhook sets this)
-              Promise.resolve(
-                supabase.from('user_profiles')
-                  .select('tier')
-                  .eq('id', supabaseUser.id)
-                  .single()
-              ).then(({ data: profile, error: tierError }) => {
-                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                  setTierState(profile.tier as 'pro' | 'report');
-                  localStorage.setItem('user_tier', profile.tier);
+              setIsAuthenticated(true);
+              setUser(newUser);
+              localStorage.setItem('is_authenticated', 'true');
+              localStorage.setItem('user_data', JSON.stringify(newUser));
+
+              // Check tier: email allowlist first (sync), then database (awaited)
+              if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                setTierState('pro');
+                localStorage.setItem('user_tier', 'pro');
+              } else {
+                // AWAIT the tier query so first paint already has the right tier.
+                // Wrapped in try/catch so a failed query doesn't block sign-in.
+                try {
+                  const { data: profile, error: tierError } = await supabase
+                    .from('user_profiles')
+                    .select('tier')
+                    .eq('id', supabaseUser.id)
+                    .single();
+                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                    setTierState(profile.tier as 'pro' | 'report');
+                    localStorage.setItem('user_tier', profile.tier);
+                  }
+                } catch {
+                  console.warn('[Auth] Tier query failed');
                 }
-              }).catch(() => console.warn('[Auth] Tier query failed'));
-            }
+              }
 
-            // Sync usage count from database
-            syncUsageFromDatabase(supabaseUser.id).catch(console.error);
+              // Sync usage count from database (fire-and-forget — not gating UI)
+              syncUsageFromDatabase(supabaseUser.id).catch(console.error);
+            }
+          } catch (error) {
+            clearTimeout(sessionTimeout);
+            captureClientError(error, 'AuthContext', { context: 'Supabase getSession failed' });
+          } finally {
+            setIsLoading(false);
           }
-          setIsLoading(false);
-        }).catch((error) => {
-          clearTimeout(sessionTimeout);
-          captureClientError(error, 'AuthContext', { context: 'Supabase getSession failed' });
-          setIsLoading(false);
-        });
+        })();
 
         // Listen for auth state changes (sign in, sign out, token refresh)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -256,28 +267,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             setIsAuthenticated(true);
             setUser(newUser);
-            setShowAuthModal(false);
             localStorage.setItem('is_authenticated', 'true');
             localStorage.setItem('user_data', JSON.stringify(newUser));
 
-            // Check tier: email allowlist first, then database
-            if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
-              setTierState('pro');
-              localStorage.setItem('user_tier', 'pro');
-            } else {
-              // Query actual tier from database (Stripe webhook sets this)
-              Promise.resolve(
-                supabase.from('user_profiles')
-                  .select('tier')
-                  .eq('id', supabaseUser.id)
-                  .single()
-              ).then(({ data: profile, error: tierError }) => {
-                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                  setTierState(profile.tier as 'pro' | 'report');
-                  localStorage.setItem('user_tier', profile.tier);
+            // Determine tier BEFORE dismissing the auth modal so there's no flicker
+            // where a pro user sees the "Upgrade to Pro" upsell during the gap between
+            // sign-in completing and the tier DB query resolving.
+            (async () => {
+              try {
+                if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                  setTierState('pro');
+                  localStorage.setItem('user_tier', 'pro');
+                } else {
+                  try {
+                    const { data: profile, error: tierError } = await supabase
+                      .from('user_profiles')
+                      .select('tier')
+                      .eq('id', supabaseUser.id)
+                      .single();
+                    if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
+                      setTierState(profile.tier as 'pro' | 'report');
+                      localStorage.setItem('user_tier', profile.tier);
+                    }
+                  } catch {
+                    console.warn('[Auth] Tier query failed on sign-in');
+                  }
                 }
-              }).catch(() => console.warn('[Auth] Tier query failed on sign-in'));
-            }
+              } finally {
+                setShowAuthModal(false);
+              }
+            })();
 
             // Sync usage count from database (so it persists across devices)
             syncUsageFromDatabase(supabaseUser.id).catch(console.error);
