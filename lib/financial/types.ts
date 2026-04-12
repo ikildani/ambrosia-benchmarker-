@@ -232,6 +232,19 @@ export interface RNPVInput {
   /** Line of therapy: 1L commands premium, 3L+ faces more competition */
   lineOfTherapy?: string;
 
+  /**
+   * Mutation / biomarker subpopulation driver (Tier 4 item 13).
+   * Examples: 'krasG12C', 'krasG12D', 'egfrExon19', 'her2Mutated', 'gba1',
+   * 'lrrk2', 'apoe4', 'wildType'. Matches keys in SUBPOPULATION_MODIFIERS.
+   */
+  mutationStatus?: string;
+
+  /** Demographic subpopulation (Tier 4 item 13). */
+  demographicSubpop?: 'pediatric' | 'adult' | 'geriatric';
+
+  /** Clinical severity subpopulation (Tier 4 item 13). */
+  severityClass?: 'mild' | 'moderate' | 'severe';
+
   /** Combination potential: strong combo eligibility = higher value */
   combinationPotential?: string;
 
@@ -337,6 +350,40 @@ export interface RNPVInput {
   biologicExperience?: string;
   /** Endoscopic endpoint */
   endoscopicEndpoint?: string;
+
+  // =========================================================================
+  // Internal flags — DO NOT set from public API code.
+  // Used by lib/financial/risk-decomposition.ts (Tier 4 item 11) to run
+  // counterfactual NPVs with specific risk sources neutralized. Always
+  // travel with skipDecomposition: true to prevent infinite recursion.
+  // =========================================================================
+  /** Internal: counterfactual flags for risk decomposition. */
+  __internalFlags?: RNPVInternalFlags;
+}
+
+/**
+ * Internal counterfactual flags used by the risk decomposer (item 11, Tier 4).
+ *
+ * Each flag, when true, neutralizes one risk source inside calculateRNPV()
+ * so the decomposer can measure the marginal value impact of that source by
+ * comparing the counterfactual NPV against the baseline NPV. NEVER set these
+ * from public API code — they exist solely for internal recursive calls.
+ */
+export interface RNPVInternalFlags {
+  /** Strip MANUFACTURING_WACC_PREMIUM from the discount rate. */
+  skipMfgPremium?: boolean;
+  /** Skip the indication-specific competitive density penetration multiplier. */
+  skipCompetitiveDensity?: boolean;
+  /** Skip the MARKET_ACCESS_DELAY_MONTHS lag added to time-to-market. */
+  skipMarketAccessDelay?: boolean;
+  /** Skip the indication generic-entrenchment peak sales penalty. */
+  skipGenericEntrenchment?: boolean;
+  /** Neutralize regulatory designations (breakthrough/fastTrack/orphan/prime). */
+  skipRegulatoryDesignations?: boolean;
+  /** Strip indication modifier + modality/biomarker/regulatory PoS uplifts. */
+  clinicalOnlyPoS?: boolean;
+  /** Suppress the recursive decomposeRisk() call (set by the decomposer). */
+  skipDecomposition?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -588,6 +635,71 @@ export interface RNPVResult {
      */
     globalEquivalentPeakSales: number;
   };
+
+  /**
+   * 4-bucket attribution of value erosion (Tier 4 item 11). Populated when
+   * TIER4_FLAGS.riskDecomposition is on. Buckets should sum to within 10%
+   * of `unadjustedNPV - riskAdjustedNPV`; any residual is booked to `other`.
+   */
+  riskDecomposition?: RiskDecomposition;
+
+  /**
+   * Patent cliff adjustment metadata (Tier 4 item 14). Populated when
+   * TIER4_FLAGS.patentCliffs is on. Informational — the peak-sales
+   * multiplier has already been applied to cash flows.
+   */
+  patentCliffAdjustment?: {
+    multiplier: number;
+    scenario: string;
+    narrative: string;
+    leaderDrug?: string;
+    loeYear?: number;
+    biosimilarYear?: number;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Risk Decomposition (Tier 4 Item 11)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single risk bucket in the 4-way decomposition of value erosion.
+ * All impacts are reported as positive $M (magnitude of value destroyed).
+ */
+export interface RiskBucket {
+  /** Magnitude of NPV impact attributed to this bucket ($M, ≥ 0). */
+  impact_M: number;
+  /** Share of total risk wedge attributable to this bucket (0..1). */
+  percentOfTotal: number;
+  /** Human-readable drivers (e.g., "phase 2→3 attrition", "Keytruda crowding"). */
+  drivers: string[];
+}
+
+/**
+ * 4-bucket attribution of `unadjustedNPV - riskAdjustedNPV` — the "risk wedge."
+ * Each bucket represents how much NPV is destroyed by a specific risk source,
+ * computed via counterfactual re-runs of calculateRNPV with that source
+ * neutralized.
+ */
+export interface RiskDecomposition {
+  /** Clinical: phase transition attrition (unavoidable biology/trial risk). */
+  clinical: RiskBucket;
+  /** Commercial: competitive density + GTN realism + market access. */
+  commercial: RiskBucket;
+  /** Manufacturing: CMC complexity premium (cell/gene therapy, ADCs, etc.). */
+  manufacturing: RiskBucket;
+  /** Regulatory: designation risk, territory risk premium, FDA pathway risk. */
+  regulatory: RiskBucket;
+  /** Residual — bookkeeping bucket so the four main ones always reconcile. */
+  other: RiskBucket;
+  /** Sum of bucket impacts ($M). Should ≈ unadjustedNPV − riskAdjustedNPV. */
+  total_M: number;
+  /**
+   * Absolute reconciliation gap vs. `unadjustedNPV − riskAdjustedNPV`,
+   * normalized by total_M (0..1). Violations > 0.10 surface as Sentry
+   * breadcrumbs but never throw (decomposition is informational).
+   */
+  reconciliationGap: number;
 }
 
 // ---------------------------------------------------------------------------

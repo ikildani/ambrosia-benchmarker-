@@ -26,6 +26,8 @@ import {
   getTerritorialEntryLag,
   type CompetitiveIntensity,
 } from './competitive-calibration';
+import { TIER4_FLAGS } from '@/lib/feature-flags';
+import { getRiskFreeRate } from './macro-factors';
 
 // ==========================================================================
 // Upgrade 4: Competitive Dynamics (Time-Varying Market Share Erosion)
@@ -756,7 +758,11 @@ export function calculateRealOptions(
   const sigma = Math.max(0.30, Math.min(0.90, impliedSigma));
 
   // --- 2. Constants ---
-  const rf = 0.045; // US 10-year Treasury benchmark (2024-2026 range)
+  // Risk-free rate: static 4.5% baseline (US 10Y Treasury avg 2024-2026).
+  // When TIER4_FLAGS.macroFactors is on, read the live snapshot from
+  // lib/financial/macro-factors.ts → getRiskFreeRate() (hydrated daily
+  // by app/api/cron/macro-factors cron, falls back to static if DB empty).
+  const rf = TIER4_FLAGS.macroFactors ? getRiskFreeRate() : 0.045;
   const N = 30;     // Lattice steps per phase
 
   // --- 3. Identify remaining phase transitions ---

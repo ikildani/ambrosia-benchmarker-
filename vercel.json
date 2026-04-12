@@ -189,6 +189,14 @@
     {
       "path": "/api/cron/distribution-monitor",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/macro-factors",
+      "schedule": "15 6 * * *"
+    },
+    {
+      "path": "/api/cron/patent-cliffs",
+      "schedule": "0 6 1 */3 *"
     }
   ]
 }
