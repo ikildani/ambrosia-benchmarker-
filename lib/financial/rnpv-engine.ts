@@ -41,6 +41,7 @@ import {
 } from './combination-therapy';
 import { decomposeGeographicRevenue } from './geographic-revenue-curves';
 import { decomposeRisk } from './risk-decomposition';
+import { getDynamicWaccComponent } from './macro-factors';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 
 /**
@@ -1390,6 +1391,13 @@ function getDefaultDiscountRate(
   // Apply deal-type risk adjustment (e.g., acquisition -1.5pp, collaboration +2pp)
   if (dealType && DEAL_TYPE_RISK_ADJUSTMENT[dealType] != null) {
     rate += DEAL_TYPE_RISK_ADJUSTMENT[dealType];
+  }
+
+  // Tier 4 Item 12: Layer dynamic rf delta on top of the static rate when the
+  // macro-factors flag is on. Flag-gated default off — zero production
+  // behavior change until the 100-deal backtest validates the blend.
+  if (TIER4_FLAGS.macroFactors) {
+    rate += getDynamicWaccComponent(rate);
   }
 
   // Clamp to reasonable range
