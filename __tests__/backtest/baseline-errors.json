@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-13T01:46:13.182Z",
+  "runAt": "2026-04-13T02:47:30.618Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -9,7 +9,7 @@
     "TIER4_SUBPOP": false,
     "TIER4_PATENT_CLIFFS": false
   },
-  "summary": {
+  "fullScope": {
     "totalDeals": 251,
     "hitRate25": 0.05976095617529881,
     "hitRate35": 0.08366533864541832,
@@ -451,137 +451,295 @@
       }
     }
   },
-  "worstDeals": [
-    {
-      "case": {
-        "id": "geo-009",
-        "year": 2023,
-        "licensor": "Pharming Group",
-        "licensee": "CSPC Pharmaceutical",
-        "therapeuticArea": "immunology",
-        "indication": "heredAngioedema",
-        "modality": "mab",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "china",
-        "actualUpfront_M": 15,
-        "actualTotalDeal_M": 180,
-        "peakSalesMedian_M": 3000
+  "coreScope": {
+    "totalDeals": 69,
+    "hitRate25": 0.13043478260869565,
+    "hitRate35": 0.14492753623188406,
+    "hitRate50": 0.30434782608695654,
+    "meanAbsErrorPct": 1.563504482743093,
+    "medianSignedErrorPct": -0.5129032258064516,
+    "rmseUpfront_M": 612.8,
+    "byTherapeuticArea": {
+      "cardiovascular": {
+        "n": 7,
+        "hitRate25": 0.14285714285714285,
+        "hitRate35": 0.14285714285714285,
+        "meanSignedErrorPct": -0.6497048496818082,
+        "meanAbsErrorPct": 0.6497048496818082
       },
-      "predictedUpfront_M": 3666,
-      "predictedTotalDeal_M": 6599,
-      "upfrontErrorPct": 243.4,
-      "totalDealErrorPct": 35.66111111111111,
-      "upfrontErrorAbs_M": 3651,
-      "totalDealErrorAbs_M": 6419,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "hem-013",
-        "year": 2023,
-        "licensor": "Rigel Pharmaceuticals",
-        "licensee": "Kissei Pharmaceutical",
-        "therapeuticArea": "hematology",
-        "indication": "itp",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "japan",
-        "actualUpfront_M": 17,
-        "actualTotalDeal_M": 200,
-        "peakSalesMedian_M": 1500
+      "infectiousDisease": {
+        "n": 9,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 1.0420000000000003,
+        "meanAbsErrorPct": 2.021703703703704
       },
-      "predictedUpfront_M": 1810,
-      "predictedTotalDeal_M": 3257,
-      "upfrontErrorPct": 105.47058823529412,
-      "totalDealErrorPct": 15.285,
-      "upfrontErrorAbs_M": 1793,
-      "totalDealErrorAbs_M": 3057,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "enrich-sm-008",
-        "year": 2022,
-        "licensor": "Tarsus Pharmaceuticals",
-        "licensee": "Samsung",
-        "therapeuticArea": "ophthalmology",
-        "indication": "blepharitis",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "ex_us",
-        "actualUpfront_M": 30,
-        "actualTotalDeal_M": 210,
-        "peakSalesMedian_M": 1000
+      "ophthalmology": {
+        "n": 4,
+        "hitRate25": 0.25,
+        "hitRate35": 0.25,
+        "meanSignedErrorPct": 0.876554054054054,
+        "meanAbsErrorPct": 1.493445945945946
       },
-      "predictedUpfront_M": 1199,
-      "predictedTotalDeal_M": 2157,
-      "upfrontErrorPct": 38.96666666666667,
-      "totalDealErrorPct": 9.271428571428572,
-      "upfrontErrorAbs_M": 1169,
-      "totalDealErrorAbs_M": 1947,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "cv-011",
-        "year": 2024,
-        "licensor": "Agepha Pharma",
-        "licensee": "Grünenthal",
-        "therapeuticArea": "cardiovascular",
-        "indication": "venousThromboembolism",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "europe",
-        "actualUpfront_M": 45,
-        "actualTotalDeal_M": 180,
-        "peakSalesMedian_M": 2000
+      "womensHealth": {
+        "n": 4,
+        "hitRate25": 0.5,
+        "hitRate35": 0.5,
+        "meanSignedErrorPct": 3.7204545454545452,
+        "meanAbsErrorPct": 3.7204545454545452
       },
-      "predictedUpfront_M": 1753,
-      "predictedTotalDeal_M": 3155,
-      "upfrontErrorPct": 37.955555555555556,
-      "totalDealErrorPct": 16.52777777777778,
-      "upfrontErrorAbs_M": 1708,
-      "totalDealErrorAbs_M": 2975,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "small-007",
-        "year": 2024,
-        "licensor": "Theratechnologies",
-        "licensee": "TaiMed Biologics",
-        "therapeuticArea": "infectiousDisease",
-        "indication": "hiv",
-        "modality": "mab",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 75,
-        "actualTotalDeal_M": 200,
-        "peakSalesMedian_M": 1200
+      "oncology": {
+        "n": 21,
+        "hitRate25": 0.09523809523809523,
+        "hitRate35": 0.14285714285714285,
+        "meanSignedErrorPct": -0.02279751806008582,
+        "meanAbsErrorPct": 1.2939747667373345
       },
-      "predictedUpfront_M": 1187,
-      "predictedTotalDeal_M": 2137,
-      "upfrontErrorPct": 14.826666666666666,
-      "totalDealErrorPct": 9.685,
-      "upfrontErrorAbs_M": 1112,
-      "totalDealErrorAbs_M": 1937,
-      "within25": false,
-      "within35": false,
-      "within50": false
+      "immunology": {
+        "n": 3,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 4.144086021505376,
+        "meanAbsErrorPct": 4.789247311827957
+      },
+      "neurology": {
+        "n": 2,
+        "hitRate25": 0.5,
+        "hitRate35": 0.5,
+        "meanSignedErrorPct": -0.73,
+        "meanAbsErrorPct": 0.78
+      },
+      "rareDisease": {
+        "n": 3,
+        "hitRate25": 0.3333333333333333,
+        "hitRate35": 0.3333333333333333,
+        "meanSignedErrorPct": -0.705327812284334,
+        "meanAbsErrorPct": 0.705327812284334
+      },
+      "dermatology": {
+        "n": 5,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 1.06052987012987,
+        "meanAbsErrorPct": 2.0740155844155845
+      },
+      "gastroenterology": {
+        "n": 3,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.5913333333333334,
+        "meanAbsErrorPct": 0.5913333333333334
+      },
+      "metabolic": {
+        "n": 2,
+        "hitRate25": 0.5,
+        "hitRate35": 0.5,
+        "meanSignedErrorPct": 0.7466666666666666,
+        "meanAbsErrorPct": 0.9633333333333334
+      },
+      "hematology": {
+        "n": 4,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.6675,
+        "meanAbsErrorPct": 0.6675
+      },
+      "rare_disease": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.925,
+        "meanAbsErrorPct": 0.925
+      },
+      "pulmonology": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 1.4,
+        "meanAbsErrorPct": 1.4
+      }
     },
+    "byPhase": {
+      "phase3": {
+        "n": 26,
+        "hitRate25": 0.15384615384615385,
+        "hitRate35": 0.15384615384615385,
+        "meanSignedErrorPct": 2.1201255713889084,
+        "meanAbsErrorPct": 2.658164055650718
+      },
+      "phase2": {
+        "n": 43,
+        "hitRate25": 0.11627906976744186,
+        "hitRate35": 0.13953488372093023,
+        "meanSignedErrorPct": -0.4814105807782763,
+        "meanAbsErrorPct": 0.9016172991245293
+      }
+    },
+    "byModality": {
+      "smallMolecule": {
+        "n": 19,
+        "hitRate25": 0.21052631578947367,
+        "hitRate35": 0.2631578947368421,
+        "meanSignedErrorPct": 1.3992408468724256,
+        "meanAbsErrorPct": 2.0772184832711145
+      },
+      "rnai": {
+        "n": 4,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.8766451612903225,
+        "meanAbsErrorPct": 0.8766451612903225
+      },
+      "myosinInhibitor": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.676,
+        "meanAbsErrorPct": 0.676
+      },
+      "aso": {
+        "n": 1,
+        "hitRate25": 1,
+        "hitRate35": 1,
+        "meanSignedErrorPct": -0.08666666666666667,
+        "meanAbsErrorPct": 0.08666666666666667
+      },
+      "mrna": {
+        "n": 2,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.998,
+        "meanAbsErrorPct": 0.998
+      },
+      "antiviral": {
+        "n": 3,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.515,
+        "meanAbsErrorPct": 0.515
+      },
+      "vaccinePreventive": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 6.56,
+        "meanAbsErrorPct": 6.56
+      },
+      "antibioticNovel": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 6.766666666666667,
+        "meanAbsErrorPct": 6.766666666666667
+      },
+      "intravitreal": {
+        "n": 1,
+        "hitRate25": 1,
+        "hitRate35": 1,
+        "meanSignedErrorPct": -0.25,
+        "meanAbsErrorPct": 0.25
+      },
+      "topicalOphthalmic": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 4.3,
+        "meanAbsErrorPct": 4.3
+      },
+      "geneTherapyOcular": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.9837837837837838,
+        "meanAbsErrorPct": 0.9837837837837838
+      },
+      "gnrhAntagonist": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 0.38181818181818183,
+        "meanAbsErrorPct": 0.38181818181818183
+      },
+      "adc": {
+        "n": 7,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 1.1225800376647836,
+        "meanAbsErrorPct": 2.252023136938391
+      },
+      "cellTherapy": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -1,
+        "meanAbsErrorPct": 1
+      },
+      "bispecific": {
+        "n": 3,
+        "hitRate25": 0.3333333333333333,
+        "hitRate35": 0.3333333333333333,
+        "meanSignedErrorPct": -0.6608503401360544,
+        "meanAbsErrorPct": 0.6608503401360544
+      },
+      "mab": {
+        "n": 9,
+        "hitRate25": 0.2222222222222222,
+        "hitRate35": 0.2222222222222222,
+        "meanSignedErrorPct": -0.24754365079365076,
+        "meanAbsErrorPct": 0.6911547619047619
+      },
+      "geneTherapy": {
+        "n": 3,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -1.0396135265700484,
+        "meanAbsErrorPct": 1.0396135265700484
+      },
+      "jakInhibitorDerm": {
+        "n": 2,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 1.9571428571428569,
+        "meanAbsErrorPct": 2.642857142857143
+      },
+      "radiopharmaceutical": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.908,
+        "meanAbsErrorPct": 0.908
+      },
+      "peptide": {
+        "n": 2,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 0.675,
+        "meanAbsErrorPct": 1.035
+      },
+      "bispecificAntibody": {
+        "n": 2,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.9507407407407408,
+        "meanAbsErrorPct": 0.9507407407407408
+      },
+      "vaccine": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.876,
+        "meanAbsErrorPct": 0.876
+      },
+      "antibody": {
+        "n": 2,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -1.1175,
+        "meanAbsErrorPct": 1.1175
+      }
+    }
+  },
+  "worstDealsCore": [
     {
       "case": {
         "id": "enrich-wh-004",
@@ -604,32 +762,6 @@
       "totalDealErrorPct": 2.668965517241379,
       "upfrontErrorAbs_M": 213,
       "totalDealErrorAbs_M": 387,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "enrich-wh-001",
-        "year": 2020,
-        "licensor": "TherapeuticsMD",
-        "licensee": "AbbVie",
-        "therapeuticArea": "womensHealth",
-        "indication": "menopause",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 50,
-        "actualTotalDeal_M": 300,
-        "peakSalesMedian_M": 800
-      },
-      "predictedUpfront_M": 726,
-      "predictedTotalDeal_M": 1307,
-      "upfrontErrorPct": 13.52,
-      "totalDealErrorPct": 3.3566666666666665,
-      "upfrontErrorAbs_M": 676,
-      "totalDealErrorAbs_M": 1007,
       "within25": false,
       "within35": false,
       "within50": false
@@ -662,32 +794,6 @@
     },
     {
       "case": {
-        "id": "small-002",
-        "year": 2023,
-        "licensor": "Epizyme",
-        "licensee": "Ipsen",
-        "therapeuticArea": "oncology",
-        "indication": "sarcoma",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "ex_us",
-        "actualUpfront_M": 247,
-        "actualTotalDeal_M": 247,
-        "peakSalesMedian_M": 2500
-      },
-      "predictedUpfront_M": 2906,
-      "predictedTotalDeal_M": 5231,
-      "upfrontErrorPct": 10.765182186234817,
-      "totalDealErrorPct": 20.178137651821864,
-      "upfrontErrorAbs_M": 2659,
-      "totalDealErrorAbs_M": 4984,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "geo-003",
         "year": 2023,
         "licensor": "CSPC Pharmaceutical",
@@ -708,6 +814,188 @@
       "totalDealErrorPct": 0.6728571428571428,
       "upfrontErrorAbs_M": 442,
       "totalDealErrorAbs_M": 471,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "id-012",
+        "year": 2024,
+        "licensor": "Cidara Therapeutics",
+        "licensee": "Melinta/Mundipharma",
+        "therapeuticArea": "infectiousDisease",
+        "indication": "fungalInfections",
+        "modality": "antibioticNovel",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 30,
+        "actualTotalDeal_M": 500,
+        "peakSalesMedian_M": 1200
+      },
+      "predictedUpfront_M": 233,
+      "predictedTotalDeal_M": 544,
+      "upfrontErrorPct": 6.766666666666667,
+      "totalDealErrorPct": 0.088,
+      "upfrontErrorAbs_M": 203,
+      "totalDealErrorAbs_M": 44,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "id-007",
+        "year": 2023,
+        "licensor": "VBI Vaccines",
+        "licensee": "Brii Biosciences",
+        "therapeuticArea": "infectiousDisease",
+        "indication": "hepatitisB",
+        "modality": "vaccinePreventive",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "china",
+        "actualUpfront_M": 25,
+        "actualTotalDeal_M": 200,
+        "peakSalesMedian_M": 1200
+      },
+      "predictedUpfront_M": 189,
+      "predictedTotalDeal_M": 442,
+      "upfrontErrorPct": 6.56,
+      "totalDealErrorPct": 1.21,
+      "upfrontErrorAbs_M": 164,
+      "totalDealErrorAbs_M": 242,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "derm-012",
+        "year": 2023,
+        "licensor": "Almirall",
+        "licensee": "AbbVie",
+        "therapeuticArea": "dermatology",
+        "indication": "psoriasis",
+        "modality": "jakInhibitorDerm",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "europe",
+        "actualUpfront_M": 50,
+        "actualTotalDeal_M": 660,
+        "peakSalesMedian_M": 1000
+      },
+      "predictedUpfront_M": 280,
+      "predictedTotalDeal_M": 652,
+      "upfrontErrorPct": 4.6,
+      "totalDealErrorPct": -0.012121212121212121,
+      "upfrontErrorAbs_M": 230,
+      "totalDealErrorAbs_M": -8,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "verified-2025-009",
+        "year": 2025,
+        "licensor": "Hengrui Medicine",
+        "licensee": "Glenmark Pharmaceuticals",
+        "therapeuticArea": "oncology",
+        "indication": "breast cancer",
+        "modality": "adc",
+        "phase": "phase2",
+        "dealType": "licensing",
+        "territory": "ex_china",
+        "actualUpfront_M": 18,
+        "actualTotalDeal_M": 1100,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 98,
+      "predictedTotalDeal_M": 298,
+      "upfrontErrorPct": 4.444444444444445,
+      "totalDealErrorPct": -0.7290909090909091,
+      "upfrontErrorAbs_M": 80,
+      "totalDealErrorAbs_M": -802,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "oph-008",
+        "year": 2023,
+        "licensor": "Ocuphire Pharma",
+        "licensee": "Viatris",
+        "therapeuticArea": "ophthalmology",
+        "indication": "myopiaProgression",
+        "modality": "topicalOphthalmic",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 30,
+        "actualTotalDeal_M": 400,
+        "peakSalesMedian_M": 1000
+      },
+      "predictedUpfront_M": 159,
+      "predictedTotalDeal_M": 370,
+      "upfrontErrorPct": 4.3,
+      "totalDealErrorPct": -0.075,
+      "upfrontErrorAbs_M": 129,
+      "totalDealErrorAbs_M": -30,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "enrich-derm-004",
+        "year": 2020,
+        "licensor": "MC2 Therapeutics",
+        "licensee": "LEO Pharma",
+        "therapeuticArea": "dermatology",
+        "indication": "psoriasis",
+        "modality": "smallMolecule",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "ex_us",
+        "actualUpfront_M": 55,
+        "actualTotalDeal_M": 300,
+        "peakSalesMedian_M": 1000
+      },
+      "predictedUpfront_M": 233,
+      "predictedTotalDeal_M": 543,
+      "upfrontErrorPct": 3.2363636363636363,
+      "totalDealErrorPct": 0.81,
+      "upfrontErrorAbs_M": 178,
+      "totalDealErrorAbs_M": 243,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "geo-016",
+        "year": 2024,
+        "licensor": "Connect Biopharma",
+        "licensee": "Astellas Pharma",
+        "therapeuticArea": "immunology",
+        "indication": "atopicderm",
+        "modality": "smallMolecule",
+        "phase": "phase2",
+        "dealType": "licensing",
+        "territory": "japan",
+        "actualUpfront_M": 25,
+        "actualTotalDeal_M": 350,
+        "peakSalesMedian_M": 3000
+      },
+      "predictedUpfront_M": 78,
+      "predictedTotalDeal_M": 237,
+      "upfrontErrorPct": 2.12,
+      "totalDealErrorPct": -0.32285714285714284,
+      "upfrontErrorAbs_M": 53,
+      "totalDealErrorAbs_M": -113,
       "within25": false,
       "within35": false,
       "within50": false
