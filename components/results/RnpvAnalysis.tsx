@@ -8,8 +8,9 @@ import {
 } from 'recharts';
 import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sparkles, BarChart3, Globe } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
+import ConfidenceBand from '@/components/ConfidenceBand';
 import { CHART_COLORS } from '@/lib/chartTheme';
-import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult } from '@/lib/financial/types';
+import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult, MonteCarloResult } from '@/lib/financial/types';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
 
 interface RnpvAnalysisProps {
@@ -23,6 +24,8 @@ interface RnpvAnalysisProps {
   lifecycleExtensions?: LifecycleExtensionResult;
   competitiveDynamics?: CompetitiveDynamicsResult;
   realOptions?: RealOptionsResult;
+  /** R24: Monte Carlo distribution for rendering 80% CI band around rNPV point estimate */
+  monteCarloResult?: MonteCarloResult;
 }
 
 const fmt = (v: number) => {
@@ -81,6 +84,7 @@ export default function RnpvAnalysis({
   lifecycleExtensions,
   competitiveDynamics,
   realOptions,
+  monteCarloResult,
 }: RnpvAnalysisProps) {
   // Fix 2: Use a Set so multiple sections can be open simultaneously; scenarios + waterfall open by default
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['scenarios', 'waterfall']));
@@ -316,6 +320,12 @@ export default function RnpvAnalysis({
               <div className="p-3 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-500/10 dark:to-cyan-500/10 rounded-lg border border-teal-100 dark:border-teal-500/20 text-center">
                 <p className="text-[10px] font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total rNPV</p>
                 <p className="text-lg sm:text-xl font-bold text-teal-700 dark:text-teal-400 font-mono">{formatCurrency(rnpvResult.riskAdjustedNPV)}</p>
+                {/* R24: Monte Carlo 80% CI band (P10–P90) — the BD-facing uncertainty range around the point estimate */}
+                {monteCarloResult && (
+                  <p className="text-[10px] font-mono mt-0.5 text-teal-600/70 dark:text-teal-400/70" title="80% confidence interval from Monte Carlo simulation (P10 – P90)">
+                    80% CI: {fmt(monteCarloResult.confidenceInterval80.low)} – {fmt(monteCarloResult.confidenceInterval80.high)}
+                  </p>
+                )}
                 {realOptions && realOptions.flexibilityPremium !== 0 && (
                   <p className={`text-[10px] font-mono mt-0.5 ${realOptions.flexibilityPremium >= 0 ? 'text-teal-600 dark:text-teal-500' : 'text-amber-600'}`}>
                     {realOptions.flexibilityPremium >= 0 ? '+' : ''}{fmt(realOptions.flexibilityPremium)} option value
@@ -338,11 +348,43 @@ export default function RnpvAnalysis({
               </div>
             </div>
 
+            {/* R40 (2026-04-13): Visual confidence bands for upfront + total deal value.
+                Uses Monte Carlo P10/P90 when available, otherwise falls back to the
+                engine's low/high range. BD-critical — point estimates without uncertainty
+                bands read as naive. */}
+            {rnpvResult.impliedDealValue && (
+              <div className="mb-5 grid gap-3 md:grid-cols-2">
+                <ConfidenceBand
+                  label="Upfront Payment"
+                  sublabel={monteCarloResult ? 'Monte Carlo P10 / P50 / P90' : 'Engine range (low / median / high)'}
+                  source={monteCarloResult ? 'monte-carlo' : 'multiplier'}
+                  low={monteCarloResult ? monteCarloResult.confidenceInterval80.low * (rnpvResult.impliedDealValue.upfront.low / rnpvResult.riskAdjustedNPV) : rnpvResult.impliedDealValue.upfront.low}
+                  median={rnpvResult.impliedDealValue.upfront.median}
+                  high={monteCarloResult ? monteCarloResult.confidenceInterval80.high * (rnpvResult.impliedDealValue.upfront.high / rnpvResult.riskAdjustedNPV) : rnpvResult.impliedDealValue.upfront.high}
+                  benchmark={benchmarkMedian ? benchmarkMedian * 0.3 : undefined}
+                />
+                <ConfidenceBand
+                  label="Total Deal Value"
+                  sublabel={monteCarloResult ? 'Monte Carlo P10 / P50 / P90' : 'Engine range (low / median / high)'}
+                  source={monteCarloResult ? 'monte-carlo' : 'multiplier'}
+                  low={rnpvResult.impliedDealValue.totalDeal.low}
+                  median={rnpvResult.impliedDealValue.totalDeal.median}
+                  high={rnpvResult.impliedDealValue.totalDeal.high}
+                  benchmark={benchmarkMedian}
+                />
+              </div>
+            )}
+
             {/* ═══ Fix 3: Valuation Summary — Goldman one-pager row ═══ */}
             <div className="grid grid-cols-5 gap-2 mb-5 p-3 bg-slate-50 dark:bg-slate-700/20 rounded-lg border border-slate-200 dark:border-slate-600">
               <div className="text-center">
                 <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">rNPV</p>
                 <p className="text-sm font-bold font-mono text-teal-700 dark:text-teal-400">{fmt(rnpvResult.riskAdjustedNPV)}</p>
+                {monteCarloResult && (
+                  <p className="text-[8px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                    {fmt(monteCarloResult.confidenceInterval80.low)}–{fmt(monteCarloResult.confidenceInterval80.high)}
+                  </p>
+                )}
               </div>
               <div className="text-center">
                 <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Implied Deal</p>
