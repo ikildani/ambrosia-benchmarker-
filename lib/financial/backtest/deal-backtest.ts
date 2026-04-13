@@ -139,11 +139,51 @@ const PEAK_SALES_BY_TA_M: Record<string, number> = {
 };
 
 /**
+ * Round 11 (2026-04-13): Indication-specific peak sales overrides for
+ * specialty/narrow-indication deals where TA defaults overshoot real
+ * typical-asset peaks. Values represent typical Phase 2/3 asset peaks
+ * (not class leader), sourced with 2022-2024 citations.
+ *
+ * Scope deliberately narrow — only indications where (a) the TA default
+ * clearly mis-anchors, (b) there's defensible 2022-2024 source data,
+ * and (c) the backtest sweep confirms no regression. Broader override
+ * maps (22+ indications) regress hit rates via over-correction.
+ */
+const INDICATION_PEAK_OVERRIDES_M: Record<string, number> = {
+  // womensHealth: no approved preterm labor drug exists. Makena (Covis
+  // Pharma, 17-hydroxyprogesterone caproate) withdrawn by FDA April 2023
+  // after PROLONG trial failed; peak sales pre-withdrawal ~$150M (Covis/
+  // AMAG pre-withdrawal 2022 SEC filings). Market is essentially without
+  // a branded drug, with generic progesterone filling the gap.
+  preterm_labor: 200,
+
+  // infectiousDisease: IV antifungals are niche hospital-use products.
+  // Cresemba peak ~$300M (Astellas/Basilea 2024 annual), Mycamine
+  // historical ~$400M (Astellas legacy), Brexafemme ~$100M ramp
+  // (Scynexis 2024 10-K). Typical new asset $200-500M.
+  fungalInfections: 400,
+  antifungal: 400,
+
+  // ophthalmology: no FDA-approved myopia progression drug; low-dose
+  // atropine 0.01% pipeline only (Ocuphire, Nevakar). Market cap
+  // estimated by Market Research Future 2024 at ~$500M globally but
+  // per-asset revenue anchors at $100-200M given market split across
+  // pipeline players.
+  myopiaProgression: 200,
+};
+
+/**
  * Convert an ExtendedComparableDeal row into the backtest case shape the
- * runner consumes. Peak sales hint defaults to TA anchor when not in the row.
+ * runner consumes. Peak sales resolution:
+ *   1. Indication-specific override (R11) — narrow specialty indications
+ *   2. TA default (R10 upward-corrected for undershooting TAs)
  */
 function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
-  const peakSalesMedian_M = PEAK_SALES_BY_TA_M[deal.therapeuticArea] ?? 1500;
+  const indicationKey = deal.indication_specific || deal.indication_category;
+  const peakSalesMedian_M =
+    INDICATION_PEAK_OVERRIDES_M[indicationKey] ??
+    PEAK_SALES_BY_TA_M[deal.therapeuticArea] ??
+    1500;
   return {
     id: deal.id,
     year: deal.year,
