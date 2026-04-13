@@ -21,6 +21,7 @@ import type { RNPVInput, RNPVResult } from '../types';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
+import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -353,73 +354,35 @@ function applyEarlyStageFloor(rawUpfront: number, phase: string): number {
 }
 
 /**
- * Round 7 (2026-04-13): Approved-stage licensing dampener.
- *
- * Approved-stage licensing deals are territorial re-licensing of already-
- * launched products (Pharming Ruconest → CSPC China, Rigel Tavalisse →
- * Kissei Japan, Tarsus → Samsung Korea, Epizyme Tazverik → Ipsen ex-US).
- * The upfront reflects a single regional rights package, not global NPV,
- * but the rNPV engine scores the full global product and produces 100-200×
- * over-predictions (baseline median signed error +1302% on the 10
- * approved+licensing deals in full scope).
- *
- * The 0.08 multiplier matches typical territorial revenue share per
- * `lib/financial/geographic-revenue-curves.ts` (Japan 0.08, China 0.10,
- * EU5 0.22 — single-region ex-US rights cluster in the 5-15% band). The
- * empirical backtest optimum (0.08 drives the slice's median signed error
- * to +12% and lifts ±25%/±35%/±50% from 0/0/0 → 30/30/30) matches the
- * theoretical prior.
- *
- * One-sided correction — only applies to (phase='approved' AND
- * dealType='licensing'), never touches any other cohort including
- * approved acquisitions, collaborations, or codev.
+ * Round 7 approved-stage licensing dampener — now sourced from the
+ * engine-level `DEAL_TYPE_PROFILES` schema (Step C of the engine
+ * restructure). Behavior unchanged; the 0.08 multiplier now lives as
+ * `licensing.postApprovalUpfrontMultiplier` in
+ * `lib/financial/deal-type-profiles.ts` alongside other deal-type
+ * metadata (upfront percent ranges, citations, characterization).
  */
-const APPROVED_LICENSING_DAMPENER = 0.08;
-
 function applyApprovedLicensingDampener(
   rawUpfront: number,
   phase: string,
   dealType: string,
 ): number {
-  if (phase === 'approved' && dealType === 'licensing') {
-    return rawUpfront * APPROVED_LICENSING_DAMPENER;
-  }
-  return rawUpfront;
+  return rawUpfront * getPostApprovalUpfrontMultiplier(dealType, phase);
 }
 
 /**
- * Round 9 (2026-04-13): Approved-stage collaboration floor.
- *
- * Approved-stage collaboration deals are co-commercialization agreements
- * where two pharma partners share economics on an already-launched
- * product (Sage/Biogen zuranolone, Vertex/CRISPR Casgevy, Ionis/Biogen
- * Spinraza). Upfronts are $200M-$1B because the licensor retains
- * significant commercial participation; rNPV undershoots because it
- * models the licensor's take as a single royalty stream.
- *
- * Small, heterogeneous slice (n=6 in full scope): 3 mega-
- * co-commercialization deals at $875-1000M, 3 smaller deals at
- * $160-200M. Floor at $200M lifts the 2 smaller deals cleanly into
- * ±25% / ±35% bands while leaving the 3 mega-deals to continue
- * undershooting (still helps median but not hit rate for those).
- * Higher floors regress because predictions overshoot the smaller
- * deals.
- *
- * Source: Empirical calibration from the 6 approved+collaboration
- * deals in corpus (25th-percentile actual upfront ~$200M). Anchored
- * to disclosed 2020-2025 co-commercialization upfronts (Syndax/Incyte
- * revumenib, Iterative/Pfizer Cosentyx, etc.).
+ * Round 9 approved-stage collaboration floor — now sourced from the
+ * engine-level `DEAL_TYPE_PROFILES` schema (Step C of the engine
+ * restructure). Behavior unchanged; the $200M value now lives as
+ * `collaboration.postApprovalFloorM` in
+ * `lib/financial/deal-type-profiles.ts`.
  */
-const APPROVED_COLLAB_FLOOR_M = 200;
-
 function applyApprovedCollaborationFloor(
   rawUpfront: number,
   phase: string,
   dealType: string,
 ): number {
-  if (phase === 'approved' && dealType === 'collaboration') {
-    return Math.max(rawUpfront, APPROVED_COLLAB_FLOOR_M);
-  }
+  const floor = getPostApprovalFloorM(dealType, phase);
+  if (floor > 0) return Math.max(rawUpfront, floor);
   return rawUpfront;
 }
 
