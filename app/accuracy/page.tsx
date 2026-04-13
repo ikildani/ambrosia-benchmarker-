@@ -12,7 +12,7 @@ const BASE_URL = 'https://calculator.ambrosiaventures.co';
 export const metadata: Metadata = {
   title: 'Model Accuracy | Ambrosia Benchmarker',
   description:
-    'Live track record of the Ambrosia Benchmarker deal-valuation model — predicted vs. actual upfront for 251 real disclosed licensing, co-development, and acquisition deals. We publish every hit, every miss, every calibration round.',
+    'Live track record of the Ambrosia Benchmarker deal-valuation model — predicted vs. actual upfront for 1,000+ real disclosed licensing, co-development, and acquisition deals. We publish every hit, every miss, every calibration round — including the ones that failed.',
   keywords: [
     'pharma deal valuation accuracy',
     'biotech licensing model backtest',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Model Accuracy | Ambrosia Benchmarker',
     description:
-      'Live backtest accuracy of our deal-valuation engine vs. 251 real disclosed deals. Hit rates, heat maps, calibration journey — fully public.',
+      'Live backtest accuracy of our deal-valuation engine vs. 1,000+ real disclosed deals. Hit rates, heat maps, calibration journey — fully public.',
     type: 'website',
     url: `${BASE_URL}/accuracy`,
     siteName: 'Ambrosia Benchmarker',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Model Accuracy | Ambrosia Benchmarker',
     description:
-      'Live backtest accuracy of our deal-valuation engine vs. 251 real disclosed deals.',
+      'Live backtest accuracy of our deal-valuation engine vs. 1,000+ real disclosed deals.',
   },
 };
 
@@ -206,7 +206,7 @@ export default function AccuracyDashboard() {
       <section className="border-b border-slate-800/60 bg-slate-900/20">
         <div className="mx-auto max-w-6xl px-6 py-12">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-200">Full scope — all 251 disclosed deals</h2>
+            <h2 className="text-xl font-semibold text-slate-200">Full scope — all {data.fullScope.n.toLocaleString()} disclosed deals</h2>
             <p className="mt-2 max-w-3xl text-sm text-slate-400">
               Includes segments where single-asset intrinsic rNPV is the wrong model regardless
               of calibration &mdash; early-stage strategic upfronts, acquisitions, approved-asset
@@ -230,6 +230,32 @@ export default function AccuracyDashboard() {
             <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-4">
               <div className="text-xs text-slate-500">Sample</div>
               <div className="mt-1 font-mono text-xl text-slate-200">{data.fullScope.n}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Corpus transparency — why the numbers moved */}
+      <section className="border-b border-slate-800/60 bg-amber-500/5">
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <div className="mb-6 flex items-start gap-3">
+            <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold">!</div>
+            <div>
+              <h2 className="text-xl font-semibold text-slate-100">Honest transparency — why the numbers are lower than last month</h2>
+              <p className="mt-2 max-w-3xl text-sm text-slate-400">
+                In April 2026 we expanded the backtest corpus from 251 hand-curated deals
+                to {data.fullScope.n.toLocaleString()} deals pulled from production Supabase. Core-scope
+                hit rates dropped — not because the engine got worse, but because the
+                previous numbers were overfit to a narrow hand-picked sample. The larger
+                corpus exposed calibration gaps the original corpus couldn&rsquo;t see
+                (oncology especially: 21 deals → 188 deals). We also de-duped 500+ duplicate
+                database entries that had been artificially inflating hit counts.
+              </p>
+              <p className="mt-3 max-w-3xl text-sm text-slate-400">
+                <span className="text-slate-200 font-medium">This is the real baseline.</span>{' '}
+                Every calibration round going forward is measured against these numbers on
+                the de-duped corpus — not the smaller, noisier one.
+              </p>
             </div>
           </div>
         </div>

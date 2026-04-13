@@ -77,6 +77,8 @@ const PaywallModal = dynamic(() => import('./PaywallModal'), { ssr: false });
 const OnboardingModal = dynamic(() => import('./OnboardingModal'), { ssr: false });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
+import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
+import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
 import { getValidationWarnings } from '@/lib/validationWarnings';
 import type { DealTemplate } from './calculator/index';
 import type { WizardStep } from './calculator/index';
@@ -690,23 +692,35 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 switch (stepId) {
                   case 'asset':
                     stepContent = (
-                      <AssetDetailsSection
-                        therapeuticArea={state.therapeuticArea}
-                        phase={(state.phase || '') as Phase}
-                        dealType={(state.dealType || '') as DealType}
-                        modality={(state.modality || '') as Modality}
-                        indication={(state.indication || '') as Indication}
-                        biomarker={state.biomarker}
-                        highlightedFields={state.highlightedFields}
-                        quickMode={false}
-                        onboardingStep={onboardingStep}
-                        onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
-                        onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
-                        onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
-                        onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
-                        onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}
-                        onShowAdvanced={() => { actions.setQuickMode(false); actions.setWizardStep(0); }}
-                      />
+                      <>
+                        <AssetDetailsSection
+                          therapeuticArea={state.therapeuticArea}
+                          phase={(state.phase || '') as Phase}
+                          dealType={(state.dealType || '') as DealType}
+                          modality={(state.modality || '') as Modality}
+                          indication={(state.indication || '') as Indication}
+                          biomarker={state.biomarker}
+                          highlightedFields={state.highlightedFields}
+                          quickMode={false}
+                          onboardingStep={onboardingStep}
+                          onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
+                          onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
+                          onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
+                          onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
+                          onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}
+                          onShowAdvanced={() => { actions.setQuickMode(false); actions.setWizardStep(0); }}
+                        />
+                        {/* R23 (2026-04-13): BD-facing peak sales override. Renders only when
+                            indication is selected so users see the engine default to compare against. */}
+                        {state.indication && (
+                          <PeakSalesOverrideInput
+                            value={state.peakSalesOverrideM}
+                            onChange={actions.setPeakSalesOverrideM}
+                            indicationName={state.indication}
+                            engineDefaultM={getIndicationTypicalAssetPeak(state.indication) ?? undefined}
+                          />
+                        )}
+                      </>
                     );
                     break;
                   case 'target':

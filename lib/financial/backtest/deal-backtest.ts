@@ -218,20 +218,37 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
 
 /**
  * Combined corpus: the curated hand-built `EXTENDED_COMPARABLE_DEALS`
- * (251 deals) plus the auto-pulled `SUPABASE_COMPARABLE_DEALS` (988
- * deals from the production Supabase corpus, Round 25 2026-04-13). The
- * union is de-duplicated on id (both sources have unique id prefixes).
+ * (251 deals) plus the auto-pulled `SUPABASE_COMPARABLE_DEALS` (~1,000
+ * deals from the production Supabase corpus, Round 26 2026-04-13).
  *
- * Corpus expansion from 251 → ~1,200 deals tightens backtest confidence
- * intervals and captures more recent deal flow (2024-2026 Supabase rows
- * dominate) that the hand-built corpus missed.
+ * De-duplication strategy (Round 27, 2026-04-13):
+ *   1. Internal dedup on `id` (same as before)
+ *   2. Cross-source dedup on semantic key (licensor + licensee + year + upfront)
+ *      — the same deal often appears in both EXTENDED (hand-curated) AND
+ *      SUPABASE (auto-extracted) sources. Round 27 discovered Hengrui→Glenmark,
+ *      Almirall→AbbVie and others double-counted this way.
+ *
+ * Prefer EXTENDED over SUPABASE when both exist (hand-curated data tends to
+ * have cleaner fields).
  */
 const COMBINED_CORPUS: ExtendedComparableDeal[] = (() => {
-  const seen = new Set<string>();
+  const seenIds = new Set<string>();
+  const seenSemanticKeys = new Set<string>();
   const combined: ExtendedComparableDeal[] = [];
+
+  const semanticKey = (d: ExtendedComparableDeal): string => {
+    const lic = (d.licensor ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const lee = (d.licensee ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return `${lic}|${lee}|${d.year}|${Math.round(d.upfront)}`;
+  };
+
+  // Extended first (curated gets priority), then Supabase fills gaps.
   for (const d of [...EXTENDED_COMPARABLE_DEALS, ...SUPABASE_COMPARABLE_DEALS]) {
-    if (seen.has(d.id)) continue;
-    seen.add(d.id);
+    if (seenIds.has(d.id)) continue;
+    const k = semanticKey(d);
+    if (seenSemanticKeys.has(k)) continue;
+    seenIds.add(d.id);
+    seenSemanticKeys.add(k);
     combined.push(d);
   }
   return combined;
