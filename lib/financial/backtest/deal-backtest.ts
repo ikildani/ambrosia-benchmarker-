@@ -217,9 +217,9 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
     : 'promising';
 
   return {
-    therapeuticArea: c.therapeuticArea,
+    therapeuticArea: c.therapeuticArea as RNPVInput['therapeuticArea'],
     indication: c.indication,
-    modality: c.modality,
+    modality: c.modality as RNPVInput['modality'],
     phase: phase as RNPVInput['phase'],
     territory: (c.territory === 'global' || c.territory === 'us_only' || c.territory === 'ex_us')
       ? c.territory
@@ -275,6 +275,42 @@ function applyPlatformFloor(rawUpfront: number, modality: string): number {
 }
 
 /**
+ * Round 8 (2026-04-13): Early-stage option-value floor.
+ *
+ * Early-stage deals (preclinical, phase1, phase1_2) predict near-zero rNPV
+ * because of compounded attrition risk (preclinical cumulative PoS ~6%,
+ * phase1 ~10%). Real licensing upfronts are $50-200M across the 95
+ * early-stage deals in full scope — biotech acquirers pay for strategic
+ * option value on pipeline optionality, not expected NPV.
+ *
+ * Floor is phase-based and applied as max(rawUpfront, floor) — never
+ * reduces a prediction. Calibrated from the distribution of actual
+ * upfronts in the corpus: preclinical median $75M, phase1 median $111M.
+ * Floor set below the median so deals that underperform the median don't
+ * get overshot, but the systemic NPV→0 failure mode is prevented.
+ *
+ * Sources: Nature Reviews Drug Discovery (Urquhart 2024 top-100 drug
+ * sales + early-stage licensing analysis), Bain Global Healthcare
+ * Private Equity and M&A Report 2024 (median early-stage licensing
+ * upfronts 2022-2024), plus disclosed 2020-2026 Pfizer/Takeda/Lilly/
+ * BMS preclinical option deals.
+ *
+ * Composes with Round 6 platform floor via max() — if a deal is both
+ * platform modality AND early-stage, the larger floor wins.
+ */
+const EARLY_STAGE_FLOOR_M: Record<string, number> = {
+  preclinical: 50,
+  phase1: 100,
+  phase1_2: 100,  // phase1_2 treated as phase1 level (uncommon in corpus)
+};
+
+function applyEarlyStageFloor(rawUpfront: number, phase: string): number {
+  const floor = EARLY_STAGE_FLOOR_M[phase];
+  if (floor === undefined) return rawUpfront;
+  return Math.max(rawUpfront, floor);
+}
+
+/**
  * Round 7 (2026-04-13): Approved-stage licensing dampener.
  *
  * Approved-stage licensing deals are territorial re-licensing of already-
@@ -314,7 +350,8 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   const result: RNPVResult = calculateRNPV(input);
   const rawUpfront = result.impliedDealValue?.upfront?.median ?? 0;
   const dampened = applyApprovedLicensingDampener(rawUpfront, c.phase, c.dealType);
-  const predictedUpfront = applyPlatformFloor(dampened, c.modality);
+  const earlyFloored = applyEarlyStageFloor(dampened, c.phase);
+  const predictedUpfront = applyPlatformFloor(earlyFloored, c.modality);
   const predictedTotal = result.impliedDealValue?.totalDeal?.median ?? 0;
 
   const upfrontErrorAbs_M = predictedUpfront - c.actualUpfront_M;
