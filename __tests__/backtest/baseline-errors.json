@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-13T18:32:09.697Z",
+  "runAt": "2026-04-13T18:40:32.101Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -13,8 +13,8 @@
     "totalDeals": 1067,
     "hitRate25": 0.16307403936269915,
     "hitRate35": 0.23711340206185566,
-    "hitRate50": 0.34957825679475163,
-    "meanAbsErrorPct": 1.2706621806238279,
+    "hitRate50": 0.3486410496719775,
+    "meanAbsErrorPct": 1.2704461244804175,
     "medianSignedErrorPct": -0.46715328467153283,
     "rmseUpfront_M": 3297.4,
     "byTherapeuticArea": {
@@ -50,8 +50,8 @@
         "n": 658,
         "hitRate25": 0.16109422492401215,
         "hitRate35": 0.23708206686930092,
-        "meanSignedErrorPct": -0.17868544327153504,
-        "meanAbsErrorPct": 0.782032829718725
+        "meanSignedErrorPct": -0.17967247685053397,
+        "meanAbsErrorPct": 0.7816824772794868
       },
       "immunology": {
         "n": 60,
@@ -143,8 +143,8 @@
         "n": 206,
         "hitRate25": 0.11650485436893204,
         "hitRate35": 0.18932038834951456,
-        "meanSignedErrorPct": 0.7816541552357277,
-        "meanAbsErrorPct": 1.6040761091721334
+        "meanSignedErrorPct": 0.7790728361094534,
+        "meanAbsErrorPct": 1.6023855836382133
       },
       "preclinical": {
         "n": 225,
@@ -171,8 +171,8 @@
         "n": 235,
         "hitRate25": 0.07234042553191489,
         "hitRate35": 0.09787234042553192,
-        "meanSignedErrorPct": -0.6197555465298682,
-        "meanAbsErrorPct": 0.8512881348693347
+        "meanSignedErrorPct": -0.62025646718931,
+        "meanAbsErrorPct": 0.8517890555287765
       }
     },
     "byModality": {
@@ -303,11 +303,11 @@
         "meanAbsErrorPct": 0.7714285714285715
       },
       "adc": {
-        "n": 73,
-        "hitRate25": 0.0821917808219178,
-        "hitRate35": 0.1232876712328767,
-        "meanSignedErrorPct": -0.14338452770735355,
-        "meanAbsErrorPct": 0.9890114124008971
+        "n": 66,
+        "hitRate25": 0.09090909090909091,
+        "hitRate35": 0.13636363636363635,
+        "meanSignedErrorPct": -0.13768622177686968,
+        "meanAbsErrorPct": 0.9848622782236247
       },
       "cellTherapy": {
         "n": 2,
@@ -498,6 +498,27 @@
         "meanSignedErrorPct": -0.18324134736744643,
         "meanAbsErrorPct": 0.6680609675904664
       },
+      "adc_her2": {
+        "n": 5,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.7445986698920165,
+        "meanAbsErrorPct": 0.7445986698920165
+      },
+      "adc_trop2": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 2.4685714285714284,
+        "meanAbsErrorPct": 2.4685714285714284
+      },
+      "adc_claudin18_2": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.7748260594560404,
+        "meanAbsErrorPct": 0.7748260594560404
+      },
       "implant": {
         "n": 1,
         "hitRate25": 0,
@@ -511,10 +532,10 @@
     "totalDeals": 266,
     "hitRate25": 0.10526315789473684,
     "hitRate35": 0.16541353383458646,
-    "hitRate50": 0.23684210526315788,
-    "meanAbsErrorPct": 1.2440895652924289,
-    "medianSignedErrorPct": -0.7459677419354839,
-    "rmseUpfront_M": 487.8,
+    "hitRate50": 0.23308270676691728,
+    "meanAbsErrorPct": 1.243165003468471,
+    "medianSignedErrorPct": -0.7504578754578755,
+    "rmseUpfront_M": 488,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 15,
@@ -548,8 +569,8 @@
         "n": 174,
         "hitRate25": 0.05747126436781609,
         "hitRate35": 0.10344827586206896,
-        "meanSignedErrorPct": -0.5618672683940374,
-        "meanAbsErrorPct": 0.8146751392732434
+        "meanSignedErrorPct": -0.5655113290539644,
+        "meanAbsErrorPct": 0.8132617286688024
       },
       "immunology": {
         "n": 6,
@@ -620,15 +641,15 @@
         "n": 121,
         "hitRate25": 0.12396694214876033,
         "hitRate35": 0.2231404958677686,
-        "meanSignedErrorPct": 0.8851170864762837,
-        "meanAbsErrorPct": 1.7468069297832767
+        "meanSignedErrorPct": 0.8807224439968417,
+        "meanAbsErrorPct": 1.7439288449899912
       },
       "phase2": {
         "n": 145,
         "hitRate25": 0.0896551724137931,
         "hitRate35": 0.11724137931034483,
-        "meanSignedErrorPct": -0.6461182677722239,
-        "meanAbsErrorPct": 0.8245805921655827
+        "meanSignedErrorPct": -0.6468238871847399,
+        "meanAbsErrorPct": 0.8252862115780986
       }
     },
     "byModality": {
@@ -717,11 +738,11 @@
         "meanAbsErrorPct": 0.32727272727272727
       },
       "adc": {
-        "n": 22,
+        "n": 17,
         "hitRate25": 0,
-        "hitRate35": 0.045454545454545456,
-        "meanSignedErrorPct": -0.20320201405389435,
-        "meanAbsErrorPct": 1.1317590126108927
+        "hitRate35": 0.058823529411764705,
+        "meanSignedErrorPct": -0.2618720040705041,
+        "meanAbsErrorPct": 1.1213491282535106
       },
       "cellTherapy": {
         "n": 1,
@@ -821,6 +842,13 @@
         "meanSignedErrorPct": -0.4064743981427508,
         "meanAbsErrorPct": 0.7309369654086747
       },
+      "adc_her2": {
+        "n": 3,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.782144054643255,
+        "meanAbsErrorPct": 0.782144054643255
+      },
       "protac": {
         "n": 11,
         "hitRate25": 0,
@@ -841,6 +869,20 @@
         "hitRate35": 0,
         "meanSignedErrorPct": 13.066666666666666,
         "meanAbsErrorPct": 13.066666666666666
+      },
+      "adc_trop2": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": 2.4685714285714284,
+        "meanAbsErrorPct": 2.4685714285714284
+      },
+      "adc_claudin18_2": {
+        "n": 1,
+        "hitRate25": 0,
+        "hitRate35": 0,
+        "meanSignedErrorPct": -0.7748260594560404,
+        "meanAbsErrorPct": 0.7748260594560404
       }
     }
   },
@@ -1055,32 +1097,6 @@
     },
     {
       "case": {
-        "id": "sb_06401a1d-e53d-4220-8932-3b1c6e80404a",
-        "year": 2024,
-        "licensor": "Kelun-Biotech",
-        "licensee": "Merck",
-        "therapeuticArea": "oncology",
-        "indication": "TNBC, NSCLC, Gastric",
-        "modality": "adc",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "ex_china",
-        "actualUpfront_M": 175,
-        "actualTotalDeal_M": 9475,
-        "peakSalesMedian_M": 2500
-      },
-      "predictedUpfront_M": 684,
-      "predictedTotalDeal_M": 2177,
-      "upfrontErrorPct": 2.9085714285714284,
-      "totalDealErrorPct": -0.7702374670184696,
-      "upfrontErrorAbs_M": 509,
-      "totalDealErrorAbs_M": -7298,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_e5f5e676-2124-460b-a805-e54e184eb696",
         "year": 2024,
         "licensor": "NewAmsterdam Pharma",
@@ -1101,6 +1117,32 @@
       "totalDealErrorPct": 0.41058823529411764,
       "upfrontErrorAbs_M": 277,
       "totalDealErrorAbs_M": 349,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "sb_1e7cd2f3-51df-43ba-a9f0-7524c18a2d17",
+        "year": 2022,
+        "licensor": "Xencor",
+        "licensee": "Boehringer Ingelheim",
+        "therapeuticArea": "oncology",
+        "indication": "Prostate",
+        "modality": "mab",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "ex_china",
+        "actualUpfront_M": 174,
+        "actualTotalDeal_M": 1467.4,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 647,
+      "predictedTotalDeal_M": 2059,
+      "upfrontErrorPct": 2.718390804597701,
+      "totalDealErrorPct": 0.4031620553359683,
+      "upfrontErrorAbs_M": 473,
+      "totalDealErrorAbs_M": 591.6,
       "within25": false,
       "within35": false,
       "within50": false
@@ -9045,7 +9087,7 @@
         "licensee": "Bristol-Myers Squibb",
         "therapeuticArea": "oncology",
         "indication": "SCLC",
-        "modality": "adc",
+        "modality": "adc_her2",
         "phase": "phase2",
         "dealType": "licensing",
         "territory": "japan",
@@ -9053,12 +9095,12 @@
         "actualTotalDeal_M": 1597.7,
         "peakSalesMedian_M": 1250
       },
-      "predictedUpfront_M": 39,
-      "predictedTotalDeal_M": 118,
-      "upfrontErrorPct": -0.8194444444444444,
-      "totalDealErrorPct": -0.9261438317581523,
-      "upfrontErrorAbs_M": -177,
-      "totalDealErrorAbs_M": -1479.7,
+      "predictedUpfront_M": 25,
+      "predictedTotalDeal_M": 75,
+      "upfrontErrorPct": -0.8842592592592593,
+      "totalDealErrorPct": -0.9530575201852663,
+      "upfrontErrorAbs_M": -191,
+      "totalDealErrorAbs_M": -1522.7,
       "within25": false,
       "within35": false,
       "within50": false
@@ -19861,7 +19903,7 @@
         "licensee": "Merck",
         "therapeuticArea": "oncology",
         "indication": "TNBC, NSCLC, Gastric",
-        "modality": "adc",
+        "modality": "adc_trop2",
         "phase": "phase3",
         "dealType": "licensing",
         "territory": "ex_china",
@@ -19869,12 +19911,12 @@
         "actualTotalDeal_M": 9475,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 684,
-      "predictedTotalDeal_M": 2177,
-      "upfrontErrorPct": 2.9085714285714284,
-      "totalDealErrorPct": -0.7702374670184696,
-      "upfrontErrorAbs_M": 509,
-      "totalDealErrorAbs_M": -7298,
+      "predictedUpfront_M": 607,
+      "predictedTotalDeal_M": 1933,
+      "upfrontErrorPct": 2.4685714285714284,
+      "totalDealErrorPct": -0.7959894459102902,
+      "upfrontErrorAbs_M": 432,
+      "totalDealErrorAbs_M": -7542,
       "within25": false,
       "within35": false,
       "within50": false
@@ -20895,6 +20937,32 @@
     },
     {
       "case": {
+        "id": "sb_82c86321-c53a-44dd-a885-9986c0361fa0",
+        "year": 2023,
+        "licensor": "SystImmune",
+        "licensee": "Bristol-Myers Squibb",
+        "therapeuticArea": "oncology",
+        "indication": "NSCLC, Breast, other solid tumors",
+        "modality": "adc_her2",
+        "phase": "phase2",
+        "dealType": "licensing",
+        "territory": "ex_china",
+        "actualUpfront_M": 800,
+        "actualTotalDeal_M": 8400,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 73,
+      "predictedTotalDeal_M": 225,
+      "upfrontErrorPct": -0.90875,
+      "totalDealErrorPct": -0.9732142857142857,
+      "upfrontErrorAbs_M": -727,
+      "totalDealErrorAbs_M": -8175,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
         "id": "sb_3d68d884-3c9f-44b1-813f-b7c1d3033ce2",
         "year": 2023,
         "licensor": "Daiichi Sankyo",
@@ -20941,32 +21009,6 @@
       "totalDealErrorPct": -0.9878116729349492,
       "upfrontErrorAbs_M": -124,
       "totalDealErrorAbs_M": -2836.6,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_82c86321-c53a-44dd-a885-9986c0361fa0",
-        "year": 2023,
-        "licensor": "SystImmune",
-        "licensee": "Bristol-Myers Squibb",
-        "therapeuticArea": "oncology",
-        "indication": "NSCLC, Breast, other solid tumors",
-        "modality": "adc",
-        "phase": "phase2",
-        "dealType": "licensing",
-        "territory": "ex_china",
-        "actualUpfront_M": 800,
-        "actualTotalDeal_M": 8400,
-        "peakSalesMedian_M": 2500
-      },
-      "predictedUpfront_M": 103,
-      "predictedTotalDeal_M": 313,
-      "upfrontErrorPct": -0.87125,
-      "totalDealErrorPct": -0.9627380952380953,
-      "upfrontErrorAbs_M": -697,
-      "totalDealErrorAbs_M": -8087,
       "within25": false,
       "within35": false,
       "within50": false
@@ -21623,6 +21665,32 @@
     },
     {
       "case": {
+        "id": "sb_18ce7bcc-5f13-403e-8d2c-55b1e3b1bfb3",
+        "year": 2023,
+        "licensor": "BeiGene",
+        "licensee": "AbbVie",
+        "therapeuticArea": "oncology",
+        "indication": "Breast (HER2+)",
+        "modality": "adc_her2",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "china",
+        "actualUpfront_M": 781.5,
+        "actualTotalDeal_M": 5864.8,
+        "peakSalesMedian_M": 1500
+      },
+      "predictedUpfront_M": 349,
+      "predictedTotalDeal_M": 1111,
+      "upfrontErrorPct": -0.5534229046705055,
+      "totalDealErrorPct": -0.8105647251398173,
+      "upfrontErrorAbs_M": -432.5,
+      "totalDealErrorAbs_M": -4753.8,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
         "id": "sb_dda59576-5c2f-460b-9751-ea1e71832717",
         "year": 2023,
         "licensor": "Zai Lab",
@@ -21646,32 +21714,6 @@
       "within25": false,
       "within35": false,
       "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_18ce7bcc-5f13-403e-8d2c-55b1e3b1bfb3",
-        "year": 2023,
-        "licensor": "BeiGene",
-        "licensee": "AbbVie",
-        "therapeuticArea": "oncology",
-        "indication": "Breast (HER2+)",
-        "modality": "adc",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "china",
-        "actualUpfront_M": 781.5,
-        "actualTotalDeal_M": 5864.8,
-        "peakSalesMedian_M": 1500
-      },
-      "predictedUpfront_M": 395,
-      "predictedTotalDeal_M": 1256,
-      "upfrontErrorPct": -0.4945617402431222,
-      "totalDealErrorPct": -0.7858409493929887,
-      "upfrontErrorAbs_M": -386.5,
-      "totalDealErrorAbs_M": -4608.8,
-      "within25": false,
-      "within35": false,
-      "within50": true
     },
     {
       "case": {
@@ -24535,6 +24577,32 @@
     },
     {
       "case": {
+        "id": "sb_5f083c11-ee93-4adb-b282-037409052188",
+        "year": 2023,
+        "licensor": "Duality Bio",
+        "licensee": "BioNTech",
+        "therapeuticArea": "oncology",
+        "indication": "Multiple solid tumors",
+        "modality": "adc_her2",
+        "phase": "phase1",
+        "dealType": "licensing",
+        "territory": "ex_china",
+        "actualUpfront_M": 170,
+        "actualTotalDeal_M": 1670,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 100,
+      "predictedTotalDeal_M": 22,
+      "upfrontErrorPct": -0.4117647058823529,
+      "totalDealErrorPct": -0.9868263473053892,
+      "upfrontErrorAbs_M": -70,
+      "totalDealErrorAbs_M": -1648,
+      "within25": false,
+      "within35": false,
+      "within50": true
+    },
+    {
+      "case": {
         "id": "sb_e9d572cd-60d5-4742-bfc3-077b873fa824",
         "year": 2023,
         "licensor": "Daiichi Sankyo",
@@ -24584,32 +24652,6 @@
       "within25": false,
       "within35": false,
       "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_5f083c11-ee93-4adb-b282-037409052188",
-        "year": 2023,
-        "licensor": "Duality Bio",
-        "licensee": "BioNTech",
-        "therapeuticArea": "oncology",
-        "indication": "Multiple solid tumors",
-        "modality": "adc",
-        "phase": "phase1",
-        "dealType": "licensing",
-        "territory": "ex_china",
-        "actualUpfront_M": 170,
-        "actualTotalDeal_M": 1670,
-        "peakSalesMedian_M": 2500
-      },
-      "predictedUpfront_M": 100,
-      "predictedTotalDeal_M": 54,
-      "upfrontErrorPct": -0.4117647058823529,
-      "totalDealErrorPct": -0.9676646706586827,
-      "upfrontErrorAbs_M": -70,
-      "totalDealErrorAbs_M": -1616,
-      "within25": false,
-      "within35": false,
-      "within50": true
     },
     {
       "case": {
@@ -24827,7 +24869,7 @@
         "licensee": "Novartis",
         "therapeuticArea": "oncology",
         "indication": "Prostate",
-        "modality": "adc",
+        "modality": "adc_claudin18_2",
         "phase": "phase3",
         "dealType": "codevelopment",
         "territory": "asia_pacific",
@@ -24835,12 +24877,12 @@
         "actualTotalDeal_M": 4136.3,
         "peakSalesMedian_M": 1000
       },
-      "predictedUpfront_M": 204,
-      "predictedTotalDeal_M": 905,
-      "upfrontErrorPct": -0.7419354838709677,
-      "totalDealErrorPct": -0.7812054251384087,
-      "upfrontErrorAbs_M": -586.5,
-      "totalDealErrorAbs_M": -3231.3,
+      "predictedUpfront_M": 178,
+      "predictedTotalDeal_M": 789,
+      "upfrontErrorPct": -0.7748260594560404,
+      "totalDealErrorPct": -0.8092498126344801,
+      "upfrontErrorAbs_M": -612.5,
+      "totalDealErrorAbs_M": -3347.3,
       "within25": false,
       "within35": false,
       "within50": false
@@ -27401,7 +27443,7 @@
         "licensee": "Biogen",
         "therapeuticArea": "oncology",
         "indication": "Breast (HER2+)",
-        "modality": "adc",
+        "modality": "adc_her2",
         "phase": "phase2",
         "dealType": "option",
         "territory": "ex_china",
@@ -27409,12 +27451,12 @@
         "actualTotalDeal_M": 3200.7,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 23,
-      "predictedTotalDeal_M": 225,
-      "upfrontErrorPct": -0.9493949394939494,
-      "totalDealErrorPct": -0.9297028774955478,
-      "upfrontErrorAbs_M": -431.5,
-      "totalDealErrorAbs_M": -2975.7,
+      "predictedUpfront_M": 16,
+      "predictedTotalDeal_M": 161,
+      "upfrontErrorPct": -0.9647964796479648,
+      "totalDealErrorPct": -0.9496985034523698,
+      "upfrontErrorAbs_M": -438.5,
+      "totalDealErrorAbs_M": -3039.7,
       "within25": false,
       "within35": false,
       "within50": false
@@ -28855,10 +28897,10 @@
       "totalDeals": 215,
       "hitRate25": 0.10232558139534884,
       "hitRate35": 0.16279069767441862,
-      "hitRate50": 0.2372093023255814,
-      "meanAbsErrorPct": 1.2769820065441657,
-      "medianSignedErrorPct": -0.7536231884057971,
-      "rmseUpfront_M": 505.6,
+      "hitRate50": 0.23255813953488372,
+      "meanAbsErrorPct": 1.2758381300549901,
+      "medianSignedErrorPct": -0.7591093117408907,
+      "rmseUpfront_M": 505.9,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 11,
@@ -28892,8 +28934,8 @@
           "n": 140,
           "hitRate25": 0.04285714285714286,
           "hitRate35": 0.09285714285714286,
-          "meanSignedErrorPct": -0.5948392646491971,
-          "meanAbsErrorPct": 0.8113298900953623
+          "meanSignedErrorPct": -0.599368311469392,
+          "meanAbsErrorPct": 0.8095732226298429
         },
         "immunology": {
           "n": 6,
@@ -28964,15 +29006,15 @@
           "n": 96,
           "hitRate25": 0.11458333333333333,
           "hitRate35": 0.21875,
-          "meanSignedErrorPct": 0.9862177223885357,
-          "meanAbsErrorPct": 1.8675014707449857
+          "meanSignedErrorPct": 0.9806786417634057,
+          "meanAbsErrorPct": 1.8638738847034488
         },
         "phase2": {
           "n": 119,
           "hitRate25": 0.09243697478991597,
           "hitRate35": 0.11764705882352941,
-          "meanSignedErrorPct": -0.6655327531334813,
-          "meanAbsErrorPct": 0.8005965564325785
+          "meanSignedErrorPct": -0.6663925414932697,
+          "meanAbsErrorPct": 0.8014563447923669
         }
       },
       "byModality": {
@@ -29047,11 +29089,11 @@
           "meanAbsErrorPct": 0.32727272727272727
         },
         "adc": {
-          "n": 17,
+          "n": 12,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": -0.37100949093029595,
-          "meanAbsErrorPct": 1.0171159335073268
+          "meanSignedErrorPct": -0.5240450921523273,
+          "meanAbsErrorPct": 0.9546006477078826
         },
         "cellTherapy": {
           "n": 1,
@@ -29137,6 +29179,13 @@
           "meanSignedErrorPct": -0.3771155948738665,
           "meanAbsErrorPct": 0.7711058551253454
         },
+        "adc_her2": {
+          "n": 3,
+          "hitRate25": 0,
+          "hitRate35": 0,
+          "meanSignedErrorPct": -0.782144054643255,
+          "meanAbsErrorPct": 0.782144054643255
+        },
         "radiopharmaceutical": {
           "n": 12,
           "hitRate25": 0,
@@ -29164,6 +29213,20 @@
           "hitRate35": 0,
           "meanSignedErrorPct": 13.066666666666666,
           "meanAbsErrorPct": 13.066666666666666
+        },
+        "adc_trop2": {
+          "n": 1,
+          "hitRate25": 0,
+          "hitRate35": 0,
+          "meanSignedErrorPct": 2.4685714285714284,
+          "meanAbsErrorPct": 2.4685714285714284
+        },
+        "adc_claudin18_2": {
+          "n": 1,
+          "hitRate25": 0,
+          "hitRate35": 0,
+          "meanSignedErrorPct": -0.7748260594560404,
+          "meanAbsErrorPct": 0.7748260594560404
         }
       }
     },
@@ -29381,8 +29444,8 @@
     "overfittingGap": {
       "hit25": -0.015321477428180574,
       "hit35": -0.013679890560875513,
-      "hit50": 0.0019151846785225857,
-      "meanAbsErrorPct": -0.17155665437180168
+      "hit50": -0.0027359781121751026,
+      "meanAbsErrorPct": -0.1704127778826261
     }
   }
 }
