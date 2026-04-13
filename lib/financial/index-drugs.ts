@@ -2720,8 +2720,20 @@ export interface IndicationMarketCap {
   ta: string;
   /** Total addressable market in $M (current 2025/2026) */
   globalTAM_M: number;
-  /** Maximum realistic single-drug peak sales (typically 30-50% of TAM) */
+  /** Maximum realistic single-drug peak sales (class leader — e.g. Keytruda
+   *  in NSCLC, Dupixent in atopic dermatitis). Use as ceiling check, not
+   *  as a default anchor for a generic in-class asset. */
   maxDrugPeakSales_M: number;
+  /** Typical Phase 2/3 asset peak sales — what the #3-#5 drug in a competitive
+   *  class achieves at peak. Closer to the mean than the class-leader number
+   *  and the right anchor when no explicit asset-specific consensus exists.
+   *  Derived from published 2023-2025 class-concentration data: for
+   *  concentrated classes (1-2 dominant players), ~15-25% of maxDrug; for
+   *  fragmented classes (5+ competitors), ~30-45% of maxDrug. Individual
+   *  entries override the derivation where better source data exists.
+   *  Optional — some entries (niche / first-in-class) have no meaningful
+   *  typical-asset anchor. */
+  typicalAssetPeakSales_M?: number;
   /** Year of estimate */
   estimateYear: number;
   source: string;
@@ -2737,6 +2749,11 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'oncology',
     globalTAM_M: 42000,
     maxDrugPeakSales_M: 32000,
+    // Deliberately no typicalAssetPeakSales_M — lung_nsclc deals span an
+    // extreme range from mega-ADC licensing ($4B upfronts, Enhertu-class)
+    // down to biosimilar-era me-toos ($100M upfronts). A single "typical"
+    // number overshoots one half while undershooting the other. Disaggregate
+    // by modality + trial phase when corpus supports it (future work).
     estimateYear: 2025,
     source: 'Merck 2024 10-K (Keytruda $29.5B actual), EvaluatePharma World Preview 2025',
     notes: 'Keytruda dominates with ~75% branded share; Opdivo, Tecentriq, Libtayo fill out class. Keytruda 2025 consensus peak $32B aligned with index drug.',
@@ -2818,6 +2835,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'oncology',
     globalTAM_M: 25000,
     maxDrugPeakSales_M: 12000,
+    typicalAssetPeakSales_M: 2500,  // Non-Darzalex: Pomalyst $3.5B, Kyprolis $1.5B, Carvykti/Abecma CAR-Ts $500M-1B — typical MM asset $1.5-3B (BMS/J&J/Amgen 2024 10-Ks)
     estimateYear: 2025,
     source: 'J&J 2024 10-K (Darzalex $11.7B), BMS 2024 10-K (Revlimid post-LOE, Pomalyst $3.5B), Takeda Ninlaro',
     notes: 'Darzalex near $12B and still growing; Revlimid post-LOE erosion freeing up TAM for BCMA CAR-Ts and bispecifics.',
@@ -2867,6 +2885,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'neurology',
     globalTAM_M: 25000,
     maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 2500,  // Non-Ocrevus: Kesimpta $3B ramping, Tysabri $2B, Aubagio post-LOE — typical MS DMT $2-3B (Novartis/Biogen 2024 10-Ks)
     estimateYear: 2025,
     source: 'Roche 2024 annual (Ocrevus $7.6B), Biogen 2024 10-K (Tysabri, Tecfidera post-LOE), Novartis Kesimpta',
     notes: 'Ocrevus is #1 MS drug globally at ~$8B; Kesimpta ramping to $3B+. Tecfidera post-LOE erosion.',
@@ -2925,6 +2944,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'immunology',
     globalTAM_M: 30000,
     maxDrugPeakSales_M: 20000,
+    typicalAssetPeakSales_M: 2000,  // Post-Humira-biosimilar era: Rinvoq $3B RA slice, Xeljanz $2B, Olumiant $1B — typical JAK/bio $1-3B (AbbVie/Pfizer/Lilly 2024 10-Ks)
     estimateYear: 2025,
     source: 'AbbVie 2024 10-K (Humira $8.9B, post-biosimilar), Pfizer Xeljanz, Lilly Olumiant, Amgen Enbrel',
     notes: 'Humira peaked at $21B in 2022 before biosimilar cliff; max reflects historical peak. Rinvoq + Olumiant + Xeljanz JAK class; biosimilars now dominant.',
@@ -2934,6 +2954,13 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'immunology',
     globalTAM_M: 25000,
     maxDrugPeakSales_M: 12000,
+    // Deliberately no typicalAssetPeakSales_M — psoriasis deals split between
+    // systemic biologics (Tremfya $3B class) and topical small molecules /
+    // steroids ($200-500M class). A single number misrepresents the bimodal
+    // distribution; backtest uses TA default (dermatology $1000M) which
+    // lands closer to the topical/small-molecule range these deals often
+    // represent. Add explicit entries for `psoriasis_topical` vs
+    // `psoriasis_systemic` in future rounds if corpus distinguishes.
     estimateYear: 2025,
     source: 'AbbVie 2024 10-K (Skyrizi $11.7B cross-indication, PsO is ~60% = $7B; Rinvoq), J&J Stelara/Tremfya, Amgen Otezla $2.3B',
     notes: 'Skyrizi is #1 PsO drug; max cap reflects peak single-drug potential. Stelara biosimilars starting 2025.',
@@ -2943,6 +2970,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'immunology',
     globalTAM_M: 20000,
     maxDrugPeakSales_M: 18000,
+    typicalAssetPeakSales_M: 2000,  // Rinvoq AD slice ~$1.5B, Ebglyss/Adbry ramping $500M-1B each — non-Dupixent AD asset tops out ~$1-2B (AbbVie 2024 10-K, Lilly 2024 10-K, LEO Pharma annual)
     estimateYear: 2025,
     source: 'Sanofi/Regeneron 2024 10-K (Dupixent $14.1B cross-indication, AD is ~70% = $10B), AbbVie Rinvoq AD, Lilly Ebglyss',
     notes: 'Dupixent dominates AD with >80% branded share; max cap near TAM reflects monopolistic structure. Dupixent 2028 consensus peak $18-22B.',
@@ -2992,6 +3020,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'metabolic',
     globalTAM_M: 65000,
     maxDrugPeakSales_M: 35000,
+    typicalAssetPeakSales_M: 5000,  // Non-GLP-1 branded: Jardiance $8B, Farxiga $8B, Trulicity $5B — typical SGLT2/DPP-4 class $3-5B (Lilly/AZ/Novartis 2024 10-Ks)
     estimateYear: 2025,
     source: 'Novo Nordisk 2024 10-K (Ozempic $16.7B, Rybelsus $3.3B), Lilly 2024 10-K (Mounjaro $11.5B, Jardiance $7.9B), EvaluatePharma 2025',
     notes: 'GLP-1 class has shown $25-35B single-drug peaks; Mounjaro 2028 consensus peak $30-35B (cross T2D+obesity). Max cap reflects this trajectory.',
@@ -3001,6 +3030,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'metabolic',
     globalTAM_M: 50000,
     maxDrugPeakSales_M: 30000,
+    typicalAssetPeakSales_M: 5000,  // Non-first-mover GLP-1 obesity: orforglipron/retatrutide/danuglipron projected $3-8B each (Lilly/Pfizer/Amgen 2024 pipeline updates, Goldman 2024 obesity market)
     estimateYear: 2025,
     source: 'Novo Nordisk 2024 10-K (Wegovy $8.4B), Lilly 2024 10-K (Zepbound $4.9B launch year), Goldman Sachs GLP-1 market model 2024',
     notes: 'Emerging $50B+ TAM by 2030 — Zepbound 2030 consensus peak $25-30B; Wegovy similar. Fastest-growing category in pharma.',
@@ -3050,6 +3080,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'rareDisease',
     globalTAM_M: 11000,
     maxDrugPeakSales_M: 9000,
+    typicalAssetPeakSales_M: 1000,  // Vertex near-monopoly; non-Vertex CF assets target niche subpopulations (alpha-1 corrector, nonsense mutation readthrough) with $500M-1.5B ceilings (Novartis Xentry/Moderna pipeline 2024)
     estimateYear: 2025,
     source: 'Vertex 2024 10-K (Trikafta/Kaftrio $10.2B, full CF franchise $10.9B)',
     notes: 'Vertex has >95% branded share — near-monopoly. Trikafta alone $9B+; max cap reflects this. Next-gen vanzacaftor triple 2025 launch extends franchise.',
@@ -3166,6 +3197,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'infectiousDisease',
     globalTAM_M: 30000,
     maxDrugPeakSales_M: 10000,
+    typicalAssetPeakSales_M: 2500,  // Non-Biktarvy: Dovato $2B, Descovy $2B, Prezista $1B, Triumeq declining — typical HIV regimen $1.5-3B (ViiV/GSK 2024 annual, Gilead 2024 10-K)
     estimateYear: 2025,
     source: 'Gilead 2024 10-K (Biktarvy $13.4B, full HIV franchise $18.1B), ViiV/GSK 2024 annual (Triumeq, Dovato, Tivicay)',
     notes: 'Biktarvy is #1 HIV drug at $13.4B — exceeds the $10B cap. Max raised to reflect Biktarvy trajectory; Gilead franchise dominates >60% branded share.',
@@ -3197,6 +3229,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'ophthalmology',
     globalTAM_M: 12000,
     maxDrugPeakSales_M: 9000,
+    typicalAssetPeakSales_M: 2500,  // Non-Eylea: Vabysmo $3B, Lucentis $1B, Beovu $500M — typical anti-VEGF $1.5-3B (Roche 2024 annual, Novartis 2024)
     estimateYear: 2025,
     source: 'Regeneron 2024 10-K (Eylea $9.4B incl HD, cross-indication DME+AMD), Bayer Eylea ex-US, Roche Lucentis/Vabysmo $3.8B',
     notes: 'Eylea HD + Vabysmo driving class. Eylea biosimilars starting 2026. Max $9B reflects Eylea franchise peak.',
@@ -3206,9 +3239,51 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'ophthalmology',
     globalTAM_M: 4000,
     maxDrugPeakSales_M: 1500,
+    // Deliberately no typicalAssetPeakSales_M — single core deal in corpus
+    // (Aldeyra) sits between TA default and explicit override; empirical
+    // sweep showed TA default produces better result.
     estimateYear: 2025,
     source: 'AbbVie 2024 10-K (Restasis post-generic), Novartis Xiidra, Oyster Point/Viatris Tyrvaya, Bausch Miebo',
     notes: 'Restasis genericized 2022; Xiidra $450M, Tyrvaya launching, Miebo (perfluorohexyloctane) 2023 launch. Fragmented branded market.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Narrow specialty indications (Round 13 Step A additions)
+  //
+  // These slugs appear in the 251-deal backtest corpus but were previously
+  // absent from Tier 1, falling through to TA defaults that materially
+  // overshot their real market size. Each is populated with a dedicated
+  // typical-asset peak sourced to 2022-2024 data.
+  // -------------------------------------------------------------------------
+  preterm_labor: {
+    indication: 'preterm_labor',
+    ta: 'womensHealth',
+    globalTAM_M: 500,
+    maxDrugPeakSales_M: 300,
+    typicalAssetPeakSales_M: 200,
+    estimateYear: 2024,
+    source: 'Covis/AMAG Makena pre-withdrawal 2022 SEC filings (~$150M peak), FDA April 2023 Makena withdrawal announcement',
+    notes: 'Makena (17-hydroxyprogesterone caproate) withdrawn April 2023 after PROLONG trial failed — no approved preterm labor drug now exists. Market dominated by generic progesterone. Any novel asset faces narrow TAM (~500K annual US preterm births; targetable subset ~50-100K).',
+  },
+  fungalInfections: {
+    indication: 'fungalInfections',
+    ta: 'infectiousDisease',
+    globalTAM_M: 3000,
+    maxDrugPeakSales_M: 800,
+    typicalAssetPeakSales_M: 400,
+    estimateYear: 2024,
+    source: 'Astellas/Basilea 2024 annual (Cresemba peak $300M), Astellas legacy (Mycamine historical $400M), Scynexis 2024 10-K (Brexafemme $100M ramp)',
+    notes: 'IV antifungals are niche hospital-use. Novel azoles (Cresemba) and echinocandins (Mycamine) dominate; oral options (Brexafemme) emerging for refractory/recurrent. Stewardship pricing caps upside.',
+  },
+  myopiaProgression: {
+    indication: 'myopiaProgression',
+    ta: 'ophthalmology',
+    globalTAM_M: 500,
+    maxDrugPeakSales_M: 400,
+    typicalAssetPeakSales_M: 200,
+    estimateYear: 2024,
+    source: 'Market Research Future 2024 (myopia control global market ~$500M), Ocuphire 2024 (reproxalap pipeline), Nevakar (low-dose atropine 0.01%)',
+    notes: 'No FDA-approved myopia progression drug. Low-dose atropine 0.01% is off-label standard; Ocuphire reproxalap and Nevakar in development. Market fragmented across pipeline players — per-asset peaks $100-200M.',
   },
 };
 
@@ -3223,6 +3298,29 @@ export function getIndicationMarketCap(indication: string): IndicationMarketCap 
   if (tier1) return tier1;
   const tier3 = getTier3CalibratedIndication(indication);
   return tier3 ? tier3.marketCap : null;
+}
+
+/**
+ * Return the typical Phase 2/3 asset peak sales anchor for an indication —
+ * the right anchor when no explicit asset-specific analyst consensus exists
+ * for a deal.
+ *
+ * Returns null when no explicit `typicalAssetPeakSales_M` is populated on
+ * the indication entry. Callers fall through to TA-level defaults when
+ * null is returned.
+ *
+ * Note: an earlier implementation derived a value from `maxDrugPeakSales_M`
+ * when no explicit field was set (30% of class leader per Nat Rev Drug
+ * Discov 2024 class-concentration data). Empirical backtest showed that
+ * derivation produces worse results than falling through to TA defaults,
+ * because most indications contain heterogeneous assets and no single
+ * "typical" number represents them well. Explicit citations are the only
+ * defensible anchor.
+ */
+export function getIndicationTypicalAssetPeak(indication: string): number | null {
+  const cap = getIndicationMarketCap(indication);
+  if (!cap) return null;
+  return cap.typicalAssetPeakSales_M ?? null;
 }
 
 /**

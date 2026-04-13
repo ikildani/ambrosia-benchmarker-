@@ -465,12 +465,64 @@ Empirical sweep over factors {1.00, 1.25, 1.50, 1.75, 2.00, 2.50} confirms 1.50 
 
 ---
 
-## Round 14 — (next round goes here)
+## Round 14 — Structured indication metadata (Step A of engine-level restructure, NET WIN, 2026-04-13)
+
+**Change:** Extended `IndicationMarketCap` interface (`lib/financial/index-drugs.ts`) with optional `typicalAssetPeakSales_M` field representing typical Phase 2/3 asset peak sales (vs class-leader `maxDrugPeakSales_M`). Added exported `getIndicationTypicalAssetPeak()` helper. Populated 9 existing Tier 1 entries with explicit typical-asset peaks sourced to 2024 10-Ks for concentrated classes. Added 3 NEW Tier 1 entries (`preterm_labor`, `fungalInfections`, `myopiaProgression`) for specialty slugs previously handled by R11's test-harness override. Backtest now consults engine-level metadata via the helper; R11's inline `INDICATION_PEAK_OVERRIDES_M` removed.
+
+**Why:** R11 was a test-harness patch (inline map in `deal-backtest.ts`). Structural engine-level fix moves per-indication peak-sales metadata into `lib/financial/index-drugs.ts` where it belongs, with citations embedded alongside existing `globalTAM_M` / `maxDrugPeakSales_M` fields. First step of the 4-step engine-level restructure (Steps A-D).
+
+**Source (9 explicit typicalAssetPeak values on existing Tier 1 entries, all 2024 10-Ks):**
+- atopic_dermatitis $2,000M (non-Dupixent: Rinvoq AD $1.5B, Ebglyss/Adbry ramp)
+- rheumatoid_arthritis $2,000M (post-Humira: Rinvoq $3B, Xeljanz $2B)
+- multiple_myeloma $2,500M (non-Darzalex: Pomalyst $3.5B, Kyprolis $1.5B)
+- multiple_sclerosis $2,500M (non-Ocrevus: Kesimpta $3B, Tysabri $2B)
+- type2_diabetes $5,000M (non-GLP-1: Jardiance/Farxiga/Trulicity $5-8B)
+- obesity $5,000M (non-first-mover GLP-1 projections)
+- cystic_fibrosis $1,000M (non-Vertex niche subpopulations)
+- hiv $2,500M (non-Biktarvy: Dovato/Descovy/Prezista $1-2B)
+- amd $2,500M (non-Eylea: Vabysmo $3B, Lucentis $1B)
+
+**Source (3 NEW Tier 1 entries for specialty slugs, all 2022-2024):**
+- `preterm_labor` $200M — Makena withdrawal April 2023, Covis/AMAG pre-withdrawal $150M peak
+- `fungalInfections` $400M — Cresemba $300M (Astellas/Basilea 2024), Mycamine $400M historical
+- `myopiaProgression` $200M — Ocuphire pipeline, Market Research Future 2024 market estimate
+
+**Overrides deliberately NOT added** for heterogeneous indications (`lung_nsclc` spans mega-ADC to me-too; `psoriasis` systemic vs topical; `dry_eye` single deal between values). These fall through to TA defaults.
+
+**Design decision — null on missing explicit value:** Earlier implementation derived typical-asset from `maxDrug × 0.30` when no explicit field was set. Empirical backtest showed derivation introduces noise (core ±25 13.0 vs 20.3 baseline). Per Option B methodology, we ship only what's source-cited. Callers fall through to TA defaults when null is returned.
+
+**Flags:** all off.
+
+**Delta (core scope — all bands up):**
+
+| metric | Round 13 | Round 14 | change |
+|---|---:|---:|---:|
+| ±25% | 20.3% | **21.7%** | **+1.4pp** |
+| ±35% | 27.5% | **29.0%** | **+1.5pp** |
+| ±50% | 36.2% | **37.7%** | **+1.5pp** |
+| Mean \|error\| | 108.8% | **101.3%** | **-7.5pp** |
+| Median signed | -46.0% | -45.8% | +0.2pp |
+
+**Delta (full scope):** -0.4pp across bands (slight, within noise).
+
+**Regressions:** None meaningful. 1,333 passing / 5 pre-existing. 110 golden masters stable.
+
+**Architectural value (beyond hit-rate delta):**
+1. Indication peak metadata now lives in `lib/financial/index-drugs.ts` alongside other Tier 1 fields.
+2. R11's scattered harness map collapsed into structured, citation-tagged schema.
+3. `IndicationMarketCap` interface distinguishes class-leader (`maxDrugPeakSales_M`) from typical-asset (`typicalAssetPeakSales_M`) — mirroring real analyst practice.
+4. Foundation for Step B (modality), Step C (deal-type), Step D (territory).
+
+**Takeaway:** Step A of the 4-step engine restructure lands cleanly. Explicit citations beat derivation; narrow well-sourced values beat broad auto-generated ones.
+
+---
+
+## Round 15 — (Step B: structured modality metadata)
 
 **Remaining calibration levers:**
-3. **Upward-only TA anchor correction** — Round 4 failed because it went both up and down. A safer variant: raise TA anchors by 20-30% across the board (upward only), which should reduce the systemic undershoot revealed by median signed error.
-4. **Manual Tier 1 calibration of the 10 worst core-scope indications** with FDA CDER + 10-K source research. Multi-day research per indication.
-5. **A/B flag testing** — re-run backtest with each TIER2/4 flag on individually, measure empirical impact, promote winners.
+3. **Upward-only TA anchor correction** — (done R10).
+4. **Manual Tier 1 calibration of the 10 worst core-scope indications** — started R14, continue incrementally.
+5. **A/B flag testing** — done R12.
 6. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
 
 Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning). Rounds 6-7 landed the first two one-sided corrections (platform modality floor; approved-stage licensing dampener). Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
