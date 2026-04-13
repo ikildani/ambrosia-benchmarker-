@@ -35,6 +35,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     competitivePosition: s.competitivePosition,
     dataQuality: s.dataQuality,
     regulatoryDesignations: s.regulatoryDesignations,
+    peakSalesOverrideM: s.peakSalesOverrideM,  // R23
     ...(s.therapeuticArea === 'neurology' ? { bbbPenetration: s.bbbPenetration, diseaseProgression: s.diseaseProgression, biomarkerValidation: s.biomarkerValidation } : {}),
     ...(s.therapeuticArea === 'immunology' ? { immuneResetPotential: s.immuneResetPotential, targetSpecificity: s.targetSpecificity, diseaseSeverity: s.diseaseSeverity, treatmentGoal: s.treatmentGoal } : {}),
     ...(s.therapeuticArea === 'metabolic' ? { mechanismDifferentiation: s.mechanismDifferentiation, weightLossEfficacy: s.weightLossEfficacy, routeOfAdministration: s.routeOfAdministration, comorbidityBreadth: s.comorbidityBreadth, metabolicTreatmentApproach: s.metabolicTreatmentApproach } : {}),

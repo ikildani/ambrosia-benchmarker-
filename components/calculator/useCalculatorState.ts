@@ -117,6 +117,13 @@ export interface CalculatorFormState {
   giSegment: GISegment;
   biologicExperience: BiologicExperience;
   endoscopicEndpoint: EndoscopicEndpoint;
+  // Round 23 (2026-04-13): Asset-specific peak sales override.
+  // When set (>0), this value replaces the engine's indication-based peak
+  // anchor. BD users who have their own analyst consensus peak should
+  // enter it here — it propagates to the engine as `peakSalesEstimate.median`.
+  // null/undefined or 0 = use engine default based on indication/TA.
+  peakSalesOverrideM: number | null;
+
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -174,6 +181,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   giSegment: 'colonic',
   biologicExperience: 'biologic_naive',
   endoscopicEndpoint: 'endoscopic_improvement',
+  peakSalesOverrideM: null,  // R23: null = use engine default
   wizardStep: 0,
   quickMode: true,
   showTemplates: true,
@@ -393,6 +401,8 @@ export interface CalculatorActions {
   setCombinationPotential: (v: CombinationPotential) => void;
   setCompetitivePosition: (v: CompetitivePosition) => void;
   setDataQuality: (v: DataQuality) => void;
+  /** R23: Set asset-specific peak sales override in $M. null = use engine default. */
+  setPeakSalesOverrideM: (v: number | null) => void;
   setRegulatoryDesignations: (v: RegulatoryDesignations) => void;
   setBbbPenetration: (v: BBBPenetration) => void;
   setDiseaseProgression: (v: DiseaseProgression) => void;
@@ -460,6 +470,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     setCombinationPotential: (v) => dispatch({ type: 'SET_FIELD', field: 'combinationPotential', value: v }),
     setCompetitivePosition: (v) => dispatch({ type: 'SET_FIELD', field: 'competitivePosition', value: v }),
     setDataQuality: (v) => dispatch({ type: 'SET_FIELD', field: 'dataQuality', value: v }),
+    setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),
     setRegulatoryDesignations: (v) => dispatch({ type: 'SET_FIELD', field: 'regulatoryDesignations', value: v }),
     setBbbPenetration: (v) => dispatch({ type: 'SET_FIELD', field: 'bbbPenetration', value: v }),
     setDiseaseProgression: (v) => dispatch({ type: 'SET_FIELD', field: 'diseaseProgression', value: v }),

@@ -369,6 +369,12 @@ export interface CalculationInput {
   biologicExperience?: BiologicExperience;
   endoscopicEndpoint?: EndoscopicEndpoint;
 
+  // Round 23 (2026-04-13): Asset-specific peak sales override ($M, median).
+  // BD users who have their own analyst consensus peak should enter it here.
+  // When set (>0), takes precedence over the engine's indication-based anchor.
+  // null/undefined/0 = engine uses indication + TA defaults as before.
+  peakSalesOverrideM?: number | null;
+
   // Deal-type-specific structural inputs (mirror RNPVInput).
   // Co-development: licensee's share of the remaining R&D budget (0–1). Default 0.5.
   costSharingRatio?: number;
