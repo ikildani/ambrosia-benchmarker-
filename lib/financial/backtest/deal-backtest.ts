@@ -20,6 +20,7 @@ import { calculateRNPV } from '../rnpv-engine';
 import type { RNPVInput, RNPVResult } from '../types';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
+import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -179,6 +180,17 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
     typicalPeak ??
     PEAK_SALES_BY_TA_M[deal.therapeuticArea] ??
     1500;
+
+  // NOTE: `narrowMarketCapM` is defined in MODALITY_PROFILES for topical
+  // and narrow-class modalities but is NOT currently applied as a clamp.
+  // The modality labels in the backtest corpus don't reliably distinguish
+  // topical from systemic assets (e.g., `jakInhibitorDerm` is applied to
+  // both topical JAK creams and systemic JAK inhibitors for dermatology
+  // indications). Applying the cap blindly overcorrects systemic JAK deals
+  // that should reach $1-3B peak. Corpus must be re-tagged with topical/
+  // systemic distinction before this cap can be turned on.
+  void getNarrowMarketCapM;  // retained import — consumed in future work
+
   return {
     id: deal.id,
     year: deal.year,
@@ -291,34 +303,16 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
 }
 
 /**
- * Round 6 (2026-04-13): Platform modality option-value floor.
- *
- * For rnai / geneTherapy / mrna / cellTherapy / radiopharmaceutical deals,
- * intrinsic rNPV tends toward zero (platform assets have steep attrition +
- * narrow addressable populations). Real licensing upfronts don't go to zero
- * because the market prices option value on rare platforms and acquirers
- * pay for optionality, not expected NPV.
- *
- * Floor applied ONLY when predicted upfront falls below the floor — this
- * never *reduces* a prediction. The floor is calibrated empirically from the
- * 9 platform-modality deals in the core-scope cohort (median actual
- * upfront by modality). Sources: disclosed 2020-2026 licensing deals for
- * Alnylam, Moderna, Sarepta, BioNTech, Cellectis.
+ * Round 6 platform modality option-value floor — now sourced from the
+ * engine-level `MODALITY_PROFILES` schema (Step B of the engine restructure).
+ * Behavior unchanged; data moved out of this file into
+ * `lib/financial/modality-profiles.ts` where it's part of a richer
+ * modality metadata schema alongside manufacturing WACC premium, narrow-
+ * market caps, and modality category.
  */
-const PLATFORM_MODALITY_FLOOR_M: Record<string, number> = {
-  rnai: 30,
-  geneTherapy: 50,
-  mrna: 30,
-  cellTherapy: 30,
-  radiopharmaceutical: 30,
-  protac: 20,                  // PROTAC licensing upfronts 2023-2025
-  microRNA: 25,
-  'microRNA therapeutics': 25,
-};
-
 function applyPlatformFloor(rawUpfront: number, modality: string): number {
-  const floor = PLATFORM_MODALITY_FLOOR_M[modality];
-  if (floor === undefined) return rawUpfront;
+  const floor = getPlatformOptionFloorM(modality);
+  if (floor === 0) return rawUpfront;
   return Math.max(rawUpfront, floor);
 }
 

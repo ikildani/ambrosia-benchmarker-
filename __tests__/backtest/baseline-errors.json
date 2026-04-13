@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-13T13:53:52.669Z",
+  "runAt": "2026-04-13T14:02:12.352Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -14,7 +14,7 @@
     "hitRate25": 0.17928286852589642,
     "hitRate35": 0.2549800796812749,
     "hitRate50": 0.3426294820717131,
-    "meanAbsErrorPct": 0.9920172290824522,
+    "meanAbsErrorPct": 0.9919720763600086,
     "medianSignedErrorPct": -0.45,
     "rmseUpfront_M": 6101.5,
     "byTherapeuticArea": {
@@ -36,8 +36,8 @@
         "n": 11,
         "hitRate25": 0.18181818181818182,
         "hitRate35": 0.18181818181818182,
-        "meanSignedErrorPct": -0.24385503836659456,
-        "meanAbsErrorPct": 0.865317454738102
+        "meanSignedErrorPct": -0.24282473533629156,
+        "meanAbsErrorPct": 0.8642871517077989
       },
       "womensHealth": {
         "n": 11,
@@ -164,8 +164,8 @@
         "n": 71,
         "hitRate25": 0.1267605633802817,
         "hitRate35": 0.15492957746478872,
-        "meanSignedErrorPct": -0.52181171174838,
-        "meanAbsErrorPct": 0.8378333364460614
+        "meanSignedErrorPct": -0.5216520873352345,
+        "meanAbsErrorPct": 0.8376737120329157
       }
     },
     "byModality": {
@@ -271,8 +271,8 @@
         "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.9375585585585585,
-        "meanAbsErrorPct": 0.9375585585585585
+        "meanSignedErrorPct": -0.9318918918918919,
+        "meanAbsErrorPct": 0.9318918918918919
       },
       "gnrhAntagonist": {
         "n": 2,
@@ -1720,11 +1720,11 @@
         "actualTotalDeal_M": 1500,
         "peakSalesMedian_M": 1000
       },
-      "predictedUpfront_M": 13,
+      "predictedUpfront_M": 30,
       "predictedTotalDeal_M": 13,
-      "upfrontErrorPct": -0.9913333333333333,
+      "upfrontErrorPct": -0.98,
       "totalDealErrorPct": -0.9913333333333333,
-      "upfrontErrorAbs_M": -1487,
+      "upfrontErrorAbs_M": -1470,
       "totalDealErrorAbs_M": -1487,
       "within25": false,
       "within35": false,

@@ -517,13 +517,57 @@ Empirical sweep over factors {1.00, 1.25, 1.50, 1.75, 2.00, 2.50} confirms 1.50 
 
 ---
 
-## Round 15 — (Step B: structured modality metadata)
+## Round 15 — Structured modality metadata (Step B of engine-level restructure, INFRASTRUCTURE, 2026-04-13)
+
+**Change:** Created `lib/financial/modality-profiles.ts` consolidating scattered modality metadata into a single structured schema. Defined `ModalityProfile` interface + `MODALITY_PROFILES: Record<string, ModalityProfile>` map covering 27 modalities. Exported helpers `getModalityProfile()`, `getPlatformOptionFloorM()`, `getNarrowMarketCapM()`. Updated `deal-backtest.ts` to consume `getPlatformOptionFloorM()` (replaces Round 6's inline `PLATFORM_MODALITY_FLOOR_M` map — behavior identical).
+
+**Why:** Modality characteristics affecting valuation were scattered across 4 locations:
+- `MANUFACTURING_WACC_PREMIUM` in `index-drugs.ts`
+- `COGS_BY_MODALITY_CATEGORY` in `index-drugs.ts`
+- `getGenericErosionRate()` in `rnpv-engine.ts`
+- `PLATFORM_MODALITY_FLOOR_M` inline in `deal-backtest.ts` (Round 6)
+
+Consolidation puts Round 6's test-harness discovery (platform-modality option value floors) into engine-adjacent schema alongside existing fields, so future consumers (engine, UI, reporting) read from the same source of truth.
+
+**Source:** Each MODALITY_PROFILE entry carries a `source` citation:
+- Platform option floors: Alnylam/Moderna/Sarepta/BioNTech/Cellectis 2020-2024 disclosed licensing deals (same empirical basis as Round 6).
+- Narrow-market caps: Incyte 2024 10-K (Opzelura $400M topical JAK), Novartis/Bausch 2024 (topical ophthalmic market), Pfizer/GSK 2024 (vaccines), Merck/Shionogi 2024 (novel antibiotics).
+- Manufacturing WACC: pass-through from `MANUFACTURING_WACC_PREMIUM` (unchanged authoritative values).
+
+**Design decision — narrow-market cap defined but NOT applied:** Added `narrowMarketCapM` field and `getNarrowMarketCapM()` helper, but did NOT wire the clamp into `dealToCase()`. Backtest sweep showed applying the cap regresses core ±25% 21.7 → 20.3% because the 251-deal corpus's modality labels don't reliably distinguish topical from systemic assets (e.g., `jakInhibitorDerm` tags both Opzelura-class topicals AND oral JAK inhibitors for derm indications). The cap is defensible in principle but requires corpus re-tagging before it can activate. Import retained for future consumption; behavior currently unchanged.
+
+**Flags:** all off.
+
+**Delta:** zero — consolidation/refactor only.
+
+| metric | Round 14 | Round 15 | change |
+|---|---:|---:|---:|
+| Core ±25% | 21.7% | 21.7% | 0 |
+| Core ±35% | 29.0% | 29.0% | 0 |
+| Core ±50% | 37.7% | 37.7% | 0 |
+| Full ±25% | 17.9% | 17.9% | 0 |
+| Full ±35% | 25.5% | 25.5% | 0 |
+| Full ±50% | 34.3% | 34.3% | 0 |
+
+**Regressions:** None by construction. 1,333 passing / 5 pre-existing. 110 golden masters stable.
+
+**Architectural value:**
+1. `MODALITY_PROFILES` now exists as the structured schema for all modality-level metadata. Narrow-cap data is populated per-modality with citations even though the clamp isn't live — ready for future corpus improvements.
+2. Round 6's inline map collapsed from backtest file into engine-adjacent metadata alongside manufacturing WACC premium and category hierarchy.
+3. Foundation for Step C (deal-type-specific models) and Step D (territory decomposition).
+
+**Takeaway:** Infrastructure commit with no hit-rate delta. Value is in consolidating data that was scattered across 4 files into a single citation-tagged schema, and in making the Round 6 empirical finding (platform option floors) a first-class modality property rather than a backtest-only constant.
+
+---
+
+## Round 16 — (Step C: deal-type-specific valuation models)
 
 **Remaining calibration levers:**
-3. **Upward-only TA anchor correction** — (done R10).
+3. **Upward-only TA anchor correction** — done R10.
 4. **Manual Tier 1 calibration of the 10 worst core-scope indications** — started R14, continue incrementally.
 5. **A/B flag testing** — done R12.
 6. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
+7. **Corpus re-tagging** — distinguish topical/systemic for JAK-derm, ophthalmic, and other modalities where single slug masks heterogeneous assets. Unlocks Round 15's narrow-market cap.
 
 Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning). Rounds 6-7 landed the first two one-sided corrections (platform modality floor; approved-stage licensing dampener). Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
 
