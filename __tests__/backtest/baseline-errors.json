@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-13T15:02:17.793Z",
+  "runAt": "2026-04-13T17:31:49.470Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -14,7 +14,7 @@
     "hitRate25": 0.1752988047808765,
     "hitRate35": 0.2589641434262948,
     "hitRate50": 0.3426294820717131,
-    "meanAbsErrorPct": 0.8972654218832635,
+    "meanAbsErrorPct": 0.8860436423347908,
     "medianSignedErrorPct": -0.46,
     "rmseUpfront_M": 6101.4,
     "byTherapeuticArea": {
@@ -50,8 +50,8 @@
         "n": 74,
         "hitRate25": 0.17567567567567569,
         "hitRate35": 0.24324324324324326,
-        "meanSignedErrorPct": -0.10819274846053255,
-        "meanAbsErrorPct": 0.8209490059495487
+        "meanSignedErrorPct": -0.14625581152359562,
+        "meanAbsErrorPct": 0.7828859428864856
       },
       "immunology": {
         "n": 21,
@@ -136,8 +136,8 @@
         "n": 39,
         "hitRate25": 0.23076923076923078,
         "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": 0.35180747485644637,
-        "meanAbsErrorPct": 0.9709576725116421
+        "meanSignedErrorPct": 0.2795852526342242,
+        "meanAbsErrorPct": 0.8987354502894197
       },
       "preclinical": {
         "n": 46,
@@ -299,8 +299,8 @@
         "n": 16,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 0.287244588141496,
-        "meanAbsErrorPct": 1.3738665229696154
+        "meanSignedErrorPct": 0.11120292147482924,
+        "meanAbsErrorPct": 1.1978248563029485
       },
       "cellTherapy": {
         "n": 2,
@@ -456,9 +456,9 @@
     "hitRate25": 0.21739130434782608,
     "hitRate35": 0.30434782608695654,
     "hitRate50": 0.37681159420289856,
-    "meanAbsErrorPct": 0.8824268825247424,
+    "meanAbsErrorPct": 0.8416056264860948,
     "medianSignedErrorPct": -0.488,
-    "rmseUpfront_M": 594.8,
+    "rmseUpfront_M": 593.8,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 7,
@@ -492,8 +492,8 @@
         "n": 21,
         "hitRate25": 0.14285714285714285,
         "hitRate35": 0.19047619047619047,
-        "meanSignedErrorPct": -0.06433179710975745,
-        "meanAbsErrorPct": 1.100972008749969
+        "meanSignedErrorPct": -0.19845878123674154,
+        "meanAbsErrorPct": 0.966845024622985
       },
       "immunology": {
         "n": 3,
@@ -564,8 +564,8 @@
         "n": 26,
         "hitRate25": 0.3076923076923077,
         "hitRate35": 0.4230769230769231,
-        "meanSignedErrorPct": 0.540892712023295,
-        "meanAbsErrorPct": 0.9688950002644171
+        "meanSignedErrorPct": 0.4325593786899618,
+        "meanAbsErrorPct": 0.8605616669310838
       },
       "phase2": {
         "n": 43,
@@ -664,8 +664,8 @@
         "n": 7,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 0.8764536588646757,
-        "meanAbsErrorPct": 2.015609833198816
+        "meanSignedErrorPct": 0.47407270648372346,
+        "meanAbsErrorPct": 1.6132288808178639
       },
       "cellTherapy": {
         "n": 1,
@@ -742,32 +742,6 @@
   "worstDealsCore": [
     {
       "case": {
-        "id": "geo-003",
-        "year": 2023,
-        "licensor": "CSPC Pharmaceutical",
-        "licensee": "Elevar Therapeutics",
-        "therapeuticArea": "oncology",
-        "indication": "gastric",
-        "modality": "adc",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "ex_us",
-        "actualUpfront_M": 60,
-        "actualTotalDeal_M": 700,
-        "peakSalesMedian_M": 2125
-      },
-      "predictedUpfront_M": 384,
-      "predictedTotalDeal_M": 1221,
-      "upfrontErrorPct": 5.4,
-      "totalDealErrorPct": 0.7442857142857143,
-      "upfrontErrorAbs_M": 324,
-      "totalDealErrorAbs_M": 521,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "verified-2025-009",
         "year": 2025,
         "licensor": "Hengrui Medicine",
@@ -840,6 +814,32 @@
       "totalDealErrorPct": -0.38333333333333336,
       "upfrontErrorAbs_M": 263,
       "totalDealErrorAbs_M": -690,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "geo-003",
+        "year": 2023,
+        "licensor": "CSPC Pharmaceutical",
+        "licensee": "Elevar Therapeutics",
+        "therapeuticArea": "oncology",
+        "indication": "gastric",
+        "modality": "adc",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "ex_us",
+        "actualUpfront_M": 60,
+        "actualTotalDeal_M": 700,
+        "peakSalesMedian_M": 1275
+      },
+      "predictedUpfront_M": 215,
+      "predictedTotalDeal_M": 683,
+      "upfrontErrorPct": 2.5833333333333335,
+      "totalDealErrorPct": -0.024285714285714285,
+      "upfrontErrorAbs_M": 155,
+      "totalDealErrorAbs_M": -17,
       "within25": false,
       "within35": false,
       "within50": false
@@ -2160,14 +2160,14 @@
         "territory": "ex_us",
         "actualUpfront_M": 60,
         "actualTotalDeal_M": 700,
-        "peakSalesMedian_M": 2125
+        "peakSalesMedian_M": 1275
       },
-      "predictedUpfront_M": 384,
-      "predictedTotalDeal_M": 1221,
-      "upfrontErrorPct": 5.4,
-      "totalDealErrorPct": 0.7442857142857143,
-      "upfrontErrorAbs_M": 324,
-      "totalDealErrorAbs_M": 521,
+      "predictedUpfront_M": 215,
+      "predictedTotalDeal_M": 683,
+      "upfrontErrorPct": 2.5833333333333335,
+      "totalDealErrorPct": -0.024285714285714285,
+      "upfrontErrorAbs_M": 155,
+      "totalDealErrorAbs_M": -17,
       "within25": false,
       "within35": false,
       "within50": false
@@ -7535,9 +7535,9 @@
       "hitRate25": 0.21818181818181817,
       "hitRate35": 0.3090909090909091,
       "hitRate50": 0.4,
-      "meanAbsErrorPct": 0.8202534306606574,
+      "meanAbsErrorPct": 0.7690413094485362,
       "medianSignedErrorPct": -0.488,
-      "rmseUpfront_M": 640.6,
+      "rmseUpfront_M": 639.5,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 6,
@@ -7571,8 +7571,8 @@
           "n": 16,
           "hitRate25": 0.125,
           "hitRate35": 0.1875,
-          "meanSignedErrorPct": -0.21962066889174184,
-          "meanAbsErrorPct": 0.9899331688917419
+          "meanSignedErrorPct": -0.39566233555840846,
+          "meanAbsErrorPct": 0.8138915022250752
         },
         "immunology": {
           "n": 3,
@@ -7643,8 +7643,8 @@
           "n": 23,
           "hitRate25": 0.30434782608695654,
           "hitRate35": 0.43478260869565216,
-          "meanSignedErrorPct": 0.45149493622319703,
-          "meanAbsErrorPct": 0.9162492760862326
+          "meanSignedErrorPct": 0.3290311681072551,
+          "meanAbsErrorPct": 0.7937855079702907
         },
         "phase2": {
           "n": 32,
@@ -7729,8 +7729,8 @@
           "n": 6,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": 0.23549223163841812,
-          "meanAbsErrorPct": 1.564507768361582
+          "meanSignedErrorPct": -0.23395221280602638,
+          "meanAbsErrorPct": 1.0950633239171375
         },
         "cellTherapy": {
           "n": 1,
@@ -7970,7 +7970,7 @@
       "hit25": 0.0038961038961038974,
       "hit35": 0.023376623376623384,
       "hit50": 0.11428571428571432,
-      "meanAbsErrorPct": 0.3064262984729885
+      "meanAbsErrorPct": 0.3576384196851097
     }
   }
 }

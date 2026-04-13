@@ -3157,6 +3157,7 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     ta: 'cardiovascular',
     globalTAM_M: 7000,
     maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1500,  // Opsumit $2B, Uptravi $1.7B, Tyvaso $2B, Orenitram ~$500M — typical PAH asset $1-2B (J&J/United Therapeutics 2024 10-Ks)
     estimateYear: 2025,
     source: 'J&J 2024 10-K (Opsumit $2.0B, Uptravi $1.7B, Tracleer legacy), Gilead Letairis legacy, Merck Winrevair (activin)',
     notes: 'J&J/Actelion franchise dominates (Opsumit, Uptravi, Tracleer). Winrevair (sotatercept) 2024 approval is first disease-modifying class.',
@@ -3284,6 +3285,20 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     estimateYear: 2024,
     source: 'Market Research Future 2024 (myopia control global market ~$500M), Ocuphire 2024 (reproxalap pipeline), Nevakar (low-dose atropine 0.01%)',
     notes: 'No FDA-approved myopia progression drug. Low-dose atropine 0.01% is off-label standard; Ocuphire reproxalap and Nevakar in development. Market fragmented across pipeline players — per-asset peaks $100-200M.',
+  },
+
+  // -------------------------------------------------------------------------
+  // Round 18 additions (2026-04-13): oncology subtypes appearing in worst-10
+  // -------------------------------------------------------------------------
+  gastric: {
+    indication: 'gastric',
+    ta: 'oncology',
+    globalTAM_M: 6000,
+    maxDrugPeakSales_M: 2500,
+    typicalAssetPeakSales_M: 1500,
+    estimateYear: 2024,
+    source: 'AstraZeneca/Daiichi 2024 10-K (Enhertu gastric slice $500M), BMS 2024 10-K (Opdivo gastric $1B), Lilly Cyramza $800M, EvaluatePharma 2024 gastric cancer forecast',
+    notes: 'Asian incidence dominates volume but pricing favors US/EU. Enhertu gastric + Opdivo-Yervoy are emerging SoC; HER2+ and claudin-18.2 segmentation driving new asset development. Typical asset $1-2B.',
   },
 };
 

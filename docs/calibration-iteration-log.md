@@ -654,10 +654,41 @@ Full scope: 6.8 → 17.5% (+10.7pp), 11.2 → 25.9% (+14.7pp), 16.7 → 34.3% (+
 
 ---
 
-## Round 18 — (next round)
+## Round 18 — Extended Tier 1 coverage: gastric, pah (SMALL WIN, 2026-04-13)
+
+**Change:** Added typical-asset peak to existing `pah` Tier 1 entry ($1,500M). Added new `gastric` Tier 1 entry (globalTAM_M $6,000M, maxDrugPeakSales_M $2,500M, typicalAssetPeakSales_M $1,500M). Continues R14 pattern of one-by-one Tier 1 expansion for indications appearing in the worst-predicted core deals.
+
+**Why:** Post-R17 worst-10 still includes gastric (CSPC→Elevar ADC +540%) and pulmonary_hypertension (Gossamer→Chiesi +118%). Both indications had either no Tier 1 entry or no typical-asset peak. Explicit values reduce the TA-default fallback's over-prediction for these specialty oncology / cardiopulmonary assets.
+
+**Source:**
+- `pah` $1,500M: J&J 2024 10-K (Opsumit $2B, Uptravi $1.7B), United Therapeutics 2024 10-K (Tyvaso $2B), Orenitram ~$500M — typical PAH asset $1-2B.
+- `gastric` entry: AstraZeneca/Daiichi 2024 10-K (Enhertu gastric slice $500M), BMS 2024 10-K (Opdivo gastric $1B), Lilly Cyramza $800M, EvaluatePharma 2024. HER2+ and claudin-18.2 segmentation driving new asset development; typical asset $1-2B.
+
+**Flags:** all off.
+
+**Delta (core scope):**
+
+| metric | Round 17 | Round 18 | change |
+|---|---:|---:|---:|
+| ±25% | 21.7% | 21.7% | 0 |
+| ±35% | 30.4% | 30.4% | 0 |
+| ±50% | 37.7% | 37.7% | 0 |
+| Mean \|error\| | 88.2% | **84.2%** | **-4.0pp** |
+
+**Delta (full scope):** unchanged across bands.
+
+**Regressions:** None. 1,333 passing / 5 pre-existing. 110 golden masters stable.
+
+**Reading:** Small-win consolidation. Hit rates unchanged (the specific deals helped by these entries didn't cross band boundaries) but mean error improves. Incremental extension of the R14 Tier 1 coverage pattern.
+
+**Takeaway:** More slug-by-slug Tier 1 additions would produce similar marginal gains. Higher-leverage alternatives are corpus expansion (more deals = tighter confidence intervals) or promoting the metadata to production engine defaults.
+
+---
+
+## Round 19 — (next round)
 
 **Remaining calibration levers:**
-1. **Manual Tier 1 calibration of the 10 worst core-scope indications** — started R14, continue incrementally.
+1. **Manual Tier 1 calibration of more specialty indications** — continue R14/R18 pattern incrementally.
 2. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
 3. **Corpus re-tagging** — distinguish topical/systemic for JAK-derm, ophthalmic, etc. Unlocks R15 narrow-market cap.
 4. **Promote Step A-D metadata to production engine** — replace existing scattered constants (`getDealTypeUpfrontPercent`, `MANUFACTURING_WACC_PREMIUM`, etc.) with the new structured schemas. Requires golden master regeneration.
