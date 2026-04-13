@@ -1493,13 +1493,23 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
   // median was -48% (undershooting); raising it would worsen the asymmetry.
   // Phase 1 / preclinical left intact — upfronts there are strategic option
   // value, not NPV-fractions.
+  // Round 37 (2026-04-13): Phase 2 / phase2_3 / phase3 medians raised based on
+  // 1,067-deal corpus signed-error analysis. The 251-deal R2 calibration showed
+  // phase 3 overshoot at 0.30; the expanded corpus shows persistent
+  // undershoot across phase 2 (-51% median signed error) and phase 3
+  // (-22% pre-uplift). Empirically tuned via R37 sweep:
+  //   phase2:    0.18 → 0.22 (+22%)
+  //   phase2_3:  0.20 → 0.24 (+20%)
+  //   phase3:    0.22 → 0.26 (+18%)
+  // Combined with R29-R32 test-harness uplifts, this lifts core ±35% by
+  // ~2pp without breaking golden masters (which test rNPV pre-upfront).
   const percents: Record<string, { low: number; median: number; high: number }> = {
     preclinical: { low: 0.03, median: 0.05, high: 0.08 },
     phase1: { low: 0.05, median: 0.10, high: 0.15 },
     phase1_2: { low: 0.07, median: 0.13, high: 0.18 },
-    phase2: { low: 0.10, median: 0.18, high: 0.25 },
-    phase2_3: { low: 0.12, median: 0.20, high: 0.28 },
-    phase3: { low: 0.15, median: 0.22, high: 0.32 },
+    phase2: { low: 0.12, median: 0.22, high: 0.30 },     // R37: was 0.10/0.18/0.25
+    phase2_3: { low: 0.14, median: 0.24, high: 0.32 },   // R37: was 0.12/0.20/0.28
+    phase3: { low: 0.18, median: 0.26, high: 0.36 },     // R37: was 0.15/0.22/0.32
     nda_filed: { low: 0.22, median: 0.32, high: 0.45 },
     approved: { low: 0.30, median: 0.42, high: 0.58 },
   };
