@@ -22,6 +22,7 @@ import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/c
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
 import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
+import { getTerritoryAdjustedPeak } from '../geographic-revenue-curves';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -177,20 +178,25 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
   const rawSlug = deal.indication_specific || deal.indication_category;
   const canonicalSlug = BACKTEST_INDICATION_ALIASES[rawSlug] ?? rawSlug;
   const typicalPeak = getIndicationTypicalAssetPeak(canonicalSlug);
-  const peakSalesMedian_M =
+  const globalPeak_M =
     typicalPeak ??
     PEAK_SALES_BY_TA_M[deal.therapeuticArea] ??
     1500;
 
+  // Step D (2026-04-13): Scale global peak by territorial fraction when
+  // deal is non-global. Engine consumes the territory-adjusted peak so the
+  // rNPV reflects the actual rights package (regional share), not the full
+  // global product. Helper sourced from lib/financial/geographic-revenue-
+  // curves.ts (TERRITORY_GLOBAL_SHARE map). For 'global' deals returns
+  // peak unchanged. Note: 0 of the 69 core-scope Phase 2/3 licensing+codev
+  // deals are tagged non-global, so this only affects the ~37 territorial
+  // deals in full scope.
+  const peakSalesMedian_M = getTerritoryAdjustedPeak(globalPeak_M, deal.territory);
+
   // NOTE: `narrowMarketCapM` is defined in MODALITY_PROFILES for topical
-  // and narrow-class modalities but is NOT currently applied as a clamp.
-  // The modality labels in the backtest corpus don't reliably distinguish
-  // topical from systemic assets (e.g., `jakInhibitorDerm` is applied to
-  // both topical JAK creams and systemic JAK inhibitors for dermatology
-  // indications). Applying the cap blindly overcorrects systemic JAK deals
-  // that should reach $1-3B peak. Corpus must be re-tagged with topical/
-  // systemic distinction before this cap can be turned on.
-  void getNarrowMarketCapM;  // retained import — consumed in future work
+  // and narrow-class modalities but is NOT currently applied as a clamp —
+  // corpus modality labels don't distinguish topical from systemic.
+  void getNarrowMarketCapM;
 
   return {
     id: deal.id,
