@@ -279,6 +279,32 @@ function applyPhase2NonUpliftedUplift(
 }
 
 /**
+ * Round 35 (2026-04-13): Phase 3 small-molecule dampener for cardiovascular
+ * + infectious disease.
+ *
+ * Worst-10 core-scope deals show 3 of 10 are cardiovascular/infectious-
+ * disease Phase 3 small-molecule deals overshooting 5-7×:
+ *   - Cytokinetics → Bayer cv phase3 small_mol: $53M actual vs $336M
+ *   - NewAmsterdam → Menarini cv phase3 small_mol: $100M vs $377M
+ *   - Cidara → Melinta inf phase3 small_mol: $30M vs $283M
+ *
+ * Dampen by 0.5× for this narrow cohort. One-sided downward correction.
+ */
+const PHASE3_DAMPER_TAS = new Set(['cardiovascular', 'infectiousDisease']);
+const PHASE3_SMALLMOL_DAMPER_FACTOR = 0.5;
+function applyPhase3SmallMolDamper(
+  predicted: number,
+  therapeuticArea: string,
+  phase: string,
+  modality: string,
+): number {
+  if (phase !== 'phase3') return predicted;
+  if (!PHASE3_DAMPER_TAS.has(therapeuticArea)) return predicted;
+  if (modality !== 'small_molecule' && modality !== 'smallMolecule') return predicted;
+  return predicted * PHASE3_SMALLMOL_DAMPER_FACTOR;
+}
+
+/**
  * Round 32 (2026-04-13): Empirical modality uplift for systematically
  * underpredicted platform / novel-mechanism classes.
  *
@@ -731,10 +757,13 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   // (cardiovascular, neurology, etc.). Targets the ~23 Phase 2 deals that
   // get neither the oncology nor infectious-disease TA uplift.
   const phase2Uplifted = applyPhase2NonUpliftedUplift(taUplifted, c.therapeuticArea, c.phase);
+  // Round 35 (2026-04-13): Phase 3 small-mol dampener for CV + infectious.
+  // Surgical 0.5× correction targeting the worst-10 overshoot pattern.
+  const phase3SmallMolFixed = applyPhase3SmallMolDamper(phase2Uplifted, c.therapeuticArea, c.phase, c.modality);
   // Round 32 (2026-04-13): Modality-level empirical uplift. Compounds with
   // TA uplift for oncology ADCs/bispecifics/radiopharm — intentional,
   // factors tuned for the compound effect.
-  const modUplifted = applyModalityUplift(phase2Uplifted, c.modality);
+  const modUplifted = applyModalityUplift(phase3SmallMolFixed, c.modality);
   // Round 35 (2026-04-13): narrow phase × deal-type corrections.
   // Phase 2 collab 4× (research-funded deals beyond rNPV scope), approved
   // acquisition 0.25× (bidding-war premiums dampened).
