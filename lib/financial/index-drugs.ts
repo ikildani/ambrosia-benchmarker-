@@ -3300,6 +3300,130 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     source: 'AstraZeneca/Daiichi 2024 10-K (Enhertu gastric slice $500M), BMS 2024 10-K (Opdivo gastric $1B), Lilly Cyramza $800M, EvaluatePharma 2024 gastric cancer forecast',
     notes: 'Asian incidence dominates volume but pricing favors US/EU. Enhertu gastric + Opdivo-Yervoy are emerging SoC; HER2+ and claudin-18.2 segmentation driving new asset development. Typical asset $1-2B.',
   },
+
+  // =========================================================================
+  // Round 29 additions (2026-04-13): proper-case oncology sub-indications
+  // appearing in the 988-deal Supabase corpus that previously fell through
+  // to the TA default ($2,500M) because no Tier 1 entry existed. Accompanying
+  // alias map lives in BACKTEST_INDICATION_ALIASES in deal-backtest.ts.
+  //
+  // Sizing: 150+ core oncology deals were mis-anchored before this round.
+  // All typical-asset peaks cited to 2024 10-Ks or 2024/2025 EvaluatePharma.
+  // =========================================================================
+  cll: {
+    indication: 'cll', ta: 'oncology', globalTAM_M: 8000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2024,
+    source: 'AbbVie 2024 10-K (Imbruvica CLL), AstraZeneca 2024 (Calquence $2.4B), BMS 2024 (Venclexta), BeiGene 2024 (Brukinsa)',
+    notes: 'BTK class + Venclexta BCL-2 dominate. Imbruvica LOE 2029 opens window for next-gen BTK.',
+  },
+  hcc: {
+    indication: 'hcc', ta: 'oncology', globalTAM_M: 4000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2024,
+    source: 'Eisai 2024 (Lenvima HCC $1.5B), Lilly 2024 (Cyramza), Roche 2024 (Tecentriq+Avastin HCC SOC)',
+    notes: 'Asia dominates volume; atezo+bev is SOC. TKI + IO combos expanding.',
+  },
+  sclc: {
+    indication: 'sclc', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 1800,
+    typicalAssetPeakSales_M: 700, estimateYear: 2024,
+    source: 'Amgen 2024 10-K (Imdelltra/tarlatamab DLL3 BiTE $1-2B projected), AstraZeneca 2024 (Imfinzi SCLC), Roche 2024 (Tecentriq)',
+    notes: 'DLL3-targeted T-cell engagers re-igniting segment.',
+  },
+  all_leukemia: {
+    indication: 'all_leukemia', ta: 'oncology', globalTAM_M: 3500, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 700, estimateYear: 2024,
+    source: 'Amgen 2024 10-K (Blincyto $803M), Pfizer 2024 (Besponsa), Novartis 2024 (Kymriah pediatric ALL)',
+    notes: 'Pediatric B-ALL driven by Blincyto+Kymriah; adult Ph+ ALL adds TKIs.',
+  },
+  sarcoma: {
+    indication: 'sarcoma', ta: 'oncology', globalTAM_M: 2500, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2024,
+    source: 'SpringWorks 2024 10-K (Ogsiveo desmoid $400M), AstraZeneca 2024 (Koselugo NF1-PN), PharmaMar 2024 (Yondelis)',
+    notes: 'Heterogeneous — GIST, desmoid, NF1-PN, soft tissue. Each subtype $100-500M.',
+  },
+  mantle_cell_lymphoma: {
+    indication: 'mantle_cell_lymphoma', ta: 'oncology', globalTAM_M: 2500, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 600, estimateYear: 2024,
+    source: 'Lilly 2024 10-K (Jaypirca $500M projected MCL), AbbVie 2024 (Imbruvica MCL), Gilead 2024 (Tecartus $500M MCL)',
+    notes: 'Post-BTK-resistance segment growing via Jaypirca + Tecartus CAR-T.',
+  },
+  follicular_lymphoma: {
+    indication: 'follicular_lymphoma', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 1800,
+    typicalAssetPeakSales_M: 700, estimateYear: 2024,
+    source: 'Roche 2024 annual (Lunsumio $400M launch), AbbVie 2024 (Epkinly FL), Gilead 2024 (Yescarta indolent)',
+    notes: 'CD20 bispecifics reshaping 3L+ FL.',
+  },
+  t_cell_lymphoma: {
+    indication: 't_cell_lymphoma', ta: 'oncology', globalTAM_M: 1500, maxDrugPeakSales_M: 800,
+    typicalAssetPeakSales_M: 300, estimateYear: 2024,
+    source: 'Seagen/Takeda 2024 (Adcetris T-cell slice), Spectrum 2024 (Folotyn), Kyowa Kirin 2024 (Poteligeo)',
+    notes: 'Cutaneous dominates (Adcetris CTCL, Poteligeo). Peripheral T-cell rarer.',
+  },
+  mds: {
+    indication: 'mds', ta: 'oncology', globalTAM_M: 2500, maxDrugPeakSales_M: 1200,
+    typicalAssetPeakSales_M: 500, estimateYear: 2024,
+    source: 'BMS 2024 10-K (Reblozyl MDS $800M), Taiho 2024 (Inqovi oral decitabine), Celgene legacy (Vidaza)',
+    notes: 'Lower-risk MDS anemia driving class; higher-risk converts to AML protocol.',
+  },
+  mpn: {
+    indication: 'mpn', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 2500,
+    typicalAssetPeakSales_M: 800, estimateYear: 2024,
+    source: 'Novartis 2024 (Jakafi cross-indication), Incyte 2024 10-K (Jakafi US $2.5B), GSK 2024 (Ojjaara momelotinib)',
+    notes: 'MF+PV dominated by Jakafi ruxolitinib; anemia-preserving JAK inhibitors emerging.',
+  },
+  rcc: {
+    indication: 'rcc', ta: 'oncology', globalTAM_M: 6000, maxDrugPeakSales_M: 3500,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2024,
+    source: 'Exelixis 2024 10-K (Cabometyx $2.3B), Merck 2024 (Welireg HIF-2α, Keytruda RCC allocation), Bayer 2024 (Nexavar legacy)',
+    notes: 'IO+TKI combos standard. Welireg for VHL. Mature class.',
+  },
+  bladder: {
+    indication: 'bladder', ta: 'oncology', globalTAM_M: 4500, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2024,
+    source: 'Astellas/Seagen 2024 (Padcev $1.2B), Merck 2024 (Keytruda NMIBC+metastatic), Pfizer 2024 (Bavencio)',
+    notes: 'Nectin-4 ADC Padcev + IO is emerging SoC for advanced. NMIBC dominated by BCG + Keytruda.',
+  },
+  endometrial: {
+    indication: 'endometrial', ta: 'oncology', globalTAM_M: 2500, maxDrugPeakSales_M: 1800,
+    typicalAssetPeakSales_M: 700, estimateYear: 2024,
+    source: 'GSK 2024 annual (Jemperli dostarlimab $800M), Merck 2024 (Keytruda+Lenvima endometrial), Eisai 2024 (Lenvima)',
+    notes: 'dMMR has shifted to IO-first-line. pMMR adds IO+chemo+Lenvima.',
+  },
+  mesothelioma: {
+    indication: 'mesothelioma', ta: 'oncology', globalTAM_M: 1500, maxDrugPeakSales_M: 800,
+    typicalAssetPeakSales_M: 300, estimateYear: 2024,
+    source: 'BMS 2024 (Opdivo+Yervoy mesothelioma), Novocure 2024 (Optune TTF)',
+    notes: 'Small but underserved. IO doublet standard.',
+  },
+  cholangiocarcinoma: {
+    indication: 'cholangiocarcinoma', ta: 'oncology', globalTAM_M: 1500, maxDrugPeakSales_M: 1000,
+    typicalAssetPeakSales_M: 400, estimateYear: 2024,
+    source: 'Incyte 2024 10-K (Pemazyre pemigatinib $150M), Servier 2024 (Tibsovo IDH1), Taiho 2024 (Lytgobi)',
+    notes: 'FGFR2 fusion + IDH1 + HER2 subtypes driving targeted therapy.',
+  },
+  esophageal: {
+    indication: 'esophageal', ta: 'oncology', globalTAM_M: 3500, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2024,
+    source: 'Merck 2024 (Keytruda GEJ+esophageal), BMS 2024 (Opdivo esophageal), AZ/Daiichi 2024 (Enhertu GEJ)',
+    notes: 'IO is first-line; HER2+ overlaps with gastric ADC franchise.',
+  },
+  gbm: {
+    indication: 'gbm', ta: 'oncology', globalTAM_M: 2000, maxDrugPeakSales_M: 1000,
+    typicalAssetPeakSales_M: 300, estimateYear: 2024,
+    source: 'Novocure 2024 10-K (Optune Gio TTF $500M), Servier 2024 (Voranigo vorasidenib), Merck legacy (Temodar generic)',
+    notes: 'IDH-mutant via Voranigo; TTF adjunct. High unmet need.',
+  },
+  breast_hr_positive: {
+    indication: 'breast_hr_positive', ta: 'oncology', globalTAM_M: 15000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 3000, estimateYear: 2024,
+    source: 'Pfizer 2024 10-K (Ibrance $4.7B), Lilly 2024 10-K (Verzenio $5.3B), Novartis 2024 (Kisqali), Stemline 2024 (Orserdu elacestrant)',
+    notes: 'CDK4/6 class + endocrine dominates. ER-degraders emerging for ESR1-mutant.',
+  },
+  solid_tumors_basket: {
+    indication: 'solid_tumors_basket', ta: 'oncology', globalTAM_M: 40000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2024,
+    source: 'Merck 2024 (Keytruda cross-tumor $29B), BMS 2024 (Opdivo), Roche 2024 (Tecentriq), tissue-agnostic (Vitrakvi, Retevmo)',
+    notes: 'Basket indications (NTRK/RET/TMB-H/dMMR). Label-expansion deals cover 3-5 tumor types.',
+  },
 };
 
 /**
