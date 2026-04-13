@@ -19,6 +19,7 @@
 import { calculateRNPV } from '../rnpv-engine';
 import type { RNPVInput, RNPVResult } from '../types';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
+import { getIndicationTypicalAssetPeak } from '../index-drugs';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -139,49 +140,43 @@ const PEAK_SALES_BY_TA_M: Record<string, number> = {
 };
 
 /**
- * Round 11 (2026-04-13): Indication-specific peak sales overrides for
- * specialty/narrow-indication deals where TA defaults overshoot real
- * typical-asset peaks. Values represent typical Phase 2/3 asset peaks
- * (not class leader), sourced with 2022-2024 citations.
- *
- * Scope deliberately narrow — only indications where (a) the TA default
- * clearly mis-anchors, (b) there's defensible 2022-2024 source data,
- * and (c) the backtest sweep confirms no regression. Broader override
- * maps (22+ indications) regress hit rates via over-correction.
+ * Round 13 Step A (2026-04-13): Per-modality fallback aliases for slugs
+ * that don't land cleanly in INDICATION_MARKET_CAPS. The engine's
+ * `getIndicationTypicalAssetPeak` returns null for unknown slugs; these
+ * aliases map deal-slug variants to canonical Tier 1 keys when the
+ * semantic mapping is unambiguous (case/format normalization only,
+ * no subjective claim).
  */
-const INDICATION_PEAK_OVERRIDES_M: Record<string, number> = {
-  // womensHealth: no approved preterm labor drug exists. Makena (Covis
-  // Pharma, 17-hydroxyprogesterone caproate) withdrawn by FDA April 2023
-  // after PROLONG trial failed; peak sales pre-withdrawal ~$150M (Covis/
-  // AMAG pre-withdrawal 2022 SEC filings). Market is essentially without
-  // a branded drug, with generic progesterone filling the gap.
-  preterm_labor: 200,
-
-  // infectiousDisease: IV antifungals are niche hospital-use products.
-  // Cresemba peak ~$300M (Astellas/Basilea 2024 annual), Mycamine
-  // historical ~$400M (Astellas legacy), Brexafemme ~$100M ramp
-  // (Scynexis 2024 10-K). Typical new asset $200-500M.
-  fungalInfections: 400,
-  antifungal: 400,
-
-  // ophthalmology: no FDA-approved myopia progression drug; low-dose
-  // atropine 0.01% pipeline only (Ocuphire, Nevakar). Market cap
-  // estimated by Market Research Future 2024 at ~$500M globally but
-  // per-asset revenue anchors at $100-200M given market split across
-  // pipeline players.
-  myopiaProgression: 200,
+const BACKTEST_INDICATION_ALIASES: Record<string, string> = {
+  antifungal: 'fungalInfections',           // same canonical indication
+  hepatitisB: 'hepatitis_b',                // case normalization
+  crohns: 'ibd_cd',                          // disease-name → Tier 1 key
+  ulcerativeColitis: 'ibd_uc',
+  atopicderm: 'atopic_dermatitis',
+  nash: 'nash_mash',
+  pulmonary_hypertension: 'pah',
+  muscular_dystrophy: 'dmd',                 // broader form → specific Tier 1 entry
+  wetAmd: 'amd',
 };
 
 /**
  * Convert an ExtendedComparableDeal row into the backtest case shape the
- * runner consumes. Peak sales resolution:
- *   1. Indication-specific override (R11) — narrow specialty indications
- *   2. TA default (R10 upward-corrected for undershooting TAs)
+ * runner consumes. Peak sales resolution (post-Step-A):
+ *   1. Engine's `getIndicationTypicalAssetPeak` (Tier 1 + Tier 3 fallback)
+ *      via direct slug OR backtest alias.
+ *   2. TA default (R10 upward-corrected for undershooting TAs).
+ *
+ * Round 11's inline `INDICATION_PEAK_OVERRIDES_M` was removed — those
+ * three specialty indications (preterm_labor, fungalInfections,
+ * myopiaProgression) are now NEW Tier 1 entries in `INDICATION_MARKET_CAPS`
+ * with full citations, accessed via the engine helper.
  */
 function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
-  const indicationKey = deal.indication_specific || deal.indication_category;
+  const rawSlug = deal.indication_specific || deal.indication_category;
+  const canonicalSlug = BACKTEST_INDICATION_ALIASES[rawSlug] ?? rawSlug;
+  const typicalPeak = getIndicationTypicalAssetPeak(canonicalSlug);
   const peakSalesMedian_M =
-    INDICATION_PEAK_OVERRIDES_M[indicationKey] ??
+    typicalPeak ??
     PEAK_SALES_BY_TA_M[deal.therapeuticArea] ??
     1500;
   return {
@@ -567,6 +562,53 @@ export interface BacktestReport {
   worstDealsCore: DealBacktestResult[];
   /** All per-deal results — full scope. */
   results: DealBacktestResult[];
+  /**
+   * Held-out validation (Round 13). 80/20 deterministic split of the core
+   * scope so the calibration work done in Rounds 1-12 can be checked against
+   * a test set it never saw. A big gap between train and test hit rates
+   * signals overfitting.
+   */
+  holdout: {
+    coreTrain: DealBacktestSummary;
+    coreTest: DealBacktestSummary;
+    overfittingGap: {
+      hit25: number;
+      hit35: number;
+      hit50: number;
+      meanAbsErrorPct: number;
+    };
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Held-out validation (Round 13)
+// ---------------------------------------------------------------------------
+
+/**
+ * Deterministic hash of a string to a 32-bit unsigned integer. Same input
+ * always yields the same hash across runs — critical for a stable
+ * train/test split that doesn't drift between backtest executions.
+ * (Simple FNV-1a — fast, dependency-free, good enough for a test-split key.)
+ */
+function stableHash(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Fraction of deals routed into the held-out TEST set. 0.20 = 80/20
+ * train/test. Deterministic: each deal lands in the same bucket every run
+ * based on its id hash.
+ */
+const HOLDOUT_TEST_FRACTION = 0.20;
+
+/** True when this deal is in the held-out TEST set (20% of corpus). */
+export function isInHoldoutTestSet(dealId: string): boolean {
+  return (stableHash(dealId) % 1000) < (HOLDOUT_TEST_FRACTION * 1000);
 }
 
 /**
@@ -592,6 +634,19 @@ export function runDealBacktest(): BacktestReport {
     .sort((a, b) => Math.abs(b.upfrontErrorPct) - Math.abs(a.upfrontErrorPct))
     .slice(0, 10);
 
+  // Held-out validation (Round 13): split core scope into train/test so we
+  // can measure whether Rounds 1-12 calibration generalizes or overfits.
+  const coreTrain = coreResults.filter(r => !isInHoldoutTestSet(r.case.id));
+  const coreTest = coreResults.filter(r => isInHoldoutTestSet(r.case.id));
+  const coreTrainSummary = summarize(coreTrain);
+  const coreTestSummary = summarize(coreTest);
+  const overfittingGap = {
+    hit25: coreTrainSummary.hitRate25 - coreTestSummary.hitRate25,
+    hit35: coreTrainSummary.hitRate35 - coreTestSummary.hitRate35,
+    hit50: coreTrainSummary.hitRate50 - coreTestSummary.hitRate50,
+    meanAbsErrorPct: coreTestSummary.meanAbsErrorPct - coreTrainSummary.meanAbsErrorPct,
+  };
+
   return {
     runAt: new Date().toISOString(),
     featureFlags: {
@@ -607,5 +662,10 @@ export function runDealBacktest(): BacktestReport {
     coreScope: coreSummary,
     worstDealsCore,
     results: fullResults,
+    holdout: {
+      coreTrain: coreTrainSummary,
+      coreTest: coreTestSummary,
+      overfittingGap,
+    },
   };
 }

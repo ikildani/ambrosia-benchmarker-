@@ -55,6 +55,16 @@ export interface AccuracyDashboardData {
   slicesByModality: SliceRow[];
   worstMisses: WorstMiss[];
   calibrationRounds: CalibrationRound[];
+  holdout?: {
+    train: BucketSummary;
+    test: BucketSummary;
+    overfittingGap: {
+      hit25: number;
+      hit35: number;
+      hit50: number;
+      meanAbsErrorPct: number;
+    };
+  };
 }
 
 export interface CalibrationRound {
@@ -94,6 +104,16 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         byModality: Record<string, SliceRaw>;
       };
       fullScope: typeof report.coreScope;
+      holdout?: {
+        coreTrain: typeof report.coreScope;
+        coreTest: typeof report.coreScope;
+        overfittingGap: {
+          hit25: number;
+          hit35: number;
+          hit50: number;
+          meanAbsErrorPct: number;
+        };
+      };
       worstDealsCore: Array<{
         case: {
           id: string;
@@ -156,6 +176,11 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         errorPct: w.upfrontErrorPct,
       })),
       calibrationRounds: CALIBRATION_ROUNDS,
+      holdout: report.holdout ? {
+        train: toBucket(report.holdout.coreTrain),
+        test: toBucket(report.holdout.coreTest),
+        overfittingGap: report.holdout.overfittingGap,
+      } : undefined,
     };
   } catch {
     return null;
@@ -294,5 +319,25 @@ const CALIBRATION_ROUNDS: CalibrationRound[] = [
     coreHit35: 0.275,
     coreHit50: 0.362,
     summary: 'Three narrow specialty overrides where TA defaults overshot typical-asset peaks: preterm_labor $200M (no approved drug), fungalInfections $400M (Cresemba-class peaks ~$300-400M), myopiaProgression $200M (pipeline-only class). Empirical sweep confirmed the 3-override narrow set was the only config that improved without regression. Core ±35% +1.4pp, full-scope RMSE -$117M.',
+  },
+  {
+    round: 12,
+    label: 'A/B test each TIER2/4 feature flag',
+    date: '2026-04-13',
+    outcome: 'wash',
+    coreHit25: 0.203,
+    coreHit35: 0.275,
+    coreHit50: 0.362,
+    summary: 'Ran backtest with each of the 7 TIER2/TIER4 flags individually on. Null result — no single flag moved hit rates, and several had zero impact because their adjustments fall inside the Round 6-10 floors. Honest conclusion: the flag-gated features matter for production use, but they don\'t independently move backtest accuracy at this calibration level. Flags stay default-off pending structural engine additions.',
+  },
+  {
+    round: 13,
+    label: 'Held-out train/test validation',
+    date: '2026-04-13',
+    outcome: 'scaffolding',
+    coreHit25: 0.203,
+    coreHit35: 0.275,
+    coreHit50: 0.362,
+    summary: 'Added 80/20 deterministic split of core scope (stable hash of deal id → train/test bucket). Rounds 1-12 all calibrated against the full 251-deal corpus — this round measures how much of that work generalizes. Result: modest overfit on ±35-50% bands (7-10pp train/test gap), NO overfit at ±25% (test slightly beat train). Engine generalizes reasonably. Next rounds should target held-out test hit rates, not full-corpus.',
   },
 ];

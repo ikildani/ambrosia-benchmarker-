@@ -71,6 +71,20 @@ function main(): void {
   printSummary('FULL SCOPE: All 251 disclosed deals (incl. structurally ill-fit)', report.fullScope, false);
   console.log('');
 
+  // Round 13: held-out train/test validation
+  console.log('─── HELD-OUT VALIDATION (80/20 core-scope split) ───');
+  printSummary('TRAIN (80%)', report.holdout.coreTrain, false);
+  console.log('');
+  printSummary('TEST (20%, held out)', report.holdout.coreTest, false);
+  console.log('');
+  const gap = report.holdout.overfittingGap;
+  console.log('Overfitting gap (train - test, positive = overfit):');
+  console.log(`  ±25%: ${formatPct(gap.hit25)}`);
+  console.log(`  ±35%: ${formatPct(gap.hit35)}`);
+  console.log(`  ±50%: ${formatPct(gap.hit50)}`);
+  console.log(`  Test mean |err| - Train mean |err|: ${formatPct(gap.meanAbsErrorPct)}`);
+  console.log('');
+
   console.log('─── 10 Worst Core-Scope Deals (|upfront error|) ───');
   for (const r of report.worstDealsCore) {
     const c = r.case;
