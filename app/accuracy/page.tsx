@@ -153,6 +153,58 @@ export default function AccuracyDashboard() {
         </div>
       </section>
 
+      {/* Held-out validation */}
+      {data.holdout && (
+        <section className="border-b border-slate-800/60 bg-slate-950">
+          <div className="mx-auto max-w-6xl px-6 py-12">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-slate-200">
+                Held-out validation — does it generalize?
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm text-slate-400">
+                The calibration rounds tune against the full corpus. That risks overfitting.
+                We split core scope 80/20 (deterministic hash on deal id) and measure hit rates
+                separately on the test set the engine never saw during tuning.{' '}
+                <span className="text-slate-300">Small train/test gap = the model generalizes.</span>{' '}
+                Big gap = we&rsquo;re memorizing deals.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-5">
+                <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Train (80%, tuned)</div>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-slate-500">±25%</span><span className="font-mono text-slate-200">{pct(data.holdout.train.hit25)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±35%</span><span className="font-mono text-slate-200">{pct(data.holdout.train.hit35)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±50%</span><span className="font-mono text-slate-200">{pct(data.holdout.train.hit50)}</span></div>
+                  <div className="flex justify-between border-t border-slate-800 pt-1.5"><span className="text-slate-500">n</span><span className="font-mono text-slate-400">{data.holdout.train.n}</span></div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-teal-500/30 bg-teal-500/5 p-5">
+                <div className="mb-2 text-xs uppercase tracking-wider text-teal-400">Test (20%, never seen)</div>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-slate-500">±25%</span><span className="font-mono text-slate-100">{pct(data.holdout.test.hit25)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±35%</span><span className="font-mono text-slate-100">{pct(data.holdout.test.hit35)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±50%</span><span className="font-mono text-slate-100">{pct(data.holdout.test.hit50)}</span></div>
+                  <div className="flex justify-between border-t border-slate-800 pt-1.5"><span className="text-slate-500">n</span><span className="font-mono text-slate-400">{data.holdout.test.n}</span></div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-5">
+                <div className="mb-2 text-xs uppercase tracking-wider text-slate-500">Overfitting gap</div>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-slate-500">±25%</span><span className="font-mono text-slate-200">{signedPct(data.holdout.overfittingGap.hit25)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±35%</span><span className="font-mono text-slate-200">{signedPct(data.holdout.overfittingGap.hit35)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">±50%</span><span className="font-mono text-slate-200">{signedPct(data.holdout.overfittingGap.hit50)}</span></div>
+                  <div className="mt-2 text-xs text-slate-500">train − test, positive = overfit</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Full scope */}
       <section className="border-b border-slate-800/60 bg-slate-900/20">
         <div className="mx-auto max-w-6xl px-6 py-12">
