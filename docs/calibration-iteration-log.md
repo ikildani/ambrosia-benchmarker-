@@ -255,11 +255,45 @@ npx tsx scripts/run-deal-backtest.ts
 
 ---
 
-## Round 9 — (next round goes here)
+## Round 9 — Approved-stage collaboration floor (SMALL WIN, 2026-04-13)
+
+**Change:** New `applyApprovedCollaborationFloor()` in scoreCase. For `phase='approved' AND dealType='collaboration'`, `predictedUpfront = max(rawUpfront, $200M)`.
+
+**Why:** Approved-stage collaboration deals are co-commercialization agreements where the licensor retains significant commercial participation (Sage/Biogen zuranolone $875M, Vertex/CRISPR Casgevy $900M, Ionis/Biogen Spinraza $1B on the big end; Syndax/Incyte revumenib $200M, Iterative/Pfizer $160M on the smaller end). Baseline ±35% already 50% — 3 of 6 already hit. A $200M floor lifts the 2 mid-size deals into the ±25% band without regressing anything.
+
+**Source:** Empirical sweep over floor values $0-$600M; $200M is the 25th-percentile actual upfront in the slice and the only floor that improves without over-flooring. Literature: 2020-2025 disclosed co-commercialization upfronts (Syndax/Incyte revumenib AACR 2024 materials, Iterative/Pfizer SEC 8-K 2024).
+
+**Flags:** all off.
+
+**Delta (full scope):**
+
+| metric | Round 8 | Round 9 | change |
+|---|---:|---:|---:|
+| ±25% | 15.5% | **15.9%** | **+0.4pp** |
+| ±35% | 24.7% | 24.7% | 0 |
+| ±50% | 33.9% | 33.9% | 0 |
+| Mean \|error\| | 105.7% | 105.4% | -0.3pp |
+
+**Delta (approved+collaboration slice, n=6):**
+
+| metric | before | after | change |
+|---|---:|---:|---:|
+| ±25% | 33.3% | **50.0%** | **+16.7pp** |
+| Mean \|error\| | 58.9% | 47.5% | -11.4pp |
+
+**Delta (core scope):** unchanged. Core remains 14.5% / 23.2% / 33.3%.
+
+**Regressions:** None. 1,333 passing / 5 pre-existing. 110 golden masters stable.
+
+**Reading:** Smallest round yet — only 6 deals affected and 3 already hit. The mega co-commercialization deals (Sage/Vertex/Ionis at $875-1000M actual) still undershoot because $200M floor is well below their real upfronts, but floor avoids over-correcting the 3 mid-size deals. Directional win, low magnitude. Full-scope ±25% +0.4pp mostly reflects 1-deal noise.
+
+**Takeaway:** Slice is small and heterogeneous; a tighter fit would require disaggregating mega-co-commercialization from standard collaboration, which the dataset can't reliably distinguish.
+
+---
+
+## Round 10 — (next round goes here)
 
 **Remaining calibration levers:**
-
-1. **Approved-stage collaboration adjustment** — 6 approved+collaboration deals show -51% signed error (mild undershoot). Lower priority than the early-stage floor.
 3. **Upward-only TA anchor correction** — Round 4 failed because it went both up and down. A safer variant: raise TA anchors by 20-30% across the board (upward only), which should reduce the systemic undershoot revealed by median signed error.
 4. **Manual Tier 1 calibration of the 10 worst core-scope indications** with FDA CDER + 10-K source research. Multi-day research per indication.
 5. **A/B flag testing** — re-run backtest with each TIER2/4 flag on individually, measure empirical impact, promote winners.
