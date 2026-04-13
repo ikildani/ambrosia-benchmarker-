@@ -10,6 +10,13 @@ const footerLinks = {
     { label: 'Companies', href: '/companies' },
     { label: 'Methodology', href: '/methodology' },
   ],
+  Intelligence: [
+    { label: 'Model Accuracy', href: '/accuracy' },
+    { label: 'Counterparty Playbooks', href: '/playbook' },
+    { label: 'Deal Structure Trade Space', href: '/trade-space' },
+    { label: 'Negotiation Simulator', href: '/simulator' },
+    { label: 'Engine Methodology', href: '/methodology/engine' },
+  ],
   'Therapeutic Areas': [
     { label: 'Oncology Deals', href: '/therapeutic-areas/oncology' },
     { label: 'Neurology Deals', href: '/therapeutic-areas/neurology' },
@@ -41,7 +48,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-slate-900 border-t border-slate-800 py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-10">
           {Object.entries(footerLinks).map(([section, links]) => (
             <div key={section}>
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
