@@ -560,14 +560,48 @@ Consolidation puts Round 6's test-harness discovery (platform-modality option va
 
 ---
 
-## Round 16 — (Step C: deal-type-specific valuation models)
+## Round 16 — Structured deal-type valuation profiles (Step C of engine-level restructure, INFRASTRUCTURE, 2026-04-13)
+
+**Change:** Created `lib/financial/deal-type-profiles.ts` with `DealTypeProfile` interface + `DEAL_TYPE_PROFILES` map covering 5 deal types (licensing, acquisition, codevelopment, collaboration, option). Each profile carries `upfrontPercent` ranges (mirroring the existing `getDealTypeUpfrontPercent` in rnpv-engine.ts), `postApprovalUpfrontMultiplier` (Round 7 territorial dampener), `postApprovalFloorM` (Round 9 collaboration floor), `notes`, and `source`. Exported helpers `getDealTypeProfile()`, `getPostApprovalUpfrontMultiplier()`, `getPostApprovalFloorM()`. Updated `deal-backtest.ts` to consume R7 + R9 logic via these helpers (replaces inline functions).
+
+**Why:** R7 and R9 were inline test-harness patches with the same shape as Step B's R6 floor: hardcoded numbers buried in `deal-backtest.ts`. Step C consolidates them into engine-adjacent metadata so the post-approval territorial dampener and co-commercialization floor become first-class deal-type properties with citations.
+
+**Source:** Each DealTypeProfile entry carries a `source` citation:
+- Licensing post-approval multiplier 0.08: territorial revenue share from `geographic-revenue-curves.ts` + 10 approved+licensing deals 2020-2025 (Pharming/CSPC, Rigel/Kissei, Tarsus/Samsung, Epizyme/Ipsen, Cidara/Melinta, etc.) — same R7 empirical basis.
+- Collaboration post-approval floor $200M: Sage/Biogen zuranolone, Vertex/CRISPR Casgevy, Ionis/Biogen Spinraza, Syndax/Incyte revumenib, Iterative/Pfizer Cosentyx — same R9 empirical basis.
+- Upfront percent ranges: DealForma/BioCentury 2020-2025 (existing engine citation).
+
+**Flags:** all off.
+
+**Delta:** zero — pure refactor, behavior identical.
+
+| metric | Round 15 | Round 16 | change |
+|---|---:|---:|---:|
+| Core ±25/35/50% | 21.7/29.0/37.7% | 21.7/29.0/37.7% | 0 |
+| Full ±25/35/50% | 17.9/25.5/34.3% | 17.9/25.5/34.3% | 0 |
+| Mean \|err\| | 101.3 / 100.3% | 101.3 / 100.3% | 0 |
+
+**Regressions:** None functional. 1,332 passing / 6 pre-existing. **Pre-existing failure count rose from 5 → 6 between Round 14 and Round 16 due to date drift** — `__tests__/lib/deal-flow-forecast.test.ts` expects "Q1 2026" as next forecast quarter but real date crossed into Q2 2026, so code now correctly returns "Q2 2026". Verified by running same test against clean main pre-Step-C → also fails. Not caused by R15/R16; will need test fix.
+
+**Architectural value:**
+1. `DEAL_TYPE_PROFILES` is the new source of truth for deal-type valuation metadata.
+2. R7 + R9 calibrations collapsed from backtest-only constants into structured engine-adjacent schema — same pattern as Step A (indication metadata) and Step B (modality profiles).
+3. Foundation for promoting the post-approval adjustments to production engine defaults (would require golden master regeneration; deferred).
+4. Unblocks Step D (territory-aware peak sales decomposition) — territorial logic now has a clean home alongside the deal-type metadata it interacts with.
+
+**Takeaway:** Third infrastructure commit in the engine restructure. Steps A/B/C consolidate ~5 separate test-harness patches (R6, R7, R9, R11, R14) into 3 structured metadata files (`index-drugs.ts` typicalAssetPeakSales_M, `modality-profiles.ts`, `deal-type-profiles.ts`) totaling ~600 lines of citation-tagged schema. The backtest harness is now a thin consumer of engine-level data rather than the data owner.
+
+---
+
+## Round 17 — (Step D: territory-aware peak sales decomposition)
 
 **Remaining calibration levers:**
-3. **Upward-only TA anchor correction** — done R10.
-4. **Manual Tier 1 calibration of the 10 worst core-scope indications** — started R14, continue incrementally.
-5. **A/B flag testing** — done R12.
-6. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
-7. **Corpus re-tagging** — distinguish topical/systemic for JAK-derm, ophthalmic, and other modalities where single slug masks heterogeneous assets. Unlocks Round 15's narrow-market cap.
+1. **Territory-aware peak sales decomposition** — STEP D. Wire `decomposeGeographicRevenue()` into the engine peak-sales path when deal territory ≠ 'global'. Currently territory only affects discount rate.
+2. **Manual Tier 1 calibration of the 10 worst core-scope indications** — started R14, continue incrementally.
+3. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
+4. **Corpus re-tagging** — distinguish topical/systemic for JAK-derm, ophthalmic, etc. Unlocks R15 narrow-market cap.
+5. **Promote Step A-D metadata to production engine** — replace existing scattered constants (`getDealTypeUpfrontPercent`, `MANUFACTURING_WACC_PREMIUM`, etc.) with the new structured schemas. Requires golden master regeneration.
+6. **Fix `deal-flow-forecast.test.ts` Q1 2026 → Q2 2026 date drift.**
 
 Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning). Rounds 6-7 landed the first two one-sided corrections (platform modality floor; approved-stage licensing dampener). Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
 
