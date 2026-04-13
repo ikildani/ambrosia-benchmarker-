@@ -91,15 +91,15 @@ export interface BackTestReport {
  */
 function assetToRNPVInput(asset: HistoricalAsset): RNPVInput {
   return {
-    therapeuticArea: asset.asOfInputs.therapeuticArea,
+    therapeuticArea: asset.asOfInputs.therapeuticArea as RNPVInput['therapeuticArea'],
     phase: asset.asOfInputs.phase as RNPVInput['phase'],
-    modality: asset.asOfInputs.modality,
+    modality: asset.asOfInputs.modality as RNPVInput['modality'],
     indication: asset.asOfInputs.indication,
-    territory: asset.asOfInputs.territory,
+    territory: asset.asOfInputs.territory as RNPVInput['territory'],
     dealType: 'licensing',
-    competitivePosition: asset.asOfInputs.competitivePosition,
+    competitivePosition: asset.asOfInputs.competitivePosition as RNPVInput['competitivePosition'],
     dataQuality: 'robust' as RNPVInput['dataQuality'],
-    biomarkerStatus: asset.asOfInputs.biomarkerStatus,
+    biomarkerStatus: asset.asOfInputs.biomarkerStatus as RNPVInput['biomarkerStatus'],
     regulatoryDesignations: asset.asOfInputs.regulatoryDesignations,
     peakSalesEstimate: asset.asOfInputs.peakSalesEstimate,
   };

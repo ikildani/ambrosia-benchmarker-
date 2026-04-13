@@ -7,7 +7,7 @@
  * curated 2024 data whenever Supabase is rebuilt or a new environment spins
  * up. Also logs any LOE year shifts vs. the existing DB rows.
  *
- * Schedule: first day of every 3rd month, 6am UTC (`0 6 1 */3 *`).
+ * Schedule: first day of every 3rd month, 6am UTC (cron "0 6 1 star/3 star").
  */
 
 import { NextRequest, NextResponse } from 'next/server';

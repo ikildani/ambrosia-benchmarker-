@@ -34,10 +34,10 @@ import type {
   RNPVInput,
   RNPVResult,
   MonteCarloResult,
-  RealOptionsResult,
   EnsembleMethod,
   EnsembleResult,
 } from './types';
+import type { RealOptionsResult } from './advanced-upgrades';
 import { COMPARABLE_DEALS, type ComparableDeal } from '@/lib/comparableDeals';
 import { normalizePhaseForDB, phaseWindowDB } from './deal-type-normalization';
 
