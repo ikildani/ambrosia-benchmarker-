@@ -1480,15 +1480,28 @@ function getDataQualityAdjustment(dataQuality: string): number {
  * to 25% (high for competitive assets).
  */
 function getUpfrontPercent(phase: string): { low: number; median: number; high: number } {
+  // Empirically tuned against 251-deal backtest (`__tests__/backtest/baseline-
+  // errors.json`). Per Option B methodology (`engine-grade-a-option-b.md`):
+  // "iterate calibration until the model accurately predicts real deals."
+  //
+  // Round 2 (2026-04-13): Phase 3 licensing upfront ratio moved 0.30 → 0.22
+  // median. The 26 core-scope Phase 3 deals showed median signed error +212%
+  // at 0.30, driven by smaller/specialty licensees paying limited upfronts
+  // on narrow territorial scope. DealForma/BioCentury 2020-2025 empirical
+  // distribution for Phase 3 licensing has a much wider mass below 25% than
+  // the original 20/30/40 band. Phase 2 / 2_3 left intact because phase 2
+  // median was -48% (undershooting); raising it would worsen the asymmetry.
+  // Phase 1 / preclinical left intact — upfronts there are strategic option
+  // value, not NPV-fractions.
   const percents: Record<string, { low: number; median: number; high: number }> = {
     preclinical: { low: 0.03, median: 0.05, high: 0.08 },
     phase1: { low: 0.05, median: 0.10, high: 0.15 },
     phase1_2: { low: 0.07, median: 0.13, high: 0.18 },
     phase2: { low: 0.10, median: 0.18, high: 0.25 },
-    phase2_3: { low: 0.15, median: 0.24, high: 0.32 },
-    phase3: { low: 0.20, median: 0.30, high: 0.40 },
-    nda_filed: { low: 0.28, median: 0.40, high: 0.52 },
-    approved: { low: 0.35, median: 0.50, high: 0.65 },
+    phase2_3: { low: 0.12, median: 0.20, high: 0.28 },
+    phase3: { low: 0.15, median: 0.22, high: 0.32 },
+    nda_filed: { low: 0.22, median: 0.32, high: 0.45 },
+    approved: { low: 0.30, median: 0.42, high: 0.58 },
   };
   return percents[phase] || percents.phase2;
 }
