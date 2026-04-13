@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-13T21:23:53.259Z",
+  "runAt": "2026-04-13T21:25:23.573Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -13,10 +13,10 @@
     "totalDeals": 853,
     "hitRate25": 0.21219226260257915,
     "hitRate35": 0.2954279015240328,
-    "hitRate50": 0.4243845252051583,
-    "meanAbsErrorPct": 1.018090583119197,
-    "medianSignedErrorPct": -0.21248070444104122,
-    "rmseUpfront_M": 3551.1,
+    "hitRate50": 0.4220398593200469,
+    "meanAbsErrorPct": 0.9978420270156076,
+    "medianSignedErrorPct": -0.22083333333333335,
+    "rmseUpfront_M": 3551.4,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 41,
@@ -29,8 +29,8 @@
         "n": 33,
         "hitRate25": 0.12121212121212122,
         "hitRate35": 0.18181818181818182,
-        "meanSignedErrorPct": 2.589994064451453,
-        "meanAbsErrorPct": 2.9592340882090133
+        "meanSignedErrorPct": 1.9916617203762113,
+        "meanAbsErrorPct": 2.435839592561689
       },
       "ophthalmology": {
         "n": 27,
@@ -141,38 +141,38 @@
     "byPhase": {
       "phase3": {
         "n": 154,
-        "hitRate25": 0.22727272727272727,
+        "hitRate25": 0.22077922077922077,
         "hitRate35": 0.2922077922077922,
-        "meanSignedErrorPct": 1.2168081307370755,
-        "meanAbsErrorPct": 1.6871786636015216
+        "meanSignedErrorPct": 1.1745673814169397,
+        "meanAbsErrorPct": 1.650627134921038
       },
       "preclinical": {
         "n": 174,
-        "hitRate25": 0.28735632183908044,
-        "hitRate35": 0.3563218390804598,
-        "meanSignedErrorPct": 0.12781375653328,
-        "meanAbsErrorPct": 0.6276738067187063
+        "hitRate25": 0.29310344827586204,
+        "hitRate35": 0.3620689655172414,
+        "meanSignedErrorPct": 0.11616379136434929,
+        "meanAbsErrorPct": 0.6165267151129941
       },
       "phase1": {
         "n": 169,
         "hitRate25": 0.2781065088757396,
         "hitRate35": 0.3905325443786982,
-        "meanSignedErrorPct": 0.41219868011810096,
-        "meanAbsErrorPct": 0.8672757552207442
+        "meanSignedErrorPct": 0.3807696860352607,
+        "meanAbsErrorPct": 0.8370301930905666
       },
       "approved": {
         "n": 162,
         "hitRate25": 0.10493827160493827,
         "hitRate35": 0.16666666666666666,
-        "meanSignedErrorPct": 0.10477371339718866,
-        "meanAbsErrorPct": 1.1121406212807037
+        "meanSignedErrorPct": 0.07778175248541079,
+        "meanAbsErrorPct": 1.0873795944149414
       },
       "phase2": {
         "n": 194,
         "hitRate25": 0.16494845360824742,
-        "hitRate35": 0.26804123711340205,
-        "meanSignedErrorPct": 0.026611022729555164,
-        "meanAbsErrorPct": 0.8899697296763213
+        "hitRate35": 0.26288659793814434,
+        "meanSignedErrorPct": 0.018731639471410183,
+        "meanAbsErrorPct": 0.8869764170581775
       }
     },
     "byModality": {
@@ -180,8 +180,8 @@
         "n": 95,
         "hitRate25": 0.12631578947368421,
         "hitRate35": 0.21052631578947367,
-        "meanSignedErrorPct": 0.32896060425809304,
-        "meanAbsErrorPct": 1.0904895860327248
+        "meanSignedErrorPct": 0.297551436176599,
+        "meanAbsErrorPct": 1.0590804179512308
       },
       "rnai": {
         "n": 56,
@@ -222,43 +222,43 @@
         "n": 1,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.916259090909091,
-        "meanAbsErrorPct": 0.916259090909091
+        "meanSignedErrorPct": -0.9302159090909091,
+        "meanAbsErrorPct": 0.9302159090909091
       },
       "mrna": {
         "n": 51,
         "hitRate25": 0.23529411764705882,
-        "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": 1.3681994151931076,
-        "meanAbsErrorPct": 1.68249305770786
+        "hitRate35": 0.35294117647058826,
+        "meanSignedErrorPct": 1.264801801608484,
+        "meanAbsErrorPct": 1.6021070014335288
       },
       "protac": {
         "n": 37,
         "hitRate25": 0.2702702702702703,
         "hitRate35": 0.40540540540540543,
-        "meanSignedErrorPct": 0.2574816345133412,
-        "meanAbsErrorPct": 0.9468282742396533
+        "meanSignedErrorPct": 0.24338703991874666,
+        "meanAbsErrorPct": 0.9327336796450586
       },
       "antiviral": {
         "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 0.5618444,
-        "meanAbsErrorPct": 1.1012556
+        "meanSignedErrorPct": 0.30153699999999983,
+        "meanAbsErrorPct": 0.9177129999999999
       },
       "antibioticNovel": {
         "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 4.052,
-        "meanAbsErrorPct": 4.052
+        "meanSignedErrorPct": 3.21,
+        "meanAbsErrorPct": 3.21
       },
       "mab": {
         "n": 57,
         "hitRate25": 0.2631578947368421,
-        "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": 0.44635205303436126,
-        "meanAbsErrorPct": 1.0499801645208129
+        "hitRate35": 0.3157894736842105,
+        "meanSignedErrorPct": 0.41394070800512156,
+        "meanAbsErrorPct": 1.0228242580880642
       },
       "intravitreal": {
         "n": 2,
@@ -418,8 +418,8 @@
         "n": 3,
         "hitRate25": 0.6666666666666666,
         "hitRate35": 0.6666666666666666,
-        "meanSignedErrorPct": -0.12678844114219118,
-        "meanAbsErrorPct": 0.22694745629370636
+        "meanSignedErrorPct": -0.21766558129370628,
+        "meanAbsErrorPct": 0.21766558129370628
       },
       "geneEditing": {
         "n": 1,
@@ -446,8 +446,8 @@
         "n": 45,
         "hitRate25": 0.1111111111111111,
         "hitRate35": 0.24444444444444444,
-        "meanSignedErrorPct": 0.5389280088534965,
-        "meanAbsErrorPct": 1.3003363984202156
+        "meanSignedErrorPct": 0.5368297805926269,
+        "meanAbsErrorPct": 1.3024346266810851
       },
       "rna": {
         "n": 1,
@@ -460,8 +460,8 @@
         "n": 96,
         "hitRate25": 0.20833333333333334,
         "hitRate35": 0.2604166666666667,
-        "meanSignedErrorPct": 0.6559463517091866,
-        "meanAbsErrorPct": 1.3406296327586584
+        "meanSignedErrorPct": 0.5878916838249875,
+        "meanAbsErrorPct": 1.276582569041126
       },
       "gene_therapy": {
         "n": 55,
@@ -516,12 +516,12 @@
   },
   "coreScope": {
     "totalDeals": 206,
-    "hitRate25": 0.24757281553398058,
-    "hitRate35": 0.3446601941747573,
+    "hitRate25": 0.24271844660194175,
+    "hitRate35": 0.33980582524271846,
     "hitRate50": 0.46601941747572817,
-    "meanAbsErrorPct": 0.8806422482837052,
-    "medianSignedErrorPct": -0.20029131513647647,
-    "rmseUpfront_M": 303.6,
+    "meanAbsErrorPct": 0.8561640483473302,
+    "medianSignedErrorPct": -0.20745903030303026,
+    "rmseUpfront_M": 303.4,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 15,
@@ -532,10 +532,10 @@
       },
       "infectiousDisease": {
         "n": 13,
-        "hitRate25": 0.15384615384615385,
-        "hitRate35": 0.3076923076923077,
-        "meanSignedErrorPct": 1.9838750875622178,
-        "meanAbsErrorPct": 2.40423500933536
+        "hitRate25": 0.07692307692307693,
+        "hitRate35": 0.23076923076923078,
+        "meanSignedErrorPct": 1.4865625729685148,
+        "meanAbsErrorPct": 2.016349687266646
       },
       "ophthalmology": {
         "n": 9,
@@ -625,17 +625,17 @@
     "byPhase": {
       "phase3": {
         "n": 86,
-        "hitRate25": 0.32558139534883723,
+        "hitRate25": 0.313953488372093,
         "hitRate35": 0.38372093023255816,
-        "meanSignedErrorPct": 0.8147247846255884,
-        "meanAbsErrorPct": 1.1746036302891505
+        "meanSignedErrorPct": 0.756087759557916,
+        "meanAbsErrorPct": 1.1239584591171552
       },
       "phase2": {
         "n": 120,
         "hitRate25": 0.19166666666666668,
-        "hitRate35": 0.31666666666666665,
-        "meanSignedErrorPct": -0.07525066103760127,
-        "meanAbsErrorPct": 0.6699699245131358
+        "hitRate35": 0.30833333333333335,
+        "meanSignedErrorPct": -0.08710298215342045,
+        "meanAbsErrorPct": 0.6642447206289549
       }
     },
     "byModality": {
@@ -669,24 +669,24 @@
       },
       "mrna": {
         "n": 15,
-        "hitRate25": 0.26666666666666666,
+        "hitRate25": 0.2,
         "hitRate35": 0.4666666666666667,
-        "meanSignedErrorPct": 0.37512524490637783,
-        "meanAbsErrorPct": 0.8251139099570948
+        "meanSignedErrorPct": 0.22798028781405755,
+        "meanAbsErrorPct": 0.7420451863864318
       },
       "antiviral": {
         "n": 1,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 1.6631,
-        "meanAbsErrorPct": 1.6631
+        "meanSignedErrorPct": 1.2192499999999997,
+        "meanAbsErrorPct": 1.2192499999999997
       },
       "antibioticNovel": {
         "n": 1,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 3.8,
-        "meanAbsErrorPct": 3.8
+        "meanSignedErrorPct": 3,
+        "meanAbsErrorPct": 3
       },
       "intravitreal": {
         "n": 1,
@@ -726,9 +726,9 @@
       "mab": {
         "n": 17,
         "hitRate25": 0.35294117647058826,
-        "hitRate35": 0.47058823529411764,
-        "meanSignedErrorPct": 0.144219469341573,
-        "meanAbsErrorPct": 0.6833452711130487
+        "hitRate35": 0.4117647058823529,
+        "meanSignedErrorPct": 0.13540888110627883,
+        "meanAbsErrorPct": 0.6921558593483428
       },
       "radiopharmaceutical": {
         "n": 9,
@@ -755,8 +755,8 @@
         "n": 1,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.5144500000000001,
-        "meanAbsErrorPct": 0.5144500000000001
+        "meanSignedErrorPct": -0.595375,
+        "meanAbsErrorPct": 0.595375
       },
       "antibody": {
         "n": 5,
@@ -776,8 +776,8 @@
         "n": 29,
         "hitRate25": 0.2413793103448276,
         "hitRate35": 0.27586206896551724,
-        "meanSignedErrorPct": 0.7317173714052762,
-        "meanAbsErrorPct": 1.2408494306083862
+        "meanSignedErrorPct": 0.6357403599110233,
+        "meanAbsErrorPct": 1.1448724191141335
       },
       "bispecific": {
         "n": 16,
@@ -854,11 +854,11 @@
         "actualTotalDeal_M": 460,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 501,
+      "predictedUpfront_M": 417.5,
       "predictedTotalDeal_M": 899,
-      "upfrontErrorPct": 15.7,
+      "upfrontErrorPct": 12.916666666666666,
       "totalDealErrorPct": 0.9543478260869566,
-      "upfrontErrorAbs_M": 471,
+      "upfrontErrorAbs_M": 387.5,
       "totalDealErrorAbs_M": 439,
       "within25": false,
       "within35": false,
@@ -892,32 +892,6 @@
     },
     {
       "case": {
-        "id": "sb_e9f1656c-ebb6-4e01-96f3-1752c7f8463c",
-        "year": 2025,
-        "licensor": "CEPI",
-        "licensee": "Moderna",
-        "therapeuticArea": "infectiousDisease",
-        "indication": "H5 pandemic influenza",
-        "modality": "mrna",
-        "phase": "phase3",
-        "dealType": "collaboration",
-        "territory": "global",
-        "actualUpfront_M": 54.3,
-        "actualTotalDeal_M": 54.3,
-        "peakSalesMedian_M": 1200
-      },
-      "predictedUpfront_M": 363.5,
-      "predictedTotalDeal_M": 155,
-      "upfrontErrorPct": 5.694806629834255,
-      "totalDealErrorPct": 1.85451197053407,
-      "upfrontErrorAbs_M": 309.2,
-      "totalDealErrorAbs_M": 100.7,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_c5e5f467-0ed9-44c5-8143-0f4bb28bbabe",
         "year": 2023,
         "licensor": "Roivant Sciences",
@@ -938,6 +912,32 @@
       "totalDealErrorPct": -0.9330028328611898,
       "upfrontErrorAbs_M": 300.6,
       "totalDealErrorAbs_M": -6587,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "sb_e9f1656c-ebb6-4e01-96f3-1752c7f8463c",
+        "year": 2025,
+        "licensor": "CEPI",
+        "licensee": "Moderna",
+        "therapeuticArea": "infectiousDisease",
+        "indication": "H5 pandemic influenza",
+        "modality": "mrna",
+        "phase": "phase3",
+        "dealType": "collaboration",
+        "territory": "global",
+        "actualUpfront_M": 54.3,
+        "actualTotalDeal_M": 54.3,
+        "peakSalesMedian_M": 1200
+      },
+      "predictedUpfront_M": 302.9,
+      "predictedTotalDeal_M": 155,
+      "upfrontErrorPct": 4.579005524861879,
+      "totalDealErrorPct": 1.85451197053407,
+      "upfrontErrorAbs_M": 248.6,
+      "totalDealErrorAbs_M": 100.7,
       "within25": false,
       "within35": false,
       "within50": false
@@ -996,32 +996,6 @@
     },
     {
       "case": {
-        "id": "id-012",
-        "year": 2024,
-        "licensor": "Cidara Therapeutics",
-        "licensee": "Melinta/Mundipharma",
-        "therapeuticArea": "infectiousDisease",
-        "indication": "fungalInfections",
-        "modality": "antibioticNovel",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 30,
-        "actualTotalDeal_M": 500,
-        "peakSalesMedian_M": 400
-      },
-      "predictedUpfront_M": 144,
-      "predictedTotalDeal_M": 129,
-      "upfrontErrorPct": 3.8,
-      "totalDealErrorPct": -0.742,
-      "upfrontErrorAbs_M": 114,
-      "totalDealErrorAbs_M": -371,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_73853a50-e626-4f7b-8e0c-83a6942b77e9",
         "year": 2024,
         "licensor": "Scholar Rock",
@@ -1068,6 +1042,32 @@
       "totalDealErrorPct": -0.480622321594932,
       "upfrontErrorAbs_M": 777.9,
       "totalDealErrorAbs_M": -1031.8,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "id-012",
+        "year": 2024,
+        "licensor": "Cidara Therapeutics",
+        "licensee": "Melinta/Mundipharma",
+        "therapeuticArea": "infectiousDisease",
+        "indication": "fungalInfections",
+        "modality": "antibioticNovel",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 30,
+        "actualTotalDeal_M": 500,
+        "peakSalesMedian_M": 400
+      },
+      "predictedUpfront_M": 120,
+      "predictedTotalDeal_M": 129,
+      "upfrontErrorPct": 3,
+      "totalDealErrorPct": -0.742,
+      "upfrontErrorAbs_M": 90,
+      "totalDealErrorAbs_M": -371,
       "within25": false,
       "within35": false,
       "within50": false
@@ -1402,11 +1402,11 @@
         "actualTotalDeal_M": 3300,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 276.3,
+      "predictedUpfront_M": 230.3,
       "predictedTotalDeal_M": 89,
-      "upfrontErrorPct": -0.916259090909091,
+      "upfrontErrorPct": -0.9302159090909091,
       "totalDealErrorPct": -0.973030303030303,
-      "upfrontErrorAbs_M": -3023.7,
+      "upfrontErrorAbs_M": -3069.7,
       "totalDealErrorAbs_M": -3211,
       "within25": false,
       "within35": false,
@@ -1428,11 +1428,11 @@
         "actualTotalDeal_M": 2000,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 586.3,
+      "predictedUpfront_M": 488.6,
       "predictedTotalDeal_M": 10,
-      "upfrontErrorPct": 1.3451839999999997,
+      "upfrontErrorPct": 0.95432,
       "totalDealErrorPct": -0.995,
-      "upfrontErrorAbs_M": 336.3,
+      "upfrontErrorAbs_M": 238.6,
       "totalDealErrorAbs_M": -1990,
       "within25": false,
       "within35": false,
@@ -1454,11 +1454,11 @@
         "actualTotalDeal_M": 800,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 234.7,
+      "predictedUpfront_M": 195.6,
       "predictedTotalDeal_M": 21,
-      "upfrontErrorPct": 2.1289999999999996,
+      "upfrontErrorPct": 1.6075,
       "totalDealErrorPct": -0.97375,
-      "upfrontErrorAbs_M": 159.7,
+      "upfrontErrorAbs_M": 120.6,
       "totalDealErrorAbs_M": -779,
       "within25": false,
       "within35": false,
@@ -1480,11 +1480,11 @@
         "actualTotalDeal_M": 800,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 69.1,
+      "predictedUpfront_M": 57.6,
       "predictedTotalDeal_M": 591,
-      "upfrontErrorPct": -0.5394112,
+      "upfrontErrorPct": -0.6161760000000001,
       "totalDealErrorPct": -0.26125,
-      "upfrontErrorAbs_M": -80.9,
+      "upfrontErrorAbs_M": -92.4,
       "totalDealErrorAbs_M": -209,
       "within25": false,
       "within35": false,
@@ -1506,11 +1506,11 @@
         "actualTotalDeal_M": 780,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 133.2,
+      "predictedUpfront_M": 111,
       "predictedTotalDeal_M": 83,
-      "upfrontErrorPct": 1.6631,
+      "upfrontErrorPct": 1.2192499999999997,
       "totalDealErrorPct": -0.8935897435897436,
-      "upfrontErrorAbs_M": 83.2,
+      "upfrontErrorAbs_M": 61,
       "totalDealErrorAbs_M": -697,
       "within25": false,
       "within35": false,
@@ -1532,11 +1532,11 @@
         "actualTotalDeal_M": 375,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 1989,
+      "predictedUpfront_M": 1657.5,
       "predictedTotalDeal_M": 663,
-      "upfrontErrorPct": 4.304,
+      "upfrontErrorPct": 3.42,
       "totalDealErrorPct": 0.768,
-      "upfrontErrorAbs_M": 1614,
+      "upfrontErrorAbs_M": 1282.5,
       "totalDealErrorAbs_M": 288,
       "within25": false,
       "within35": false,
@@ -1558,11 +1558,11 @@
         "actualTotalDeal_M": 500,
         "peakSalesMedian_M": 400
       },
-      "predictedUpfront_M": 144,
+      "predictedUpfront_M": 120,
       "predictedTotalDeal_M": 129,
-      "upfrontErrorPct": 3.8,
+      "upfrontErrorPct": 3,
       "totalDealErrorPct": -0.742,
-      "upfrontErrorAbs_M": 114,
+      "upfrontErrorAbs_M": 90,
       "totalDealErrorAbs_M": -371,
       "within25": false,
       "within35": false,
@@ -1584,11 +1584,11 @@
         "actualTotalDeal_M": 600,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 143.7,
+      "predictedUpfront_M": 119.8,
       "predictedTotalDeal_M": 19,
-      "upfrontErrorPct": 1.8739999999999997,
+      "upfrontErrorPct": 1.395,
       "totalDealErrorPct": -0.9683333333333334,
-      "upfrontErrorAbs_M": 93.7,
+      "upfrontErrorAbs_M": 69.8,
       "totalDealErrorAbs_M": -581,
       "within25": false,
       "within35": false,
@@ -3040,11 +3040,11 @@
         "actualTotalDeal_M": 200,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 548.4,
+      "predictedUpfront_M": 457,
       "predictedTotalDeal_M": 4897,
-      "upfrontErrorPct": 6.312000000000001,
+      "upfrontErrorPct": 5.093333333333334,
       "totalDealErrorPct": 23.485,
-      "upfrontErrorAbs_M": 473.4,
+      "upfrontErrorAbs_M": 382,
       "totalDealErrorAbs_M": 4697,
       "within25": false,
       "within35": false,
@@ -3248,11 +3248,11 @@
         "actualTotalDeal_M": 1500,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 267.2,
+      "predictedUpfront_M": 222.7,
       "predictedTotalDeal_M": -22,
-      "upfrontErrorPct": 2.5632,
+      "upfrontErrorPct": 1.9693333333333336,
       "totalDealErrorPct": -1.0146666666666666,
-      "upfrontErrorAbs_M": 192.2,
+      "upfrontErrorAbs_M": 147.7,
       "totalDealErrorAbs_M": -1522,
       "within25": false,
       "within35": false,
@@ -3378,14 +3378,14 @@
         "actualTotalDeal_M": 600,
         "peakSalesMedian_M": 400
       },
-      "predictedUpfront_M": 34.6,
+      "predictedUpfront_M": 28.8,
       "predictedTotalDeal_M": 27,
-      "upfrontErrorPct": -0.3083199999999999,
+      "upfrontErrorPct": -0.4236,
       "totalDealErrorPct": -0.955,
-      "upfrontErrorAbs_M": -15.4,
+      "upfrontErrorAbs_M": -21.2,
       "totalDealErrorAbs_M": -573,
       "within25": false,
-      "within35": true,
+      "within35": false,
       "within50": true
     },
     {
@@ -4054,11 +4054,11 @@
         "actualTotalDeal_M": 375,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 24.8,
+      "predictedUpfront_M": 20.7,
       "predictedTotalDeal_M": 14,
-      "upfrontErrorPct": -0.7929999999999999,
+      "upfrontErrorPct": -0.8275,
       "totalDealErrorPct": -0.9626666666666667,
-      "upfrontErrorAbs_M": -95.2,
+      "upfrontErrorAbs_M": -99.3,
       "totalDealErrorAbs_M": -361,
       "within25": false,
       "within35": false,
@@ -4444,11 +4444,11 @@
         "actualTotalDeal_M": 1200,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 242.8,
+      "predictedUpfront_M": 202.3,
       "predictedTotalDeal_M": 186,
-      "upfrontErrorPct": -0.5144500000000001,
+      "upfrontErrorPct": -0.595375,
       "totalDealErrorPct": -0.845,
-      "upfrontErrorAbs_M": -257.2,
+      "upfrontErrorAbs_M": -297.7,
       "totalDealErrorAbs_M": -1014,
       "within25": false,
       "within35": false,
@@ -5822,15 +5822,15 @@
         "actualTotalDeal_M": 9200,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 5212,
+      "predictedUpfront_M": 4343.3,
       "predictedTotalDeal_M": 1395,
-      "upfrontErrorPct": -0.4334783695652174,
+      "upfrontErrorPct": -0.5278986413043478,
       "totalDealErrorPct": -0.8483695652173913,
-      "upfrontErrorAbs_M": -3988,
+      "upfrontErrorAbs_M": -4856.7,
       "totalDealErrorAbs_M": -7805,
       "within25": false,
       "within35": false,
-      "within50": true
+      "within50": false
     },
     {
       "case": {
@@ -6394,11 +6394,11 @@
         "actualTotalDeal_M": 820,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 1800,
+      "predictedUpfront_M": 1500,
       "predictedTotalDeal_M": 1200,
-      "upfrontErrorPct": 1.903225806451613,
+      "upfrontErrorPct": 1.4193548387096775,
       "totalDealErrorPct": 0.4634146341463415,
-      "upfrontErrorAbs_M": 1180,
+      "upfrontErrorAbs_M": 880,
       "totalDealErrorAbs_M": 380,
       "within25": false,
       "within35": false,
@@ -6602,11 +6602,11 @@
         "actualTotalDeal_M": 2250,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 356.1,
+      "predictedUpfront_M": 296.7,
       "predictedTotalDeal_M": 2362,
-      "upfrontErrorPct": -0.6251622399999999,
+      "upfrontErrorPct": -0.6876352,
       "totalDealErrorPct": 0.049777777777777775,
-      "upfrontErrorAbs_M": -593.9,
+      "upfrontErrorAbs_M": -653.3,
       "totalDealErrorAbs_M": 112,
       "within25": false,
       "within35": false,
@@ -7304,11 +7304,11 @@
         "actualTotalDeal_M": 365,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 426.3,
+      "predictedUpfront_M": 355.3,
       "predictedTotalDeal_M": 42,
-      "upfrontErrorPct": 11.18,
+      "upfrontErrorPct": 9.15,
       "totalDealErrorPct": -0.8849315068493151,
-      "upfrontErrorAbs_M": 391.3,
+      "upfrontErrorAbs_M": 320.3,
       "totalDealErrorAbs_M": -323,
       "within25": false,
       "within35": false,
@@ -7382,11 +7382,11 @@
         "actualTotalDeal_M": 54.3,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 363.5,
+      "predictedUpfront_M": 302.9,
       "predictedTotalDeal_M": 155,
-      "upfrontErrorPct": 5.694806629834255,
+      "upfrontErrorPct": 4.579005524861879,
       "totalDealErrorPct": 1.85451197053407,
-      "upfrontErrorAbs_M": 309.2,
+      "upfrontErrorAbs_M": 248.6,
       "totalDealErrorAbs_M": 100.7,
       "within25": false,
       "within35": false,
@@ -10658,11 +10658,11 @@
         "actualTotalDeal_M": 12500,
         "peakSalesMedian_M": 720
       },
-      "predictedUpfront_M": 300,
+      "predictedUpfront_M": 250,
       "predictedTotalDeal_M": 39,
-      "upfrontErrorPct": -0.4,
+      "upfrontErrorPct": -0.5,
       "totalDealErrorPct": -0.99688,
-      "upfrontErrorAbs_M": -200,
+      "upfrontErrorAbs_M": -250,
       "totalDealErrorAbs_M": -12461,
       "within25": false,
       "within35": false,
@@ -11022,11 +11022,11 @@
         "actualTotalDeal_M": 590,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 363.5,
+      "predictedUpfront_M": 302.9,
       "predictedTotalDeal_M": 135,
-      "upfrontErrorPct": -0.3838508474576271,
+      "upfrontErrorPct": -0.48654237288135593,
       "totalDealErrorPct": -0.7711864406779662,
-      "upfrontErrorAbs_M": -226.5,
+      "upfrontErrorAbs_M": -287.1,
       "totalDealErrorAbs_M": -455,
       "within25": false,
       "within35": false,
@@ -11048,13 +11048,13 @@
         "actualTotalDeal_M": 766,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 484.7,
+      "predictedUpfront_M": 403.9,
       "predictedTotalDeal_M": 0,
-      "upfrontErrorPct": -0.17846779661016948,
+      "upfrontErrorPct": -0.3153898305084745,
       "totalDealErrorPct": -1,
-      "upfrontErrorAbs_M": -105.3,
+      "upfrontErrorAbs_M": -186.1,
       "totalDealErrorAbs_M": -766,
-      "within25": true,
+      "within25": false,
       "within35": true,
       "within50": true
     },
@@ -11100,11 +11100,11 @@
         "actualTotalDeal_M": 590,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 363.5,
+      "predictedUpfront_M": 302.9,
       "predictedTotalDeal_M": 77,
-      "upfrontErrorPct": -0.3838508474576271,
+      "upfrontErrorPct": -0.48654237288135593,
       "totalDealErrorPct": -0.8694915254237288,
-      "upfrontErrorAbs_M": -226.5,
+      "upfrontErrorAbs_M": -287.1,
       "totalDealErrorAbs_M": -513,
       "within25": false,
       "within35": false,
@@ -11542,11 +11542,11 @@
         "actualTotalDeal_M": 2200,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 2530.5,
+      "predictedUpfront_M": 2108.8,
       "predictedTotalDeal_M": 3411,
-      "upfrontErrorPct": 0.15023852272727276,
+      "upfrontErrorPct": -0.041467897727272676,
       "totalDealErrorPct": 0.5504545454545454,
-      "upfrontErrorAbs_M": 330.5,
+      "upfrontErrorAbs_M": -91.2,
       "totalDealErrorAbs_M": 1211,
       "within25": true,
       "within35": true,
@@ -13076,11 +13076,11 @@
         "actualTotalDeal_M": 600,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 408.9,
+      "predictedUpfront_M": 340.8,
       "predictedTotalDeal_M": 74,
-      "upfrontErrorPct": 3.089,
+      "upfrontErrorPct": 2.4075,
       "totalDealErrorPct": -0.8766666666666667,
-      "upfrontErrorAbs_M": 308.9,
+      "upfrontErrorAbs_M": 240.8,
       "totalDealErrorAbs_M": -526,
       "within25": false,
       "within35": false,
@@ -13752,15 +13752,15 @@
         "actualTotalDeal_M": 100,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 55.4,
+      "predictedUpfront_M": 46.2,
       "predictedTotalDeal_M": 134,
-      "upfrontErrorPct": -0.44581,
+      "upfrontErrorPct": -0.538175,
       "totalDealErrorPct": 0.34,
-      "upfrontErrorAbs_M": -44.6,
+      "upfrontErrorAbs_M": -53.8,
       "totalDealErrorAbs_M": 34,
       "within25": false,
       "within35": false,
-      "within50": true
+      "within50": false
     },
     {
       "case": {
@@ -13908,14 +13908,14 @@
         "actualTotalDeal_M": 176,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 255,
+      "predictedUpfront_M": 212.5,
       "predictedTotalDeal_M": 19,
-      "upfrontErrorPct": 0.44886363636363635,
+      "upfrontErrorPct": 0.20738636363636365,
       "totalDealErrorPct": -0.8920454545454546,
-      "upfrontErrorAbs_M": 79,
+      "upfrontErrorAbs_M": 36.5,
       "totalDealErrorAbs_M": -157,
-      "within25": false,
-      "within35": false,
+      "within25": true,
+      "within35": true,
       "within50": true
     },
     {
@@ -13934,11 +13934,11 @@
         "actualTotalDeal_M": 176,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 202,
+      "predictedUpfront_M": 168.3,
       "predictedTotalDeal_M": 18,
-      "upfrontErrorPct": 0.14750000000000005,
+      "upfrontErrorPct": -0.043749999999999935,
       "totalDealErrorPct": -0.8977272727272727,
-      "upfrontErrorAbs_M": 26,
+      "upfrontErrorAbs_M": -7.7,
       "totalDealErrorAbs_M": -158,
       "within25": true,
       "within35": true,
@@ -15104,13 +15104,13 @@
         "actualTotalDeal_M": 750,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 622.2,
+      "predictedUpfront_M": 518.5,
       "predictedTotalDeal_M": 541,
-      "upfrontErrorPct": -0.17040000000000008,
+      "upfrontErrorPct": -0.30866666666666664,
       "totalDealErrorPct": -0.2786666666666667,
-      "upfrontErrorAbs_M": -127.8,
+      "upfrontErrorAbs_M": -231.5,
       "totalDealErrorAbs_M": -209,
-      "within25": true,
+      "within25": false,
       "within35": true,
       "within50": true
     },
@@ -15312,13 +15312,13 @@
         "actualTotalDeal_M": 920,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 158.4,
+      "predictedUpfront_M": 132,
       "predictedTotalDeal_M": 24,
-      "upfrontErrorPct": 0.31962499999999994,
+      "upfrontErrorPct": 0.0996874999999998,
       "totalDealErrorPct": -0.9739130434782609,
-      "upfrontErrorAbs_M": 38.4,
+      "upfrontErrorAbs_M": 12,
       "totalDealErrorAbs_M": -896,
-      "within25": false,
+      "within25": true,
       "within35": true,
       "within50": true
     },
@@ -18432,11 +18432,11 @@
         "actualTotalDeal_M": 462,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 2345.3,
+      "predictedUpfront_M": 1954.4,
       "predictedTotalDeal_M": 3411,
-      "upfrontErrorPct": 4.076298701298701,
+      "upfrontErrorPct": 3.2302489177489178,
       "totalDealErrorPct": 6.383116883116883,
-      "upfrontErrorAbs_M": 1883.3,
+      "upfrontErrorAbs_M": 1492.4,
       "totalDealErrorAbs_M": 2949,
       "within25": false,
       "within35": false,
@@ -20460,11 +20460,11 @@
         "actualTotalDeal_M": 380,
         "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 3202.8,
+      "predictedUpfront_M": 2669,
       "predictedTotalDeal_M": 2740,
-      "upfrontErrorPct": 10.862222222222222,
+      "upfrontErrorPct": 8.885185185185184,
       "totalDealErrorPct": 6.2105263157894735,
-      "upfrontErrorAbs_M": 2932.8,
+      "upfrontErrorAbs_M": 2399,
       "totalDealErrorAbs_M": 2360,
       "within25": false,
       "within35": false,
@@ -22124,11 +22124,11 @@
         "actualTotalDeal_M": 365,
         "peakSalesMedian_M": 600
       },
-      "predictedUpfront_M": 300,
+      "predictedUpfront_M": 250,
       "predictedTotalDeal_M": 1,
-      "upfrontErrorPct": 14,
+      "upfrontErrorPct": 11.5,
       "totalDealErrorPct": -0.9972602739726028,
-      "upfrontErrorAbs_M": 280,
+      "upfrontErrorAbs_M": 230,
       "totalDealErrorAbs_M": -364,
       "within25": false,
       "within35": false,
@@ -23112,11 +23112,11 @@
         "actualTotalDeal_M": 460,
         "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 501,
+      "predictedUpfront_M": 417.5,
       "predictedTotalDeal_M": 899,
-      "upfrontErrorPct": 15.7,
+      "upfrontErrorPct": 12.916666666666666,
       "totalDealErrorPct": 0.9543478260869566,
-      "upfrontErrorAbs_M": 471,
+      "upfrontErrorAbs_M": 387.5,
       "totalDealErrorAbs_M": 439,
       "within25": false,
       "within35": false,
@@ -23283,11 +23283,11 @@
     "coreTrain": {
       "totalDeals": 165,
       "hitRate25": 0.23030303030303031,
-      "hitRate35": 0.3333333333333333,
+      "hitRate35": 0.32727272727272727,
       "hitRate50": 0.4484848484848485,
-      "meanAbsErrorPct": 0.9309507410611406,
-      "medianSignedErrorPct": -0.1936893382352942,
-      "rmseUpfront_M": 308.1,
+      "meanAbsErrorPct": 0.8995602488139186,
+      "medianSignedErrorPct": -0.1976923076923078,
+      "rmseUpfront_M": 307.6,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 11,
@@ -23299,9 +23299,9 @@
         "infectiousDisease": {
           "n": 12,
           "hitRate25": 0.08333333333333333,
-          "hitRate35": 0.25,
-          "meanSignedErrorPct": 2.1640703279099167,
-          "meanAbsErrorPct": 2.5897156103957926
+          "hitRate35": 0.16666666666666666,
+          "meanSignedErrorPct": 1.6367252732582636,
+          "meanAbsErrorPct": 2.158096341996494
         },
         "ophthalmology": {
           "n": 7,
@@ -23391,17 +23391,17 @@
       "byPhase": {
         "phase3": {
           "n": 67,
-          "hitRate25": 0.29850746268656714,
+          "hitRate25": 0.2835820895522388,
           "hitRate35": 0.373134328358209,
-          "meanSignedErrorPct": 0.8950368621587413,
-          "meanAbsErrorPct": 1.2665025166826245
+          "meanSignedErrorPct": 0.8197714269972513,
+          "meanAbsErrorPct": 1.201495282043944
         },
         "phase2": {
           "n": 98,
-          "hitRate25": 0.1836734693877551,
-          "hitRate35": 0.30612244897959184,
-          "meanSignedErrorPct": -0.019309378310237872,
-          "meanAbsErrorPct": 0.7015428944627787
+          "hitRate25": 0.19387755102040816,
+          "hitRate35": 0.29591836734693877,
+          "meanSignedErrorPct": -0.03242526096329911,
+          "meanAbsErrorPct": 0.6931352771158401
         }
       },
       "byModality": {
@@ -23437,22 +23437,22 @@
           "n": 12,
           "hitRate25": 0.16666666666666666,
           "hitRate35": 0.4166666666666667,
-          "meanSignedErrorPct": 0.4091730975676582,
-          "meanAbsErrorPct": 0.9074279526783493
+          "meanSignedErrorPct": 0.23665207069378325,
+          "meanAbsErrorPct": 0.7921818787234951
         },
         "antiviral": {
           "n": 1,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": 1.6631,
-          "meanAbsErrorPct": 1.6631
+          "meanSignedErrorPct": 1.2192499999999997,
+          "meanAbsErrorPct": 1.2192499999999997
         },
         "antibioticNovel": {
           "n": 1,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": 3.8,
-          "meanAbsErrorPct": 3.8
+          "meanSignedErrorPct": 3,
+          "meanAbsErrorPct": 3
         },
         "intravitreal": {
           "n": 1,
@@ -23485,9 +23485,9 @@
         "mab": {
           "n": 15,
           "hitRate25": 0.3333333333333333,
-          "hitRate35": 0.4666666666666667,
-          "meanSignedErrorPct": 0.19693651517168087,
-          "meanAbsErrorPct": 0.7304368573435571
+          "hitRate35": 0.4,
+          "meanSignedErrorPct": 0.18695118183834758,
+          "meanAbsErrorPct": 0.7404221906768904
         },
         "bispecificAntibody": {
           "n": 1,
@@ -23500,8 +23500,8 @@
           "n": 1,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": -0.5144500000000001,
-          "meanAbsErrorPct": 0.5144500000000001
+          "meanSignedErrorPct": -0.595375,
+          "meanAbsErrorPct": 0.595375
         },
         "antibody": {
           "n": 3,
@@ -23521,8 +23521,8 @@
           "n": 22,
           "hitRate25": 0.2727272727272727,
           "hitRate35": 0.3181818181818182,
-          "meanSignedErrorPct": 0.7492658225729344,
-          "meanAbsErrorPct": 1.2484816187696557
+          "meanSignedErrorPct": 0.6227506710577828,
+          "meanAbsErrorPct": 1.121966467254504
         },
         "adc": {
           "n": 5,
@@ -23598,12 +23598,12 @@
     },
     "coreTest": {
       "totalDeals": 41,
-      "hitRate25": 0.3170731707317073,
+      "hitRate25": 0.2926829268292683,
       "hitRate35": 0.3902439024390244,
       "hitRate50": 0.5365853658536586,
-      "meanAbsErrorPct": 0.6781812407647587,
-      "medianSignedErrorPct": -0.20799999999999988,
-      "rmseUpfront_M": 284.8,
+      "meanAbsErrorPct": 0.6815208025671563,
+      "medianSignedErrorPct": -0.21248070444104122,
+      "rmseUpfront_M": 285.8,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 4,
@@ -23649,10 +23649,10 @@
         },
         "infectiousDisease": {
           "n": 1,
-          "hitRate25": 1,
+          "hitRate25": 0,
           "hitRate35": 1,
-          "meanSignedErrorPct": -0.17846779661016948,
-          "meanAbsErrorPct": 0.17846779661016948
+          "meanSignedErrorPct": -0.3153898305084745,
+          "meanAbsErrorPct": 0.3153898305084745
         }
       },
       "byPhase": {
@@ -23665,10 +23665,10 @@
         },
         "phase2": {
           "n": 22,
-          "hitRate25": 0.22727272727272727,
+          "hitRate25": 0.18181818181818182,
           "hitRate35": 0.36363636363636365,
-          "meanSignedErrorPct": -0.32444364773221995,
-          "meanAbsErrorPct": 0.5293266947374534
+          "meanSignedErrorPct": -0.33066737654577927,
+          "meanAbsErrorPct": 0.5355504235510128
         }
       },
       "byModality": {
@@ -23751,10 +23751,10 @@
         },
         "mrna": {
           "n": 3,
-          "hitRate25": 0.6666666666666666,
+          "hitRate25": 0.3333333333333333,
           "hitRate35": 0.6666666666666666,
-          "meanSignedErrorPct": 0.23893383426125658,
-          "meanAbsErrorPct": 0.49585773907207664
+          "meanSignedErrorPct": 0.1932931562951549,
+          "meanAbsErrorPct": 0.5414984170381784
         },
         "gene_therapy": {
           "n": 5,
@@ -23780,10 +23780,10 @@
       }
     },
     "overfittingGap": {
-      "hit25": -0.086770140428677,
-      "hit35": -0.05691056910569109,
+      "hit25": -0.06237989652623796,
+      "hit35": -0.06297117516629713,
       "hit50": -0.08810051736881008,
-      "meanAbsErrorPct": -0.2527695002963819
+      "meanAbsErrorPct": -0.2180394462467623
     }
   }
 }
