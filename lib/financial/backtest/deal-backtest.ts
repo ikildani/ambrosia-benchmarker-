@@ -338,6 +338,15 @@ const MODALITY_EMPIRICAL_UPLIFT: Record<string, number> = {
   rnai: 1.5,
   radiopharmaceutical: 2.2,   // Heavy uplift — radiopharm had -75% signed
   protac: 1.5,
+  // Round 36 (2026-04-13): mRNA modality had n=15 core with -48% mean
+  // signed error. The 2020-2024 BioNTech/Moderna/CureVac disclosed deals
+  // show upfronts in the $100-400M range for Phase 2/3 mRNA therapeutics
+  // (Pfizer BioNTech CMV $90M, Moderna Merck ONCO $200M, CureVac GSK
+  // $150M, Arcturus Ultragenyx $150M). Engine rNPV collapses these to
+  // near-zero because mRNA peak sales forecasts post-COVID-vaccine era
+  // are highly uncertain. 1.7× uplift brings signed error near center
+  // without overshooting (prior tests at 2.0× pushed mean to +25%).
+  mrna: 1.7,
 };
 
 function applyModalityUplift(predicted: number, modality: string): number {
