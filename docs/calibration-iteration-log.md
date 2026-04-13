@@ -389,7 +389,49 @@ Empirical sweep over factors {1.00, 1.25, 1.50, 1.75, 2.00, 2.50} confirms 1.50 
 
 ---
 
-## Round 12 — (next round goes here)
+## Round 12 — A/B flag test of TIER2/TIER4 flags (NULL RESULT, 2026-04-13)
+
+**Change:** No code change. Ran the backtest with each of the 7 TIER2/TIER4 feature flags individually set to `on` to measure empirical impact on hit rates.
+
+**Why:** The flags (TIER2_TIME_WINDOWED_POS, TIER2_COMBO_THERAPY, TIER2_GEO_DECOMP, TIER4_RISK_DECOMP, TIER4_MACRO, TIER4_SUBPOP, TIER4_PATENT_CLIFFS) have been default-off since the Tier 2/4 implementations landed. Methodology called for A/B testing after Rounds 4-6 to identify winners for promotion to production defaults.
+
+**Results:**
+
+| Flag | Core ±25/±35/±50 | Core mean \|err\| | Full ±25/±35/±50 | Net |
+|---|---|---|---|---|
+| (baseline R11) | 20.3 / 27.5 / 36.2% | 108.8% | 18.3 / 25.9 / 34.7% | — |
+| TIER2_TIME_WINDOWED_POS | 20.3 / 27.5 / **34.8** | 112.5% | **19.1** / 25.9 / 34.7 | mixed (+0.8pp full ±25, −1.4pp core ±50) |
+| TIER2_COMBO_THERAPY | **18.8** / 27.5 / **34.8** | 103.3% | **17.1** / **24.7** / **33.1** | HARMFUL across bands |
+| TIER2_GEO_DECOMP | 20.3 / 27.5 / 36.2 | 108.8% | 18.3 / 25.9 / 34.7 | zero-impact |
+| TIER4_RISK_DECOMP | 20.3 / 27.5 / 36.2 | 108.8% | 18.3 / 25.9 / 34.7 | zero-impact |
+| TIER4_MACRO | 20.3 / 27.5 / 36.2 | 108.8% | 18.3 / 25.9 / 34.7 | zero-impact |
+| TIER4_SUBPOP | 20.3 / 27.5 / 36.2 | 108.8% | 18.3 / 25.9 / 34.7 | zero-impact |
+| TIER4_PATENT_CLIFFS | **18.8** / 27.5 / 36.2 | 108.7% | **17.9** / **25.5** / 34.7 | mildly harmful |
+
+**Conclusion: no flag warrants promotion to production default-on.**
+- 4 flags (TIER2_GEO_DECOMP, TIER4_RISK_DECOMP, TIER4_MACRO, TIER4_SUBPOP) produce zero measurable impact on backtest metrics. Either they don't fire for the deal archetypes in the corpus, or their adjustments net to zero after downstream clamping.
+- 2 flags (TIER2_COMBO_THERAPY, TIER4_PATENT_CLIFFS) regress hit rates across multiple bands.
+- 1 flag (TIER2_TIME_WINDOWED_POS) is a mild trade-off: +0.8pp on full ±25% but -1.4pp on core ±50%. Net directional ambiguity.
+
+**Diagnosis — why zero-impact flags look zero-impact:**
+- TIER2_GEO_DECOMP requires territorial deals to exercise geographic decomposition, but the core 69-deal scope has zero non-global deals (per Round 2 diagnostic).
+- TIER4_RISK_DECOMP / TIER4_SUBPOP / TIER4_MACRO feed into discount rate and subpopulation paths that already clamp within the guardrails established by Rounds 6-10; their deltas fall inside the floor/dampener envelopes.
+
+**Action:** Leave all flags default-off. Revisit flag impact when the corpus is expanded (Round 13+ candidate) and the scope includes more non-global / rare-subpop / patent-sensitive deals.
+
+**Flags:** flags were the experiment — see table above.
+
+**Delta:** No code change; no backtest regression to commit. `baseline-errors.json` unchanged.
+
+**Regressions:** N/A.
+
+**Reading:** Valuable null result. The flag system was built during Tier 2/4 development under the assumption that each feature might win on a subset of deals. The backtest corpus doesn't stress those subsets enough to reveal a win. This does NOT mean the flags are wrong — it means the 251-deal sample lacks diagnostic power to discriminate between them. Addressing this is a corpus-expansion question (Round 13+), not a flag tuning question.
+
+**Takeaway:** Rounds 6-11 moved full-scope ±25% from 6.8% to 18.3% (+11.5pp), core ±25% from 13.0% to 20.3% (+7.3pp). Flag toggles cannot replicate that magnitude on the current corpus — further gains require either (a) sourcing more indication-specific peaks (extend R11 pattern), (b) adding one-sided corrections for remaining structural failure modes, or (c) expanding the deal corpus to 500+ deals.
+
+---
+
+## Round 13 — (next round goes here)
 
 **Remaining calibration levers:**
 3. **Upward-only TA anchor correction** — Round 4 failed because it went both up and down. A safer variant: raise TA anchors by 20-30% across the board (upward only), which should reduce the systemic undershoot revealed by median signed error.
