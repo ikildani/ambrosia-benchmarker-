@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { loadTradeSpaceScenarios } from '@/lib/trade-space-data';
 import { StructureCards } from '@/components/trade-space/StructureCards';
+import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
@@ -20,11 +21,9 @@ export default function TradeSpacePage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
+      <InstitutionalNav activePath="/trade-space" />
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <nav className="mb-6 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-slate-300">← Ambrosia Benchmarker</Link>
-          </nav>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Deal Structure Trade Space
           </h1>

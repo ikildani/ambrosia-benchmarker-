@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { loadPlaybookBuyer, listAllSlugs } from '@/lib/playbook-data';
+import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const dynamic = 'force-dynamic';
@@ -55,11 +56,10 @@ export default async function PlaybookDetail({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
+      <InstitutionalNav activePath="/playbook" />
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-5xl px-6 py-12">
           <nav className="mb-4 flex items-center gap-2 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-slate-300">Home</Link>
-            <span className="text-slate-700">/</span>
             <Link href="/playbook" className="text-slate-500 hover:text-slate-300">Playbooks</Link>
             <span className="text-slate-700">/</span>
             <span className="text-slate-300">{buyer.companyName}</span>
