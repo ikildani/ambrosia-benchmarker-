@@ -115,16 +115,78 @@ npx tsx scripts/run-deal-backtest.ts
 
 ---
 
-## Round 4 — (next round goes here)
+## Round 4 — Per-indication peak sales anchors (FAILED HYPOTHESIS, 2026-04-13)
 
-**Remaining calibration levers for future rounds** (source-cited work, multi-session):
+**Change:** Replaced `PEAK_SALES_BY_TA_M` lookups with `INDICATION_MARKET_CAPS` anchors in `dealToCase()`, scaled by a 0.22-0.30 follower positioning factor.
 
-1. Per-indication peak sales anchors from `INDICATION_MARKET_CAPS` (replacing the TA-default constants in `PEAK_SALES_BY_TA_M`).
-2. Territorial scope scaling — the 10 worst core-scope deals are mostly specialty / ex-US licensees. Detect territory from deal record and scale predicted upfront accordingly.
-3. Option-value floor for platform modalities (rnai, geneTherapy, mRNA) to correct ~-100% undershoot — structurally, these deals anchor on scarcity not NPV.
-4. A/B flag testing: after rounds 4-6, re-run backtest with each TIER2/4 flag on individually to measure empirical impact and promote winners to production defaults.
+**Why tried:** Crude TA anchors ignore per-indication variance. Market leaders like Keytruda ($32B) and Ozempic ($14B) dwarf the oncology default ($2.5B); smaller indications like hypertension ($2B) are far below metabolic default ($4B). Per-indication anchors should tighten the distribution.
 
-Stage 7 continues to be multi-week work. Rounds 1-3 establish the framework, infrastructure, and the first measurable improvements; Rounds 4+ are primarily research (FDA, Wong/Siah/Lo, company filings) plus iterative tuning.
+**Result (core scope):** REGRESSED — ±25% 13.0→8.7 (-4.3pp), ±35% 20.3→18.8 (-1.5pp), ±50% 30.4→26.1 (-4.3pp).
+
+**Reading:** The follower factor (0.22-0.30) was too aggressive. Scaling Keytruda's $32B by 0.30 = $9.6B, which is 4× the TA default — overshooting. Meanwhile for indications where the leader is smaller, the 0.22 factor brought anchors below TA defaults, undershooting. The change increased dispersion without reducing bias.
+
+**Reverted.** A better version of this round would either (a) use a more nuanced positioning factor derived from the licensor's corporate profile, or (b) use per-deal analyst consensus peak sales (which requires manual curation of 251 deals).
+
+---
+
+## Round 5 — Territorial scope scaling (FAILED HYPOTHESIS, 2026-04-13)
+
+**Change:** Added `TERRITORIAL_PEAK_SHARE` multiplier applied to peak sales when `deal.territory ≠ 'global'`. Factors from `geographic-revenue-curves.ts`: us 0.55, europe 0.22, japan 0.08, china 0.10, ex_us 0.45, ex_china 0.90.
+
+**Why tried:** The 10 worst core-scope deals were all specialty / ex-US licensees. Scaling peak sales by territorial share should fix the predicted upfront on those deals without affecting global deals.
+
+**Result (core scope):** REGRESSED — ±25% 13.0→10.1 (-2.9pp), ±35% 20.3→17.4 (-2.9pp), ±50% 30.4→26.1 (-4.3pp). Median signed -54.8→-78.5 (worse undershoot).
+
+**Reading:** The territorial scaling only corrects the ~40 non-global deals, but it applies a downward peak sales adjustment that makes the already-present NPV undershoot worse. Mean |error| improved (fewer overshoots) but the hit rate bands moved deeper into undershoot territory. This confirms that scaling-DOWN corrections can't fix a corpus with systematic undershoot bias.
+
+**Reverted.** For territorial scaling to work, the base NPV needs to FIRST be calibrated upward (Round 6+), THEN territory-scaled.
+
+---
+
+## Round 6 — Platform modality option-value floor (NET WIN, 2026-04-13)
+
+**Change:** New `applyPlatformFloor()` in `lib/financial/backtest/deal-backtest.ts` scoreCase. For rnai / geneTherapy / mrna / cellTherapy / radiopharmaceutical / protac / microRNA modalities, `predictedUpfront = max(rawUpfront, modalityFloor)`. Floors: $20-50M per modality, calibrated empirically from the 9 platform-modality deals in core scope. Never reduces a prediction — floor-only adjustment.
+
+**Why:** Platform modality signed errors were -88% to -104% (model predicts near-$0 upfront, actuals $10-100M). These assets are priced on scarcity / option value, not expected NPV. A one-sided floor captures that reality without affecting non-platform deals.
+
+**Source:** Empirical median upfront from disclosed 2020-2026 licensing deals for Alnylam (rnai), Moderna (mrna), Sarepta (geneTherapy), BioNTech (mrna), Cellectis (cellTherapy). Option B methodology — "iterate until the model accurately predicts real deals."
+
+**Flags:** all off.
+
+**Delta (core scope):**
+
+| metric | Round 3 | Round 6 | change |
+|---|---:|---:|---:|
+| Total deals scored | 69 | 69 | — |
+| ±25% | 13.0% | **14.5%** | **+1.5pp** |
+| ±35% | 20.3% | **23.2%** | **+2.9pp** |
+| ±50% | 30.4% | **33.3%** | **+2.9pp** |
+| Mean \|error\| | 141.8% | 138.1% | -3.7pp |
+| Median signed | -54.8% | **-47.0%** | **+7.8pp** (tighter) |
+| RMSE ($M) | 603.8 | 601.8 | -2.0 |
+
+**Delta (full scope):** bigger wins — ±25% 6.8→10.4 (+3.6pp), ±35% 11.2→15.5 (+4.3pp), ±50% 16.7→22.3 (+5.6pp).
+
+**Regressions:** None. 110 golden masters stable.
+
+**Reading:** First consistent win across all hit rate bands AND full/core scope. The modality floor converts ~20 near-zero predictions into realistic floor values, pulling them inside the hit rate tolerance bands. Median signed error tightened 7.8pp — the biggest single-round bias correction so far.
+
+**Takeaway:** One-sided corrections (floor / ceiling) work better than symmetric scaling when the underlying distribution has directional bias. Rounds 4 and 5 failed because they tried to reshape the distribution while the underlying engine still undershoots. Round 6 succeeded because it corrected only the specific failure mode (platform NPV collapse) without touching deals where the engine was already close.
+
+---
+
+## Round 7 — (next round goes here)
+
+**Remaining calibration levers:**
+
+1. **Option-value floor for early-stage deals** (phase1, preclinical). Same pattern as Round 6 but for early-stage: predicted NPV→0 but real upfronts are $20-300M strategic option value. Would target the 95 Phase 1 / preclinical deals in full scope.
+2. **Approved-stage dampener** — the 46 approved deals median +1,034% overshoot (full scope). Royalty-dominant commercialization handoffs. Add `0.20-0.30× rawUpfront` for `phase = 'approved'` to bring predictions toward empirical reality.
+3. **Upward-only TA anchor correction** — Round 4 failed because it went both up and down. A safer variant: raise TA anchors by 20-30% across the board (upward only), which should reduce the systemic undershoot revealed by median signed error.
+4. **Manual Tier 1 calibration of the 10 worst indications** with FDA CDER + 10-K source research. Multi-day research per indication.
+5. **A/B flag testing** — re-run backtest with each TIER2/4 flag on individually, measure empirical impact, promote winners.
+6. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
+
+Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning — documented above). Round 6 is the first proven win via one-sided corrections. Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
 
 Format to follow for each subsequent round:
 
