@@ -217,11 +217,8 @@ const TA_EMPIRICAL_UPLIFT: Record<string, Record<string, number>> = {
     phase2_3: 3.0,
     // Round 37 (2026-04-13): Lowered phase3 from 1.8 → 1.3 because worst-10
     // core overshoots are all oncology Phase 3 with heavy modalities (ADC,
-    // cell_therapy, bispecific, rnai). With modality uplift 1.3-1.5× + buyer
-    // premium 1.0-1.5× + TA uplift, stacking hit 3-5× causing 500-700%
-    // overshoots (Karyopharm/Roche, Kelun/Merck, Arvinas/Biogen, Nkarta/
-    // AbbVie). Modality uplifts already cover the Phase 3 undershoot signal;
-    // letting TA uplift compound is the error.
+    // cell_therapy, bispecific, rnai). Tried 1.0× in R39 — regressed core
+    // ±25% by 5pp and test ±25% by 10pp. 1.3× is the empirical optimum.
     phase3: 1.3,
   },
   // R36 (2026-04-13): Full per-TA audit of non-oncology TAs. Sweep over
