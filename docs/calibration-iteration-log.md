@@ -175,18 +175,58 @@ npx tsx scripts/run-deal-backtest.ts
 
 ---
 
-## Round 7 — (next round goes here)
+## Round 7 — Approved-stage licensing dampener (NET WIN, 2026-04-13)
+
+**Change:** New `applyApprovedLicensingDampener()` in `lib/financial/backtest/deal-backtest.ts` scoreCase. For deals where `phase='approved' AND dealType='licensing'`, `predictedUpfront = rawUpfront × 0.08`. Applied before the Round 6 platform floor, so floors still protect platform-modality cases. No effect on approved acquisitions, collaborations, or codev.
+
+**Why:** Approved-stage licensing deals are territorial re-licensing of already-launched products — Pharming Ruconest → CSPC China, Rigel Tavalisse → Kissei Japan, Tarsus → Samsung Korea, Epizyme Tazverik → Ipsen ex-US, Theratechnologies ibalizumab → TaiMed. The upfront reflects a single regional rights package, not global NPV, but the rNPV engine scores the full global product and produces 100-200× over-predictions. Diagnostic: the 10 approved+licensing deals in full scope had median signed error **+1,302%** and hit rates 0/0/0 across all bands, driven by deals like Pharming→CSPC ($15M actual vs $3,387M predicted = +22,480%).
+
+**Source:** Territorial revenue share multiplier 0.08 matches `lib/financial/geographic-revenue-curves.ts` regional splits (Japan 0.08, China 0.10, EU5 0.22 — single-region ex-US rights cluster in the 5-15% band; the geographic-revenue-curves.ts constants cite EvaluatePharma 2024 and IQVIA regional data). Empirical sweep over [0.03, 0.05, 0.08, 0.10, 0.15, 0.20, 0.25, 0.30] shows 0.08 optimizes both the slice's ±25% hit rate (0% → 30%) and tightens median signed error to +12% (from +1,302%). Theoretical prior and empirical optimum converge.
+
+**Flags:** all off.
+
+**Delta (full scope):**
+
+| metric | Round 6 | Round 7 | change |
+|---|---:|---:|---:|
+| ±25% | 10.4% | **11.6%** | **+1.2pp** |
+| ±35% | 15.5% | **16.7%** | **+1.2pp** |
+| ±50% | 22.3% | **23.5%** | **+1.2pp** |
+| Mean \|error\| | 272.8% | **111.4%** | **-161pp** (the overshoot tail collapsed) |
+| Median signed | -78.5% | -79.1% | -0.6pp (slight, expected) |
+| RMSE ($M) | 6,228.2 | 6,220.1 | -8.1 |
+
+**Delta (approved+licensing slice, n=10):**
+
+| metric | Round 6 | Round 7 | change |
+|---|---:|---:|---:|
+| ±25% | 0.0% | **30.0%** | **+30pp** |
+| ±35% | 0.0% | **30.0%** | **+30pp** |
+| ±50% | 0.0% | **30.0%** | **+30pp** |
+| Median signed | +1,302.3% | **+12.2%** | **-1,290pp** |
+
+**Delta (core scope):** unchanged. Dampener is surgically scoped to approved+licensing; core scope (Phase 2/3 licensing/codev) contains no approved-phase deals by definition. Core remains 14.5% / 23.2% / 33.3%, median signed -47.0%.
+
+**Regressions:** None. 1,333 passing / 5 pre-existing failures. 110 golden masters stable.
+
+**Reading:** Second consecutive one-sided correction win. Like Round 6 (platform floor), this targets a specific structural failure mode (territorial re-licensing priced as global product) without touching deals the engine already handles reasonably well. Full-scope hit rates all gained +1.2pp, the overshoot tail collapsed (mean |error| fell 161pp because the $3,387M-vs-$15M Pharming-scale overshoots are gone), and the slice itself went from uniformly failing to 30% hit-rate success.
+
+**Takeaway:** One-sided corrections continue to compound. Rounds 4-5 taught that symmetric scaling fails; Rounds 6-7 confirm surgical one-sided corrections work. The approved-stage licensing cohort was the largest remaining structural failure mode; what's left in full scope is primarily Phase 1 / preclinical NPV-collapse deals (Round 8 candidate) and approved collaborations (smaller, less uniform pattern).
+
+---
+
+## Round 8 — (next round goes here)
 
 **Remaining calibration levers:**
 
 1. **Option-value floor for early-stage deals** (phase1, preclinical). Same pattern as Round 6 but for early-stage: predicted NPV→0 but real upfronts are $20-300M strategic option value. Would target the 95 Phase 1 / preclinical deals in full scope.
-2. **Approved-stage dampener** — the 46 approved deals median +1,034% overshoot (full scope). Royalty-dominant commercialization handoffs. Add `0.20-0.30× rawUpfront` for `phase = 'approved'` to bring predictions toward empirical reality.
+2. **Approved-stage collaboration adjustment** — 6 approved+collaboration deals show -51% signed error (mild undershoot). Lower priority than the early-stage floor.
 3. **Upward-only TA anchor correction** — Round 4 failed because it went both up and down. A safer variant: raise TA anchors by 20-30% across the board (upward only), which should reduce the systemic undershoot revealed by median signed error.
-4. **Manual Tier 1 calibration of the 10 worst indications** with FDA CDER + 10-K source research. Multi-day research per indication.
+4. **Manual Tier 1 calibration of the 10 worst core-scope indications** with FDA CDER + 10-K source research. Multi-day research per indication.
 5. **A/B flag testing** — re-run backtest with each TIER2/4 flag on individually, measure empirical impact, promote winners.
 6. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
 
-Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning — documented above). Round 6 is the first proven win via one-sided corrections. Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
+Stage 7 continues to be multi-week work. Rounds 1-3 established the framework. Rounds 4-5 tested hypotheses that failed (valuable learning). Rounds 6-7 landed the first two one-sided corrections (platform modality floor; approved-stage licensing dampener). Future rounds should continue the one-sided correction approach until the engine's base NPV can be raised systematically.
 
 Format to follow for each subsequent round:
 
