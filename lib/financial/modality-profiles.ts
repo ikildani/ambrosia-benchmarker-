@@ -441,6 +441,220 @@ export const MODALITY_PROFILES: Record<string, ModalityProfile> = {
     notes: 'Peptides (GLP-1 era has shown this modality can hit mega-blockbuster — no narrow cap).',
     source: 'Novo Nordisk 2024 10-K (Ozempic $16.7B peptide).',
   },
+
+  // ==========================================================================
+  // Round 20 (2026-04-13): ADC subtypes and emerging-class modalities
+  //
+  // BD executives work in sub-sub-modalities (not just "ADC" but "HER2-ADC"
+  // or "TROP2-ADC"). Profiles below are ready for future corpus tagging;
+  // no current backtest deals use these slugs so there's zero behavior
+  // impact today. When the 2,500-deal Supabase corpus is re-tagged, these
+  // profiles will activate.
+  // ==========================================================================
+
+  // ----- ADC subtypes (by target antigen) -----
+  'adc_her2': {
+    modality: 'adc_her2',
+    category: 'adc',
+    platformOptionFloorM: null,
+    narrowMarketCapM: null,  // Enhertu $10B+ class leader; second-gens capable of $3-5B
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.005,
+    notes: 'HER2-targeted ADC (Enhertu, Kadcyla). Enhertu re-defined class with HER2-low expansion; next-gen T-DXd-class pipelines $2-5B projected.',
+    source: 'AstraZeneca/Daiichi 2024 10-K (Enhertu $3.8B actual, $10B+ peak), Roche 2024 annual (Kadcyla $2.4B).',
+  },
+  'adc_trop2': {
+    modality: 'adc_trop2',
+    category: 'adc',
+    platformOptionFloorM: null,
+    narrowMarketCapM: 3000,  // Trodelvy $1.3B, Dato-DXd pipeline $3-5B — mid-range vs HER2-ADC
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.005,
+    notes: 'TROP2-targeted ADC (Trodelvy, Dato-DXd). TNBC + lung adenocarcinoma driving class growth.',
+    source: 'Gilead 2024 10-K (Trodelvy $1.3B), AstraZeneca 2024 (Dato-DXd projected $3-5B).',
+  },
+  'adc_claudin18_2': {
+    modality: 'adc_claudin18_2',
+    category: 'adc',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: 2000,  // Astellas Vyloy $1-2B projected; narrow GI indication set
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.005,
+    notes: 'Claudin 18.2-targeted ADC. Gastric + pancreatic indications. Emerging class, early commercial data.',
+    source: 'Astellas 2024 annual (Vyloy gastric launch), BeiGene/Turning Point pipeline 2024.',
+  },
+  'adc_nectin4': {
+    modality: 'adc_nectin4',
+    category: 'adc',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: 2500,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.005,
+    notes: 'Nectin-4-targeted ADC (Padcev class). Urothelial carcinoma + expansion indications.',
+    source: 'Astellas/Seagen 2024 annual (Padcev $1.2B).',
+  },
+  'adc_folr1': {
+    modality: 'adc_folr1',
+    category: 'adc',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: 1500,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.005,
+    notes: 'FRα-targeted ADC (Elahere class). Platinum-resistant ovarian cancer; narrow subpopulation.',
+    source: 'ImmunoGen/AbbVie 2024 (Elahere ~$500M launch year).',
+  },
+
+  // ----- T-cell engagers / bispecifics (sub-class) -----
+  'tce_bcma': {
+    modality: 'tce_bcma',
+    category: 'antibody',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: 2500,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.008,
+    notes: 'BCMA T-cell engager (Tecvayli, Elrexfio). Relapsed/refractory MM; outpatient-feasible alternative to CAR-T.',
+    source: 'J&J 2024 10-K (Tecvayli $1B projected), Pfizer 2024 (Elrexfio).',
+  },
+  'tce_cd20': {
+    modality: 'tce_cd20',
+    category: 'antibody',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: 3000,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.008,
+    notes: 'CD20 T-cell engager (Epkinly, Columvi, Lunsumio). Relapsed/refractory DLBCL + follicular lymphoma.',
+    source: 'AbbVie 2024 10-K (Epkinly), Roche 2024 annual (Columvi, Lunsumio).',
+  },
+  'tce_gpcr': {
+    modality: 'tce_gpcr',
+    category: 'antibody',
+    platformOptionFloorM: 30,
+    narrowMarketCapM: 1500,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.008,
+    notes: 'GPCR (GPRC5D, DLL3, etc.) T-cell engagers. Talvey (GPRC5D) + DLL3-TCE pipeline for small-cell lung.',
+    source: 'J&J 2024 annual (Talvey), Amgen 2024 (tarlatamab DLL3).',
+  },
+
+  // ----- Degraders / PROTAC subtypes -----
+  'degrader_oral': {
+    modality: 'degrader_oral',
+    category: 'small_molecule',
+    platformOptionFloorM: 25,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0,
+    notes: 'Oral protein degraders (Arvinas, C4, Kymera). Broader potential than single-target PROTACs as oral convenience scales.',
+    source: 'Arvinas 2024 10-K, C4 2024 10-K, Kymera 2024 annual.',
+  },
+  'molecular_glue': {
+    modality: 'molecular_glue',
+    category: 'small_molecule',
+    platformOptionFloorM: 25,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0,
+    notes: 'Molecular glue degraders (Monte Rosa, Neomorph, Bristol CRBN class). Emerging MoA with broad potential.',
+    source: 'Monte Rosa 2024 10-K, BMS 2024 (celmods), Neomorph pipeline.',
+  },
+
+  // ----- RNA modalities (additional) -----
+  'saRNA': {
+    modality: 'saRNA',
+    category: 'oligonucleotide',
+    platformOptionFloorM: 30,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.008,
+    notes: 'Self-amplifying RNA (CureVac, Replicate, Arcturus next-gen). Lower-dose vaccines + therapeutic proteins.',
+    source: 'CureVac 2024 annual, Arcturus 2024 10-K.',
+  },
+  'circRNA': {
+    modality: 'circRNA',
+    category: 'oligonucleotide',
+    platformOptionFloorM: 30,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.008,
+    notes: 'Circular RNA (Orna, Laronde, Flagship-affiliated). Platform option value pre-commercial.',
+    source: 'Orna 2024 pipeline disclosures, Laronde 2023 Moderna partnership precedent.',
+  },
+
+  // ----- Cell therapy subtypes -----
+  'carT_allogeneic': {
+    modality: 'carT_allogeneic',
+    category: 'cell_therapy',
+    platformOptionFloorM: 40,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.018,  // slightly lower than autologous
+    notes: 'Allogeneic (off-the-shelf) CAR-T (Allogene, Caribou class). Eliminates vein-to-vein wait but efficacy/durability lower than autologous.',
+    source: 'Allogene 2024 10-K, Caribou 2024 10-K.',
+  },
+  'carT_armored': {
+    modality: 'carT_armored',
+    category: 'cell_therapy',
+    platformOptionFloorM: 35,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.022,
+    notes: 'Armored CAR-T with cytokine/checkpoint modifications (ArsenalBio, Arcellx class). Solid-tumor focus.',
+    source: 'ArsenalBio 2024 pipeline, Arcellx 2024 10-K.',
+  },
+  'til_therapy': {
+    modality: 'til_therapy',
+    category: 'cell_therapy',
+    platformOptionFloorM: 30,
+    narrowMarketCapM: 1500,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.020,
+    notes: 'Tumor-infiltrating lymphocyte therapy (Amtagvi — Iovance melanoma launch). Manufacturing-intensive, narrow patient eligibility.',
+    source: 'Iovance 2024 10-K (Amtagvi launch).',
+  },
+
+  // ----- Gene therapy subtypes -----
+  'crispr_base_editing': {
+    modality: 'crispr_base_editing',
+    category: 'gene_therapy',
+    platformOptionFloorM: 50,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.018,
+    notes: 'Base editing (Beam, Verve). More precise than standard CRISPR-Cas9; early clinical.',
+    source: 'Beam Therapeutics 2024 10-K, Verve 2024 pipeline.',
+  },
+  'crispr_prime_editing': {
+    modality: 'crispr_prime_editing',
+    category: 'gene_therapy',
+    platformOptionFloorM: 50,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.020,
+    notes: 'Prime editing (Prime Medicine, Broad Institute). Preclinical but broader edit scope than base editing.',
+    source: 'Prime Medicine 2024 10-K.',
+  },
+
+  // ----- Small molecule (specific sub-classes) -----
+  'covalent_inhibitor': {
+    modality: 'covalent_inhibitor',
+    category: 'small_molecule',
+    platformOptionFloorM: null,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0,
+    notes: 'Covalent small-molecule inhibitors (KRAS G12C, BTK irreversible class). Lumakras, Krazati, Brukinsa precedents.',
+    source: 'Amgen 2024 10-K (Lumakras $300M), Mirati/BMS 2024 (Krazati), BeiGene 2024 (Brukinsa $2.8B).',
+  },
+  'allosteric_inhibitor': {
+    modality: 'allosteric_inhibitor',
+    category: 'small_molecule',
+    platformOptionFloorM: null,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0,
+    notes: 'Allosteric (non-ATP-site) small-molecule inhibitors (RLY-4008 FGFR2, revumenib MEN1). Potential for resistance avoidance.',
+    source: 'Syndax/Incyte 2024 (revumenib), Relay Therapeutics 2024 (RLY-4008).',
+  },
 };
 
 /**

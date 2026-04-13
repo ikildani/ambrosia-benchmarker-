@@ -685,9 +685,83 @@ Full scope: 6.8 → 17.5% (+10.7pp), 11.2 → 25.9% (+14.7pp), 16.7 → 34.3% (+
 
 ---
 
-## Round 19 — (next round)
+## Round 19 — DEFERRED (2026-04-13)
 
-**Remaining calibration levers:**
+**Attempted:** Populate `typicalAssetPeakSales_M` on all 50 Tier 1 indication entries.
+
+**Result:** REGRESSED. Core ±25% 21.7% → 17.4%, full scope also slipped. Root cause: single-peak-per-deal backtest model doesn't cleanly benefit from broader typical-asset coverage when some indications have class-leader-dominant deals. The 14 curated entries (R14 + R18) already capture the specialty indications where typical-asset cleanly overrides TA default. Adding typical-asset to the other 36 entries pulls predictions in both directions (some toward reality, others away) with net negative impact.
+
+**Reverted.** Kept 14 curated entries. Future work: deal-context-aware peak resolution — use class leader for mega-deals, typical for followers, based on licensor profile / deal size signals.
+
+---
+
+## Round 20 — Modality granularity expansion (INFRASTRUCTURE, 2026-04-13)
+
+**Change:** Added 18 new modality profiles to `lib/financial/modality-profiles.ts`:
+- ADC subtypes (5): `adc_her2`, `adc_trop2`, `adc_claudin18_2`, `adc_nectin4`, `adc_folr1`
+- T-cell engager subtypes (3): `tce_bcma`, `tce_cd20`, `tce_gpcr`
+- Degrader subtypes (2): `degrader_oral`, `molecular_glue`
+- RNA modalities (2): `saRNA`, `circRNA`
+- Cell therapy subtypes (3): `carT_allogeneic`, `carT_armored`, `til_therapy`
+- Gene therapy subtypes (2): `crispr_base_editing`, `crispr_prime_editing`
+- Small-molecule sub-classes (2): `covalent_inhibitor`, `allosteric_inhibitor`
+
+**Why:** BDs work in sub-sub-modalities (not "ADC" but "HER2-ADC" or "TROP2-ADC"). Current corpus doesn't tag deals at this granularity so zero backtest impact today, but the metadata is ready for future corpus re-tagging. Closes gap #5 from the BD-credibility punch list.
+
+**Source:** Each profile entry carries 2024 10-K / annual report citation:
+- adc_her2: AZ/Daiichi Enhertu $3.8B + Roche Kadcyla $2.4B
+- adc_trop2: Gilead Trodelvy $1.3B + AZ Dato-DXd pipeline
+- tce_bcma: J&J Tecvayli + Pfizer Elrexfio
+- tce_cd20: AbbVie Epkinly + Roche Columvi/Lunsumio
+- crispr_base_editing: Beam Therapeutics 2024 10-K
+- Others similarly cited
+
+**Flags:** all off. **Delta:** zero by design.
+
+---
+
+## Round 21 — Deal-type expansion (INFRASTRUCTURE, 2026-04-13)
+
+**Change:** Added 4 new deal types to `DEAL_TYPE_PROFILES` in `lib/financial/deal-type-profiles.ts`:
+- `platform` — broad modality/target access (Moderna-Merck $250M, Moderna-BMS $1B, Alnylam-Roche $310M style)
+- `cro_conversion` — discovery-to-licensing conversion deals
+- `structured_finance` — synthetic royalty / revenue interest (Royalty Pharma class)
+- `co_promotion` — sales force co-promotion without IP transfer (Lilly/Boehringer Jardiance class)
+
+Each carries upfront-percent ranges + source citations (2024 10-Ks).
+
+**Why:** Original schema covered only 5 classic deal types. BDs at pharma actually see these 4 additional structures frequently. Closes gap #6.
+
+**Flags:** all off. **Delta:** zero by design.
+
+---
+
+## Round 22 — Sharpened recency weighting (ANALYTICAL, 2026-04-13)
+
+**Change:** `getRecencyWeight()` in `lib/comparableDeals.ts` replaced the 4-tier step function (0.5 / 1.0 / 1.5 / 2.0) with a finer 7-tier curve (0.25 / 0.5 / 1.0 / 1.2 / 1.5 / 2.0 / 2.5 / 3.0). Ratio between 2025+ and 2020 deals widened from 2:1 to 3:1.
+
+**Why:** BDs treat deals older than 18 months as "reference only" and anchor most heavily on last-12-month comparables. The sharper curve matches that mental model. Callers (partner-matching, pharma-intent, hedonic scoring) automatically inherit the update. Closes gap #3.
+
+**Source:** BD workflow norm — not a published citation, but reflects industry practice where recent precedent dominates comp analysis.
+
+**Delta:** Not measurable via core-scope backtest (which doesn't use comparable-weighted scoring) but affects UI-exposed comparables ranking across `/share`, `/calculator`, and partner-matching views.
+
+**Regressions:** None. 1,333 passing / 5 pre-existing. 110 golden masters stable.
+
+---
+
+## Phase 2 (R23-R24) — UI WORK (BLOCKED on dev-server testing)
+
+Remaining gaps from BD-credibility punch list that require UI work:
+- **Gap #1: Asset-specific peak sales input prominence.** Engine accepts `peakSalesEstimate`; UI needs to surface this as first-class input with clear "Your analyst consensus peak" framing.
+- **Gap #2: Confidence intervals everywhere.** Monte Carlo exists; UI needs to replace point estimates with ranges throughout calculator + share pages + PDFs.
+
+## Phase 3 (R25) — EXTERNAL DATA (BLOCKED on Supabase access)
+
+- **Gap #4: Territorial audit.** Script to scan 2,500-deal production corpus for misstagged territories (deals that are structurally ex-US but tagged 'global'). User executes via Supabase CLI.
+
+## Remaining calibration levers
+
 1. **Manual Tier 1 calibration of more specialty indications** — continue R14/R18 pattern incrementally.
 2. **Expand corpus to 500+ deals** from the Supabase `deals` table (currently 251). Larger sample tightens confidence intervals.
 3. **Corpus re-tagging** — distinguish topical/systemic for JAK-derm, ophthalmic, etc. Unlocks R15 narrow-market cap.

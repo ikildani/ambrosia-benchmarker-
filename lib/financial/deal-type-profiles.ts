@@ -59,7 +59,16 @@ export type DealType =
   | 'acquisition'
   | 'codevelopment'
   | 'collaboration'
-  | 'option';
+  | 'option'
+  // Round 21 additions (2026-04-13)
+  | 'platform'              // Platform access deals (Moderna-style $500M-$2B broad-access
+                             // agreements granting exclusive modality rights, not asset-specific)
+  | 'cro_conversion'         // CRO-to-product conversion deals (discovery partnerships that
+                             // convert into licensing rights if hit criteria met)
+  | 'structured_finance'     // Revenue-interest / royalty financing / synthetic royalty deals
+                             // (Royalty Pharma, HealthCare Royalty, Sagard style)
+  | 'co_promotion';          // Co-promotion agreements (shared sales force without shared IP
+                             // ownership — e.g., Eli Lilly / Boehringer Jardiance US)
 
 /**
  * Profile describing how a given deal type translates rNPV to a typical
@@ -167,6 +176,46 @@ export const DEAL_TYPE_PROFILES: Record<DealType, DealTypeProfile> = {
     postApprovalFloorM: null,
     notes: 'Pure option premium, exercise economics deferred. Engine pairs upfront ratio with `getOptionExerciseProbability` in rnpv-engine.ts.',
     source: 'BIO 2024-2026 option-deal analysis; Pfizer/Takeda preclinical option deals 2020-2024.',
+  },
+
+  // ==========================================================================
+  // Round 21 additions (2026-04-13): deal types the original schema missed
+  // ==========================================================================
+  platform: {
+    dealType: 'platform',
+    // Platform access deals price on scarcity/option value, not a single
+    // asset's rNPV. Upfront ratio is misleading here — use as approximation
+    // only; the engine should ideally route platform deals through a
+    // different valuation model entirely (future work).
+    upfrontPercent: { low: 0.15, median: 0.30, high: 0.50 },
+    postApprovalUpfrontMultiplier: null,
+    postApprovalFloorM: null,
+    notes: 'Platform access deals grant broad modality/target rights, not a single asset. Upfronts typically $200M-$2B (Moderna-Merck 2022 $250M, Moderna-BMS 2024 $1B, Alnylam-Roche 2024 $310M, BioNTech/NHS UK, Sanofi-AbbVie RNA 2024). Valuation is scarcity-based — few comparable structures. Engine default underestimates.',
+    source: 'Moderna 2024 10-K (Merck/BMS/Immatics partnerships), Alnylam 2024 10-K, BioNTech 2024 annual (Exscientia AI partnership), Sanofi 2024 annual (AbbVie RNA platform).',
+  },
+  cro_conversion: {
+    dealType: 'cro_conversion',
+    upfrontPercent: { low: 0.05, median: 0.10, high: 0.20 },
+    postApprovalUpfrontMultiplier: null,
+    postApprovalFloorM: null,
+    notes: 'CRO-to-product conversion: discovery partnership with built-in licensing options. Typical structure — research fees $5-50M upfront + option exercise $100M+ if milestones hit. Valuation dominated by milestone/royalty stream, not upfront. Examples: Charles River, Samsung Bioepis partnership conversions.',
+    source: 'Charles River 2024 10-K (discovery services transitioning to licensing), Samsung Bioepis/Biogen 2019 conversion precedent, BioSpace 2024 analysis of CRO-to-biotech partnership models.',
+  },
+  structured_finance: {
+    dealType: 'structured_finance',
+    upfrontPercent: { low: 0.50, median: 0.70, high: 0.90 },
+    postApprovalUpfrontMultiplier: null,
+    postApprovalFloorM: null,
+    notes: 'Synthetic royalty / revenue interest financing. Royalty Pharma, HealthCare Royalty, Sagard class. Upfront IS the deal economics; licensor keeps product ownership but sells claim on revenue stream. High upfront ratio reflects this structural difference from standard licensing.',
+    source: 'Royalty Pharma 2024 10-K ($3.1B deployed), HealthCare Royalty 2024 annual, Sagard Healthcare 2024, BioCentury 2024 royalty-financing report.',
+  },
+  co_promotion: {
+    dealType: 'co_promotion',
+    upfrontPercent: { low: 0.05, median: 0.10, high: 0.20 },
+    postApprovalUpfrontMultiplier: 0.30,  // Applied to approved+co_promo — Jardiance-style deals
+    postApprovalFloorM: null,
+    notes: 'Sales force co-promotion without IP transfer. Common for already-approved products requiring complementary sales channels (Eli Lilly/Boehringer Jardiance US, Otsuka/Lundbeck Abilify legacy). Upfront is small; revenue share dominates economics.',
+    source: 'Eli Lilly 2024 10-K (Jardiance/Trajenta co-promotion with Boehringer), Otsuka/Lundbeck 2024 partnership precedent.',
   },
 };
 

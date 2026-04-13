@@ -188,12 +188,35 @@ export interface HedocnicScoreBreakdown {
 // RECENCY WEIGHTING — shared across all deal matching
 // ═══════════════════════════════════════════════════════════════════════
 
-/** Get recency weight for a deal based on its year */
+/**
+ * Recency weight for a deal based on its year. Used across comparable-deal
+ * scoring, partner matching, and pharma intent calculations.
+ *
+ * Round 22 (2026-04-13) — sharpened the ratio from 2:1 to 3:1 between
+ * current year and 2020 deals, with finer year-by-year granularity.
+ * BD analysts treat deals older than 18 months as "reference only" and
+ * weight recent comparables more heavily; the sharper curve matches
+ * that mental model.
+ *
+ * Weights:
+ *   - 2025+: 3.0 (current-year comparable)
+ *   - 2024:  2.5 (last 12 months — most relevant)
+ *   - 2023:  2.0 (last 18 months — primary reference set)
+ *   - 2022:  1.5 (still relevant but environment has shifted)
+ *   - 2021:  1.2
+ *   - 2020:  1.0 (baseline — pre-pandemic-shift reference)
+ *   - 2018-2019: 0.5 (deep reference only)
+ *   - pre-2018:  0.25 (legacy — include for class-level context only)
+ */
 export function getRecencyWeight(year: number): number {
-  if (year >= 2024) return 2.0;
+  if (year >= 2025) return 3.0;
+  if (year >= 2024) return 2.5;
+  if (year >= 2023) return 2.0;
   if (year >= 2022) return 1.5;
+  if (year >= 2021) return 1.2;
   if (year >= 2020) return 1.0;
-  return 0.5; // 2017-2019
+  if (year >= 2018) return 0.5;
+  return 0.25;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
