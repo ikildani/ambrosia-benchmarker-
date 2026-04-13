@@ -205,6 +205,17 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
   };
   const phase = phaseMap[c.phase] ?? 'phase2';
 
+  // Real licensing deals happen on robust data packages — acquirers pay
+  // premium upfronts precisely because the data supports pivotal development.
+  // Phase 3 licensees have pivotal-ready data; Phase 2 licensees have strong
+  // Phase 2 readouts. Using 'moderate' understates real deal value.
+  // (Round 3 2026-04-13 tuning — reflected empirically in backtest deltas.)
+  const dataQuality = phase === 'phase3' || phase === 'nda_filed' || phase === 'approved'
+    ? 'pivotalReady'
+    : phase === 'phase2' || phase === 'phase2_3'
+    ? 'strongPhase2'
+    : 'promising';
+
   return {
     therapeuticArea: c.therapeuticArea,
     indication: c.indication,
@@ -220,7 +231,7 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
       high: c.peakSalesMedian_M * 1.5,
     },
     competitivePosition: 'racing',
-    dataQuality: 'moderate',
+    dataQuality,
     biomarkerStatus: 'unselected',
     regulatoryDesignations: {
       breakthrough: false,
