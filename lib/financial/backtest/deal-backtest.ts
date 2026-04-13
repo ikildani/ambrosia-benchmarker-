@@ -19,6 +19,7 @@
 import { calculateRNPV } from '../rnpv-engine';
 import type { RNPVInput, RNPVResult } from '../types';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
+import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
 import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
@@ -216,12 +217,33 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
 }
 
 /**
+ * Combined corpus: the curated hand-built `EXTENDED_COMPARABLE_DEALS`
+ * (251 deals) plus the auto-pulled `SUPABASE_COMPARABLE_DEALS` (988
+ * deals from the production Supabase corpus, Round 25 2026-04-13). The
+ * union is de-duplicated on id (both sources have unique id prefixes).
+ *
+ * Corpus expansion from 251 → ~1,200 deals tightens backtest confidence
+ * intervals and captures more recent deal flow (2024-2026 Supabase rows
+ * dominate) that the hand-built corpus missed.
+ */
+const COMBINED_CORPUS: ExtendedComparableDeal[] = (() => {
+  const seen = new Set<string>();
+  const combined: ExtendedComparableDeal[] = [];
+  for (const d of [...EXTENDED_COMPARABLE_DEALS, ...SUPABASE_COMPARABLE_DEALS]) {
+    if (seen.has(d.id)) continue;
+    seen.add(d.id);
+    combined.push(d);
+  }
+  return combined;
+})();
+
+/**
  * Return all backtest cases suitable for the run — excludes deals missing
  * disclosed upfront or total value, and platform / multi-asset deals which
  * the single-asset rNPV engine cannot fairly price.
  */
 export function getAllBacktestCases(): DealBacktestCase[] {
-  return EXTENDED_COMPARABLE_DEALS
+  return COMBINED_CORPUS
     .filter(d => d.upfront > 0 && d.totalDealValue > 0)
     .map(dealToCase);
 }
@@ -246,7 +268,7 @@ export function getAllBacktestCases(): DealBacktestCase[] {
 export function getCoreScopeBacktestCases(): DealBacktestCase[] {
   const corePhases = new Set(['phase2', 'phase2_3', 'phase3']);
   const coreDealTypes = new Set(['licensing', 'codevelopment', 'collaboration']);
-  return EXTENDED_COMPARABLE_DEALS
+  return COMBINED_CORPUS
     .filter(d => d.upfront > 0 && d.totalDealValue > 0)
     .filter(d => corePhases.has(d.phase))
     .filter(d => coreDealTypes.has(d.dealType))
