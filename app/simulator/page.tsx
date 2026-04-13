@@ -12,6 +12,26 @@ export const metadata: Metadata = {
   description:
     'Where should you open? The Ambrosia engine combines rNPV base valuation, counterparty historical premiums, and your cash-runway BATNA to show the zone of agreement and recommended opening position.',
   alternates: { canonical: `${BASE_URL}/simulator` },
+  openGraph: {
+    title: 'Negotiation Simulator | Ambrosia Benchmarker',
+    description: 'Where should you open? Engine computes ZOPA from rNPV, buyer premium, and your BATNA.',
+    type: 'website',
+    url: `${BASE_URL}/simulator`,
+    siteName: 'Ambrosia Benchmarker',
+    images: [
+      {
+        url: '/api/og?title=Negotiation%20Simulator&subtitle=ZOPA%20%2B%20recommended%20opening',
+        width: 1200,
+        height: 630,
+        alt: 'Ambrosia negotiation simulator',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Negotiation Simulator | Ambrosia Benchmarker',
+    description: 'Engine computes ZOPA from rNPV, buyer premium, and your BATNA. See where to open.',
+  },
 };
 
 export const dynamic = 'force-dynamic';

@@ -10,8 +10,28 @@ const BASE_URL = 'https://calculator.ambrosiaventures.co';
 export const metadata: Metadata = {
   title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
   description:
-    'Every asset has five possible deal structures — licensing, acquisition, co-development, option, and collaboration. The Ambrosia engine runs all five and ranks them by total value to the licensor. Explore four representative scenarios with live engine output.',
+    'Every asset has five possible deal structures — licensing, acquisition, co-development, option, and collaboration. The Ambrosia engine runs all five and ranks them by total value to the licensor.',
   alternates: { canonical: `${BASE_URL}/trade-space` },
+  openGraph: {
+    title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
+    description: 'The same asset under 5 deal structures, ranked by value. Licensing isn\'t always the answer.',
+    type: 'website',
+    url: `${BASE_URL}/trade-space`,
+    siteName: 'Ambrosia Benchmarker',
+    images: [
+      {
+        url: '/api/og?title=Trade%20Space&subtitle=5%20structures%2C%20ranked%20by%20value',
+        width: 1200,
+        height: 630,
+        alt: 'Deal structure trade space',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
+    description: '5 deal structures ranked for each asset. Licensing isn\'t always the answer.',
+  },
 };
 
 export const dynamic = 'force-dynamic';

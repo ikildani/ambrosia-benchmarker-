@@ -10,6 +10,26 @@ export const metadata: Metadata = {
   description:
     'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, honest limitations. For BD professionals and buy-side analysts who need a defensible model.',
   alternates: { canonical: `${BASE_URL}/methodology/engine` },
+  openGraph: {
+    title: 'Engine Methodology | Ambrosia Benchmarker',
+    description: '14 modeling dimensions, Option B rigor, held-out validation, honest limitations.',
+    type: 'article',
+    url: `${BASE_URL}/methodology/engine`,
+    siteName: 'Ambrosia Benchmarker',
+    images: [
+      {
+        url: '/api/og?title=Engine%20Methodology&subtitle=Finance-grade%20technical%20doc',
+        width: 1200,
+        height: 630,
+        alt: 'Ambrosia engine methodology',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Engine Methodology | Ambrosia Benchmarker',
+    description: '14 dimensions, Option B rigor, held-out validation, honest limitations.',
+  },
 };
 
 function SectionAnchor({ id, children }: { id: string; children: React.ReactNode }) {

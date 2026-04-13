@@ -11,6 +11,26 @@ export const metadata: Metadata = {
   description:
     'Per-acquirer deal premiums sourced from disclosed transactions. AbbVie pays +X% on orphan oncology, Pfizer +Y% on immunology, Gilead −Z% on Phase 3 — backed by every disclosed deal each buyer has signed.',
   alternates: { canonical: `${BASE_URL}/playbook` },
+  openGraph: {
+    title: 'Counterparty Playbooks | Ambrosia Benchmarker',
+    description: 'Per-acquirer deal premiums from 39 large buyers. Historical patterns backed by disclosed deals.',
+    type: 'website',
+    url: `${BASE_URL}/playbook`,
+    siteName: 'Ambrosia Benchmarker',
+    images: [
+      {
+        url: '/api/og?title=Counterparty%20Playbooks&subtitle=Who%20pays%20what%20premium',
+        width: 1200,
+        height: 630,
+        alt: 'Ambrosia Benchmarker counterparty playbooks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Counterparty Playbooks | Ambrosia Benchmarker',
+    description: 'Per-acquirer deal premiums. AbbVie ×1.36, Pfizer ×1.50, Gilead ×1.42 — from 39 large buyers.',
+  },
 };
 
 export const dynamic = 'force-dynamic';
