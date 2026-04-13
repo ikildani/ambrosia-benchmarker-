@@ -19,7 +19,7 @@
 import { calculateRNPV } from '../rnpv-engine';
 import type { RNPVInput, RNPVResult } from '../types';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
-import { getCounterpartyPremiumMultiplier } from '@/data/counterparty-premiums-snapshot';
+import { getCounterpartyPremiumMultiplier, getSmallSpecialtyBuyerDiscount } from '@/data/counterparty-premiums-snapshot';
 import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
@@ -216,6 +216,17 @@ const TA_EMPIRICAL_UPLIFT: Record<string, Record<string, number>> = {
                         // premium layer pushes some P2 deals into overshoot at 3.5x
     phase2_3: 3.0,
     phase3: 1.8,
+  },
+  // R36 (2026-04-13): Full per-TA audit of non-oncology TAs. Sweep over
+  // uplifts for neurology, metabolic, hematology, rareDisease, dermatology
+  // showed that small-n TAs (n=4-16 core) are too noisy for blanket uplifts
+  // — individual deal moves dominate TA-level stats and often push median
+  // off-center without improving band hits.
+  //
+  // Only infectiousDisease showed a clean improvement (n=16 core, -78%
+  // median → +10% with 3× uplift; full scope also improves).
+  infectiousDisease: {
+    '*': 3.0,
   },
   // Round 31 (2026-04-13): Evaluated uplifts for other undershooting TAs
   // (neurology, cardiovascular, hematology) and dampeners for overshooting
@@ -637,6 +648,29 @@ function applyCounterpartyPremium(
   return rawUpfront * premium;
 }
 
+/**
+ * Round 33 (2026-04-13): Small-specialty-buyer discount.
+ *
+ * When the licensee is NOT in counterparty_premiums (i.e., not in the
+ * tracked Big Pharma list with ≥3 disclosed deals), apply 0.55× discount.
+ * Empirically calibrated against the worst-10 core overshoots, all of
+ * which involve unknown specialty buyers paying 30-50% of what the
+ * "neutral median" model predicts.
+ *
+ * Applied AFTER applyCounterpartyPremium so the two are mutually
+ * exclusive: known buyer → premium applied; unknown buyer → discount.
+ */
+function applySmallSpecialtyDiscount(
+  upfrontAfterPremium: number,
+  licensee: string | null | undefined,
+): number {
+  // If counterparty premium was applied (known buyer), no discount.
+  // Otherwise apply the small-specialty discount.
+  const knownPremium = getCounterpartyPremiumMultiplier(licensee);
+  if (knownPremium != null) return upfrontAfterPremium;
+  return upfrontAfterPremium * getSmallSpecialtyBuyerDiscount(licensee);
+}
+
 function scoreCase(c: DealBacktestCase): DealBacktestResult {
   const input = buildInputForCase(c);
   const result: RNPVResult = calculateRNPV(input);
@@ -659,8 +693,12 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   const approvedAcqFixed = applyApprovedAcqDampener(phaseCollabFixed, c.phase, c.dealType);
   // Buyer-premium-aware scoring (Round 28). When the buyer has >=3 disclosed
   // deals in counterparty_premiums, scale the prediction by their historical
-  // premium vs. peer median. Otherwise leave unchanged.
-  const predictedUpfront = applyCounterpartyPremium(approvedAcqFixed, c.licensee);
+  // premium vs. peer median.
+  const premiumApplied = applyCounterpartyPremium(approvedAcqFixed, c.licensee);
+  // Round 33 (2026-04-13): Small-specialty discount for unknown buyers.
+  // Mutually exclusive with the premium above — only fires when buyer is
+  // not in counterparty_premiums table (i.e., < 3 disclosed deals).
+  const predictedUpfront = applySmallSpecialtyDiscount(premiumApplied, c.licensee);
   const predictedTotal = result.impliedDealValue?.totalDeal?.median ?? 0;
 
   const upfrontErrorAbs_M = predictedUpfront - c.actualUpfront_M;
