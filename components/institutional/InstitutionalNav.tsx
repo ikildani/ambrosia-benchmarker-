@@ -24,6 +24,7 @@ const ITEMS: NavItem[] = [
   { href: '/playbook', label: 'Counterparty Playbooks', shortLabel: 'Playbooks' },
   { href: '/trade-space', label: 'Trade Space', shortLabel: 'Trade Space' },
   { href: '/simulator', label: 'Negotiation Simulator', shortLabel: 'Simulator' },
+  { href: '/intelligence', label: 'Market Intelligence', shortLabel: 'Intel' },
   { href: '/methodology/engine', label: 'Methodology', shortLabel: 'Methodology' },
 ];
 

@@ -15,6 +15,7 @@ const footerLinks = {
     { label: 'Counterparty Playbooks', href: '/playbook' },
     { label: 'Deal Structure Trade Space', href: '/trade-space' },
     { label: 'Negotiation Simulator', href: '/simulator' },
+    { label: 'Live Market Intelligence', href: '/intelligence' },
     { label: 'Engine Methodology', href: '/methodology/engine' },
   ],
   'Therapeutic Areas': [
