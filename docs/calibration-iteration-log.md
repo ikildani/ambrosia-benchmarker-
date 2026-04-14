@@ -1427,3 +1427,21 @@ Full ±25% crossed 20% for the first time.
 
 **Tests:** 5 / 1,333 (unchanged).
 
+
+---
+
+## Round 59 — Phase 3 licensing dampener (NULL RESULT, 2026-04-14)
+
+**Hypothesis:** Core scope phase3:licensing n=21 had hit25=29%, signed_med +56%. A 0.75×-0.85× harness dampener could reduce overshoot.
+
+**Sweep:**
+| dampener | phase3:lic hit25 | phase3:lic signed | core ±25% | full ±25% |
+|---:|---:|---:|---:|---:|
+| 1.0 (R58) | 29% | +56% | 22.9% | 20.8% |
+| 0.85 | 14% | +33% | 18.6% | 19.7% |
+| 0.75 | 10% | +17% | 17.1% | 19.4% |
+
+Every dampener regressed hit rates across scales. Root cause: the +56% signed is driven by outlier deals (Cidara $30→$143M, Kelun $175→$894M, Arvinas $250→$1028M) not cohort bulk. Dampening the whole cohort pushes the centered-at-actual deals from +25% to −25%, losing them. Targeted per-deal data-quality fixes would work but scaling dampener to the cohort does not. Reverted.
+
+**Tests:** 5 / 1,333 (unchanged).
+
