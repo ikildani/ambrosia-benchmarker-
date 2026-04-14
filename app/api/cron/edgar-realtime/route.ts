@@ -106,24 +106,43 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        // Extract filing URL from hit structure
-        const filingUrl =
+        // SEC full-text search returns hits with _id = "{adsh}:{filename}"
+        // and _source.ciks = ["0001234567"]. No direct URL — we construct:
+        // https://www.sec.gov/Archives/edgar/data/{cik}/{adsh-no-dashes}/{filename}
+        const accessionNumber =
+          hit._source?.adsh ||
+          hit._source?.accession_no ||
+          hit.accession_no ||
+          (typeof hit._id === 'string' ? hit._id.split(':')[0] : undefined);
+
+        const filename =
+          (typeof hit._id === 'string' && hit._id.includes(':')
+            ? hit._id.split(':')[1]
+            : undefined);
+
+        const cikRaw: string | undefined = hit._source?.ciks?.[0] || hit._source?.cik;
+        const cik = cikRaw ? String(cikRaw).replace(/^0+/, '') : undefined;
+
+        // Legacy path kept as last-resort fallback
+        const legacyUrl =
           hit._source?.file_url ||
           hit.file_url ||
           hit._source?.document_url ||
           hit.document_url ||
           hit.url;
 
-        if (!filingUrl) {
-          continue;
+        let filingUrl: string | undefined;
+        if (cik && accessionNumber && filename) {
+          const adshFlat = accessionNumber.replace(/-/g, '');
+          filingUrl = `https://www.sec.gov/Archives/edgar/data/${cik}/${adshFlat}/${filename}`;
+        } else if (legacyUrl) {
+          filingUrl = legacyUrl;
         }
 
-        const accessionNumber =
-          hit._source?.accession_no ||
-          hit.accession_no ||
-          hit._source?.accession_number ||
-          hit.accession_number ||
-          filingUrl;
+        if (!filingUrl || !accessionNumber) {
+          errors.push(`Skipped hit without resolvable URL (id=${hit._id ?? 'unknown'})`);
+          continue;
+        }
 
         // Check if already processed
         const { data: existing } = await supabase
