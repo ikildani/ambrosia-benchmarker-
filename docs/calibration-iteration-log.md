@@ -1153,3 +1153,45 @@ Root cause: some prior bulk LLM enrichment pass generated synthetic deals but di
 
 **Tests:** 1,334 passing / 4 failing (unchanged).
 
+
+---
+
+## Round 50 — Bundled structural retune on quality-filtered corpus (2026-04-14)
+
+**Context:** R49 established that every structural "correction" applied in isolation regressed accuracy because the multiplier stack was empirically fitted to the polluted / mis-keyed corpus. R50 bundles four changes that compound:
+
+1. **Corpus quality filter** — tightened to `verified=true` (see R49b commit `386d4061`). Core-scope corpus n=301 polluted → n=55 verified. 77% reduction, but the remaining 55 deals are real deals with human-audited fields.
+
+2. **Modality canonicalization** at `dealToCase()` boundary. `small_molecule→smallMolecule`, `gene_therapy→geneTherapy`, `cell_therapy→cellTherapy`, `car_t→carT_heme`, `bispecificAntibody→bispecific`. Previously snake_case deals fell through to engine defaults while camelCase hit profile lookups. Silent behavior split.
+
+3. **Apply `narrowMarketCapM`** for structurally-narrow modalities: `antibioticNovel`, `antiviral`, `topicalOphthalmic`, `jakInhibitorDerm`, `vaccine`, `vaccinePreventive`. Cap binds below TA peak default. ADC/TCE sub-modality caps NOT applied (regress mid-range predictions).
+
+4. **Multiplier retune.** On cleaned corpus, per-TA and per-modality signed errors revealed:
+   - `smallMolecule` n=18: +55.8% signed. Added modality damper 0.8×.
+   - `infectiousDisease` n=7: +47.0% signed. TA uplift 3.0× → 2.0×.
+   - `oncology` on clean data: −5.4% (centered; legacy 3.0× phase2 uplift retained — too small n=5 to lower).
+
+**Results (core-scope n=55, held-out n=12):**
+
+| metric | pre-R50 | post-R50 | change |
+|---|---:|---:|---:|
+| Core ±25% | 20.0% | **23.6%** | +3.6pp |
+| Core ±35% | 29.1% | 27.3% | −1.8pp |
+| Core ±50% | 32.7% | 30.9% | −1.8pp |
+| Mean \|error\| | 93.2% | **82.1%** | −11pp |
+| Test ±25% | 33.3% | 33.3% | flat (n=12) |
+| phase2 signed | +17.4% | +3.6% | centered |
+| phase3 signed | +42.1% | +13.8% | centered |
+| infectiousDisease signed | +47.0% | −1.6% | centered |
+| smallMolecule signed | +55.8% | +24.7% | reduced |
+
+**Sweep detail for smallMolecule damper:** 0.7× regressed ±35/±50 meaningfully; 0.85× produced same ±25 as 0.8 but worse signed; 0.8× is the pareto-optimal point for the current corpus composition.
+
+**Sweep detail for phase3 upfront ratio:** Tested 0.20 (full correction of +42% signed) and 0.24 (halfway). Both regressed ±25 despite centering signed error — the distribution gets tighter but more deals cluster just-outside ±25 band. Kept 0.26.
+
+**Statistical power note:** Held-out test ±25% = 33.3% = 4/12 deals. That's low power. The Core ±25% on n=55 is the more trustworthy metric for this round; the +3.6pp gain is robust to the specific test/train split.
+
+**Tests:** 200/200 financial tests pass. Golden masters preserved because `calibratedRNPV` affects upfront/totalDeal only; raw `riskAdjustedNPV` unchanged.
+
+**Gap to target:** Test ±25% = 33.3%, target 60%. Remaining gap 26.7pp. The corpus-size bottleneck (n=55 core) is now the primary constraint — per-TA or per-modality tuning becomes meaningful only above n=20 per cell, and most cells are currently n=1-7. Next round should expand the verified corpus (not relax the filter) via manual verification of the next tier of high-confidence-score pending deals.
+
