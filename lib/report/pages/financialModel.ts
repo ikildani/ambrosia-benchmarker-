@@ -109,7 +109,7 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(rnpv.riskAdjustedNPV)}</div>
           <div class="kpi-label">Total rNPV</div>
-          <div class="kpi-sub">Risk-adjusted</div>
+          <div class="kpi-sub">${mc ? `80% CI: ${formatUsd(mc.confidenceInterval80.low)} &ndash; ${formatUsd(mc.confidenceInterval80.high)}` : 'Risk-adjusted'}</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-value" style="color: ${COLORS.navy};">${formatPercent(rnpv.cumulativePoS * 100, 1)}</div>

@@ -7,7 +7,7 @@ import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS } from '../hel
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta): string {
-  const { result, riskScore, sensitivityData } = data;
+  const { result, riskScore, sensitivityData, rnpvResult, monteCarloResult } = data;
   const terms = result.terms;
   const dtl = result.dealTypeLabels;
 
@@ -40,6 +40,13 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">${dtl.totalValueLabel || 'Total Deal Value'}</div>
           <div style="font-size: 32px; font-weight: 800; color: ${COLORS.tealMid}; letter-spacing: -0.03em; line-height: 1;">${formatUsd(terms.totalDealValue.median)}</div>
           <div style="font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 5px;">${formatUsd(terms.totalDealValue.low)} &ndash; ${formatUsd(terms.totalDealValue.high)}</div>
+          ${rnpvResult && monteCarloResult ? `
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 3px;">rNPV &middot; 80% CI</div>
+            <div style="font-size: 13px; font-weight: 700; color: white; font-variant-numeric: tabular-nums;">${formatUsd(rnpvResult.riskAdjustedNPV)}</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 2px; font-variant-numeric: tabular-nums;">${formatUsd(monteCarloResult.confidenceInterval80.low)} &ndash; ${formatUsd(monteCarloResult.confidenceInterval80.high)}</div>
+          </div>
+          ` : ''}
         </div>
         <!-- Upfront Payment -->
         <div class="kpi-card">

@@ -23,7 +23,13 @@ export async function POST(request: NextRequest) {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const { inputs, results, labels, expiresIn } = parsed.data;
+    const { inputs, results, labels, expiresIn, financialSummary } = parsed.data;
+
+    // R24: Merge the headline rNPV + MC CI + PoS summary into the results JSON payload
+    // so the share page can render a valuation card without widening the table schema.
+    const resultsWithSummary = financialSummary
+      ? { ...results, financialSummary }
+      : results;
 
     // Verify Pro tier from authenticated user's profile
     const { data: profile } = await supabase
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         email: user.email,
         inputs,
-        results,
+        results: resultsWithSummary,
         labels: labels || {},
         is_public: true,
         expires_at: expiresAt,

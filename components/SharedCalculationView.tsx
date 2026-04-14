@@ -2,9 +2,17 @@
 
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
 
+interface FinancialSummary {
+  riskAdjustedNPV: number;
+  confidenceInterval80: { low: number; high: number };
+  cumulativePoS: number;
+}
+
 interface SharedCalculationViewProps {
   results: CalculationResult;
   labels: { phase: string; modality: string; indication: string };
+  /** R24: when present, renders rNPV headline + 80% CI band + cumulative PoS at the top. */
+  financialSummary?: FinancialSummary | null;
 }
 
 function Icon({ children, v = 'teal' }: { children: React.ReactNode; v?: 'teal' | 'emerald' | 'cyan' }) {
@@ -29,12 +37,48 @@ function Bar({ pct, color = 'from-teal-500 to-cyan-400' }: { pct: number; color?
   );
 }
 
-export default function SharedCalculationView({ results, labels }: SharedCalculationViewProps) {
+export default function SharedCalculationView({ results, labels, financialSummary }: SharedCalculationViewProps) {
   const { terms, tieredRoyalties, dealRecommendation, modifiers } = results;
   const maxVal = terms.totalDealValue.high || 1;
 
   return (
     <div className="space-y-4">
+      {/* ── Valuation Headline (R24): rNPV + 80% CI band + PoS ── */}
+      {financialSummary && (
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15]">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <Icon>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </Icon>
+              <div>
+                <p className="text-sm font-semibold text-slate-300">Risk-Adjusted NPV (rNPV)</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Valuation with 80% confidence band (P10 – P90) from Monte Carlo</p>
+              </div>
+            </div>
+            <Tag>Institutional</Tag>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-5 items-end">
+            <div className="sm:col-span-2">
+              <p className="text-4xl sm:text-5xl font-black text-teal-400 tracking-tight font-mono">
+                {formatCurrency(financialSummary.riskAdjustedNPV)}
+              </p>
+              <p className="text-sm text-slate-400 mt-2 font-mono">
+                80% CI: <span className="text-slate-300">{formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}</span>
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cumulative PoS</p>
+              <p className="text-2xl font-black text-white tracking-tight font-mono">
+                {Math.round(financialSummary.cumulativePoS * 100)}%
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Key Metrics ── */}
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="p-6 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-teal-500/20 transition-colors">

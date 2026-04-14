@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { CalculationResult } from '@/lib/calculations';
+import type { FinancialModelResult } from '@/lib/financial/run-financial-model';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -11,9 +12,11 @@ interface ShareModalProps {
   inputs: Record<string, string>;
   results: CalculationResult;
   labels: { phase: string; modality: string; indication: string };
+  /** R24: optional — when present, headline rNPV + MC 80% CI + PoS are embedded in the share payload */
+  financialModel?: FinancialModelResult;
 }
 
-export default function ShareModal({ isOpen, onClose, inputs, results, labels }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, inputs, results, labels, financialModel }: ShareModalProps) {
   const { user, tier } = useAuth();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,6 +33,16 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
     setError(null);
 
     try {
+      // R24: surface rNPV headline + 80% CI band + PoS on the share page.
+      // Deeper breakdowns (histogram, tornado, scenarios, waterfall) stay gated.
+      const financialSummary = financialModel
+        ? {
+            riskAdjustedNPV: financialModel.rnpv.riskAdjustedNPV,
+            confidenceInterval80: financialModel.monteCarlo.confidenceInterval80,
+            cumulativePoS: financialModel.rnpv.cumulativePoS,
+          }
+        : undefined;
+
       const response = await fetch('/api/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,6 +53,7 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels }:
           labels,
           tier,
           expiresIn,
+          financialSummary,
         }),
       });
 

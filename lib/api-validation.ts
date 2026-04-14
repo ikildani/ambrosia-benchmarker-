@@ -217,6 +217,20 @@ export const shareSchema = z.object({
   labels: z.record(z.string(), z.unknown()).optional(),
   tier: z.string().optional(), // accepted but ignored (security)
   expiresIn: z.enum(['7d', '30d', '90d']).optional().nullable(),
+  // R24: optional rNPV headline + Monte Carlo 80% CI + cumulative PoS for share page.
+  // Exposed on the share page headline; breakdowns (histogram, tornado, scenarios,
+  // waterfall, buyer-specific) remain gated behind the $499 report / Pro tier.
+  financialSummary: z
+    .object({
+      riskAdjustedNPV: z.number(),
+      confidenceInterval80: z.object({
+        low: z.number(),
+        high: z.number(),
+      }),
+      cumulativePoS: z.number().min(0).max(1),
+    })
+    .optional()
+    .nullable(),
 });
 
 // Session POST body

@@ -1632,6 +1632,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 lifecycleExtensions={financialModel.lifecycleExtensions}
                 competitiveDynamics={financialModel.competitiveDynamics}
                 realOptions={financialModel.realOptions}
+                monteCarloResult={financialModel.monteCarlo}
               />
             </FinancialErrorBoundary>
             </div>
@@ -1911,6 +1912,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             inputs={inputs}
             results={result}
             labels={labels}
+            financialModel={financialModel ?? undefined}
           />
         )}
 

@@ -100,7 +100,11 @@ export default async function SharePage({ params }: Props) {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <SharedCalculationView results={data.results} labels={data.labels} />
+        <SharedCalculationView
+          results={data.results}
+          labels={data.labels}
+          financialSummary={data.results?.financialSummary}
+        />
       </div>
 
       {/* Report Purchase CTA */}
