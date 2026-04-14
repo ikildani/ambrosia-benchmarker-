@@ -808,8 +808,14 @@ const EARLY_STAGE_FLOOR_M: Record<string, number> = {
   //   phase1_2           $75-200M  (rare — treated as phase1)
   discovery: 30,
   preclinical: 75,   // R50: was 50 — raised to target -27% signed
-  phase1: 125,       // R50: was 100 — raised to tighten variance
-  phase1_2: 125,     // R50: was 100
+  phase1: 100,       // R54 (2026-04-14): lowered back from 125 → 100
+                     // phase1 signed was +37.3% (overshooting). Audit showed
+                     // 33/58 deals landed $100-150M where floor compressed
+                     // small-TAM deals into that band, inflating predictions.
+                     // Modality-gated floor (R54 first attempt) over-corrected
+                     // to −38% signed by removing floor from non-platform.
+                     // Middle ground: keep floor universal but lower it.
+  phase1_2: 100,
 };
 
 function applyEarlyStageFloor(rawUpfront: number, phase: string): number {

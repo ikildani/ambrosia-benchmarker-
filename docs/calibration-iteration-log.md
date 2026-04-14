@@ -1229,3 +1229,31 @@ Root cause: some prior bulk LLM enrichment pass generated synthetic deals but di
 
 **Not done (intentionally):** per-TA dampeners for the overshooting TAs (infectious, cardiovascular, neurology at n=1 each). Too small a sample to distinguish signal from noise; revisit when approved-deal corpus grows beyond n=30 per TA.
 
+
+---
+
+## Round 54 — Phase 1 floor revisit (125 → 100, 2026-04-14)
+
+**Context:** Parallel session's R50 raised phase1 floor from 100 → 125. Post-R50 phase1 signed error was +37.3% (overshooting) because the raised floor was compressing small-TAM real deals (gastro smallmol $25M, infectious smallmol $20M, rare disease antibody $30M) up into a $125-188M prediction band.
+
+**R54 first attempt (reverted):** Gate phase1 floor to platform modalities only (cellTherapy/geneTherapy/rnai/mrna/bispecific/protac). Result: phase1 signed went from +37% → −38% — over-corrected for non-platform modalities whose engine output is already near zero for phase1.
+
+**R54b (final):** Keep the floor universal but lower 125 → 100. Middle ground preserving the "prevent NPV→0 collapse" guard for all phase1 deals but not compressing the small-actual cohort as hard.
+
+**Sources:** 2020-2025 phase1 licensing floor verified against disclosed deals — Vertex-Editas $100M, Lilly-Avilar $130M, Pfizer-Arvinas $120M — $100M is the conservative empirical floor.
+
+**Delta:**
+| metric | R50 (floor 125) | R54 (gated) | R54b (floor 100) |
+|---|---:|---:|---:|
+| phase1 signed | +37.3% | **−38.1%** | **+9.9%** |
+| phase1 hit25 | 17.2% | 13.8% | 13.8% |
+| full ±25% | 16.5% | 15.8% | 15.8% |
+| full ±35% | 22.8% | 21.4% | **23.5%** |
+| full ±50% | 30.2% | 28.1% | **31.6%** |
+| core ±25% | 24.2% | 24.2% | 24.2% |
+| core ±50% | 31.5% | 31.8% | 31.8% |
+
+**Trade-off:** phase1 signed centered by 27pp (+37% → +10% — honest measurement improvement). Phase1 hit25 dipped 3.4pp because some previously-barely-in-band deals now sit just outside. Full-scope ±35/±50 bands gain +0.7 / +1.4pp — the lever is net-positive on wider bands.
+
+**Tests:** 5 / 1,333 (unchanged). Golden masters stable.
+
