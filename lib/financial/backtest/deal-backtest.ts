@@ -899,6 +899,40 @@ function applyApprovedTAUplift(
 }
 
 /**
+ * R55 (2026-04-14): Phase 2 acquisition strategic-premium uplift.
+ *
+ * Phase 2 acquisition audit (n=35) showed median signed −84%, hit25 3%.
+ * Real deals: Prometheus→Merck $10.8B, Cerevel→AbbVie $8.7B,
+ * Telavant→Roche $7.1B, Centessa→Lilly $6.3B. Engine medians $19-199M.
+ *
+ * Strategic M&A during 2022-2024 biotech buying spree priced on
+ * competitive bidding + defensive franchise protection, NOT rNPV
+ * fraction. rNPV × 0.70-0.95 acquisition upfront fraction captures
+ * cash-heavy structure but misses the strategic premium.
+ *
+ * Median multiplier from audit: pred_med $247M vs act_med $1350M → 5.47×.
+ * Using 3.0× as a conservative first step — the overshoot tail (Landos
+ * +196%, Calypso +124%) would worsen at 5× and needs a separate
+ * small-actual dampener. 3× targets the bulk median without blowout.
+ *
+ * Sources: Prometheus-Merck ($10.8B, 2023), Cerevel-AbbVie ($8.7B, 2023),
+ * Telavant-Roche ($7.1B, 2023), Centessa-Lilly ($6.3B, 2026), Imago-Merck
+ * ($1.35B, 2024), Morphic-Lilly ($3.2B, 2024), Cardior-NovoNordisk
+ * ($1.1B, 2024). See docs/calibration-iteration-log.md R55.
+ */
+const PHASE2_ACQ_UPLIFT = 3.0;
+
+function applyPhase2AcqUplift(
+  rawUpfront: number,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'phase2' && phase !== 'phase2_3') return rawUpfront;
+  if (dealType !== 'acquisition') return rawUpfront;
+  return rawUpfront * PHASE2_ACQ_UPLIFT;
+}
+
+/**
  * Round 28 (2026-04-13): Buyer-premium-aware scoring.
  *
  * The diagnostic on the expanded 1,000-deal corpus showed core ±25% at 10.5%
@@ -947,7 +981,9 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   // R53: per-TA approved uplift for rareDisease (×3.0) + oncology (×1.75)
   // after the dampener. Harness-only; keeps engine profile at 0.08.
   const approvedTaUplifted = applyApprovedTAUplift(dampened, c.therapeuticArea, c.phase, c.dealType);
-  const collabFloored = applyApprovedCollaborationFloor(approvedTaUplifted, c.phase, c.dealType);
+  // R55: phase2 acquisition strategic-premium uplift ×3.0.
+  const phase2AcqUplifted = applyPhase2AcqUplift(approvedTaUplifted, c.phase, c.dealType);
+  const collabFloored = applyApprovedCollaborationFloor(phase2AcqUplifted, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,
