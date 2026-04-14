@@ -228,14 +228,22 @@ export const TERRITORY_GLOBAL_SHARE: Record<string, number> = {
   ex_us: 0.85,           // ex-US licensing deals typically price near-global
   europe: 0.70,          // EU5 rights are high-premium regional packages
   eu5: 0.70,
-  japan: 0.50,           // Japan-only rights — mid-tier premium
-  china: 0.60,           // China rights have high strategic premium despite smaller revenue share
-  ex_china: 1.00,        // ex-China (i.e., rest of world) captures nearly full global NPV
+  // R53 (2026-04-14): Retuned against real ex-US territorial licensing
+  // upfronts. The "strategic premium" rationale for prior 0.50/0.60
+  // values was theoretical — real Japan-only and China-only licensing
+  // deals (Cytokinetics-Bayer Aficamten Japan $53M, Arrowhead-Sanofi
+  // Plozasiran China $40M, Hansoh-Eli Lilly china rights etc.) price
+  // at 10-20% of global NPV, consistent with the raw regional share
+  // rather than the inflated premium. Engine was overshooting these
+  // deals by 2-10× before this change.
+  japan: 0.15,           // Japan revenue share ~8-12% of global pharma sales
+  china: 0.20,           // China share higher on strategic value but still capped ~20%
+  ex_china: 0.92,        // ex-China (ROW) is ~85-90% of global pharma revenue
   // Round 25 additions (2026-04-13): territory values appearing in the
   // normalized Supabase corpus that previously fell through to 1.0.
   // Mapped based on the same licensing-premium logic as original entries.
   north_america: 0.88,   // US + Canada — slightly more than us_only
-  asia_pacific: 0.40,    // Broader APAC bundle (Japan + Korea + Taiwan + SE Asia etc.) — still mid-tier
+  asia_pacific: 0.30,    // APAC bundle retuned R53 — Japan+Korea+Taiwan+SEA total ~30% share
   ex_japan: 0.92,        // Global minus Japan (8% share of global)
   other: 1.00,           // Unclassified — default to global (conservative)
 };
