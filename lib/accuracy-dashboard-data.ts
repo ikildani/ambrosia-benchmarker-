@@ -64,6 +64,10 @@ export interface AccuracyDashboardData {
       hit50: number;
       meanAbsErrorPct: number;
     };
+    /** Per-TA slices on the 20% held-out test set (deals the engine never saw during tuning). */
+    testByTA: SliceRow[];
+    /** Per-TA slices on the 80% train set — paired with testByTA to expose over-fit gaps per TA. */
+    trainByTA: SliceRow[];
   };
 }
 
@@ -180,6 +184,8 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         train: toBucket(report.holdout.coreTrain),
         test: toBucket(report.holdout.coreTest),
         overfittingGap: report.holdout.overfittingGap,
+        testByTA: toSlices(report.holdout.coreTest.byTherapeuticArea),
+        trainByTA: toSlices(report.holdout.coreTrain.byTherapeuticArea),
       } : undefined,
     };
   } catch {
@@ -539,5 +545,15 @@ const CALIBRATION_ROUNDS: CalibrationRound[] = [
     coreHit35: 0.303,
     coreHit50: 0.433,
     summary: 'Addressed three phase-specific calibration gaps exposed by R33 audit: (1) Added discovery-stage floor $30M to EARLY_STAGE_FLOOR_M (was missing). (2) Phase 2 collaboration 4× uplift — engine undershoots by -82% because collaborative early-mid-stage deals fund multi-year research with sponsored FTE agreements that dwarf rNPV formula. P2 collab ±25%: 7.9% → 15.8% (doubled). (3) Approved acquisition 0.25× dampener — bidding-war premiums on approved acquisitions (Pharmacyclics $21B, Horizon $28B, Prometheus $11B) exceed any NPV basis. Approved acq median: +132% → -64% (still off; auctions need separate valuation model). Engine now calibrated across all 9 development phases.',
+  },
+  {
+    round: 20.5,
+    label: 'R20 activation — non-ADC modality sub-class retag',
+    date: '2026-04-14',
+    outcome: 'wash',
+    coreHit25: 0.175,
+    coreHit35: 0.238,
+    coreHit50: 0.291,
+    summary: 'Activated 18 fine-grain R20 sub-modality profiles on the production corpus. Two-pass retag (rule-based regex + Claude Haiku 4.5) mapped 20 verified non-synthetic deals from coarse parent slugs (smallMolecule, bispecific, cellTherapy, geneEditing, geneTherapy, carT_*) to fine-grain slugs (allosteric_inhibitor, covalent_inhibitor, molecular_glue, carT_allogeneic, tce_bcma/cd20/gpcr, crispr_base_editing, crispr_prime_editing, til_therapy, circRNA, degrader_oral). Core ±50% regressed -5.1pp as the new profile multipliers diverge from their coarse parents; full scope improved broadly (+5.3pp at ±50%, median signed error moved from large positive to -1.2%). Script (`scripts/retag-non-adc-modalities.ts`) is re-runnable for ADC pass + future corpus expansions.',
   },
 ];
