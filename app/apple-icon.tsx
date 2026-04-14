@@ -24,11 +24,9 @@ export default function AppleIcon() {
           viewBox="0 0 64 64"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g stroke="#5fd4e3" strokeLinecap="round" fill="none">
-            <path d="M20 12 C 44 22, 44 42, 20 52" strokeWidth={5} />
-            <path d="M44 12 C 20 22, 20 42, 44 52" strokeWidth={5} />
-            <line x1={25} y1={18} x2={39} y2={18} strokeWidth={3} opacity={0.55} />
-            <line x1={25} y1={46} x2={39} y2={46} strokeWidth={3} opacity={0.55} />
+          <g stroke="#3fb5c4" strokeLinecap="round" fill="none">
+            <path d="M20 12 C 44 22, 44 42, 20 52" strokeWidth={6} />
+            <path d="M44 12 C 20 22, 20 42, 44 52" strokeWidth={6} />
           </g>
         </svg>
       </div>
