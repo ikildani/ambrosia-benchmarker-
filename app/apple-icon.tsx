@@ -24,10 +24,11 @@ export default function AppleIcon() {
           viewBox="0 0 64 64"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g stroke="#3fb5c4" strokeLinecap="round" fill="none">
-            <path d="M20 12 C 44 22, 44 42, 20 52" strokeWidth={6} />
-            <path d="M44 12 C 20 22, 20 42, 44 52" strokeWidth={6} />
-          </g>
+          <path
+            fillRule="evenodd"
+            fill="#3fb5c4"
+            d="M32 10 L50 54 L42 54 L37 42 L27 42 L22 54 L14 54 Z M28 38 L36 38 L32 22 Z"
+          />
         </svg>
       </div>
     ),
