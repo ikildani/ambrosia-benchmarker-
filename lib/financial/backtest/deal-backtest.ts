@@ -557,6 +557,49 @@ const STRUCTURAL_MISMATCH_PARTIES = new Set([
   'Shanghai Henlius Biotech',
 ]);
 
+// R49 (2026-04-14): LLM-hallucination pattern detector. Audit against
+// Supabase deals table revealed ~564 rows where asset_name matches one of
+// three pseudo-code patterns that are characteristic of fabricated data
+// (some prior bulk LLM enrichment flagged rows is_synthetic=false that are
+// clearly invented — e.g., Y-mAbs Therapeutics has 18 rows spanning every
+// target class and therapeutic area, all verified=false). The patterns:
+//
+//   1. "PI3K-101" / "GD2-201" / "HER3-501" — TARGET + hyphen + 3-digit code
+//      (400 rows, 15 verified = 3.75% verified rate — an order of magnitude
+//      below the 26% verified rate of non-matching rows)
+//   2. "CSF1R-mab" / "KIT-mab" / "B7-H3-mab" — target-mab with no brand name
+//      (106 rows, 0 verified)
+//   3. "Anti-MDM2" / "Anti-CSF1R" — Anti-target with no brand (58 rows, 0
+//      verified)
+//
+// A real branded asset has a WHO INN or a development code like
+// "trastuzumab-deruxtecan", "ibrutinib", or a company code like
+// "ABBV-383" or "BMS-986269" — NOT a target-with-generic-suffix.
+//
+// Filtering at the harness is reversible; production database cleanup is a
+// separate downstream action. 564 rows is ~21% of the 2,500-deal table.
+const FABRICATED_ASSET_NAME_PATTERNS: RegExp[] = [
+  /^[A-Za-z0-9/]+-\d{3}$/,                       // PI3K-101, GD2-201
+  /^[A-Za-z0-9/-]+-mab$/i,                       // CSF1R-mab, B7-H3-mab
+  /^Anti-[A-Za-z0-9]+(-mab)?$/i,                 // Anti-MDM2, Anti-CSF1R
+];
+
+// Extract the asset name from the Supabase-generated headline format:
+// "{asset_name} — {licensor} to {licensee}". EXTENDED_COMPARABLE_DEALS uses
+// freeform headlines that may or may not match this pattern; treat
+// non-matching headlines as "no detectable asset code", skip.
+function extractAssetNameFromHeadline(headline: string | null | undefined): string | null {
+  if (!headline) return null;
+  const emDashIdx = headline.indexOf(' — ');
+  if (emDashIdx <= 0) return null;
+  return headline.slice(0, emDashIdx).trim();
+}
+
+function looksLikeFabricatedAsset(assetName: string | null | undefined): boolean {
+  if (!assetName) return false;
+  return FABRICATED_ASSET_NAME_PATTERNS.some((re) => re.test(assetName.trim()));
+}
+
 function isDataQualitySuspect(d: ExtendedComparableDeal): boolean {
   if (d.modality === 'other') return true;
   const ind = (d.indication_specific || '').toLowerCase();
@@ -564,6 +607,13 @@ function isDataQualitySuspect(d: ExtendedComparableDeal): boolean {
   // R48: structural-mismatch counterparty (funder, biosimilar maker).
   if (d.licensor && STRUCTURAL_MISMATCH_PARTIES.has(d.licensor)) return true;
   if (d.licensee && STRUCTURAL_MISMATCH_PARTIES.has(d.licensee)) return true;
+  // R49: LLM-hallucinated asset-name patterns extracted from headline.
+  // Pattern matches 564 rows in Supabase with 0-3% verified rate (vs 26%
+  // baseline) — strong fabrication signal. Extracts from
+  // "{asset} — {licensor} to {licensee}" format emitted by the corpus
+  // expansion script.
+  const asset = extractAssetNameFromHeadline(d.headline);
+  if (looksLikeFabricatedAsset(asset)) return true;
   return false;
 }
 

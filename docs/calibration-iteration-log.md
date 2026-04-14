@@ -1074,3 +1074,44 @@ This is not calibration-by-exclusion: these 2 deal archetypes are orthogonal to 
 
 **What was NOT added to the filter:** Y-mAbs Therapeutics 2020 Danyelza → Sanofi ($40M / $1,359M, 3,299% err) — Danyelza was FDA-approved Nov 2020 but is tagged `phase3` in the corpus; this is a CORPUS tagging issue, should be fixed upstream in the Supabase `deals` table, not hidden behind a licensor filter. Cidara/Melinta antibiotic deals — economics different from typical rNPV but still commercial licensing; excluding them would be scope creep. Neither is added.
 
+
+---
+
+## Round 49 — LLM-hallucination filter for fabricated deal corpus rows (2026-04-14)
+
+**Finding during Supabase audit:** 564 of the 2,500+ production `deals` rows match one of three asset-name patterns characteristic of fabricated (LLM-invented) entries:
+
+| Pattern | Example | n | verified |
+|---|---|---:|---:|
+| `TARGET-NNN` | `PI3K-101`, `GD2-201`, `HER3-501` | 400 | 3.75% |
+| `TARGET-mab` | `CSF1R-mab`, `B7-H3-mab`, `KIT-mab` | 106 | 0% |
+| `Anti-TARGET` | `Anti-MDM2`, `Anti-CSF1R` | 58 | 0% |
+| (baseline non-pattern) | real asset names | 1,241 | 26.2% |
+
+The fabrication rate of rows matching these patterns is 0-3.75%, an order of magnitude below the 26% verified rate of non-pattern rows. Spot check: Y-mAbs Therapeutics has 18 deals table rows spanning every oncology target class (KIT, MDM2, SIRPα, KRAS G12C, TIM-3, ATR, Mesothelin, GPC3...). All 18 have `verified=false`. Y-mAbs's actual pipeline is 2 GD2-targeted antibodies for neuroblastoma — so ~16 of those 18 rows are pure fabrication.
+
+Root cause: some prior bulk LLM enrichment pass generated synthetic deals but did not flag them `is_synthetic=true`. The corpus-expansion script (`scripts/expand-backtest-corpus.ts`) filters on `is_synthetic=false` → fabricated rows pass through into the backtest corpus.
+
+**Change:** Added `looksLikeFabricatedAsset()` + `extractAssetNameFromHeadline()` helpers to `lib/financial/backtest/deal-backtest.ts`. `isDataQualitySuspect()` now rejects any deal whose headline-extracted asset name matches one of the three patterns. 111 rows removed from core scope (301 → 190).
+
+**Delta (core scope):**
+| metric | with fabrications (n=301) | real-only (n=190) | change |
+|---|---:|---:|---:|
+| ±25% | 21.6% | 21.6% | **flat** |
+| ±35% | 30.9% | 28.9% | −2.0pp |
+| ±50% | 42.5% | 37.9% | −4.6pp |
+| median signed | −31.5% | −30.9% | centered |
+| mean \|err\| | 90.4% | 101.5% | wider (real deals spread more) |
+
+**Held-out test (out-of-sample — the honest signal):**
+| metric | with fabrications (n=60) | real-only (n=36) | change |
+|---|---:|---:|---:|
+| ±25% | 30.0% | **30.6%** | +0.6pp |
+| ±35% | 36.7% | 36.1% | −0.6pp |
+
+**Interpretation:** The 111 fabricated rows were artificially inflating fixed-corpus hit rates because the LLM generated them with upfront values consistent with typical engine predictions. Filtering them exposes the engine's true accuracy against real deals. Held-out test ±25% improved slightly — the most trustworthy signal.
+
+**Decision:** Commit the harness filter. Filter is reversible, engine untouched. **Production database cleanup is the next step** — the 564 fabricated rows should be either deleted, or flagged with `is_synthetic=true` upstream, so the calculator doesn't also score against them in live cron audits. That is a separate blast-radius decision requiring user authorization.
+
+**Tests:** 1,334 passing / 4 failing (unchanged).
+
