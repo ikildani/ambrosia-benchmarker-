@@ -43,6 +43,8 @@ import { decomposeGeographicRevenue } from './geographic-revenue-curves';
 import { decomposeRisk } from './risk-decomposition';
 import { getDynamicWaccComponent } from './macro-factors';
 import { getSubpopulationModifier } from './subpopulation-modifiers';
+import { resolveUpfrontStructure } from './deal-structure-classifier';
+import type { DealStructureClassification } from './deal-structure-classifier';
 import { getPatentCliffAdjustment } from './patent-cliffs';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 
@@ -735,10 +737,40 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const peakSalesYear = peakCF?.year || 0;
 
   // 9. Calculate implied deal terms
-  // Upfront % depends on both phase and deal type.
-  // Deal-type overrides (acquisition, option, codev, collaboration) take
-  // precedence over phase-based ratios.
-  const upfrontPercent = getDealTypeUpfrontPercent(dealType) ?? getUpfrontPercent(phase);
+  // R57 (2026-04-14): Structure-aware upfront %. The single phase-based
+  // formula had a ±25% ceiling of ~23% on backtest because real deals
+  // split into six structurally distinct pricing regimes (classic,
+  // option, platform_collab, regional, biosimilar, acquisition). The
+  // classifier routes each deal to a regime-specific upfront %
+  // distribution. See lib/financial/deal-structure-classifier.ts for
+  // the regime definitions and the empirical calibration basis per regime.
+  //
+  // Legacy behavior preserved: dealType='acquisition' still lands in
+  // strategic_acquisition with the same (0.70/0.825/0.95) fractions;
+  // dealType='option' lands in option_style. New routing only changes
+  // predictions for collaboration + licensing + early-phase deals where
+  // the classic formula was systematically wrong.
+  // Prefer the real (non-narrowed) territory when present — the backtest
+  // harness narrows to global/us_only/ex_us for the rNPV math but passes
+  // the original string via `realTerritory` so the classifier can detect
+  // china/japan/europe/etc. and route to regional_license.
+  const extended = input as unknown as {
+    licensor?: string | null;
+    licensee?: string | null;
+    realTerritory?: string | null;
+  };
+  const structureResolution = resolveUpfrontStructure({
+    phase,
+    dealType,
+    modality,
+    therapeuticArea,
+    territory: String(extended.realTerritory ?? territory ?? ''),
+    licensor: extended.licensor ?? null,
+    licensee: extended.licensee ?? null,
+  });
+  const dealStructureClassification: DealStructureClassification =
+    structureResolution.classification;
+  const upfrontPercent = structureResolution.upfrontPercent;
   // Total deal value as a fraction of rNPV is phase-stratified. Earlier phases
   // command a lower fraction due to higher risk premium. The median matches
   // getPhaseDealToRNPVRatio(phase); low/high are +/- 15pp around it (clamped).
@@ -818,10 +850,41 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const taUpliftMap = TA_UPLIFT_BY_PHASE[therapeuticArea];
   const taUplift = taUpliftMap ? (taUpliftMap[phase] ?? taUpliftMap['*'] ?? 1.0) : 1.0;
   const modUplift = MODALITY_UPLIFT[modality] ?? 1.0;
+  // R61 (2026-04-14): Expanded phase × dealType multipliers. The R42 engine
+  // migration encoded only three pairs; the R53-R58 session audits surfaced
+  // that rNPV fundamentally undershoots M&A upfronts by 5-50× because
+  // acquisitions price on bidding dynamics + defensive franchise protection,
+  // not rNPV fraction. These multipliers were first landed in the backtest
+  // harness (R55/56/57/58); R61 promotes them to the engine so every live
+  // calculator user — not just the backtest — sees the same calibrated
+  // output when valuing an M&A scenario.
+  //
+  // Representative deals per cohort:
+  //   preclinical:acq — early platform M&A, strategic option premium
+  //   phase1:acq — Carmot-Roche $2.7B, Inversago-Novo $1.1B, Prevail-Lilly $1.04B
+  //   phase2:acq — Prometheus-Merck $10.8B, Cerevel-AbbVie $8.7B, Telavant-Roche $7.1B
+  //   phase3:acq — Pfizer-GBT $5.4B, BMS-MyoKardia $13B, Amgen-ChemoCentryx $3.7B
+  //   approved:acq — Amgen-Horizon $28B, Pfizer-Seagen $43B, Roche-Spark $4.8B
+  //
+  // R53 approved-licensing per-TA uplifts are also migrated: orphan
+  // exclusivity (rareDisease Alexion/Soliris) and blockbuster territorial
+  // rollout (oncology Keytruda/Opdivo) have distinct approved-stage
+  // economics that the flat 0.08 multiplier cannot model.
   let phaseDealTypeMult = 1.0;
-  if (phase === 'phase2' && dealType === 'collaboration') phaseDealTypeMult = 4.0;
-  else if (phase === 'phase3' && dealType === 'collaboration') phaseDealTypeMult = 3.0;
-  else if (phase === 'approved' && dealType === 'acquisition') phaseDealTypeMult = 0.25;
+  if (dealType === 'collaboration') {
+    if (phase === 'phase2' || phase === 'phase2_3') phaseDealTypeMult = 4.0;
+    else if (phase === 'phase3') phaseDealTypeMult = 3.0;
+  } else if (dealType === 'acquisition') {
+    if (phase === 'preclinical' || phase === 'discovery') phaseDealTypeMult = 6.0;
+    else if (phase === 'phase1' || phase === 'phase1_2') phaseDealTypeMult = 4.0;
+    else if (phase === 'phase2' || phase === 'phase2_3') phaseDealTypeMult = 5.0;
+    else if (phase === 'phase3') phaseDealTypeMult = 2.5;
+    else if (phase === 'approved' || phase === 'nda_filed') phaseDealTypeMult = 1.5;
+  } else if (dealType === 'licensing' && phase === 'approved') {
+    if (therapeuticArea === 'rareDisease') phaseDealTypeMult = 3.0;
+    else if (therapeuticArea === 'oncology') phaseDealTypeMult = 1.75;
+  }
+
   const empiricalMultiplier = taUplift * modUplift * phaseDealTypeMult;
 
   // calibratedRNPV scales with the empirical multiplier for ALL downstream

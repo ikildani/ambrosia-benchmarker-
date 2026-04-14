@@ -739,14 +739,24 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
     ? 'strongPhase2'
     : 'promising';
 
+  // R57 (2026-04-14): Pass licensor/licensee + real territory through
+  // so the deal-structure classifier has full signal. RNPVInput type
+  // doesn't declare these fields so we attach them as an extension the
+  // engine reads via `as unknown as { licensor?: ... }` cast.
+  const narrowedTerritory =
+    c.territory === 'global' || c.territory === 'us_only' || c.territory === 'ex_us'
+      ? c.territory
+      : 'global';
   return {
     therapeuticArea: c.therapeuticArea as RNPVInput['therapeuticArea'],
     indication: c.indication,
     modality: c.modality as RNPVInput['modality'],
     phase: phase as RNPVInput['phase'],
-    territory: (c.territory === 'global' || c.territory === 'us_only' || c.territory === 'ex_us')
-      ? c.territory
-      : 'global',
+    territory: narrowedTerritory,
+    // Extension fields read by classifier (not on RNPVInput type).
+    licensor: c.licensor,
+    licensee: c.licensee,
+    realTerritory: c.territory,
     dealType: c.dealType as RNPVInput['dealType'],
     peakSalesEstimate: {
       low: c.peakSalesMedian_M * 0.5,
@@ -1242,25 +1252,16 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   const result: RNPVResult = calculateRNPV(input);
   const rawUpfront = result.impliedDealValue?.upfront?.median ?? 0;
   const dampened = applyApprovedLicensingDampener(rawUpfront, c.phase, c.dealType);
-  // R53: per-TA approved uplift for rareDisease (×3.0) + oncology (×1.75)
-  // after the dampener. Harness-only; keeps engine profile at 0.08.
-  const approvedTaUplifted = applyApprovedTAUplift(dampened, c.therapeuticArea, c.phase, c.dealType);
-  // R55: phase2 acquisition strategic-premium uplift ×5.0.
-  const phase2AcqUplifted = applyPhase2AcqUplift(approvedTaUplifted, c.phase, c.dealType);
-  // R56: reverse the engine's 0.25× approved-acquisition dampener — now
-  // over-aggressive on the expanded corpus (signed −79%).
-  const approvedAcqUplifted = applyApprovedAcqUplift(phase2AcqUplifted, c.phase, c.dealType);
-  // R57: phase1 acquisition strategic-premium uplift (mirrors R55 phase2).
-  const phase1AcqUplifted = applyPhase1AcqUplift(approvedAcqUplifted, c.phase, c.dealType);
-  const collabFloored = applyApprovedCollaborationFloor(phase1AcqUplifted, c.phase, c.dealType);
+  // R61 (2026-04-14): R53 (approved-licensing per-TA) + R55/R56/R57/R58
+  // (phase-dealtype acquisition uplifts) have all been migrated into
+  // calculateRNPV. The harness no longer re-applies them — the engine now
+  // bakes these multipliers into the rNPV output before upfrontPercent is
+  // applied. Live calculator users see the same calibrated numbers as the
+  // backtest. See rnpv-engine.ts R61 phaseDealTypeMult block.
+  const collabFloored = applyApprovedCollaborationFloor(dampened, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
-  // R58: preclinical + phase3 acquisition uplifts applied AFTER the floors
-  // so the floor doesn't shadow a would-be-higher uplifted prediction. This
-  // fires after platformFloor so platform-modality preclinical acquisitions
-  // get the max(floor, engine×uplift) boost.
-  const preclinAcqUplifted = applyPreclinicalAcqUplift(platformFloored, c.phase, c.dealType);
-  const phase3AcqUplifted = applyPhase3AcqUplift(preclinAcqUplifted, c.phase, c.dealType);
+  const phase3AcqUplifted = platformFloored; // renamed for chain continuity; no longer uplifting here
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,
   // and approved-acq dampener have all been migrated into calculateRNPV itself
   // (see rnpv-engine.ts ~L756). The harness no longer re-applies them —
