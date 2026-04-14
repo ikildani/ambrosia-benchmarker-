@@ -158,6 +158,50 @@ export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
   { brand: 'Paxlovid', inn: 'nirmatrelvir/ritonavir', codes: [], peakSales_M: 2000, therapeuticArea: 'infectiousDisease', source: 'Pfizer 2024 — $5.7B (post-pandemic decline)' },
   { brand: 'Biktarvy', inn: 'bictegravir/emtricitabine/tenofovir', codes: [], peakSales_M: 13500, therapeuticArea: 'infectiousDisease', source: 'Gilead 2024 — $13.4B' },
   { brand: 'Rezafungin', inn: 'rezafungin', codes: [], peakSales_M: 200, therapeuticArea: 'infectiousDisease', source: 'Cidara/Melinta — narrow antifungal market' },
+
+  // ─── Phase 3 pipeline assets (analyst consensus peaks, not actuals) ─
+  { brand: 'Dato-DXd', inn: 'datopotamab deruxtecan', codes: ['DS-1062'], peakSales_M: 9000, therapeuticArea: 'oncology', source: 'AZ/Daiichi phase 3 — RBC/Barclays peak $8-10B (TROP2 ADC broad NSCLC/breast)' },
+  { brand: 'Tulisokibart', inn: 'tulisokibart', codes: ['PRA-023', 'MK-7240'], peakSales_M: 6000, therapeuticArea: 'gastroenterology', source: 'Prometheus/Merck acquisition ($10.8B) TL1A IBD — analyst peak $5-7B' },
+  { brand: 'Petosemtamab', inn: 'petosemtamab', codes: ['MCLA-158'], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Merus phase 3 EGFR×LGR5 HNSCC — analyst peak $2B' },
+  { brand: 'MariTide', inn: 'maridebart cafraglutide', codes: ['AMG-133'], peakSales_M: 15000, therapeuticArea: 'metabolic', source: 'Amgen GLP-1/GIP antagonist obesity — analyst peak $15B' },
+  { brand: 'VK2735', inn: 'VK2735', codes: [], peakSales_M: 8000, therapeuticArea: 'metabolic', source: 'Viking Therapeutics GLP-1/GIP obesity — analyst peak $8B' },
+  { brand: 'Emraclidine', inn: 'emraclidine', codes: ['CVL-231'], peakSales_M: 5000, therapeuticArea: 'neurology', source: 'Cerevel/AbbVie M4 schizophrenia — acquisition peak $5-8B' },
+  { brand: 'Zuranolone', inn: 'zuranolone', codes: ['SAGE-217'], peakSales_M: 1500, therapeuticArea: 'neurology', source: 'Sage/Biogen PPD — analyst peak $1-2B' },
+  { brand: 'KarXT', inn: 'xanomeline/trospium', codes: [], peakSales_M: 8000, therapeuticArea: 'neurology', source: 'Karuna/BMS M1-M4 schizophrenia — acquisition peak $8B' },
+  { brand: 'Cobenfy', inn: 'xanomeline/trospium', codes: [], peakSales_M: 8000, therapeuticArea: 'neurology', source: 'BMS 2024 launch (KarXT brand) — analyst peak $8B' },
+  { brand: 'Resmetirom', inn: 'resmetirom', codes: ['MGL-3196'], peakSales_M: 5000, therapeuticArea: 'metabolic', source: 'Madrigal MASH — analyst peak $3-6B' },
+  { brand: 'Rezdiffra', inn: 'resmetirom', codes: [], peakSales_M: 5000, therapeuticArea: 'metabolic', source: 'Madrigal MASH brand launched 2024' },
+  { brand: 'Ensifentrine', inn: 'ensifentrine', codes: ['RPL-554'], peakSales_M: 3000, therapeuticArea: 'pulmonology', source: 'Verona COPD PDE3/4 — analyst peak $3B' },
+  { brand: 'Seladelpar', inn: 'seladelpar', codes: ['MBX-8025'], peakSales_M: 1500, therapeuticArea: 'hepatology', source: 'Gilead/CymaBay PBC — analyst peak $1.5B' },
+  { brand: 'Efgartigimod', inn: 'efgartigimod', codes: ['ARGX-113'], peakSales_M: 6000, therapeuticArea: 'immunology', source: 'argenx FcRn generalized myasthenia gravis — analyst peak $5-8B' },
+  { brand: 'Vyvgart', inn: 'efgartigimod', codes: [], peakSales_M: 6000, therapeuticArea: 'immunology', source: 'argenx 2024 launch — $2.2B growing' },
+  { brand: 'Vonoprazan', inn: 'vonoprazan', codes: [], peakSales_M: 2000, therapeuticArea: 'gastroenterology', source: 'Phathom/Takeda GERD — analyst peak $2B' },
+  { brand: 'Voquezna', inn: 'vonoprazan', codes: [], peakSales_M: 2000, therapeuticArea: 'gastroenterology', source: 'Phathom 2024 launch' },
+  { brand: 'Etrasimod', inn: 'etrasimod', codes: ['APD-334'], peakSales_M: 2500, therapeuticArea: 'gastroenterology', source: 'Pfizer S1P ulcerative colitis — analyst peak $2-3B' },
+  { brand: 'Velsipity', inn: 'etrasimod', codes: [], peakSales_M: 2500, therapeuticArea: 'gastroenterology', source: 'Pfizer 2024 launch (etrasimod brand)' },
+  { brand: 'Mirikizumab', inn: 'mirikizumab', codes: ['LY3074828'], peakSales_M: 3000, therapeuticArea: 'immunology', source: 'Eli Lilly IL-23 IBD — analyst peak $3B' },
+  { brand: 'Omvoh', inn: 'mirikizumab', codes: [], peakSales_M: 3000, therapeuticArea: 'immunology', source: 'Eli Lilly 2024 launch' },
+  { brand: 'Nexviazyme', inn: 'avalglucosidase alfa', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Sanofi late-onset Pompe — 2024 $430M' },
+  { brand: 'Inaxaplin', inn: 'inaxaplin', codes: ['VX-147'], peakSales_M: 2500, therapeuticArea: 'nephrology', source: 'Vertex APOL1 FSGS — analyst peak $2-3B' },
+  { brand: 'Fidanacogene', inn: 'fidanacogene elaparvovec', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Pfizer hemophilia B gene therapy' },
+  { brand: 'Beqvez', inn: 'fidanacogene elaparvovec', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Pfizer 2024 launch' },
+  { brand: 'Roctavian', inn: 'valoctocogene roxaparvovec', codes: [], peakSales_M: 400, therapeuticArea: 'rareDisease', source: 'BioMarin hemophilia A gene therapy — slow launch' },
+  { brand: 'Hemgenix', inn: 'etranacogene dezaparvovec', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'uniQure/CSL hemophilia B' },
+  { brand: 'Lenmeldy', inn: 'atidarsagene autotemcel', codes: [], peakSales_M: 300, therapeuticArea: 'rareDisease', source: 'Orchard MLD — narrow orphan' },
+  { brand: 'Elevidys', inn: 'delandistrogene moxeparvovec', codes: ['SRP-9001'], peakSales_M: 3000, therapeuticArea: 'rareDisease', source: 'Sarepta DMD gene therapy — $820M 2024 growing' },
+  { brand: 'Givinostat', inn: 'givinostat', codes: ['ITF-2357'], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Italfarmaco/Duchenne — analyst peak $600M' },
+  { brand: 'Abelacimab', inn: 'abelacimab', codes: ['MAA-868'], peakSales_M: 3500, therapeuticArea: 'cardiovascular', source: 'Anthos/Novartis factor XI — analyst peak $3-5B' },
+  { brand: 'Milvexian', inn: 'milvexian', codes: ['JNJ-70033093'], peakSales_M: 3000, therapeuticArea: 'cardiovascular', source: 'J&J/BMS factor XIa — analyst peak $3B' },
+  { brand: 'Asundexian', inn: 'asundexian', codes: ['BAY-2433334'], peakSales_M: 2500, therapeuticArea: 'cardiovascular', source: 'Bayer factor XIa — analyst peak $2-3B (post Ph3 risk)' },
+
+  // ─── ADC / bispecific pipeline (Phase 1-3 with analyst peak) ─────
+  { brand: 'Ifinatamab deruxtecan', inn: 'ifinatamab deruxtecan', codes: ['DS-7300', 'I-DXd'], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Daiichi/Merck B7-H3 ADC SCLC — analyst peak $3B' },
+  { brand: 'Raludotatug deruxtecan', inn: 'raludotatug deruxtecan', codes: ['R-DXd', 'DS-6000'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Daiichi/Merck CDH6 ADC ovarian — analyst peak $2-3B' },
+  { brand: 'Patritumab deruxtecan', inn: 'patritumab deruxtecan', codes: ['HER3-DXd', 'U3-1402'], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'Daiichi/Merck HER3 ADC NSCLC/breast — analyst peak $3-5B' },
+  { brand: 'BNT327', inn: 'BNT327', codes: ['PM8002'], peakSales_M: 5000, therapeuticArea: 'oncology', source: 'BioNTech PD-L1×VEGF-A bispecific — licensed from Biotheus $800M upfront; analyst peak $5B' },
+  { brand: 'Ivonescimab', inn: 'ivonescimab', codes: ['AK112'], peakSales_M: 6000, therapeuticArea: 'oncology', source: 'Akeso/Summit PD-1×VEGF — beat Keytruda in HARMONi-2 — analyst peak $5-8B' },
+  { brand: 'Golcadomide', inn: 'golcadomide', codes: ['CC-99282'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS CELMoD — lymphoma — analyst peak $2-3B' },
+  { brand: 'Mezigdomide', inn: 'mezigdomide', codes: ['CC-92480'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS CELMoD — MM — analyst peak $2-3B' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -199,12 +243,24 @@ const LOOKUP: Map<string, AssetPeakSalesEntry> = (() => {
 /**
  * Resolve asset peak sales from a name or headline.
  *
- * Strategy: check if the normalized input CONTAINS any of the known
- * lookup keys as a whole word. Substring match (not exact) because
- * headlines often have extra text ("Enhertu (T-DXd) expansion deal").
- * But require word boundaries so "ada" doesn't match "Dupixent adalimumab
- * combo".
+ * R60b (2026-04-14): Fuzzier matching — word-boundary substring match
+ * remains the primary path (so "ada" doesn't match "adalimumab"), but
+ * also accepts:
+ *   - Token prefix: "DS-8201" matches "DS-8201a" (common for ADC payload
+ *     variants like DS-8201a, DS-1062)
+ *   - Compound INN with hyphens: "trastuzumab-deruxtecan" normalizes to
+ *     "trastuzumab deruxtecan" — existing normalization handles this.
+ *
+ * Sort keys by length descending so longer specific matches (e.g.,
+ * "trastuzumab deruxtecan") beat shorter generic ones (e.g., "trastuzumab")
+ * when both appear in the same headline.
  */
+const SORTED_KEYS = Array.from(LOOKUP.keys()).sort((a, b) => b.length - a.length);
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function lookupAssetPeakSales_M(
   assetName: string | null | undefined,
   headline: string | null | undefined,
@@ -213,10 +269,20 @@ export function lookupAssetPeakSales_M(
     if (!candidate) continue;
     const norm = normalize(candidate);
     if (!norm) continue;
-    // Word-boundary substring match for each lookup key.
-    for (const [key, entry] of LOOKUP.entries()) {
-      const re = new RegExp(`(^|\\s)${key}($|\\s)`);
-      if (re.test(norm)) return entry.peakSales_M;
+    for (const key of SORTED_KEYS) {
+      const escaped = escapeRegex(key);
+      // Word-boundary for natural brand/INN names (e.g., "keytruda",
+      // "enhertu"). Allow optional trailing letter/digit suffix when the
+      // key looks like a dev code (contains a digit) so "DS-8201" matches
+      // "DS-8201a" but "enhertu" doesn't match "enhertu2".
+      const hasDigit = /\d/.test(key);
+      const re = hasDigit
+        ? new RegExp(`(^|\\s)${escaped}[a-z0-9]{0,2}($|\\s)`)
+        : new RegExp(`(^|\\s)${escaped}($|\\s)`);
+      if (re.test(norm)) {
+        const entry = LOOKUP.get(key);
+        if (entry) return entry.peakSales_M;
+      }
     }
   }
   return null;
