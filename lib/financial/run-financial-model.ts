@@ -205,8 +205,28 @@ export function runFinancialModel(
     peakSalesFromMarket = marketSize.peakSales;
   }
 
+  // R60c (2026-04-14): User-supplied peak-sales override (R23 UI input) now
+  // flows into the rNPV engine. Previously the CalculationInput.peakSalesOverrideM
+  // scalar was collected by the calculator form but never reached buildRNPVInput —
+  // every BD user's custom analyst consensus was silently dropped. Override takes
+  // highest priority: user input > epidemiology > phase-multiplier default.
+  //
+  // Given only a scalar median, spread ±30% around it for low/high bounds (matches
+  // typical analyst consensus IQR per EvaluatePharma World Preview methodology).
+  let peakSalesOverride: { low: number; median: number; high: number } | undefined;
+  const userPeak = inputs.peakSalesOverrideM;
+  if (userPeak != null && userPeak > 0) {
+    peakSalesOverride = {
+      low: userPeak * 0.7,
+      median: userPeak,
+      high: userPeak * 1.5,
+    };
+  } else {
+    peakSalesOverride = peakSalesFromMarket;
+  }
+
   // Step 2: rNPV calculation
-  const rnpvInput = buildRNPVInput(inputs, result, peakSalesFromMarket);
+  const rnpvInput = buildRNPVInput(inputs, result, peakSalesOverride);
   const rnpv = calculateRNPV(rnpvInput);
 
   // Step 3: Monte Carlo simulation (10K iterations, seeded for reproducibility)
