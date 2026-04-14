@@ -763,29 +763,18 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   const collabFloored = applyApprovedCollaborationFloor(dampened, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
-  // Round 29-30 (2026-04-13): Empirical per-phase TA uplift. Oncology Phase 2
-  // × 3.0, Phase 3 × 1.8 to correct systemic undershoot.
-  const taUplifted = applyTAUplift(platformFloored, c.therapeuticArea, c.phase);
-  // Round 34 (2026-04-13): Gentle Phase 2 uplift for non-uplifted TAs only
-  // (cardiovascular, neurology, etc.). Targets the ~23 Phase 2 deals that
-  // get neither the oncology nor infectious-disease TA uplift.
-  const phase2Uplifted = applyPhase2NonUpliftedUplift(taUplifted, c.therapeuticArea, c.phase);
+  // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,
+  // and approved-acq dampener have all been migrated into calculateRNPV itself
+  // (see rnpv-engine.ts ~L756). The harness no longer re-applies them —
+  // doing so would compound the calibration. Harness-only layers that remain
+  // below (Phase 2 non-uplifted-TA uplift, Phase 3 small-mol dampener,
+  // counterparty premium) do NOT have engine counterparts.
+  // Round 34 (2026-04-13): Gentle Phase 2 uplift for non-uplifted TAs only.
+  const phase2Uplifted = applyPhase2NonUpliftedUplift(platformFloored, c.therapeuticArea, c.phase);
   // Round 35 (2026-04-13): Phase 3 small-mol dampener for CV + infectious.
-  // Surgical 0.5× correction targeting the worst-10 overshoot pattern.
   const phase3SmallMolFixed = applyPhase3SmallMolDamper(phase2Uplifted, c.therapeuticArea, c.phase, c.modality);
-  // Round 32 (2026-04-13): Modality-level empirical uplift. Compounds with
-  // TA uplift for oncology ADCs/bispecifics/radiopharm — intentional,
-  // factors tuned for the compound effect.
-  const modUplifted = applyModalityUplift(phase3SmallMolFixed, c.modality);
-  // Round 35 (2026-04-13): narrow phase × deal-type corrections.
-  // Phase 2 collab 4× (research-funded deals beyond rNPV scope), approved
-  // acquisition 0.25× (bidding-war premiums dampened).
-  const phaseCollabFixed = applyPhase2CollabUplift(modUplifted, c.phase, c.dealType);
-  const approvedAcqFixed = applyApprovedAcqDampener(phaseCollabFixed, c.phase, c.dealType);
-  // Buyer-premium-aware scoring (Round 28). When the buyer has >=3 disclosed
-  // deals in counterparty_premiums, scale the prediction by their historical
-  // premium vs. peer median. Otherwise leave unchanged.
-  const predictedUpfront = applyCounterpartyPremium(approvedAcqFixed, c.licensee);
+  // Round 28: counterparty-premium scaling when buyer has ≥3 disclosed deals.
+  const predictedUpfront = applyCounterpartyPremium(phase3SmallMolFixed, c.licensee);
   const predictedTotal = result.impliedDealValue?.totalDeal?.median ?? 0;
 
   const upfrontErrorAbs_M = predictedUpfront - c.actualUpfront_M;
