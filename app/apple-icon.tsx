@@ -12,7 +12,7 @@ export default function AppleIcon() {
           width: 180,
           height: 180,
           borderRadius: 40,
-          background: '#0a0d1b',
+          background: '#f4f1e8',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -26,7 +26,7 @@ export default function AppleIcon() {
         >
           <path
             fillRule="evenodd"
-            fill="#3fb5c4"
+            fill="#0a0d1b"
             d="M32 10 L50 54 L42 54 L37 42 L27 42 L22 54 L14 54 Z M28 38 L36 38 L32 22 Z"
           />
         </svg>
