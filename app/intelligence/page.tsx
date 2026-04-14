@@ -5,6 +5,8 @@ import { getAdCommCalendar } from '@/lib/market-intelligence/fda-adcomm';
 import { MarketIntelligenceSidebar } from '@/components/intelligence/MarketIntelligenceSidebar';
 import { AdCommCalendar } from '@/components/intelligence/AdCommCalendar';
 import { DigestSignup } from '@/components/intelligence/DigestSignup';
+import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
+import { resolveUserTier } from '@/lib/auth/tier-check';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
@@ -43,6 +45,15 @@ interface Props {
 }
 
 export default async function IntelligencePage({ searchParams }: Props) {
+  // Tier gate — /intelligence is Pro + Portfolio only.
+  // Server-side check pulls tier directly from user_profiles; can't be
+  // spoofed by stale client cookies. Internal PRO_EMAILS allowlist
+  // also short-circuits.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return <IntelligenceUpgradeGate isAuthenticated={auth.isAuthenticated} />;
+  }
+
   const params = await searchParams;
   const supportedTAs = getSupportedTAs();
   const selectedTA = supportedTAs.includes(params.ta || '') ? params.ta : undefined;

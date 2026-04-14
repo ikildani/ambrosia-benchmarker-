@@ -75,7 +75,7 @@ export interface CalibrationRound {
   round: number;
   label: string;
   date: string;
-  outcome: 'win' | 'regression' | 'wash' | 'scaffolding';
+  outcome: 'win' | 'regression' | 'wash' | 'scaffolding' | 'loss';
   coreHit25: number;
   coreHit35: number;
   coreHit50: number;

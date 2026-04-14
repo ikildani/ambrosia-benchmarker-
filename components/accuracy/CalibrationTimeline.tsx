@@ -10,6 +10,7 @@ const OUTCOME_STYLES: Record<CalibrationRound['outcome'], { label: string; color
   regression: { label: 'Regressed', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
   wash: { label: 'Wash', color: 'bg-slate-500/10 text-slate-400 border-slate-500/30' },
   scaffolding: { label: 'Foundation', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' },
+  loss: { label: 'Null Result', color: 'bg-slate-700/30 text-slate-400 border-slate-600/40' },
 };
 
 function pct(x: number): string {
