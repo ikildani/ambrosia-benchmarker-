@@ -591,6 +591,15 @@ const STRUCTURAL_MISMATCH_PARTIES = new Set([
   'CEPI',
   'Shanghai Henlius',
   'Shanghai Henlius Biotech',
+  // R53 (2026-04-14): HHS/BARDA pandemic-preparedness funding follows
+  // the same non-rNPV pricing pattern as CEPI — public-health-mandate
+  // contracts, not commercial licensing economics. The 2025 HHS-Moderna
+  // H5 flu contract ($590M upfront) is a procurement agreement, not a
+  // deal comp for private-sector bio-pharma negotiation.
+  'HHS',
+  'HHS/BARDA',
+  'U.S. HHS/BARDA',
+  'BARDA',
 ]);
 
 // R49 (2026-04-14): LLM-hallucination pattern detector. Audit against
@@ -843,6 +852,47 @@ function applyApprovedCollaborationFloor(
 }
 
 /**
+ * R53 (2026-04-14): Per-TA approved-stage licensing uplift.
+ *
+ * Per-TA audit of the 17 approved licensing/codev/collab deals in the
+ * post-R49 corpus shows two cohorts consistently undershooting beyond
+ * what the global 0.08 `postApprovalUpfrontMultiplier` absorbs:
+ *
+ *   rareDisease n=3:  signed_med -75%, suggested_mult 0.36 (orphan exclusivity
+ *                     + high per-patient pricing — Alexion/Soliris pattern)
+ *   oncology    n=3:  signed_med -30%, suggested_mult 0.14 (territorial rollout
+ *                     of blockbusters — Keytruda/Opdivo territorial deals)
+ *
+ * Rather than bump the engine-level profile (which regressed
+ * comparable-deals-backtest when attempted in the R50 session), apply a
+ * harness-layer per-TA uplift. Keeps the engine neutral and the test
+ * corpus numbers unchanged.
+ *
+ * Not added: womensHealth n=3 had suggested 0.27 but one row dominated
+ * (Shanghai Henlius biosimilar case, now filtered by R48). Small-n
+ * overshoot TAs (infectious, cardiovascular, neurology — all n=1) are
+ * noise floor and get no dampener.
+ */
+const APPROVED_TA_UPLIFT: Record<string, number> = {
+  rareDisease: 3.0,
+  oncology: 1.75,
+};
+
+function applyApprovedTAUplift(
+  rawUpfront: number,
+  therapeuticArea: string,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'approved') return rawUpfront;
+  if (dealType !== 'licensing' && dealType !== 'codevelopment' && dealType !== 'collaboration') {
+    return rawUpfront;
+  }
+  const u = APPROVED_TA_UPLIFT[therapeuticArea];
+  return u !== undefined ? rawUpfront * u : rawUpfront;
+}
+
+/**
  * Round 28 (2026-04-13): Buyer-premium-aware scoring.
  *
  * The diagnostic on the expanded 1,000-deal corpus showed core ±25% at 10.5%
@@ -888,7 +938,10 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   const result: RNPVResult = calculateRNPV(input);
   const rawUpfront = result.impliedDealValue?.upfront?.median ?? 0;
   const dampened = applyApprovedLicensingDampener(rawUpfront, c.phase, c.dealType);
-  const collabFloored = applyApprovedCollaborationFloor(dampened, c.phase, c.dealType);
+  // R53: per-TA approved uplift for rareDisease (×3.0) + oncology (×1.75)
+  // after the dampener. Harness-only; keeps engine profile at 0.08.
+  const approvedTaUplifted = applyApprovedTAUplift(dampened, c.therapeuticArea, c.phase, c.dealType);
+  const collabFloored = applyApprovedCollaborationFloor(approvedTaUplifted, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,

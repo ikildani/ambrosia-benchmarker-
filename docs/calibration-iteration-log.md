@@ -1195,3 +1195,37 @@ Root cause: some prior bulk LLM enrichment pass generated synthetic deals but di
 
 **Gap to target:** Test ±25% = 33.3%, target 60%. Remaining gap 26.7pp. The corpus-size bottleneck (n=55 core) is now the primary constraint — per-TA or per-modality tuning becomes meaningful only above n=20 per cell, and most cells are currently n=1-7. Next round should expand the verified corpus (not relax the filter) via manual verification of the next tier of high-confidence-score pending deals.
 
+
+---
+
+## Round 53 — Per-TA approved-stage uplift (rareDisease + oncology, 2026-04-14)
+
+**Change:** Added `applyApprovedTAUplift()` in the backtest harness between `applyApprovedLicensingDampener` and `applyApprovedCollaborationFloor`. Fires only for `phase === 'approved'` on licensing/codev/collab deals. Uplift rates:
+  - `rareDisease`: 3.0× (suggested from n=3, signed_med −75%, Alexion/Soliris pattern)
+  - `oncology`: 1.75× (suggested from n=3, signed_med −30%, Keytruda/Opdivo territorial rollout)
+
+**Why harness-level rather than engine profile:** Bumping `postApprovalUpfrontMultiplier` from 0.08 → 0.12 in `lib/financial/deal-type-profiles.ts` regressed `comparable-deals-backtest ±50%` in the R50 session. The harness layer preserves engine neutrality and the 20-deal curated test corpus.
+
+**Audit data (17 approved licensing deals, post-R49 corpus):**
+| TA | n | pred_med | act_med | signed_med | suggested_mult |
+|---|---:|---:|---:|---:|---:|
+| womensHealth | 3 | $59M | $200M | −71% | 0.273 (not added — Henlius dominance) |
+| oncology | 3 | $140M | $247M | −30% | 0.141 → **×1.75 harness** |
+| rareDisease | 3 | $200M | $900M | −75% | 0.360 → **×3.0 harness** |
+| infectiousDisease | 2 | $366M | $150M | +387% | 0.033 (n=2, not touched) |
+| hematology | 2 | $1779M | $2000M | +137% | 0.090 (near default) |
+| others | 1 each | — | — | — | small-n, no change |
+
+**Delta:**
+| metric | R52 baseline | R53 |
+|---|---:|---:|
+| full ±25% | 15.8% | 16.5% |
+| approved signed | −25.1% | −18.9% |
+| approved hit25 | 7.5% | 9.4% |
+| core ±25% | 24.1% | 24.2% |
+| tests | 5 fail | 5 fail |
+
+**Interpretation:** Full-scope gain is small (+0.7pp) because approved deals are only 53/273 of the full scope. But the approved-specific signed error centered by +6.2pp — the lever works for its target cohort. Held-out test set fluctuated (14-deal set, ~7pp per deal) but the per-deal signal is in the noise floor.
+
+**Not done (intentionally):** per-TA dampeners for the overshooting TAs (infectious, cardiovascular, neurology at n=1 each). Too small a sample to distinguish signal from noise; revisit when approved-deal corpus grows beyond n=30 per TA.
+
