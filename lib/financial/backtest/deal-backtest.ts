@@ -232,6 +232,14 @@ const TA_EMPIRICAL_UPLIFT: Record<string, Record<string, number>> = {
   infectiousDisease: {
     '*': 3.0,
   },
+  // R43 (2026-04-14): neurology phase2 added to this map so that
+  // applyPhase2NonUpliftedUplift (1.4×) does NOT double-fire on top of
+  // the engine's 2.0× neurology phase2 uplift. The engine is the source
+  // of truth; this entry is a truthy flag for the harness guard.
+  neurology: {
+    phase2: 2.0,
+    phase2_3: 2.0,
+  },
   // Round 31 (2026-04-13): Evaluated uplifts for other undershooting TAs
   // (neurology, cardiovascular, hematology) and dampeners for overshooting
   // TAs (immunology, dermatology). All combinations tested in the sweep

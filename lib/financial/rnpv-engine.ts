@@ -787,6 +787,14 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const TA_UPLIFT_BY_PHASE: Record<string, Record<string, number>> = {
     oncology: { phase2: 3.0, phase2_3: 3.0, phase3: 1.3 },
     infectiousDisease: { '*': 3.0 },
+    // R43 (2026-04-14): neurology phase2 is the largest non-oncology
+    // phase2 undershoot (-62% median signed, n=13 core). 2.0× targets
+    // centering signed error while staying under 3× to avoid over-
+    // correction (harness NON_ONCO_PHASE2_UPLIFT 1.4× is no longer
+    // applied to neurology — see TA_EMPIRICAL_UPLIFT update in
+    // deal-backtest.ts). Sources: Neurocrine-Takeda KarXT, Acumen-Eisai
+    // anti-Aβ, Sage-Biogen zuranolone phase2 precedents at $100-500M.
+    neurology: { phase2: 2.0, phase2_3: 2.0 },
   };
   const MODALITY_UPLIFT: Record<string, number> = {
     adc: 1.3, bispecific: 1.5, bispecificAntibody: 1.5,

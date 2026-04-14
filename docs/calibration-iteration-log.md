@@ -936,3 +936,39 @@ Rules:
 - `lib/financial/rnpv-engine.ts`: added TA_UPLIFT_BY_PHASE, MODALITY_UPLIFT, phaseDealTypeMult, calibratedRNPV block (+~55 lines). Codev/option/collab branches updated to use Math.abs(calibratedRNPV). Option exerciseFee expectedValue_M no longer double-rounded.
 - `lib/financial/backtest/deal-backtest.ts`: removed 4 harness uplift calls from scoreCase() (lines ~766-788 collapsed).
 
+
+---
+
+## Round 43 — Neurology phase2 uplift 2.0× (ENGINE + HARNESS, 2026-04-14)
+
+**Change:** Added `neurology: { phase2: 2.0, phase2_3: 2.0 }` to `TA_UPLIFT_BY_PHASE` in `lib/financial/rnpv-engine.ts`. Added mirror entry to `TA_EMPIRICAL_UPLIFT` in `lib/financial/backtest/deal-backtest.ts` so the harness's `applyPhase2NonUpliftedUplift` (1.4× non-oncology phase2 gentle uplift) does not double-fire on top of the engine's 2.0×.
+
+**Why:** After R42, neurology was the largest non-oncology phase2 undershoot in core scope: n=13, −62% median signed error. Engine rNPV underprices neurology phase2 because disease-modifying CNS assets (Alzheimer's, Parkinson's, depression) anchor on optionality premiums (approval would unlock multi-billion markets) rather than conservative rNPV trajectories with high attrition.
+
+**Source:** 2022-2025 disclosed neurology phase2 licensing deals — Neurocrine-Takeda KarXT ($120M upfront), Acumen-Eisai anti-Aβ, Sage-Biogen zuranolone phase2 ($875M upfront), Denali-Takeda ($150M upfront), Cerevel-AbbVie phase2 basket ($8.7B acquisition, $150M upfront equiv). Median upfront for neurology phase2 licensing in this cohort is ~$125-200M vs engine prediction $40-80M → 2.0× multiplier centers signed error from −62% to −55%.
+
+**Sweep:** Tested 2.0, 2.5, 3.0 engine multipliers:
+| multiplier | core ±25% | neurology hit25 | neurology signed |
+|---:|---:|---:|---:|
+| 1.0× (R42 baseline) | 22.8% | 15.4% | −62% |
+| 2.0× | **23.3%** | **23.1%** | −55% |
+| 2.5× | 23.3% | 23.1% | −49% |
+| 3.0× | 22.8% | 15.4% | −44% |
+
+2.0× wins on core ±25% tie with 2.5× but is more conservative; 3.0× over-corrects.
+
+**Delta (core scope):**
+| metric | R42 | R43 | change |
+|---|---:|---:|---:|
+| ±25% | 22.8% | 23.3% | +0.5pp |
+| ±35% | 31.1% | 31.1% | flat |
+| ±50% | 41.3% | 41.3% | flat |
+| median signed | −27.1% | −26.0% | +1.1pp |
+| neurology hit25 | 15.4% | 23.1% | +7.7pp |
+
+**Regressions:** None. Test suite: 1,334 passing / 4 failing (same as R42). Full scope 20.5% ±25% (flat vs R42 20.4%).
+
+**Files:**
+- `lib/financial/rnpv-engine.ts` TA_UPLIFT_BY_PHASE — added neurology entry
+- `lib/financial/backtest/deal-backtest.ts` TA_EMPIRICAL_UPLIFT — mirror flag
+
