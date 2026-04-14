@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { loadNegotiationScenarios } from '@/lib/negotiation-data';
 import { ZOPAChart } from '@/components/simulator/ZOPAChart';
+import { PeerBenchmarkPanel } from '@/components/peer-benchmark/PeerBenchmarkPanel';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
@@ -157,16 +158,26 @@ export default async function SimulatorPage() {
               </div>
             </div>
 
-            {/* ZOPA visualization */}
-            <div>
-              <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-400">
-                Zone of Possible Agreement
-              </h3>
-              <ZOPAChart
-                floorUpfront={s.zopa.floorUpfront_M}
-                buyerTop={s.zopa.buyerTopUpfront_M}
-                recommendedOpening={s.zopa.recommendedOpening_M}
-                recommendedFallback={s.zopa.recommendedFallback_M}
+            {/* ZOPA visualization + peer benchmark side-by-side on desktop */}
+            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+              <div>
+                <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-400">
+                  Zone of Possible Agreement
+                </h3>
+                <ZOPAChart
+                  floorUpfront={s.zopa.floorUpfront_M}
+                  buyerTop={s.zopa.buyerTopUpfront_M}
+                  recommendedOpening={s.zopa.recommendedOpening_M}
+                  recommendedFallback={s.zopa.recommendedFallback_M}
+                />
+              </div>
+              <PeerBenchmarkPanel
+                therapeuticArea={s.assetProfile.ta}
+                phase={s.assetProfile.phase}
+                modality={s.assetProfile.modality}
+                candidateUpfront_M={s.zopa.recommendedFallback_M}
+                candidateTotalDeal_M={s.rnpv.totalDealMedian_M}
+                compact={false}
               />
             </div>
 
