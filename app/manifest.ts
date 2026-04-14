@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       'Instant deal benchmarks, rNPV analysis, and AI market intelligence for biopharma licensing deals.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#0c0e1f',
-    theme_color: '#0EA5A5',
+    background_color: '#0a0d1b',
+    theme_color: '#5fd4e3',
     icons: [
       {
         src: '/icon.svg',
