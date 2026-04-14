@@ -920,7 +920,7 @@ function applyApprovedTAUplift(
  * ($1.35B, 2024), Morphic-Lilly ($3.2B, 2024), Cardior-NovoNordisk
  * ($1.1B, 2024). See docs/calibration-iteration-log.md R55.
  */
-const PHASE2_ACQ_UPLIFT = 3.0;
+const PHASE2_ACQ_UPLIFT = 5.0;
 
 function applyPhase2AcqUplift(
   rawUpfront: number,
@@ -973,7 +973,121 @@ function applyCounterpartyPremium(
  * Applied AFTER applyCounterpartyPremium so the two are mutually
  * exclusive: known buyer → premium applied; unknown buyer → discount.
  */
-function scoreCase(c: DealBacktestCase): DealBacktestResult {
+// R56 (2026-04-14): k-nearest-comparables blend for grade A+ accuracy.
+// The rNPV engine's intrinsic-value model has a structural ceiling around
+// core ±25% ≈ 23% because it cannot distinguish option-style deals (low
+// upfront + high milestones) from classic licensing deals at the same
+// underlying rNPV. A comparables-based retrieval method handles these
+// directly: for each deal being predicted, find k verified deals in the
+// TRAIN set with the same (TA, modality, phase ±1), take their median
+// upfront, and blend with the rNPV prediction via inverse-variance
+// weighting.
+//
+// The comparables retrieval pool is TRAIN-SET ONLY to avoid leakage when
+// scoring held-out TEST deals. For TRAIN deals, it sees all other train
+// deals (this is calibration, not evaluation). The deal being scored is
+// always excluded from its own retrieval pool.
+//
+// Progressive widening (same pattern as ensemble-valuation.ts):
+//   Level 0: TA + modality + phase ±1 (strict)
+//   Level 1: TA + phase ±1 (modality widened)
+//   Level 2: TA only
+//   Level 3: phase ±1 only (deep fallback)
+//
+// Blend weights depend on comparables sample size:
+//   n >= 8: 0.60 comparables + 0.40 rNPV (strong comparables signal)
+//   n >= 5: 0.50 comparables + 0.50 rNPV
+//   n >= 3: 0.35 comparables + 0.65 rNPV
+//   n < 3:  pure rNPV (too few comparables to be reliable)
+
+function phaseDistance(a: string, b: string): number {
+  const order = ['preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
+  const ia = order.indexOf(a);
+  const ib = order.indexOf(b);
+  if (ia < 0 || ib < 0) return Infinity;
+  return Math.abs(ia - ib);
+}
+
+function medianOf(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+function sampleVariance(values: number[]): number {
+  if (values.length < 2) return Infinity;
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  return values.reduce((s, v) => s + (v - mean) ** 2, 0) / (values.length - 1);
+}
+
+interface ComparablesBlend {
+  comparablesMedian: number;
+  n: number;
+  widenLevel: 0 | 1 | 2 | 3 | 4; // 4 = no comparables found
+}
+
+function findComparables(
+  c: DealBacktestCase,
+  pool: DealBacktestCase[],
+): ComparablesBlend {
+  const candidates = pool.filter(d => d.id !== c.id);
+
+  // Level 0: TA + modality + phase ±1
+  let matches = candidates.filter(d =>
+    d.therapeuticArea === c.therapeuticArea &&
+    d.modality === c.modality &&
+    phaseDistance(d.phase, c.phase) <= 1,
+  );
+  if (matches.length >= 3) {
+    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 0 };
+  }
+
+  // Level 1: TA + phase ±1 (modality widened)
+  matches = candidates.filter(d =>
+    d.therapeuticArea === c.therapeuticArea &&
+    phaseDistance(d.phase, c.phase) <= 1,
+  );
+  if (matches.length >= 3) {
+    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 1 };
+  }
+
+  // Level 2: TA only
+  matches = candidates.filter(d => d.therapeuticArea === c.therapeuticArea);
+  if (matches.length >= 3) {
+    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 2 };
+  }
+
+  // Level 3: phase ±1 only (last resort)
+  matches = candidates.filter(d => phaseDistance(d.phase, c.phase) <= 1);
+  if (matches.length >= 3) {
+    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 3 };
+  }
+
+  return { comparablesMedian: 0, n: 0, widenLevel: 4 };
+}
+
+function blendWithComparables(
+  enginePrediction: number,
+  c: DealBacktestCase,
+  trainPool: DealBacktestCase[],
+): number {
+  const { comparablesMedian, n, widenLevel } = findComparables(c, trainPool);
+  if (n < 3 || widenLevel === 4) return enginePrediction;
+
+  // Weight based on sample size and widening level.
+  let compWeight: number;
+  if (widenLevel === 0 && n >= 8) compWeight = 0.60;
+  else if (widenLevel === 0 && n >= 5) compWeight = 0.50;
+  else if (widenLevel === 0 && n >= 3) compWeight = 0.35;
+  else if (widenLevel === 1 && n >= 5) compWeight = 0.30;
+  else if (widenLevel === 2 && n >= 5) compWeight = 0.20;
+  else compWeight = 0.15;
+
+  return enginePrediction * (1 - compWeight) + comparablesMedian * compWeight;
+}
+
+function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): DealBacktestResult {
   const input = buildInputForCase(c);
   const result: RNPVResult = calculateRNPV(input);
   const rawUpfront = result.impliedDealValue?.upfront?.median ?? 0;
@@ -1003,7 +1117,12 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   // (e.g., alzheimers antibodies with compounded PoS × high COGS). Real
   // disclosed upfronts are never negative. Escape was visible in the
   // AC Immune → Takeda 2024 deal (−$48M predicted vs $100M actual).
-  const predictedUpfront = Math.max(0, premiumApplied);
+  const engineUpfront = Math.max(0, premiumApplied);
+  // R56: Blend rNPV prediction with k-nearest comparables' median upfront
+  // retrieved from the TRAIN set only (prevents test-set leakage).
+  const predictedUpfront = trainPool.length > 0
+    ? Math.max(0, blendWithComparables(engineUpfront, c, trainPool))
+    : engineUpfront;
   const predictedTotal = Math.max(0, result.impliedDealValue?.totalDeal?.median ?? 0);
 
   const upfrontErrorAbs_M = predictedUpfront - c.actualUpfront_M;

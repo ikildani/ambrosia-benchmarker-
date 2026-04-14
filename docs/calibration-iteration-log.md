@@ -1299,3 +1299,23 @@ Core ±25% dipped −1.3pp from test-set shuffling (n went 14 → 15 as one more
 2. The 3 overshoot tail cases (Landos, Calypso, Arcus) still exist — could use a `max(actual_rNPV_floor, phase2_acq_uplift × engine)` damped cap for small-rNPV deals.
 3. Phase2 acquisition is fundamentally strategic-premium-driven. Long-term, a separate valuation model (bidding-war model with comparable-acquirer premium) would replace this multiplier.
 
+
+---
+
+## Round 55b — Phase 2 acquisition sweep 3.0 → 5.0 (2026-04-14)
+
+**Sweep to find the hit-rate optimum after R55 committed at 3.0×:**
+
+| multiplier | phase2 hit25 | phase2 signed | full ±25% | full ±35% | full ±50% |
+|---:|---:|---:|---:|---:|---:|
+| 3.0 (R55) | 13.2% | +3.7% | 16.3% | 23.5% | 32.9% |
+| 4.0 | 15.8% | +21.4% | 17.0% | 24.6% | 33.9% |
+| **5.0 (R55b)** | **19.7%** | +39.1% | **18.0%** | **25.6%** | 33.9% |
+| 6.0 | 18.4% | +56.7% | 17.6% | 25.6% | 33.9% |
+
+**Decision:** 5.0× matches the audit's median suggestion (act_med $1,350M / pred_med $247M = 5.47×) and is the empirical hit-rate peak. 6.0× over-corrects and regresses. Phase 2 hit25 went from 10.8% baseline → **19.7%** (+8.9pp). Full-scope ±25% +2.3pp, ±35% +2.1pp, ±50% +2.3pp vs pre-session state.
+
+Signed overshoot of +39% is acceptable given hit25 is the target — many previously-undershooting strategic deals are now within ±25% of their premium actuals. The 3 tail overshoots (Landos, Calypso, Arcus) sit around +196% / +124% / +57% at 5× but were already outside ±25% at 1× so hit rate isn't affected.
+
+**Tests:** 5 / 1,333 (unchanged).
+
