@@ -4,6 +4,7 @@ import { fetchUpcomingReadouts, getSupportedTAs } from '@/lib/market-intelligenc
 import { getAdCommCalendar } from '@/lib/market-intelligence/fda-adcomm';
 import { MarketIntelligenceSidebar } from '@/components/intelligence/MarketIntelligenceSidebar';
 import { AdCommCalendar } from '@/components/intelligence/AdCommCalendar';
+import { DigestSignup } from '@/components/intelligence/DigestSignup';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
@@ -181,6 +182,13 @@ export default async function IntelligencePage({ searchParams }: Props) {
               No AdComm meetings in the current window.
             </p>
           )}
+        </div>
+      </section>
+
+      {/* Monthly digest signup */}
+      <section className="border-t border-slate-800/60">
+        <div className="mx-auto max-w-3xl px-6 py-10">
+          <DigestSignup />
         </div>
       </section>
 
