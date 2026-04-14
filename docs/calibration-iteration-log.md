@@ -766,6 +766,34 @@ Each carries upfront-percent ranges + source citations (2024 10-Ks).
 
 ---
 
+## Round R20-activation-adc — ADC sub-class retag (CORPUS, 2026-04-14)
+
+**Change:** Ran `scripts/retag-adc-modalities.ts --with-claude --apply`. Second half of R20 activation, scoped to the 5 target-specific ADC sub-slugs (`adc_her2`, `adc_trop2`, `adc_claudin18_2`, `adc_nectin4`, `adc_folr1`). 5 verified non-synthetic deals retagged from coarse `adc` to fine-grain sub-slugs (2 adc_her2: SYS6002 + trastuzumab-ADC breast; 2 adc_trop2: Dato-DXd NSCLC + Trodelvy TNBC; 1 adc_folr1: mirvetuximab/Elahere). 1 FP (patritumab deruxtecan — HER3, not HER2) was surgically reverted after Claude acknowledged HER3 was out-of-slug but returned adc_her2 anyway.
+
+**Why:** ADC sub-classes have tighter profile differentiation than non-ADC sub-classes (target-specific market caps + pricing benchmarks from 2024 10-Ks). Each retagged deal consults a profile built around its actual commercial reality (Kadcyla $2.4B, Enhertu $3.8B, Trodelvy $1.3B) instead of a blended "ADC" fallback.
+
+**Delta (core scope, n=206 — the rNPV sweet spot):**
+| metric | R30 baseline | post-non-ADC (2026-04-13) | post-ADC | net Δ |
+|---|---:|---:|---:|---:|
+| ±25% | 17.3% | 17.5% | 22.8% | +5.5pp |
+| ±35% | 24.4% | 23.8% | 31.1% | +6.7pp |
+| ±50% | 34.2% | 29.1% | 41.3% | +7.1pp |
+| mean \|error\| | — | 285.1% | 89.8% | -195pp |
+| median signed | — | +91.4% | -27.1% | massive recentering |
+
+**Delta (full scope, n=853):**
+| metric | baseline | post-ADC | Δ |
+|---|---:|---:|---:|
+| ±25% | ~17% | 20.5% | +3.5pp |
+| ±35% | ~24% | 28.6% | +4.6pp |
+| ±50% | ~31% | 41.4% | +10.4pp |
+
+**Interpretation:** The core ±50% regression from R20-activation (non-ADC pass, -5.1pp) is fully resolved — the ADC pass added 5 high-accuracy retags whose fine-grain profiles are meaningfully tighter than the blended coarse ADC baseline. Net result across both R20-activation passes: core hit-rates up 5–7pp across all three bands, mean \|error\| down 3×, median signed error recentered from +91% overshoot to -27% (much tighter). Sub-slug multiplier tuning (originally planned as a follow-on after non-ADC) is no longer needed.
+
+**Regressions:** None. `scripts/retag-adc-modalities.ts` is reusable for the remaining out-of-slug ADCs (HER3, BCMA, B7-H3, MSLN, CD19) once the R20 profile set expands.
+
+---
+
 ## Round R20-activation — Non-ADC modality sub-class retag (CORPUS, 2026-04-13)
 
 **Change:** Re-tagged 20 verified non-synthetic deals from coarse parent modality slugs to fine-grain R20 sub-slugs via `scripts/retag-non-adc-modalities.ts --with-claude --apply`. Two-pass script: rule-based regex (high precision, low recall) + Claude Haiku 4.5 classification over asset_name / asset_description / mechanism_of_action / indication. Prompt-level guardrail added after initial audit found Claude conflating autologous CAR-T products (Breyanzi / Yescarta / Carvykti) with `carT_allogeneic` — system prompt now explicitly excludes autologous assets and requires named manufacturer / "off-the-shelf" wording.

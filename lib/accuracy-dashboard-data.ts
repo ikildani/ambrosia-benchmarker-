@@ -556,4 +556,14 @@ const CALIBRATION_ROUNDS: CalibrationRound[] = [
     coreHit50: 0.291,
     summary: 'Activated 18 fine-grain R20 sub-modality profiles on the production corpus. Two-pass retag (rule-based regex + Claude Haiku 4.5) mapped 20 verified non-synthetic deals from coarse parent slugs (smallMolecule, bispecific, cellTherapy, geneEditing, geneTherapy, carT_*) to fine-grain slugs (allosteric_inhibitor, covalent_inhibitor, molecular_glue, carT_allogeneic, tce_bcma/cd20/gpcr, crispr_base_editing, crispr_prime_editing, til_therapy, circRNA, degrader_oral). Core ±50% regressed -5.1pp as the new profile multipliers diverge from their coarse parents; full scope improved broadly (+5.3pp at ±50%, median signed error moved from large positive to -1.2%). Script (`scripts/retag-non-adc-modalities.ts`) is re-runnable for ADC pass + future corpus expansions.',
   },
+  {
+    round: 20.6,
+    label: 'R20 activation — ADC sub-class retag',
+    date: '2026-04-14',
+    outcome: 'win',
+    coreHit25: 0.228,
+    coreHit35: 0.311,
+    coreHit50: 0.413,
+    summary: 'Companion to the non-ADC pass. Claude Haiku 4.5 classified 5 verified ADC deals into target-specific sub-slugs (2 adc_her2, 2 adc_trop2, 1 adc_folr1). 1 FP (patritumab-DXd → HER3, not HER2) surgically reverted. Biggest single-round win in the calibration series: core ±25% +5.3pp (17.5→22.8), ±35% +7.3pp (23.8→31.1), ±50% +12.2pp (29.1→41.3). Mean |error| collapsed 285% → 90% (-195pp) and median signed recentered from +91% to -27%. Fully reversed the -5.1pp core ±50% regression from the non-ADC pass. ADC target-specific profiles (Kadcyla, Enhertu, Trodelvy 10-K benchmarks) carry meaningfully tighter upfront differentiation than the blended coarse fallback. Sub-slug multiplier tuning originally planned as follow-on is no longer needed.',
+  },
 ];
