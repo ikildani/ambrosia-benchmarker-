@@ -9,7 +9,7 @@
  * disclosed upfront + total value, announced 2020+, recognizable phase and
  * deal type. De-duplicated on (licensor, licensee, year, upfront).
  *
- * Generated: 2026-04-14T04:35:22.746Z
+ * Generated: 2026-04-14T05:03:24.908Z
  * Row count: 1540
  *
  * @module data/comparable-deals-supabase
@@ -35,6 +35,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HSK55718 and HSK51155 — Haisco Pharmaceutical Group to AbbVie',
     source: 'press_release — https://www.fiercebiotech.com/biotech/abbvie-inks-715m-deal-chinese-biotech-haisco-two-acute-pain-assets',
+    assetName: 'HSK55718 and HSK51155',
+    verified: false,
   },
   {
     id: 'sb_fb3cc968-81dc-4a1e-be90-0fd4a326eb18',
@@ -53,6 +55,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD388 (flu DFC acquisition) — Cidara Therapeutics to Merck',
     source: 'press_release',
+    assetName: 'CD388 (flu DFC acquisition)',
+    verified: false,
   },
   {
     id: 'sb_936a85fa-17f9-4f90-8685-62ba15ddafa1',
@@ -71,6 +75,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KT-200 — Kymera Therapeutics to Gilead Sciences',
     source: 'press_release — https://www.fiercebiotech.com/biotech/gilead-pays-kymera-45m-glue-preclinical-protein-degrader-burgeoning-oncology-pipeline',
+    assetName: 'KT-200',
+    verified: false,
   },
   {
     id: 'sb_2ad8982a-257f-4fb0-aa5e-b1fe74945cc1',
@@ -89,6 +95,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Bofanglutide Injection — Gan & Lee Pharmaceuticals to JW Pharmaceutical',
     source: 'press_release — https://www.prnewswire.com/news-releases/gan--lee-pharmaceuticals-signs-exclusive-license-agreement-with-jw-pharmaceutical-the-leading-south-korean-pharma-to-advance-the-global-commercialization-of-the-innovative-glp-1-receptor-agonist-bofanglutide-302738066.html',
+    assetName: 'Bofanglutide Injection',
+    verified: false,
   },
   {
     id: 'sb_f2b18beb-aa51-4fcb-84d7-3a16a7bd6f9e',
@@ -107,6 +115,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Deal — Tubulis GmbH to Gilead Sciences',
     source: 'press_release — https://www.biospace.com/business/gilead-swallows-another-partner-paying-up-to-5-b-for-adc-specialist-tubulis',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_846f95a5-791e-4b97-abc5-7f0f2581d749',
@@ -125,6 +135,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Morphomer Tau — AC Immune SA to Eli Lilly and Company',
     source: 'press_release — https://www.globenewswire.com/news-release/2026/04/07/3268952/0/en/AC-Immune-Announces-Amendment-to-Morphomer-Tau-License-and-Collaboration-Agreement-with-Lilly.html',
+    assetName: 'Morphomer Tau',
+    verified: false,
   },
   {
     id: 'sb_0aa63653-6508-4a66-b93a-83f864760bdb',
@@ -143,6 +155,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TUB-040 — Tubulis to Gilead Sciences',
     source: 'press_release — https://www.fiercebiotech.com/biotech/gilead-inks-5b-tubulis-buyout-bolster-oncology-adc-pipeline',
+    assetName: 'TUB-040',
+    verified: true,
   },
   {
     id: 'sb_74daa5e7-ab34-4a95-9e43-00121edfebf3',
@@ -161,6 +175,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Syfovre + Empaveli (full company acquisition) — Apellis Pharmaceuticals to Biogen',
     source: 'manual — https://www.biopharmadive.com/news/biogen-apellis-acquisition-deal-immune-syfovre-empaveli/816233/',
+    assetName: 'Syfovre + Empaveli (full company acquisition)',
+    verified: true,
   },
   {
     id: 'sb_3277f91d-431f-4913-9daa-ae18cc7283e1',
@@ -179,6 +195,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Cleminorexton (ORX750) — full company acquisition — Centessa Pharmaceuticals to Eli Lilly',
     source: 'manual — https://european-biotechnology.com/latest-news/eli-lilly-sleep-disorder-centessa-acquisition/',
+    assetName: 'Cleminorexton (ORX750) — full company acquisition',
+    verified: true,
   },
   {
     id: 'sb_c839592d-1194-4043-8038-9206b7157cb5',
@@ -197,6 +215,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Deal — Insilico Medicine Inc. to Eli Lilly and Co.',
     source: 'press_release — https://www.bioworld.com/articles/730091-lilly-taps-insilico-ai-in-275b-deal-to-expand-pipeline-options',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_c31654ce-88a5-44ac-a978-0895f74a6c18',
@@ -214,6 +234,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'AI-developed oral therapeutics (multiple preclinical programs) — Insilico Medicine to Eli Lilly',
     source: 'press_release — https://www.cnbc.com/2026/03/29/eli-lilly-reaches-deal-to-bring-ai-developed-drugs-to-global-market.html',
+    assetName: 'AI-developed oral therapeutics (multiple preclinical programs)',
+    verified: true,
   },
   {
     id: 'sb_fff03fe3-c441-4e09-9b75-3cd33fd968f4',
@@ -232,6 +254,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TSND-201 — Transcend Therapeutics to Otsuka Pharmaceutical',
     source: 'press_release — https://www.biopharmadive.com/news/otsuka-transcend-deal-acquisition-neurology-psychiatry-neuroscience/815985/',
+    assetName: 'TSND-201',
+    verified: false,
   },
   {
     id: 'sb_940c0d19-e244-419c-922e-4fdbad87e773',
@@ -250,6 +274,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Shionogi-Apnimed Sleep Science (SASS) joint venture stake — Apnimed to Shionogi',
     source: 'press_release — https://www.fiercebiotech.com/biotech/shionogi-pays-apnimed-100m-joint-venture-awaken-sleep-disorder-dream',
+    assetName: 'Shionogi-Apnimed Sleep Science (SASS) joint venture stake',
+    verified: false,
   },
   {
     id: 'sb_8f459e2b-51cf-4d5f-86e2-e5728c464f6f',
@@ -267,6 +293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'AXPAXLI — Ocular Therapeutix to Sanofi',
     source: 'press_release',
+    assetName: 'AXPAXLI',
+    verified: false,
   },
   {
     id: 'sb_ef469437-6b4a-4871-8d09-e0ff209dab17',
@@ -284,6 +312,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TERN-701 — Terns Pharmaceuticals to Merck',
     source: 'press_release',
+    assetName: 'TERN-701',
+    verified: true,
   },
   {
     id: 'sb_4fbc5a8e-4e2f-4149-9f41-eed9ba2f28e3',
@@ -301,6 +331,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'OM336 (gamgertamig) — Ouro Medicines to Gilead Sciences',
     source: 'press_release',
+    assetName: 'OM336 (gamgertamig)',
+    verified: true,
   },
   {
     id: 'sb_245dae01-7165-4b25-925a-5be94a87cee5',
@@ -318,6 +350,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ATI-450 — Confluence Life Science to Aclaris Therapeutics',
     source: 'press_release',
+    assetName: 'ATI-450',
+    verified: false,
   },
   {
     id: 'sb_ac43c5d6-1abc-4c2c-9a89-d2b70e6110ca',
@@ -336,6 +370,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TEV-408 — Teva to Royalty Pharma',
     source: 'press_release',
+    assetName: 'TEV-408',
+    verified: false,
   },
   {
     id: 'sb_877495a8-916e-4256-b9ce-2bac136a0996',
@@ -355,6 +391,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KT501 — Kali Therapeutics to Sanofi',
     source: 'press_release — https://www.biospace.com/deals/sanofi-keeps-immuno-deals-coming-with-kali-bet-worth-potential-1b',
+    assetName: 'KT501',
+    verified: false,
   },
   {
     id: 'sb_89b4e8c2-2873-46e2-9ebd-4b4a4503fe09',
@@ -373,6 +411,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Azstarys — Corium Therapeutics to Collegium Pharmaceutical',
     source: 'press_release — https://www.fiercepharma.com/pharma/collegium-ponies-650m-gain-adhd-drug-azstarys-corium',
+    assetName: 'Azstarys',
+    verified: true,
   },
   {
     id: 'sb_74a575f8-2248-47ea-9ea5-9e40ecb52428',
@@ -391,6 +431,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SNV4818 — Pikavation Therapeutics to Novartis',
     source: 'press_release — https://www.biopharmadive.com/news/novartis-synnovation-pikavation-PI3Ka-inhibitor-deal/815283/',
+    assetName: 'SNV4818',
+    verified: false,
   },
   {
     id: 'sb_237a3411-90d7-433c-9a4c-1a2c1793770c',
@@ -409,6 +451,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SNV4818 — Synnovation Therapeutics to Novartis',
     source: 'press_release — https://www.biospace.com/deals/novartis-buys-breast-cancer-drug-for-2b-to-keep-up-with-myriad-rivals',
+    assetName: 'SNV4818',
+    verified: false,
   },
   {
     id: 'sb_e9a953a1-e678-4ea7-9658-d36c45e9ee08',
@@ -427,6 +471,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Deal — CytomX Therapeutics to Astellas Pharma',
     source: 'press_release — https://www.fiercebiotech.com/biotech/astellas-ends-16-billion-t-cell-engager-discovery-pact-cytomx',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_f6750bd5-e58c-4158-8433-b0dbd5edb52d',
@@ -445,6 +491,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hemophilia A program — Sangamo to Pfizer',
     source: 'press_release',
+    assetName: 'hemophilia A program',
+    verified: false,
   },
   {
     id: 'sb_98ca6795-5fed-40c0-bdc6-d217d4503827',
@@ -462,6 +510,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'neurological gene-editing therapies — Verve Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'neurological gene-editing therapies',
+    verified: false,
   },
   {
     id: 'sb_9d49890a-5d89-4609-9ec9-d4a67d728456',
@@ -480,6 +530,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix — uniQure to CSL',
     source: 'press_release',
+    assetName: 'Hemgenix',
+    verified: false,
   },
   {
     id: 'sb_cb82b31b-f9f6-412f-a3b7-5429ea7c4cac',
@@ -498,6 +550,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'phase 3 hepatitis B/D drug — Bluejay Therapeutics to Mirum Pharmaceuticals',
     source: 'press_release',
+    assetName: 'phase 3 hepatitis B/D drug',
+    verified: false,
   },
   {
     id: 'sb_b2864b00-9d55-4d90-b49f-d6582fdf6441',
@@ -515,6 +569,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'serdexmethylphenidate (SDX) portfolio — Zevra Therapeutics to Commave Therapeutics SA',
     source: 'press_release — https://www.globenewswire.com/news-release/2026/03/16/3256166/16626/en/Zevra-Therapeutics-Sells-SDX-Portfolio-to-Commave-Therapeutics-for-50-Million.html',
+    assetName: 'serdexmethylphenidate (SDX) portfolio',
+    verified: false,
   },
   {
     id: 'sb_9371f416-73a6-4b17-af81-d65b91db4576',
@@ -533,6 +589,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'linerixibat — GSK to Alfasigma',
     source: 'press_release — https://www.fiercebiotech.com/biotech/alfasigma-pens-690m-deal-gsk-itching-drug-awaiting-fda-approval-decision',
+    assetName: 'linerixibat',
+    verified: false,
   },
   {
     id: 'sb_4d7850ea-214c-4917-ba30-ea7597471840',
@@ -552,6 +610,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RAP-219 — Rapport Therapeutics to Tenacia Biotechnology',
     source: 'press_release — https://www.globenewswire.com/news-release/2026/03/09/3252334/0/zh-hans/Rapport-Therapeutics%E4%B8%8ETenacia-Biotechnology%E5%AE%A3%E5%B8%83%E8%BE%BE%E6%88%90%E5%A4%A7%E4%B8%AD%E5%8D%8E%E5%8C%BARAP-219%E5%BC%80%E5%8F%91%E4%B8%8E%E5%95%86%E4%B8%9A%E5%8C%96%E6%88%98%E7%95%A5%E5%90%88%E4%BD%9C.html',
+    assetName: 'RAP-219',
+    verified: true,
   },
   {
     id: 'sb_6279f661-afc3-41aa-bb74-ae32e27d072a',
@@ -570,6 +630,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SSGJ-707 / PF-08634404 — 3SBio to Pfizer',
     source: 'press_release — https://www.fiercebiotech.com/biotech/pfizer-oncology-rd-strategy-jeff-legos-speed-breadth-and-novel-combinations',
+    assetName: 'SSGJ-707 / PF-08634404',
+    verified: false,
   },
   {
     id: 'sb_b834d261-d247-43e1-a0eb-d9391901180b',
@@ -588,6 +650,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'rovadicitinib — Sino Biopharmaceutical (Chia Tai Tianqing Pharmaceutical) to Sanofi',
     source: 'press_release — https://www.fiercepharma.com/pharma/sanofi-strikes-15b-global-licensing-deal-sino-biopharm-first-class-jak-asset',
+    assetName: 'rovadicitinib',
+    verified: false,
   },
   {
     id: 'sb_33d4c586-4cd2-4069-85b0-534e1ba86d60',
@@ -606,6 +670,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ATG-201 — Antengene to UCB',
     source: 'press_release — https://www.fiercebiotech.com/biotech/ucb-enters-tce-space-11b-deal-chinese-biotechs-autoimmune-candidate',
+    assetName: 'ATG-201',
+    verified: false,
   },
   {
     id: 'sb_38e9e4d1-0904-4a2c-9b2d-ebca3dfb40cb',
@@ -624,6 +690,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'rovadicitinib — Sino Biopharmaceutical to Sanofi',
     source: 'press_release — https://www.biospace.com/deals/sanofi-bets-up-to-1-53b-in-hong-kong-immuno-pact-adding-to-string-of-deals',
+    assetName: 'rovadicitinib',
+    verified: false,
   },
   {
     id: 'sb_8fe0f855-8038-4ba0-bbc2-f9ee17f2bbb1',
@@ -642,6 +710,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LNP patent license (settlement) — Genevant/Arbutus to Moderna',
     source: 'press_release',
+    assetName: 'LNP patent license (settlement)',
+    verified: false,
   },
   {
     id: 'sb_6e149ef8-5d82-4bd6-9b3e-9ba6069e6996',
@@ -659,6 +729,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HS235 — 35Pharma to GSK',
     source: 'press_release — https://www.biopharmadive.com/news/gsk-35pharma-acquire-pulmonary-hypertension-drug-activin-winrevair/813067/',
+    assetName: 'HS235',
+    verified: false,
   },
   {
     id: 'sb_0dc6fea3-1250-4419-b61b-2bef8fb0ff67',
@@ -676,6 +748,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HS-235 — 35Pharma Inc. to GSK plc',
     source: 'press_release — https://www.bioworld.com/articles/729199-returning-to-pulmonary-hypertension-gsk-buys-35pharma',
+    assetName: 'HS-235',
+    verified: false,
   },
   {
     id: 'sb_f567f529-c730-44bf-9985-8d0644049432',
@@ -694,6 +768,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'VIR-5500 — Vir Biotechnology to Astellas Pharma',
     source: 'press_release — https://www.biopharmadive.com/news/vir-astellas-masked-t-cell-engager-prostate-cancer-results/812950/',
+    assetName: 'VIR-5500',
+    verified: false,
   },
   {
     id: 'sb_4e597cd6-14bc-429e-9183-e62637802792',
@@ -712,6 +788,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GH31 — Genhouse Bio to Gilead Sciences',
     source: 'press_release — https://www.fiercepharma.com/pharma/gilead-synthetic-lethality-deal-tokyo-biotech-ipo-novos-ozempic-china-sales-dip',
+    assetName: 'GH31',
+    verified: false,
   },
   {
     id: 'sb_79f116ff-5a1b-43cb-9813-f43b2ee61a4f',
@@ -730,6 +808,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Deal — Suzhou Ribo Life Science Co. Ltd. and Ribocure Pharmaceuticals AB to Madrigal Pharmaceuticals, Inc.',
     source: 'press_release — https://www.globenewswire.com/news-release/2026/02/11/3236027/0/en/Madrigal-Expands-its-MASH-Pipeline-with-Exclusive-Global-Licensing-Agreement-for-Six-Preclinical-siRNA-Programs.html',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_433ee4e1-abd8-423e-875a-969089e2949d',
@@ -748,6 +828,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Deal — Suzhou Ribo Life Sciences to Madrigal Pharmaceuticals',
     source: 'press_release — https://www.biospace.com/deals/madrigal-dives-further-into-mash-with-up-to-4-4-b-sirna-deal-with-chinese-biotech',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_375f220b-4183-4c6c-a1b7-75dcdff72d65',
@@ -766,6 +848,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SYH2082 — CSPC Pharmaceutical to AstraZeneca',
     source: 'press_release — https://www.biospace.com/deals/astrazenecas-china-trip-yields-cspc-obesity-deal-worth-1-2b-upfront',
+    assetName: 'SYH2082',
+    verified: false,
   },
   {
     id: 'sb_18d465d0-70cf-41da-89b5-81f1773f721a',
@@ -784,6 +868,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Deal — CSPC Pharmaceutical Group to AstraZeneca',
     source: 'press_release — https://www.biopharmadive.com/news/astrazeneca-obesity-deal-china-cspc-ai/810942/',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_f986b47d-6252-4414-b090-b6349e1c0a9a',
@@ -803,6 +889,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD22-mab — Editas Medicine to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CD22-mab',
+    verified: false,
   },
   {
     id: 'sb_f857947d-e683-462d-80a2-99737308848b',
@@ -822,6 +910,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BCL-2-mab — Legend Biotech to Takeda',
     source: 'press_release',
+    assetName: 'BCL-2-mab',
+    verified: false,
   },
   {
     id: 'sb_baeca2b7-224e-496c-813d-af67abd4ca39',
@@ -840,6 +930,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD47-001 — Affimed to Roche',
     source: 'press_release',
+    assetName: 'Anti-CD47-001',
+    verified: false,
   },
   {
     id: 'sb_4501caf4-09a7-47c6-9bd8-96173b8cd50a',
@@ -858,6 +950,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Deal — Janux Therapeutics to Bristol Myers Squibb',
     source: 'press_release — https://www.biopharmadive.com/news/janux-bristol-myers-partnership-t-cell-engagers-cancer/810227/',
+    assetName: '',
+    verified: false,
   },
   {
     id: 'sb_12cfe8e3-7929-4795-b599-f018e4da5f86',
@@ -877,6 +971,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-1-201 — Karyopharm Therapeutics to Novartis',
     source: 'press_release',
+    assetName: 'PD-1-201',
+    verified: false,
   },
   {
     id: 'sb_dc87beea-2162-496a-b3ac-87c3116da773',
@@ -896,6 +992,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'SIRPα-001 — Revolution Medicines to Vertex',
     source: 'sec_10k',
+    assetName: 'SIRPα-001',
+    verified: false,
   },
   {
     id: 'sb_4232781b-f03b-4547-b4de-b06c1f81d821',
@@ -915,6 +1013,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RET-mab — Forma Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'RET-mab',
+    verified: false,
   },
   {
     id: 'sb_c6097f48-a9d3-44bb-a24d-8ff55fdf952c',
@@ -933,6 +1033,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CLDN18.2 — Tyra Biosciences to Merck',
     source: 'sec_8k',
+    assetName: 'CLDN18.2',
+    verified: false,
   },
   {
     id: 'sb_a8d87415-4c7b-426e-ba36-e2b8e249c89c',
@@ -951,6 +1053,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PARP-tinib — IGM Biosciences to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'PARP-tinib',
+    verified: false,
   },
   {
     id: 'sb_7e6ea4ed-c9e8-4b1f-9483-ccd99f7704dc',
@@ -969,6 +1073,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TEV-53408 — Teva Pharmaceuticals to Royalty Pharma',
     source: 'press_release',
+    assetName: 'TEV-53408',
+    verified: false,
   },
   {
     id: 'sb_9ae547c2-9867-4260-9360-1b8bd624f257',
@@ -988,6 +1094,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD73-101 — Nektar Therapeutics to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'CD73-101',
+    verified: false,
   },
   {
     id: 'sb_cb7e73f3-acba-4d9d-9f53-95db278c673d',
@@ -1006,6 +1114,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'amyloid beta-targeted antibody program — SciNeuro to Novartis',
     source: 'press_release',
+    assetName: 'amyloid beta-targeted antibody program',
+    verified: true,
   },
   {
     id: 'sb_7b6d8070-108c-4d62-9f1f-90823aea5b82',
@@ -1025,6 +1135,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SMN-101 — Cassava Sciences to Gilead Sciences',
     source: 'press_release',
+    assetName: 'SMN-101',
+    verified: false,
   },
   {
     id: 'sb_458e2cbf-deba-47b5-87cb-1414a746a41e',
@@ -1044,6 +1156,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OX40-301 — Monte Rosa Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'OX40-301',
+    verified: false,
   },
   {
     id: 'sb_cc7733cf-7a4e-4215-aba5-a1faea91ccf6',
@@ -1063,6 +1177,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'DLL3-001 — Syros Pharmaceuticals to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'DLL3-001',
+    verified: false,
   },
   {
     id: 'sb_9dac0b9b-cdc3-4cb9-a295-300e93179b5f',
@@ -1081,6 +1197,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD33-tinib — Blueprint Medicines to Merck',
     source: 'sec_10k',
+    assetName: 'CD33-tinib',
+    verified: false,
   },
   {
     id: 'sb_eec5d009-e77c-44e5-867c-d54cc2dc802b',
@@ -1099,6 +1217,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PARP-mab — Tyra Biosciences to Pfizer',
     source: 'sec_8k',
+    assetName: 'PARP-mab',
+    verified: false,
   },
   {
     id: 'sb_2b19b78a-6080-4e8d-8e20-f67ba620b586',
@@ -1118,6 +1238,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SIRPα-mab — Junshi Biosciences to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'SIRPα-mab',
+    verified: false,
   },
   {
     id: 'sb_e39967b4-7815-4326-b722-8608ee568bc0',
@@ -1137,6 +1259,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER3-tinib — Nektar Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'HER3-tinib',
+    verified: false,
   },
   {
     id: 'sb_89f207cb-59bc-4f96-9c91-b5fae3cc47e4',
@@ -1156,6 +1280,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-Orexin-101 — Passage Bio to Seagen',
     source: 'press_release',
+    assetName: 'Anti-Orexin-101',
+    verified: false,
   },
   {
     id: 'sb_69ba4c6b-7ffc-4b24-8b78-7d6bff3d6ab1',
@@ -1174,6 +1300,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ABI-5366 + ABI-1179 (HSV) — Assembly Biosciences to Gilead Sciences',
     source: 'press_release',
+    assetName: 'ABI-5366 + ABI-1179 (HSV)',
+    verified: false,
   },
   {
     id: 'sb_46045ce7-9782-4249-9c99-54a8be9f20fe',
@@ -1192,6 +1320,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ATR-201 — Mirati Therapeutics to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'ATR-201',
+    verified: false,
   },
   {
     id: 'sb_66985883-0589-45c5-984d-612ecb46a698',
@@ -1211,6 +1341,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'DLL3 — Caribou Biosciences to Takeda',
     source: 'press_release',
+    assetName: 'DLL3',
+    verified: false,
   },
   {
     id: 'sb_de0bc803-68fc-4c15-9858-fd712740db6f',
@@ -1228,6 +1360,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Amicus Therapeutics — Amicus Therapeutics to BioMarin Pharmaceutical',
     source: 'press_release',
+    assetName: 'Amicus Therapeutics',
+    verified: false,
   },
   {
     id: 'sb_7bf1a21d-217d-49b0-8156-7a153992c5b9',
@@ -1245,6 +1379,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'antibody therapy — Adel to Sanofi',
     source: 'press_release',
+    assetName: 'antibody therapy',
+    verified: false,
   },
   {
     id: 'sb_e9f1656c-ebb6-4e01-96f3-1752c7f8463c',
@@ -1262,6 +1398,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mRNA-1018 — CEPI to Moderna',
     source: 'press_release',
+    assetName: 'mRNA-1018',
+    verified: false,
   },
   {
     id: 'sb_374162b3-2b11-4177-a22e-7d55a974a4a6',
@@ -1281,6 +1419,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ICOS-101 — Ono Pharmaceutical to Roche',
     source: 'sec_8k',
+    assetName: 'ICOS-101',
+    verified: false,
   },
   {
     id: 'sb_f3f78380-2b3c-4170-9120-a4add96dbbe2',
@@ -1300,6 +1440,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'EGFR-301 — Arcus Biosciences to Amgen',
     source: 'press_release',
+    assetName: 'EGFR-301',
+    verified: false,
   },
   {
     id: 'sb_dc9ffd94-bb57-42b3-b6bc-173dcd34a44c',
@@ -1319,6 +1461,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ALK-mab — Turning Point Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'ALK-mab',
+    verified: false,
   },
   {
     id: 'sb_a09faae6-ea8b-472b-98d2-cef89e19d0fd',
@@ -1337,6 +1481,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'YP05002 — YaoPharma to Pfizer',
     source: 'press_release — https://www.biopharmadive.com/news/pfizer-yaopharma-fosun-obesity-pill-deal-china/807375/',
+    assetName: 'YP05002',
+    verified: false,
   },
   {
     id: 'sb_995e7371-60f0-4045-b15e-ac7294797ec6',
@@ -1356,6 +1502,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TROP2-201 — Immunogen to GSK',
     source: 'sec_10k',
+    assetName: 'TROP2-201',
+    verified: false,
   },
   {
     id: 'sb_8111164b-1b47-41ba-81c8-69d90b8a0719',
@@ -1374,6 +1522,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ICOS-101 — Zai Lab to Regeneron',
     source: 'sec_8k',
+    assetName: 'ICOS-101',
+    verified: false,
   },
   {
     id: 'sb_6c6add28-9321-4009-83e6-b1d3d5f37f9b',
@@ -1393,6 +1543,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PD-1-mab — Junshi Biosciences to Biogen',
     source: 'sec_10k',
+    assetName: 'PD-1-mab',
+    verified: false,
   },
   {
     id: 'sb_369f5ca6-158c-49c3-910e-ec4c5daf12da',
@@ -1412,6 +1564,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-L1-mab — Daiichi Sankyo to Takeda',
     source: 'press_release',
+    assetName: 'PD-L1-mab',
+    verified: false,
   },
   {
     id: 'sb_1579646c-0bad-473c-93ab-146dfcb1f4cc',
@@ -1431,6 +1585,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LAG-3-301 — PMV Pharmaceuticals to Takeda',
     source: 'sec_8k',
+    assetName: 'LAG-3-301',
+    verified: false,
   },
   {
     id: 'sb_89b9c31a-f920-4c2d-8ebd-f14c1bef8bbb',
@@ -1450,6 +1606,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-DLL3-301 — Springworks Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'Anti-DLL3-301',
+    verified: false,
   },
   {
     id: 'sb_38e2498b-dce2-4682-9436-94dd426e16ee',
@@ -1469,6 +1627,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BCMA-001 — Hengrui Medicine to Moderna',
     source: 'sec_8k',
+    assetName: 'BCMA-001',
+    verified: false,
   },
   {
     id: 'sb_ce72e3ee-532e-4654-b739-a17b51ce70ca',
@@ -1488,6 +1648,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-FLT3-301 — Umoja Biopharma to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'Anti-FLT3-301',
+    verified: false,
   },
   {
     id: 'sb_96e912a6-71aa-4365-ae11-9016717fe15e',
@@ -1507,6 +1669,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-BRAF V600E-001 — Karyopharm Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-BRAF V600E-001',
+    verified: false,
   },
   {
     id: 'sb_ecf2a115-74a1-43fc-83a2-ab64fd21bfc9',
@@ -1526,6 +1690,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KIT-mab — Syros Pharmaceuticals to Roche',
     source: 'sec_10k',
+    assetName: 'KIT-mab',
+    verified: false,
   },
   {
     id: 'sb_bc0f6a1c-ca59-4458-aa84-6bc6372d6d72',
@@ -1545,6 +1711,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-SIRPα-501 — Verve Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-SIRPα-501',
+    verified: false,
   },
   {
     id: 'sb_0042a594-4c13-4a5c-84d3-06b14d3cb070',
@@ -1564,6 +1732,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-PI3K-301 — Nkarta to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-PI3K-301',
+    verified: false,
   },
   {
     id: 'sb_125afdda-2351-4b99-bccb-7362cd4ae972',
@@ -1583,6 +1753,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD22-101 — BioNTech to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'CD22-101',
+    verified: false,
   },
   {
     id: 'sb_0eb65195-0b7e-4929-af99-44a235d16720',
@@ -1602,6 +1774,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mTOR-101 — Relay Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'mTOR-101',
+    verified: false,
   },
   {
     id: 'sb_f26acfff-852e-4e71-8594-966c74cc83d6',
@@ -1621,6 +1795,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H4-tinib — Mirati Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_2ba17642-199a-4593-8945-3c7f88a8e936',
@@ -1640,6 +1816,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'B7-H4-tinib — Umoja Biopharma to Moderna',
     source: 'sec_8k',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_175b0961-3d55-4cf5-8694-1a6a6636dfdc',
@@ -1659,6 +1837,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ICOS-001 — Denali Therapeutics to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'Anti-ICOS-001',
+    verified: false,
   },
   {
     id: 'sb_b5bad723-5865-433e-bf06-f3d8ebb89dd8',
@@ -1678,6 +1858,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD38-tinib — BeiGene to AbbVie',
     source: 'sec_10k',
+    assetName: 'CD38-tinib',
+    verified: false,
   },
   {
     id: 'sb_c5ef94b2-0e42-4a89-969e-5fa7a10b1d38',
@@ -1697,6 +1879,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PARP-301 — Syndax Pharmaceuticals to Eli Lilly',
     source: 'press_release',
+    assetName: 'PARP-301',
+    verified: false,
   },
   {
     id: 'sb_788aaa3b-52e3-4e74-8fab-8540ec13cedc',
@@ -1716,6 +1900,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-RET-101 — ORIC Pharmaceuticals to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-RET-101',
+    verified: false,
   },
   {
     id: 'sb_e2c29c84-aa8a-43ff-b189-690821d51b6f',
@@ -1734,6 +1920,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'DLL3-001 — Puma Biotechnology to Takeda',
     source: 'sec_10k',
+    assetName: 'DLL3-001',
+    verified: false,
   },
   {
     id: 'sb_4722047c-697e-4728-b8fe-c3f9bf1a0773',
@@ -1752,6 +1940,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Efruxifermin (EFX) acquisition — Akero Therapeutics to Novo Nordisk',
     source: 'press_release',
+    assetName: 'Efruxifermin (EFX) acquisition',
+    verified: false,
   },
   {
     id: 'sb_4e97d706-8c6f-49e6-9017-90db3dbbf9a0',
@@ -1771,6 +1961,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-FLT3 — Denali Therapeutics to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'Anti-FLT3',
+    verified: false,
   },
   {
     id: 'sb_a1a830e4-b09f-41cc-a96b-1986720d34fe',
@@ -1790,6 +1982,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HER2 — MorphoSys to Roche',
     source: 'sec_10k',
+    assetName: 'HER2',
+    verified: false,
   },
   {
     id: 'sb_c4495499-7ba9-4646-9bfd-a537ae254764',
@@ -1808,6 +2002,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD38-201 — Zymeworks to Vertex',
     source: 'sec_10k',
+    assetName: 'CD38-201',
+    verified: false,
   },
   {
     id: 'sb_77edda1a-479e-454c-b964-415c0b810781',
@@ -1826,6 +2022,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PD-1-201 — Zymeworks to AbbVie',
     source: 'press_release',
+    assetName: 'PD-1-201',
+    verified: false,
   },
   {
     id: 'sb_f02e68a2-f74b-4a9a-a9f9-4fab2b17332e',
@@ -1845,6 +2043,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BRAF V600E-101 — RemeGen to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'Anti-BRAF V600E-101',
+    verified: false,
   },
   {
     id: 'sb_4bf2a44d-f99d-4a8e-b679-a82a6d3414f7',
@@ -1864,6 +2064,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-L1-101 — Alphamab Oncology to Moderna',
     source: 'press_release',
+    assetName: 'PD-L1-101',
+    verified: false,
   },
   {
     id: 'sb_cf266d4e-10d0-4b55-a339-51e8e274ff82',
@@ -1883,6 +2085,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Claudin 6 — Argenx to Takeda',
     source: 'press_release',
+    assetName: 'Claudin 6',
+    verified: false,
   },
   {
     id: 'sb_1cf59f6a-5ce4-48eb-8c07-47599ca88370',
@@ -1902,6 +2106,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ERK-201 — Syros Pharmaceuticals to Sanofi',
     source: 'press_release',
+    assetName: 'ERK-201',
+    verified: false,
   },
   {
     id: 'sb_70c4edff-dad4-4aa3-87a9-041bc9fa9ee9',
@@ -1921,6 +2127,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ALK-mab — Pyxis Oncology to Pfizer',
     source: 'press_release',
+    assetName: 'ALK-mab',
+    verified: false,
   },
   {
     id: 'sb_f215e5f6-19eb-4ac9-bdbf-b6e0b63b6e5b',
@@ -1939,6 +2147,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PSMA-ciclib — Alkermes to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'PSMA-ciclib',
+    verified: false,
   },
   {
     id: 'sb_90fb7226-34ac-4074-a01a-ff9a33fd78b1',
@@ -1958,6 +2168,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD38-tinib — Syros Pharmaceuticals to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-CD38-tinib',
+    verified: false,
   },
   {
     id: 'sb_3533990c-644c-4df3-9f78-7899766c489f',
@@ -1977,6 +2189,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MUC1-001 — Beam Therapeutics to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'MUC1-001',
+    verified: false,
   },
   {
     id: 'sb_0a5aace5-888d-440d-8134-4592c1a93d3e',
@@ -1996,6 +2210,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FGFR-201 — Zai Lab to Roche',
     source: 'sec_8k',
+    assetName: 'FGFR-201',
+    verified: false,
   },
   {
     id: 'sb_7f6fbd4d-abbd-4836-95d9-361b9efd69f5',
@@ -2015,6 +2231,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CDK4/6-201 — Zai Lab to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'Anti-CDK4/6-201',
+    verified: false,
   },
   {
     id: 'sb_094cd841-543d-49bf-9e13-85204710f7c6',
@@ -2033,6 +2251,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Pegozafermin (MASH acquisition) — 89bio to Roche',
     source: 'press_release',
+    assetName: 'Pegozafermin (MASH acquisition)',
+    verified: false,
   },
   {
     id: 'sb_ef8369f3-fb20-40b4-bee0-3ba660b42177',
@@ -2052,6 +2272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ALK — PMV Pharmaceuticals to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'ALK',
+    verified: false,
   },
   {
     id: 'sb_3d4fd8ad-9e99-4d67-8c18-b682e31c700a',
@@ -2071,6 +2293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OCU400 — Ocugen to Kwangdong Pharmaceutical',
     source: 'press_release',
+    assetName: 'OCU400',
+    verified: false,
   },
   {
     id: 'sb_0292c207-c603-488f-a883-286efa526809',
@@ -2089,6 +2313,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'alpha-synuclein siRNA — Arrowhead Pharmaceuticals to Novartis',
     source: 'press_release',
+    assetName: 'alpha-synuclein siRNA',
+    verified: false,
   },
   {
     id: 'sb_94af2752-53ec-4fef-aa71-120de4ffcef2',
@@ -2108,6 +2334,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD33-301 — Bicycle Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'CD33-301',
+    verified: false,
   },
   {
     id: 'sb_b8522131-819e-45e3-ab1d-c2fb34d0ccda',
@@ -2126,6 +2354,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'NMDA-101 — Intra-Cellular Therapies to Amgen',
     source: 'press_release',
+    assetName: 'NMDA-101',
+    verified: false,
   },
   {
     id: 'sb_1295f14d-9b08-47eb-a276-8e30acc4d0a2',
@@ -2145,6 +2375,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MUC16-201 — Hookipa Pharma to Pfizer',
     source: 'sec_10k',
+    assetName: 'MUC16-201',
+    verified: false,
   },
   {
     id: 'sb_1057d652-8130-4b70-b94c-7d27164025fa',
@@ -2164,6 +2396,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'B7-H4-201 — Argenx to Moderna',
     source: 'sec_8k',
+    assetName: 'B7-H4-201',
+    verified: false,
   },
   {
     id: 'sb_4e3d0e69-ed4e-4b4c-927b-57ba3efaef5e',
@@ -2183,6 +2417,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-L1 — Zai Lab to Sanofi',
     source: 'sec_8k',
+    assetName: 'PD-L1',
+    verified: false,
   },
   {
     id: 'sb_d87b2559-b301-4779-baa8-bbde17d914a8',
@@ -2202,6 +2438,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ALK-201 — Immatics to Gilead Sciences',
     source: 'press_release',
+    assetName: 'ALK-201',
+    verified: false,
   },
   {
     id: 'sb_abe295d2-0d70-428f-9605-af4cba43a53d',
@@ -2221,6 +2459,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'War-Lock Drug Conjugates — Enlaza Therapeutics to Vertex Pharmaceuticals',
     source: 'press_release',
+    assetName: 'War-Lock Drug Conjugates',
+    verified: false,
   },
   {
     id: 'sb_19a19d39-0a42-49f3-b27b-7e403bee4b81',
@@ -2239,6 +2479,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CSF1R-001 — Legend Biotech to Pfizer',
     source: 'sec_10k',
+    assetName: 'CSF1R-001',
+    verified: false,
   },
   {
     id: 'sb_a27fdf75-bc91-4496-8446-de6dc10b67c2',
@@ -2258,6 +2500,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'OX40-101 — G1 Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'OX40-101',
+    verified: false,
   },
   {
     id: 'sb_b197bc9a-67f2-4a9c-b1c2-2d1c9ec4c775',
@@ -2277,6 +2521,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HTT — Prevail Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'HTT',
+    verified: false,
   },
   {
     id: 'sb_19476c5c-8696-464f-80b6-3e8c4245f1cd',
@@ -2296,6 +2542,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SAN2355 — Saniona to Jazz Pharmaceuticals',
     source: 'press_release',
+    assetName: 'SAN2355',
+    verified: false,
   },
   {
     id: 'sb_7ad0d586-8e7b-46f3-8fae-462e5712e374',
@@ -2315,6 +2563,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'SIRPα-101 — BioNTech to Vertex',
     source: 'press_release',
+    assetName: 'SIRPα-101',
+    verified: false,
   },
   {
     id: 'sb_45ecf6a7-d006-4b2f-8bca-330279832c86',
@@ -2334,6 +2584,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-BTK-001 — Caribou Biosciences to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'Anti-BTK-001',
+    verified: false,
   },
   {
     id: 'sb_49e9e2eb-ad06-4cd4-b599-e2af087d1698',
@@ -2353,6 +2605,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FRα-101 — Revolution Medicines to GSK',
     source: 'press_release',
+    assetName: 'FRα-101',
+    verified: false,
   },
   {
     id: 'sb_731af033-425e-4ba2-ae66-b025962a96c8',
@@ -2371,6 +2625,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Nectin-4-tinib — IGM Biosciences to Bayer',
     source: 'sec_10k',
+    assetName: 'Nectin-4-tinib',
+    verified: false,
   },
   {
     id: 'sb_975a736d-e7e5-41e0-9bb1-a4f458d9cc45',
@@ -2390,6 +2646,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-ATR-001 — G1 Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-ATR-001',
+    verified: false,
   },
   {
     id: 'sb_39d2ed4e-6ef5-4db5-b4af-8485a6a8317e',
@@ -2408,6 +2666,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-KIT-301 — MacroGenics to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-KIT-301',
+    verified: false,
   },
   {
     id: 'sb_52cfbfc7-8430-4765-bac5-92714befcf73',
@@ -2427,6 +2687,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KIT-301 — Hookipa Pharma to Vertex',
     source: 'sec_10k',
+    assetName: 'KIT-301',
+    verified: false,
   },
   {
     id: 'sb_dbd9c105-fdd3-4727-89cf-d1dd3f22075d',
@@ -2445,6 +2707,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-B7-H4-201 — G1 Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'Anti-B7-H4-201',
+    verified: false,
   },
   {
     id: 'sb_25b0eb1f-8b0a-474c-9699-e2524991e0d6',
@@ -2463,6 +2727,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'WEE1 — RemeGen to Roche',
     source: 'sec_8k',
+    assetName: 'WEE1',
+    verified: false,
   },
   {
     id: 'sb_5d6881d8-6cb3-4a60-902f-bf690fc8f7a8',
@@ -2481,6 +2747,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1 — Tango Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'ROS1',
+    verified: false,
   },
   {
     id: 'sb_dc12c928-2628-43b2-b419-40fe097208a0',
@@ -2500,6 +2768,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Nectin-4-001 — Xencor to Eli Lilly',
     source: 'press_release',
+    assetName: 'Nectin-4-001',
+    verified: false,
   },
   {
     id: 'sb_1f7ad091-37b6-4857-ad59-6cc951b3e9c6',
@@ -2519,6 +2789,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4-001 — Caribou Biosciences to Amgen',
     source: 'sec_10k',
+    assetName: 'Nectin-4-001',
+    verified: false,
   },
   {
     id: 'sb_2acff4bd-8c0d-4e20-a72c-2e67d3435b09',
@@ -2538,6 +2810,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-SIRPα-301 — Karyopharm Therapeutics to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'Anti-SIRPα-301',
+    verified: false,
   },
   {
     id: 'sb_71639717-2516-4f06-80f6-14a50af08ec4',
@@ -2557,6 +2831,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SIRPα-tinib — Blueprint Medicines to Merck',
     source: 'sec_10k',
+    assetName: 'SIRPα-tinib',
+    verified: false,
   },
   {
     id: 'sb_b15fe737-ef2e-4ab1-94b5-fa43a7ddedbf',
@@ -2576,6 +2852,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-SHP2-tinib — Forma Therapeutics to Novartis',
     source: 'sec_10k',
+    assetName: 'Anti-SHP2-tinib',
+    verified: false,
   },
   {
     id: 'sb_2cfda9ef-5447-4f35-9182-7b72769b0001',
@@ -2595,6 +2873,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD33 — CytomX Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'CD33',
+    verified: false,
   },
   {
     id: 'sb_e2ed01b2-af49-4257-a62f-6c4f9cea77a0',
@@ -2613,6 +2893,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ATR — Innovent Biologics to Merck',
     source: 'press_release',
+    assetName: 'ATR',
+    verified: false,
   },
   {
     id: 'sb_56b775b6-cbb1-478b-acf4-0a8e61dc3710',
@@ -2631,6 +2913,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SYH2086 — CSPC to Madrigal Pharmaceuticals',
     source: 'press_release',
+    assetName: 'SYH2086',
+    verified: false,
   },
   {
     id: 'sb_b1e01f11-b95c-4342-9a61-624644a4c081',
@@ -2650,6 +2934,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12D-101 — CytomX Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'KRAS G12D-101',
+    verified: false,
   },
   {
     id: 'sb_b0e33d87-81df-4ca4-89c0-fb9573f2c699',
@@ -2667,6 +2953,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Inozyme Pharma — Inozyme Pharma to BioMarin Pharmaceutical',
     source: 'press_release',
+    assetName: 'Inozyme Pharma',
+    verified: false,
   },
   {
     id: 'sb_df5f7a35-eeca-4f73-b684-6b3bd0293f3b',
@@ -2686,6 +2974,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'mTOR-tinib — Roivant Sciences to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'mTOR-tinib',
+    verified: false,
   },
   {
     id: 'sb_44eb3178-94a4-4c67-8a96-5ecf9149a657',
@@ -2705,6 +2995,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ALK-001 — Bicycle Therapeutics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'ALK-001',
+    verified: false,
   },
   {
     id: 'sb_af0749cf-4927-4c64-8157-5e4a8b9fd7d6',
@@ -2724,6 +3016,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-LAG-3-mab — TCR2 Therapeutics to Regeneron',
     source: 'press_release',
+    assetName: 'Anti-LAG-3-mab',
+    verified: false,
   },
   {
     id: 'sb_879b0c03-aa7b-4c13-9bf2-395d88e4994a',
@@ -2743,6 +3037,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FGFR — Ono Pharmaceutical to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'FGFR',
+    verified: false,
   },
   {
     id: 'sb_c570ffdb-0b5d-4f01-a32a-1fae63f74ffe',
@@ -2761,6 +3057,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PARP-201 — Syros Pharmaceuticals to GSK',
     source: 'sec_10k',
+    assetName: 'PARP-201',
+    verified: false,
   },
   {
     id: 'sb_452bbda5-52d9-42bb-9b10-e7c8994ccf50',
@@ -2779,6 +3077,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-WEE1-tinib — RemeGen to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-WEE1-tinib',
+    verified: false,
   },
   {
     id: 'sb_b7ab7f7e-f7a9-4da7-9627-ed21f831a3fe',
@@ -2797,6 +3097,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SYH2086 — CSPC Pharmaceutical to Madrigal',
     source: 'press_release',
+    assetName: 'SYH2086',
+    verified: false,
   },
   {
     id: 'sb_988143d9-0edd-449b-938c-2e484b794cbf',
@@ -2814,6 +3116,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Inozyme pipeline — Inozyme Pharma to BioMarin',
     source: 'press_release',
+    assetName: 'Inozyme pipeline',
+    verified: false,
   },
   {
     id: 'sb_89252894-9eda-4764-97fb-1f2f527e2b1e',
@@ -2832,6 +3136,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid tumors — BioNTech to BMS',
     source: 'manual',
+    assetName: 'solid tumors',
+    verified: true,
   },
   {
     id: 'sb_ce63cb87-62e8-41a8-a91a-79110d2f3c53',
@@ -2849,6 +3155,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Aktis Oncology to Eli Lilly',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_72164f9b-47cc-4773-9f3b-01577db47d3f',
@@ -2867,6 +3175,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid tumors — 3SBio to Pfizer',
     source: 'manual',
+    assetName: 'solid tumors',
+    verified: true,
   },
   {
     id: 'sb_3efdc7f8-5e96-4f4c-b28c-c7d66f4d4a89',
@@ -2885,6 +3195,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'depression — Biogen to Sage Therapeutics',
     source: 'manual',
+    assetName: 'depression',
+    verified: true,
   },
   {
     id: 'sb_a7ced381-63d2-4409-b638-5aec04898202',
@@ -2902,6 +3214,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'systemic mastocytosis — Blueprint Medicines to Sanofi',
     source: 'manual',
+    assetName: 'systemic mastocytosis',
+    verified: true,
   },
   {
     id: 'sb_edc389ca-ca27-4014-af2e-b6d39faf7136',
@@ -2920,6 +3234,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'breast cancer — Hengrui Medicine to Glenmark Pharmaceuticals',
     source: 'manual',
+    assetName: 'breast cancer',
+    verified: true,
   },
   {
     id: 'sb_c8158d8f-d9e4-43a6-be4e-09f0ffb33eb8',
@@ -2938,6 +3254,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'myastheniaGravis — Cabaletta Bio to BMS',
     source: 'manual',
+    assetName: 'myastheniaGravis',
+    verified: true,
   },
   {
     id: 'sb_48a2c73b-ba19-4ac9-b306-ea413129931c',
@@ -2956,6 +3274,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiovascular risk reduction — Argo Biopharmaceutical to Novartis',
     source: 'manual',
+    assetName: 'cardiovascular risk reduction',
+    verified: true,
   },
   {
     id: 'sb_1813d33c-e32c-472e-b65c-afc5e12f4254',
@@ -2974,6 +3294,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — LaNova Medicines to BMS',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_2e174c3b-33a0-4c12-95c9-87f1722726f8',
@@ -2992,6 +3314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'psoriasis — Nimbus Therapeutics to Takeda',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_6e38c584-ac8d-49fa-8feb-96812e005bfa',
@@ -3009,6 +3333,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'gastrointestinal stromal tumor — IDRx to GSK',
     source: 'manual',
+    assetName: 'gastrointestinal stromal tumor',
+    verified: true,
   },
   {
     id: 'sb_e3e13060-8942-470f-afeb-f750591a36c3',
@@ -3027,6 +3353,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'multi-indication — Hengrui Pharma to GSK',
     source: 'manual',
+    assetName: 'multi-indication',
+    verified: true,
   },
   {
     id: 'sb_4cde2560-46cc-4543-8bce-5c960fcc419b',
@@ -3044,6 +3372,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'microRNA therapeutics — Regulus Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'microRNA therapeutics',
+    verified: true,
   },
   {
     id: 'sb_2c3cc7b1-43ba-4275-926d-9db7b268b60e',
@@ -3061,6 +3391,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Uplizna — Mitsubishi Tanabe Pharma to Bain Capital',
     source: 'press_release',
+    assetName: 'Uplizna',
+    verified: false,
   },
   {
     id: 'sb_5bf3de98-67a6-4dc5-931a-04053e590b7f',
@@ -3079,6 +3411,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LX9851 — Lexicon Pharmaceuticals to Novo Nordisk',
     source: 'press_release',
+    assetName: 'LX9851',
+    verified: false,
   },
   {
     id: 'sb_176bcb9f-949c-4674-a16e-fe1974856f03',
@@ -3097,6 +3431,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'STAC-BBB AAV capsid — Sangamo to Eli Lilly',
     source: 'press_release',
+    assetName: 'STAC-BBB AAV capsid',
+    verified: false,
   },
   {
     id: 'sb_bad13b6e-0291-40ef-9614-16c881ef133c',
@@ -3114,6 +3450,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'In vivo CAR-T platform — Capstan Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'In vivo CAR-T platform',
+    verified: true,
   },
   {
     id: 'sb_b1dc7156-33ed-4bdb-a79d-5cefdac2354b',
@@ -3133,6 +3471,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'RET-101 — Vor Biopharma to Bayer',
     source: 'sec_10k',
+    assetName: 'RET-101',
+    verified: false,
   },
   {
     id: 'sb_7db9255d-1ad2-4e14-9bfb-fa4c39d7798f',
@@ -3152,6 +3492,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-MDM2 — Janux Therapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-MDM2',
+    verified: false,
   },
   {
     id: 'sb_3e024d9f-626b-42d5-abe3-0f60bb562eeb',
@@ -3171,6 +3513,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-FRα-101 — Intellia Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'Anti-FRα-101',
+    verified: false,
   },
   {
     id: 'sb_0cf3e58e-1e5f-4e86-aa74-13d841db2a36',
@@ -3189,6 +3533,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Zurzuvae (zuranolone) acquisition — Sage Therapeutics to Supernus Pharmaceuticals',
     source: 'press_release',
+    assetName: 'Zurzuvae (zuranolone) acquisition',
+    verified: false,
   },
   {
     id: 'sb_340c86f9-db8e-46b7-a8f0-55351065a47f',
@@ -3206,6 +3552,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'deuterated JAK inhibitor — Concert Pharmaceuticals to Sun Pharmaceutical',
     source: 'press_release',
+    assetName: 'deuterated JAK inhibitor',
+    verified: false,
   },
   {
     id: 'sb_d12ca29b-fd1f-4674-9ecb-b7f7dc1ded95',
@@ -3224,6 +3572,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'neuroscience portfolio — Sage Therapeutics to Supernus',
     source: 'press_release',
+    assetName: 'neuroscience portfolio',
+    verified: false,
   },
   {
     id: 'sb_caf1d5d4-6e72-4d8a-804d-115ee78ebff0',
@@ -3243,6 +3593,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGFR — CRISPR Therapeutics to AbbVie',
     source: 'sec_8k',
+    assetName: 'VEGFR',
+    verified: false,
   },
   {
     id: 'sb_d86141d3-0e1f-4ca3-9ff8-7b7cd51ff637',
@@ -3262,6 +3614,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CEA-mab — Astellas to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CEA-mab',
+    verified: false,
   },
   {
     id: 'sb_809f6fca-be8f-4b59-aaad-3d10f9d399e5',
@@ -3281,6 +3635,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'DLL3-301 — Xencor to Takeda',
     source: 'press_release',
+    assetName: 'DLL3-301',
+    verified: false,
   },
   {
     id: 'sb_49ca793d-aba6-4d79-869d-54cb7c61a8b8',
@@ -3299,6 +3655,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER2 — Alphamab Oncology to Roche',
     source: 'sec_8k',
+    assetName: 'HER2',
+    verified: false,
   },
   {
     id: 'sb_b984c542-5365-4190-90da-f596d0c4db74',
@@ -3318,6 +3676,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RET-301 — Fate Therapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'RET-301',
+    verified: false,
   },
   {
     id: 'sb_dbd356ef-b877-4f59-af87-5a6ca7b4a3b1',
@@ -3337,6 +3697,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12D-201 — PMV Pharmaceuticals to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'KRAS G12D-201',
+    verified: false,
   },
   {
     id: 'sb_ea16938f-6f87-41d0-a8f0-71b111d166d4',
@@ -3356,6 +3718,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CLDN18.2-301 — CytomX Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'CLDN18.2-301',
+    verified: false,
   },
   {
     id: 'sb_cd56c38c-196b-45e2-b21e-d160849742a2',
@@ -3375,6 +3739,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H4-201 — MacroGenics to AbbVie',
     source: 'sec_10k',
+    assetName: 'B7-H4-201',
+    verified: false,
   },
   {
     id: 'sb_efe8a2ee-87d9-4d9f-ae4c-acafd1209af3',
@@ -3394,6 +3760,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CDK4/6-201 — Nektar Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'CDK4/6-201',
+    verified: false,
   },
   {
     id: 'sb_1ec8c13e-139a-45dc-a487-9ce8c7899f10',
@@ -3411,6 +3779,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BNT327 (PD-L1/VEGF-A bispecific) — BioNTech to Bristol Myers Squibb',
     source: 'press_release',
+    assetName: 'BNT327 (PD-L1/VEGF-A bispecific)',
+    verified: true,
   },
   {
     id: 'sb_56218fb9-80c2-480e-bc04-cd752f8805cf',
@@ -3430,6 +3800,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MEK-001 — Immatics to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-MEK-001',
+    verified: false,
   },
   {
     id: 'sb_f4b7b3e2-20c7-4cff-bfa7-2a6fe67fa9cd',
@@ -3449,6 +3821,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FGFR — Arvinas to Biogen',
     source: 'sec_10k',
+    assetName: 'FGFR',
+    verified: false,
   },
   {
     id: 'sb_06c3b3bd-5701-4f1c-b31c-4b4bac222d13',
@@ -3467,6 +3841,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-B7-H4-201 — Elevation Oncology to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Anti-B7-H4-201',
+    verified: false,
   },
   {
     id: 'sb_cc45a134-8ff0-491c-b8ff-b9992782e593',
@@ -3485,6 +3861,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H4-201 — Hengrui Medicine to Regeneron',
     source: 'press_release',
+    assetName: 'B7-H4-201',
+    verified: false,
   },
   {
     id: 'sb_759b3839-9b33-4813-bbca-183ab307b506',
@@ -3503,6 +3881,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VG-3927 (TREM2 agonist) — Vigil Neuroscience to Sanofi',
     source: 'press_release',
+    assetName: 'VG-3927 (TREM2 agonist)',
+    verified: false,
   },
   {
     id: 'sb_c5663f7d-0203-42c7-bb9c-f285f16345e5',
@@ -3521,6 +3901,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CDK4/6-mab — Replimune to Sanofi',
     source: 'sec_8k',
+    assetName: 'CDK4/6-mab',
+    verified: false,
   },
   {
     id: 'sb_5f14db30-03a9-456f-b14c-6d910cd5183a',
@@ -3539,6 +3921,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Pacibekitug (CV) — Tourmaline Bio to Novartis',
     source: 'press_release',
+    assetName: 'Pacibekitug (CV)',
+    verified: false,
   },
   {
     id: 'sb_c11d7ed0-7df9-420a-8b28-4e86de176671',
@@ -3558,6 +3942,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-EGFR-tinib — Astellas to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'Anti-EGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_450dd7de-2055-46f9-b924-c8d1f998bcc0',
@@ -3576,6 +3962,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-RET — Immunogen to Takeda',
     source: 'sec_8k',
+    assetName: 'Anti-RET',
+    verified: false,
   },
   {
     id: 'sb_defe4e01-4c65-4f12-a051-a536be76b0d2',
@@ -3595,6 +3983,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-MEK — Junshi Biosciences to Roche',
     source: 'press_release',
+    assetName: 'Anti-MEK',
+    verified: false,
   },
   {
     id: 'sb_dea9c95f-5b47-4cce-b8ea-28d12ef0a8bb',
@@ -3614,6 +4004,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BCMA-001 — Vor Biopharma to AbbVie',
     source: 'sec_8k',
+    assetName: 'Anti-BCMA-001',
+    verified: false,
   },
   {
     id: 'sb_3af163d6-5f19-4d82-97f7-0bd11bee793c',
@@ -3633,6 +4025,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FRα-201 — Blueprint Medicines to Amgen',
     source: 'press_release',
+    assetName: 'FRα-201',
+    verified: false,
   },
   {
     id: 'sb_dd35abb4-3abd-486a-844f-7ef1480bb08c',
@@ -3652,6 +4046,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FLT3-301 — G1 Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'FLT3-301',
+    verified: false,
   },
   {
     id: 'sb_4761d8a6-b9ba-4783-b371-e9201907aa62',
@@ -3670,6 +4066,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Efimosfermin alfa (MASH FGF21) — Boston Pharmaceuticals to GSK',
     source: 'press_release',
+    assetName: 'Efimosfermin alfa (MASH FGF21)',
+    verified: false,
   },
   {
     id: 'sb_f89f045d-cc88-4069-836e-122390c96fb2',
@@ -3689,6 +4087,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HMI-115 — Hope Medicine to Organon',
     source: 'press_release',
+    assetName: 'HMI-115',
+    verified: false,
   },
   {
     id: 'sb_34a0f2cb-e342-41a0-99e4-5bb2b7ba68a0',
@@ -3708,6 +4108,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KIT-mab — MorphoSys to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'KIT-mab',
+    verified: false,
   },
   {
     id: 'sb_c537c27a-e233-4e99-b433-cf5d9f8c6878',
@@ -3727,6 +4129,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-ICOS-301 — Alphamab Oncology to Regeneron',
     source: 'sec_10k',
+    assetName: 'Anti-ICOS-301',
+    verified: false,
   },
   {
     id: 'sb_5c3b04c5-2443-4a17-b5b8-7a9d4bf29685',
@@ -3746,6 +4150,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ATLX-1282 — Alchemab Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'ATLX-1282',
+    verified: false,
   },
   {
     id: 'sb_304292cb-d50b-40c5-ad24-6cb4d269c3e4',
@@ -3765,6 +4171,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'RET-201 — ORIC Pharmaceuticals to Amgen',
     source: 'sec_8k',
+    assetName: 'RET-201',
+    verified: false,
   },
   {
     id: 'sb_dea4d94c-dbd1-417e-9a41-fc4674b95f2a',
@@ -3783,6 +4191,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'RET-101 — CRISPR Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'RET-101',
+    verified: false,
   },
   {
     id: 'sb_6f98cab4-b3b8-4052-b79c-876fb1d03639',
@@ -3802,6 +4212,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER3-301 — Syndax Pharmaceuticals to Biogen',
     source: 'sec_10k',
+    assetName: 'HER3-301',
+    verified: false,
   },
   {
     id: 'sb_d4990aeb-e932-40c8-a42c-ba815e851df8',
@@ -3821,6 +4233,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'KRAS G12C-tinib — Celldex Therapeutics to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'KRAS G12C-tinib',
+    verified: false,
   },
   {
     id: 'sb_20916e6e-0e0d-4057-bb50-2417d3cfddc4',
@@ -3840,6 +4254,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-LRRK2-nib — Passage Bio to Genentech',
     source: 'sec_10k',
+    assetName: 'Anti-LRRK2-nib',
+    verified: false,
   },
   {
     id: 'sb_097d861f-0e90-45b9-9b0d-686ca3ebc3cd',
@@ -3858,6 +4274,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-ICOS-301 — Umoja Biopharma to Biogen',
     source: 'sec_8k',
+    assetName: 'Anti-ICOS-301',
+    verified: false,
   },
   {
     id: 'sb_a111c2c6-2345-469b-a49d-5233d4236285',
@@ -3876,6 +4294,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD40-101 — CytomX Therapeutics to Takeda',
     source: 'sec_10k',
+    assetName: 'CD40-101',
+    verified: false,
   },
   {
     id: 'sb_12039346-9472-4015-a833-6ed077e7ec7f',
@@ -3895,6 +4315,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD33-001 — Mirati Therapeutics to Bayer',
     source: 'sec_8k',
+    assetName: 'Anti-CD33-001',
+    verified: false,
   },
   {
     id: 'sb_13981eb4-8104-4aa9-a4a3-8a5edef671f9',
@@ -3914,6 +4336,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD38-301 — Pyxis Oncology to Novartis',
     source: 'sec_8k',
+    assetName: 'CD38-301',
+    verified: false,
   },
   {
     id: 'sb_d06f2736-0a8e-4bec-aed3-cd682e23acec',
@@ -3933,6 +4357,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CLDN18.2-201 — Arrowhead Pharmaceuticals to Vertex',
     source: 'sec_8k',
+    assetName: 'CLDN18.2-201',
+    verified: false,
   },
   {
     id: 'sb_62191ffb-dc61-4dc0-8446-4a3fc11ee403',
@@ -3952,6 +4378,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SIRPα — Pyxis Oncology to Merck',
     source: 'sec_8k',
+    assetName: 'SIRPα',
+    verified: false,
   },
   {
     id: 'sb_0638cef1-7013-44d3-88ef-84313830613d',
@@ -3971,6 +4399,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC1-101 — Nurix Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_24c1f1b7-953b-4994-88e2-d6bc3bb08071',
@@ -3990,6 +4420,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CEA-tinib — Syros Pharmaceuticals to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'CEA-tinib',
+    verified: false,
   },
   {
     id: 'sb_40922c0d-0cec-494e-b638-4e03bc9027e2',
@@ -4009,6 +4441,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ROS1-tinib — Kelun-Biotech to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-ROS1-tinib',
+    verified: false,
   },
   {
     id: 'sb_7fd693a7-0fc7-4dae-b732-a721f26cdb59',
@@ -4027,6 +4461,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'mTOR-mab — Kymera Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'mTOR-mab',
+    verified: false,
   },
   {
     id: 'sb_080083c6-5591-4c3e-8f90-2333ffa87f9a',
@@ -4045,6 +4481,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'transcription factor asset — Nurix Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'transcription factor asset',
+    verified: false,
   },
   {
     id: 'sb_45310553-09e3-423e-ba6e-a109a07cd7c1',
@@ -4064,6 +4502,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGFR-tinib — Zai Lab to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'VEGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_c49aa4cd-1967-4743-93f9-f24b6eaddf59',
@@ -4083,6 +4523,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BRAF V600E-tinib — Akeso to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'BRAF V600E-tinib',
+    verified: false,
   },
   {
     id: 'sb_e3a5bb4a-e887-4a84-a64b-d882761fec0d',
@@ -4101,6 +4543,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ALK-201 — Immunogen to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-ALK-201',
+    verified: false,
   },
   {
     id: 'sb_4e2545d8-ee0c-466c-9967-d030c90cbc89',
@@ -4120,6 +4564,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PI3K-tinib — Janux Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'PI3K-tinib',
+    verified: false,
   },
   {
     id: 'sb_6b418f41-ad25-491c-a5a1-7f33c36f8e28',
@@ -4138,6 +4584,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HRS-5346 — Jiangsu Hengrui to Merck',
     source: 'manual',
+    assetName: 'HRS-5346',
+    verified: true,
   },
   {
     id: 'sb_2d4f1072-a896-48bc-a851-b8e047494576',
@@ -4157,6 +4605,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGFR-201 — Agenus to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'VEGFR-201',
+    verified: false,
   },
   {
     id: 'sb_6528bb80-d05b-4de3-bd61-e8b4dca439f0',
@@ -4176,6 +4626,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'DLL3-tinib — Akeso to Novartis',
     source: 'press_release',
+    assetName: 'DLL3-tinib',
+    verified: false,
   },
   {
     id: 'sb_acbd6d62-fb76-4d01-8ff6-f789b8d5cdb7',
@@ -4195,6 +4647,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CD73-101 — Nkarta to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-CD73-101',
+    verified: false,
   },
   {
     id: 'sb_83551110-1022-446b-8f3f-ff89e59fe1db',
@@ -4213,6 +4667,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MET — Relay Therapeutics to Roche',
     source: 'sec_10k',
+    assetName: 'MET',
+    verified: false,
   },
   {
     id: 'sb_07ead63b-cbaa-4ff8-b702-0da026f30d2f',
@@ -4231,6 +4687,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'DR-0201 — Dren Bio to Sanofi',
     source: 'press_release',
+    assetName: 'DR-0201',
+    verified: false,
   },
   {
     id: 'sb_e1a6ae99-6534-45d5-ab45-e72416fc4039',
@@ -4249,6 +4707,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BCMA-mab — Innovent Biologics to Biogen',
     source: 'sec_8k',
+    assetName: 'BCMA-mab',
+    verified: false,
   },
   {
     id: 'sb_2a904d2f-6653-4fc1-9bcb-15af6a7c7c1b',
@@ -4268,6 +4728,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIGIT-101 — Editas Medicine to Sanofi',
     source: 'sec_10k',
+    assetName: 'TIGIT-101',
+    verified: false,
   },
   {
     id: 'sb_e601e80e-f6a2-4f51-a44f-867241c9c277',
@@ -4287,6 +4749,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CEA-201 — CRISPR Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'CEA-201',
+    verified: false,
   },
   {
     id: 'sb_4fec1203-2b19-4e2b-aba1-873967859c35',
@@ -4306,6 +4770,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER3-tinib — Junshi Biosciences to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'HER3-tinib',
+    verified: false,
   },
   {
     id: 'sb_1751869f-e89f-479e-958b-557967cf612f',
@@ -4325,6 +4791,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PI3K-001 — Junshi Biosciences to Regeneron',
     source: 'sec_8k',
+    assetName: 'PI3K-001',
+    verified: false,
   },
   {
     id: 'sb_52f0da5c-a8c0-4787-98eb-70cc17dcccdb',
@@ -4344,6 +4812,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-HER2-301 — Editas Medicine to Merck',
     source: 'sec_10k',
+    assetName: 'Anti-HER2-301',
+    verified: false,
   },
   {
     id: 'sb_8a2cd6af-be33-4873-9818-ab3bd2f7e08e',
@@ -4363,6 +4833,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD22-201 — Daiichi Sankyo to Amgen',
     source: 'sec_8k',
+    assetName: 'CD22-201',
+    verified: false,
   },
   {
     id: 'sb_8de6ee94-b454-4fb2-b7d8-433125053648',
@@ -4382,6 +4854,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Nectin-4-301 — Arcus Biosciences to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_0ac76970-00ef-4124-965b-85e218fa818b',
@@ -4401,6 +4875,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'KIT-301 — Xencor to Vertex',
     source: 'press_release',
+    assetName: 'KIT-301',
+    verified: false,
   },
   {
     id: 'sb_af1c28d6-11f5-4ee7-af99-8f0311b20de5',
@@ -4420,6 +4896,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-KIT-tinib — Beam Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-KIT-tinib',
+    verified: false,
   },
   {
     id: 'sb_353dc6ef-3a4a-4c32-8817-7247187897ca',
@@ -4439,6 +4917,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12C — Affimed to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'KRAS G12C',
+    verified: false,
   },
   {
     id: 'sb_944a9582-1236-46a2-a09e-02e30dfa9a65',
@@ -4458,6 +4938,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VEGFR-301 — PMV Pharmaceuticals to Vertex',
     source: 'press_release',
+    assetName: 'VEGFR-301',
+    verified: false,
   },
   {
     id: 'sb_fa9dba6c-19e3-4812-8033-8b3a852f44a9',
@@ -4477,6 +4959,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CEA-tinib — Monte Rosa Therapeutics to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Anti-CEA-tinib',
+    verified: false,
   },
   {
     id: 'sb_1753cb26-3d67-4175-8ecc-d9d0c2680b63',
@@ -4496,6 +4980,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-TIM-3-mab — Zymeworks to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Anti-TIM-3-mab',
+    verified: false,
   },
   {
     id: 'sb_6975836f-32ac-4b37-be3f-b281e9162a93',
@@ -4514,6 +5000,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Zorevunersen (Dravet syndrome) — Stoke Therapeutics to Biogen',
     source: 'press_release',
+    assetName: 'Zorevunersen (Dravet syndrome)',
+    verified: false,
   },
   {
     id: 'sb_d48041c8-f578-4e68-9fe6-a795eefff358',
@@ -4533,6 +5021,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'mTOR-301 — Affimed to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'mTOR-301',
+    verified: false,
   },
   {
     id: 'sb_09dd4e25-8539-47b5-bb56-0d57fcbc95b8',
@@ -4552,6 +5042,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Vipoglanstat — Gesynta Pharma to Undisclosed',
     source: 'press_release',
+    assetName: 'Vipoglanstat',
+    verified: false,
   },
   {
     id: 'sb_d596d94c-bafa-4978-ab00-a7b276c092f2',
@@ -4571,6 +5063,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SIRPα-301 — Relay Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'SIRPα-301',
+    verified: false,
   },
   {
     id: 'sb_c128832b-47cf-4e02-a7d0-51e17026b65d',
@@ -4589,6 +5083,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KRAS G12D-001 — Galapagos to Merck',
     source: 'sec_8k',
+    assetName: 'KRAS G12D-001',
+    verified: false,
   },
   {
     id: 'sb_cefaac6d-1862-44ba-98d1-11243bc7d225',
@@ -4607,6 +5103,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Abelacimab — Anthos Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'Abelacimab',
+    verified: true,
   },
   {
     id: 'sb_577380c7-c704-4fd9-adf4-36dd6c65e054',
@@ -4626,6 +5124,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Multiple ID assets — GSK to Hengrui Pharma',
     source: 'press_release',
+    assetName: 'Multiple ID assets',
+    verified: false,
   },
   {
     id: 'sb_da034771-ece6-4995-90c7-4ea0ec5e80e7',
@@ -4645,6 +5145,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BRAF V600E-001 — Junshi Biosciences to Bayer',
     source: 'sec_8k',
+    assetName: 'BRAF V600E-001',
+    verified: false,
   },
   {
     id: 'sb_ae224970-8150-47f9-8341-42737e854cc0',
@@ -4664,6 +5166,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ERK-301 — Editas Medicine to Biogen',
     source: 'sec_10k',
+    assetName: 'ERK-301',
+    verified: false,
   },
   {
     id: 'sb_00e7bc44-087b-4773-b961-5813e84b11b2',
@@ -4683,6 +5187,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-FLT3-301 — Forma Therapeutics to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'Anti-FLT3-301',
+    verified: false,
   },
   {
     id: 'sb_222670bb-d284-4120-8c31-8efc3bf2b270',
@@ -4701,6 +5207,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ALK-tinib — Relay Therapeutics to Vertex',
     source: 'sec_10k',
+    assetName: 'ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_5dbd408f-744e-45e2-8845-a6951d2e735a',
@@ -4720,6 +5228,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ALK-301 — Arvinas to Regeneron',
     source: 'press_release',
+    assetName: 'ALK-301',
+    verified: false,
   },
   {
     id: 'sb_b25363b9-ac3d-46ec-b92d-edebaf01113e',
@@ -4737,6 +5247,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Galafold (migalastat) + pipeline — Amicus Therapeutics to BioMarin',
     source: 'manual',
+    assetName: 'Galafold (migalastat) + pipeline',
+    verified: true,
   },
   {
     id: 'sb_31dda2ad-236b-4461-8f00-03500888640d',
@@ -4756,6 +5268,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ATR-mab — Syndax Pharmaceuticals to GSK',
     source: 'sec_8k',
+    assetName: 'ATR-mab',
+    verified: false,
   },
   {
     id: 'sb_4c58bd00-7a9e-4cd1-9220-254b4bc1df36',
@@ -4774,6 +5288,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VERVE-201 (Lp(a) gene editing) — Verve Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'VERVE-201 (Lp(a) gene editing)',
+    verified: false,
   },
   {
     id: 'sb_a399318a-62af-4074-99e2-653b9b7eb93e',
@@ -4793,6 +5309,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SHP2-mab — Umoja Biopharma to AstraZeneca',
     source: 'press_release',
+    assetName: 'SHP2-mab',
+    verified: false,
   },
   {
     id: 'sb_aa3c1f7e-399a-4ad1-81d5-e9ec38c8259e',
@@ -4812,6 +5330,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'JAK — Nkarta to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'JAK',
+    verified: false,
   },
   {
     id: 'sb_737518a9-9c09-4b43-afa8-4a4e9058649f',
@@ -4830,6 +5350,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'LIV-1 — Revolution Medicines to Biogen',
     source: 'sec_8k',
+    assetName: 'LIV-1',
+    verified: false,
   },
   {
     id: 'sb_783e96c7-85a5-49e2-b85c-e4f3f4101be9',
@@ -4849,6 +5371,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OX40-101 — Hengrui Medicine to Bayer',
     source: 'press_release',
+    assetName: 'OX40-101',
+    verified: false,
   },
   {
     id: 'sb_1408b501-62af-4ecf-b9b4-4e68e91a5503',
@@ -4867,6 +5391,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CLDN18.2-201 — Sana Biotechnology to Roche',
     source: 'press_release',
+    assetName: 'CLDN18.2-201',
+    verified: false,
   },
   {
     id: 'sb_e4788b39-8a2c-4a09-a5fa-12b5164f2556',
@@ -4886,6 +5412,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'HER2 — BioNTech to GSK',
     source: 'sec_8k',
+    assetName: 'HER2',
+    verified: false,
   },
   {
     id: 'sb_c880b44e-d707-406f-8820-7ff247d08a54',
@@ -4905,6 +5433,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD47-mab — BeiGene to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-CD47-mab',
+    verified: false,
   },
   {
     id: 'sb_de6be64e-ad3a-4ac0-ab1d-a1a907873c81',
@@ -4922,6 +5452,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mRNA pandemic influenza vaccines — HHS to Moderna',
     source: 'press_release',
+    assetName: 'mRNA pandemic influenza vaccines',
+    verified: false,
   },
   {
     id: 'sb_aca28b83-7da1-4e7b-bb28-5bb82dbd6a3a',
@@ -4939,6 +5471,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'needle-free mRNA influenza vaccines — BARDA to Micron Biomedical',
     source: 'press_release',
+    assetName: 'needle-free mRNA influenza vaccines',
+    verified: false,
   },
   {
     id: 'sb_6c492127-8a57-4aac-83b1-2e5893906c40',
@@ -4956,6 +5490,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'mRNA influenza vaccines — Zipcode Bio to Micron Biomedical',
     source: 'press_release',
+    assetName: 'mRNA influenza vaccines',
+    verified: false,
   },
   {
     id: 'sb_82b998c9-8396-4754-b06f-af79c5dd34d3',
@@ -4973,6 +5509,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mRNA-1018 — HHS/BARDA to Moderna',
     source: 'press_release',
+    assetName: 'mRNA-1018',
+    verified: false,
   },
   {
     id: 'sb_f81541a6-f568-42fb-bf64-dcbfe703b2ad',
@@ -4992,6 +5530,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Danicamtiv — Kardigan to Bristol Myers Squibb',
     source: 'press_release',
+    assetName: 'Danicamtiv',
+    verified: false,
   },
   {
     id: 'sb_e12d3324-8522-4f54-b246-b01dc521bb01',
@@ -5009,6 +5549,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'needle-free mRNA avian/seasonal flu vaccines — HHS to Micron Biomedical',
     source: 'press_release',
+    assetName: 'needle-free mRNA avian/seasonal flu vaccines',
+    verified: false,
   },
   {
     id: 'sb_a5473df8-e81b-4bad-a099-577e58af2e60',
@@ -5026,6 +5568,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'pre-pandemic mRNA influenza vaccines — U.S. HHS/BARDA to Moderna',
     source: 'press_release',
+    assetName: 'pre-pandemic mRNA influenza vaccines',
+    verified: false,
   },
   {
     id: 'sb_27b9f9fe-59e0-4284-98e4-78fe49bc16bf',
@@ -5044,6 +5588,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Gubra obesity peptide — Gubra to AbbVie',
     source: 'manual',
+    assetName: 'Gubra obesity peptide',
+    verified: true,
   },
   {
     id: 'sb_6e86f9ca-ea30-4d64-9d85-7303dba72de8',
@@ -5062,6 +5608,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'siRNA MASH portfolio — Ribo Life Science to Madrigal Pharmaceuticals',
     source: 'manual',
+    assetName: 'siRNA MASH portfolio',
+    verified: true,
   },
   {
     id: 'sb_8f111c5d-43a0-4c5b-a462-fc2c02f03c5b',
@@ -5079,6 +5627,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Caplyta (lumateperone) acquisition — Intra-Cellular Therapies to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'Caplyta (lumateperone) acquisition',
+    verified: false,
   },
   {
     id: 'sb_b5a43160-df66-451f-8342-bd011d4b3962',
@@ -5098,6 +5648,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'STAT6 Inhibitor Program — LEO Pharma to Gilead Sciences',
     source: 'press_release',
+    assetName: 'STAT6 Inhibitor Program',
+    verified: false,
   },
   {
     id: 'sb_c826e49e-7c7d-47ea-a1ef-4abda6dc8cce',
@@ -5116,6 +5668,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'UBT251 — United Laboratories to Novo Nordisk',
     source: 'manual',
+    assetName: 'UBT251',
+    verified: true,
   },
   {
     id: 'sb_fed546ca-a899-4ae5-bc08-c1f1a8d089a8',
@@ -5134,6 +5688,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD33 — Beam Therapeutics to Takeda',
     source: 'sec_8k',
+    assetName: 'Anti-CD33',
+    verified: false,
   },
   {
     id: 'sb_c1f5db28-acaf-403a-af43-982754ffecd2',
@@ -5153,6 +5709,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'LAG-3-201 — Caribou Biosciences to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'LAG-3-201',
+    verified: false,
   },
   {
     id: 'sb_145d23c2-a72b-4488-abd7-2922ad0ba342',
@@ -5172,6 +5730,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TROP2-101 — ORIC Pharmaceuticals to Biogen',
     source: 'press_release',
+    assetName: 'TROP2-101',
+    verified: false,
   },
   {
     id: 'sb_47d8ab61-2c96-4a63-a713-c17f555d3dde',
@@ -5190,6 +5750,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'JAK-101 — Replimune to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'JAK-101',
+    verified: false,
   },
   {
     id: 'sb_ffcdbde0-5dfd-44e6-8010-f3793e2e50b4',
@@ -5209,6 +5771,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-Amyloid-beta-stat — Prothena to Amgen',
     source: 'sec_10k',
+    assetName: 'Anti-Amyloid-beta-stat',
+    verified: false,
   },
   {
     id: 'sb_3fa98a75-366d-4441-be84-4caaef1fb944',
@@ -5228,6 +5792,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-KRAS G12D-301 — Replimune to Amgen',
     source: 'sec_10k',
+    assetName: 'Anti-KRAS G12D-301',
+    verified: false,
   },
   {
     id: 'sb_8d0bcbb6-5218-41e6-820f-2370a746749c',
@@ -5247,6 +5813,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'FLT3-001 — Roivant Sciences to Vertex',
     source: 'sec_8k',
+    assetName: 'FLT3-001',
+    verified: false,
   },
   {
     id: 'sb_5edcfd88-49b1-4b18-b022-01de66538140',
@@ -5266,6 +5834,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'SHP2-001 — Turning Point Therapeutics to Vertex',
     source: 'sec_8k',
+    assetName: 'SHP2-001',
+    verified: false,
   },
   {
     id: 'sb_bbca7244-bb7d-49ec-b1fa-d78c227f6304',
@@ -5284,6 +5854,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TGF-β-001 — Umoja Biopharma to Biogen',
     source: 'sec_8k',
+    assetName: 'TGF-β-001',
+    verified: false,
   },
   {
     id: 'sb_68de2e02-d381-471a-bbd9-b3af22e29844',
@@ -5303,6 +5875,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KIT — Sana Biotechnology to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'KIT',
+    verified: false,
   },
   {
     id: 'sb_8fb14fb8-aa1e-4d73-b215-c6b7add6cb0c',
@@ -5322,6 +5896,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'STAC-BBB capsid (neuro gene therapy) — Sangamo Therapeutics to Astellas Pharma',
     source: 'press_release',
+    assetName: 'STAC-BBB capsid (neuro gene therapy)',
+    verified: false,
   },
   {
     id: 'sb_033a963a-88cf-49ab-96db-ba43c7d3028c',
@@ -5341,6 +5917,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Linzagolix (YSELTY) — Kissei Pharmaceutical to Theramex',
     source: 'press_release',
+    assetName: 'Linzagolix (YSELTY)',
+    verified: false,
   },
   {
     id: 'sb_dc30dd4a-7b25-40d8-bf10-9e96215158c7',
@@ -5359,6 +5937,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Petrelintide — Zealand Pharma to Roche',
     source: 'manual',
+    assetName: 'Petrelintide',
+    verified: true,
   },
   {
     id: 'sb_2676be29-a8ae-465a-9bb9-9e52c7bb21fb',
@@ -5376,6 +5956,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Ixoberogene soroparvovec (ixo-vec) acquisition — Adverum Biotechnologies to Eli Lilly',
     source: 'press_release',
+    assetName: 'Ixoberogene soroparvovec (ixo-vec) acquisition',
+    verified: false,
   },
   {
     id: 'sb_c00c3f0a-c02b-498e-be87-6d0c98f2fe51',
@@ -5395,6 +5977,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-HER2-001 — Galapagos to Vertex',
     source: 'press_release',
+    assetName: 'Anti-HER2-001',
+    verified: false,
   },
   {
     id: 'sb_de2ca525-317a-429d-a397-f41d6df558fb',
@@ -5414,6 +5998,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD47 — Junshi Biosciences to Vertex',
     source: 'press_release',
+    assetName: 'CD47',
+    verified: false,
   },
   {
     id: 'sb_a82632b8-168c-444c-bf02-74b6081f7032',
@@ -5431,6 +6017,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HEPLISAV-B — Dynavax Technologies to Sanofi',
     source: 'press_release',
+    assetName: 'HEPLISAV-B',
+    verified: false,
   },
   {
     id: 'sb_03d791d5-c91e-4d76-966e-707b3c9283de',
@@ -5450,6 +6038,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER2-301 — Deciphera Pharmaceuticals to Bayer',
     source: 'press_release',
+    assetName: 'HER2-301',
+    verified: false,
   },
   {
     id: 'sb_32d4917b-3609-436f-ac2e-f1ae2d673d78',
@@ -5469,6 +6059,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12C-301 — Y-mAbs Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'KRAS G12C-301',
+    verified: false,
   },
   {
     id: 'sb_52e7ff21-d888-48d0-8184-8dcbc8a1b459',
@@ -5488,6 +6080,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MEK-001 — CureVac to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'MEK-001',
+    verified: false,
   },
   {
     id: 'sb_6c50a889-805f-4a07-bb60-e3d4f346521c',
@@ -5507,6 +6101,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Abelacimab — Anthos Therapeutics to BMS',
     source: 'press_release',
+    assetName: 'Abelacimab',
+    verified: false,
   },
   {
     id: 'sb_4b9d5a20-4f53-46cc-a90e-05949d99eeb1',
@@ -5526,6 +6122,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Nectin-4-301 — Replimune to Vertex',
     source: 'sec_8k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_7fe89114-d8b9-43e7-8fc1-e2e5e7ea48de',
@@ -5545,6 +6143,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CSF1R-001 — Umoja Biopharma to GSK',
     source: 'press_release',
+    assetName: 'CSF1R-001',
+    verified: false,
   },
   {
     id: 'sb_2f5afe48-112c-479d-a03f-85aaa100804a',
@@ -5564,6 +6164,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Resmetirom — Madrigal Pharmaceuticals to Takeda',
     source: 'press_release',
+    assetName: 'Resmetirom',
+    verified: false,
   },
   {
     id: 'sb_368c593f-405f-4a9f-813e-038d634d4083',
@@ -5583,6 +6185,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PTC518 — PTC Therapeutics to Novartis',
     source: 'press_release',
+    assetName: 'PTC518',
+    verified: false,
   },
   {
     id: 'sb_27a0c758-3a61-4a82-b833-2ca182d8bb7c',
@@ -5602,6 +6206,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4 — PMV Pharmaceuticals to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Nectin-4',
+    verified: false,
   },
   {
     id: 'sb_be7648d2-f972-4c41-8a66-b77d2f14b065',
@@ -5621,6 +6227,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Cretostimogene (CG0070) — CG Oncology to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Cretostimogene (CG0070)',
+    verified: false,
   },
   {
     id: 'sb_c6b810b1-6076-477f-a26a-8ae3436fce72',
@@ -5640,6 +6248,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ATR-201 — Arvinas to Pfizer',
     source: 'sec_10k',
+    assetName: 'ATR-201',
+    verified: false,
   },
   {
     id: 'sb_647c3d98-0ea0-4489-9115-20555e32e6c6',
@@ -5659,6 +6269,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ALK-mab — CytomX Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'ALK-mab',
+    verified: false,
   },
   {
     id: 'sb_98916fe2-f383-4110-abc4-ff6c1232dd81',
@@ -5678,6 +6290,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Ziftomenib — Kura Oncology to Kyowa Kirin',
     source: 'press_release',
+    assetName: 'Ziftomenib',
+    verified: false,
   },
   {
     id: 'sb_cde620ed-683b-47e5-913e-4a8cb1847694',
@@ -5696,6 +6310,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'gpNMB-tinib — Intellia Therapeutics to Roche',
     source: 'sec_8k',
+    assetName: 'gpNMB-tinib',
+    verified: false,
   },
   {
     id: 'sb_79cfe2e2-f027-4099-9b18-1543d573ae4e',
@@ -5715,6 +6331,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Aficamten (Japan) — Cytokinetics to Bayer',
     source: 'press_release',
+    assetName: 'Aficamten (Japan)',
+    verified: false,
   },
   {
     id: 'sb_3cd946fe-aa8f-4d5b-89ad-52778af7ef45',
@@ -5733,6 +6351,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'WEE1 — Deciphera Pharmaceuticals to AstraZeneca',
     source: 'press_release',
+    assetName: 'WEE1',
+    verified: false,
   },
   {
     id: 'sb_9bd9c508-4354-4150-b66b-9344428989ec',
@@ -5752,6 +6372,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Pemvidutide — Altimmune to Roche',
     source: 'press_release',
+    assetName: 'Pemvidutide',
+    verified: false,
   },
   {
     id: 'sb_89ac6501-385b-4b0d-afeb-f5e15cc46435',
@@ -5771,6 +6393,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H4-001 — Argenx to Merck',
     source: 'sec_8k',
+    assetName: 'B7-H4-001',
+    verified: false,
   },
   {
     id: 'sb_e60f370a-52c8-4d0a-81ff-52dbc958d728',
@@ -5790,6 +6414,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-L1-tinib — TCR2 Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'PD-L1-tinib',
+    verified: false,
   },
   {
     id: 'sb_39208622-91ab-48b7-9383-0924fa9cc787',
@@ -5809,6 +6435,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-Claudin 6 — Immunocore to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-Claudin 6',
+    verified: false,
   },
   {
     id: 'sb_bb226601-e6de-496e-ac21-6c7c00c977e4',
@@ -5828,6 +6456,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SIRPα-mab — ORIC Pharmaceuticals to Regeneron',
     source: 'sec_10k',
+    assetName: 'SIRPα-mab',
+    verified: false,
   },
   {
     id: 'sb_155ad727-c05c-4323-9c66-dec42ce71184',
@@ -5847,6 +6477,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD47-001 — Tyra Biosciences to Pfizer',
     source: 'sec_8k',
+    assetName: 'CD47-001',
+    verified: false,
   },
   {
     id: 'sb_07ac6bc4-4806-466e-a7a1-da454003cfda',
@@ -5865,6 +6497,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BTK-201 — Immunocore to Merck',
     source: 'sec_10k',
+    assetName: 'BTK-201',
+    verified: false,
   },
   {
     id: 'sb_cd086bed-8e8e-4c26-a966-2e58452d18d2',
@@ -5884,6 +6518,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD47 — MorphoSys to Roche',
     source: 'press_release',
+    assetName: 'CD47',
+    verified: false,
   },
   {
     id: 'sb_6d465439-82e1-4ad1-8ab9-e8c005bcad6c',
@@ -5903,6 +6539,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: '5-HT2A-201 — Neurocrine Biosciences to Pfizer',
     source: 'sec_8k',
+    assetName: '5-HT2A-201',
+    verified: false,
   },
   {
     id: 'sb_d38f0ffe-d0b6-4d0e-88c7-a8762e3267d7',
@@ -5922,6 +6560,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Nectin-4-301 — Mirati Therapeutics to Novartis',
     source: 'sec_10k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_8d47919f-b724-4b59-b6bd-dad41f525495',
@@ -5941,6 +6581,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'M1/M4 muscarinic-201 — Prothena to Biogen',
     source: 'sec_10k',
+    assetName: 'M1/M4 muscarinic-201',
+    verified: false,
   },
   {
     id: 'sb_ac329710-1a10-43a6-86e4-c7da47039fd9',
@@ -5960,6 +6602,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-Claudin 6-001 — IGM Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-Claudin 6-001',
+    verified: false,
   },
   {
     id: 'sb_1b8685d8-3b7c-4bec-b351-f306c4493da6',
@@ -5979,6 +6623,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'iPSC Allogeneic CAR-T — Century Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'iPSC Allogeneic CAR-T',
+    verified: false,
   },
   {
     id: 'sb_a83fe2ee-9021-4b2d-b45c-a2a61a7b0e84',
@@ -5998,6 +6644,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TIM-3-201 — Celldex Therapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_fdc20d7d-6594-40bd-a2e6-b2766a961dd4',
@@ -6017,6 +6665,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-HER3-301 — Beam Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'Anti-HER3-301',
+    verified: false,
   },
   {
     id: 'sb_e3753f83-34e6-4083-a2af-1a37127fcec1',
@@ -6036,6 +6686,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Sotagliflozin (Inpefa) — Lexicon Pharmaceuticals to Viatris',
     source: 'press_release',
+    assetName: 'Sotagliflozin (Inpefa)',
+    verified: false,
   },
   {
     id: 'sb_88f98175-a1de-41ca-a232-a7ecedf56fad',
@@ -6055,6 +6707,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ISB 2001 — Ichnos Glenmark Innovation to AbbVie',
     source: 'press_release',
+    assetName: 'ISB 2001',
+    verified: false,
   },
   {
     id: 'sb_20aeb7ed-3627-4373-b393-430b869e0476',
@@ -6073,6 +6727,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CMG-1A46 — Chimagen to GSK',
     source: 'press_release',
+    assetName: 'CMG-1A46',
+    verified: false,
   },
   {
     id: 'sb_ee00b6df-fc8c-4f36-86f0-a3b027fda862',
@@ -6091,6 +6747,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Bexicaserin (LP352) — Longboard Pharmaceuticals to Lundbeck',
     source: 'sec_8k — lundbeck.com',
+    assetName: 'Bexicaserin (LP352)',
+    verified: false,
   },
   {
     id: 'sb_987946cf-e3ac-40be-bed9-497846415445',
@@ -6110,6 +6768,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-KIT-301 — Caribou Biosciences to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-KIT-301',
+    verified: false,
   },
   {
     id: 'sb_0a9cdb6e-4fbb-4838-a2e2-35710ebcc7cd',
@@ -6129,6 +6789,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'DR-01 — Dren Bio to Sanofi',
     source: 'press_release',
+    assetName: 'DR-01',
+    verified: false,
   },
   {
     id: 'sb_ade914f0-4108-49eb-a5f9-990588e858bf',
@@ -6148,6 +6810,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC16-tinib — Arvinas to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'MUC16-tinib',
+    verified: false,
   },
   {
     id: 'sb_9034a388-c215-4352-a983-1778ee84f132',
@@ -6167,6 +6831,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BCMA-mab — CRISPR Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-BCMA-mab',
+    verified: false,
   },
   {
     id: 'sb_c9e9fd2d-d542-4ffe-b911-d3bc5e1f36bf',
@@ -6186,6 +6852,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-LAG-3-001 — CureVac to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-LAG-3-001',
+    verified: false,
   },
   {
     id: 'sb_87ce4837-898c-4393-82fd-11c84d8beccc',
@@ -6205,6 +6873,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MUC16-301 — Tango Therapeutics to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'MUC16-301',
+    verified: false,
   },
   {
     id: 'sb_9be4aad7-41ef-4e35-898e-b19c96cd60bf',
@@ -6224,6 +6894,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ATR-201 — Springworks Therapeutics to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'ATR-201',
+    verified: false,
   },
   {
     id: 'sb_b7980fcb-5d40-4d46-bcc9-e314153c520d',
@@ -6243,6 +6915,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mTOR-201 — CytomX Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'mTOR-201',
+    verified: false,
   },
   {
     id: 'sb_8756f404-3ada-458a-9bf7-0e569a63a09f',
@@ -6261,6 +6935,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-MUC1-tinib — Mirati Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'Anti-MUC1-tinib',
+    verified: false,
   },
   {
     id: 'sb_9b98c9d6-b62f-473e-8d6e-8fad2f612b7d',
@@ -6280,6 +6956,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-ALK-mab — Junshi Biosciences to Merck',
     source: 'press_release',
+    assetName: 'Anti-ALK-mab',
+    verified: false,
   },
   {
     id: 'sb_623189b4-0c03-47ba-986b-2633ac19c741',
@@ -6299,6 +6977,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: '4-1BB-101 — Fate Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: '4-1BB-101',
+    verified: false,
   },
   {
     id: 'sb_a6e2c42f-c998-4593-b27c-d2114ffba81f',
@@ -6317,6 +6997,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Vtama (tapinarof) acquisition — Dermavant/Roivant to Organon',
     source: 'press_release',
+    assetName: 'Vtama (tapinarof) acquisition',
+    verified: false,
   },
   {
     id: 'sb_e6327e66-4706-4ce0-99ae-a246b2eb5e0b',
@@ -6336,6 +7018,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BAFF/APRIL Biologic — RemeGen to Vor Biopharma',
     source: 'press_release',
+    assetName: 'BAFF/APRIL Biologic',
+    verified: false,
   },
   {
     id: 'sb_8ef069a7-53bc-4315-b8d4-47a4a8a2d5fd',
@@ -6355,6 +7039,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HBM7008 — Harbour BioMed to AbbVie',
     source: 'press_release',
+    assetName: 'HBM7008',
+    verified: false,
   },
   {
     id: 'sb_bc76bf10-552a-4d22-89f9-a595a06508ec',
@@ -6373,6 +7059,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Vtama (tapinarof) — Dermavant to Organon',
     source: 'press_release',
+    assetName: 'Vtama (tapinarof)',
+    verified: false,
   },
   {
     id: 'sb_d468654c-580d-4a85-8a2b-dc4e5b64e90e',
@@ -6391,6 +7079,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Dermavant (including VTAMA) — Roivant to Organon',
     source: 'press_release',
+    assetName: 'Dermavant (including VTAMA)',
+    verified: false,
   },
   {
     id: 'sb_2f8cefb5-a65d-4e2d-aeac-d01adc94b88e',
@@ -6410,6 +7100,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-MDM2-tinib — BeiGene to Amgen',
     source: 'sec_8k',
+    assetName: 'Anti-MDM2-tinib',
+    verified: false,
   },
   {
     id: 'sb_094f2607-8725-4bd4-80e2-77f404929212',
@@ -6429,6 +7121,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Mesothelin-201 — Arvinas to Biogen',
     source: 'press_release',
+    assetName: 'Mesothelin-201',
+    verified: false,
   },
   {
     id: 'sb_6fab837b-6322-45ed-9faa-1439a046ff07',
@@ -6448,6 +7142,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MUC16-tinib — CytomX Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'MUC16-tinib',
+    verified: false,
   },
   {
     id: 'sb_38c8cbb5-728f-4fbe-abf3-3f71d4fe4f0a',
@@ -6466,6 +7162,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Ochre RNA program — Ochre Bio to Boehringer Ingelheim',
     source: 'manual',
+    assetName: 'Ochre RNA program',
+    verified: true,
   },
   {
     id: 'sb_39a3b72b-e6ff-4524-b549-303e14f5c34c',
@@ -6485,6 +7183,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TERN-601 — Terns Pharmaceuticals to Hansoh Pharma',
     source: 'press_release',
+    assetName: 'TERN-601',
+    verified: false,
   },
   {
     id: 'sb_b4ee00b5-f48d-43ed-82e5-6946e826e540',
@@ -6504,6 +7204,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Mesothelin-301 — BioNTech to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'Mesothelin-301',
+    verified: false,
   },
   {
     id: 'sb_6890bc49-f92a-4775-b4c2-1d365cb13db2',
@@ -6522,6 +7224,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-ALK-tinib — Relay Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'Anti-ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_e1144441-8d3c-458a-8e2f-ca4d7b576ae8',
@@ -6540,6 +7244,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD33-301 — TCR2 Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'CD33-301',
+    verified: false,
   },
   {
     id: 'sb_7a295a95-7b7e-4cd9-ad84-742cab23c3bb',
@@ -6559,6 +7265,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD19-401 — Kymera Therapeutics to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'CD19-401',
+    verified: false,
   },
   {
     id: 'sb_ab5163b4-b742-49ae-87aa-f39c95b16044',
@@ -6578,6 +7286,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ALK-001 — Revolution Medicines to GSK',
     source: 'sec_8k',
+    assetName: 'ALK-001',
+    verified: false,
   },
   {
     id: 'sb_c1c2b81e-d04f-4554-a57b-d19579a1dea6',
@@ -6597,6 +7307,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-FLT3-001 — PMV Pharmaceuticals to Pfizer',
     source: 'sec_8k',
+    assetName: 'Anti-FLT3-001',
+    verified: false,
   },
   {
     id: 'sb_4e02cf79-d8ff-478c-b05d-78663a237e9e',
@@ -6616,6 +7328,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD33-tinib — Kronos Bio to Regeneron',
     source: 'press_release',
+    assetName: 'CD33-tinib',
+    verified: false,
   },
   {
     id: 'sb_6e9aee4a-3e1e-46a0-b414-e93b2e4c53af',
@@ -6635,6 +7349,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'UCART19 — Cellectis to AstraZeneca',
     source: 'press_release',
+    assetName: 'UCART19',
+    verified: false,
   },
   {
     id: 'sb_aa490749-a27d-4878-bda1-3ce3473ef254',
@@ -6654,6 +7370,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PSMA-101 — BeiGene to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'PSMA-101',
+    verified: false,
   },
   {
     id: 'sb_4c1023e2-9e71-4b0d-8c8b-cfaff00c06fc',
@@ -6673,6 +7391,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FRα-tinib — IGM Biosciences to Sanofi',
     source: 'press_release',
+    assetName: 'FRα-tinib',
+    verified: false,
   },
   {
     id: 'sb_78e06cce-0d94-4d91-b0f5-3939260f60da',
@@ -6691,6 +7411,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Aucatzyl (obecabtagene autoleucel) — Autolus Therapeutics to BioNTech',
     source: 'sec_8k',
+    assetName: 'Aucatzyl (obecabtagene autoleucel)',
+    verified: false,
   },
   {
     id: 'sb_cf7cdff1-8f44-40e6-b317-100ee57cde94',
@@ -6710,6 +7432,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4-301 — Argenx to Regeneron',
     source: 'sec_8k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_fce4c70d-7c26-4e8d-9aac-60f1c4269cb9',
@@ -6729,6 +7453,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-KIT-mab — Arvinas to Takeda',
     source: 'sec_8k',
+    assetName: 'Anti-KIT-mab',
+    verified: false,
   },
   {
     id: 'sb_a4e63e68-4cd2-4562-81a0-0e45bdd771a2',
@@ -6748,6 +7474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Tau-201 — Alector to AbbVie',
     source: 'press_release',
+    assetName: 'Tau-201',
+    verified: false,
   },
   {
     id: 'sb_ef818ddf-9040-4d2b-8722-9e87a9b4c3b8',
@@ -6766,6 +7494,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Telitacicept — RemeGen to Vor Bio',
     source: 'manual',
+    assetName: 'Telitacicept',
+    verified: true,
   },
   {
     id: 'sb_0b45336d-b2e9-4ba6-b9f2-84726a05aea9',
@@ -6785,6 +7515,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Zosurabalpin — Harvard University to Roche',
     source: 'press_release',
+    assetName: 'Zosurabalpin',
+    verified: false,
   },
   {
     id: 'sb_ef4a0a5c-91a7-47b6-8454-9da3caba0c57',
@@ -6803,6 +7535,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Zinc finger tau repressors + STAC-BBB — Sangamo Therapeutics to Genentech (Roche)',
     source: 'press_release',
+    assetName: 'Zinc finger tau repressors + STAC-BBB',
+    verified: false,
   },
   {
     id: 'sb_7f910d9f-a861-49fa-b233-791ffff9fdd0',
@@ -6822,6 +7556,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MEK-301 — Zymeworks to Pfizer',
     source: 'sec_8k',
+    assetName: 'Anti-MEK-301',
+    verified: false,
   },
   {
     id: 'sb_6dece605-4629-4195-b06d-5bd863810601',
@@ -6840,6 +7576,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'EP262 and MRGPRX programs — Escient Pharmaceuticals to Incyte',
     source: 'manual',
+    assetName: 'EP262 and MRGPRX programs',
+    verified: true,
   },
   {
     id: 'sb_e588dea0-8dcc-4551-b578-cd5a8b444663',
@@ -6858,6 +7596,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GD2-301 — Affimed to Vertex',
     source: 'sec_10k',
+    assetName: 'GD2-301',
+    verified: false,
   },
   {
     id: 'sb_43c82071-2003-4f69-a2fa-274c68bea7f8',
@@ -6876,6 +7616,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGFR-mab — Syros Pharmaceuticals to GSK',
     source: 'sec_10k',
+    assetName: 'VEGFR-mab',
+    verified: false,
   },
   {
     id: 'sb_45426109-a045-41d7-b6dd-cf0bd939dc4b',
@@ -6895,6 +7637,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-B7-H3-mab — Revolution Medicines to Eli Lilly',
     source: 'press_release',
+    assetName: 'Anti-B7-H3-mab',
+    verified: false,
   },
   {
     id: 'sb_088b71da-ecc0-4ab3-8031-c32b61e1c309',
@@ -6914,6 +7658,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-MUC1-001 — Alkermes to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-MUC1-001',
+    verified: false,
   },
   {
     id: 'sb_cfdbfbee-1832-48e7-b013-577603cdbe54',
@@ -6931,6 +7677,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ALPN-303 — Alpine Immune Sciences to Vertex Pharmaceuticals',
     source: 'sec_8k',
+    assetName: 'ALPN-303',
+    verified: false,
   },
   {
     id: 'sb_e4273ff0-0869-4ba6-95b8-791fe188a06c',
@@ -6950,6 +7698,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Plozasiran (China) — Arrowhead Pharmaceuticals to Sanofi',
     source: 'press_release',
+    assetName: 'Plozasiran (China)',
+    verified: false,
   },
   {
     id: 'sb_ac5ba5dd-1de2-4059-93bd-3c9cb73c6e69',
@@ -6969,6 +7719,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-B7-H3-tinib — Springworks Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_6e0ae3e4-9cb5-4b22-8f83-f9c6fe4a917f',
@@ -6988,6 +7740,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'OX40-001 — CRISPR Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'OX40-001',
+    verified: false,
   },
   {
     id: 'sb_d9d1c042-71bd-49d3-95a9-31b5a159a5f6',
@@ -7007,6 +7761,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ICOS-201 — Allogene Therapeutics to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'ICOS-201',
+    verified: false,
   },
   {
     id: 'sb_8826132b-da4b-4059-93ae-af0a5c2fdf8e',
@@ -7026,6 +7782,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PSMA-301 — Karyopharm Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'PSMA-301',
+    verified: false,
   },
   {
     id: 'sb_80a3eb3d-631f-49b3-b0b6-6fcffb29d3d0',
@@ -7045,6 +7803,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CEA-301 — Mirati Therapeutics to Merck',
     source: 'press_release',
+    assetName: 'CEA-301',
+    verified: false,
   },
   {
     id: 'sb_78a2cc99-6a23-43fa-ad82-f7cdd46d43a3',
@@ -7063,6 +7823,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-PI3K-tinib — IGM Biosciences to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-PI3K-tinib',
+    verified: false,
   },
   {
     id: 'sb_4e65a4cb-a7fa-4f29-9bee-a318748a7501',
@@ -7082,6 +7844,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'SMN-301 — Longboard Pharmaceuticals to Takeda',
     source: 'sec_8k',
+    assetName: 'SMN-301',
+    verified: false,
   },
   {
     id: 'sb_9a85b158-436b-4455-b7ef-d1cf63f3f8e6',
@@ -7101,6 +7865,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-GPC3-mab — Beam Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-GPC3-mab',
+    verified: false,
   },
   {
     id: 'sb_fb0e5323-b2b7-41e7-86f4-25f9e5e7540c',
@@ -7118,6 +7884,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MORF-057 — Morphic Holding to Eli Lilly',
     source: 'manual',
+    assetName: 'MORF-057',
+    verified: true,
   },
   {
     id: 'sb_b0b58c4f-955d-480f-af3f-c65a0c2641b6',
@@ -7136,6 +7904,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TIGIT-201 — Junshi Biosciences to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'TIGIT-201',
+    verified: false,
   },
   {
     id: 'sb_e3296986-27e7-4539-b1e6-e98c22f8cd00',
@@ -7155,6 +7925,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD19-201 — Innovent Biologics to Vertex',
     source: 'sec_10k',
+    assetName: 'CD19-201',
+    verified: false,
   },
   {
     id: 'sb_3967c6b9-025c-4f2e-8e38-7c8178168a84',
@@ -7173,6 +7945,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CSF1R-mab — Turning Point Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'Anti-CSF1R-mab',
+    verified: false,
   },
   {
     id: 'sb_a9e4568f-198c-42cb-8364-16a11f864ffe',
@@ -7192,6 +7966,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD22-001 — Legend Biotech to GSK',
     source: 'press_release',
+    assetName: 'CD22-001',
+    verified: false,
   },
   {
     id: 'sb_024f2208-e3a3-476d-8bc2-a5a2836d7c8d',
@@ -7210,6 +7986,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'venousThromboembolism — Agepha Pharma to Grünenthal',
     source: 'manual',
+    assetName: 'venousThromboembolism',
+    verified: true,
   },
   {
     id: 'sb_684fecd3-e5e0-4de6-a543-2ad6e003748e',
@@ -7229,6 +8007,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'atherosclerosis — Intellia Therapeutics to Regeneron',
     source: 'manual',
+    assetName: 'atherosclerosis',
+    verified: true,
   },
   {
     id: 'sb_f0404555-5463-4841-b233-b6dcc871bad1',
@@ -7248,6 +8028,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'wetAmd — REGENXBIO to AbbVie',
     source: 'manual',
+    assetName: 'wetAmd',
+    verified: true,
   },
   {
     id: 'sb_d456c4ca-bbe3-4255-aa9b-d3efb4e599e4',
@@ -7267,6 +8049,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'friedreichsAtaxia — Neurocrine Biosciences to Voyager Therapeutics',
     source: 'manual',
+    assetName: 'friedreichsAtaxia',
+    verified: true,
   },
   {
     id: 'sb_7158f4df-2700-452b-9083-f99d7bbf0c31',
@@ -7285,6 +8069,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'lung_nsclc — AstraZeneca to Daiichi Sankyo',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_2973f379-932a-4c89-b0fa-78f7ec14ae91',
@@ -7302,6 +8088,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ovarian — ImmunoGen to AbbVie',
     source: 'manual',
+    assetName: 'ovarian',
+    verified: true,
   },
   {
     id: 'sb_1379056c-d75b-4bf4-ace7-4ed22adc0038',
@@ -7321,6 +8109,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'lung_nsclc — Innovent Biologics to Sanofi',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_c6d99863-0ecd-4cf3-91e1-468478a815eb',
@@ -7340,6 +8130,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'breast_her2 — Zymeworks to BeiGene',
     source: 'manual',
+    assetName: 'breast_her2',
+    verified: true,
   },
   {
     id: 'sb_0d55b096-131a-4f48-8f5a-4032f779d9a1',
@@ -7358,6 +8150,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'rareNeuro — Regeneron to Alnylam',
     source: 'manual',
+    assetName: 'rareNeuro',
+    verified: true,
   },
   {
     id: 'sb_be2d4841-6d52-4646-bc83-0c28ea716535',
@@ -7377,6 +8171,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'atopicderm — Connect Biopharma to Astellas Pharma',
     source: 'manual',
+    assetName: 'atopicderm',
+    verified: true,
   },
   {
     id: 'sb_85c4bb2b-5a41-4bc6-9b27-d1ec4189b219',
@@ -7396,6 +8192,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'lung_nsclc — Kelun-Biotech to AbbVie',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_b0f7684a-7cfb-4c28-a601-a11f842baa54',
@@ -7414,6 +8212,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'autoimmune — Poseida Therapeutics to Roche',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_1d9776f3-e60e-4cab-9f67-3f3313295a44',
@@ -7431,6 +8231,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'geographic_atrophy — Iveric Bio to Astellas',
     source: 'manual',
+    assetName: 'geographic_atrophy',
+    verified: true,
   },
   {
     id: 'sb_6c3a2c4f-30d3-4737-a7bc-f5d143ce8b74',
@@ -7450,6 +8252,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ulcerativeColitis — Teva Pharmaceutical to Sanofi',
     source: 'manual',
+    assetName: 'ulcerativeColitis',
+    verified: true,
   },
   {
     id: 'sb_29390056-fb3b-4f00-8b11-7b92bc7fa54b',
@@ -7467,6 +8271,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'gerd — Phathom Pharmaceuticals to Alfasigma',
     source: 'manual',
+    assetName: 'gerd',
+    verified: true,
   },
   {
     id: 'sb_1d1cb051-c0c0-4b08-90b3-89ea8472dd9b',
@@ -7486,6 +8292,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'neuroendocrine — Radiopharm Theranostics to Lantheus',
     source: 'manual',
+    assetName: 'neuroendocrine',
+    verified: true,
   },
   {
     id: 'sb_271c7e07-8770-4853-88c1-193e6fb630ed',
@@ -7505,6 +8313,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'pancreatic — Candel Therapeutics to Novavax',
     source: 'manual',
+    assetName: 'pancreatic',
+    verified: true,
   },
   {
     id: 'sb_0196b884-4f5f-4db6-8a40-70453ffeba2e',
@@ -7523,6 +8333,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — Merus to Gilead',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_d07ff9ed-6ef3-4ec9-a5f1-431490fd0200',
@@ -7542,6 +8354,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'atherosclerosis — Verve Therapeutics to Eli Lilly',
     source: 'manual',
+    assetName: 'atherosclerosis',
+    verified: true,
   },
   {
     id: 'sb_28e14c0e-7477-4d9f-939c-a3b19fb955b6',
@@ -7559,6 +8373,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ibd — Celsius Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'ibd',
+    verified: true,
   },
   {
     id: 'sb_03cbd178-cc6e-4d77-9d1c-de1dfbaf8f9c',
@@ -7577,6 +8393,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mds — Syndax Pharmaceuticals to Incyte',
     source: 'manual',
+    assetName: 'mds',
+    verified: true,
   },
   {
     id: 'sb_a615b74d-ad42-4ae1-83ab-49734bc9b9f7',
@@ -7596,6 +8414,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'breast_her2 — Hansoh Pharmaceutical to Merck',
     source: 'manual',
+    assetName: 'breast_her2',
+    verified: true,
   },
   {
     id: 'sb_a28188bd-322c-4bcf-b67f-9fec9ea1b228',
@@ -7614,6 +8434,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — MacroGenics to Incyte',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_6c040640-8005-4a18-aedf-45f6e10ead35',
@@ -7632,6 +8454,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'obesity — Boehringer Ingelheim to Zealand Pharma',
     source: 'manual',
+    assetName: 'obesity',
+    verified: true,
   },
   {
     id: 'sb_7b7760eb-19ce-414d-9688-1ebd4c83aa1e',
@@ -7649,6 +8473,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'manufacturing — Catalent to Novo Holdings',
     source: 'manual',
+    assetName: 'manufacturing',
+    verified: true,
   },
   {
     id: 'sb_b068d69b-cd56-4ac3-9b14-832d8fdb9c82',
@@ -7667,6 +8493,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'endometriosis — Organon to Samsung Bioepis',
     source: 'manual',
+    assetName: 'endometriosis',
+    verified: true,
   },
   {
     id: 'sb_d68c4323-3c3b-4ac1-8a19-c5e1152e53aa',
@@ -7686,6 +8514,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'lung_nsclc — Arcus Biosciences to Gilead',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_fad020fe-536a-4b3c-bab6-3baad004f1dc',
@@ -7704,6 +8534,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'retinal_disease — EyeBio to Merck',
     source: 'manual',
+    assetName: 'retinal_disease',
+    verified: true,
   },
   {
     id: 'sb_9924d35b-3966-459a-8588-f7776849f83f',
@@ -7722,6 +8554,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'frontotemporal dementia — AviadoBio to Astellas Pharma',
     source: 'manual',
+    assetName: 'frontotemporal dementia',
+    verified: true,
   },
   {
     id: 'sb_131ae99c-8b8c-4eaa-b6d0-356cd8f37853',
@@ -7739,6 +8573,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'neuromuscular — Arrowhead Pharmaceuticals to Sarepta Therapeutics',
     source: 'manual',
+    assetName: 'neuromuscular',
+    verified: true,
   },
   {
     id: 'sb_712cb75a-278f-4f6d-b2ff-0497a9abf2c4',
@@ -7757,6 +8593,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CAR-T enhancement — Prime Medicine to BMS',
     source: 'manual',
+    assetName: 'CAR-T enhancement',
+    verified: true,
   },
   {
     id: 'sb_9143f659-6a8b-43d0-91da-ef1f68e132b3',
@@ -7774,6 +8612,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'checkpoint_inhibitor — Nerio Therapeutics to Boehringer Ingelheim',
     source: 'manual',
+    assetName: 'checkpoint_inhibitor',
+    verified: true,
   },
   {
     id: 'sb_266dac1d-b155-43f7-b4bd-10263ac03059',
@@ -7791,6 +8631,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'atopic_dermatitis — Numab Therapeutics to Johnson & Johnson',
     source: 'manual',
+    assetName: 'atopic_dermatitis',
+    verified: true,
   },
   {
     id: 'sb_3bae6372-7141-4593-a474-582b76140f77',
@@ -7808,6 +8650,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'atopic_dermatitis — Proteologix to Johnson & Johnson',
     source: 'manual',
+    assetName: 'atopic_dermatitis',
+    verified: true,
   },
   {
     id: 'sb_76fede2a-2e24-49bd-8d6f-8e2a4a085480',
@@ -7825,6 +8669,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'neuroendocrine_tumors — Harpoon Therapeutics to Merck',
     source: 'manual',
+    assetName: 'neuroendocrine_tumors',
+    verified: true,
   },
   {
     id: 'sb_37bfccca-a039-4916-8c20-e41905b3a7d8',
@@ -7842,6 +8688,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Abceutics to Merck',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_8d36f4f1-8cff-4490-806b-7b3391b0c626',
@@ -7859,6 +8707,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'her2_breast_cancer — Ambrx Biopharma to Johnson & Johnson',
     source: 'manual',
+    assetName: 'her2_breast_cancer',
+    verified: true,
   },
   {
     id: 'sb_88f14edf-874c-4fea-9643-dfa220f5bea8',
@@ -7876,6 +8726,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'lupus — Chimagen Biosciences to GSK',
     source: 'manual',
+    assetName: 'lupus',
+    verified: true,
   },
   {
     id: 'sb_adb5a3a8-395e-4796-a57e-bb14df659af0',
@@ -7894,6 +8746,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'parkinsons — Vesalius Therapeutics to GSK',
     source: 'manual',
+    assetName: 'parkinsons',
+    verified: true,
   },
   {
     id: 'sb_36035313-0221-405b-9145-45db20416937',
@@ -7912,6 +8766,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'solid_tumors — Duality Biologics to GSK',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_d2846b53-dafd-4215-968e-f207d154432f',
@@ -7930,6 +8786,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hematologic_malignancies — Ascentage Pharma to Takeda',
     source: 'manual',
+    assetName: 'hematologic_malignancies',
+    verified: true,
   },
   {
     id: 'sb_38f82696-f990-4f28-b8f2-f028da1b5f40',
@@ -7947,6 +8805,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'heart_failure — Cardior Pharmaceuticals to Novo Nordisk',
     source: 'manual',
+    assetName: 'heart_failure',
+    verified: true,
   },
   {
     id: 'sb_7831d349-d18f-43b1-a7e0-4dbd234114c5',
@@ -7965,6 +8825,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'immuno_oncology — Kumquat Biosciences to Takeda',
     source: 'manual',
+    assetName: 'immuno_oncology',
+    verified: true,
   },
   {
     id: 'sb_d7b65135-cc45-47e7-93d8-53d570f4d2d7',
@@ -7983,6 +8845,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'alzheimers — AC Immune to Takeda',
     source: 'manual',
+    assetName: 'alzheimers',
+    verified: true,
   },
   {
     id: 'sb_76528ecd-1a56-44c6-915a-d9899c17b4f3',
@@ -8001,6 +8865,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'pku — Jnana Therapeutics to Otsuka Pharmaceutical',
     source: 'manual',
+    assetName: 'pku',
+    verified: true,
   },
   {
     id: 'sb_4bca16db-3797-41e6-b469-d41af7f6df62',
@@ -8020,6 +8886,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'thalassemia — Disc Medicine to Novo Nordisk',
     source: 'manual',
+    assetName: 'thalassemia',
+    verified: true,
   },
   {
     id: 'sb_00d20169-3056-4bd6-9fc7-22d62981bca5',
@@ -8039,6 +8907,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'gm1Gangliosidosis — Passage Bio to Novartis',
     source: 'manual',
+    assetName: 'gm1Gangliosidosis',
+    verified: true,
   },
   {
     id: 'sb_f0b905a0-2e5f-40f5-ae97-375046c2137b',
@@ -8058,6 +8928,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'melanoma — Iovance Biotherapeutics to Roche',
     source: 'manual',
+    assetName: 'melanoma',
+    verified: true,
   },
   {
     id: 'sb_5b851af0-0c88-44d3-a770-152a70afd3c7',
@@ -8076,6 +8948,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'autoimmune — GenEdit to Genentech',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_1dede152-f1af-4c89-95a0-c865bb42f4b9',
@@ -8093,6 +8967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'breast_cancer — Regor Therapeutics to Genentech',
     source: 'manual',
+    assetName: 'breast_cancer',
+    verified: true,
   },
   {
     id: 'sb_0ae496cc-2485-4ccb-abf4-81034797d4bd',
@@ -8112,6 +8988,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'pnh — Alnylam Pharmaceuticals to Roche',
     source: 'manual',
+    assetName: 'pnh',
+    verified: true,
   },
   {
     id: 'sb_72f2e981-29e8-4b8d-9694-2706b9700a08',
@@ -8130,6 +9008,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiovascular — CSPC Pharmaceutical to AstraZeneca',
     source: 'manual',
+    assetName: 'cardiovascular',
+    verified: true,
   },
   {
     id: 'sb_f569709e-8b7a-436f-a02b-57e8dc95db05',
@@ -8147,6 +9027,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Fusion Pharmaceuticals to AstraZeneca',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_a50c6646-33ba-47ad-8291-fcf1b96196e2',
@@ -8164,6 +9046,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'myelofibrosis — MorphoSys to Novartis',
     source: 'manual',
+    assetName: 'myelofibrosis',
+    verified: true,
   },
   {
     id: 'sb_cfda1505-74ad-4874-8fb1-79fac9e4e029',
@@ -8182,6 +9066,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'celiac_disease — Calypso Biotech to Novartis',
     source: 'manual',
+    assetName: 'celiac_disease',
+    verified: true,
   },
   {
     id: 'sb_03f378d2-791e-4641-96bc-fdc7af320e36',
@@ -8200,6 +9086,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — Chengdu Baiyu to Novartis',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_0ed531cb-4e30-4271-80fd-c0198e3a6d1f',
@@ -8218,6 +9106,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'drug_discovery — Schrödinger to Novartis',
     source: 'manual',
+    assetName: 'drug_discovery',
+    verified: true,
   },
   {
     id: 'sb_3cc9c681-9df5-4ce5-a631-d1f46b4ff75a',
@@ -8235,6 +9125,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'psoriasis — Protagonist Therapeutics to J&J',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_66cfbbf6-62f3-487f-adf5-506ed6d01f9f',
@@ -8253,6 +9145,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ulcerative_colitis — Landos Biopharma to AbbVie',
     source: 'manual',
+    assetName: 'ulcerative_colitis',
+    verified: true,
   },
   {
     id: 'sb_934f4771-85b4-4cc6-b530-3204c7218290',
@@ -8271,6 +9165,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'sle_lupus — Kyverna Therapeutics to Gilead',
     source: 'manual',
+    assetName: 'sle_lupus',
+    verified: true,
   },
   {
     id: 'sb_9ebb7039-a22e-4ca9-a06e-dcc595c6c622',
@@ -8289,6 +9185,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — C4 Therapeutics to Merck',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_89bfaf16-9682-473f-a78d-dab0a2f3e97f',
@@ -8307,6 +9205,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — BioNTech to Duality Biologics',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_eccb05ec-fdf3-4d0f-b60a-23f32088a695',
@@ -8324,6 +9224,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'crohns — Ventyx Biosciences to Eli Lilly',
     source: 'manual',
+    assetName: 'crohns',
+    verified: true,
   },
   {
     id: 'sb_13e6290d-6c78-4c8a-8aaf-6851dbae2c97',
@@ -8342,6 +9244,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'drug_discovery — Isomorphic Labs to Eli Lilly',
     source: 'manual',
+    assetName: 'drug_discovery',
+    verified: true,
   },
   {
     id: 'sb_1976fa6c-0a1f-4a99-b11e-afac9ee0f6c9',
@@ -8359,6 +9263,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'alzheimers — Aliada Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'alzheimers',
+    verified: true,
   },
   {
     id: 'sb_bb1c6461-eb2b-4748-91e4-193f5ded00de',
@@ -8377,6 +9283,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'solid_tumors — EvolveImmune Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_a777ae99-1e16-40ec-a39a-7ba4194483fd',
@@ -8395,6 +9303,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — MediLink Therapeutics to BioNTech',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_cd8917ff-a185-4820-b5f2-d19c29382389',
@@ -8413,6 +9323,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Biotheus to BioNTech',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_71470fdd-6076-470e-b4a5-b3b56670ab1a',
@@ -8430,6 +9342,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'pbc — CymaBay Therapeutics to Gilead Sciences',
     source: 'manual',
+    assetName: 'pbc',
+    verified: true,
   },
   {
     id: 'sb_3ad41bc2-464d-4fab-8567-40ab06cab577',
@@ -8448,6 +9362,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'autoimmune — HI-Bio to Biogen',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_79e9ba19-7cc2-44eb-a643-7512c078e780',
@@ -8466,6 +9382,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'rare_cancer — RadioMedix to Sanofi',
     source: 'manual',
+    assetName: 'rare_cancer',
+    verified: true,
   },
   {
     id: 'sb_416744eb-48a1-4ab9-b291-879f3ff6ac2d',
@@ -8483,6 +9401,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — ProfoundBio to Genmab',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_b5a13305-48b4-4c17-b933-976d38260401',
@@ -8501,6 +9421,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'prostate_cancer — Arvinas to Novartis',
     source: 'manual',
+    assetName: 'prostate_cancer',
+    verified: true,
   },
   {
     id: 'sb_7ddf2fee-6e15-448b-9523-2e771c996e03',
@@ -8518,6 +9440,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'anemia — Keros Therapeutics to Takeda',
     source: 'manual',
+    assetName: 'anemia',
+    verified: true,
   },
   {
     id: 'sb_4903cbdb-2db9-484b-a713-c963f5d12767',
@@ -8535,6 +9459,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'gist — Deciphera Pharmaceuticals to ONO Pharmaceutical',
     source: 'manual',
+    assetName: 'gist',
+    verified: true,
   },
   {
     id: 'sb_cdd05b9f-9bc7-45dd-8415-b70dfc94141b',
@@ -8552,6 +9478,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'psoriasis — Dermavant Sciences to Organon',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_67039e18-4792-42bf-b7d4-0b4e0f499f33',
@@ -8570,6 +9498,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'pulmonary_hypertension — Gossamer Bio to Chiesi',
     source: 'manual',
+    assetName: 'pulmonary_hypertension',
+    verified: true,
   },
   {
     id: 'sb_974206bd-3aed-4a88-b234-505e9b0866f9',
@@ -8587,6 +9517,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'thrombosis — Idorsia to Viatris',
     source: 'manual',
+    assetName: 'thrombosis',
+    verified: true,
   },
   {
     id: 'sb_62e78970-ed59-4024-bd64-4a4ce916b14a',
@@ -8605,6 +9537,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'obesity — MBX Biosciences to Novo Nordisk',
     source: 'manual',
+    assetName: 'obesity',
+    verified: true,
   },
   {
     id: 'sb_ede4ea72-21a9-4b0f-a658-7e56b79072c3',
@@ -8624,6 +9558,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hemophiliaB — Catalyst Biosciences to Novo Nordisk',
     source: 'manual',
+    assetName: 'hemophiliaB',
+    verified: true,
   },
   {
     id: 'sb_3fe36e7d-62ef-46de-bd90-d7fe51826cd7',
@@ -8642,6 +9578,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'autoimmune — COUR Pharmaceuticals to Genentech',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_aaaae974-ed09-44b5-b4af-4bc378d05e08',
@@ -8661,6 +9599,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'breast — Astellia Oncology to AstraZeneca',
     source: 'manual',
+    assetName: 'breast',
+    verified: true,
   },
   {
     id: 'sb_05f09b8e-5d13-4595-8c85-facd9fb37582',
@@ -8680,6 +9620,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'autoimmune — Numab Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_7f7dfee0-b7bc-4798-9531-702e425546fa',
@@ -8698,6 +9640,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'solid_tumors — Tubulis to Gilead Sciences',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_ee41051d-4606-4ea0-b3fa-d0931b43c536',
@@ -8716,6 +9660,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'inflammation — IFM Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'inflammation',
+    verified: true,
   },
   {
     id: 'sb_0714d4ae-cc6c-4520-b762-65759fc42a37',
@@ -8734,6 +9680,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'solid_tumors — Mariana Oncology to Novartis',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_199221ff-f817-4be7-b056-6240b98fe1a0',
@@ -8751,6 +9699,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'cold_agglutinin_disease — Recordati (Enjaymo) to Sanofi',
     source: 'manual',
+    assetName: 'cold_agglutinin_disease',
+    verified: true,
   },
   {
     id: 'sb_4b82c9f7-4c1b-4620-82ff-6dc60670c21d',
@@ -8769,6 +9719,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Modifi Biosciences to Merck',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_de97f47c-b315-4e99-a341-dec4dd72e50e',
@@ -8787,6 +9739,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'hematologic_malignancies — Curon Biopharmaceutical to Merck',
     source: 'manual',
+    assetName: 'hematologic_malignancies',
+    verified: true,
   },
   {
     id: 'sb_aaa1439f-73e6-4074-a0de-f9ffb115735b',
@@ -8804,6 +9758,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'myelofibrosis — Imago BioSciences to Merck',
     source: 'manual',
+    assetName: 'myelofibrosis',
+    verified: true,
   },
   {
     id: 'sb_a3a9287c-a2a8-4048-b585-5f2e32c555a4',
@@ -8822,6 +9778,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — LaNova Medicines to Merck',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_0799780d-8d83-4fc9-8fa8-64ce01773895',
@@ -8840,6 +9798,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'neurodegeneration — Voyager Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'neurodegeneration',
+    verified: true,
   },
   {
     id: 'sb_dd4675d1-dbed-4a1f-9f38-97174a404a56',
@@ -8859,6 +9819,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'lung_nsclc — CytomX Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_754a85b2-43c4-498e-b496-c7ccdc919185',
@@ -8877,6 +9839,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'myeloma — Genmab to AbbVie',
     source: 'manual',
+    assetName: 'myeloma',
+    verified: true,
   },
   {
     id: 'sb_ded993d1-918a-44d6-bc89-36cb213f0a45',
@@ -8895,6 +9859,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'inflammation — OSE Immunotherapeutics to AbbVie',
     source: 'manual',
+    assetName: 'inflammation',
+    verified: true,
   },
   {
     id: 'sb_f250a998-cef5-4ddd-8f74-fa29f7716925',
@@ -8914,6 +9880,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hidradenitisSuppurativa — Acelyrin to AbbVie',
     source: 'manual',
+    assetName: 'hidradenitisSuppurativa',
+    verified: true,
   },
   {
     id: 'sb_d624566b-08e0-4564-9b0b-8e393fc83b28',
@@ -8932,6 +9900,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hematologic — Nurix Therapeutics to Sanofi',
     source: 'manual',
+    assetName: 'hematologic',
+    verified: true,
   },
   {
     id: 'sb_d5981ebd-02bd-4a5c-8539-b5a90a3c4995',
@@ -8951,6 +9921,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'lung_nsclc — Hengrui Medicine to Merck',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_ecc81f1d-3bd6-4331-b325-6c7521538587',
@@ -8969,6 +9941,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ulcerativeColitis — Iterative Health to Pfizer',
     source: 'manual',
+    assetName: 'ulcerativeColitis',
+    verified: true,
   },
   {
     id: 'sb_3fa2a409-e3ac-4213-ac46-ae35b3d4e0c6',
@@ -8987,6 +9961,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'hypoparathyroidism — Amolyt Pharma to AstraZeneca',
     source: 'manual',
+    assetName: 'hypoparathyroidism',
+    verified: true,
   },
   {
     id: 'sb_b5369406-f19f-4869-a286-29493f493951',
@@ -9005,6 +9981,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'prostate — Convergent Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'prostate',
+    verified: true,
   },
   {
     id: 'sb_a19ed18c-0d96-4a41-8f91-ab9dee71735c',
@@ -9023,6 +10001,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'obesity — Scribe Therapeutics to Novo Nordisk',
     source: 'manual',
+    assetName: 'obesity',
+    verified: true,
   },
   {
     id: 'sb_d2d52e20-e856-401e-8793-71cb70cb2119',
@@ -9042,6 +10022,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiomyopathy — BridgeBio Pharma to Astellas Pharma',
     source: 'manual',
+    assetName: 'cardiomyopathy',
+    verified: true,
   },
   {
     id: 'sb_93ac65b5-8689-454b-95a1-406890781ece',
@@ -9059,6 +10041,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ulcerativeColitis — Morphic Therapeutic to Eli Lilly',
     source: 'manual',
+    assetName: 'ulcerativeColitis',
+    verified: true,
   },
   {
     id: 'sb_5731ed5a-19f2-4428-9d7c-a66b37ee974f',
@@ -9077,6 +10061,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hiv — Theratechnologies to TaiMed Biologics',
     source: 'manual',
+    assetName: 'hiv',
+    verified: true,
   },
   {
     id: 'sb_bb9e3faf-a621-45ee-8f60-6dc56a0ca96d',
@@ -9095,6 +10081,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'liver_disease — Medincell to AbbVie',
     source: 'manual',
+    assetName: 'liver_disease',
+    verified: true,
   },
   {
     id: 'sb_34f19e95-ff3c-4731-a8a0-585b5bc20c84',
@@ -9113,6 +10101,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'solid_tumors — Xilio Therapeutics to Gilead Sciences',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_6bd64b88-99b1-4161-bce0-dd30eeb3e2be',
@@ -9131,6 +10121,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiovascular risk reduction — Shanghai Argo to Novartis',
     source: 'manual',
+    assetName: 'cardiovascular risk reduction',
+    verified: true,
   },
   {
     id: 'sb_2a15f16c-5912-45dd-8834-e22f706336a3',
@@ -9149,6 +10141,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'egfr_solid_tumors — Pinetree Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'egfr_solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_ec7e8a19-72e9-4a1a-a316-9d9de26e6875',
@@ -9168,6 +10162,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'fungalInfections — Cidara Therapeutics to Melinta/Mundipharma',
     source: 'manual',
+    assetName: 'fungalInfections',
+    verified: true,
   },
   {
     id: 'sb_91db7acf-bf48-4654-8497-1053f9fa9825',
@@ -9185,6 +10181,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'a1at_deficiency — Inhibrx to Sanofi',
     source: 'manual',
+    assetName: 'a1at_deficiency',
+    verified: true,
   },
   {
     id: 'sb_dcbb7319-4e30-44db-89ec-36c4b943edf7',
@@ -9202,6 +10200,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'neuromuscular — Kate Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'neuromuscular',
+    verified: true,
   },
   {
     id: 'sb_f983ccad-e095-4cfd-859b-d9bacf19a2b3',
@@ -9219,6 +10219,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'psoriasis — Nimble Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_967f24d1-8feb-4d16-b6a3-8bd05d5ab064',
@@ -9237,6 +10239,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'respiratory infection — Novavax to Sanofi',
     source: 'manual',
+    assetName: 'respiratory infection',
+    verified: true,
   },
   {
     id: 'sb_2a87fcf7-c85d-4db6-8532-f3144f6b0bdf',
@@ -9254,6 +10258,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'schizophrenia — Vanda Pharmaceuticals to Cycle Pharmaceuticals',
     source: 'manual',
+    assetName: 'schizophrenia',
+    verified: true,
   },
   {
     id: 'sb_fcb217be-87eb-4918-9fbc-cfc31673d130',
@@ -9271,6 +10277,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'neurodegenerative programs — Sangamo to Roche-Genentech',
     source: 'press_release',
+    assetName: 'neurodegenerative programs',
+    verified: false,
   },
   {
     id: 'sb_faef2010-894a-449d-baf3-6a1bbc69c7de',
@@ -9289,6 +10297,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'muscular_dystrophy — Fulcrum Therapeutics to Sanofi',
     source: 'manual',
+    assetName: 'muscular_dystrophy',
+    verified: true,
   },
   {
     id: 'sb_5fce5a96-56f0-4ab3-aae4-404903b56883',
@@ -9307,6 +10317,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'asthma — Aiolos Bio to GSK',
     source: 'manual',
+    assetName: 'asthma',
+    verified: true,
   },
   {
     id: 'sb_bfa27aab-2934-4f43-84ec-ff082d03471b',
@@ -9326,6 +10338,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'dyslipidemia — Alnylam Pharmaceuticals to Regeneron',
     source: 'manual',
+    assetName: 'dyslipidemia',
+    verified: true,
   },
   {
     id: 'sb_28aa7925-fcb8-42bf-a3d7-803cd435a465',
@@ -9345,6 +10359,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CEA-101 — Immatics to Novartis',
     source: 'sec_10k',
+    assetName: 'CEA-101',
+    verified: false,
   },
   {
     id: 'sb_8b80cf30-806f-4776-a5fd-722a7c0e209a',
@@ -9364,6 +10380,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD22 — Forma Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'CD22',
+    verified: false,
   },
   {
     id: 'sb_032f1345-93a2-4b30-a498-7b2a8a0d2eeb',
@@ -9383,6 +10401,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BCMA-mab — Innovent Biologics to Merck',
     source: 'sec_10k',
+    assetName: 'BCMA-mab',
+    verified: false,
   },
   {
     id: 'sb_499b624a-56f3-41c6-881d-c25e3fd12d4e',
@@ -9402,6 +10422,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ARCUS Nuclease (SCD program) — Precision BioSciences to Novartis',
     source: 'press_release',
+    assetName: 'ARCUS Nuclease (SCD program)',
+    verified: false,
   },
   {
     id: 'sb_ef2e7971-6da8-493c-9d97-d06ce9c5941b',
@@ -9421,6 +10443,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-GPC3-201 — Caribou Biosciences to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'Anti-GPC3-201',
+    verified: false,
   },
   {
     id: 'sb_cfde1653-3502-4e69-83c5-b078c09f6cde',
@@ -9440,6 +10464,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CDK4/6 — Arcus Biosciences to Sanofi',
     source: 'sec_8k',
+    assetName: 'Anti-CDK4/6',
+    verified: false,
   },
   {
     id: 'sb_d53e9894-451a-40e8-a2b0-4c8e357e00fc',
@@ -9459,6 +10485,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Claudin 6-tinib — Syros Pharmaceuticals to Moderna',
     source: 'sec_8k',
+    assetName: 'Claudin 6-tinib',
+    verified: false,
   },
   {
     id: 'sb_f4875b00-c28f-42dd-a11d-2e377021180c',
@@ -9477,6 +10505,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HBV portfolio — Assembly Biosciences to Gilead Sciences',
     source: 'press_release',
+    assetName: 'HBV portfolio',
+    verified: false,
   },
   {
     id: 'sb_4cef1315-d034-4ad6-9334-2f8b41cf09cb',
@@ -9495,6 +10525,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'QRL-204 — QurAlis to Eli Lilly',
     source: 'manual',
+    assetName: 'QRL-204',
+    verified: true,
   },
   {
     id: 'sb_60a0dbc3-eb36-4a55-baa0-01670a8bf779',
@@ -9513,6 +10545,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'SZN-413 (Wnt modulator for retina) — Surrozen to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'SZN-413 (Wnt modulator for retina)',
+    verified: false,
   },
   {
     id: 'sb_2e6fbfa7-99db-4e39-9b11-d4cd54562e55',
@@ -9531,6 +10565,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Zanidatamab — Zymeworks to Jazz Pharmaceuticals',
     source: 'sec_8k',
+    assetName: 'Zanidatamab',
+    verified: false,
   },
   {
     id: 'sb_a566f56c-c985-4ab6-b155-e6716bec4275',
@@ -9550,6 +10586,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VEGF-201 — Vor Biopharma to Moderna',
     source: 'sec_8k',
+    assetName: 'VEGF-201',
+    verified: false,
   },
   {
     id: 'sb_2341c4e4-66ba-4428-a970-a80594e2a6a6',
@@ -9567,6 +10605,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NM26 — Yellow Jersey Therapeutics to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'NM26',
+    verified: false,
   },
   {
     id: 'sb_7eabdf03-6d61-4afc-aee4-e183988086b6',
@@ -9584,6 +10624,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mRNA Group 1 H5NX pandemic influenza vaccine — HHS/BARDA to ModernaTX',
     source: 'press_release',
+    assetName: 'mRNA Group 1 H5NX pandemic influenza vaccine',
+    verified: false,
   },
   {
     id: 'sb_e5454d9b-d2e5-4d3f-87fa-ddf12e102e10',
@@ -9601,6 +10643,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Group 1 H5NX mRNA pandemic influenza vaccine — RRPV to Moderna',
     source: 'press_release',
+    assetName: 'Group 1 H5NX mRNA pandemic influenza vaccine',
+    verified: false,
   },
   {
     id: 'sb_a44d592a-4459-49a9-a9f9-ac6db1a77b8c',
@@ -9618,6 +10662,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Alpine pipeline — Alpine Immune to Vertex',
     source: 'press_release',
+    assetName: 'Alpine pipeline',
+    verified: false,
   },
   {
     id: 'sb_6e7ba380-c837-4c9a-ba6e-a99e61ef650a',
@@ -9636,6 +10682,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'AVTX-009 — AlmataBio to Avalo Therapeutics',
     source: 'press_release',
+    assetName: 'AVTX-009',
+    verified: false,
   },
   {
     id: 'sb_83366e48-474e-446d-b0aa-0360fc6b6a36',
@@ -9653,6 +10701,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NM26 — Yellow Jersey Therapeutics to J&J',
     source: 'press_release',
+    assetName: 'NM26',
+    verified: false,
   },
   {
     id: 'sb_2c7a55bd-bca9-4345-9cf1-a351d22f2a72',
@@ -9672,6 +10722,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'SOT101 + CAR-T autoimmune — Sotio Biotech to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'SOT101 + CAR-T autoimmune',
+    verified: false,
   },
   {
     id: 'sb_7c8a16a3-b663-4a06-99f4-940003ecc407',
@@ -9690,6 +10742,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FG-M701 — FutureGen Biotech to AbbVie',
     source: 'press_release',
+    assetName: 'FG-M701',
+    verified: false,
   },
   {
     id: 'sb_ab83c9ae-e104-4ee3-88f5-b59ff01ce814',
@@ -9707,6 +10761,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NM26 — Numab/Yellow Jersey to J&J',
     source: 'press_release',
+    assetName: 'NM26',
+    verified: false,
   },
   {
     id: 'sb_2347db0a-8df2-4c0f-95c3-5b427316e109',
@@ -9725,6 +10781,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FG-M701 — FutureGen to AbbVie',
     source: 'press_release',
+    assetName: 'FG-M701',
+    verified: false,
   },
   {
     id: 'sb_7a9ab7a3-8ffd-4df5-aa1b-2e8900a9cdc0',
@@ -9744,6 +10802,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ATR — Karyopharm Therapeutics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'Anti-ATR',
+    verified: false,
   },
   {
     id: 'sb_446d8ea6-29ba-46e2-8d41-83f7837d27d8',
@@ -9762,6 +10822,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FG-M701 — FutureGen Biopharmaceutical to AbbVie',
     source: 'manual',
+    assetName: 'FG-M701',
+    verified: true,
   },
   {
     id: 'sb_99efd64a-319a-4b69-8eba-14dfe7ac7394',
@@ -9781,6 +10843,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD40 — CRISPR Therapeutics to GSK',
     source: 'press_release',
+    assetName: 'CD40',
+    verified: false,
   },
   {
     id: 'sb_e7437f3e-70df-4db9-87d3-68043243c8e3',
@@ -9800,6 +10864,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CTLA-4-201 — Astellas to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'CTLA-4-201',
+    verified: false,
   },
   {
     id: 'sb_0d9e64c3-7f69-4cc3-b23d-0a5a21f5f561',
@@ -9819,6 +10885,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Pan-TL1A — LianBio to Roche',
     source: 'press_release',
+    assetName: 'Pan-TL1A',
+    verified: false,
   },
   {
     id: 'sb_b214e0d0-55d7-4af4-81cf-f74ed5f1cef4',
@@ -9838,6 +10906,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-M1/M4 muscarinic-stat — Prevail Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-M1/M4 muscarinic-stat',
+    verified: false,
   },
   {
     id: 'sb_47103d5c-ff06-44f5-bf09-f4fe99546a77',
@@ -9856,6 +10926,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD33-201 — Umoja Biopharma to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'CD33-201',
+    verified: false,
   },
   {
     id: 'sb_552f9e00-9248-4285-bf06-40f3b297aaf5',
@@ -9875,6 +10947,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-201 — IGM Biosciences to Regeneron',
     source: 'press_release',
+    assetName: 'EGFR-201',
+    verified: false,
   },
   {
     id: 'sb_3dc76f9d-a9ea-40e9-8dbb-60211bc24610',
@@ -9893,6 +10967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-001 — CureVac to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'EGFR-001',
+    verified: false,
   },
   {
     id: 'sb_4d41e2f8-6cf0-4540-8465-06a5bcf93684',
@@ -9911,6 +10987,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'AAV gene therapy (ophtho collaboration) — MeiraGTx to Eli Lilly',
     source: 'press_release',
+    assetName: 'AAV gene therapy (ophtho collaboration)',
+    verified: false,
   },
   {
     id: 'sb_0f0b2237-e94e-4b65-ab0b-d2875f9c963d',
@@ -9930,6 +11008,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC1-001 — iTeos Therapeutics to Novartis',
     source: 'press_release',
+    assetName: 'MUC1-001',
+    verified: false,
   },
   {
     id: 'sb_6956058d-f533-4e01-adf1-b7df9f35de0f',
@@ -9948,6 +11028,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CLDN18.2-301 — Kronos Bio to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CLDN18.2-301',
+    verified: false,
   },
   {
     id: 'sb_62a7add5-be2c-4690-82ff-61ddfa9a5bdc',
@@ -9967,6 +11049,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD40-101 — Denali Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'CD40-101',
+    verified: false,
   },
   {
     id: 'sb_58f19f82-a2f9-4ba3-bd32-5e63275047a7',
@@ -9986,6 +11070,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H3-tinib — Roivant Sciences to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_12b0219f-0650-4252-b1f4-c8ebd8196d0b',
@@ -10004,6 +11090,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12C-301 — Astellas to AbbVie',
     source: 'sec_10k',
+    assetName: 'KRAS G12C-301',
+    verified: false,
   },
   {
     id: 'sb_33d696f3-192c-422a-bed4-9f8392ec9560',
@@ -10023,6 +11111,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Uza-cel — Adaptimmune to Galapagos',
     source: 'press_release',
+    assetName: 'Uza-cel',
+    verified: false,
   },
   {
     id: 'sb_78c51a4d-fbb0-4539-b195-dd9e33ccb1d2',
@@ -10042,6 +11132,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'LAG-3-mab — CRISPR Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: 'LAG-3-mab',
+    verified: false,
   },
   {
     id: 'sb_d97c0b99-9106-479e-a731-ae2c32ae06c3',
@@ -10061,6 +11153,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ALK-301 — BioNTech to Regeneron',
     source: 'press_release',
+    assetName: 'ALK-301',
+    verified: false,
   },
   {
     id: 'sb_577a440e-9d08-41d5-b2a8-06afaa732717',
@@ -10080,6 +11174,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BCL-2-mab — PMV Pharmaceuticals to Regeneron',
     source: 'sec_10k',
+    assetName: 'BCL-2-mab',
+    verified: false,
   },
   {
     id: 'sb_6cb5caf2-3a7a-4e48-8a38-029f10465419',
@@ -10099,6 +11195,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SIRPα-001 — Y-mAbs Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'SIRPα-001',
+    verified: false,
   },
   {
     id: 'sb_8e0938f3-2996-46bc-8ee0-8d3764e7e27a',
@@ -10118,6 +11216,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FGFR-201 — Affimed to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'FGFR-201',
+    verified: false,
   },
   {
     id: 'sb_c11c671e-71b2-45d6-b2e8-aedf60f8531b',
@@ -10135,6 +11235,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NM26 — Numab/Yellow Jersey Therapeutics to J&J',
     source: 'press_release',
+    assetName: 'NM26',
+    verified: false,
   },
   {
     id: 'sb_ab1f099e-804b-413c-8ff8-a2bea716ec28',
@@ -10152,6 +11254,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NM26 — Numab Therapeutics/Yellow Jersey to J&J',
     source: 'press_release',
+    assetName: 'NM26',
+    verified: false,
   },
   {
     id: 'sb_73853a50-e626-4f7b-8e0c-83a6942b77e9',
@@ -10171,6 +11275,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Apitegromab — Scholar Rock to Eli Lilly',
     source: 'press_release',
+    assetName: 'Apitegromab',
+    verified: false,
   },
   {
     id: 'sb_e5f5e676-2124-460b-a805-e54e184eb696',
@@ -10190,6 +11296,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Obicetrapib — NewAmsterdam Pharma to Menarini',
     source: 'press_release',
+    assetName: 'Obicetrapib',
+    verified: false,
   },
   {
     id: 'sb_dfe7f9b5-5c88-4bc3-a4ab-3e7415f7af6d',
@@ -10208,6 +11316,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1-tinib — Nkarta to AbbVie',
     source: 'sec_10k',
+    assetName: 'ROS1-tinib',
+    verified: false,
   },
   {
     id: 'sb_f76999d1-cf74-40c5-984b-f87060b817af',
@@ -10227,6 +11337,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RET — Arrowhead Pharmaceuticals to Takeda',
     source: 'sec_8k',
+    assetName: 'RET',
+    verified: false,
   },
   {
     id: 'sb_358d7d24-eacd-46a0-b0c0-96a69e14ae71',
@@ -10246,6 +11358,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-Claudin 6 — Alphamab Oncology to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-Claudin 6',
+    verified: false,
   },
   {
     id: 'sb_048c46a7-2418-49fa-81fb-faf15beeec7c',
@@ -10265,6 +11379,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MDM2-101 — Argenx to Sanofi',
     source: 'press_release',
+    assetName: 'MDM2-101',
+    verified: false,
   },
   {
     id: 'sb_cd67bd83-8921-4526-99c8-0926f21873f2',
@@ -10284,6 +11400,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FGFR-101 — CRISPR Therapeutics to Genentech',
     source: 'sec_10k',
+    assetName: 'FGFR-101',
+    verified: false,
   },
   {
     id: 'sb_80a18a18-c622-443c-9857-aa2c89c5942b',
@@ -10302,6 +11420,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-BCMA-101 — Ideaya Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-BCMA-101',
+    verified: false,
   },
   {
     id: 'sb_6a9a433a-e9da-4dc1-b8bb-6602b480c58f',
@@ -10320,6 +11440,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-TGF-β-001 — IGM Biosciences to GSK',
     source: 'sec_10k',
+    assetName: 'Anti-TGF-β-001',
+    verified: false,
   },
   {
     id: 'sb_8982fdfc-4342-4559-b643-11fd894bf664',
@@ -10338,6 +11460,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER2-mab — Syndax Pharmaceuticals to Amgen',
     source: 'sec_8k',
+    assetName: 'HER2-mab',
+    verified: false,
   },
   {
     id: 'sb_66246758-ccb6-44c6-aefc-43bb460dcf07',
@@ -10356,6 +11480,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FLT3-001 — Agenus to Biogen',
     source: 'press_release',
+    assetName: 'FLT3-001',
+    verified: false,
   },
   {
     id: 'sb_a937e62b-6ba5-415b-b55b-a6aa2c98c230',
@@ -10375,6 +11501,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KIT — Beam Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'KIT',
+    verified: false,
   },
   {
     id: 'sb_e037a7ca-44cf-4497-b82f-ed0df825cdb2',
@@ -10394,6 +11522,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIGIT-tinib — Vor Biopharma to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'TIGIT-tinib',
+    verified: false,
   },
   {
     id: 'sb_6df74263-6e11-49e6-a9c4-f6a622b2761a',
@@ -10413,6 +11543,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FcRn Bispecific — Astria Therapeutics to Otsuka Pharmaceutical',
     source: 'press_release',
+    assetName: 'FcRn Bispecific',
+    verified: false,
   },
   {
     id: 'sb_8a558975-aa85-44b8-ba33-a734ec311d64',
@@ -10432,6 +11564,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin-tinib — Intellia Therapeutics to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Mesothelin-tinib',
+    verified: false,
   },
   {
     id: 'sb_e2ca3e13-14e7-477c-a13e-8050eaea7ae5',
@@ -10450,6 +11584,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'tolerizing vaccines — Repertoire Immune Medicines to Bristol Myers Squibb',
     source: 'press_release',
+    assetName: 'tolerizing vaccines',
+    verified: false,
   },
   {
     id: 'sb_d4f0132f-ad5a-49a9-8a5b-194d96d41047',
@@ -10469,6 +11605,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CEA-201 — Elevation Oncology to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'CEA-201',
+    verified: false,
   },
   {
     id: 'sb_9ff4e005-b02b-4f9b-baad-3d9de593a48b',
@@ -10487,6 +11625,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FGFR-001 — Immunocore to Roche',
     source: 'sec_10k',
+    assetName: 'FGFR-001',
+    verified: false,
   },
   {
     id: 'sb_f336ba05-f849-4211-bf56-3412b92298f8',
@@ -10505,6 +11645,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ICOS-tinib — Affimed to Regeneron',
     source: 'press_release',
+    assetName: 'ICOS-tinib',
+    verified: false,
   },
   {
     id: 'sb_7a70a090-c63e-4d8a-8cc0-718c1f704df1',
@@ -10524,6 +11666,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TIGIT — Janux Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'TIGIT',
+    verified: false,
   },
   {
     id: 'sb_c1134118-7e8b-492d-882f-2357db1bd753',
@@ -10543,6 +11687,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'LIV-1-101 — Editas Medicine to Regeneron',
     source: 'sec_10k',
+    assetName: 'LIV-1-101',
+    verified: false,
   },
   {
     id: 'sb_13665c19-8ac4-4f57-9800-cf7589f8ef20',
@@ -10561,6 +11707,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'JAK — Tyra Biosciences to Merck',
     source: 'press_release',
+    assetName: 'JAK',
+    verified: false,
   },
   {
     id: 'sb_b243f7ef-482d-495c-b52a-c2e783e9c20f',
@@ -10580,6 +11728,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'OX40-201 — Arrowhead Pharmaceuticals to GSK',
     source: 'sec_10k',
+    assetName: 'OX40-201',
+    verified: false,
   },
   {
     id: 'sb_b82f2076-064c-4023-82f6-8936658e8358',
@@ -10598,6 +11748,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Bioprinted islet tissue — Aspect Biosystems to Novo Nordisk',
     source: 'manual',
+    assetName: 'Bioprinted islet tissue',
+    verified: true,
   },
   {
     id: 'sb_afc94431-04a9-40f7-bcaa-d2a6567963a3',
@@ -10616,6 +11768,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'mRNA-1010 flu vaccine funding — Moderna to Blackstone Life Sciences',
     source: 'press_release',
+    assetName: 'mRNA-1010 flu vaccine funding',
+    verified: false,
   },
   {
     id: 'sb_fefa52a2-1c7d-4dcc-8cf6-86d61e5f6b32',
@@ -10635,6 +11789,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ADC Autoimmune Program — Seagen to Pfizer',
     source: 'press_release',
+    assetName: 'ADC Autoimmune Program',
+    verified: false,
   },
   {
     id: 'sb_fd57bf6e-b0bc-46ee-a466-1ac8094d3301',
@@ -10654,6 +11810,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-1 — Forma Therapeutics to Vertex',
     source: 'sec_10k',
+    assetName: 'PD-1',
+    verified: false,
   },
   {
     id: 'sb_2ebc451d-4ef9-433c-a672-a247f1524c25',
@@ -10672,6 +11830,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12D-001 — Intellia Therapeutics to GSK',
     source: 'sec_10k',
+    assetName: 'KRAS G12D-001',
+    verified: false,
   },
   {
     id: 'sb_bc1e68c0-30d0-4afa-8bf0-5f1b7b0772f7',
@@ -10690,6 +11850,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MET-201 — Mirati Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: 'MET-201',
+    verified: false,
   },
   {
     id: 'sb_ff21efa3-cd40-4416-8d96-16e9a57ed396',
@@ -10708,6 +11870,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Argo cardiovascular pipeline — Shanghai Argo Biopharmaceutical to Novartis',
     source: 'manual',
+    assetName: 'Argo cardiovascular pipeline',
+    verified: true,
   },
   {
     id: 'sb_2f7cc895-7d48-4793-a8c1-0502ffcfedf2',
@@ -10727,6 +11891,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ADARx siRNA Platform — ADARx Pharmaceuticals to AbbVie',
     source: 'press_release',
+    assetName: 'ADARx siRNA Platform',
+    verified: false,
   },
   {
     id: 'sb_044a8957-2e73-4232-bcdd-46738b92fea5',
@@ -10746,6 +11912,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PSMA-tinib — Innovent Biologics to Moderna',
     source: 'sec_8k',
+    assetName: 'PSMA-tinib',
+    verified: false,
   },
   {
     id: 'sb_96caf042-3e1e-4430-ba4c-b2644e436c02',
@@ -10765,6 +11933,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD73 — Kronos Bio to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'CD73',
+    verified: false,
   },
   {
     id: 'sb_03fdfa77-a828-4aa8-aa59-757eaa239f5a',
@@ -10784,6 +11954,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Self-amplifying RNA platform — Genevant Sciences to GSK',
     source: 'press_release',
+    assetName: 'Self-amplifying RNA platform',
+    verified: false,
   },
   {
     id: 'sb_74957ad6-7bc8-44f5-947d-d39697644acb',
@@ -10803,6 +11975,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD123-tinib — Immatics to Merck',
     source: 'sec_10k',
+    assetName: 'CD123-tinib',
+    verified: false,
   },
   {
     id: 'sb_005a9739-6cc5-4ef8-9aa2-bb512f60929b',
@@ -10822,6 +11996,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BRAF V600E-301 — Zai Lab to Amgen',
     source: 'sec_10k',
+    assetName: 'BRAF V600E-301',
+    verified: false,
   },
   {
     id: 'sb_c9c19bfe-4d1d-4d16-90b6-58c11b45a6e6',
@@ -10841,6 +12017,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PM1080 — Biotheus to Hansoh Pharma',
     source: 'press_release',
+    assetName: 'PM1080',
+    verified: false,
   },
   {
     id: 'sb_abba9352-f202-40fe-967a-2a24f3a9889d',
@@ -10859,6 +12037,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Circular RNA gene editing — Orna Therapeutics to Vertex Pharmaceuticals',
     source: 'manual',
+    assetName: 'Circular RNA gene editing',
+    verified: true,
   },
   {
     id: 'sb_c746ed8a-b240-4986-811f-e46ee00c3b8e',
@@ -10878,6 +12058,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD123-tinib — Genmab to Pfizer',
     source: 'sec_8k',
+    assetName: 'CD123-tinib',
+    verified: false,
   },
   {
     id: 'sb_b78f7fbd-8929-4793-934b-52ae43e1b019',
@@ -10897,6 +12079,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ICOS-tinib — Allogene Therapeutics to Vertex',
     source: 'sec_10k',
+    assetName: 'ICOS-tinib',
+    verified: false,
   },
   {
     id: 'sb_5350ef32-f929-4b01-968f-899a5227cd79',
@@ -10914,6 +12098,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Efruxifermin (EFX) — Akero Therapeutics to Novo Nordisk',
     source: 'sec_8k',
+    assetName: 'Efruxifermin (EFX)',
+    verified: false,
   },
   {
     id: 'sb_7cb2aead-0ec4-4873-8759-8accb0d2bf19',
@@ -10933,6 +12119,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Bispecific Platform — Harbour BioMed to AstraZeneca',
     source: 'press_release',
+    assetName: 'Bispecific Platform',
+    verified: false,
   },
   {
     id: 'sb_85276cbb-2792-4c04-9aca-2ba3121f39a4',
@@ -10952,6 +12140,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Acoramidis (Europe) — BridgeBio Pharma to Bayer',
     source: 'press_release',
+    assetName: 'Acoramidis (Europe)',
+    verified: false,
   },
   {
     id: 'sb_b1040145-aee4-4a83-b444-7416c0e9d436',
@@ -10971,6 +12161,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CLDN18.2 — RemeGen to Bayer',
     source: 'sec_8k',
+    assetName: 'Anti-CLDN18.2',
+    verified: false,
   },
   {
     id: 'sb_d228bc8a-c84c-42ce-b9ca-fc371e5ad02f',
@@ -10989,6 +12181,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PARP — Immatics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'PARP',
+    verified: false,
   },
   {
     id: 'sb_37a9a7a2-9aad-4b7d-8a2b-8caf7936cf48',
@@ -11008,6 +12202,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-BCL-2-301 — Galapagos to Roche',
     source: 'sec_10k',
+    assetName: 'Anti-BCL-2-301',
+    verified: false,
   },
   {
     id: 'sb_7251d3fe-8ff2-4d80-a6b6-6bcc212cbb81',
@@ -11027,6 +12223,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-B7-H4 — BeiGene to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-B7-H4',
+    verified: false,
   },
   {
     id: 'sb_3d398ece-2ae8-464e-bdbc-3826c93138bc',
@@ -11046,6 +12244,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER3 — Springworks Therapeutics to Biogen',
     source: 'press_release',
+    assetName: 'HER3',
+    verified: false,
   },
   {
     id: 'sb_672dc93c-71d3-448e-bdb7-a63a171f23f3',
@@ -11065,6 +12265,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GD2-001 — Intellia Therapeutics to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'GD2-001',
+    verified: false,
   },
   {
     id: 'sb_a5397461-5483-49b3-b035-60e29e59be0f',
@@ -11084,6 +12286,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PARP-tinib — BioNTech to Pfizer',
     source: 'press_release',
+    assetName: 'PARP-tinib',
+    verified: false,
   },
   {
     id: 'sb_02619164-e2f0-4dc1-ad7d-1d23bf38bb06',
@@ -11102,6 +12306,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-MET-201 — Mirati Therapeutics to Regeneron',
     source: 'press_release',
+    assetName: 'Anti-MET-201',
+    verified: false,
   },
   {
     id: 'sb_ab83b08e-4c46-4519-99f0-4768e7fd60b9',
@@ -11121,6 +12327,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12D-001 — Iovance Biotherapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'KRAS G12D-001',
+    verified: false,
   },
   {
     id: 'sb_f96dc7a3-ba69-4b6d-954a-3c5bd0a6ff00',
@@ -11139,6 +12347,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-mTOR-mab — ORIC Pharmaceuticals to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-mTOR-mab',
+    verified: false,
   },
   {
     id: 'sb_b20cdb8a-6828-4925-89bc-7be03715edac',
@@ -11158,6 +12368,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'A2AR-401 — Tmunity Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'A2AR-401',
+    verified: false,
   },
   {
     id: 'sb_a77e037b-9fb7-4b32-b1f4-e80942e16ff3',
@@ -11177,6 +12389,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-VEGF — Janux Therapeutics to AbbVie',
     source: 'sec_8k',
+    assetName: 'Anti-VEGF',
+    verified: false,
   },
   {
     id: 'sb_f98cbde8-6845-4fb2-be92-f26529c34437',
@@ -11196,6 +12410,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'OX40-201 — Zai Lab to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'OX40-201',
+    verified: false,
   },
   {
     id: 'sb_dd120ec6-57e8-4aae-af2a-f177f25124d6',
@@ -11215,6 +12431,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ERK-mab — Bicycle Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'ERK-mab',
+    verified: false,
   },
   {
     id: 'sb_06401a1d-e53d-4220-8932-3b1c6e80404a',
@@ -11234,6 +12452,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SKB264 — Kelun-Biotech to Merck',
     source: 'press_release',
+    assetName: 'SKB264',
+    verified: false,
   },
   {
     id: 'sb_70f6f472-c3b1-48b8-b8e0-384914e2ab05',
@@ -11253,6 +12473,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TROP2-301 — Innovent Biologics to Pfizer',
     source: 'press_release',
+    assetName: 'TROP2-301',
+    verified: false,
   },
   {
     id: 'sb_188e10da-6ff0-400f-ba37-600a117c3dff',
@@ -11272,6 +12494,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OCU400 — Ocugen to Bharat Biotech',
     source: 'press_release',
+    assetName: 'OCU400',
+    verified: false,
   },
   {
     id: 'sb_9bc9d54a-72c6-4bee-882b-6526d6717df0',
@@ -11290,6 +12514,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD33-101 — Beam Therapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'CD33-101',
+    verified: false,
   },
   {
     id: 'sb_b4443754-0c4c-45df-b093-93d325e13325',
@@ -11309,6 +12535,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12D-mab — PMV Pharmaceuticals to Sanofi',
     source: 'sec_10k',
+    assetName: 'KRAS G12D-mab',
+    verified: false,
   },
   {
     id: 'sb_e379782c-2e15-44f2-9c4b-535f8f6454b9',
@@ -11328,6 +12556,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Mesothelin — Agenus to Eli Lilly',
     source: 'press_release',
+    assetName: 'Mesothelin',
+    verified: false,
   },
   {
     id: 'sb_e0fbe82a-3884-482f-a0d3-dae14a4852b2',
@@ -11347,6 +12577,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GD2 — Caribou Biosciences to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'GD2',
+    verified: false,
   },
   {
     id: 'sb_23057832-8f59-43ed-b0b7-c8d00f7cdf17',
@@ -11365,6 +12597,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Cardiovascular RNAi programs — Tenaya Therapeutics to Alnylam Pharmaceuticals',
     source: 'manual',
+    assetName: 'Cardiovascular RNAi programs',
+    verified: true,
   },
   {
     id: 'sb_3f01221a-1b8b-4f24-90e5-a17102059557',
@@ -11383,6 +12617,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RGT-075 — Regor Therapeutics to Eli Lilly',
     source: 'manual',
+    assetName: 'RGT-075',
+    verified: true,
   },
   {
     id: 'sb_17f7760c-1bf7-4472-a72e-4345fd09081d',
@@ -11401,6 +12637,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Reproxalap (dry eye) — Aldeyra Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'Reproxalap (dry eye)',
+    verified: false,
   },
   {
     id: 'sb_842f82b9-136a-416e-adf1-8a236333ecaf',
@@ -11420,6 +12658,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BRAF V600E-001 — Immatics to Moderna',
     source: 'press_release',
+    assetName: 'BRAF V600E-001',
+    verified: false,
   },
   {
     id: 'sb_23651e52-75bf-4044-bb8c-c31525ca543c',
@@ -11439,6 +12679,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MUC1-tinib — Kyowa Kirin to Roche',
     source: 'sec_10k',
+    assetName: 'MUC1-tinib',
+    verified: false,
   },
   {
     id: 'sb_17fd6f97-e88f-48b4-bba3-2c6f4183d7ea',
@@ -11458,6 +12700,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGFR-301 — Celldex Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'VEGFR-301',
+    verified: false,
   },
   {
     id: 'sb_5a998b8b-fdc6-44fa-a4cd-3c67e526d92f',
@@ -11477,6 +12721,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-PD-L1-001 — MacroGenics to Roche',
     source: 'press_release',
+    assetName: 'Anti-PD-L1-001',
+    verified: false,
   },
   {
     id: 'sb_da755395-ea83-41e4-aa33-ee10e2423c52',
@@ -11496,6 +12742,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GLP-1 gene therapy — Fractyl Health to Novo Nordisk',
     source: 'press_release',
+    assetName: 'GLP-1 gene therapy',
+    verified: false,
   },
   {
     id: 'sb_c265013d-cdd3-4b6e-a9c9-20ea8832d475',
@@ -11513,6 +12761,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HPN328 — Harpoon Therapeutics to AbbVie',
     source: 'sec_8k',
+    assetName: 'HPN328',
+    verified: false,
   },
   {
     id: 'sb_96a0bfec-d2c5-4232-8d94-962ccdd5931a',
@@ -11531,6 +12781,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FGFR-001 — Tyra Biosciences to Moderna',
     source: 'sec_10k',
+    assetName: 'FGFR-001',
+    verified: false,
   },
   {
     id: 'sb_1207586b-f1b0-4a0a-ab07-4e77e75b8111',
@@ -11550,6 +12802,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PI3K — Arcus Biosciences to GSK',
     source: 'press_release',
+    assetName: 'PI3K',
+    verified: false,
   },
   {
     id: 'sb_7e84b09a-1c99-41ee-8775-a9292f66517a',
@@ -11568,6 +12822,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'experimental gene therapy for SMA — Voyager to Novartis',
     source: 'press_release',
+    assetName: 'experimental gene therapy for SMA',
+    verified: false,
   },
   {
     id: 'sb_49100ce4-fa15-491e-914f-cb37ed50c565',
@@ -11587,6 +12843,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KRAS G12D-tinib — Bicycle Therapeutics to Novartis',
     source: 'press_release',
+    assetName: 'KRAS G12D-tinib',
+    verified: false,
   },
   {
     id: 'sb_31aec89b-482b-4705-bbfb-6991b46b860e',
@@ -11605,6 +12863,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'VEGFR-101 — Iovance Biotherapeutics to Pfizer',
     source: 'press_release',
+    assetName: 'VEGFR-101',
+    verified: false,
   },
   {
     id: 'sb_49b3241a-ba67-4c62-abc2-825396587451',
@@ -11624,6 +12884,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-ROS1 — IGM Biosciences to Vertex',
     source: 'sec_8k',
+    assetName: 'Anti-ROS1',
+    verified: false,
   },
   {
     id: 'sb_54694581-8ac1-4aab-a8ef-1f53044b32fa',
@@ -11643,6 +12905,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'WEE1 — Chugai Pharmaceutical to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'WEE1',
+    verified: false,
   },
   {
     id: 'sb_82a8b6ec-a311-4e85-9078-3f9af8c14a12',
@@ -11661,6 +12925,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'RET — Fate Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'RET',
+    verified: false,
   },
   {
     id: 'sb_49f3d1c9-6276-44b3-b1fe-c54d8134eb82',
@@ -11679,6 +12945,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Prime gene editing CAR-T — Prime Medicine to Bristol Myers Squibb',
     source: 'manual',
+    assetName: 'Prime gene editing CAR-T',
+    verified: true,
   },
   {
     id: 'sb_b625fcc4-fba5-4f8c-a392-4a27fa579c4d',
@@ -11697,6 +12965,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ADC Pipeline — Ambrx to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'ADC Pipeline',
+    verified: false,
   },
   {
     id: 'sb_4ece97e2-a63c-4bf5-988d-0b2ba4b852fd',
@@ -11716,6 +12986,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Rusfertide — Protagonist Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'Rusfertide',
+    verified: false,
   },
   {
     id: 'sb_85244880-d2de-42e9-a7c3-13a626594ac5',
@@ -11735,6 +13007,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BTK-101 — Verve Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'BTK-101',
+    verified: false,
   },
   {
     id: 'sb_bd0f68ad-2eec-4628-82a6-394f2714ed9e',
@@ -11753,6 +13027,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MEN2312 (KAT6A inhibitor) — Insilico Medicine to Menarini/Stemline',
     source: 'press_release',
+    assetName: 'MEN2312 (KAT6A inhibitor)',
+    verified: false,
   },
   {
     id: 'sb_5ad9e5b8-9dbc-4193-8a01-5e727d3c7377',
@@ -11770,6 +13046,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Allogeneic CAR-T for autoimmune — Gracell Biotechnologies to AstraZeneca',
     source: 'manual',
+    assetName: 'Allogeneic CAR-T for autoimmune',
+    verified: true,
   },
   {
     id: 'sb_d41822da-ab80-4180-bc78-acb58adff185',
@@ -11789,6 +13067,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MEK-mab — Innovent Biologics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'MEK-mab',
+    verified: false,
   },
   {
     id: 'sb_78c96055-e852-4eac-bc3d-32525869a203',
@@ -11808,6 +13088,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CGRP-001 — Denali Therapeutics to Merck',
     source: 'press_release',
+    assetName: 'CGRP-001',
+    verified: false,
   },
   {
     id: 'sb_7a5f0720-474f-4260-9f4c-c402ad81291c',
@@ -11826,6 +13108,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HS-20094 — Hansoh Pharmaceutical to Merck',
     source: 'manual',
+    assetName: 'HS-20094',
+    verified: true,
   },
   {
     id: 'sb_c0a2a380-0356-47b0-ac07-b0bbed9724a2',
@@ -11844,6 +13128,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MEK-mab — Akeso to GSK',
     source: 'sec_8k',
+    assetName: 'MEK-mab',
+    verified: false,
   },
   {
     id: 'sb_ccf00414-533e-459e-93e5-08c096356f6a',
@@ -11862,6 +13148,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RYZ101 — RayzeBio to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'RYZ101',
+    verified: false,
   },
   {
     id: 'sb_5e3f2cbd-4419-46e1-bbb7-d20a856c6964',
@@ -11881,6 +13169,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ICOS-301 — Alphamab Oncology to Pfizer',
     source: 'sec_8k',
+    assetName: 'ICOS-301',
+    verified: false,
   },
   {
     id: 'sb_07ab0944-9238-468d-b309-b663e8b4913f',
@@ -11900,6 +13190,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'EGFR-001 — Nektar Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'EGFR-001',
+    verified: false,
   },
   {
     id: 'sb_b40e6f99-9735-4056-93cb-5debddccbc1e',
@@ -11917,6 +13209,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Cobenfy (KarXT) — Karuna Therapeutics to Bristol Myers Squibb',
     source: 'manual',
+    assetName: 'Cobenfy (KarXT)',
+    verified: true,
   },
   {
     id: 'sb_65471361-b025-407e-848b-3968cae808f6',
@@ -11936,6 +13230,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ALK-mab — Affimed to Sanofi',
     source: 'press_release',
+    assetName: 'ALK-mab',
+    verified: false,
   },
   {
     id: 'sb_398cc626-18e8-4c5a-bf8b-fa1052e4e166',
@@ -11955,6 +13251,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ERK-mab — Relay Therapeutics to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'ERK-mab',
+    verified: false,
   },
   {
     id: 'sb_82c86321-c53a-44dd-a885-9986c0361fa0',
@@ -11974,6 +13272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BL-B01D1 — SystImmune to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'BL-B01D1',
+    verified: false,
   },
   {
     id: 'sb_3d68d884-3c9f-44b1-813f-b7c1d3033ce2',
@@ -11993,6 +13293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Nectin-4-tinib — Daiichi Sankyo to AbbVie',
     source: 'sec_10k',
+    assetName: 'Nectin-4-tinib',
+    verified: false,
   },
   {
     id: 'sb_5449a991-b63e-455e-981a-0b1c60066e56',
@@ -12012,6 +13314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BTK-101 — Argenx to Roche',
     source: 'sec_10k',
+    assetName: 'BTK-101',
+    verified: false,
   },
   {
     id: 'sb_f576f11a-1330-4eca-960a-d1067ea5629d',
@@ -12031,6 +13335,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-MUC16-tinib — Kymera Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'Anti-MUC16-tinib',
+    verified: false,
   },
   {
     id: 'sb_a1fca226-0cdb-45cc-a8bf-a2f6ee35c463',
@@ -12048,6 +13354,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RVT-3101 — Televant to Roche',
     source: 'press_release',
+    assetName: 'RVT-3101',
+    verified: false,
   },
   {
     id: 'sb_74d952a4-191c-4c0e-98a8-b60637ba49c9',
@@ -12066,6 +13374,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KarXT (xanomeline-trospium) — Karuna Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'KarXT (xanomeline-trospium)',
+    verified: true,
   },
   {
     id: 'sb_6099797b-fd6b-45d0-a7b7-343678744088',
@@ -12085,6 +13395,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PD-1-mab — Legend Biotech to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'PD-1-mab',
+    verified: false,
   },
   {
     id: 'sb_c08dc156-3b79-455e-81a2-9cfbecd9a2ef',
@@ -12103,6 +13415,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PD-1-tinib — Astellas to Vertex',
     source: 'press_release',
+    assetName: 'PD-1-tinib',
+    verified: false,
   },
   {
     id: 'sb_3d0745ab-d4c6-4fb7-bf3f-04a608573451',
@@ -12120,6 +13434,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Emraclidine + pipeline — Cerevel Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'Emraclidine + pipeline',
+    verified: true,
   },
   {
     id: 'sb_8ff029fd-cc78-4ae6-b6fc-871e9a238734',
@@ -12137,6 +13453,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CT-388 / CT-996 — Carmot Therapeutics to Roche',
     source: 'manual',
+    assetName: 'CT-388 / CT-996',
+    verified: true,
   },
   {
     id: 'sb_5b5fab32-8675-4dcc-aea1-e3dd9be87fbc',
@@ -12156,6 +13474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CLDN18.2-001 — Alkermes to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-CLDN18.2-001',
+    verified: false,
   },
   {
     id: 'sb_c4d3b6cb-4a56-4f46-a030-03dccaacb54f',
@@ -12174,6 +13494,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FRα-101 — Alphamab Oncology to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'FRα-101',
+    verified: false,
   },
   {
     id: 'sb_2889eecd-cbc2-42bd-8cc3-2f3666162515',
@@ -12193,6 +13515,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CD20-201 — MorphoSys to GSK',
     source: 'sec_10k',
+    assetName: 'Anti-CD20-201',
+    verified: false,
   },
   {
     id: 'sb_6ae9f20a-b674-446a-8c56-5cc282ca4377',
@@ -12211,6 +13535,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Mesothelin-501 — Imago BioSciences to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'Mesothelin-501',
+    verified: false,
   },
   {
     id: 'sb_4203ca64-3c84-4636-b8df-7419dcd7b684',
@@ -12230,6 +13556,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TGF-β-001 — Akeso to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'TGF-β-001',
+    verified: false,
   },
   {
     id: 'sb_0bf764a2-4f07-4db7-a6d5-6ae12e7cfbe9',
@@ -12249,6 +13577,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PSMA-mab — Zymeworks to Merck',
     source: 'press_release',
+    assetName: 'PSMA-mab',
+    verified: false,
   },
   {
     id: 'sb_db217aba-1c99-4f69-a9f0-a2262a875299',
@@ -12268,6 +13598,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CSF1R-101 — CureVac to Amgen',
     source: 'press_release',
+    assetName: 'CSF1R-101',
+    verified: false,
   },
   {
     id: 'sb_cae93e30-49a2-48d8-89fd-372f14836b9b',
@@ -12286,6 +13618,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-PARP-ciclib — Ono Pharmaceutical to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Anti-PARP-ciclib',
+    verified: false,
   },
   {
     id: 'sb_253f518b-7a53-42ab-8576-4b125dad6cd0',
@@ -12305,6 +13639,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VEGFR-101 — Editas Medicine to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'VEGFR-101',
+    verified: false,
   },
   {
     id: 'sb_df3e970b-9cd3-415f-a23d-12a7bb292cb6',
@@ -12324,6 +13660,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FRα-201 — Intellia Therapeutics to Takeda',
     source: 'sec_8k',
+    assetName: 'FRα-201',
+    verified: false,
   },
   {
     id: 'sb_916a4e7b-76f5-4373-8de1-2117b52301b0',
@@ -12342,6 +13680,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CSF1R-201 — Immatics to Pfizer',
     source: 'press_release',
+    assetName: 'CSF1R-201',
+    verified: false,
   },
   {
     id: 'sb_cb67ad71-97c5-427a-acda-2ef03b400a0b',
@@ -12361,6 +13701,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H4-001 — Janux Therapeutics to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'B7-H4-001',
+    verified: false,
   },
   {
     id: 'sb_94d105cc-16c7-46d2-9742-563e7085bb01',
@@ -12379,6 +13721,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GPC3-tinib — Elevation Oncology to Biogen',
     source: 'sec_10k',
+    assetName: 'GPC3-tinib',
+    verified: false,
   },
   {
     id: 'sb_c17b93d0-34ac-498c-b32a-1cb4431ee022',
@@ -12398,6 +13742,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BCMA-201 — CytomX Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Anti-BCMA-201',
+    verified: false,
   },
   {
     id: 'sb_8c6899c3-b7a2-4d51-973c-92be87e825dd',
@@ -12416,6 +13762,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Phexxi — Evofem Biosciences to Aditxt',
     source: 'press_release',
+    assetName: 'Phexxi',
+    verified: false,
   },
   {
     id: 'sb_133c1939-41d3-4ed0-a74c-8a1dac9e4aa2',
@@ -12435,6 +13783,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD20 — MorphoSys to Novartis',
     source: 'sec_8k',
+    assetName: 'CD20',
+    verified: false,
   },
   {
     id: 'sb_131c6285-96f4-41e3-8c3b-6842d49349a7',
@@ -12453,6 +13803,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'OX40 — Immatics to Bayer',
     source: 'sec_10k',
+    assetName: 'OX40',
+    verified: false,
   },
   {
     id: 'sb_213c09ca-ed5e-489c-841a-3825a5b130e5',
@@ -12471,6 +13823,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ECC5004 — Eccogene to AstraZeneca',
     source: 'manual',
+    assetName: 'ECC5004',
+    verified: true,
   },
   {
     id: 'sb_3f46e468-edff-40eb-858e-221b0cb5a3f2',
@@ -12490,6 +13844,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GD2-tinib — Denali Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'GD2-tinib',
+    verified: false,
   },
   {
     id: 'sb_18ce7bcc-5f13-403e-8d2c-55b1e3b1bfb3',
@@ -12509,6 +13865,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ERK-201 — BeiGene to AbbVie',
     source: 'sec_10k',
+    assetName: 'ERK-201',
+    verified: false,
   },
   {
     id: 'sb_dda59576-5c2f-460b-9751-ea1e71832717',
@@ -12527,6 +13885,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GPC3-tinib — Zai Lab to Regeneron',
     source: 'press_release',
+    assetName: 'GPC3-tinib',
+    verified: false,
   },
   {
     id: 'sb_914ffce7-1e26-475f-8565-f0e8f4c91e89',
@@ -12546,6 +13906,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-DLL3-001 — Syros Pharmaceuticals to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-DLL3-001',
+    verified: false,
   },
   {
     id: 'sb_0d6f09f2-54cd-4946-a1ee-a2e769504442',
@@ -12563,6 +13925,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Ocedurenone — KBP Biosciences to Novo Nordisk',
     source: 'press_release',
+    assetName: 'Ocedurenone',
+    verified: false,
   },
   {
     id: 'sb_67286274-bcca-40eb-b75a-7bba8d37d3a9',
@@ -12581,6 +13945,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RVT-3101 — Televant Holdings to Roche',
     source: 'press_release',
+    assetName: 'RVT-3101',
+    verified: false,
   },
   {
     id: 'sb_0ad3b298-8674-44a5-af23-ab43c03e48cc',
@@ -12599,6 +13965,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PINK1 activator — Mitokinin to AbbVie',
     source: 'press_release',
+    assetName: 'PINK1 activator',
+    verified: false,
   },
   {
     id: 'sb_7c92ceb4-1414-4645-8272-fcbcc278f240',
@@ -12617,6 +13985,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Nectin-4-mab — Agenus to Vertex',
     source: 'sec_8k',
+    assetName: 'Nectin-4-mab',
+    verified: false,
   },
   {
     id: 'sb_bc14e1fa-6a97-4f58-b609-94d6c2923a0c',
@@ -12636,6 +14006,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MET-301 — Intellia Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-MET-301',
+    verified: false,
   },
   {
     id: 'sb_398c73d1-139d-420e-a764-3b42ae7323f6',
@@ -12655,6 +14027,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: '4-1BB-mab — Immatics to Eli Lilly',
     source: 'sec_8k',
+    assetName: '4-1BB-mab',
+    verified: false,
   },
   {
     id: 'sb_ec5be5e1-7572-4860-bd93-d03efb175ebc',
@@ -12674,6 +14048,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'JAK-301 — Genmab to Moderna',
     source: 'sec_8k',
+    assetName: 'JAK-301',
+    verified: false,
   },
   {
     id: 'sb_a35deeb2-2424-4d9b-b962-383f6de262d5',
@@ -12693,6 +14069,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-SHP2-101 — Syros Pharmaceuticals to Roche',
     source: 'sec_8k',
+    assetName: 'Anti-SHP2-101',
+    verified: false,
   },
   {
     id: 'sb_fb333b24-fb8a-4643-b2ab-c86533ef0fca',
@@ -12712,6 +14090,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FGFR-tinib — Karyopharm Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'FGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_b95cd346-565e-40fe-8262-ea53e6a98b86',
@@ -12731,6 +14111,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PD-1-201 — Immunogen to Pfizer',
     source: 'sec_10k',
+    assetName: 'PD-1-201',
+    verified: false,
   },
   {
     id: 'sb_05aafad8-96b1-4874-9408-44318d5e0294',
@@ -12749,6 +14131,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PNT2002 — Point Biopharma to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'PNT2002',
+    verified: false,
   },
   {
     id: 'sb_b7e7cd63-6c06-4148-88c9-904d17cc0333',
@@ -12768,6 +14152,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD33-101 — Tango Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-CD33-101',
+    verified: false,
   },
   {
     id: 'sb_4be41950-9cac-44be-8e84-0c7c036e62a1',
@@ -12785,6 +14171,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RVT-3101 (anti-TL1A) — Telavant Holdings to Roche',
     source: 'manual',
+    assetName: 'RVT-3101 (anti-TL1A)',
+    verified: true,
   },
   {
     id: 'sb_c5e5f467-0ed9-44c5-8143-0f4bb28bbabe',
@@ -12803,6 +14191,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KPL-404 — Roivant Sciences to Roche',
     source: 'manual',
+    assetName: 'KPL-404',
+    verified: true,
   },
   {
     id: 'sb_56db2f9c-5891-42b3-ad11-96a4a3a5cb9d',
@@ -12822,6 +14212,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HS-20089 — Hansoh Pharma to GSK',
     source: 'press_release',
+    assetName: 'HS-20089',
+    verified: false,
   },
   {
     id: 'sb_b5c244b0-248c-421a-9502-ee17ebe8c03d',
@@ -12840,6 +14232,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Prasinezumab — Prothena to Roche',
     source: 'manual',
+    assetName: 'Prasinezumab',
+    verified: true,
   },
   {
     id: 'sb_3fa24c81-4158-48f0-8864-7d5883a8e62b',
@@ -12859,6 +14253,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'VEGFR-mab — Syndax Pharmaceuticals to Moderna',
     source: 'press_release',
+    assetName: 'VEGFR-mab',
+    verified: false,
   },
   {
     id: 'sb_3cf00160-f24a-408c-8473-c9a936cfd557',
@@ -12876,6 +14272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Ocaliva (OCA) acquisition — Intercept Pharmaceuticals to Alfasigma',
     source: 'press_release',
+    assetName: 'Ocaliva (OCA) acquisition',
+    verified: false,
   },
   {
     id: 'sb_e82a8f42-e4ef-4377-8ecd-351e629d4da8',
@@ -12895,6 +14293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LAG-3-201 — Innovent Biologics to Roche',
     source: 'sec_10k',
+    assetName: 'LAG-3-201',
+    verified: false,
   },
   {
     id: 'sb_19743e98-5380-4388-b272-694c4a96d1a6',
@@ -12914,6 +14314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GB-102 — Graybug Vision to Alcon',
     source: 'press_release',
+    assetName: 'GB-102',
+    verified: false,
   },
   {
     id: 'sb_b76756cf-72bb-472d-bc50-e78f0be033ab',
@@ -12933,6 +14335,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ICOS-mab — IGM Biosciences to AbbVie',
     source: 'press_release',
+    assetName: 'ICOS-mab',
+    verified: false,
   },
   {
     id: 'sb_bf22a446-960d-4d40-bf94-bb905a73a731',
@@ -12952,6 +14356,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-201 — Syros Pharmaceuticals to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'EGFR-201',
+    verified: false,
   },
   {
     id: 'sb_95c29cce-4f66-4cb5-bd04-416c447171a5',
@@ -12970,6 +14376,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OMass IBD program — OMass Therapeutics to Roche',
     source: 'manual',
+    assetName: 'OMass IBD program',
+    verified: true,
   },
   {
     id: 'sb_fa1df61f-1f7c-420c-99d2-b26e2fec283c',
@@ -12989,6 +14397,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ARO-MUC5AC — Arrowhead Pharmaceuticals to Takeda',
     source: 'press_release',
+    assetName: 'ARO-MUC5AC',
+    verified: false,
   },
   {
     id: 'sb_a1e69716-4e64-4b82-954d-1a546d098409',
@@ -13008,6 +14418,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD123-mab — IGM Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'CD123-mab',
+    verified: false,
   },
   {
     id: 'sb_e59d236d-c39c-4ee3-aecc-0bb82184b0ac',
@@ -13027,6 +14439,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CSF1R — Revolution Medicines to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-CSF1R',
+    verified: false,
   },
   {
     id: 'sb_c2b8d9af-ae91-4a9d-888d-c4a7297de550',
@@ -13046,6 +14460,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BTK-tinib — Xencor to Roche',
     source: 'press_release',
+    assetName: 'BTK-tinib',
+    verified: false,
   },
   {
     id: 'sb_b4a1a5d1-6d7f-4488-a079-0e0a28fed3bd',
@@ -13065,6 +14481,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'B7-H4-101 — MacroGenics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'B7-H4-101',
+    verified: false,
   },
   {
     id: 'sb_fbb4b3ea-4b54-4003-a83f-d2c31babd157',
@@ -13084,6 +14502,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD40-301 — CureVac to GSK',
     source: 'sec_8k',
+    assetName: 'CD40-301',
+    verified: false,
   },
   {
     id: 'sb_cfa5fa9c-3d8e-4e98-a5df-087686f65f4d',
@@ -13101,6 +14521,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Xiidra (lifitegrast) — Novartis to Bausch + Lomb',
     source: 'manual',
+    assetName: 'Xiidra (lifitegrast)',
+    verified: true,
   },
   {
     id: 'sb_70d63fe6-899b-477e-b7de-02313458cc7e',
@@ -13120,6 +14542,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ICOS — Affimed to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'ICOS',
+    verified: false,
   },
   {
     id: 'sb_8b50be0f-4d66-4d90-9b0b-37c9f6529a3b',
@@ -13137,6 +14561,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Bimagrumab — Versanis Bio to Eli Lilly',
     source: 'manual',
+    assetName: 'Bimagrumab',
+    verified: true,
   },
   {
     id: 'sb_3172af9b-a493-4fe1-b64c-09c61cdd2e5a',
@@ -13156,6 +14582,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'AAV-RPGR gene therapy — MeiraGTx to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'AAV-RPGR gene therapy',
+    verified: false,
   },
   {
     id: 'sb_a700c60f-a8d0-4f77-a465-2b75ebc142c9',
@@ -13174,6 +14602,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD19 — Astellas to Gilead Sciences',
     source: 'press_release',
+    assetName: 'CD19',
+    verified: false,
   },
   {
     id: 'sb_a093b893-cd10-462e-b426-548a41c6f6d9',
@@ -13193,6 +14623,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD123-101 — Syndax Pharmaceuticals to Sanofi',
     source: 'press_release',
+    assetName: 'CD123-101',
+    verified: false,
   },
   {
     id: 'sb_b88e1ccc-b22e-4efa-833b-6accb589be23',
@@ -13212,6 +14644,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H3 — G1 Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'B7-H3',
+    verified: false,
   },
   {
     id: 'sb_553a3ddc-db45-4b0a-8fd2-311f96ce6b27',
@@ -13231,6 +14665,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'JAK-301 — Springworks Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'JAK-301',
+    verified: false,
   },
   {
     id: 'sb_fd217c67-61ea-4e5d-b40a-a3399af3f484',
@@ -13249,6 +14685,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD22-tinib — iTeos Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'CD22-tinib',
+    verified: false,
   },
   {
     id: 'sb_28a5b165-fb98-4d99-9454-426b0e6ccadf',
@@ -13268,6 +14706,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'p53-tinib — Arrowhead Pharmaceuticals to GSK',
     source: 'press_release',
+    assetName: 'p53-tinib',
+    verified: false,
   },
   {
     id: 'sb_08d7bffe-f094-40b4-a716-2a32a1b8eb93',
@@ -13287,6 +14727,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-Tau antibody transport vehicle — Voyager Therapeutics to Neurocrine Biosciences',
     source: 'press_release',
+    assetName: 'Anti-Tau antibody transport vehicle',
+    verified: false,
   },
   {
     id: 'sb_6c820c43-5f13-45e5-8b43-bfaf14dc2511',
@@ -13306,6 +14748,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'EGFR-001 — Alkermes to Novartis',
     source: 'sec_8k',
+    assetName: 'EGFR-001',
+    verified: false,
   },
   {
     id: 'sb_4b349739-d151-4221-b1e6-d74b66918a96',
@@ -13325,6 +14769,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER3-501 — Y-mAbs Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'HER3-501',
+    verified: false,
   },
   {
     id: 'sb_63e21e40-09cc-480f-b185-760ef451802b',
@@ -13343,6 +14789,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-SIRPα-001 — Umoja Biopharma to Regeneron',
     source: 'press_release',
+    assetName: 'Anti-SIRPα-001',
+    verified: false,
   },
   {
     id: 'sb_69231b18-ccbd-4584-993f-a0a71d9c5b66',
@@ -13362,6 +14810,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-BTK-201 — Argenx to Moderna',
     source: 'press_release',
+    assetName: 'Anti-BTK-201',
+    verified: false,
   },
   {
     id: 'sb_afa96764-b069-44ff-be35-1d8b4d626ddb',
@@ -13381,6 +14831,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD40 — Vor Biopharma to Merck',
     source: 'sec_10k',
+    assetName: 'CD40',
+    verified: false,
   },
   {
     id: 'sb_974d69b8-0ad0-4cca-873e-353093db310c',
@@ -13400,6 +14852,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CLDN18.2 — Roivant Sciences to Takeda',
     source: 'sec_8k',
+    assetName: 'Anti-CLDN18.2',
+    verified: false,
   },
   {
     id: 'sb_77d5a772-b161-4b47-8902-6a795376fa03',
@@ -13417,6 +14871,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NUZYRA (omadacycline) acquisition — Paratek Pharmaceuticals to Novo Holdings',
     source: 'press_release',
+    assetName: 'NUZYRA (omadacycline) acquisition',
+    verified: false,
   },
   {
     id: 'sb_196aff30-7072-47f9-8ac7-2164bfa905fc',
@@ -13436,6 +14892,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-PI3K-001 — Fate Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Anti-PI3K-001',
+    verified: false,
   },
   {
     id: 'sb_97fde6b6-20c5-4715-9f88-c17189264fd5',
@@ -13455,6 +14913,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MUC1 — MorphoSys to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-MUC1',
+    verified: false,
   },
   {
     id: 'sb_576d5f79-e267-485a-b2fc-f2b5e43fcca5',
@@ -13473,6 +14933,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Skyclarys (omaveloxolone) for FA — Reata Pharmaceuticals to AbbVie',
     source: 'sec_8k',
+    assetName: 'Skyclarys (omaveloxolone) for FA',
+    verified: false,
   },
   {
     id: 'sb_bf4b503d-86a3-4f29-91b7-dd3c212bb27c',
@@ -13492,6 +14954,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BRAF V600E-201 — RemeGen to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-BRAF V600E-201',
+    verified: false,
   },
   {
     id: 'sb_c0f018f2-624d-4079-bdf9-1a21bd4d32ea',
@@ -13511,6 +14975,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ALK-201 — Arcus Biosciences to Takeda',
     source: 'sec_10k',
+    assetName: 'ALK-201',
+    verified: false,
   },
   {
     id: 'sb_9c65717b-1ea4-4df9-af74-94d74a0afadf',
@@ -13528,6 +14994,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Omaveloxolone (Skyclarys) — Reata Pharmaceuticals to Biogen',
     source: 'manual',
+    assetName: 'Omaveloxolone (Skyclarys)',
+    verified: true,
   },
   {
     id: 'sb_d040de95-2eab-44fc-8d91-b4a98da5a7fc',
@@ -13547,6 +15015,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD40-101 — Denali Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'CD40-101',
+    verified: false,
   },
   {
     id: 'sb_10b2525e-ef64-426f-a172-98c03b87351e',
@@ -13565,6 +15035,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGF-mab — Celldex Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'VEGF-mab',
+    verified: false,
   },
   {
     id: 'sb_b064d131-1ff9-47c2-bbc7-b024e2215b23',
@@ -13584,6 +15056,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12C — Ideaya Biosciences to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'KRAS G12C',
+    verified: false,
   },
   {
     id: 'sb_7dc77b89-709a-463a-b386-02ab4a74b97e',
@@ -13603,6 +15077,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD20-001 — Karyopharm Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'CD20-001',
+    verified: false,
   },
   {
     id: 'sb_745f3e2d-538b-4c7f-be11-ea0eba0ad05f',
@@ -13622,6 +15098,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6-201 — Agenus to Amgen',
     source: 'sec_8k',
+    assetName: 'CDK4/6-201',
+    verified: false,
   },
   {
     id: 'sb_b02188af-f16d-4e90-b677-d0abf9c2d7d9',
@@ -13640,6 +15118,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'R100 vector (rare ophtho GT) — 4D Molecular Therapeutics to Astellas',
     source: 'press_release',
+    assetName: 'R100 vector (rare ophtho GT)',
+    verified: false,
   },
   {
     id: 'sb_94fbd317-6517-41b3-b72f-431090c04711',
@@ -13659,6 +15139,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BBB-crossing antibody platform — JCR Pharmaceuticals to AstraZeneca',
     source: 'press_release',
+    assetName: 'BBB-crossing antibody platform',
+    verified: false,
   },
   {
     id: 'sb_e7158c13-838d-40c1-ad55-55fb72fab7fc',
@@ -13678,6 +15160,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-KRAS G12D-mab — Tyra Biosciences to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-KRAS G12D-mab',
+    verified: false,
   },
   {
     id: 'sb_1af2b818-7080-426c-bb73-6ebc9da4342d',
@@ -13697,6 +15181,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-Claudin 6-101 — Arcus Biosciences to Sanofi',
     source: 'sec_8k',
+    assetName: 'Anti-Claudin 6-101',
+    verified: false,
   },
   {
     id: 'sb_3dc569d0-6334-4891-aef1-c6df8de39b0b',
@@ -13716,6 +15202,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'GD2-tinib — Xencor to Takeda',
     source: 'sec_10k',
+    assetName: 'GD2-tinib',
+    verified: false,
   },
   {
     id: 'sb_0c9796c3-0e43-44da-9bd9-a8eb066b6ea5',
@@ -13733,6 +15221,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'dryAmdGA — Iveric Bio to Astellas Pharma',
     source: 'manual',
+    assetName: 'dryAmdGA',
+    verified: true,
   },
   {
     id: 'sb_4e179f27-d818-4a63-919c-ec9660b4e6c9',
@@ -13751,6 +15241,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'heartFailureHfref — CRISPR Therapeutics to Vertex Pharmaceuticals',
     source: 'manual',
+    assetName: 'heartFailureHfref',
+    verified: true,
   },
   {
     id: 'sb_e727d8a3-5bf1-4116-a58e-7429e39dd2e9',
@@ -13769,6 +15261,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiomyopathy — Cytokinetics to Royalty Pharma',
     source: 'manual',
+    assetName: 'cardiomyopathy',
+    verified: true,
   },
   {
     id: 'sb_40919b53-fc2b-4249-903a-ab6f25b52a0a',
@@ -13788,6 +15282,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'covid — Arvinas to Pfizer',
     source: 'manual',
+    assetName: 'covid',
+    verified: true,
   },
   {
     id: 'sb_8c2ef8ff-4088-45ee-b7ca-4887649d3629',
@@ -13805,6 +15301,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'amrBacterial — Affinivax to GSK',
     source: 'manual',
+    assetName: 'amrBacterial',
+    verified: true,
   },
   {
     id: 'sb_1ba2babf-ef8c-49a7-8838-c3f71eb472a3',
@@ -13824,6 +15322,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'endometriosis — ObsEva to XOMA/Kissei',
     source: 'manual',
+    assetName: 'endometriosis',
+    verified: true,
   },
   {
     id: 'sb_4a94c193-d0f6-40eb-896a-d479dc43d01f',
@@ -13843,6 +15343,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'vulvodynia — Dare Bioscience to Bayer',
     source: 'manual',
+    assetName: 'vulvodynia',
+    verified: true,
   },
   {
     id: 'sb_d5ff9de9-4bcf-41bf-93fd-f02ad464ef2e',
@@ -13862,6 +15364,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'myopiaProgression — Ocuphire Pharma to Viatris',
     source: 'manual',
+    assetName: 'myopiaProgression',
+    verified: true,
   },
   {
     id: 'sb_1b8802d1-7112-46ab-84fa-a341df3a1288',
@@ -13879,6 +15383,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'myelofibrosis — CTI BioPharma to Sobi',
     source: 'manual',
+    assetName: 'myelofibrosis',
+    verified: true,
   },
   {
     id: 'sb_21228948-3f17-447e-970d-fb9019da4133',
@@ -13898,6 +15404,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'lung_nsclc — Daiichi Sankyo to Merck',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_55c79353-f911-43fc-a68a-2433f153dc3e',
@@ -13916,6 +15424,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'postpartumDepression — Sage Therapeutics to Biogen',
     source: 'manual',
+    assetName: 'postpartumDepression',
+    verified: true,
   },
   {
     id: 'sb_fa14e5a0-e77a-46ce-915f-f6081df136f6',
@@ -13935,6 +15445,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'gastric — CSPC Pharmaceutical to Elevar Therapeutics',
     source: 'manual',
+    assetName: 'gastric',
+    verified: true,
   },
   {
     id: 'sb_28a4dde1-6a08-47d2-a38c-4ad0585f8123',
@@ -13953,6 +15465,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'sickleCell — Vertex Pharmaceuticals to CRISPR Therapeutics',
     source: 'manual',
+    assetName: 'sickleCell',
+    verified: true,
   },
   {
     id: 'sb_0fce6b18-4d58-41c0-a529-94084ebba065',
@@ -13971,6 +15485,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'antifungal — Cidara Therapeutics to Janssen',
     source: 'manual',
+    assetName: 'antifungal',
+    verified: true,
   },
   {
     id: 'sb_e693684e-f064-4471-aba1-4f4c44aeef80',
@@ -13989,6 +15505,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'autoimmune — Kymera Therapeutics to Sanofi',
     source: 'manual',
+    assetName: 'autoimmune',
+    verified: true,
   },
   {
     id: 'sb_6b1f9b5e-411b-4480-8589-e2fdae59a266',
@@ -14006,6 +15524,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'sarcoma — Epizyme to Ipsen',
     source: 'manual',
+    assetName: 'sarcoma',
+    verified: true,
   },
   {
     id: 'sb_e7c8a396-11b7-44e2-9c34-408bed63ddc0',
@@ -14025,6 +15545,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'melanoma — Inotiv to IDEAYA Biosciences',
     source: 'manual',
+    assetName: 'melanoma',
+    verified: true,
   },
   {
     id: 'sb_7f20790c-d850-4913-b12c-fe8847f1c941',
@@ -14044,6 +15566,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'dry_eye — Aldeyra Therapeutics to Partner',
     source: 'manual',
+    assetName: 'dry_eye',
+    verified: true,
   },
   {
     id: 'sb_b3b2d767-f359-4db5-ac5b-dd58d608167c',
@@ -14063,6 +15587,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'solid_tumors — Monte Rosa Therapeutics to Roche',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_14e6487e-661f-4f9e-bd07-501f22c5fb53',
@@ -14081,6 +15607,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'obesity — Structure Therapeutics to Roche',
     source: 'manual',
+    assetName: 'obesity',
+    verified: true,
   },
   {
     id: 'sb_87e1a6a4-3920-4a68-887e-8e996e75e26d',
@@ -14100,6 +15628,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'cardiomyopathy — Ionis Pharmaceuticals to Novartis',
     source: 'manual',
+    assetName: 'cardiomyopathy',
+    verified: true,
   },
   {
     id: 'sb_83918d11-b4c0-4466-a4e7-951c7479040c',
@@ -14119,6 +15649,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hepatitisB — VBI Vaccines to Brii Biosciences',
     source: 'manual',
+    assetName: 'hepatitisB',
+    verified: true,
   },
   {
     id: 'sb_46ecaab2-c82f-477c-ba52-7b024495d8b7',
@@ -14138,6 +15670,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hepatitisB — Arbutus Biopharma to Qilu Pharmaceutical',
     source: 'manual',
+    assetName: 'hepatitisB',
+    verified: true,
   },
   {
     id: 'sb_98a11156-f26f-4882-a2f2-70bfb46633ef',
@@ -14157,6 +15691,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'covid — Pandion Therapeutics to Merck',
     source: 'manual',
+    assetName: 'covid',
+    verified: true,
   },
   {
     id: 'sb_504a7b52-604e-46da-b6f4-440be086d65a',
@@ -14176,6 +15712,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'diabeticMacularEdema — Clearside Biomedical to Arctus Therapeutics',
     source: 'manual',
+    assetName: 'diabeticMacularEdema',
+    verified: true,
   },
   {
     id: 'sb_16cdb75a-d752-4791-8e72-7812d60965b8',
@@ -14195,6 +15733,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'depression — Takeda to Lundbeck',
     source: 'manual',
+    assetName: 'depression',
+    verified: true,
   },
   {
     id: 'sb_a1de86ab-0098-4d50-bc4a-f316d188e23d',
@@ -14212,6 +15752,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Skyclarys — Reata to Biogen',
     source: 'press_release',
+    assetName: 'Skyclarys',
+    verified: false,
   },
   {
     id: 'sb_bc43ea6b-8ff8-45d7-8718-1ed11bb49412',
@@ -14230,6 +15772,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'cardiomyopathy — Tenaya Therapeutics to Roche',
     source: 'manual',
+    assetName: 'cardiomyopathy',
+    verified: true,
   },
   {
     id: 'sb_61f32c9a-3ab5-4b38-9a84-d45d5eb423e0',
@@ -14247,6 +15791,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'thyroidEyeDisease — Horizon Therapeutics to Amgen',
     source: 'manual',
+    assetName: 'thyroidEyeDisease',
+    verified: true,
   },
   {
     id: 'sb_119ff81b-d432-4090-b01a-ed9eacd6e470',
@@ -14265,6 +15811,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'myelofibrosis — Kartos Therapeutics to Roche',
     source: 'manual',
+    assetName: 'myelofibrosis',
+    verified: true,
   },
   {
     id: 'sb_a9d412d9-51b3-45be-a47f-e592c87a86dd',
@@ -14282,6 +15830,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'crohns — Prometheus Biosciences to Merck',
     source: 'manual',
+    assetName: 'crohns',
+    verified: true,
   },
   {
     id: 'sb_e08978ac-3b7f-4873-a069-49412f79d965',
@@ -14301,6 +15851,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'crohns — Theravance Biopharma to Pfizer',
     source: 'manual',
+    assetName: 'crohns',
+    verified: true,
   },
   {
     id: 'sb_60542534-8238-48a9-b82c-dca330999e71',
@@ -14319,6 +15871,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'glioblastoma — Imvax to Merck',
     source: 'manual',
+    assetName: 'glioblastoma',
+    verified: true,
   },
   {
     id: 'sb_4631c242-f237-43ca-bf20-9646636f8074',
@@ -14338,6 +15892,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'atopicderm — Evommune to Pfizer',
     source: 'manual',
+    assetName: 'atopicderm',
+    verified: true,
   },
   {
     id: 'sb_57740fb0-484b-40d6-9bfd-a1279c0e2c6e',
@@ -14356,6 +15912,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'hypertension — CinCor Pharma to AstraZeneca',
     source: 'manual',
+    assetName: 'hypertension',
+    verified: true,
   },
   {
     id: 'sb_ed27663f-f2e5-4e06-80f3-ce4764f1f5a3',
@@ -14373,6 +15931,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'breast_her2 — Seagen to Pfizer',
     source: 'manual',
+    assetName: 'breast_her2',
+    verified: true,
   },
   {
     id: 'sb_70cb5165-0c6b-46a7-8066-da7e794a1e03',
@@ -14390,6 +15950,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Mariana Oncology to AstraZeneca',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_369fe0c4-8b22-48d3-b136-be3c751456b1',
@@ -14408,6 +15970,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'influenza — Moderna to Merck',
     source: 'manual',
+    assetName: 'influenza',
+    verified: true,
   },
   {
     id: 'sb_df93673c-1fb5-4808-8d92-b7abfe9ada8b',
@@ -14426,6 +15990,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'breast_her2 — Daiichi Sankyo to AstraZeneca',
     source: 'manual',
+    assetName: 'breast_her2',
+    verified: true,
   },
   {
     id: 'sb_7ade4f7e-ed06-4e3a-87bb-5ec5bb52f5cd',
@@ -14444,6 +16010,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'cardiometabolic — Valo Health to Novo Nordisk',
     source: 'manual',
+    assetName: 'cardiometabolic',
+    verified: true,
   },
   {
     id: 'sb_ad5c8f45-b30d-4274-994b-f0edd3bfb6ef',
@@ -14461,6 +16029,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'alopeciaAreata — Concert Pharmaceuticals to Sun Pharma',
     source: 'manual',
+    assetName: 'alopeciaAreata',
+    verified: true,
   },
   {
     id: 'sb_62bc71d7-f1ab-499a-b186-f0492cbc7f45',
@@ -14480,6 +16050,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'heredAngioedema — Pharming Group to CSPC Pharmaceutical',
     source: 'manual',
+    assetName: 'heredAngioedema',
+    verified: true,
   },
   {
     id: 'sb_b9024eb8-0a15-4179-943c-98da2190b7d5',
@@ -14498,6 +16070,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hepatitis_b — Arcturus Therapeutics to Janssen (J&J)',
     source: 'manual',
+    assetName: 'hepatitis_b',
+    verified: true,
   },
   {
     id: 'sb_668e813f-e23b-48f9-937f-3545054a2d91',
@@ -14517,6 +16091,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'itp — Rigel Pharmaceuticals to Kissei Pharmaceutical',
     source: 'manual',
+    assetName: 'itp',
+    verified: true,
   },
   {
     id: 'sb_63e76dd2-beb3-4b23-a76b-5b796665a848',
@@ -14536,6 +16112,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'atopicderm — Almirall to AbbVie',
     source: 'manual',
+    assetName: 'atopicderm',
+    verified: true,
   },
   {
     id: 'sb_234ef63f-b73a-4984-808f-999f64661196',
@@ -14555,6 +16133,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'atopicderm — Abbisko Therapeutics to Eli Lilly',
     source: 'manual',
+    assetName: 'atopicderm',
+    verified: true,
   },
   {
     id: 'sb_99ff1155-8f47-499b-9a0b-c9e70132c6b6',
@@ -14573,6 +16153,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Hemgenix — UniQure to HealthCare Royalty and Sagard',
     source: 'press_release',
+    assetName: 'Hemgenix',
+    verified: false,
   },
   {
     id: 'sb_86ebb7d6-8d8d-40f1-b8aa-4c813bca3099',
@@ -14590,6 +16172,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Atrasentan — Chinook Therapeutics to Johnson & Johnson',
     source: 'manual',
+    assetName: 'Atrasentan',
+    verified: true,
   },
   {
     id: 'sb_8cccc4b8-a540-4c80-b075-ec49fd64d75d',
@@ -14608,6 +16192,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-TIM-3-tinib — BioNTech to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-TIM-3-tinib',
+    verified: false,
   },
   {
     id: 'sb_4dd33825-afdb-455f-88f2-6e71e62308de',
@@ -14626,6 +16212,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Atrasentan + Zigakibart — Chinook Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'Atrasentan + Zigakibart',
+    verified: true,
   },
   {
     id: 'sb_2732a1ba-9601-4368-82a6-951acd6d594f',
@@ -14644,6 +16232,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Synapse Density Restoration — Syndesi Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'Synapse Density Restoration',
+    verified: false,
   },
   {
     id: 'sb_59191870-64ec-4871-9be5-52c3fd3cd195',
@@ -14663,6 +16253,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIGIT-101 — Innovent Biologics to Vertex',
     source: 'press_release',
+    assetName: 'TIGIT-101',
+    verified: false,
   },
   {
     id: 'sb_94f0f4f3-9a8a-4211-9780-067b9fb9f36c',
@@ -14682,6 +16274,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD22-001 — RemeGen to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CD22-001',
+    verified: false,
   },
   {
     id: 'sb_8092bbb9-11ad-44f7-be38-b2142938e315',
@@ -14701,6 +16295,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD47 — Monte Rosa Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'CD47',
+    verified: false,
   },
   {
     id: 'sb_314db72a-57df-49de-931d-e6c966c2ac69',
@@ -14720,6 +16316,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TGF-β-tinib — Turning Point Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'TGF-β-tinib',
+    verified: false,
   },
   {
     id: 'sb_0dd7ce7a-ee73-4531-9fcd-57db94408f7b',
@@ -14738,6 +16336,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIGIT-101 — Affimed to AstraZeneca',
     source: 'press_release',
+    assetName: 'TIGIT-101',
+    verified: false,
   },
   {
     id: 'sb_443eb749-53b4-459b-92c7-1a77b2c24c35',
@@ -14757,6 +16357,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PD-1-mab — Nektar Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'PD-1-mab',
+    verified: false,
   },
   {
     id: 'sb_494140db-6424-48ae-9ada-db2a533d2b33',
@@ -14776,6 +16378,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ROS1-101 — Kelun-Biotech to AbbVie',
     source: 'sec_8k',
+    assetName: 'ROS1-101',
+    verified: false,
   },
   {
     id: 'sb_af70cc2d-0701-4831-870b-18fd3e41fbef',
@@ -14795,6 +16399,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MUC16-mab — Kymera Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'MUC16-mab',
+    verified: false,
   },
   {
     id: 'sb_e05b4665-a1f2-4784-acb8-092578ad4859',
@@ -14813,6 +16419,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix — uniQure to CSL Behring',
     source: 'press_release',
+    assetName: 'Hemgenix',
+    verified: false,
   },
   {
     id: 'sb_76a28cde-777a-4efc-bf4a-0809e34c5fe6',
@@ -14831,6 +16439,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix (etranacogene dezaparvovec) — UniQure to HealthCare Royalty and Sagard Healthcare',
     source: 'press_release',
+    assetName: 'Hemgenix (etranacogene dezaparvovec)',
+    verified: false,
   },
   {
     id: 'sb_3b300477-b731-4d93-a9f3-8d002d66ac13',
@@ -14850,6 +16460,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FGFR-301 — Relay Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'FGFR-301',
+    verified: false,
   },
   {
     id: 'sb_1e3c131e-c95b-4583-80e7-9018474b7641',
@@ -14868,6 +16480,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MOR106 — Galapagos and MorphoSys to Novartis',
     source: 'press_release',
+    assetName: 'MOR106',
+    verified: false,
   },
   {
     id: 'sb_85cb1d09-26af-4f5d-91e3-373a5970ab82',
@@ -14886,6 +16500,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix — UniQure to Sagard Healthcare',
     source: 'press_release',
+    assetName: 'Hemgenix',
+    verified: false,
   },
   {
     id: 'sb_8b937a35-d7c2-4905-9684-fc3ab3815cb6',
@@ -14905,6 +16521,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'GPC3-001 — Sana Biotechnology to Biogen',
     source: 'press_release',
+    assetName: 'GPC3-001',
+    verified: false,
   },
   {
     id: 'sb_a1a0337f-ed52-4a6c-b1c3-a749e616f101',
@@ -14923,6 +16541,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H3-301 — IGM Biosciences to Sanofi',
     source: 'sec_8k',
+    assetName: 'B7-H3-301',
+    verified: false,
   },
   {
     id: 'sb_c8be77dd-fd16-49e7-a16c-21639a5f4894',
@@ -14942,6 +16562,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ATR-101 — RemeGen to Novartis',
     source: 'press_release',
+    assetName: 'ATR-101',
+    verified: false,
   },
   {
     id: 'sb_ffdbab40-1daa-4098-9f0a-890a68963034',
@@ -14961,6 +16583,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BTK-mab — CytomX Therapeutics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'BTK-mab',
+    verified: false,
   },
   {
     id: 'sb_8bed523d-415b-4e97-b444-fbdce8eecb01',
@@ -14978,6 +16602,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Xiidra (lifitegrast) — Novartis to Bausch+Lomb',
     source: 'press_release',
+    assetName: 'Xiidra (lifitegrast)',
+    verified: false,
   },
   {
     id: 'sb_d56f4f21-b0ec-4a41-b280-d4e19811743d',
@@ -14997,6 +16623,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-WEE1-mab — Springworks Therapeutics to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'Anti-WEE1-mab',
+    verified: false,
   },
   {
     id: 'sb_593ffaac-e6d8-47c6-8ec9-d23736ac4dfc',
@@ -15016,6 +16644,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OpRegen (RG6501) — Lineage Cell Therapeutics to Roche/Genentech',
     source: 'press_release',
+    assetName: 'OpRegen (RG6501)',
+    verified: false,
   },
   {
     id: 'sb_5abffc25-5632-4ae4-9c99-c1c3630d2119',
@@ -15035,6 +16665,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ALK-tinib — Sutro Biopharma to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_b3e4d642-7131-4e54-a8f1-3c93bff66547',
@@ -15054,6 +16686,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD20-201 — RemeGen to Biogen',
     source: 'sec_8k',
+    assetName: 'CD20-201',
+    verified: false,
   },
   {
     id: 'sb_f16b9291-c9cf-4c8e-b812-56823527b9a5',
@@ -15072,6 +16706,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD40-101 — Immunogen to Merck',
     source: 'press_release',
+    assetName: 'CD40-101',
+    verified: false,
   },
   {
     id: 'sb_dd7ba222-48a8-4579-b8db-693366984585',
@@ -15091,6 +16727,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-1-001 — Turning Point Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'PD-1-001',
+    verified: false,
   },
   {
     id: 'sb_4c30a5ee-9e26-416c-ad21-53f7347bc607',
@@ -15110,6 +16748,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RG6421 — Ionis Pharmaceuticals to Roche',
     source: 'press_release',
+    assetName: 'RG6421',
+    verified: false,
   },
   {
     id: 'sb_30236c42-a637-439b-a3f6-b482fb8dde76',
@@ -15129,6 +16769,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-RET-301 — Chugai Pharmaceutical to Sanofi',
     source: 'press_release',
+    assetName: 'Anti-RET-301',
+    verified: false,
   },
   {
     id: 'sb_ae5d1173-8e54-4117-b455-8fa09c205116',
@@ -15148,6 +16790,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TIM-3-301 — ORIC Pharmaceuticals to Vertex',
     source: 'sec_10k',
+    assetName: 'TIM-3-301',
+    verified: false,
   },
   {
     id: 'sb_da6c2b35-511a-4f0a-924f-1530e4871e4f',
@@ -15167,6 +16811,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PDE9 inhibitor — Cardurion Pharmaceuticals to BMS',
     source: 'press_release',
+    assetName: 'PDE9 inhibitor',
+    verified: false,
   },
   {
     id: 'sb_2b2e5210-1ad3-403f-a320-ca13ac97d49b',
@@ -15185,6 +16831,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix — UniQure to HealthCare Royalty/Sagard',
     source: 'press_release',
+    assetName: 'Hemgenix',
+    verified: false,
   },
   {
     id: 'sb_16a2e071-8cea-4c42-aba0-fbb0e83677ef',
@@ -15203,6 +16851,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Hemgenix royalty rights — UniQure to HealthCare Royalty',
     source: 'press_release',
+    assetName: 'Hemgenix royalty rights',
+    verified: false,
   },
   {
     id: 'sb_29b24add-34e6-41b6-affc-21f48cd9e537',
@@ -15222,6 +16872,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GD2-mab — Gritstone bio to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'GD2-mab',
+    verified: false,
   },
   {
     id: 'sb_e82a22a7-fdc0-4905-b600-85df1c26ff4d',
@@ -15241,6 +16893,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PD-L1-301 — CRISPR Therapeutics to Novartis',
     source: 'sec_8k',
+    assetName: 'PD-L1-301',
+    verified: false,
   },
   {
     id: 'sb_7145ce8d-9622-440c-a0b2-9c0767311107',
@@ -15260,6 +16914,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD20-101 — Bicycle Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-CD20-101',
+    verified: false,
   },
   {
     id: 'sb_5614c734-ae22-4979-b5d6-d61c0819edad',
@@ -15279,6 +16935,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'WEE1 — Innovent Biologics to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'WEE1',
+    verified: false,
   },
   {
     id: 'sb_bb523bcc-6418-4238-8508-b5d50396ad72',
@@ -15298,6 +16956,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin-001 — Kronos Bio to AstraZeneca',
     source: 'press_release',
+    assetName: 'Mesothelin-001',
+    verified: false,
   },
   {
     id: 'sb_bc114122-30af-418f-8342-432703bc9e28',
@@ -15317,6 +16977,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TIGIT-tinib — Agenus to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'Anti-TIGIT-tinib',
+    verified: false,
   },
   {
     id: 'sb_0a913a1f-8707-4d97-bbae-a1a91fd3985a',
@@ -15336,6 +16998,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Nectin-4-201 — G1 Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'Nectin-4-201',
+    verified: false,
   },
   {
     id: 'sb_bf9824af-1e1f-4d2c-b63a-3a4534006ed8',
@@ -15353,6 +17017,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Teplizumab (Tzield) — Provention Bio to Sanofi',
     source: 'manual',
+    assetName: 'Teplizumab (Tzield)',
+    verified: true,
   },
   {
     id: 'sb_2cd0414d-56ce-424e-9240-b9736b4abed3',
@@ -15371,6 +17037,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KIT-201 — CytomX Therapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'KIT-201',
+    verified: false,
   },
   {
     id: 'sb_f2dd4776-bdb1-4527-b3fd-7867f5552273',
@@ -15390,6 +17058,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MEK-001 — Zymeworks to Roche',
     source: 'sec_10k',
+    assetName: 'MEK-001',
+    verified: false,
   },
   {
     id: 'sb_5f083c11-ee93-4adb-b282-037409052188',
@@ -15409,6 +17079,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'DB-1303, DB-1311 — Duality Bio to BioNTech',
     source: 'press_release',
+    assetName: 'DB-1303, DB-1311',
+    verified: false,
   },
   {
     id: 'sb_e9d572cd-60d5-4742-bfc3-077b873fa824',
@@ -15428,6 +17100,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD22-001 — Daiichi Sankyo to Biogen',
     source: 'press_release',
+    assetName: 'Anti-CD22-001',
+    verified: false,
   },
   {
     id: 'sb_d8e2dcd3-fe2d-40de-b6bb-c720fd8e9a2d',
@@ -15447,6 +17121,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ERK-201 — Agenus to Moderna',
     source: 'sec_10k',
+    assetName: 'ERK-201',
+    verified: false,
   },
   {
     id: 'sb_490db6da-98d8-4b3b-be36-37f56d42fa29',
@@ -15466,6 +17142,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BTK-301 — Bicycle Therapeutics to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'BTK-301',
+    verified: false,
   },
   {
     id: 'sb_415ff531-a12a-4154-a223-2254b889cbd6',
@@ -15485,6 +17163,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD47-301 — Replimune to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'CD47-301',
+    verified: false,
   },
   {
     id: 'sb_21639cfc-0ec4-463d-b34f-8ea55fabf77d',
@@ -15504,6 +17184,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-SIRPα-301 — iTeos Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-SIRPα-301',
+    verified: false,
   },
   {
     id: 'sb_f5484960-8f3e-474c-8391-94cbaa43fa32',
@@ -15523,6 +17205,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-ERK-201 — PMV Pharmaceuticals to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-ERK-201',
+    verified: false,
   },
   {
     id: 'sb_0c308e6d-de11-47b8-9f4b-5107ee3733ec',
@@ -15542,6 +17226,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'B7-H4-tinib — PMV Pharmaceuticals to Novartis',
     source: 'sec_8k',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_bfedc30d-ce51-41e0-a7c1-f5b03087c7e9',
@@ -15561,6 +17247,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SOS1-ciclib — Graphite Bio to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'SOS1-ciclib',
+    verified: false,
   },
   {
     id: 'sb_145f2416-2d55-4bc5-8f25-28a67949461f',
@@ -15579,6 +17267,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-GPC3-mab — Gritstone bio to AbbVie',
     source: 'press_release',
+    assetName: 'Anti-GPC3-mab',
+    verified: false,
   },
   {
     id: 'sb_256f0202-119c-42fb-bcc9-7cd02034c9df',
@@ -15598,6 +17288,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BTK — Arcus Biosciences to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-BTK',
+    verified: false,
   },
   {
     id: 'sb_1d2bd2a5-c705-4ce8-a0db-d6e4de18e97e',
@@ -15617,6 +17309,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CLDN18.2-tinib — BeiGene to Novartis',
     source: 'press_release',
+    assetName: 'CLDN18.2-tinib',
+    verified: false,
   },
   {
     id: 'sb_ab5075de-1cb2-4bc8-8429-8e55dd4f0498',
@@ -15636,6 +17330,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ERK-mab — Caribou Biosciences to Sanofi',
     source: 'press_release',
+    assetName: 'Anti-ERK-mab',
+    verified: false,
   },
   {
     id: 'sb_81ea2c60-9159-4c07-9d5f-fe57b83decb7',
@@ -15655,6 +17351,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RP-A501 — Rocket Pharmaceuticals to Beacon Therapeutics',
     source: 'press_release',
+    assetName: 'RP-A501',
+    verified: false,
   },
   {
     id: 'sb_67020c67-9627-4d4d-aed3-d62df8ef1590',
@@ -15674,6 +17372,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FRα-001 — Bicycle Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'FRα-001',
+    verified: false,
   },
   {
     id: 'sb_c88a5f13-370b-4a0b-b76b-f1dfd309c413',
@@ -15692,6 +17392,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'WEE1 — Pyxis Oncology to Merck',
     source: 'sec_8k',
+    assetName: 'WEE1',
+    verified: false,
   },
   {
     id: 'sb_1315df75-a211-4a19-a5ad-cec37a724a10',
@@ -15711,6 +17413,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MUC16-201 — Intellia Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'MUC16-201',
+    verified: false,
   },
   {
     id: 'sb_bd9024e1-cee3-4eb4-8514-7bc6a4327918',
@@ -15730,6 +17434,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGF-201 — Syndax Pharmaceuticals to Vertex',
     source: 'sec_10k',
+    assetName: 'VEGF-201',
+    verified: false,
   },
   {
     id: 'sb_e6bb11e2-0222-40bf-bba4-af33409eaede',
@@ -15749,6 +17455,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD38-201 — Bicycle Therapeutics to Bayer',
     source: 'sec_8k',
+    assetName: 'CD38-201',
+    verified: false,
   },
   {
     id: 'sb_890db610-2ac8-451b-9085-47eb37e3a59b',
@@ -15767,6 +17475,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD20-301 — Hookipa Pharma to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'CD20-301',
+    verified: false,
   },
   {
     id: 'sb_8958deaa-1f4d-41e4-8eb5-9692c8757169',
@@ -15785,6 +17495,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LBS-008 — Lin BioScience to Boehringer Ingelheim',
     source: 'manual',
+    assetName: 'LBS-008',
+    verified: true,
   },
   {
     id: 'sb_eeab489e-0bb4-4b6c-b0ac-14a70f661750',
@@ -15804,6 +17516,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SIRPα-101 — Hookipa Pharma to Regeneron',
     source: 'press_release',
+    assetName: 'SIRPα-101',
+    verified: false,
   },
   {
     id: 'sb_5f2fbe62-a8d2-4a87-95ad-7d5685ed55c7',
@@ -15822,6 +17536,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'B7-H3-101 — Kronos Bio to Amgen',
     source: 'sec_8k',
+    assetName: 'B7-H3-101',
+    verified: false,
   },
   {
     id: 'sb_66fd84ba-d030-45cf-846a-350a6f2bf02e',
@@ -15841,6 +17557,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BMP receptor-mab — Voyager Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'BMP receptor-mab',
+    verified: false,
   },
   {
     id: 'sb_e1547dd6-ab1d-48c0-94cc-27835f544c58',
@@ -15859,6 +17577,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Deuruxolitinib (CTP-543) — Concert Pharmaceuticals to AbbVie',
     source: 'manual',
+    assetName: 'Deuruxolitinib (CTP-543)',
+    verified: true,
   },
   {
     id: 'sb_eab6f379-a4d7-439c-ad17-c8ca81bb667d',
@@ -15878,6 +17598,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-DLL3-tinib — Iovance Biotherapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'Anti-DLL3-tinib',
+    verified: false,
   },
   {
     id: 'sb_7c893a96-af0e-4008-837c-20fe55f466e8',
@@ -15896,6 +17618,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H3-mab — Kronos Bio to Sanofi',
     source: 'sec_10k',
+    assetName: 'B7-H3-mab',
+    verified: false,
   },
   {
     id: 'sb_98f04369-3ed0-4a25-b14e-27d017801ee7',
@@ -15915,6 +17639,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'mTOR-001 — Affimed to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'mTOR-001',
+    verified: false,
   },
   {
     id: 'sb_bc45ac79-9bc4-42f8-9057-a39d603c7b16',
@@ -15934,6 +17660,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Mesothelin-001 — G1 Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'Mesothelin-001',
+    verified: false,
   },
   {
     id: 'sb_02e59ffa-318d-4592-8857-6b232fccf36c',
@@ -15953,6 +17681,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CGRP-301 — Karuna Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'CGRP-301',
+    verified: false,
   },
   {
     id: 'sb_5b1c92db-c2e5-4cc0-b4ba-4427d0efcf6e',
@@ -15971,6 +17701,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Vivotif + Vaxchora + ChikV — Emergent BioSolutions to Bavarian Nordic',
     source: 'press_release',
+    assetName: 'Vivotif + Vaxchora + ChikV',
+    verified: false,
   },
   {
     id: 'sb_c11dffd3-8887-4f00-8e74-a4d345045617',
@@ -15990,6 +17722,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Linzagolix (EU rights) — Obseva to XOMA Corporation',
     source: 'press_release',
+    assetName: 'Linzagolix (EU rights)',
+    verified: false,
   },
   {
     id: 'sb_9fcac6b1-957b-4d34-8f23-3aade837e161',
@@ -16009,6 +17743,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CSF1R-mab — Alkermes to Takeda',
     source: 'sec_8k',
+    assetName: 'CSF1R-mab',
+    verified: false,
   },
   {
     id: 'sb_a1a5b14c-57a1-450b-b826-44f02fecc06b',
@@ -16028,6 +17764,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PD-1 — Gritstone bio to Regeneron',
     source: 'sec_10k',
+    assetName: 'PD-1',
+    verified: false,
   },
   {
     id: 'sb_1fcad318-da05-4018-98c3-4e90d1f68cfe',
@@ -16047,6 +17785,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PARP-401 — Denali Therapeutics to Pfizer',
     source: 'press_release',
+    assetName: 'PARP-401',
+    verified: false,
   },
   {
     id: 'sb_8a37aa07-3e57-4c28-a890-7023f8c2ecd7',
@@ -16066,6 +17806,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PI3K-tinib — Zai Lab to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'PI3K-tinib',
+    verified: false,
   },
   {
     id: 'sb_b933c5c6-4d19-46dc-9208-24d08feb272e',
@@ -16085,6 +17827,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-1-mab — Alkermes to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'PD-1-mab',
+    verified: false,
   },
   {
     id: 'sb_66b75cc7-0506-49e7-9903-9cdeb345e630',
@@ -16104,6 +17848,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-L1-tinib — BeiGene to Regeneron',
     source: 'press_release',
+    assetName: 'PD-L1-tinib',
+    verified: false,
   },
   {
     id: 'sb_de5916b2-df30-4696-a543-7345ffa67855',
@@ -16122,6 +17868,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BCL-2-mab — Turning Point Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'Anti-BCL-2-mab',
+    verified: false,
   },
   {
     id: 'sb_ee6af550-e11c-45d4-a17e-102b2794fb1e',
@@ -16139,6 +17887,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Immune checkpoint agonists — MiroBio to Gilead Sciences',
     source: 'manual',
+    assetName: 'Immune checkpoint agonists',
+    verified: true,
   },
   {
     id: 'sb_6dd47064-8d92-4068-892f-904ed219a448',
@@ -16157,6 +17907,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'NDI-034858 — Nimbus Therapeutics to AbbVie',
     source: 'manual',
+    assetName: 'NDI-034858',
+    verified: true,
   },
   {
     id: 'sb_b6d8596c-46bb-4da9-9f7c-ef873895a71f',
@@ -16176,6 +17928,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TDP-43 — Longboard Pharmaceuticals to Seagen',
     source: 'press_release',
+    assetName: 'TDP-43',
+    verified: false,
   },
   {
     id: 'sb_b16667a6-db74-415f-ba19-889cf2dd1459',
@@ -16195,6 +17949,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'RET-201 — Revolution Medicines to Vertex',
     source: 'sec_8k',
+    assetName: 'RET-201',
+    verified: false,
   },
   {
     id: 'sb_ffce9757-9acb-4ab2-b1a2-e1d2bfd055b1',
@@ -16214,6 +17970,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'LIV-1-001 — Iovance Biotherapeutics to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'LIV-1-001',
+    verified: false,
   },
   {
     id: 'sb_e3d4e9ed-a475-40c1-8d1e-510bf7d29b07',
@@ -16233,6 +17991,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin — Monte Rosa Therapeutics to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'Mesothelin',
+    verified: false,
   },
   {
     id: 'sb_a334bf78-ab50-4dcf-a0f3-1d11c5d1ae17',
@@ -16252,6 +18012,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BCMA-tinib — Zai Lab to AstraZeneca',
     source: 'press_release',
+    assetName: 'BCMA-tinib',
+    verified: false,
   },
   {
     id: 'sb_d6a8386c-39ee-4ddc-9340-df78b43bf212',
@@ -16271,6 +18033,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: '4-1BB-mab — TCR2 Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: '4-1BB-mab',
+    verified: false,
   },
   {
     id: 'sb_89e936fd-4e53-4067-86a5-9cd2dbb1d0c3',
@@ -16290,6 +18054,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CTLA-4-301 — Intellia Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'CTLA-4-301',
+    verified: false,
   },
   {
     id: 'sb_3b108bb9-9730-4a30-bf63-46cbdd0b1337',
@@ -16309,6 +18075,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD33-201 — Monte Rosa Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'CD33-201',
+    verified: false,
   },
   {
     id: 'sb_31da8f70-4815-4750-9c5d-00e8bb0739d2',
@@ -16327,6 +18095,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CD22-201 — Umoja Biopharma to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-CD22-201',
+    verified: false,
   },
   {
     id: 'sb_228b2372-bbb4-43bb-a4ad-f98f0b782ebf',
@@ -16346,6 +18116,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ALK-301 — Gritstone bio to Takeda',
     source: 'sec_8k',
+    assetName: 'ALK-301',
+    verified: false,
   },
   {
     id: 'sb_43fb99d7-3374-4408-a906-b3191bbe6061',
@@ -16363,6 +18135,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Oral IL-17 Inhibitor — DICE Therapeutics to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'Oral IL-17 Inhibitor',
+    verified: false,
   },
   {
     id: 'sb_579d59ea-80d0-49f2-a13f-a8c427102b04',
@@ -16381,6 +18155,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Glaucoma sustained-release implant — Ripple Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'Glaucoma sustained-release implant',
+    verified: false,
   },
   {
     id: 'sb_5c21a436-1a02-4b93-a45e-e5a85ca0be90',
@@ -16400,6 +18176,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Nuzyra (omadacycline) — Paratek Pharmaceuticals to Zai Lab',
     source: 'press_release',
+    assetName: 'Nuzyra (omadacycline)',
+    verified: false,
   },
   {
     id: 'sb_99b258e3-0fa4-4f0c-a8d6-8f3bdaced6ae',
@@ -16417,6 +18195,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-TIGIT + HIF-2a — Arcus Biosciences to Gilead Sciences',
     source: 'press_release',
+    assetName: 'Anti-TIGIT + HIF-2a',
+    verified: false,
   },
   {
     id: 'sb_419abd39-7138-4232-ba8c-42b262f45888',
@@ -16435,6 +18215,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-MEK-tinib — CRISPR Therapeutics to Takeda',
     source: 'sec_10k',
+    assetName: 'Anti-MEK-tinib',
+    verified: false,
   },
   {
     id: 'sb_a3171e06-f098-4c45-861d-62027f8e47b0',
@@ -16454,6 +18236,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KIT-mab — Y-mAbs Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'KIT-mab',
+    verified: false,
   },
   {
     id: 'sb_f06b3c05-2cd3-4234-8434-90dc05cd09e5',
@@ -16473,6 +18257,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-B7-H3-tinib — Vor Biopharma to Takeda',
     source: 'sec_10k',
+    assetName: 'Anti-B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_faee64f4-0aff-41e8-993a-d25ef9de27f1',
@@ -16492,6 +18278,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CGRP-nib — Vigil Neuroscience to Merck',
     source: 'press_release',
+    assetName: 'CGRP-nib',
+    verified: false,
   },
   {
     id: 'sb_2479aa63-067b-4bcb-8b50-4dfc1efb93b1',
@@ -16510,6 +18298,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD20-301 — Zai Lab to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'Anti-CD20-301',
+    verified: false,
   },
   {
     id: 'sb_2db5dbb0-9504-42f9-9908-a057b884b1cc',
@@ -16529,6 +18319,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-MEK-001 — Iovance Biotherapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'Anti-MEK-001',
+    verified: false,
   },
   {
     id: 'sb_387ce63c-1d6d-4692-9475-ff21b6cc2e4d',
@@ -16548,6 +18340,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CEA-tinib — Arrowhead Pharmaceuticals to Vertex',
     source: 'press_release',
+    assetName: 'Anti-CEA-tinib',
+    verified: false,
   },
   {
     id: 'sb_e53a1fe4-be7f-4e7e-9131-0e1e8c9627bd',
@@ -16567,6 +18361,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-KRAS G12C — Vor Biopharma to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-KRAS G12C',
+    verified: false,
   },
   {
     id: 'sb_35445d6a-fb52-439a-9c5a-e1b0f26b88bb',
@@ -16584,6 +18380,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'INV-202 — Inversago Pharma to Novo Nordisk',
     source: 'manual',
+    assetName: 'INV-202',
+    verified: true,
   },
   {
     id: 'sb_dbb7506c-f540-4564-b6de-0b7136db62f1',
@@ -16601,6 +18399,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Tepezza (teprotumumab) & portfolio — Horizon Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'Tepezza (teprotumumab) & portfolio',
+    verified: false,
   },
   {
     id: 'sb_d52892b7-d7e1-4cd9-bcb2-57e03601e47e',
@@ -16620,6 +18420,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'AZD0901 (SKB264-related) — Kelun-Biotech to AstraZeneca',
     source: 'press_release',
+    assetName: 'AZD0901 (SKB264-related)',
+    verified: false,
   },
   {
     id: 'sb_855a175a-88ba-48ce-a52b-30d82bc6be08',
@@ -16637,6 +18439,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'GM-1020 — Gilgamesh Pharmaceuticals to AbbVie',
     source: 'press_release',
+    assetName: 'GM-1020',
+    verified: false,
   },
   {
     id: 'sb_c945c20b-4325-4ea0-8a40-81a13d5e14e1',
@@ -16656,6 +18460,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD19-301 — Roivant Sciences to Merck',
     source: 'sec_10k',
+    assetName: 'Anti-CD19-301',
+    verified: false,
   },
   {
     id: 'sb_cff037c4-1126-40cc-81a3-fffdb0e4d576',
@@ -16675,6 +18481,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD73-301 — Revolution Medicines to Moderna',
     source: 'press_release',
+    assetName: 'CD73-301',
+    verified: false,
   },
   {
     id: 'sb_5baf77c1-83f2-44b5-bd30-791c592d8436',
@@ -16694,6 +18502,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MEK-mab — Iovance Biotherapeutics to Vertex',
     source: 'sec_8k',
+    assetName: 'MEK-mab',
+    verified: false,
   },
   {
     id: 'sb_f7916453-1388-48d8-987e-bbf0c94031df',
@@ -16712,6 +18522,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-WEE1-mab — Legend Biotech to Vertex',
     source: 'sec_10k',
+    assetName: 'Anti-WEE1-mab',
+    verified: false,
   },
   {
     id: 'sb_cc8a7696-cd2f-4873-8855-525f26286a21',
@@ -16731,6 +18543,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MET — Hookipa Pharma to Roche',
     source: 'sec_10k',
+    assetName: 'MET',
+    verified: false,
   },
   {
     id: 'sb_6011eb46-ab31-4c0e-ae6e-08e0e872d514',
@@ -16749,6 +18563,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-mTOR-mab — Xencor to Regeneron',
     source: 'sec_10k',
+    assetName: 'Anti-mTOR-mab',
+    verified: false,
   },
   {
     id: 'sb_271eee69-1cca-4a99-ad09-d1f82e5d04ff',
@@ -16768,6 +18584,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CSF1R-101 — Forma Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'CSF1R-101',
+    verified: false,
   },
   {
     id: 'sb_ded7a061-0925-4d7b-a673-4bf59bc9539e',
@@ -16787,6 +18605,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MDM2-001 — Umoja Biopharma to Merck',
     source: 'press_release',
+    assetName: 'MDM2-001',
+    verified: false,
   },
   {
     id: 'sb_7f09912e-48b6-4948-994a-2c91f9e7aa90',
@@ -16806,6 +18626,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin-mab — Roivant Sciences to AbbVie',
     source: 'sec_8k',
+    assetName: 'Mesothelin-mab',
+    verified: false,
   },
   {
     id: 'sb_8b5723f6-7f63-4d33-9f79-d278aa1fea9b',
@@ -16825,6 +18647,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-SMN-001 — Neumora Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'Anti-SMN-001',
+    verified: false,
   },
   {
     id: 'sb_df388a0e-8733-43a8-b5ea-4c16ecb074b4',
@@ -16844,6 +18668,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'JAK-tinib — Galapagos to Takeda',
     source: 'press_release',
+    assetName: 'JAK-tinib',
+    verified: false,
   },
   {
     id: 'sb_55e826ac-538c-4c8d-8796-c5ff7e049ea4',
@@ -16863,6 +18689,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-PARP-101 — Janux Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'Anti-PARP-101',
+    verified: false,
   },
   {
     id: 'sb_c1034edd-6eeb-44f0-a5d4-87bf3d77f43e',
@@ -16882,6 +18710,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Survodutide — Zealand Pharma to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Survodutide',
+    verified: false,
   },
   {
     id: 'sb_52d3c5d3-0544-45a0-94b9-8be8d950a792',
@@ -16901,6 +18731,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-SIRPα-301 — Arcus Biosciences to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-SIRPα-301',
+    verified: false,
   },
   {
     id: 'sb_d95149fe-bc0c-4274-bc87-22996f7bbc07',
@@ -16920,6 +18752,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ALK-tinib — RemeGen to AbbVie',
     source: 'sec_8k',
+    assetName: 'ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_1e6d5b73-fa3b-4cf4-9376-91667950118e',
@@ -16937,6 +18771,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Tyrvaya (varenicline nasal spray) — Oyster Point Pharma to Viatris',
     source: 'manual',
+    assetName: 'Tyrvaya (varenicline nasal spray)',
+    verified: true,
   },
   {
     id: 'sb_84a098f6-edd8-48da-b2b2-7906e8844dc1',
@@ -16956,6 +18792,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12D-101 — Kronos Bio to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'KRAS G12D-101',
+    verified: false,
   },
   {
     id: 'sb_dd3c0325-327f-4ac0-afb4-99ce03e6d826',
@@ -16974,6 +18812,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GD2-201 — CureVac to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'GD2-201',
+    verified: false,
   },
   {
     id: 'sb_64a164da-3518-4265-9e8d-8dd7e64d25c8',
@@ -16993,6 +18833,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PSMA-001 — Alphamab Oncology to Amgen',
     source: 'press_release',
+    assetName: 'PSMA-001',
+    verified: false,
   },
   {
     id: 'sb_26b49592-a8c1-4ea9-b60f-a2ff0353530c',
@@ -17012,6 +18854,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LAG-3-301 — BioNTech to GSK',
     source: 'press_release',
+    assetName: 'LAG-3-301',
+    verified: false,
   },
   {
     id: 'sb_bd932a15-1c55-4941-a7ad-27a3fe2a8889',
@@ -17031,6 +18875,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'M1/M4 muscarinic-001 — Sage Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'M1/M4 muscarinic-001',
+    verified: false,
   },
   {
     id: 'sb_aa2df414-263b-4544-a90f-035418430c2d',
@@ -17050,6 +18896,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Efgartigimod — argenx to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'Efgartigimod',
+    verified: false,
   },
   {
     id: 'sb_ceb0a3ce-ab42-40dd-bfc3-f733fb8118ec',
@@ -17069,6 +18917,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD33-201 — Arcus Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'CD33-201',
+    verified: false,
   },
   {
     id: 'sb_fdc5f372-d3b5-4c76-ba2c-abfdbff6b4b9',
@@ -17088,6 +18938,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CDK4/6-mab — Vor Biopharma to Pfizer',
     source: 'sec_10k',
+    assetName: 'CDK4/6-mab',
+    verified: false,
   },
   {
     id: 'sb_8ebc112f-1353-4bb5-915f-aa3a3bee7d7a',
@@ -17106,6 +18958,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD40-mab — Innovent Biologics to Novartis',
     source: 'sec_8k',
+    assetName: 'Anti-CD40-mab',
+    verified: false,
   },
   {
     id: 'sb_e788248e-a8d9-436c-b9f8-53cdcdc2b3e9',
@@ -17125,6 +18979,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FGFR-tinib — Kymera Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'FGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_343d58ec-ba02-47ae-b79c-082eacee0d63',
@@ -17142,6 +18998,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Relugolix (Myfembree/Orgovyx) acquisition — Myovant Sciences to Sumitovant/Sumitomo Pharma',
     source: 'press_release',
+    assetName: 'Relugolix (Myfembree/Orgovyx) acquisition',
+    verified: false,
   },
   {
     id: 'sb_38321169-cdb1-43df-ab13-ae80075e39ca',
@@ -17161,6 +19019,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PI3K-301 — Sana Biotechnology to GSK',
     source: 'press_release',
+    assetName: 'PI3K-301',
+    verified: false,
   },
   {
     id: 'sb_1256ecb6-db86-479b-b3be-133dc9818060',
@@ -17179,6 +19039,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HER3-tinib — Legend Biotech to Moderna',
     source: 'sec_10k',
+    assetName: 'HER3-tinib',
+    verified: false,
   },
   {
     id: 'sb_da40c404-d9bc-4d39-8634-cb775810e08c',
@@ -17198,6 +19060,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4 — Tyra Biosciences to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'Nectin-4',
+    verified: false,
   },
   {
     id: 'sb_ac36a506-b156-4db8-934a-1f1d3a681926',
@@ -17217,6 +19081,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FLT3-301 — Hengrui Medicine to Roche',
     source: 'sec_8k',
+    assetName: 'FLT3-301',
+    verified: false,
   },
   {
     id: 'sb_ece2dcb2-ab10-4fda-958f-ee28aa9101bf',
@@ -17235,6 +19101,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'DLL3 — Iovance Biotherapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'DLL3',
+    verified: false,
   },
   {
     id: 'sb_5ea75151-d684-4db4-86d3-2ffef230c0ab',
@@ -17253,6 +19121,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LIV-1-mab — Nurix Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'LIV-1-mab',
+    verified: false,
   },
   {
     id: 'sb_0a227919-3082-4fcc-887e-7f616b8278ef',
@@ -17272,6 +19142,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CEA-mab — Arcus Biosciences to Amgen',
     source: 'sec_8k',
+    assetName: 'CEA-mab',
+    verified: false,
   },
   {
     id: 'sb_e89e7c36-7833-42f6-a87c-a597b90e7287',
@@ -17291,6 +19163,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD20 — Argenx to GSK',
     source: 'sec_8k',
+    assetName: 'Anti-CD20',
+    verified: false,
   },
   {
     id: 'sb_4494f09f-aa27-48f5-9842-44bd9e7b2da0',
@@ -17310,6 +19184,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-ALK — Springworks Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'Anti-ALK',
+    verified: false,
   },
   {
     id: 'sb_9d4b5283-1a3d-4537-8ed2-9e14c31aaed4',
@@ -17329,6 +19205,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PSMA-mab — Umoja Biopharma to Moderna',
     source: 'sec_10k',
+    assetName: 'PSMA-mab',
+    verified: false,
   },
   {
     id: 'sb_0138849d-f5b1-4f6f-97b9-1d3a8317a59c',
@@ -17348,6 +19226,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PI3K-101 — Vor Biopharma to AbbVie',
     source: 'sec_10k',
+    assetName: 'PI3K-101',
+    verified: false,
   },
   {
     id: 'sb_79e7b989-f340-432f-98d6-6adef10f45c6',
@@ -17367,6 +19247,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CTLA-4-tinib — CureVac to Moderna',
     source: 'sec_8k',
+    assetName: 'Anti-CTLA-4-tinib',
+    verified: false,
   },
   {
     id: 'sb_620e4422-7d95-4362-a7b4-fe8054c3fafd',
@@ -17386,6 +19268,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Krazati (adagrasib) — Mirati Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Krazati (adagrasib)',
+    verified: false,
   },
   {
     id: 'sb_4ba0c6c7-29b3-4a9f-a13c-f12119955770',
@@ -17405,6 +19289,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KIT-mab — Tango Therapeutics to Pfizer',
     source: 'press_release',
+    assetName: 'KIT-mab',
+    verified: false,
   },
   {
     id: 'sb_56630fe8-c446-4424-9263-c82bf21c7cf6',
@@ -17424,6 +19310,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TIGIT — iTeos Therapeutics to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'Anti-TIGIT',
+    verified: false,
   },
   {
     id: 'sb_2e9523fc-0ccd-4458-9802-271f3921c89c',
@@ -17441,6 +19329,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RVT-3101 — Roivant Sciences to Roche',
     source: 'manual',
+    assetName: 'RVT-3101',
+    verified: true,
   },
   {
     id: 'sb_962e24e4-9dc8-4e83-9de1-98fbf63bc9c2',
@@ -17460,6 +19350,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12C-101 — Immunogen to Biogen',
     source: 'press_release',
+    assetName: 'KRAS G12C-101',
+    verified: false,
   },
   {
     id: 'sb_749a1bb7-96cd-4a0c-9b2e-d8c9395ec28f',
@@ -17479,6 +19371,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CEND-1 — Cend Therapeutics, Inc. to Qilu Pharmaceutical Co., Ltd.',
     source: 'sec_8k — https://www.sec.gov/Archives/edgar/data/320017/000114036122036093/brhc10042374_ex99-1.htm',
+    assetName: 'CEND-1',
+    verified: false,
   },
   {
     id: 'sb_94d90b1c-c8f6-4380-b1a4-5e2e5ea762e3',
@@ -17498,6 +19392,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GPC3-201 — Affimed to Novartis',
     source: 'press_release',
+    assetName: 'GPC3-201',
+    verified: false,
   },
   {
     id: 'sb_0a3fe3d8-00cc-479f-a6af-4bbcc4d8f5c6',
@@ -17516,6 +19412,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BCMA-tinib — Blueprint Medicines to Bayer',
     source: 'press_release',
+    assetName: 'BCMA-tinib',
+    verified: false,
   },
   {
     id: 'sb_15cb543a-88ce-4666-a916-cfc810b7d9c7',
@@ -17534,6 +19432,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'QPX7728 — Qpex Biopharma to Shionogi',
     source: 'manual',
+    assetName: 'QPX7728',
+    verified: true,
   },
   {
     id: 'sb_a6a27d71-cb35-4ba5-b392-edb95b54183c',
@@ -17553,6 +19453,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Avapritinib (BLU-263) — Blueprint Medicines to Roche',
     source: 'press_release',
+    assetName: 'Avapritinib (BLU-263)',
+    verified: false,
   },
   {
     id: 'sb_7f286ee8-1f3a-4a79-9b7c-f56f01daa83c',
@@ -17572,6 +19474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12C — Affimed to Sanofi',
     source: 'sec_10k',
+    assetName: 'KRAS G12C',
+    verified: false,
   },
   {
     id: 'sb_75015784-7086-4842-9d3b-edff9b74f196',
@@ -17591,6 +19495,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KRAS G12C-101 — Forma Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'KRAS G12C-101',
+    verified: false,
   },
   {
     id: 'sb_906b0888-539d-4d66-9ac5-e6bc255a3390',
@@ -17610,6 +19516,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD73-tinib — Zai Lab to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'CD73-tinib',
+    verified: false,
   },
   {
     id: 'sb_1d7d1327-1944-4f09-8f0a-e2cd7617810b',
@@ -17629,6 +19537,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'mTOR-301 — Turning Point Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'mTOR-301',
+    verified: false,
   },
   {
     id: 'sb_f9986be4-b364-4d44-a521-df4315d9bc91',
@@ -17647,6 +19557,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Axiomer RNA editing (ophtho) — ProQR Therapeutics to Eli Lilly',
     source: 'manual',
+    assetName: 'Axiomer RNA editing (ophtho)',
+    verified: true,
   },
   {
     id: 'sb_257636e2-cccb-43e7-ad65-a4f48d24b402',
@@ -17666,6 +19578,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGFR-201 — Alphamab Oncology to Eli Lilly',
     source: 'press_release',
+    assetName: 'VEGFR-201',
+    verified: false,
   },
   {
     id: 'sb_ff4b52af-bc69-4fbb-a1a6-b22bac80f0ef',
@@ -17685,6 +19599,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LIV-1-tinib — Gritstone bio to Takeda',
     source: 'sec_8k',
+    assetName: 'LIV-1-tinib',
+    verified: false,
   },
   {
     id: 'sb_757d8d74-2546-45fe-a053-052249663430',
@@ -17704,6 +19620,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MET-201 — Forma Therapeutics to Roche',
     source: 'sec_10k',
+    assetName: 'MET-201',
+    verified: false,
   },
   {
     id: 'sb_0f3d5fd2-b2a6-4d60-9f18-26f33f6975c6',
@@ -17723,6 +19641,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ATR — Denali Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'ATR',
+    verified: false,
   },
   {
     id: 'sb_7171ab4a-91d7-4133-9b41-8115e3cb6009',
@@ -17742,6 +19662,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: '4-1BB-mab — Deciphera Pharmaceuticals to Merck',
     source: 'press_release',
+    assetName: '4-1BB-mab',
+    verified: false,
   },
   {
     id: 'sb_c86fc26e-b78d-46a4-922d-ae88013f8517',
@@ -17761,6 +19683,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GD2-tinib — Nektar Therapeutics to Gilead Sciences',
     source: 'press_release',
+    assetName: 'GD2-tinib',
+    verified: false,
   },
   {
     id: 'sb_afd64a46-206d-412a-87f8-d8a46137929b',
@@ -17780,6 +19704,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'GD2-mab — Immunogen to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'GD2-mab',
+    verified: false,
   },
   {
     id: 'sb_3ef013e0-bb9b-4263-a522-7e295a9ad305',
@@ -17798,6 +19724,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'RGX-314 — REGENXBIO to Roche',
     source: 'manual',
+    assetName: 'RGX-314',
+    verified: true,
   },
   {
     id: 'sb_d7cac0a9-59a0-4d22-ac23-7b74423f5c09',
@@ -17817,6 +19745,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-Mesothelin-101 — Iovance Biotherapeutics to Novartis',
     source: 'press_release',
+    assetName: 'Anti-Mesothelin-101',
+    verified: false,
   },
   {
     id: 'sb_2027c9f2-f786-4198-a50c-5e2f2fa242b9',
@@ -17836,6 +19766,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12D-101 — Innovent Biologics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'KRAS G12D-101',
+    verified: false,
   },
   {
     id: 'sb_fff1ffc5-c809-4931-a207-4d3373902bc0',
@@ -17855,6 +19787,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD19-201 — Hengrui Medicine to Pfizer',
     source: 'press_release',
+    assetName: 'CD19-201',
+    verified: false,
   },
   {
     id: 'sb_9bf99e2f-df2f-427c-989e-b8dbd9350df7',
@@ -17873,6 +19807,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BCL-2-301 — Daiichi Sankyo to Amgen',
     source: 'sec_10k',
+    assetName: 'BCL-2-301',
+    verified: false,
   },
   {
     id: 'sb_e1519190-df88-4a56-bb42-bbb62ccc7729',
@@ -17891,6 +19827,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H3-301 — Kymera Therapeutics to Regeneron',
     source: 'press_release',
+    assetName: 'B7-H3-301',
+    verified: false,
   },
   {
     id: 'sb_6b49ee3d-5c48-4a68-9c5c-3972297fcc01',
@@ -17910,6 +19848,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-VEGF-301 — Sana Biotechnology to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-VEGF-301',
+    verified: false,
   },
   {
     id: 'sb_fcbaeaae-bb23-47b8-acbf-9652801fa80e',
@@ -17929,6 +19869,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CSF1R — iTeos Therapeutics to Bayer',
     source: 'press_release',
+    assetName: 'CSF1R',
+    verified: false,
   },
   {
     id: 'sb_6f20fc9e-176a-4e72-bf41-80fa1cbc68f4',
@@ -17948,6 +19890,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER3-301 — Intellia Therapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'HER3-301',
+    verified: false,
   },
   {
     id: 'sb_52241f9f-dd73-4360-ae54-6ab9ced17843',
@@ -17965,6 +19909,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Rocklatan/Rhopressa — Aerie Pharmaceuticals to AbbVie',
     source: 'manual',
+    assetName: 'Rocklatan/Rhopressa',
+    verified: true,
   },
   {
     id: 'sb_c1368e1d-7d36-417f-8a4e-ea8405d7f725',
@@ -17984,6 +19930,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MEK-101 — Alphamab Oncology to Sanofi',
     source: 'sec_8k',
+    assetName: 'MEK-101',
+    verified: false,
   },
   {
     id: 'sb_eb70155e-a286-4318-9756-dff02cd718f6',
@@ -18003,6 +19951,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BRAF V600E-tinib — Beam Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'BRAF V600E-tinib',
+    verified: false,
   },
   {
     id: 'sb_c2ed25f1-bf76-46b9-82c9-472852b092e7',
@@ -18022,6 +19972,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'FRα-001 — CRISPR Therapeutics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'FRα-001',
+    verified: false,
   },
   {
     id: 'sb_1e7cd2f3-51df-43ba-a9f0-7524c18a2d17',
@@ -18041,6 +19993,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER2-mab — Xencor to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'HER2-mab',
+    verified: false,
   },
   {
     id: 'sb_bb32a24e-edc6-404c-8ae6-76c7961a8985',
@@ -18060,6 +20014,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CGRP-001 — Ultragenyx to Vertex',
     source: 'sec_8k',
+    assetName: 'CGRP-001',
+    verified: false,
   },
   {
     id: 'sb_9dac167c-52c2-4aba-880a-c439c629c1ef',
@@ -18079,6 +20035,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD38-301 — Genmab to Biogen',
     source: 'sec_8k',
+    assetName: 'CD38-301',
+    verified: false,
   },
   {
     id: 'sb_af767b7f-e902-4252-934c-29e22f685df8',
@@ -18097,6 +20055,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PI3K-301 — Tyra Biosciences to Merck',
     source: 'sec_10k',
+    assetName: 'PI3K-301',
+    verified: false,
   },
   {
     id: 'sb_69339b0a-bf20-48a5-ad3a-50d07e00a155',
@@ -18116,6 +20076,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD73 — CRISPR Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'Anti-CD73',
+    verified: false,
   },
   {
     id: 'sb_d6ec0a0c-8bac-4c64-8236-6371802380d8',
@@ -18135,6 +20097,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'WEE1-tinib — Syndax Pharmaceuticals to Amgen',
     source: 'sec_10k',
+    assetName: 'WEE1-tinib',
+    verified: false,
   },
   {
     id: 'sb_7a190c3e-f09c-426b-91a4-cb1c53af2b0b',
@@ -18154,6 +20118,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD33 (neuro)-nib — Annovis Bio to Regeneron',
     source: 'sec_8k',
+    assetName: 'CD33 (neuro)-nib',
+    verified: false,
   },
   {
     id: 'sb_e7f72139-2b4e-42fb-9be6-bad987ae2276',
@@ -18173,6 +20139,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD19-101 — Replimune to GSK',
     source: 'sec_10k',
+    assetName: 'CD19-101',
+    verified: false,
   },
   {
     id: 'sb_0fedafac-7f81-4edf-a817-cdc497b0bcdc',
@@ -18191,6 +20159,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'TIM-3-mab — Kronos Bio to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'TIM-3-mab',
+    verified: false,
   },
   {
     id: 'sb_50167e4d-6f10-4de9-a153-c290bf2fb2da',
@@ -18210,6 +20180,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PARP — Intellia Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'PARP',
+    verified: false,
   },
   {
     id: 'sb_42b3c22d-e3af-4cb0-85cf-590a1e0dd8b8',
@@ -18227,6 +20199,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Tavneos (avacopan) — ChemoCentryx to Amgen',
     source: 'manual',
+    assetName: 'Tavneos (avacopan)',
+    verified: true,
   },
   {
     id: 'sb_0767687e-bb03-4757-aa8c-848fa2ff3cdc',
@@ -18246,6 +20220,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-MET-tinib — Hookipa Pharma to Moderna',
     source: 'sec_10k',
+    assetName: 'Anti-MET-tinib',
+    verified: false,
   },
   {
     id: 'sb_fea73495-e871-4716-ace9-f88b23d92517',
@@ -18264,6 +20240,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BCMA-201 — Janux Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'BCMA-201',
+    verified: false,
   },
   {
     id: 'sb_25eaea90-ac1c-4e35-8838-2828b8ff05e6',
@@ -18283,6 +20261,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD123-301 — Immunogen to Amgen',
     source: 'sec_10k',
+    assetName: 'CD123-301',
+    verified: false,
   },
   {
     id: 'sb_5a30bb5e-cfde-4279-b3de-d9ca42deba7f',
@@ -18302,6 +20282,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'RET — Caribou Biosciences to Takeda',
     source: 'sec_8k',
+    assetName: 'RET',
+    verified: false,
   },
   {
     id: 'sb_9926f6dc-b3bf-4baf-8f63-355555aedccf',
@@ -18320,6 +20302,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Claudin 6-301 — Iovance Biotherapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'Claudin 6-301',
+    verified: false,
   },
   {
     id: 'sb_2f27f6c2-dc1d-47ef-ba14-11810f94b111',
@@ -18338,6 +20322,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-RET-201 — Editas Medicine to Merck',
     source: 'sec_10k',
+    assetName: 'Anti-RET-201',
+    verified: false,
   },
   {
     id: 'sb_2c4589e3-6c25-43d8-a096-f2039f59bb42',
@@ -18357,6 +20343,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Rezafungin (Rezzayo) — Cidara Therapeutics to Melinta Therapeutics',
     source: 'press_release',
+    assetName: 'Rezafungin (Rezzayo)',
+    verified: false,
   },
   {
     id: 'sb_19048cf1-1067-4080-9ee4-4b76d8e26980',
@@ -18375,6 +20363,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TGF-β — Mirati Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'TGF-β',
+    verified: false,
   },
   {
     id: 'sb_171b5913-5661-42e3-a560-5cc4fb6b2d08',
@@ -18394,6 +20384,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BTK-301 — Innovent Biologics to Regeneron',
     source: 'press_release',
+    assetName: 'BTK-301',
+    verified: false,
   },
   {
     id: 'sb_fdc1d127-742c-4186-9216-10bb05b0bd61',
@@ -18413,6 +20405,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Linzagolix — Neurocrine Biosciences to Internal',
     source: 'press_release',
+    assetName: 'Linzagolix',
+    verified: false,
   },
   {
     id: 'sb_3519df90-c504-4d70-a75a-0febde9481c7',
@@ -18431,6 +20425,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD20-tinib — BioNTech to Merck',
     source: 'sec_10k',
+    assetName: 'CD20-tinib',
+    verified: false,
   },
   {
     id: 'sb_2bb91f9b-7f9c-4dd3-ad11-8befadb89005',
@@ -18450,6 +20446,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD19-001 — Zymeworks to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'Anti-CD19-001',
+    verified: false,
   },
   {
     id: 'sb_2589cef6-b769-4589-96a4-7d438184ad43',
@@ -18468,6 +20466,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD73-201 — Deciphera Pharmaceuticals to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-CD73-201',
+    verified: false,
   },
   {
     id: 'sb_d01b8172-c9db-4c63-861f-584acdb107fe',
@@ -18486,6 +20486,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'GTX-102 — GeneTx Biotherapeutics to Ultragenyx Pharmaceutical',
     source: 'press_release',
+    assetName: 'GTX-102',
+    verified: false,
   },
   {
     id: 'sb_df377d23-d03e-4364-805d-2a1db4d2f0da',
@@ -18505,6 +20507,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TROP2-001 — Janux Therapeutics to GSK',
     source: 'sec_10k',
+    assetName: 'TROP2-001',
+    verified: false,
   },
   {
     id: 'sb_7270f68a-605f-4ce1-9478-af5854828aba',
@@ -18524,6 +20528,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ICOS-tinib — Nektar Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'ICOS-tinib',
+    verified: false,
   },
   {
     id: 'sb_fed78ae5-2e34-4cfa-b60a-be53c3306bb6',
@@ -18543,6 +20549,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CBP-201 — Connect Biopharma to Roche',
     source: 'press_release',
+    assetName: 'CBP-201',
+    verified: false,
   },
   {
     id: 'sb_43d8f8e4-b800-406d-828a-bd0e399e0cea',
@@ -18562,6 +20570,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BCMA-301 — Elevation Oncology to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'BCMA-301',
+    verified: false,
   },
   {
     id: 'sb_fbb47bf6-0627-4ddc-8b96-922e400670d3',
@@ -18580,6 +20590,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-BRAF V600E-101 — Gritstone bio to Biogen',
     source: 'press_release',
+    assetName: 'Anti-BRAF V600E-101',
+    verified: false,
   },
   {
     id: 'sb_c5e1589a-64f9-4741-a5c8-6077a76e61cf',
@@ -18598,6 +20610,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-KIT-201 — Innovent Biologics to Gilead Sciences',
     source: 'press_release',
+    assetName: 'Anti-KIT-201',
+    verified: false,
   },
   {
     id: 'sb_62656d07-1be6-4ec2-88ae-597d172629d7',
@@ -18617,6 +20631,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Nectin-4-301 — PMV Pharmaceuticals to Amgen',
     source: 'sec_10k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_b9007135-344d-428f-b7eb-3f7e3d2402e6',
@@ -18635,6 +20651,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD38-mab — Janux Therapeutics to AbbVie',
     source: 'sec_8k',
+    assetName: 'Anti-CD38-mab',
+    verified: false,
   },
   {
     id: 'sb_b89807b8-d0c5-46f3-af2a-411841dd5f68',
@@ -18652,6 +20670,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VX-880 / PEC-Direct — ViaCyte to Vertex Pharmaceuticals',
     source: 'manual',
+    assetName: 'VX-880 / PEC-Direct',
+    verified: true,
   },
   {
     id: 'sb_08f73352-7442-4dbc-9b04-a310f5e51ba9',
@@ -18669,6 +20689,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'cardiomyopathy — MyoKardia to BMS',
     source: 'manual',
+    assetName: 'cardiomyopathy',
+    verified: true,
   },
   {
     id: 'sb_67656e00-7b66-49fd-91ef-8a532db20538',
@@ -18686,6 +20708,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'amrBacterial — Entasis Therapeutics to Innoviva',
     source: 'manual',
+    assetName: 'amrBacterial',
+    verified: true,
   },
   {
     id: 'sb_05f18d47-191a-4e95-b761-6f59207e45b0',
@@ -18705,6 +20729,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'hepatitisB — Assembly Biosciences to Roche',
     source: 'manual',
+    assetName: 'hepatitisB',
+    verified: true,
   },
   {
     id: 'sb_4d3b07e3-e3e6-4c2b-a08d-f8a653c98924',
@@ -18724,6 +20750,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'covid — Shionogi to Pfizer',
     source: 'manual',
+    assetName: 'covid',
+    verified: true,
   },
   {
     id: 'sb_4b1c2a77-26d4-4ff1-a9bb-ad30e68f59d1',
@@ -18741,6 +20769,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'uterineFibroids — Myovant Sciences to Sumitomo Pharma',
     source: 'manual',
+    assetName: 'uterineFibroids',
+    verified: true,
   },
   {
     id: 'sb_652004ad-8c61-4d11-86f6-3248baff01a5',
@@ -18760,6 +20790,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'fabry — Amicus Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'fabry',
+    verified: true,
   },
   {
     id: 'sb_13157060-48c7-47b0-b3db-ebc74916913d',
@@ -18779,6 +20811,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'hemophiliaA — Pfizer to Sangamo Therapeutics',
     source: 'manual',
+    assetName: 'hemophiliaA',
+    verified: true,
   },
   {
     id: 'sb_efb4d9da-4622-40e6-bdf4-04a0b104ddb7',
@@ -18796,6 +20830,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'migraine — Biohaven Pharmaceutical to Pfizer',
     source: 'manual',
+    assetName: 'migraine',
+    verified: true,
   },
   {
     id: 'sb_3b6a8e2f-c4c0-4bf6-9564-ac02c28df2c1',
@@ -18814,6 +20850,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'parkinsons — Voyager Therapeutics to Neurocrine Biosciences',
     source: 'manual',
+    assetName: 'parkinsons',
+    verified: true,
   },
   {
     id: 'sb_76694eaf-d83e-468f-b1b7-cbd040dc8904',
@@ -18831,6 +20869,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'lung_nsclc — Turning Point Therapeutics to BMS',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_2ebe0b55-34e9-45aa-a3e7-9170dab11120',
@@ -18848,6 +20888,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'menopause — TherapeuticsMD to Mayne Pharma',
     source: 'manual',
+    assetName: 'menopause',
+    verified: true,
   },
   {
     id: 'sb_3f8261c2-6243-400f-9378-a913fed78867',
@@ -18867,6 +20909,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'endometriosis — Organon to Forendo Pharma',
     source: 'manual',
+    assetName: 'endometriosis',
+    verified: true,
   },
   {
     id: 'sb_b094b919-46b7-45a3-a318-a12d5815f17d',
@@ -18884,6 +20928,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'sickleCell — Global Blood Therapeutics to Pfizer',
     source: 'manual',
+    assetName: 'sickleCell',
+    verified: true,
   },
   {
     id: 'sb_eddcaf0c-0457-47e2-bfe8-2a286eed95a1',
@@ -18903,6 +20949,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'acne — Nuvation Bio to Sun Pharma',
     source: 'manual',
+    assetName: 'acne',
+    verified: true,
   },
   {
     id: 'sb_924ffb6a-266e-4baf-8384-1d894acb0f86',
@@ -18921,6 +20969,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'nash — Pliant Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'nash',
+    verified: true,
   },
   {
     id: 'sb_26dbdc40-08ea-405b-ab29-d820e59bb7f3',
@@ -18938,6 +20988,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ulcerativeColitis — Arena Pharmaceuticals to Pfizer',
     source: 'manual',
+    assetName: 'ulcerativeColitis',
+    verified: true,
   },
   {
     id: 'sb_94a380b3-c01c-45c1-a49d-a9b3589aa5b1',
@@ -18956,6 +21008,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'sickleCell — Magenta Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'sickleCell',
+    verified: true,
   },
   {
     id: 'sb_7158a274-fe4d-4e45-8e7c-306f5dd58c0a',
@@ -18974,6 +21028,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'lysosomal — Applied DNA Sciences to Takeda',
     source: 'manual',
+    assetName: 'lysosomal',
+    verified: true,
   },
   {
     id: 'sb_176cc5b0-6c4a-4a4a-b7ef-7481d23478cb',
@@ -18992,6 +21048,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'blepharitis — Tarsus Pharmaceuticals to Samsung',
     source: 'manual',
+    assetName: 'blepharitis',
+    verified: true,
   },
   {
     id: 'sb_de686d6a-93f3-4295-86c9-beab9a86ea2b',
@@ -19009,6 +21067,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'glaucoma — Aerie Pharmaceuticals to Alcon',
     source: 'manual',
+    assetName: 'glaucoma',
+    verified: true,
   },
   {
     id: 'sb_8c04a7ff-e1b7-4d96-a1fb-fbc8dc524abb',
@@ -19028,6 +21088,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'rsv — Enanta Pharmaceuticals to Novartis',
     source: 'manual',
+    assetName: 'rsv',
+    verified: true,
   },
   {
     id: 'sb_589eff7e-29a2-42ce-8533-8c0f938d1a8b',
@@ -19045,6 +21107,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'dryAmdGA — Gyroscope Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'dryAmdGA',
+    verified: true,
   },
   {
     id: 'sb_6a089306-27bc-436f-bd75-c2b1255acfc9',
@@ -19063,6 +21127,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Ebopiprant (OBE022) — ObsEva to Organon',
     source: 'manual',
+    assetName: 'Ebopiprant (OBE022)',
+    verified: true,
   },
   {
     id: 'sb_50c48e24-b236-469a-97c0-8599a438959e',
@@ -19081,6 +21147,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'KRAS G12C-mab — Springworks Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'KRAS G12C-mab',
+    verified: false,
   },
   {
     id: 'sb_8be72ae5-c9df-45d1-8752-798376da9687',
@@ -19100,6 +21168,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-MUC16-101 — Nektar Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-MUC16-101',
+    verified: false,
   },
   {
     id: 'sb_a3ebc157-6373-405e-b2f0-9b3107ea9f65',
@@ -19119,6 +21189,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ALK-001 — Immatics to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'ALK-001',
+    verified: false,
   },
   {
     id: 'sb_f0010017-52dd-414e-ae54-3b907699f1e2',
@@ -19136,6 +21208,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TAVNEOS — Amgen to Chemocentryx',
     source: 'press_release',
+    assetName: 'TAVNEOS',
+    verified: false,
   },
   {
     id: 'sb_df3543e0-0eb1-4d96-9c34-f9aaece313e3',
@@ -19155,6 +21229,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TROP2-mab — Genmab to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'Anti-TROP2-mab',
+    verified: false,
   },
   {
     id: 'sb_ee06d289-dbf8-4b39-951e-760a899733e7',
@@ -19173,6 +21249,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'FRα-tinib — Innovent Biologics to Biogen',
     source: 'press_release',
+    assetName: 'FRα-tinib',
+    verified: false,
   },
   {
     id: 'sb_a61c7f83-d0c4-444e-aa85-0bf007f31ec8',
@@ -19191,6 +21269,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Zerlasiran (SLN360) — Silence Therapeutics to AstraZeneca',
     source: 'manual',
+    assetName: 'Zerlasiran (SLN360)',
+    verified: true,
   },
   {
     id: 'sb_24e57a25-841e-4203-aad2-58fa6ec0e551',
@@ -19209,6 +21289,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HLX11+HLX14 (pertuzumab+denosumab biosimilars) — Shanghai Henlius to Organon',
     source: 'press_release',
+    assetName: 'HLX11+HLX14 (pertuzumab+denosumab biosimilars)',
+    verified: false,
   },
   {
     id: 'sb_733b6c58-d8e8-4885-83d1-512cb46c221d',
@@ -19228,6 +21310,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Claudin 6 — Immunogen to Novartis',
     source: 'press_release',
+    assetName: 'Claudin 6',
+    verified: false,
   },
   {
     id: 'sb_c607c104-3749-4aa3-a7d2-2d3b768815ec',
@@ -19247,6 +21331,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD19-tinib — Ono Pharmaceutical to Pfizer',
     source: 'press_release',
+    assetName: 'CD19-tinib',
+    verified: false,
   },
   {
     id: 'sb_8c0952e0-7400-40c2-8e1c-adf51c232399',
@@ -19265,6 +21351,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Claudin 6-001 — CRISPR Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'Claudin 6-001',
+    verified: false,
   },
   {
     id: 'sb_a048fbd1-59e5-48c4-919a-d4a34c283295',
@@ -19284,6 +21372,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD22-301 — Elevation Oncology to GSK',
     source: 'sec_8k',
+    assetName: 'CD22-301',
+    verified: false,
   },
   {
     id: 'sb_d4e4bdf7-fff2-42e3-9760-d270ed6e4c0e',
@@ -19302,6 +21392,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ERK-mab — Arrowhead Pharmaceuticals to Takeda',
     source: 'sec_10k',
+    assetName: 'ERK-mab',
+    verified: false,
   },
   {
     id: 'sb_f389ef92-97f8-46e8-8414-97cc5a31c8f7',
@@ -19321,6 +21413,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ALK-201 — Agenus to Amgen',
     source: 'sec_8k',
+    assetName: 'ALK-201',
+    verified: false,
   },
   {
     id: 'sb_845088fe-91e2-47bb-b1b4-8111a3d08462',
@@ -19339,6 +21433,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Augtyro (repotrectinib) — Turning Point Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Augtyro (repotrectinib)',
+    verified: false,
   },
   {
     id: 'sb_649bfd6b-4862-4df8-9f9b-de3dd56a7851',
@@ -19357,6 +21453,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CEA-tinib — Argenx to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-CEA-tinib',
+    verified: false,
   },
   {
     id: 'sb_a2fc77ed-b546-4bfb-96e9-01eb03c88745',
@@ -19374,6 +21472,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Bijuva and Imvexxy — TherapeuticsMD to Covis Pharma',
     source: 'manual',
+    assetName: 'Bijuva and Imvexxy',
+    verified: true,
   },
   {
     id: 'sb_d743a99e-99a3-4036-8452-fac43cbc476c',
@@ -19393,6 +21493,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TIM-3-201 — Syndax Pharmaceuticals to Gilead Sciences',
     source: 'press_release',
+    assetName: 'TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_b69eab2f-5c2c-4815-a715-f7bb9664e897',
@@ -19412,6 +21514,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ICOS-mab — Daiichi Sankyo to Bayer',
     source: 'sec_8k',
+    assetName: 'ICOS-mab',
+    verified: false,
   },
   {
     id: 'sb_82b4ab12-c46c-4ac9-b761-2c918fee2c21',
@@ -19431,6 +21535,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-mTOR — Immunocore to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-mTOR',
+    verified: false,
   },
   {
     id: 'sb_db0bde91-6844-4414-92b3-a18495135e3d',
@@ -19449,6 +21555,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BTK-001 — Agenus to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'BTK-001',
+    verified: false,
   },
   {
     id: 'sb_b19e24fa-1bca-4967-99fc-90195dbe10e2',
@@ -19467,6 +21575,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-B7-H4 — Sana Biotechnology to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-B7-H4',
+    verified: false,
   },
   {
     id: 'sb_17bc4e15-9b8d-4520-b5d4-e46dc429ad51',
@@ -19485,6 +21595,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PARP — CRISPR Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'PARP',
+    verified: false,
   },
   {
     id: 'sb_70bba5d4-8785-4dd4-ac43-2294bcb36408',
@@ -19502,6 +21614,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Etavopivat (FT-4202) — Forma Therapeutics to Novo Nordisk',
     source: 'manual',
+    assetName: 'Etavopivat (FT-4202)',
+    verified: true,
   },
   {
     id: 'sb_d6893f9d-f6eb-49ad-a1bb-20fe1260df5f',
@@ -19520,6 +21634,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGFR-201 — Deciphera Pharmaceuticals to Pfizer',
     source: 'sec_10k',
+    assetName: 'VEGFR-201',
+    verified: false,
   },
   {
     id: 'sb_bcc9746f-19c7-4768-82dc-b1226e6facad',
@@ -19539,6 +21655,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD73-301 — CureVac to GSK',
     source: 'sec_8k',
+    assetName: 'CD73-301',
+    verified: false,
   },
   {
     id: 'sb_12f6a6de-ae16-4b9d-8f9b-cdd5bfe47eb3',
@@ -19558,6 +21676,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD123-001 — CRISPR Therapeutics to Novartis',
     source: 'sec_10k',
+    assetName: 'Anti-CD123-001',
+    verified: false,
   },
   {
     id: 'sb_b200c97a-7e84-4544-b101-6beb64373220',
@@ -19577,6 +21697,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1-101 — Viracta Therapeutics to Seagen',
     source: 'press_release',
+    assetName: 'ROS1-101',
+    verified: false,
   },
   {
     id: 'sb_34249788-f3d9-4100-bc7b-70e390701ecc',
@@ -19596,6 +21718,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BTK-mab — CureVac to Regeneron',
     source: 'press_release',
+    assetName: 'BTK-mab',
+    verified: false,
   },
   {
     id: 'sb_70d404d6-fe29-4fbd-82de-c97cfd20ff0b',
@@ -19615,6 +21739,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-FGFR-mab — Syndax Pharmaceuticals to Vertex',
     source: 'press_release',
+    assetName: 'Anti-FGFR-mab',
+    verified: false,
   },
   {
     id: 'sb_a71acf4d-a814-4e33-b206-6d45acd296dc',
@@ -19634,6 +21760,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Mesothelin — Beam Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'Mesothelin',
+    verified: false,
   },
   {
     id: 'sb_0507364c-df62-44ba-b966-b982714cbb7b',
@@ -19653,6 +21781,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-301 — Arvinas to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'EGFR-301',
+    verified: false,
   },
   {
     id: 'sb_0441c5d7-9295-4ddf-a5dc-5775a8bbcaa7',
@@ -19672,6 +21802,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MDM2-001 — Allogene Therapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'MDM2-001',
+    verified: false,
   },
   {
     id: 'sb_c9d258c8-0841-4578-876d-9029c5794b4d',
@@ -19691,6 +21823,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-ALK-tinib — Innovent Biologics to Bayer',
     source: 'press_release',
+    assetName: 'Anti-ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_4cf5240b-5870-4ae1-9358-3700ed8684d9',
@@ -19710,6 +21844,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CEA-tinib — Iovance Biotherapeutics to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'CEA-tinib',
+    verified: false,
   },
   {
     id: 'sb_33f9e28a-d686-4c44-8209-f93f2cc3e0e3',
@@ -19729,6 +21865,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'KIT-301 — Kronos Bio to Biogen',
     source: 'sec_8k',
+    assetName: 'KIT-301',
+    verified: false,
   },
   {
     id: 'sb_36428625-d1e7-41b4-87b5-0803aae6d4c9',
@@ -19748,6 +21886,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CDK4/6-201 — Zymeworks to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'Anti-CDK4/6-201',
+    verified: false,
   },
   {
     id: 'sb_8dd8eba0-ba55-4599-88b4-159c0696f47b',
@@ -19767,6 +21907,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-Alpha-synuclein-101 — Alector to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Anti-Alpha-synuclein-101',
+    verified: false,
   },
   {
     id: 'sb_01cf6a7f-7ffb-4f09-8d8e-395dbfcaa71b',
@@ -19785,6 +21927,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12C-201 — Argenx to Takeda',
     source: 'sec_8k',
+    assetName: 'KRAS G12C-201',
+    verified: false,
   },
   {
     id: 'sb_10da891a-df32-4e15-83fb-59e613bdaed7',
@@ -19802,6 +21946,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Momelotinib (Ojjaara) — Sierra Oncology to GlaxoSmithKline',
     source: 'manual',
+    assetName: 'Momelotinib (Ojjaara)',
+    verified: true,
   },
   {
     id: 'sb_02fa13ae-6f57-498e-84e7-a0fe7a7454ba',
@@ -19821,6 +21967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LINGO-1-201 — Vigil Neuroscience to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'LINGO-1-201',
+    verified: false,
   },
   {
     id: 'sb_1141b386-f943-4488-8917-32c246effc9d',
@@ -19840,6 +21988,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-MDM2-301 — Beam Therapeutics to Eli Lilly',
     source: 'press_release',
+    assetName: 'Anti-MDM2-301',
+    verified: false,
   },
   {
     id: 'sb_48fe00b4-1576-4e96-89b7-562a59fdd7db',
@@ -19859,6 +22009,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MUC16-201 — BioNTech to Amgen',
     source: 'sec_10k',
+    assetName: 'MUC16-201',
+    verified: false,
   },
   {
     id: 'sb_18a03880-86e1-4165-b85d-e75c105e635e',
@@ -19878,6 +22030,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CD19 — Astellas to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-CD19',
+    verified: false,
   },
   {
     id: 'sb_51dde0b3-bd2b-4f80-aa22-ab897b511490',
@@ -19897,6 +22051,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-VEGFR-tinib — Deciphera Pharmaceuticals to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'Anti-VEGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_ef7f1db2-edcf-47df-bfa7-8812f6a261d5',
@@ -19915,6 +22071,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-ATR-001 — Arvinas to Merck',
     source: 'press_release',
+    assetName: 'Anti-ATR-001',
+    verified: false,
   },
   {
     id: 'sb_046dec3f-b365-4585-b093-faee3ad1ca04',
@@ -19934,6 +22092,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Plenity — Gelesis Holdings, Inc. to China Medical Systems Holdings Limited',
     source: 'sec_8k — https://www.sec.gov/Archives/edgar/data/1805087/000110465922037495/tm229599d1_ex99-2.htm',
+    assetName: 'Plenity',
+    verified: false,
   },
   {
     id: 'sb_87e2ec27-bea0-4516-8d9c-484b2ce6ac0d',
@@ -19953,6 +22113,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'GPC3-301 — Y-mAbs Therapeutics to GSK',
     source: 'sec_8k',
+    assetName: 'GPC3-301',
+    verified: false,
   },
   {
     id: 'sb_59bab8d4-5715-4ca0-b167-0bf6cc3256fd',
@@ -19972,6 +22134,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD73 — Gritstone bio to Roche',
     source: 'sec_8k',
+    assetName: 'CD73',
+    verified: false,
   },
   {
     id: 'sb_a0056f3e-ee62-4775-9691-8ab97c283e78',
@@ -19991,6 +22155,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SHP2-101 — Relay Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'SHP2-101',
+    verified: false,
   },
   {
     id: 'sb_f38d20ea-fa84-4cbe-98c0-cf285706db6b',
@@ -20010,6 +22176,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'STEAP1-101 — Akeso to Incyte',
     source: 'press_release',
+    assetName: 'STEAP1-101',
+    verified: false,
   },
   {
     id: 'sb_c7ecb120-1dde-41bf-a037-9f377d6e574b',
@@ -20029,6 +22197,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TIGIT — Agenus to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-TIGIT',
+    verified: false,
   },
   {
     id: 'sb_e684554c-8107-4f5c-b040-f2a00d4d015b',
@@ -20048,6 +22218,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD19-mab — Beam Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'CD19-mab',
+    verified: false,
   },
   {
     id: 'sb_12125753-7efc-44f9-835e-8585833f920c',
@@ -20067,6 +22239,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SHP2-001 — Daiichi Sankyo to Novartis',
     source: 'sec_8k',
+    assetName: 'SHP2-001',
+    verified: false,
   },
   {
     id: 'sb_fb271357-9697-4d08-93be-8116283298dc',
@@ -20086,6 +22260,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6 — BioNTech to Pfizer',
     source: 'press_release',
+    assetName: 'CDK4/6',
+    verified: false,
   },
   {
     id: 'sb_a77f0cec-d855-429c-9483-6c2cd71b6489',
@@ -20105,6 +22281,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ATR — Hengrui Medicine to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'ATR',
+    verified: false,
   },
   {
     id: 'sb_c7159d39-f582-49be-a36a-790aefd40327',
@@ -20123,6 +22301,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PD-1-001 — Sana Biotechnology to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'PD-1-001',
+    verified: false,
   },
   {
     id: 'sb_00e91fbf-0313-484f-838f-4450cd51f309',
@@ -20141,6 +22321,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MET-301 — Kymera Therapeutics to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'MET-301',
+    verified: false,
   },
   {
     id: 'sb_4ae2aedf-88b4-431c-8d4d-6fdb3566e3bc',
@@ -20159,6 +22341,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-LAG-3-tinib — Chugai Pharmaceutical to GSK',
     source: 'press_release',
+    assetName: 'Anti-LAG-3-tinib',
+    verified: false,
   },
   {
     id: 'sb_d82b06ea-e500-4e3b-a1fa-89c8f671a692',
@@ -20176,6 +22360,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Fintepla (fenfluramine) — Zogenix to UCB',
     source: 'manual',
+    assetName: 'Fintepla (fenfluramine)',
+    verified: true,
   },
   {
     id: 'sb_47a47e38-f726-4a84-b36b-b36de235184a',
@@ -20195,6 +22381,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-ERK-101 — Replimune to Takeda',
     source: 'sec_10k',
+    assetName: 'Anti-ERK-101',
+    verified: false,
   },
   {
     id: 'sb_2127e580-9543-44a9-acac-5754611657fc',
@@ -20214,6 +22402,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BTK-101 — Hengrui Medicine to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'BTK-101',
+    verified: false,
   },
   {
     id: 'sb_28cd1654-e0bd-4217-abb5-9dda20f90c12',
@@ -20233,6 +22423,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'LAG-3-301 — Revolution Medicines to Merck',
     source: 'sec_10k',
+    assetName: 'LAG-3-301',
+    verified: false,
   },
   {
     id: 'sb_7535eecb-c2bc-4821-81c9-73ad9c4b6184',
@@ -20252,6 +22444,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'LAG-3-001 — Alphamab Oncology to Vertex',
     source: 'press_release',
+    assetName: 'LAG-3-001',
+    verified: false,
   },
   {
     id: 'sb_b38f6ab5-3269-4ee9-b42f-68a2c4dac5d3',
@@ -20270,6 +22464,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-RET-101 — Immunocore to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-RET-101',
+    verified: false,
   },
   {
     id: 'sb_47a389f2-f18e-409f-bb5f-232528f90834',
@@ -20289,6 +22485,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FLT3-201 — Nektar Therapeutics to Bayer',
     source: 'press_release',
+    assetName: 'FLT3-201',
+    verified: false,
   },
   {
     id: 'sb_f556b33d-7041-416d-89d2-d261b23f1f34',
@@ -20308,6 +22506,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MEK-tinib — Agenus to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'MEK-tinib',
+    verified: false,
   },
   {
     id: 'sb_c59383d2-f8ec-4e9e-afa4-2f8340709937',
@@ -20326,6 +22526,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HB-500/HB-400 (HIV/HBV vaccines) — Hookipa Pharma to Gilead Sciences',
     source: 'press_release',
+    assetName: 'HB-500/HB-400 (HIV/HBV vaccines)',
+    verified: false,
   },
   {
     id: 'sb_0f6b5d9b-ca37-4751-ab0c-8acdd3863c12',
@@ -20344,6 +22546,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TN-201 — Tenaya Therapeutics to Roche',
     source: 'manual',
+    assetName: 'TN-201',
+    verified: true,
   },
   {
     id: 'sb_95603a03-46b5-4c98-b02e-597897d51a32',
@@ -20363,6 +22567,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'LAG-3-101 — Denali Therapeutics to Takeda',
     source: 'sec_8k',
+    assetName: 'LAG-3-101',
+    verified: false,
   },
   {
     id: 'sb_490f6e8d-0c04-481c-87b4-09ca0624612b',
@@ -20382,6 +22588,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CD38-mab — Janux Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'Anti-CD38-mab',
+    verified: false,
   },
   {
     id: 'sb_bd0baeb1-918d-47bb-bda3-a1a8e1d98ff3',
@@ -20401,6 +22609,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TGF-β-101 — CRISPR Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'TGF-β-101',
+    verified: false,
   },
   {
     id: 'sb_ffaa759b-3ff2-44c3-8163-1e70292378cf',
@@ -20418,6 +22628,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Sisunatovir — ReViral to Pfizer',
     source: 'manual',
+    assetName: 'Sisunatovir',
+    verified: true,
   },
   {
     id: 'sb_fb425ee5-4dfc-4e2c-8d5b-6b564262f3fa',
@@ -20437,6 +22649,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ICOS-201 — Beam Therapeutics to GSK',
     source: 'press_release',
+    assetName: 'ICOS-201',
+    verified: false,
   },
   {
     id: 'sb_7cf86b35-72dc-4de6-98e5-fd1f42728009',
@@ -20456,6 +22670,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-TROP2-mab — Karyopharm Therapeutics to Amgen',
     source: 'sec_10k',
+    assetName: 'Anti-TROP2-mab',
+    verified: false,
   },
   {
     id: 'sb_12516587-659d-4936-919f-a9260ba82683',
@@ -20475,6 +22691,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MET-201 — Affimed to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'MET-201',
+    verified: false,
   },
   {
     id: 'sb_f9438bee-8193-4784-a3fb-7f38ab60448b',
@@ -20493,6 +22711,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BTK-301 — Innovent Biologics to Merck',
     source: 'sec_8k',
+    assetName: 'BTK-301',
+    verified: false,
   },
   {
     id: 'sb_9f73e623-1b8a-452d-8f51-1b1d7e158add',
@@ -20512,6 +22732,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CSF1R-mab — Y-mAbs Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'CSF1R-mab',
+    verified: false,
   },
   {
     id: 'sb_6502e083-7f75-47b5-9756-d7f55f3b5925',
@@ -20531,6 +22753,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-FLT3 — Nkarta to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-FLT3',
+    verified: false,
   },
   {
     id: 'sb_9bbee229-4cd5-4e05-bf62-0f4cc7ca82f9',
@@ -20549,6 +22773,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GPR83 agonists — Cerevance to Merck',
     source: 'manual',
+    assetName: 'GPR83 agonists',
+    verified: true,
   },
   {
     id: 'sb_bc5ed2a7-e372-440d-9633-3119f198cc39',
@@ -20568,6 +22794,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PARP-201 — Fate Therapeutics to Amgen',
     source: 'sec_10k',
+    assetName: 'PARP-201',
+    verified: false,
   },
   {
     id: 'sb_477f3f42-38d8-46f3-96f3-202491b07953',
@@ -20586,6 +22814,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-Nav1.7-001 — Cortexyme to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'Anti-Nav1.7-001',
+    verified: false,
   },
   {
     id: 'sb_44158555-a7a2-4cbf-bd8f-8c529aff715d',
@@ -20605,6 +22835,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-KRAS G12D-001 — Kronos Bio to Pfizer',
     source: 'press_release',
+    assetName: 'Anti-KRAS G12D-001',
+    verified: false,
   },
   {
     id: 'sb_be194b0e-10e6-4b4d-b2bf-b210bf475140',
@@ -20623,6 +22855,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'NI006 — Neurimmune to AstraZeneca',
     source: 'manual',
+    assetName: 'NI006',
+    verified: true,
   },
   {
     id: 'sb_ca4d3fc0-deec-43a6-a438-94d0e766a3ec',
@@ -20641,6 +22875,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H3-tinib — MorphoSys to Sanofi',
     source: 'sec_8k',
+    assetName: 'B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_6644b5e5-224c-4c5f-9985-01f83526a443',
@@ -20660,6 +22896,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ROS1-301 — Argenx to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'ROS1-301',
+    verified: false,
   },
   {
     id: 'sb_589e3eeb-2aaf-4be8-93d6-534bae79915d',
@@ -20679,6 +22917,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-PARP-tinib — Tyra Biosciences to Amgen',
     source: 'press_release',
+    assetName: 'Anti-PARP-tinib',
+    verified: false,
   },
   {
     id: 'sb_690dd0a0-40a0-476d-8964-5e1f15c66769',
@@ -20698,6 +22938,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ERK-201 — Legend Biotech to Merck',
     source: 'press_release',
+    assetName: 'ERK-201',
+    verified: false,
   },
   {
     id: 'sb_3c0c638d-c319-4e67-b148-e4fa6b349735',
@@ -20716,6 +22958,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Base editing programs — Beam Therapeutics to Pfizer',
     source: 'manual',
+    assetName: 'Base editing programs',
+    verified: true,
   },
   {
     id: 'sb_b1afb0bf-a2f8-4b98-9db4-0567830299de',
@@ -20735,6 +22979,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-L1-201 — Karyopharm Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'PD-L1-201',
+    verified: false,
   },
   {
     id: 'sb_f1ec0e01-06c0-4c57-9c30-e6077a905999',
@@ -20754,6 +23000,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LIV-1-101 — Janux Therapeutics to Pfizer',
     source: 'press_release',
+    assetName: 'LIV-1-101',
+    verified: false,
   },
   {
     id: 'sb_7abda4e7-2218-4bbc-ac14-ee3a33ad09e2',
@@ -20771,6 +23019,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Hydrus Microstent — Ivantis to Alcon',
     source: 'manual',
+    assetName: 'Hydrus Microstent',
+    verified: true,
   },
   {
     id: 'sb_ea71a417-34da-4e8a-ab99-6d7ddcce9002',
@@ -20789,6 +23039,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'FGFR — Umoja Biopharma to Amgen',
     source: 'sec_8k',
+    assetName: 'FGFR',
+    verified: false,
   },
   {
     id: 'sb_06ec4259-5767-4489-a2a6-f8e55058a640',
@@ -20808,6 +23060,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FLT3-tinib — Vor Biopharma to Moderna',
     source: 'press_release',
+    assetName: 'FLT3-tinib',
+    verified: false,
   },
   {
     id: 'sb_3d6c1fe4-6611-4d51-926a-f2b763477617',
@@ -20827,6 +23081,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'FGFR-mab — Celldex Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'FGFR-mab',
+    verified: false,
   },
   {
     id: 'sb_cf8ac461-9ca5-4155-86f2-849202d30ce4',
@@ -20846,6 +23102,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Treg Cell Therapy — Sonoma Biotherapeutics to Vertex Pharmaceuticals',
     source: 'press_release',
+    assetName: 'Treg Cell Therapy',
+    verified: false,
   },
   {
     id: 'sb_7705589a-8111-4107-9cdc-0aec7c211222',
@@ -20865,6 +23123,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-OX40-001 — Legend Biotech to Sanofi',
     source: 'sec_10k',
+    assetName: 'Anti-OX40-001',
+    verified: false,
   },
   {
     id: 'sb_88ddb677-2fdd-45f6-b438-f800c0ec0f56',
@@ -20884,6 +23144,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-1-tinib — IGM Biosciences to Biogen',
     source: 'sec_8k',
+    assetName: 'PD-1-tinib',
+    verified: false,
   },
   {
     id: 'sb_84774380-3860-45ba-b0a5-6ae62e9b83e8',
@@ -20903,6 +23165,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC16-001 — Ono Pharmaceutical to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'MUC16-001',
+    verified: false,
   },
   {
     id: 'sb_46f39b58-b29c-427a-83cb-bc1f2eebecf3',
@@ -20922,6 +23186,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MUC16-tinib — Genmab to Vertex',
     source: 'sec_10k',
+    assetName: 'MUC16-tinib',
+    verified: false,
   },
   {
     id: 'sb_d22c04c9-762b-43d4-8618-f55a17552460',
@@ -20940,6 +23206,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CEA-301 — Daiichi Sankyo to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'CEA-301',
+    verified: false,
   },
   {
     id: 'sb_d1b09370-9eca-4535-b0db-97c5a5df58aa',
@@ -20959,6 +23227,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'DLL3 — Zymeworks to GSK',
     source: 'sec_8k',
+    assetName: 'DLL3',
+    verified: false,
   },
   {
     id: 'sb_347419c8-848a-471c-93d5-25cb4ca19fd4',
@@ -20978,6 +23248,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD33-tinib — BeiGene to GSK',
     source: 'sec_10k',
+    assetName: 'Anti-CD33-tinib',
+    verified: false,
   },
   {
     id: 'sb_f502b032-6e3a-4074-8993-8b74f9b10ea1',
@@ -20997,6 +23269,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PARP-tinib — Revolution Medicines to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'PARP-tinib',
+    verified: false,
   },
   {
     id: 'sb_717f2157-5479-4d8d-bfdd-2d54d21a3dff',
@@ -21015,6 +23289,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Eplontersen (CV) — Ionis Pharmaceuticals to AstraZeneca',
     source: 'press_release',
+    assetName: 'Eplontersen (CV)',
+    verified: false,
   },
   {
     id: 'sb_35348f24-abfd-4431-ae37-9b404fdbe012',
@@ -21034,6 +23310,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-TREM1/TREM2 — Pionyr Immunotherapeutics to Gilead Sciences',
     source: 'press_release',
+    assetName: 'Anti-TREM1/TREM2',
+    verified: false,
   },
   {
     id: 'sb_535b8099-55dc-47ca-b250-a37268553d77',
@@ -21052,6 +23330,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MUC16-301 — Revolution Medicines to Eli Lilly',
     source: 'press_release',
+    assetName: 'MUC16-301',
+    verified: false,
   },
   {
     id: 'sb_933fae16-3909-4c31-a494-97e8c2846512',
@@ -21071,6 +23351,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CSF1R-301 — MacroGenics to Moderna',
     source: 'sec_8k',
+    assetName: 'CSF1R-301',
+    verified: false,
   },
   {
     id: 'sb_8fbcaa06-8c32-46dd-bb51-e96e035ce467',
@@ -21089,6 +23371,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD38-mab — Turning Point Therapeutics to Merck',
     source: 'press_release',
+    assetName: 'CD38-mab',
+    verified: false,
   },
   {
     id: 'sb_9f3d53c8-e2ad-4580-923c-c0446b5b3c9f',
@@ -21108,6 +23392,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MUC1-301 — Chugai Pharmaceutical to Sanofi',
     source: 'press_release',
+    assetName: 'MUC1-301',
+    verified: false,
   },
   {
     id: 'sb_3d0bfa4d-0b84-425b-8379-99d0c0eeb784',
@@ -21126,6 +23412,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CTLA-4-mab — Legend Biotech to Eli Lilly',
     source: 'press_release',
+    assetName: 'Anti-CTLA-4-mab',
+    verified: false,
   },
   {
     id: 'sb_dbae6ef3-e04f-4b68-a20f-6a2aa592964b',
@@ -21145,6 +23433,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CEA — Arrowhead Pharmaceuticals to Novartis',
     source: 'sec_8k',
+    assetName: 'CEA',
+    verified: false,
   },
   {
     id: 'sb_75a8906d-5bb5-490c-9bf4-c051762128b6',
@@ -21164,6 +23454,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-SHP2-301 — Fate Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Anti-SHP2-301',
+    verified: false,
   },
   {
     id: 'sb_e1d4d8a2-ea30-4298-8ec3-ba32d08a34f7',
@@ -21182,6 +23474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BCL-2-201 — Xencor to Biogen',
     source: 'press_release',
+    assetName: 'BCL-2-201',
+    verified: false,
   },
   {
     id: 'sb_1f92c3c1-b3d0-4d5a-9ffa-02c07666a488',
@@ -21201,6 +23495,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'WEE1-301 — Junshi Biosciences to Bayer',
     source: 'sec_8k',
+    assetName: 'WEE1-301',
+    verified: false,
   },
   {
     id: 'sb_6607014d-76ae-4212-9fb6-cee59135fe58',
@@ -21220,6 +23516,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CD33-001 — Immunogen to Regeneron',
     source: 'sec_8k',
+    assetName: 'Anti-CD33-001',
+    verified: false,
   },
   {
     id: 'sb_3f65e4aa-bbaf-4e10-8c2e-50c4e9a29858',
@@ -21238,6 +23536,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'EGFR-201 — ORIC Pharmaceuticals to Eli Lilly',
     source: 'press_release',
+    assetName: 'EGFR-201',
+    verified: false,
   },
   {
     id: 'sb_ae914a22-6bfc-49f0-8679-0cd508dc3a72',
@@ -21257,6 +23557,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-FRα-201 — TCR2 Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: 'Anti-FRα-201',
+    verified: false,
   },
   {
     id: 'sb_a2c11423-f0ce-4f64-a35a-2e62f766f2ec',
@@ -21276,6 +23578,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'C9orf72-101 — ProMIS Neurosciences to AstraZeneca',
     source: 'press_release',
+    assetName: 'C9orf72-101',
+    verified: false,
   },
   {
     id: 'sb_fcb87b52-7197-47ee-aac5-da40ad2517d3',
@@ -21295,6 +23599,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD19-301 — Tyra Biosciences to Vertex',
     source: 'sec_10k',
+    assetName: 'CD19-301',
+    verified: false,
   },
   {
     id: 'sb_47715c67-58de-4361-979e-4d8296a892d7',
@@ -21314,6 +23620,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BTK-101 — Hookipa Pharma to Sanofi',
     source: 'press_release',
+    assetName: 'Anti-BTK-101',
+    verified: false,
   },
   {
     id: 'sb_a5faf24a-c323-4a9f-8d1c-e6608dfb6dc6',
@@ -21333,6 +23641,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MUC1-101 — Tango Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_cae0681e-db9f-4c6c-aa15-1503f5865c9f',
@@ -21352,6 +23662,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Claudin 6-tinib — Alkermes to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'Claudin 6-tinib',
+    verified: false,
   },
   {
     id: 'sb_c5011fa3-dd78-444e-a2e6-9d00f04bb579',
@@ -21371,6 +23683,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PARP — Springworks Therapeutics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'PARP',
+    verified: false,
   },
   {
     id: 'sb_13e55eee-882e-4ba9-b0dd-1a1083ddb7eb',
@@ -21390,6 +23704,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'SHP2 Program — Relay Therapeutics to Genentech',
     source: 'press_release',
+    assetName: 'SHP2 Program',
+    verified: false,
   },
   {
     id: 'sb_cf9577c9-dba1-45db-af13-3127b89fce89',
@@ -21409,6 +23725,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6-tinib — Nektar Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'CDK4/6-tinib',
+    verified: false,
   },
   {
     id: 'sb_002626fc-6416-42a9-986b-abab391127df',
@@ -21428,6 +23746,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'AXL-201 — Umoja Biopharma to Merck',
     source: 'sec_8k',
+    assetName: 'AXL-201',
+    verified: false,
   },
   {
     id: 'sb_7110eefa-5e18-457e-b759-80e6b58d2e5f',
@@ -21446,6 +23766,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FOR-6219 (endometriosis/PCOS) acquisition — Forendo Pharma to Organon',
     source: 'press_release',
+    assetName: 'FOR-6219 (endometriosis/PCOS) acquisition',
+    verified: false,
   },
   {
     id: 'sb_341ca516-b71c-443d-8bb1-354c6c5c9588',
@@ -21465,6 +23787,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD19 — Editas Medicine to Pfizer',
     source: 'press_release',
+    assetName: 'CD19',
+    verified: false,
   },
   {
     id: 'sb_f7e25d34-2752-4482-bff0-9277e663360d',
@@ -21484,6 +23808,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BCL-2-mab — Zymeworks to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'Anti-BCL-2-mab',
+    verified: false,
   },
   {
     id: 'sb_fd47d880-506d-4085-9d8f-3c5dca05c30f',
@@ -21501,6 +23827,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Opill (OTC oral contraceptive) — HRA Pharma to Perrigo',
     source: 'press_release',
+    assetName: 'Opill (OTC oral contraceptive)',
+    verified: false,
   },
   {
     id: 'sb_28241828-063c-4ea8-92d5-f66ff6c34091',
@@ -21520,6 +23848,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-VEGF-tinib — Zymeworks to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Anti-VEGF-tinib',
+    verified: false,
   },
   {
     id: 'sb_05208f12-0184-4013-ac0c-c96770f0273b',
@@ -21539,6 +23869,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BCMA — Immunocore to Vertex',
     source: 'press_release',
+    assetName: 'BCMA',
+    verified: false,
   },
   {
     id: 'sb_71a06735-71ce-4f2d-bbbc-d3c84c02626b',
@@ -21558,6 +23890,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-4-1BB — Kelun-Biotech to Vertex',
     source: 'sec_10k',
+    assetName: 'Anti-4-1BB',
+    verified: false,
   },
   {
     id: 'sb_62644435-8630-44e5-a9fc-e62a946205bb',
@@ -21577,6 +23911,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD33-201 — BeiGene to Roche',
     source: 'sec_8k',
+    assetName: 'Anti-CD33-201',
+    verified: false,
   },
   {
     id: 'sb_610ac198-cf6e-442d-a2b8-d5516c30e8be',
@@ -21596,6 +23932,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ICOS-tinib — Tango Therapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'ICOS-tinib',
+    verified: false,
   },
   {
     id: 'sb_043426f6-2bd1-48c4-ada5-91c11978c6f0',
@@ -21615,6 +23953,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-LIV-1-301 — Editas Medicine to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-LIV-1-301',
+    verified: false,
   },
   {
     id: 'sb_6211d141-3282-4a25-9c08-7adbc004cbd0',
@@ -21634,6 +23974,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-PARP-mab — Hookipa Pharma to Amgen',
     source: 'sec_8k',
+    assetName: 'Anti-PARP-mab',
+    verified: false,
   },
   {
     id: 'sb_3d396262-98bc-4d54-be21-7d40693ae453',
@@ -21653,6 +23995,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-JAK-tinib — Syndax Pharmaceuticals to Bayer',
     source: 'sec_8k',
+    assetName: 'Anti-JAK-tinib',
+    verified: false,
   },
   {
     id: 'sb_a7123011-c29c-44fe-908e-94fb36e5170c',
@@ -21671,6 +24015,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIGIT-201 — Ideaya Biosciences to GSK',
     source: 'sec_10k',
+    assetName: 'TIGIT-201',
+    verified: false,
   },
   {
     id: 'sb_05b858d7-e3bd-4e9a-b0d3-c826a08bce7c',
@@ -21690,6 +24036,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-Alpha-synuclein-stat — Anavex Life Sciences to Moderna',
     source: 'press_release',
+    assetName: 'Anti-Alpha-synuclein-stat',
+    verified: false,
   },
   {
     id: 'sb_c133e47f-7ebc-4f37-b414-30435fd579aa',
@@ -21709,6 +24057,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-HER2-301 — Kymera Therapeutics to Amgen',
     source: 'press_release',
+    assetName: 'Anti-HER2-301',
+    verified: false,
   },
   {
     id: 'sb_fba61c03-6b2d-407a-87d9-4dc105043768',
@@ -21728,6 +24078,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GD2-301 — iTeos Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'GD2-301',
+    verified: false,
   },
   {
     id: 'sb_4a725bfa-0389-453e-bac3-176bc77a0beb',
@@ -21747,6 +24099,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TGF-β-201 — Genmab to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-TGF-β-201',
+    verified: false,
   },
   {
     id: 'sb_1d18d7ce-1c67-48b1-bc8d-b07e12f54259',
@@ -21765,6 +24119,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ATR-201 — Mirati Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'ATR-201',
+    verified: false,
   },
   {
     id: 'sb_95a8e0b2-d015-4ad0-b1de-352ef1983988',
@@ -21784,6 +24140,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BCMA-001 — Zai Lab to Pfizer',
     source: 'sec_10k',
+    assetName: 'BCMA-001',
+    verified: false,
   },
   {
     id: 'sb_a6225f3a-8072-4431-8b13-b02b0d158db6',
@@ -21802,6 +24160,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CLDN18.2-201 — Karyopharm Therapeutics to Vertex',
     source: 'sec_10k',
+    assetName: 'Anti-CLDN18.2-201',
+    verified: false,
   },
   {
     id: 'sb_7d3b7deb-c770-41e0-aaa2-388f16991227',
@@ -21821,6 +24181,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ERK-001 — Denali Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'ERK-001',
+    verified: false,
   },
   {
     id: 'sb_54d4ed51-a1e5-4440-97b9-85c941f643f0',
@@ -21839,6 +24201,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1-001 — Celldex Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'ROS1-001',
+    verified: false,
   },
   {
     id: 'sb_72504753-2c65-4e62-8e2c-85ada1940928',
@@ -21858,6 +24222,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PD-1-301 — Springworks Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'PD-1-301',
+    verified: false,
   },
   {
     id: 'sb_3224dd26-51d1-4caa-a39f-4670ac4a3079',
@@ -21876,6 +24242,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'JNJ-2113 (PN-235) — Protagonist Therapeutics to Johnson & Johnson',
     source: 'manual',
+    assetName: 'JNJ-2113 (PN-235)',
+    verified: true,
   },
   {
     id: 'sb_af00804c-bbae-4837-8901-6f4968e67d4a',
@@ -21895,6 +24263,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-PARP-001 — Fate Therapeutics to Bayer',
     source: 'press_release',
+    assetName: 'Anti-PARP-001',
+    verified: false,
   },
   {
     id: 'sb_5de659ba-3332-4a2f-a91b-3902fa823dc4',
@@ -21914,6 +24284,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-PSMA-201 — MacroGenics to Amgen',
     source: 'sec_10k',
+    assetName: 'Anti-PSMA-201',
+    verified: false,
   },
   {
     id: 'sb_a00b569f-be83-465d-9fa2-649ffd197ee0',
@@ -21933,6 +24305,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SHP2-201 — Affimed to Amgen',
     source: 'sec_8k',
+    assetName: 'SHP2-201',
+    verified: false,
   },
   {
     id: 'sb_de4eb590-55cd-4d28-99b3-af0df58161c4',
@@ -21952,6 +24326,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'SIRPα-201 — MorphoSys to Roche',
     source: 'sec_10k',
+    assetName: 'SIRPα-201',
+    verified: false,
   },
   {
     id: 'sb_fbe1de87-bb22-46b7-84ed-81e888729797',
@@ -21971,6 +24347,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GD2 — Editas Medicine to Merck',
     source: 'sec_10k',
+    assetName: 'GD2',
+    verified: false,
   },
   {
     id: 'sb_cc2cdd12-2a73-472e-81b3-8f47f595caba',
@@ -21988,6 +24366,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Winrevair (sotatercept) — Acceleron Pharma to Merck',
     source: 'manual',
+    assetName: 'Winrevair (sotatercept)',
+    verified: true,
   },
   {
     id: 'sb_ec43ede6-0b74-496a-b679-e5f29c13d83c',
@@ -22007,6 +24387,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD40 — Tango Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'CD40',
+    verified: false,
   },
   {
     id: 'sb_b1ab09b8-1037-4354-a6f1-0d7a499b5898',
@@ -22026,6 +24408,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-DOTA Antibody — Rallybio to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'Anti-DOTA Antibody',
+    verified: false,
   },
   {
     id: 'sb_959cbe25-6c1b-4cd6-8f32-b43589c01390',
@@ -22045,6 +24429,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'SHP2-201 — Affimed to Eli Lilly',
     source: 'press_release',
+    assetName: 'SHP2-201',
+    verified: false,
   },
   {
     id: 'sb_7f89a165-7eba-4f69-87fc-ff95cac74b54',
@@ -22064,6 +24450,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TIM-3 — Ideaya Biosciences to AbbVie',
     source: 'sec_10k',
+    assetName: 'TIM-3',
+    verified: false,
   },
   {
     id: 'sb_d2f2e3c2-a3b0-4a32-b9f9-dfa6ccd8537c',
@@ -22083,6 +24471,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MEK-101 — Blueprint Medicines to AbbVie',
     source: 'sec_8k',
+    assetName: 'MEK-101',
+    verified: false,
   },
   {
     id: 'sb_7cd8788e-a3f6-4bd0-b069-a89c8b56d447',
@@ -22102,6 +24492,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Claudin 6-001 — Syndax Pharmaceuticals to Pfizer',
     source: 'sec_8k',
+    assetName: 'Claudin 6-001',
+    verified: false,
   },
   {
     id: 'sb_51326a40-99e2-4092-9e6c-32110f610f7b',
@@ -22121,6 +24513,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'FGFR-tinib — Deciphera Pharmaceuticals to Roche',
     source: 'sec_8k',
+    assetName: 'FGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_d3ce6113-0516-4e17-9672-0d57326026ab',
@@ -22140,6 +24534,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FRα-201 — Genmab to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'FRα-201',
+    verified: false,
   },
   {
     id: 'sb_643b89af-088e-463d-bc9e-cc5efd90fb25',
@@ -22159,6 +24555,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ATR-301 — Arrowhead Pharmaceuticals to Vertex',
     source: 'sec_10k',
+    assetName: 'ATR-301',
+    verified: false,
   },
   {
     id: 'sb_0c3eeb84-b377-434a-8828-05e1ccb1b1cb',
@@ -22178,6 +24576,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LIV-1 — Nkarta to Amgen',
     source: 'sec_10k',
+    assetName: 'LIV-1',
+    verified: false,
   },
   {
     id: 'sb_125c2ed4-e4ea-4141-89ef-733cee53f00e',
@@ -22197,6 +24597,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-PI3K — Denali Therapeutics to Novartis',
     source: 'sec_8k',
+    assetName: 'Anti-PI3K',
+    verified: false,
   },
   {
     id: 'sb_820b8fc6-fe49-449b-9645-f2a1ff035126',
@@ -22214,6 +24616,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TTI-622 and TTI-621 — Trillium Therapeutics to Pfizer',
     source: 'manual',
+    assetName: 'TTI-622 and TTI-621',
+    verified: true,
   },
   {
     id: 'sb_45602039-b757-4fed-b201-8940ae939e8c',
@@ -22233,6 +24637,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'RET-201 — Monte Rosa Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'RET-201',
+    verified: false,
   },
   {
     id: 'sb_c327f35e-1add-446f-85ba-c82437326568',
@@ -22252,6 +24658,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TIM-3-tinib — Allogene Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'TIM-3-tinib',
+    verified: false,
   },
   {
     id: 'sb_12ca9746-8231-404b-b96a-f131291f9810',
@@ -22271,6 +24679,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H3-101 — Alkermes to Sanofi',
     source: 'sec_8k',
+    assetName: 'B7-H3-101',
+    verified: false,
   },
   {
     id: 'sb_dabfb33c-bd6d-40bd-b38d-6d47058617f7',
@@ -22290,6 +24700,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ALK-201 — Gritstone bio to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'ALK-201',
+    verified: false,
   },
   {
     id: 'sb_dea1f50c-db0d-443b-908f-1fd09568b30c',
@@ -22309,6 +24721,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-KRAS G12C-mab — Elevation Oncology to Bayer',
     source: 'sec_8k',
+    assetName: 'Anti-KRAS G12C-mab',
+    verified: false,
   },
   {
     id: 'sb_00db6816-b4f1-4592-b8b3-a3695f95b4ed',
@@ -22328,6 +24742,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CSF1R — Y-mAbs Therapeutics to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Anti-CSF1R',
+    verified: false,
   },
   {
     id: 'sb_f6fa4171-7286-4d47-9938-67ed7209a4d0',
@@ -22346,6 +24762,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'HER2-301 — BeiGene to Moderna',
     source: 'sec_8k',
+    assetName: 'HER2-301',
+    verified: false,
   },
   {
     id: 'sb_f4e99784-d7bd-40fe-bef7-d1f2dc4a93f3',
@@ -22363,6 +24781,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Rezurock (belumosudil) — Kadmon Holdings to Sanofi',
     source: 'manual',
+    assetName: 'Rezurock (belumosudil)',
+    verified: true,
   },
   {
     id: 'sb_fa85805c-7abc-4128-911f-b8d136408ded',
@@ -22382,6 +24802,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGFR-201 — Vor Biopharma to Vertex',
     source: 'press_release',
+    assetName: 'VEGFR-201',
+    verified: false,
   },
   {
     id: 'sb_67d2ed0d-ed7a-4549-aa58-af354c660aa2',
@@ -22399,6 +24821,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TNB-383B and bispecific platform — Teneobio to Amgen',
     source: 'manual',
+    assetName: 'TNB-383B and bispecific platform',
+    verified: true,
   },
   {
     id: 'sb_c295cfff-23f3-4e9a-b0e3-20d101150556',
@@ -22418,6 +24842,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H3-tinib — Agenus to Sanofi',
     source: 'sec_10k',
+    assetName: 'B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_c566828d-7f95-40b4-8931-46b8261411d0',
@@ -22437,6 +24863,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MET — Denali Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: 'MET',
+    verified: false,
   },
   {
     id: 'sb_fdf27616-0e2b-46de-8df3-cb95581f8de7',
@@ -22456,6 +24884,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGF — Alkermes to Merck',
     source: 'press_release',
+    assetName: 'VEGF',
+    verified: false,
   },
   {
     id: 'sb_4b449223-2378-4d97-a896-1d3356fa3d56',
@@ -22474,6 +24904,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'AL001 (latozinemab) + AL101 — Alector to GSK',
     source: 'manual',
+    assetName: 'AL001 (latozinemab) + AL101',
+    verified: true,
   },
   {
     id: 'sb_5335fe85-0003-460d-815c-9b71c082909b',
@@ -22493,6 +24925,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGF-mab — Fate Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'VEGF-mab',
+    verified: false,
   },
   {
     id: 'sb_ab902795-af62-4703-8abc-03ac7342e736',
@@ -22512,6 +24946,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TIGIT-001 — Ideaya Biosciences to Gilead Sciences',
     source: 'press_release',
+    assetName: 'TIGIT-001',
+    verified: false,
   },
   {
     id: 'sb_af6e661b-7eb7-4b93-991e-22a45763981c',
@@ -22530,6 +24966,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'SER-109 (VOWST/fecal microbiota) — Seres Therapeutics to Nestle Health Science',
     source: 'manual',
+    assetName: 'SER-109 (VOWST/fecal microbiota)',
+    verified: true,
   },
   {
     id: 'sb_eb0b80c4-63a8-4a76-b14b-91ed81e759e3',
@@ -22549,6 +24987,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC16-301 — CytomX Therapeutics to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'MUC16-301',
+    verified: false,
   },
   {
     id: 'sb_155f50e9-de78-4e3d-acc3-cd744ce2a969',
@@ -22567,6 +25007,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12C-tinib — Junshi Biosciences to Novartis',
     source: 'press_release',
+    assetName: 'KRAS G12C-tinib',
+    verified: false,
   },
   {
     id: 'sb_956db0be-1f84-46d6-a569-7e39ac780e31',
@@ -22586,6 +25028,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'HER3 — Allogene Therapeutics to GSK',
     source: 'sec_8k',
+    assetName: 'HER3',
+    verified: false,
   },
   {
     id: 'sb_03c6e18f-bd9b-4364-aa3a-ecbb72f555a3',
@@ -22604,6 +25048,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'BRAF V600E-mab — Legend Biotech to Amgen',
     source: 'press_release',
+    assetName: 'BRAF V600E-mab',
+    verified: false,
   },
   {
     id: 'sb_a091ecfd-9962-47e7-8c1e-65c8bfd86165',
@@ -22622,6 +25068,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FLT3 — Vor Biopharma to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'FLT3',
+    verified: false,
   },
   {
     id: 'sb_cd49aa40-4af9-455d-a02f-ecdac4ee274e',
@@ -22641,6 +25089,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD73-mab — Beam Therapeutics to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'CD73-mab',
+    verified: false,
   },
   {
     id: 'sb_f37f7b70-d000-42b6-abea-7ada39e3a14e',
@@ -22660,6 +25110,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-CD73-001 — Zai Lab to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-CD73-001',
+    verified: false,
   },
   {
     id: 'sb_8e507d7e-4fb9-4ce4-82e2-a0404b06c8c6',
@@ -22679,6 +25131,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'WEE1-201 — Janux Therapeutics to GSK',
     source: 'sec_10k',
+    assetName: 'WEE1-201',
+    verified: false,
   },
   {
     id: 'sb_ea97b270-ccdb-4a51-b5b5-2d5d8afebc9d',
@@ -22698,6 +25152,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6-301 — Kelun-Biotech to Takeda',
     source: 'sec_8k',
+    assetName: 'CDK4/6-301',
+    verified: false,
   },
   {
     id: 'sb_136996ca-23e3-426c-b847-bd33790c34bd',
@@ -22716,6 +25172,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MEK-001 — Nektar Therapeutics to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'MEK-001',
+    verified: false,
   },
   {
     id: 'sb_77ebe18d-0a1d-4403-9774-63abaefb639f',
@@ -22735,6 +25193,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MEK-201 — IGM Biosciences to Takeda',
     source: 'sec_8k',
+    assetName: 'MEK-201',
+    verified: false,
   },
   {
     id: 'sb_7a1451ca-7117-4db3-a4bd-a0ef19bc9cc8',
@@ -22753,6 +25213,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BACE1 — Passage Bio to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'BACE1',
+    verified: false,
   },
   {
     id: 'sb_719911b9-5f8b-4690-a933-8d01d78990c0',
@@ -22772,6 +25234,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-JAK-301 — Akeso to AbbVie',
     source: 'sec_8k',
+    assetName: 'Anti-JAK-301',
+    verified: false,
   },
   {
     id: 'sb_60e01fe2-98c4-415b-9de1-9359b5d76986',
@@ -22791,6 +25255,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PDGFR-001 — MacroGenics to Vertex',
     source: 'press_release',
+    assetName: 'PDGFR-001',
+    verified: false,
   },
   {
     id: 'sb_0d4b10f8-67fb-4b5b-a155-3081c94aa7b2',
@@ -22808,6 +25274,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'pnh — Alexion Pharmaceuticals to AstraZeneca',
     source: 'manual',
+    assetName: 'pnh',
+    verified: true,
   },
   {
     id: 'sb_a8fc27e4-4209-4a14-b95c-3447efcac1b9',
@@ -22825,6 +25293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'liver_diseases — Dicerna Pharmaceuticals to Novo Nordisk',
     source: 'manual',
+    assetName: 'liver_diseases',
+    verified: true,
   },
   {
     id: 'sb_f5a10039-eb9c-492a-afee-d1dc677e3af4',
@@ -22842,6 +25312,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'prostate — Myovant Sciences to Pfizer',
     source: 'manual',
+    assetName: 'prostate',
+    verified: true,
   },
   {
     id: 'sb_eb9ee1e0-a552-43d7-abb7-cf09be1bcce5',
@@ -22860,6 +25332,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'breast — Arvinas to Pfizer',
     source: 'manual',
+    assetName: 'breast',
+    verified: true,
   },
   {
     id: 'sb_88e3e39a-6240-4fa8-a126-62ba4f55adcf',
@@ -22879,6 +25353,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ibd — Protagonist Therapeutics to Janssen',
     source: 'manual',
+    assetName: 'ibd',
+    verified: true,
   },
   {
     id: 'sb_a6bef627-d8f5-47d8-91a4-221da42d490f',
@@ -22898,6 +25374,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'neuroblastoma — Y-mAbs Therapeutics to Sanofi',
     source: 'manual',
+    assetName: 'neuroblastoma',
+    verified: true,
   },
   {
     id: 'sb_c911aaa1-acd2-4102-9e33-feba9b002fb2',
@@ -22916,6 +25394,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'als — Yumanity Therapeutics to Janssen',
     source: 'manual',
+    assetName: 'als',
+    verified: true,
   },
   {
     id: 'sb_c7890a22-a6a3-44f2-a2d2-38eb05c43f57',
@@ -22933,6 +25413,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'cysticFibrosis — Translate Bio to Sanofi',
     source: 'manual',
+    assetName: 'cysticFibrosis',
+    verified: true,
   },
   {
     id: 'sb_7df32b35-bbfb-4a1f-b5a7-2d3114ccd805',
@@ -22950,6 +25432,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'solid_tumors — Pandion Therapeutics to Merck',
     source: 'manual',
+    assetName: 'solid_tumors',
+    verified: true,
   },
   {
     id: 'sb_2f672940-0c52-46e5-a7ef-1c6dffa7b179',
@@ -22969,6 +25453,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MET-301 — Beam Therapeutics to Moderna',
     source: 'sec_10k',
+    assetName: 'MET-301',
+    verified: false,
   },
   {
     id: 'sb_5e213ae2-46ea-4ae7-ad5b-14b31f7bdb0d',
@@ -22988,6 +25474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Domvanalimab — Arcus Biosciences to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'Domvanalimab',
+    verified: false,
   },
   {
     id: 'sb_3390fb4f-8a04-46aa-aca4-d7c02cf09393',
@@ -23007,6 +25495,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FLT3-101 — Caribou Biosciences to Sanofi',
     source: 'sec_10k',
+    assetName: 'FLT3-101',
+    verified: false,
   },
   {
     id: 'sb_17c895c0-ff93-42fc-b7a2-131d822c62b8',
@@ -23026,6 +25516,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TROP2-101 — Hookipa Pharma to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'TROP2-101',
+    verified: false,
   },
   {
     id: 'sb_45399402-ee62-4b10-96a0-92f4262c6bd3',
@@ -23045,6 +25537,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-PD-L1-101 — Tyra Biosciences to Roche',
     source: 'sec_10k',
+    assetName: 'Anti-PD-L1-101',
+    verified: false,
   },
   {
     id: 'sb_7125cfdc-9527-4af4-a2af-f285fd1f694a',
@@ -23063,6 +25557,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PD-1 — Alkermes to Roche',
     source: 'sec_8k',
+    assetName: 'PD-1',
+    verified: false,
   },
   {
     id: 'sb_c1121397-336f-4f35-a7f7-519563aedb14',
@@ -23081,6 +25577,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Vividion covalent chemistry platform — Vividion Therapeutics to Bayer',
     source: 'manual',
+    assetName: 'Vividion covalent chemistry platform',
+    verified: true,
   },
   {
     id: 'sb_ce62d0b2-1e37-44af-b489-aaa1d82fe1b8',
@@ -23100,6 +25598,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD22-tinib — Karyopharm Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'CD22-tinib',
+    verified: false,
   },
   {
     id: 'sb_3da9ae9d-60e2-4dd5-988c-ce700a84f16d',
@@ -23118,6 +25618,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-DLL3 — Immunocore to Takeda',
     source: 'press_release',
+    assetName: 'Anti-DLL3',
+    verified: false,
   },
   {
     id: 'sb_375be349-5f1c-476c-b155-5c978728fd30',
@@ -23137,6 +25639,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD38-001 — Replimune to Merck',
     source: 'sec_8k',
+    assetName: 'CD38-001',
+    verified: false,
   },
   {
     id: 'sb_a761fcaf-f62a-4ed9-a022-a200024ed144',
@@ -23155,6 +25659,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Casgevy (exa-cel) — CRISPR Therapeutics to Vertex Pharmaceuticals',
     source: 'manual',
+    assetName: 'Casgevy (exa-cel)',
+    verified: true,
   },
   {
     id: 'sb_e5bf115c-9f94-441e-8b51-afb7bce462ef',
@@ -23173,6 +25679,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MEK-301 — Alkermes to Novartis',
     source: 'sec_8k',
+    assetName: 'MEK-301',
+    verified: false,
   },
   {
     id: 'sb_a1426a54-ab6a-4b95-a394-207697a89972',
@@ -23191,6 +25699,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-JAK-mab — Iovance Biotherapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-JAK-mab',
+    verified: false,
   },
   {
     id: 'sb_9da07111-efab-4e71-8089-0df3411d1362',
@@ -23209,6 +25719,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'AGTC-501 — AGTC (Applied Genetic Technologies) to Biogen',
     source: 'manual',
+    assetName: 'AGTC-501',
+    verified: true,
   },
   {
     id: 'sb_3bd9d86f-8412-4107-9685-c64727c968d7',
@@ -23227,6 +25739,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER3-201 — Zymeworks to Sanofi',
     source: 'press_release',
+    assetName: 'HER3-201',
+    verified: false,
   },
   {
     id: 'sb_e324b64b-defe-43af-a301-7079a7ba9472',
@@ -23245,6 +25759,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BCL-2-001 — G1 Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'BCL-2-001',
+    verified: false,
   },
   {
     id: 'sb_720407ec-439f-4b26-b5dc-f0dfae520cda',
@@ -23263,6 +25779,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-EGFR-301 — Akeso to Bayer',
     source: 'press_release',
+    assetName: 'Anti-EGFR-301',
+    verified: false,
   },
   {
     id: 'sb_0ab5210b-a72c-40c9-aa5c-703217c3153d',
@@ -23282,6 +25800,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER2-mab — Iovance Biotherapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'HER2-mab',
+    verified: false,
   },
   {
     id: 'sb_e570dbe8-872c-4310-900b-9b81a9077e7f',
@@ -23301,6 +25821,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-Alpha-synuclein-stat — Vigil Neuroscience to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'Anti-Alpha-synuclein-stat',
+    verified: false,
   },
   {
     id: 'sb_4b023de7-5c67-4ae9-a4d3-3992af030ba5',
@@ -23320,6 +25842,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LIV-1-mab — Zymeworks to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'LIV-1-mab',
+    verified: false,
   },
   {
     id: 'sb_bed22e69-be65-4dde-87a7-b3bbc25a3b4d',
@@ -23338,6 +25862,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-KRAS G12C-mab — CureVac to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-KRAS G12C-mab',
+    verified: false,
   },
   {
     id: 'sb_d1031ad8-2571-4cf9-8062-12871d29dac4',
@@ -23357,6 +25883,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD47-mab — Forma Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'CD47-mab',
+    verified: false,
   },
   {
     id: 'sb_5f1fcdf1-cd67-475c-91c9-facfba730fce',
@@ -23376,6 +25904,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-GD2-101 — Elevation Oncology to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Anti-GD2-101',
+    verified: false,
   },
   {
     id: 'sb_a43482c4-9137-46ff-99e0-9116642f749d',
@@ -23395,6 +25925,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CEA-101 — BioNTech to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CEA-101',
+    verified: false,
   },
   {
     id: 'sb_241d7fe3-3ba0-44c0-8659-9b5678f6b2b9',
@@ -23414,6 +25946,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H4-tinib — Blueprint Medicines to Merck',
     source: 'sec_10k',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_9fe8fc06-fdb9-47f5-98f4-c7fdbb2c4617',
@@ -23433,6 +25967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CSF1R-001 — BeiGene to Merck',
     source: 'sec_8k',
+    assetName: 'Anti-CSF1R-001',
+    verified: false,
   },
   {
     id: 'sb_a081bf4f-6b89-4ae4-a990-d982328bbd20',
@@ -23451,6 +25987,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TIM-3-201 — Monte Rosa Therapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_e6657084-c3db-4f40-9960-067a200ea304',
@@ -23468,6 +26006,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Conditionally active IL-2 — Good Therapeutics to Roche',
     source: 'manual',
+    assetName: 'Conditionally active IL-2',
+    verified: true,
   },
   {
     id: 'sb_417dd14e-8155-4017-a8e8-deddca74e810',
@@ -23487,6 +26027,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GPC3-tinib — Kelun-Biotech to Amgen',
     source: 'sec_8k',
+    assetName: 'GPC3-tinib',
+    verified: false,
   },
   {
     id: 'sb_548e4132-a0dc-41ba-9347-0f41fb1db4cf',
@@ -23505,6 +26047,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'JAK-001 — PMV Pharmaceuticals to Regeneron',
     source: 'press_release',
+    assetName: 'JAK-001',
+    verified: false,
   },
   {
     id: 'sb_64a241f8-c411-443c-bbeb-d9c254227028',
@@ -23523,6 +26067,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CAEL-101 — Caelum Biosciences to Alexion (AstraZeneca)',
     source: 'manual',
+    assetName: 'CAEL-101',
+    verified: true,
   },
   {
     id: 'sb_a9460c4c-1fd3-4831-9f32-ab2049a5b461',
@@ -23542,6 +26088,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ATR-201 — Immunogen to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'ATR-201',
+    verified: false,
   },
   {
     id: 'sb_2434a28d-2039-4366-a933-cb615ad52e7e',
@@ -23560,6 +26108,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4-101 — iTeos Therapeutics to Amgen',
     source: 'sec_8k',
+    assetName: 'Nectin-4-101',
+    verified: false,
   },
   {
     id: 'sb_207d2079-27a4-4214-8ab3-fdc969f7be70',
@@ -23578,6 +26128,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Belrestotug (EOS-448) — iTeos Therapeutics to GSK',
     source: 'press_release',
+    assetName: 'Belrestotug (EOS-448)',
+    verified: false,
   },
   {
     id: 'sb_9c3e800e-b5d9-4d03-ae51-262645715ebd',
@@ -23597,6 +26149,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'DLL3-mab — BioNTech to AbbVie',
     source: 'sec_8k',
+    assetName: 'DLL3-mab',
+    verified: false,
   },
   {
     id: 'sb_be52df4b-02df-4964-95e5-63fc0ce43858',
@@ -23615,6 +26169,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-B7-H3-tinib — G1 Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Anti-B7-H3-tinib',
+    verified: false,
   },
   {
     id: 'sb_a7ff7cf7-89ce-4307-86f2-758ef76c7816',
@@ -23634,6 +26190,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TGF-β — Turning Point Therapeutics to Takeda',
     source: 'sec_10k',
+    assetName: 'TGF-β',
+    verified: false,
   },
   {
     id: 'sb_46a15b07-93f4-47a9-bd9d-6fc7c360a259',
@@ -23653,6 +26211,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-MET-101 — Legend Biotech to GSK',
     source: 'sec_10k',
+    assetName: 'Anti-MET-101',
+    verified: false,
   },
   {
     id: 'sb_ea2dfcfc-b869-43a4-9596-d4d33be5ef64',
@@ -23672,6 +26232,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TIM-3-201 — Affimed to AbbVie',
     source: 'press_release',
+    assetName: 'TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_94ad0e7b-a4d0-4228-be98-67424a88e594',
@@ -23690,6 +26252,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-FLT3-001 — Akeso to Vertex',
     source: 'sec_8k',
+    assetName: 'Anti-FLT3-001',
+    verified: false,
   },
   {
     id: 'sb_64d5b4a4-8535-49df-b8a0-0b394f075e53',
@@ -23708,6 +26272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-KRAS G12C-tinib — Immatics to Moderna',
     source: 'sec_10k',
+    assetName: 'Anti-KRAS G12C-tinib',
+    verified: false,
   },
   {
     id: 'sb_4e46e400-4297-42a7-8eaa-cccb394f9ca6',
@@ -23727,6 +26293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PSMA-tinib — Caribou Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'PSMA-tinib',
+    verified: false,
   },
   {
     id: 'sb_088b029c-dda2-460e-b45e-0f0e9553141e',
@@ -23746,6 +26314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-TIM-3-001 — Kelun-Biotech to Roche',
     source: 'sec_8k',
+    assetName: 'Anti-TIM-3-001',
+    verified: false,
   },
   {
     id: 'sb_550a62b1-99f3-44c7-92d9-feb274d70697',
@@ -23765,6 +26335,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'mTOR-mab — Genmab to Regeneron',
     source: 'press_release',
+    assetName: 'mTOR-mab',
+    verified: false,
   },
   {
     id: 'sb_414735e9-88b7-4ed0-9ce1-c1609f36022d',
@@ -23782,6 +26354,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CAD-1883 — Cadent Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'CAD-1883',
+    verified: true,
   },
   {
     id: 'sb_5232ecd7-0b94-4680-9aad-5958de3c04db',
@@ -23801,6 +26375,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Claudin 6-201 — Vor Biopharma to Bayer',
     source: 'press_release',
+    assetName: 'Claudin 6-201',
+    verified: false,
   },
   {
     id: 'sb_4635b123-9eb8-4007-89ee-85a6a839f60d',
@@ -23819,6 +26395,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-FLT3-001 — Hookipa Pharma to Novartis',
     source: 'sec_10k',
+    assetName: 'Anti-FLT3-001',
+    verified: false,
   },
   {
     id: 'sb_2b430963-6983-454f-aa94-84ae6c2bc35e',
@@ -23838,6 +26416,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1-001 — TCR2 Therapeutics to Bayer',
     source: 'press_release',
+    assetName: 'ROS1-001',
+    verified: false,
   },
   {
     id: 'sb_19f25ec7-7594-416f-9e94-e1250395f0e1',
@@ -23857,6 +26437,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'EphA2-301 — Alphamab Oncology to Merck',
     source: 'sec_10k',
+    assetName: 'EphA2-301',
+    verified: false,
   },
   {
     id: 'sb_47be23a6-fc10-4a43-ad30-cc7f75e34d7e',
@@ -23876,6 +26458,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'ICOS-201 — Zai Lab to AbbVie',
     source: 'press_release',
+    assetName: 'ICOS-201',
+    verified: false,
   },
   {
     id: 'sb_579248bd-908f-4771-899a-51419f91f710',
@@ -23894,6 +26478,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TIM-3-001 — G1 Therapeutics to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'TIM-3-001',
+    verified: false,
   },
   {
     id: 'sb_324844f7-3d7c-47d5-9700-c5c20a222cb6',
@@ -23912,6 +26498,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-L1-501 — Simcere to Sanofi',
     source: 'sec_10k',
+    assetName: 'PD-L1-501',
+    verified: false,
   },
   {
     id: 'sb_afd601b5-768c-49b9-808b-01253e6a885c',
@@ -23931,6 +26519,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6 — Blueprint Medicines to Roche',
     source: 'press_release',
+    assetName: 'CDK4/6',
+    verified: false,
   },
   {
     id: 'sb_d6fe9a76-a71a-4c5f-91a6-0fdbf8a126c7',
@@ -23950,6 +26540,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD20-301 — Arcus Biosciences to Eli Lilly',
     source: 'press_release',
+    assetName: 'CD20-301',
+    verified: false,
   },
   {
     id: 'sb_bbaed97c-1903-431f-a115-eacd8e13436c',
@@ -23969,6 +26561,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ALK-201 — Immunocore to Eli Lilly',
     source: 'press_release',
+    assetName: 'ALK-201',
+    verified: false,
   },
   {
     id: 'sb_83c31242-2d53-4401-b1ea-42f9c96082ae',
@@ -23987,6 +26581,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H3-mab — Nektar Therapeutics to Regeneron',
     source: 'press_release',
+    assetName: 'B7-H3-mab',
+    verified: false,
   },
   {
     id: 'sb_9a20aedd-5a4f-40e3-ba7f-691d8c86d16a',
@@ -24006,6 +26602,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MDM2 — Sana Biotechnology to Sanofi',
     source: 'press_release',
+    assetName: 'MDM2',
+    verified: false,
   },
   {
     id: 'sb_e28fd8dd-6bf2-4f19-8f4b-552fd9161c0b',
@@ -24025,6 +26623,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Qinlock (ripretinib) — Deciphera Pharmaceuticals to Zai Lab',
     source: 'press_release',
+    assetName: 'Qinlock (ripretinib)',
+    verified: false,
   },
   {
     id: 'sb_8b09acb2-1335-4009-b445-9c42ee8b4375',
@@ -24044,6 +26644,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LAG-3-101 — Arcus Biosciences to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'LAG-3-101',
+    verified: false,
   },
   {
     id: 'sb_56928156-ce19-4a5b-b9dd-88fda1b2eb7f',
@@ -24063,6 +26665,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LAG-3-201 — Karyopharm Therapeutics to Amgen',
     source: 'sec_10k',
+    assetName: 'LAG-3-201',
+    verified: false,
   },
   {
     id: 'sb_d9c26a08-c4ab-4b40-b5e5-9f836ba3cc0e',
@@ -24081,6 +26685,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MUC1-101 — Zymeworks to Amgen',
     source: 'sec_10k',
+    assetName: 'Anti-MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_8bcf0bca-24b0-4f21-a841-7ea400fcd598',
@@ -24100,6 +26706,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MDM2-301 — IGM Biosciences to AbbVie',
     source: 'sec_10k',
+    assetName: 'MDM2-301',
+    verified: false,
   },
   {
     id: 'sb_fc41e428-d019-4107-b8d2-b4038f0b15de',
@@ -24119,6 +26727,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CCR4-tinib — PMV Pharmaceuticals to Novartis',
     source: 'sec_8k',
+    assetName: 'CCR4-tinib',
+    verified: false,
   },
   {
     id: 'sb_37d6f35d-25b2-4c0c-af3b-b1986c1be7ed',
@@ -24137,6 +26747,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD47 — BioNTech to Pfizer',
     source: 'sec_8k',
+    assetName: 'CD47',
+    verified: false,
   },
   {
     id: 'sb_2165f970-e556-432b-ae83-5efe20814d76',
@@ -24156,6 +26768,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-WEE1-201 — Syndax Pharmaceuticals to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-WEE1-201',
+    verified: false,
   },
   {
     id: 'sb_03152ff5-524a-4877-b20c-fb6d98f42fcd',
@@ -24175,6 +26789,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'HER2-201 — Pyxis Oncology to Takeda',
     source: 'press_release',
+    assetName: 'HER2-201',
+    verified: false,
   },
   {
     id: 'sb_963eb464-43c5-4fe1-8828-86e019bd4253',
@@ -24194,6 +26810,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'FLT3-tinib — Monte Rosa Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'FLT3-tinib',
+    verified: false,
   },
   {
     id: 'sb_6c9b73cf-9f13-40bc-9373-8d4de403e871',
@@ -24213,6 +26831,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'B7-H4-tinib — Alkermes to Regeneron',
     source: 'press_release',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_cf5fc31f-047b-4379-a4b0-018c129fa08c',
@@ -24232,6 +26852,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HER2-301 — Replimune to Vertex',
     source: 'press_release',
+    assetName: 'HER2-301',
+    verified: false,
   },
   {
     id: 'sb_7fd877ca-1f76-4bae-9d63-ea2b55c8a8ef',
@@ -24250,6 +26872,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD73-201 — Roivant Sciences to Sanofi',
     source: 'sec_10k',
+    assetName: 'CD73-201',
+    verified: false,
   },
   {
     id: 'sb_8a52837c-a389-4117-9440-ef8f93966cbb',
@@ -24269,6 +26893,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER3-001 — Gritstone bio to Takeda',
     source: 'sec_8k',
+    assetName: 'HER3-001',
+    verified: false,
   },
   {
     id: 'sb_ae95068f-8e2e-4e9a-a854-1444e1f76c1c',
@@ -24288,6 +26914,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H3 — Bicycle Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'B7-H3',
+    verified: false,
   },
   {
     id: 'sb_e0363179-a04f-4878-8c51-5ecfefc7f4cb',
@@ -24307,6 +26935,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TIM-3-201 — Alphamab Oncology to Amgen',
     source: 'sec_10k',
+    assetName: 'TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_a0393b73-dad7-413c-a3f9-ab9b93882f9e',
@@ -24326,6 +26956,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'HER3-201 — Turning Point Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'HER3-201',
+    verified: false,
   },
   {
     id: 'sb_81452f1c-95c6-4415-9693-bb057587c4ca',
@@ -24345,6 +26977,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-TGF-β — Fate Therapeutics to Takeda',
     source: 'press_release',
+    assetName: 'Anti-TGF-β',
+    verified: false,
   },
   {
     id: 'sb_1ff1d283-5b93-48fc-bed9-4ea859ce6fa7',
@@ -24363,6 +26997,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-BCL-2-101 — Legend Biotech to AstraZeneca',
     source: 'press_release',
+    assetName: 'Anti-BCL-2-101',
+    verified: false,
   },
   {
     id: 'sb_b9cdcbe1-d83f-4b0a-8210-6f197264971c',
@@ -24382,6 +27018,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'SIRPα-001 — G1 Therapeutics to Vertex',
     source: 'sec_10k',
+    assetName: 'SIRPα-001',
+    verified: false,
   },
   {
     id: 'sb_7ea8a2b6-67f7-4489-b8b6-5148410f86cf',
@@ -24401,6 +27039,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-1-001 — Revolution Medicines to Bayer',
     source: 'sec_8k',
+    assetName: 'PD-1-001',
+    verified: false,
   },
   {
     id: 'sb_1e311ec4-13ed-44d6-90d0-5456d514e412',
@@ -24420,6 +27060,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GD2-201 — Y-mAbs Therapeutics to Bayer',
     source: 'sec_8k',
+    assetName: 'GD2-201',
+    verified: false,
   },
   {
     id: 'sb_d1a8de6a-d4fb-42d6-8096-b00d3e5f5148',
@@ -24439,6 +27081,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PSMA-301 — Mirati Therapeutics to Roche',
     source: 'sec_10k',
+    assetName: 'PSMA-301',
+    verified: false,
   },
   {
     id: 'sb_1e95adf7-694a-4b0f-bcdc-2061751e882a',
@@ -24457,6 +27101,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-301 — Umoja Biopharma to Moderna',
     source: 'sec_8k',
+    assetName: 'EGFR-301',
+    verified: false,
   },
   {
     id: 'sb_3b327c5a-c263-4e4a-93ea-0a9820712a6d',
@@ -24474,6 +27120,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KY1005 (amlitelimab) — Kymab to Sanofi',
     source: 'manual',
+    assetName: 'KY1005 (amlitelimab)',
+    verified: true,
   },
   {
     id: 'sb_16a08f1d-3286-4737-8ff9-a3d4ba04a9bb',
@@ -24492,6 +27140,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD22-mab — G1 Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'CD22-mab',
+    verified: false,
   },
   {
     id: 'sb_a69adf7c-a339-4f60-8e29-dbd98e1d5d63',
@@ -24511,6 +27161,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-CTLA-4-101 — Tyra Biosciences to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-CTLA-4-101',
+    verified: false,
   },
   {
     id: 'sb_5afc97dd-630a-4cc8-bc07-70804542006a',
@@ -24530,6 +27182,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'DLL3-mab — Astellas to Regeneron',
     source: 'sec_10k',
+    assetName: 'DLL3-mab',
+    verified: false,
   },
   {
     id: 'sb_83c81e46-f2d9-4dca-a593-d6364d1fbd41',
@@ -24548,6 +27202,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Tislelizumab — BeiGene to Novartis',
     source: 'manual',
+    assetName: 'Tislelizumab',
+    verified: true,
   },
   {
     id: 'sb_4f383f60-1c3c-4a62-994a-8f184546584d',
@@ -24567,6 +27223,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BRAF V600E — ORIC Pharmaceuticals to AbbVie',
     source: 'press_release',
+    assetName: 'BRAF V600E',
+    verified: false,
   },
   {
     id: 'sb_44b9d126-351c-46fc-9e54-b2b534ae2241',
@@ -24586,6 +27244,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KRAS G12D-301 — BioNTech to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'KRAS G12D-301',
+    verified: false,
   },
   {
     id: 'sb_76fa29c8-e460-4639-a065-3f64112bdfd9',
@@ -24605,6 +27265,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BCL-2-201 — PMV Pharmaceuticals to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'Anti-BCL-2-201',
+    verified: false,
   },
   {
     id: 'sb_84a63f6b-465a-48a8-a570-db8672314645',
@@ -24624,6 +27286,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-CD20-201 — Allogene Therapeutics to Pfizer',
     source: 'sec_10k',
+    assetName: 'Anti-CD20-201',
+    verified: false,
   },
   {
     id: 'sb_117fc213-6868-4721-b38f-7e7eff49b5b2',
@@ -24642,6 +27306,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'mGluR5-nib — Ultragenyx to AbbVie',
     source: 'sec_8k',
+    assetName: 'mGluR5-nib',
+    verified: false,
   },
   {
     id: 'sb_54601b68-7708-4011-bace-5f8e7d181c47',
@@ -24661,6 +27327,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'SHP2-001 — IGM Biosciences to GSK',
     source: 'sec_8k',
+    assetName: 'SHP2-001',
+    verified: false,
   },
   {
     id: 'sb_dad08a51-d8ef-4475-b243-4c99b2af9e58',
@@ -24678,6 +27346,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Ivosidenib (Tibsovo) — Agios Pharmaceuticals to Servier',
     source: 'manual',
+    assetName: 'Ivosidenib (Tibsovo)',
+    verified: true,
   },
   {
     id: 'sb_e4f6511b-351b-47ab-8e55-6bfa0069732b',
@@ -24697,6 +27367,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD73-201 — Kelun-Biotech to Regeneron',
     source: 'press_release',
+    assetName: 'CD73-201',
+    verified: false,
   },
   {
     id: 'sb_09f6f651-e4e9-4f1a-8abd-ab874aa74bc3',
@@ -24716,6 +27388,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'TROP2-tinib — Turning Point Therapeutics to Pfizer',
     source: 'sec_8k',
+    assetName: 'TROP2-tinib',
+    verified: false,
   },
   {
     id: 'sb_ee3a30d7-2786-4a8e-a021-df3b52d4d1dc',
@@ -24734,6 +27408,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'TGF-β-001 — Tango Therapeutics to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'TGF-β-001',
+    verified: false,
   },
   {
     id: 'sb_89c458c8-c42e-438b-8005-5dda39f45e61',
@@ -24753,6 +27429,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CDK4/6-301 — Y-mAbs Therapeutics to GSK',
     source: 'sec_10k',
+    assetName: 'CDK4/6-301',
+    verified: false,
   },
   {
     id: 'sb_97653d58-0452-4f7c-95e9-d4a81ebcd21b',
@@ -24772,6 +27450,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'RMC-4630 — Revolution Medicines to Sanofi',
     source: 'press_release',
+    assetName: 'RMC-4630',
+    verified: false,
   },
   {
     id: 'sb_eaba7e3d-79d0-4e81-8906-717e5061e64d',
@@ -24790,6 +27470,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'DNL310 (ETV:IDS) — Denali Therapeutics to Sanofi',
     source: 'manual',
+    assetName: 'DNL310 (ETV:IDS)',
+    verified: true,
   },
   {
     id: 'sb_c60eea76-29a6-4180-ad88-cd7553aaa2aa',
@@ -24807,6 +27489,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Alexion Pharmaceuticals — AstraZeneca to AstraZeneca',
     source: 'press_release',
+    assetName: 'Alexion Pharmaceuticals',
+    verified: false,
   },
   {
     id: 'sb_6845bdc6-ab19-4c6a-b694-cd9e919ac693',
@@ -24824,6 +27508,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Alexion portfolio — AstraZeneca to Alexion Pharmaceuticals',
     source: 'press_release',
+    assetName: 'Alexion portfolio',
+    verified: false,
   },
   {
     id: 'sb_b4e5734e-b16d-4376-8931-fbbb7255c6d5',
@@ -24842,6 +27528,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD38-301 — Deciphera Pharmaceuticals to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CD38-301',
+    verified: false,
   },
   {
     id: 'sb_a10bd107-b793-4b31-8876-3cd7b534cf19',
@@ -24859,6 +27547,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Soliris/Ultomiris (eculizumab/ravulizumab) — Alexion (AstraZeneca) to AstraZeneca',
     source: 'sec_8k',
+    assetName: 'Soliris/Ultomiris (eculizumab/ravulizumab)',
+    verified: true,
   },
   {
     id: 'sb_8cf71371-87ea-4c94-b697-32cad49740b8',
@@ -24877,6 +27567,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Relugolix (Myfembree) — Myovant Sciences to Pfizer',
     source: 'manual',
+    assetName: 'Relugolix (Myfembree)',
+    verified: true,
   },
   {
     id: 'sb_dc8f32e1-2cea-41aa-a727-9fefc417e4c9',
@@ -24896,6 +27588,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC1-101 — Arvinas to Sanofi',
     source: 'sec_10k',
+    assetName: 'MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_97951221-45d1-47e0-850b-4092c432c3ec',
@@ -24915,6 +27609,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SIRPα-201 — MacroGenics to Bayer',
     source: 'sec_8k',
+    assetName: 'SIRPα-201',
+    verified: false,
   },
   {
     id: 'sb_28e02b33-ac59-469b-814d-31f965f6d711',
@@ -24934,6 +27630,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD47-101 — Immatics to Merck',
     source: 'sec_10k',
+    assetName: 'Anti-CD47-101',
+    verified: false,
   },
   {
     id: 'sb_c723cce3-d9f6-4a65-9751-25085f7c036b',
@@ -24953,6 +27651,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD73-tinib — Genmab to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'CD73-tinib',
+    verified: false,
   },
   {
     id: 'sb_331decdb-258b-401d-862d-b9f33ab1145f',
@@ -24972,6 +27672,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-WEE1-tinib — MacroGenics to Biogen',
     source: 'sec_8k',
+    assetName: 'Anti-WEE1-tinib',
+    verified: false,
   },
   {
     id: 'sb_b9514f80-c91d-4a89-85d6-37985e5c5eec',
@@ -24991,6 +27693,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MUC16-101 — Nurix Therapeutics to Amgen',
     source: 'press_release',
+    assetName: 'MUC16-101',
+    verified: false,
   },
   {
     id: 'sb_d5be6019-8a88-4e89-919d-570ca71e37b2',
@@ -25009,6 +27713,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SEL-212 — Selecta Biosciences to Sobi (Swedish Orphan Biovitrum)',
     source: 'manual',
+    assetName: 'SEL-212',
+    verified: true,
   },
   {
     id: 'sb_389f3de3-7ab5-439d-8b7b-7e54dbea8a1d',
@@ -25028,6 +27734,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FRα-tinib — Astellas to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'FRα-tinib',
+    verified: false,
   },
   {
     id: 'sb_5b6c5ec1-d84c-451a-af4e-d30cfb5364f5',
@@ -25047,6 +27755,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'HER2-001 — Alkermes to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'HER2-001',
+    verified: false,
   },
   {
     id: 'sb_cc29140d-c185-4b68-b9c2-4b8e2375752b',
@@ -25064,6 +27774,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Acoramidis — Eidos Therapeutics to BridgeBio Pharma',
     source: 'manual',
+    assetName: 'Acoramidis',
+    verified: true,
   },
   {
     id: 'sb_79fc5ded-8493-41f4-b6b5-ebe4069cd027',
@@ -25083,6 +27795,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-KRAS G12C-tinib — CRISPR Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'Anti-KRAS G12C-tinib',
+    verified: false,
   },
   {
     id: 'sb_a69793d2-3f01-4686-80da-4557dabf2517',
@@ -25102,6 +27816,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H4-mab — Syndax Pharmaceuticals to GSK',
     source: 'sec_8k',
+    assetName: 'B7-H4-mab',
+    verified: false,
   },
   {
     id: 'sb_8d733ac0-47fe-4dbe-b610-1bae1f027f05',
@@ -25120,6 +27836,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Zuranolone (SAGE-217) — Sage Therapeutics to Biogen',
     source: 'manual',
+    assetName: 'Zuranolone (SAGE-217)',
+    verified: true,
   },
   {
     id: 'sb_f206e008-e201-4b76-9dca-b0c9f86c37c3',
@@ -25139,6 +27857,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'PD-L1-001 — Springworks Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'PD-L1-001',
+    verified: false,
   },
   {
     id: 'sb_34c40c29-04b5-493f-a675-825b8d7826e0',
@@ -25157,6 +27877,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Optogenetic gene therapy programs — Vedere Bio to Novartis',
     source: 'manual',
+    assetName: 'Optogenetic gene therapy programs',
+    verified: true,
   },
   {
     id: 'sb_0da6028e-337e-4e7b-8b6b-ee148953f085',
@@ -25176,6 +27898,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CDK4/6-201 — Nektar Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'Anti-CDK4/6-201',
+    verified: false,
   },
   {
     id: 'sb_61d298d4-cc3f-4913-be11-7085945558cc',
@@ -25194,6 +27918,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'AAV gene therapy platform — Asklepios BioPharmaceutical to Bayer',
     source: 'manual',
+    assetName: 'AAV gene therapy platform',
+    verified: true,
   },
   {
     id: 'sb_30cd5800-bb52-48bb-a862-9dbf0943f1dc',
@@ -25212,6 +27938,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Rocatinlimab (KHK4083/AMG 451) — Kyowa Kirin to Amgen',
     source: 'manual',
+    assetName: 'Rocatinlimab (KHK4083/AMG 451)',
+    verified: true,
   },
   {
     id: 'sb_84b258e3-471f-4206-bc7c-71880675febb',
@@ -25231,6 +27959,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD73-201 — Turning Point Therapeutics to Amgen',
     source: 'press_release',
+    assetName: 'CD73-201',
+    verified: false,
   },
   {
     id: 'sb_5c48abea-394e-4e0c-9ba7-b5d87e61aafe',
@@ -25250,6 +27980,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HER3-001 — Nurix Therapeutics to Eli Lilly',
     source: 'sec_8k',
+    assetName: 'HER3-001',
+    verified: false,
   },
   {
     id: 'sb_f4486f26-a716-460a-89fa-83a1c14db34b',
@@ -25269,6 +28001,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC1-101 — CRISPR Therapeutics to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_be411019-71f1-4a19-9cd4-bef52de2e087',
@@ -25288,6 +28022,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-PD-1-001 — Zymeworks to Moderna',
     source: 'sec_10k',
+    assetName: 'Anti-PD-1-001',
+    verified: false,
   },
   {
     id: 'sb_2fcc223a-3f99-4f7e-983b-cc99f6bd348e',
@@ -25307,6 +28043,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PARP — Nkarta to Takeda',
     source: 'press_release',
+    assetName: 'PARP',
+    verified: false,
   },
   {
     id: 'sb_d91419c6-50bb-4d0c-b590-092d1f70ae5b',
@@ -25325,6 +28063,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GPC3-201 — CRISPR Therapeutics to Regeneron',
     source: 'sec_10k',
+    assetName: 'GPC3-201',
+    verified: false,
   },
   {
     id: 'sb_4e6b8e61-1363-4ca1-98d0-b63c7a36c06c',
@@ -25344,6 +28084,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-VEGFR-001 — Syndax Pharmaceuticals to Vertex',
     source: 'press_release',
+    assetName: 'Anti-VEGFR-001',
+    verified: false,
   },
   {
     id: 'sb_010b5422-0da9-4317-a746-bd8195655e59',
@@ -25363,6 +28105,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'CD20-mab — Karyopharm Therapeutics to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'CD20-mab',
+    verified: false,
   },
   {
     id: 'sb_4a70c33f-6865-4f19-a378-4cb16000cf04',
@@ -25382,6 +28126,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BTK-201 — G1 Therapeutics to Moderna',
     source: 'press_release',
+    assetName: 'BTK-201',
+    verified: false,
   },
   {
     id: 'sb_1961bb01-2445-44af-b7e3-ed9876b00792',
@@ -25401,6 +28147,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LAG-3-mab — Kronos Bio to Amgen',
     source: 'sec_8k',
+    assetName: 'LAG-3-mab',
+    verified: false,
   },
   {
     id: 'sb_b6c544da-bc52-41e2-b229-d02798e93da2',
@@ -25419,6 +28167,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'BRAF V600E-101 — Ono Pharmaceutical to Regeneron',
     source: 'press_release',
+    assetName: 'BRAF V600E-101',
+    verified: false,
   },
   {
     id: 'sb_18d6304f-7261-4888-8b90-076e5de03ff8',
@@ -25438,6 +28188,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'SHP2-tinib — Allogene Therapeutics to Takeda',
     source: 'sec_8k',
+    assetName: 'SHP2-tinib',
+    verified: false,
   },
   {
     id: 'sb_b316e59f-03e4-47cd-81ba-788ef7d1b75c',
@@ -25457,6 +28209,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD47-201 — Immunogen to Moderna',
     source: 'sec_8k',
+    assetName: 'CD47-201',
+    verified: false,
   },
   {
     id: 'sb_a8de1d47-520d-49be-a96c-5a30770bd37e',
@@ -25474,6 +28228,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Camzyos (mavacamten) — MyoKardia to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'Camzyos (mavacamten)',
+    verified: true,
   },
   {
     id: 'sb_10d4f3e4-d308-4aa9-a574-de37c040ae87',
@@ -25491,6 +28247,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Camzyos (mavacamten) — MyoKardia to Bristol Myers Squibb',
     source: 'manual',
+    assetName: 'Camzyos (mavacamten)',
+    verified: true,
   },
   {
     id: 'sb_7c7998b4-65b3-47a0-9749-8011a10a2713',
@@ -25510,6 +28268,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-CD19-201 — Innovent Biologics to Biogen',
     source: 'press_release',
+    assetName: 'Anti-CD19-201',
+    verified: false,
   },
   {
     id: 'sb_6eac3877-ed92-401a-be53-630e88c67791',
@@ -25529,6 +28289,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD73-mab — Forma Therapeutics to Sanofi',
     source: 'sec_10k',
+    assetName: 'CD73-mab',
+    verified: false,
   },
   {
     id: 'sb_581a8e4a-e628-477b-86f5-3c24ae1af6f5',
@@ -25548,6 +28310,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'HER3 — Pyxis Oncology to Boehringer Ingelheim',
     source: 'sec_10k',
+    assetName: 'HER3',
+    verified: false,
   },
   {
     id: 'sb_0bbdeca4-063f-459c-8149-aabe6f52cbed',
@@ -25567,6 +28331,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BCMA-301 — Arrowhead Pharmaceuticals to Eli Lilly',
     source: 'press_release',
+    assetName: 'BCMA-301',
+    verified: false,
   },
   {
     id: 'sb_0a5fed1a-767c-40ef-acf7-35e4e88e1f6a',
@@ -25586,6 +28352,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CSF1R-mab — Iovance Biotherapeutics to Sanofi',
     source: 'sec_8k',
+    assetName: 'CSF1R-mab',
+    verified: false,
   },
   {
     id: 'sb_1ddec6bb-42ed-4791-9e52-678b4c5ed3e7',
@@ -25605,6 +28373,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CD40-mab — Immunogen to Vertex',
     source: 'sec_8k',
+    assetName: 'CD40-mab',
+    verified: false,
   },
   {
     id: 'sb_21b8124a-25a5-4420-b78e-84d9fb282d33',
@@ -25624,6 +28394,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CCR4-401 — Akeso to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'CCR4-401',
+    verified: false,
   },
   {
     id: 'sb_90000603-37c8-4b39-a255-757383e81043',
@@ -25643,6 +28415,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PSMA-mab — Nektar Therapeutics to GSK',
     source: 'sec_8k',
+    assetName: 'PSMA-mab',
+    verified: false,
   },
   {
     id: 'sb_c2260797-faeb-43d9-9756-d1ad04ab0992',
@@ -25662,6 +28436,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MET — Arcus Biosciences to Amgen',
     source: 'press_release',
+    assetName: 'MET',
+    verified: false,
   },
   {
     id: 'sb_73af2110-3f16-483f-ab3e-5b2cd9829b3a',
@@ -25681,6 +28457,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'KIT-101 — Innovent Biologics to Takeda',
     source: 'sec_10k',
+    assetName: 'KIT-101',
+    verified: false,
   },
   {
     id: 'sb_62fd29b8-6acf-4ae6-a5a2-567d03d247e2',
@@ -25698,6 +28476,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Trodelvy — Immunomedics to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'Trodelvy',
+    verified: false,
   },
   {
     id: 'sb_83064e48-2adf-4979-b9c8-e568e8914797',
@@ -25716,6 +28496,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Magrolimab — Forty Seven to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'Magrolimab',
+    verified: false,
   },
   {
     id: 'sb_5424693b-c132-48ba-a8f0-eda9c6553b4d',
@@ -25734,6 +28516,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VEGFR — PMV Pharmaceuticals to AbbVie',
     source: 'sec_8k',
+    assetName: 'VEGFR',
+    verified: false,
   },
   {
     id: 'sb_ffdcda5e-db92-430e-9bf1-7c19103f1b03',
@@ -25752,6 +28536,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KRAS G12C-101 — G1 Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'KRAS G12C-101',
+    verified: false,
   },
   {
     id: 'sb_73db35ae-241f-4692-84ef-9374ea9c5c22',
@@ -25770,6 +28556,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-TGF-β-001 — Hookipa Pharma to Moderna',
     source: 'press_release',
+    assetName: 'Anti-TGF-β-001',
+    verified: false,
   },
   {
     id: 'sb_a1705e0a-7185-4fd0-beac-9ee31d074721',
@@ -25789,6 +28577,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TGF-β-mab — Kelun-Biotech to Vertex',
     source: 'sec_8k',
+    assetName: 'TGF-β-mab',
+    verified: false,
   },
   {
     id: 'sb_226a7353-193c-4c72-9fda-472991aa858b',
@@ -25808,6 +28598,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-PD-L1-mab — IGM Biosciences to Biogen',
     source: 'sec_8k',
+    assetName: 'Anti-PD-L1-mab',
+    verified: false,
   },
   {
     id: 'sb_45108311-ab53-47f6-9713-49a6cebaa25d',
@@ -25827,6 +28619,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'GD2-301 — G1 Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'GD2-301',
+    verified: false,
   },
   {
     id: 'sb_1c3155fe-1394-4935-9e35-9b4635a95353',
@@ -25845,6 +28639,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CSF1R-mab — Ono Pharmaceutical to Sanofi',
     source: 'sec_8k',
+    assetName: 'CSF1R-mab',
+    verified: false,
   },
   {
     id: 'sb_1c50abaf-933f-4188-88b6-8e14ba17e2d8',
@@ -25863,6 +28659,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'VEGF-201 — Karyopharm Therapeutics to Takeda',
     source: 'sec_8k',
+    assetName: 'VEGF-201',
+    verified: false,
   },
   {
     id: 'sb_76c81a04-30b1-4e89-9a91-048a4cb39dc6',
@@ -25881,6 +28679,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Ziltivekimab — Corvidia Therapeutics to Novo Nordisk',
     source: 'manual',
+    assetName: 'Ziltivekimab',
+    verified: true,
   },
   {
     id: 'sb_974aa93a-f6f1-4166-874f-feeddb55a552',
@@ -25900,6 +28700,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'GABA-A-stat — Karuna Therapeutics to Seagen',
     source: 'sec_8k',
+    assetName: 'GABA-A-stat',
+    verified: false,
   },
   {
     id: 'sb_e903aaab-c476-445c-bb94-96ae1068a403',
@@ -25919,6 +28721,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BCMA-301 — Galapagos to AbbVie',
     source: 'sec_8k',
+    assetName: 'BCMA-301',
+    verified: false,
   },
   {
     id: 'sb_db7fdd1e-ca40-4157-879b-8e82e9aa8988',
@@ -25937,6 +28741,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ATR-101 — Beam Therapeutics to GSK',
     source: 'sec_10k',
+    assetName: 'ATR-101',
+    verified: false,
   },
   {
     id: 'sb_b62aa989-db14-41e0-a777-04e9a0caeafd',
@@ -25956,6 +28762,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-BTK-mab — Karyopharm Therapeutics to Roche',
     source: 'press_release',
+    assetName: 'Anti-BTK-mab',
+    verified: false,
   },
   {
     id: 'sb_84c6cc95-9d25-4e35-95ba-e947a0e454f8',
@@ -25973,6 +28781,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TAK-062 — PvP Biologics to Takeda',
     source: 'manual',
+    assetName: 'TAK-062',
+    verified: true,
   },
   {
     id: 'sb_c55a98e3-6f17-4556-bc35-414dec69ebe0',
@@ -25991,6 +28801,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'LRRK2 inhibitors (DNL151/BIIB122) — Denali Therapeutics to Biogen',
     source: 'manual',
+    assetName: 'LRRK2 inhibitors (DNL151/BIIB122)',
+    verified: true,
   },
   {
     id: 'sb_66f90aab-c5b6-40f3-8782-66ca065a827c',
@@ -26010,6 +28822,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-tinib — Fate Therapeutics to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'EGFR-tinib',
+    verified: false,
   },
   {
     id: 'sb_6f63c062-3cec-407a-91e2-da2d491dbaf5',
@@ -26029,6 +28843,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-MUC16-301 — Blueprint Medicines to Vertex',
     source: 'sec_10k',
+    assetName: 'Anti-MUC16-301',
+    verified: false,
   },
   {
     id: 'sb_9158d8f8-df85-4b59-aaf5-512ea98cf99a',
@@ -26048,6 +28864,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'HER2-001 — Genmab to Bayer',
     source: 'press_release',
+    assetName: 'HER2-001',
+    verified: false,
   },
   {
     id: 'sb_49410f93-157e-4e39-ac70-18e7e953fc10',
@@ -26066,6 +28884,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ERK-tinib — Galapagos to Pfizer',
     source: 'press_release',
+    assetName: 'ERK-tinib',
+    verified: false,
   },
   {
     id: 'sb_e4151d92-bcdb-4d57-9289-74ab7644ae3c',
@@ -26085,6 +28905,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-PD-1-101 — Nkarta to AstraZeneca',
     source: 'sec_10k',
+    assetName: 'Anti-PD-1-101',
+    verified: false,
   },
   {
     id: 'sb_6fd77ee9-ae7a-47db-8adf-09254c808905',
@@ -26104,6 +28926,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'KRAS G12C-301 — Monte Rosa Therapeutics to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'KRAS G12C-301',
+    verified: false,
   },
   {
     id: 'sb_e64c977c-9e21-411b-af06-7e60ee912ef8',
@@ -26122,6 +28946,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'VEGF-001 — Immunogen to Amgen',
     source: 'sec_10k',
+    assetName: 'VEGF-001',
+    verified: false,
   },
   {
     id: 'sb_3b2a0d43-083e-4057-b382-518609e28ce0',
@@ -26141,6 +28967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'BCMA-001 — Celldex Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'BCMA-001',
+    verified: false,
   },
   {
     id: 'sb_38e6c6d1-cdb8-4bf7-85ad-f28f49aaa1b9',
@@ -26158,6 +28986,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'NT-814 (elinzanetant) — KaNDy Therapeutics to Bayer',
     source: 'manual',
+    assetName: 'NT-814 (elinzanetant)',
+    verified: true,
   },
   {
     id: 'sb_54ca61b6-3e33-40d5-b372-9c9b2745148e',
@@ -26177,6 +29007,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H4-tinib — Akeso to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'B7-H4-tinib',
+    verified: false,
   },
   {
     id: 'sb_b6290f1b-68b2-4d37-8f6e-10520a062744',
@@ -26196,6 +29028,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-mTOR-001 — MorphoSys to Regeneron',
     source: 'sec_8k',
+    assetName: 'Anti-mTOR-001',
+    verified: false,
   },
   {
     id: 'sb_35ab7436-4897-45b2-9297-d93102fa64f0',
@@ -26215,6 +29049,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Orexin-mab — PTC Therapeutics to Moderna',
     source: 'sec_8k',
+    assetName: 'Orexin-mab',
+    verified: false,
   },
   {
     id: 'sb_cf13b221-16f1-4e61-95c5-9a34eff4d475',
@@ -26233,6 +29069,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12C-301 — Arrowhead Pharmaceuticals to Takeda',
     source: 'sec_8k',
+    assetName: 'KRAS G12C-301',
+    verified: false,
   },
   {
     id: 'sb_64f29bd3-0684-4e57-9f12-89742fa6ab12',
@@ -26251,6 +29089,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-MUC16 — Agenus to Regeneron',
     source: 'sec_8k',
+    assetName: 'Anti-MUC16',
+    verified: false,
   },
   {
     id: 'sb_af7116a5-e001-45bb-9161-e7fd81bc1289',
@@ -26270,6 +29110,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CD38-301 — Relay Therapeutics to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'Anti-CD38-301',
+    verified: false,
   },
   {
     id: 'sb_f82d5b5a-09dd-4bf2-9de6-211d9fcb34db',
@@ -26289,6 +29131,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'CDK4/6-001 — Monte Rosa Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'CDK4/6-001',
+    verified: false,
   },
   {
     id: 'sb_1aeffe9f-9d51-495d-9a40-a5b052605a47',
@@ -26308,6 +29152,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD19-tinib — Immunocore to Merck',
     source: 'press_release',
+    assetName: 'CD19-tinib',
+    verified: false,
   },
   {
     id: 'sb_f786da67-3fad-4f2a-95f8-e855006c486c',
@@ -26327,6 +29173,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'LIV-1-301 — IGM Biosciences to Pfizer',
     source: 'sec_10k',
+    assetName: 'LIV-1-301',
+    verified: false,
   },
   {
     id: 'sb_8a04464a-ee8d-48f1-bf9e-cc164e3e6e09',
@@ -26345,6 +29193,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'B7-H3-mab — Argenx to Merck',
     source: 'sec_10k',
+    assetName: 'B7-H3-mab',
+    verified: false,
   },
   {
     id: 'sb_08ecd547-811c-4fd6-bd32-9c6da84a95e0',
@@ -26364,6 +29214,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-EGFR-001 — Ideaya Biosciences to Novartis',
     source: 'sec_10k',
+    assetName: 'Anti-EGFR-001',
+    verified: false,
   },
   {
     id: 'sb_35aaedc0-95eb-46c8-a546-6140c85db956',
@@ -26383,6 +29235,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD73-tinib — CytomX Therapeutics to Novartis',
     source: 'press_release',
+    assetName: 'CD73-tinib',
+    verified: false,
   },
   {
     id: 'sb_968ba8c7-76fa-4832-97a7-5d392a1d2ab9',
@@ -26402,6 +29256,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD40-001 — Turning Point Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'CD40-001',
+    verified: false,
   },
   {
     id: 'sb_f1fcad76-bd3e-4832-a92b-dfb570784360',
@@ -26419,6 +29275,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'epilepsy — GW Pharmaceuticals to Jazz Pharmaceuticals',
     source: 'manual',
+    assetName: 'epilepsy',
+    verified: true,
   },
   {
     id: 'sb_b2e2e14f-e68c-404c-883f-a3246fcdd594',
@@ -26436,6 +29294,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'breast_tnbc — Immunomedics to Gilead',
     source: 'manual',
+    assetName: 'breast_tnbc',
+    verified: true,
   },
   {
     id: 'sb_b3dee42a-6043-4f3e-b7ff-9236b897ef61',
@@ -26455,6 +29315,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'psoriasis — MC2 Therapeutics to LEO Pharma',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_14d8e29d-e81a-48ea-b63e-7bcb8664b5dd',
@@ -26472,6 +29334,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'nmosd — Viela Bio to Horizon Therapeutics',
     source: 'manual',
+    assetName: 'nmosd',
+    verified: true,
   },
   {
     id: 'sb_d789747f-4ddd-4b70-a916-54e0e875e70f',
@@ -26491,6 +29355,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'menopause — TherapeuticsMD to AbbVie',
     source: 'manual',
+    assetName: 'menopause',
+    verified: true,
   },
   {
     id: 'sb_d4e037a0-39a7-4db5-8049-e658b391ca9a',
@@ -26509,6 +29375,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'parkinsons_gba — Prevail Therapeutics to Eli Lilly',
     source: 'manual',
+    assetName: 'parkinsons_gba',
+    verified: true,
   },
   {
     id: 'sb_e48e1929-8a0b-4eb1-ba9b-53db7d15990d',
@@ -26527,6 +29395,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'psoriasis — Dermavant Sciences to Roivant Sciences',
     source: 'manual',
+    assetName: 'psoriasis',
+    verified: true,
   },
   {
     id: 'sb_5a114862-5261-4039-ac8a-be8d539198ab',
@@ -26545,6 +29415,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'uc — Pandion Therapeutics to Merck',
     source: 'manual',
+    assetName: 'uc',
+    verified: true,
   },
   {
     id: 'sb_7604c106-30ca-4f23-8d15-096972e67757',
@@ -26564,6 +29436,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'lung_nsclc — Turning Point Therapeutics to Zai Lab',
     source: 'manual',
+    assetName: 'lung_nsclc',
+    verified: true,
   },
   {
     id: 'sb_e23e31d9-f798-4e3e-8656-0d7907f5a972',
@@ -26581,6 +29455,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'hypercholesterolemia — The Medicines Company to Novartis',
     source: 'manual',
+    assetName: 'hypercholesterolemia',
+    verified: true,
   },
   {
     id: 'sb_8c034c7a-5fc4-449d-a5a0-c0dab78d4a80',
@@ -26598,6 +29474,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'pemphigus — Principia Biopharma to Sanofi',
     source: 'manual',
+    assetName: 'pemphigus',
+    verified: true,
   },
   {
     id: 'sb_e41a7903-54a5-4b31-a406-8cf17ad4cf70',
@@ -26616,6 +29494,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'vte — Idorsia to Janssen',
     source: 'manual',
+    assetName: 'vte',
+    verified: true,
   },
   {
     id: 'sb_99a39819-34c2-45fa-90a8-dbf55876c2a8',
@@ -26635,6 +29515,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'preterm_labor — ObsEva to XOMA',
     source: 'manual',
+    assetName: 'preterm_labor',
+    verified: true,
   },
   {
     id: 'sb_3ec5e0d6-71bf-48e1-9161-26c2ebc79724',
@@ -26652,6 +29534,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'myasthenia gravis — Momenta Pharmaceuticals to Johnson & Johnson',
     source: 'manual',
+    assetName: 'myasthenia gravis',
+    verified: true,
   },
   {
     id: 'sb_2c8955da-e441-49c7-a534-8e06feb10a96',
@@ -26670,6 +29554,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ALPN-101 (povetacicept predecessor) — Alpine Immune Sciences to AbbVie',
     source: 'manual',
+    assetName: 'ALPN-101 (povetacicept predecessor)',
+    verified: true,
   },
   {
     id: 'sb_73d99c1d-bba0-4740-8994-0ff324a96901',
@@ -26688,6 +29574,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-MDM2-301 — iTeos Therapeutics to Regeneron',
     source: 'press_release',
+    assetName: 'Anti-MDM2-301',
+    verified: false,
   },
   {
     id: 'sb_d90a8b1c-dbb8-4ff0-ab8d-c64e3b543d7a',
@@ -26707,6 +29595,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'JAK-301 — Mirati Therapeutics to Biogen',
     source: 'sec_10k',
+    assetName: 'JAK-301',
+    verified: false,
   },
   {
     id: 'sb_4fc82012-d472-42ad-a7be-a71937041684',
@@ -26726,6 +29616,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'mTOR-301 — Nkarta to Sanofi',
     source: 'press_release',
+    assetName: 'mTOR-301',
+    verified: false,
   },
   {
     id: 'sb_2b3ebb37-ebe3-4ab6-9b8c-066cf623d6cc',
@@ -26745,6 +29637,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-ATR — Junshi Biosciences to Novartis',
     source: 'press_release',
+    assetName: 'Anti-ATR',
+    verified: false,
   },
   {
     id: 'sb_c335d096-62a5-4a09-8cf2-bc4326b12e82',
@@ -26764,6 +29658,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'TIM-3-tinib — CureVac to Roche',
     source: 'sec_10k',
+    assetName: 'TIM-3-tinib',
+    verified: false,
   },
   {
     id: 'sb_19644eda-a74d-4cee-8e11-5b81012d001f',
@@ -26783,6 +29679,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'SIRPα-001 — PMV Pharmaceuticals to Merck',
     source: 'sec_8k',
+    assetName: 'SIRPα-001',
+    verified: false,
   },
   {
     id: 'sb_87f1ea49-7e4a-424c-916c-f7045dafcf7f',
@@ -26801,6 +29699,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Hemgenix (etranacogene dezaparvovec) — uniQure to CSL Behring',
     source: 'manual',
+    assetName: 'Hemgenix (etranacogene dezaparvovec)',
+    verified: true,
   },
   {
     id: 'sb_134838be-2fa1-4a64-8158-0509a941cd1d',
@@ -26819,6 +29719,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ENHANZE cabotegravir SC — Halozyme Therapeutics to ViiV Healthcare (GSK)',
     source: 'manual',
+    assetName: 'ENHANZE cabotegravir SC',
+    verified: true,
   },
   {
     id: 'sb_be162799-0215-4ba9-a571-1c916b133085',
@@ -26838,6 +29740,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-4-1BB-mab — Bicycle Therapeutics to Bristol-Myers Squibb',
     source: 'sec_8k',
+    assetName: 'Anti-4-1BB-mab',
+    verified: false,
   },
   {
     id: 'sb_28b0548f-ebcf-4eee-98c4-92c028a97ba2',
@@ -26856,6 +29760,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-infectives pipeline — Vir Biotechnology to GSK',
     source: 'manual',
+    assetName: 'Anti-infectives pipeline',
+    verified: true,
   },
   {
     id: 'sb_04af32dc-406b-4462-8afe-a9683352e32c',
@@ -26874,6 +29780,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'PARP-001 — Galapagos to Moderna',
     source: 'sec_10k',
+    assetName: 'PARP-001',
+    verified: false,
   },
   {
     id: 'sb_1117720c-9bd1-49ad-8c6c-dec16e7989b1',
@@ -26893,6 +29801,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC16-001 — Pyxis Oncology to Regeneron',
     source: 'sec_8k',
+    assetName: 'MUC16-001',
+    verified: false,
   },
   {
     id: 'sb_08c59392-e648-4873-959a-35e9edf55ad7',
@@ -26911,6 +29821,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'ROS1-001 — Elevation Oncology to Bayer',
     source: 'press_release',
+    assetName: 'ROS1-001',
+    verified: false,
   },
   {
     id: 'sb_bc7d6ad3-dbcf-4296-82bf-ad642e28adca',
@@ -26930,6 +29842,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ALK-tinib — Karyopharm Therapeutics to Gilead Sciences',
     source: 'press_release',
+    assetName: 'ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_9e417a1a-2fdb-4f89-b003-a50795e71d1a',
@@ -26949,6 +29863,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD38 — Syros Pharmaceuticals to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'CD38',
+    verified: false,
   },
   {
     id: 'sb_cab5fb27-cfa0-453e-b3c2-1bfedd60bb2c',
@@ -26968,6 +29884,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'JAK-001 — Karyopharm Therapeutics to GSK',
     source: 'press_release',
+    assetName: 'JAK-001',
+    verified: false,
   },
   {
     id: 'sb_ef4ed6f5-1a22-49d0-bf3f-d69896724f30',
@@ -26987,6 +29905,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CD19 — MorphoSys to GSK',
     source: 'sec_10k',
+    assetName: 'Anti-CD19',
+    verified: false,
   },
   {
     id: 'sb_c9cf0237-49e5-44a2-9e49-c7c9e1c44f79',
@@ -27006,6 +29926,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CEA-101 — Alphamab Oncology to Pfizer',
     source: 'press_release',
+    assetName: 'CEA-101',
+    verified: false,
   },
   {
     id: 'sb_b1dcc732-2132-4470-8109-2726013edc9b',
@@ -27024,6 +29946,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'OX40-201 — Janux Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'OX40-201',
+    verified: false,
   },
   {
     id: 'sb_1e7526c5-ca01-448e-b9e8-3ea330931d9e',
@@ -27043,6 +29967,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Omburtamab — Y-mAbs Therapeutics to Sanofi',
     source: 'press_release',
+    assetName: 'Omburtamab',
+    verified: false,
   },
   {
     id: 'sb_9007f8c5-d5a1-46c6-8642-1112b43165e1',
@@ -27061,6 +29987,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CLDN18.2-301 — Pyxis Oncology to Sanofi',
     source: 'press_release',
+    assetName: 'CLDN18.2-301',
+    verified: false,
   },
   {
     id: 'sb_afd0e91c-d5df-42d1-b8c2-e080e2932510',
@@ -27080,6 +30008,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CTLA-4-mab — Roivant Sciences to Gilead Sciences',
     source: 'sec_8k',
+    assetName: 'CTLA-4-mab',
+    verified: false,
   },
   {
     id: 'sb_1f59d4fc-3b69-4990-8fc3-155211895f5b',
@@ -27099,6 +30029,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-TIM-3-tinib — Celldex Therapeutics to Bayer',
     source: 'sec_10k',
+    assetName: 'Anti-TIM-3-tinib',
+    verified: false,
   },
   {
     id: 'sb_8cd1b86c-b079-4858-8fe0-3879bcb9f09a',
@@ -27117,6 +30049,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin — Tyra Biosciences to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'Mesothelin',
+    verified: false,
   },
   {
     id: 'sb_9514f9b3-f7c0-4a49-815e-d17025fd9487',
@@ -27136,6 +30070,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD123-mab — Alkermes to Johnson & Johnson',
     source: 'sec_10k',
+    assetName: 'CD123-mab',
+    verified: false,
   },
   {
     id: 'sb_6f31aa96-8dc6-49fb-af9a-8a212084f4df',
@@ -27155,6 +30091,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-MET-101 — Caribou Biosciences to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'Anti-MET-101',
+    verified: false,
   },
   {
     id: 'sb_573a27bf-97a9-439e-8347-b917417e172f',
@@ -27172,6 +30110,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'TYK2 Programs — Allergan to AbbVie',
     source: 'sec_8k',
+    assetName: 'TYK2 Programs',
+    verified: false,
   },
   {
     id: 'sb_deaf7345-1a4f-4af4-b767-bbd336fe180b',
@@ -27191,6 +30131,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'SHP2 — Hookipa Pharma to AbbVie',
     source: 'press_release',
+    assetName: 'SHP2',
+    verified: false,
   },
   {
     id: 'sb_44472673-f29d-4548-b1f7-6c491bb95a02',
@@ -27208,6 +30150,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Andexanet alfa (Andexxa) — Portola Pharmaceuticals to Alexion Pharmaceuticals',
     source: 'manual',
+    assetName: 'Andexanet alfa (Andexxa)',
+    verified: true,
   },
   {
     id: 'sb_c3684722-4436-4976-86d6-729740a958bd',
@@ -27227,6 +30171,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MEK-301 — Immunocore to Takeda',
     source: 'sec_8k',
+    assetName: 'MEK-301',
+    verified: false,
   },
   {
     id: 'sb_9fbb5a6e-ce41-43dd-9ba8-0d229a62b7aa',
@@ -27244,6 +30190,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Zilucoplan — Ra Pharmaceuticals to UCB',
     source: 'manual',
+    assetName: 'Zilucoplan',
+    verified: true,
   },
   {
     id: 'sb_7ca8c8dc-7ffd-498c-84b6-d3d0d2b4efb6',
@@ -27262,6 +30210,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'VLA15 — Valneva to Pfizer',
     source: 'manual',
+    assetName: 'VLA15',
+    verified: true,
   },
   {
     id: 'sb_a8ab3d98-f47f-499a-b843-3a3ed44b6271',
@@ -27281,6 +30231,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Mesothelin — Kymera Therapeutics to AstraZeneca',
     source: 'press_release',
+    assetName: 'Mesothelin',
+    verified: false,
   },
   {
     id: 'sb_0a40efbb-83b7-4240-ac60-70f8bf74fe3d',
@@ -27300,6 +30252,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-CDK4/6-001 — Turning Point Therapeutics to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'Anti-CDK4/6-001',
+    verified: false,
   },
   {
     id: 'sb_9222fe35-1564-4e73-befa-2c1c847fccba',
@@ -27318,6 +30272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PSMA-tinib — Bicycle Therapeutics to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'PSMA-tinib',
+    verified: false,
   },
   {
     id: 'sb_c4f3133c-d0de-444f-ad9a-5e7654f3bb7e',
@@ -27337,6 +30293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'B7-H3-301 — Relay Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'B7-H3-301',
+    verified: false,
   },
   {
     id: 'sb_c5bffaff-9594-4369-a78f-53d42de82e6a',
@@ -27356,6 +30314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'BRAF V600E-201 — Immunocore to Amgen',
     source: 'sec_10k',
+    assetName: 'BRAF V600E-201',
+    verified: false,
   },
   {
     id: 'sb_45da72e9-094f-4de3-a015-2b51fe63f67d',
@@ -27375,6 +30335,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'B7-H3-301 — CureVac to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'B7-H3-301',
+    verified: false,
   },
   {
     id: 'sb_9938faaf-fbe3-478a-bd90-570b80b21578',
@@ -27394,6 +30356,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'BCL-2 — RemeGen to GSK',
     source: 'sec_10k',
+    assetName: 'BCL-2',
+    verified: false,
   },
   {
     id: 'sb_25db5b4c-5e17-4ef4-b9fe-ed78bef08e1d',
@@ -27413,6 +30377,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-OX40 — Alkermes to Novartis',
     source: 'press_release',
+    assetName: 'Anti-OX40',
+    verified: false,
   },
   {
     id: 'sb_dac39d1b-47f8-4a3b-a273-49b8b163a09f',
@@ -27432,6 +30398,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-1 — Galapagos to Boehringer Ingelheim',
     source: 'press_release',
+    assetName: 'PD-1',
+    verified: false,
   },
   {
     id: 'sb_3d529969-f8ac-4a10-9656-178d48be0ffc',
@@ -27451,6 +30419,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CSF1R-301 — Alphamab Oncology to AbbVie',
     source: 'sec_8k',
+    assetName: 'CSF1R-301',
+    verified: false,
   },
   {
     id: 'sb_795b7665-cb9a-443e-bb74-303de3efa7a9',
@@ -27470,6 +30440,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Anti-MDM2 — Immunogen to Biogen',
     source: 'sec_10k',
+    assetName: 'Anti-MDM2',
+    verified: false,
   },
   {
     id: 'sb_c3e427f6-8e8d-4395-9f88-34587c636abb',
@@ -27489,6 +30461,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-TIM-3-201 — Affimed to Bayer',
     source: 'sec_8k',
+    assetName: 'Anti-TIM-3-201',
+    verified: false,
   },
   {
     id: 'sb_93354aea-a854-4e22-8f70-0149963ed3ff',
@@ -27508,6 +30482,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-MET-201 — Argenx to Biogen',
     source: 'sec_8k',
+    assetName: 'Anti-MET-201',
+    verified: false,
   },
   {
     id: 'sb_68e36273-9329-4e6a-8534-af41981815df',
@@ -27527,6 +30503,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BCL-2-tinib — Ono Pharmaceutical to AbbVie',
     source: 'sec_10k',
+    assetName: 'Anti-BCL-2-tinib',
+    verified: false,
   },
   {
     id: 'sb_088592d7-148b-43c2-a614-cbffd3c5dba6',
@@ -27546,6 +30524,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ICOS-101 — Celldex Therapeutics to Bristol-Myers Squibb',
     source: 'press_release',
+    assetName: 'ICOS-101',
+    verified: false,
   },
   {
     id: 'sb_42e31ebb-482c-41e6-892d-179750d86a6f',
@@ -27565,6 +30545,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Nectin-4-301 — Kronos Bio to Sanofi',
     source: 'sec_10k',
+    assetName: 'Nectin-4-301',
+    verified: false,
   },
   {
     id: 'sb_3a64082f-34ec-47fc-a21a-9cd6533603e3',
@@ -27584,6 +30566,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'LRRK2-301 — Acadia Pharmaceuticals to Roche',
     source: 'sec_8k',
+    assetName: 'LRRK2-301',
+    verified: false,
   },
   {
     id: 'sb_e7c0b4df-fcac-48c2-82c0-ccd25b8ce3c2',
@@ -27602,6 +30586,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD19-mab — Nkarta to Moderna',
     source: 'sec_8k',
+    assetName: 'CD19-mab',
+    verified: false,
   },
   {
     id: 'sb_98cbcc92-54c8-47c0-90f2-997e0c6a677c',
@@ -27621,6 +30607,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'ROS1-mab — Immunocore to Johnson & Johnson',
     source: 'press_release',
+    assetName: 'ROS1-mab',
+    verified: false,
   },
   {
     id: 'sb_5b2d4e1b-4d6a-4b00-bd04-9637026c9566',
@@ -27640,6 +30628,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CD40-tinib — Beam Therapeutics to Merck',
     source: 'sec_10k',
+    assetName: 'CD40-tinib',
+    verified: false,
   },
   {
     id: 'sb_09946b99-f109-4e62-a1a2-4bd177f9db5a',
@@ -27659,6 +30649,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Nectin-4 — Umoja Biopharma to Sanofi',
     source: 'sec_8k',
+    assetName: 'Nectin-4',
+    verified: false,
   },
   {
     id: 'sb_256e902b-bf78-4d79-94cd-c0bdc0ac0342',
@@ -27678,6 +30670,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'EGFR-101 — Kelun-Biotech to Biogen',
     source: 'sec_10k',
+    assetName: 'EGFR-101',
+    verified: false,
   },
   {
     id: 'sb_c716c35c-a936-4afd-b904-f72af3b9d8f5',
@@ -27697,6 +30691,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'KRAS G12C-301 — Umoja Biopharma to Eli Lilly',
     source: 'press_release',
+    assetName: 'KRAS G12C-301',
+    verified: false,
   },
   {
     id: 'sb_c8be3c0f-6e3d-4f90-a00f-6c97f78d88dd',
@@ -27716,6 +30712,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-TROP2-001 — Chugai Pharmaceutical to Roche',
     source: 'sec_10k',
+    assetName: 'Anti-TROP2-001',
+    verified: false,
   },
   {
     id: 'sb_fb295c15-0046-44b9-958f-fb71ca4f2b9f',
@@ -27735,6 +30733,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'MET-301 — Allogene Therapeutics to Pfizer',
     source: 'press_release',
+    assetName: 'MET-301',
+    verified: false,
   },
   {
     id: 'sb_f7424e57-e0cd-478c-9d0a-92cf78acef70',
@@ -27754,6 +30754,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ICOS-101 — Hookipa Pharma to Sanofi',
     source: 'press_release',
+    assetName: 'ICOS-101',
+    verified: false,
   },
   {
     id: 'sb_7d857d61-8811-4115-913d-7430a8f3270c',
@@ -27773,6 +30775,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CEA-201 — Immunocore to Vertex',
     source: 'press_release',
+    assetName: 'CEA-201',
+    verified: false,
   },
   {
     id: 'sb_2cd9fe05-de6b-4820-951f-f3979b2df8eb',
@@ -27791,6 +30795,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ALK-tinib — Zai Lab to Vertex',
     source: 'sec_10k',
+    assetName: 'ALK-tinib',
+    verified: false,
   },
   {
     id: 'sb_840115ae-c83d-4d4b-a41c-62b666c7e727',
@@ -27810,6 +30816,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'MDM2-101 — Genmab to Gilead Sciences',
     source: 'sec_10k',
+    assetName: 'MDM2-101',
+    verified: false,
   },
   {
     id: 'sb_c842151a-d44d-43ed-ab10-f9c7a6f141d5',
@@ -27828,6 +30836,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-BTK-mab — Editas Medicine to Sanofi',
     source: 'sec_8k',
+    assetName: 'Anti-BTK-mab',
+    verified: false,
   },
   {
     id: 'sb_89e44c7e-63ea-4459-8ca5-9d07fe7273d5',
@@ -27847,6 +30857,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MET — CRISPR Therapeutics to AbbVie',
     source: 'sec_10k',
+    assetName: 'MET',
+    verified: false,
   },
   {
     id: 'sb_afb27497-25f5-4786-a1c6-da0fb98d09ac',
@@ -27865,6 +30877,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD33-mab — CureVac to Eli Lilly',
     source: 'press_release',
+    assetName: 'CD33-mab',
+    verified: false,
   },
   {
     id: 'sb_d8372336-837a-488e-bf8d-184aa696d264',
@@ -27884,6 +30898,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'FLT3-301 — Monte Rosa Therapeutics to GSK',
     source: 'sec_8k',
+    assetName: 'FLT3-301',
+    verified: false,
   },
   {
     id: 'sb_dbbf9dca-6308-4693-b9ce-4a8a05660704',
@@ -27903,6 +30919,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'SIRPα-tinib — Celldex Therapeutics to Regeneron',
     source: 'sec_8k',
+    assetName: 'SIRPα-tinib',
+    verified: false,
   },
   {
     id: 'sb_c31ef356-7c82-4a27-a069-0562badcfa25',
@@ -27922,6 +30940,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'EGFR-mab — Arvinas to Bayer',
     source: 'sec_10k',
+    assetName: 'EGFR-mab',
+    verified: false,
   },
   {
     id: 'sb_1034ef27-ede3-472d-b5ca-72449e0c3450',
@@ -27941,6 +30961,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'M1/M4 muscarinic-001 — Axsome Therapeutics to Biogen',
     source: 'press_release',
+    assetName: 'M1/M4 muscarinic-001',
+    verified: false,
   },
   {
     id: 'sb_4aafbb85-435c-4844-b815-98d3c0929169',
@@ -27959,6 +30981,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'PD-L1-001 — Nurix Therapeutics to Biogen',
     source: 'press_release',
+    assetName: 'PD-L1-001',
+    verified: false,
   },
   {
     id: 'sb_2ab31613-4db8-478d-9b1a-163e10180289',
@@ -27977,6 +31001,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-GPC3-tinib — Fate Therapeutics to Bristol-Myers Squibb',
     source: 'sec_10k',
+    assetName: 'Anti-GPC3-tinib',
+    verified: false,
   },
   {
     id: 'sb_84a6dd81-bed1-4e92-9fe5-4376b31d7499',
@@ -27995,6 +31021,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Zinc finger regulators — Sangamo Therapeutics to Genentech',
     source: 'manual',
+    assetName: 'Zinc finger regulators',
+    verified: true,
   },
   {
     id: 'sb_bf5ec83f-27b0-4300-905d-c48011d8eef6',
@@ -28014,6 +31042,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: '4-1BB-001 — Ideaya Biosciences to AstraZeneca',
     source: 'press_release',
+    assetName: '4-1BB-001',
+    verified: false,
   },
   {
     id: 'sb_1d60bf93-83e2-4e0a-a52a-ea6068cb29bb',
@@ -28033,6 +31063,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'MUC16-mab — Alkermes to Eli Lilly',
     source: 'sec_10k',
+    assetName: 'MUC16-mab',
+    verified: false,
   },
   {
     id: 'sb_72d0c864-2950-407f-bc1a-48b8dcfd978d',
@@ -28052,6 +31084,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'MUC1-101 — Astellas to Biogen',
     source: 'sec_8k',
+    assetName: 'MUC1-101',
+    verified: false,
   },
   {
     id: 'sb_395caac9-4d35-4069-8f51-5a05ae73a612',
@@ -28071,6 +31105,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'GD2 — Kelun-Biotech to AbbVie',
     source: 'sec_8k',
+    assetName: 'GD2',
+    verified: false,
   },
   {
     id: 'sb_def50bb4-d133-493e-8341-8fca3bc56cf7',
@@ -28090,6 +31126,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'Anti-WEE1-301 — Roivant Sciences to GSK',
     source: 'press_release',
+    assetName: 'Anti-WEE1-301',
+    verified: false,
   },
   {
     id: 'sb_b02fd844-2dca-4788-94aa-3b761131876e',
@@ -28108,6 +31146,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'ST-501 (BIIB101) — Sangamo Therapeutics to Biogen',
     source: 'manual',
+    assetName: 'ST-501 (BIIB101)',
+    verified: true,
   },
   {
     id: 'sb_450dc489-f634-46db-8ed9-e142f5cf378f',
@@ -28127,6 +31167,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'PD-L1-001 — Editas Medicine to AstraZeneca',
     source: 'press_release',
+    assetName: 'PD-L1-001',
+    verified: false,
   },
   {
     id: 'sb_5d062dfa-f2f8-49e5-ba17-98021aa09b18',
@@ -28146,6 +31188,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'GPC3-201 — Kymera Therapeutics to Biogen',
     source: 'sec_8k',
+    assetName: 'GPC3-201',
+    verified: false,
   },
   {
     id: 'sb_0b85c793-5ea0-4b7e-b93e-4a65b6e652ab',
@@ -28165,6 +31209,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'GPC3-301 — Forma Therapeutics to Merck',
     source: 'sec_8k',
+    assetName: 'GPC3-301',
+    verified: false,
   },
   {
     id: 'sb_fc87aa51-9122-4194-9fa2-e4b835802cc4',
@@ -28184,6 +31230,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-MET-301 — Arvinas to Johnson & Johnson',
     source: 'sec_8k',
+    assetName: 'Anti-MET-301',
+    verified: false,
   },
   {
     id: 'sb_bd1390cb-f9b1-4cdc-9b14-03f00a295363',
@@ -28203,6 +31251,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'ATR-mab — MacroGenics to Vertex',
     source: 'sec_8k',
+    assetName: 'ATR-mab',
+    verified: false,
   },
   {
     id: 'sb_e9b0b04b-da9c-48cf-8a77-16c0f8319505',
@@ -28222,6 +31272,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'KRAS G12C-101 — Ono Pharmaceutical to Boehringer Ingelheim',
     source: 'sec_8k',
+    assetName: 'KRAS G12C-101',
+    verified: false,
   },
   {
     id: 'sb_465f7e0b-d328-49a4-9ecc-0148ccd6dda2',
@@ -28241,6 +31293,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'Anti-ATR-301 — Syros Pharmaceuticals to Regeneron',
     source: 'press_release',
+    assetName: 'Anti-ATR-301',
+    verified: false,
   },
   {
     id: 'sb_23748d7f-a597-4aca-b2b3-ddabd32405e9',
@@ -28260,6 +31314,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'VEGFR-201 — Editas Medicine to Moderna',
     source: 'press_release',
+    assetName: 'VEGFR-201',
+    verified: false,
   },
   {
     id: 'sb_00ddd3a8-24b6-455c-8169-67cfed7cc7eb',
@@ -28279,6 +31335,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'Claudin 6-tinib — Nkarta to AbbVie',
     source: 'sec_8k',
+    assetName: 'Claudin 6-tinib',
+    verified: false,
   },
   {
     id: 'sb_79e08ebc-cdc2-4198-8737-a43c7210c713',
@@ -28298,6 +31356,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'CD33-201 — Galapagos to Regeneron',
     source: 'sec_8k',
+    assetName: 'CD33-201',
+    verified: false,
   },
   {
     id: 'sb_83bc7d03-4c93-4f18-9d55-1d9fc1f4fc68',
@@ -28317,6 +31377,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'option',
     headline: 'OX40-mab — G1 Therapeutics to AbbVie',
     source: 'press_release',
+    assetName: 'OX40-mab',
+    verified: false,
   },
   {
     id: 'sb_2a2dc61c-4716-4a73-9e68-65ea9c6d5f8d',
@@ -28334,6 +31396,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Veozah (fezolinetant) — Ogeda to Astellas Pharma',
     source: 'manual',
+    assetName: 'Veozah (fezolinetant)',
+    verified: true,
   },
   {
     id: 'sb_715402e4-61f4-4d1c-a9cc-f49da4169d60',
@@ -28353,6 +31417,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Anti-mTOR-tinib — Arcus Biosciences to Novartis',
     source: 'sec_10k',
+    assetName: 'Anti-mTOR-tinib',
+    verified: false,
   },
   {
     id: 'sb_565abec3-bde8-4fb8-a6c0-7a884525281b',
@@ -28370,6 +31436,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'Lebrikizumab — Dermira to Eli Lilly',
     source: 'manual',
+    assetName: 'Lebrikizumab',
+    verified: true,
   },
   {
     id: 'sb_8d404cf0-2e8a-4732-93c3-0f4551ccb786',
@@ -28389,6 +31457,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'licensing',
     headline: 'CD20-tinib — Astellas to Gilead Sciences',
     source: 'press_release',
+    assetName: 'CD20-tinib',
+    verified: false,
   },
   {
     id: 'sb_5e294dd8-e273-4eae-b2b3-0829197bac9c',
@@ -28408,6 +31478,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'acquisition',
     headline: 'CLDN18.2-101 — Editas Medicine to Regeneron',
     source: 'sec_10k',
+    assetName: 'CLDN18.2-101',
+    verified: false,
   },
   {
     id: 'sb_cdc607eb-3568-4202-9170-0ce861662723',
@@ -28426,6 +31498,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'PLN-1474 — Pliant Therapeutics to Novartis',
     source: 'manual',
+    assetName: 'PLN-1474',
+    verified: true,
   },
   {
     id: 'sb_1954ba30-cb41-4b71-8119-c686e632697f',
@@ -28444,6 +31518,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'MVA-BN HIV/HBV vaccines — Bavarian Nordic to Johnson & Johnson',
     source: 'manual',
+    assetName: 'MVA-BN HIV/HBV vaccines',
+    verified: true,
   },
   {
     id: 'sb_1c44c294-0d00-4fd1-a301-01fe50b93359',
@@ -28462,6 +31538,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'codevelopment',
     headline: 'Anti-GD2 — Pyxis Oncology to Pfizer',
     source: 'sec_8k',
+    assetName: 'Anti-GD2',
+    verified: false,
   },
   {
     id: 'sb_ff9de114-349f-49da-9dfb-32fe700de67d',
@@ -28480,12 +31558,14 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: 'collaboration',
     headline: 'mTOR-mab — CRISPR Therapeutics to Vertex',
     source: 'press_release',
+    assetName: 'mTOR-mab',
+    verified: false,
   },
 ];
 
 export const SUPABASE_CORPUS_STATS = {
   totalDeals: 1540,
-  generatedAt: '2026-04-14T04:35:22.780Z',
+  generatedAt: '2026-04-14T05:03:24.933Z',
   sourceProject: 'mnzoulengniofgkwtfbo',
   dedupedDuplicates: 0,
 } as const;

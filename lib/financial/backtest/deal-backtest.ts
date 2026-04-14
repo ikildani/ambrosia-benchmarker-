@@ -607,13 +607,17 @@ function isDataQualitySuspect(d: ExtendedComparableDeal): boolean {
   // R48: structural-mismatch counterparty (funder, biosimilar maker).
   if (d.licensor && STRUCTURAL_MISMATCH_PARTIES.has(d.licensor)) return true;
   if (d.licensee && STRUCTURAL_MISMATCH_PARTIES.has(d.licensee)) return true;
-  // R49: LLM-hallucinated asset-name patterns extracted from headline.
-  // Pattern matches 564 rows in Supabase with 0-3% verified rate (vs 26%
-  // baseline) — strong fabrication signal. Extracts from
-  // "{asset} — {licensor} to {licensee}" format emitted by the corpus
-  // expansion script.
-  const asset = extractAssetNameFromHeadline(d.headline);
-  if (looksLikeFabricatedAsset(asset)) return true;
+  // R49: LLM-hallucinated asset-name patterns. Fabricated Supabase rows
+  // matching TARGET-NNN / TARGET-mab / Anti-TARGET patterns show 0-3.75%
+  // verified rate vs 26% baseline — strong fabrication signal. Skip the
+  // pattern check when `verified === true` (manual verification overrides
+  // the heuristic — protects legitimate codes like Tubulis TUB-040).
+  // Fall back to headline parsing when assetName field isn't populated
+  // (EXTENDED_COMPARABLE_DEALS corpus predates the field).
+  if (d.verified !== true) {
+    const asset = d.assetName ?? extractAssetNameFromHeadline(d.headline);
+    if (looksLikeFabricatedAsset(asset)) return true;
+  }
   return false;
 }
 

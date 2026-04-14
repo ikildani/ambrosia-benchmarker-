@@ -194,6 +194,8 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     dealType: '${mapDealType(d.deal_type)}',
     headline: '${sanitizeString(d.asset_name ?? 'Deal')} — ${sanitizeString(d.licensor_name)} to ${sanitizeString(d.licensee_name)}',
     source: '${sanitizeString(d.source_type ?? 'supabase')}${d.source_url ? ` — ${sanitizeString(d.source_url)}` : ''}',
+    assetName: '${sanitizeString(d.asset_name ?? '')}',
+    verified: ${d.verified === true ? 'true' : 'false'},
   },`;
     })
     .join('\n');

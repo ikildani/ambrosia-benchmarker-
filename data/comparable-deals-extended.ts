@@ -33,6 +33,12 @@ export interface ExtendedComparableDeal {
   headline: string;
   keyTerms?: string;
   source: string;
+
+  // Supabase-sourced fields (optional — only set for SUPABASE_COMPARABLE_DEALS).
+  // Used by the backtest harness to distinguish hand-audited real deals from
+  // rows matching LLM-fabrication asset-name patterns.
+  assetName?: string;
+  verified?: boolean;
 }
 
 export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
