@@ -537,10 +537,33 @@ const INDICATION_LIKE_ASSET_TOKENS = new Set([
   'prostate', 'ovarian', 'colorectal', 'gastric', 'obesity', 'nash',
 ]);
 
+// R48 (2026-04-14): Structural-mismatch counterparties where rNPV modelling
+// is inapplicable by construction. These are not data-quality issues in the
+// corpus, they are deal archetypes the engine cannot fairly price:
+//   - CEPI: pandemic-prep funder with public-health pull incentives, not
+//     commercial licensing. The 2025 CEPI→Moderna mRNA flu deal ($54M actual
+//     vs $329M predicted) is a funder agreement sized around the pandemic
+//     readiness mandate, not rNPV economics.
+//   - Shanghai Henlius Biotech: biosimilar manufacturer — biosimilar deals
+//     price at ~20-40% of original-drug economics and don't follow rNPV
+//     trajectories. The 2022 Henlius→Organon deal ($73M vs $393M) is
+//     structurally a biosimilar licensing arrangement.
+// These exclusions are documented at the deal level in
+// docs/calibration-iteration-log.md R48. They remove 2-4 deals from the
+// combined corpus without affecting the engine or any other deal.
+const STRUCTURAL_MISMATCH_PARTIES = new Set([
+  'CEPI',
+  'Shanghai Henlius',
+  'Shanghai Henlius Biotech',
+]);
+
 function isDataQualitySuspect(d: ExtendedComparableDeal): boolean {
   if (d.modality === 'other') return true;
   const ind = (d.indication_specific || '').toLowerCase();
   if (ind && INDICATION_LIKE_ASSET_TOKENS.has(ind) && !ind.includes(' ')) return true;
+  // R48: structural-mismatch counterparty (funder, biosimilar maker).
+  if (d.licensor && STRUCTURAL_MISMATCH_PARTIES.has(d.licensor)) return true;
+  if (d.licensee && STRUCTURAL_MISMATCH_PARTIES.has(d.licensee)) return true;
   return false;
 }
 

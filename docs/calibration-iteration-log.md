@@ -1049,3 +1049,28 @@ Test-set ±25% (30.0%) beats train-set ±25% (19.3%) by +10.7pp — **negative o
 
 **Decision:** R37 phase3 ratio retained. No commit — code reverted, only log entry.
 
+
+---
+
+## Round 48 — Structural-mismatch party filter (CEPI + Shanghai Henlius, 2026-04-14)
+
+**Change:** Added `STRUCTURAL_MISMATCH_PARTIES` set to `isDataQualitySuspect()` in `lib/financial/backtest/deal-backtest.ts`. Excludes deals where either counterparty is a funder or biosimilar manufacturer whose deal economics are not rNPV-modellable by construction:
+  - **CEPI** — pandemic-preparedness funder. The 2025 CEPI→Moderna mRNA flu deal prices around the public-health mandate, not rNPV. ($54M actual / $329M engine prediction, 505% err pre-filter.)
+  - **Shanghai Henlius Biotech** — biosimilar manufacturer. Biosimilar licensing prices at 20-40% of original-drug economics. The 2022 Henlius→Organon mAb deal ($73M / $393M, 439% err) is structurally a biosimilar rights agreement.
+
+This is not calibration-by-exclusion: these 2 deal archetypes are orthogonal to the rNPV model's scope (intrinsic-value licensing of investigational products). Documented deal-by-deal in the engine comment.
+
+**Delta (core scope):**
+| metric | before (n=303) | after (n=301) | change |
+|---|---:|---:|---:|
+| ±25% | 21.5% | 21.6% | +0.1pp |
+| ±35% | 30.7% | 30.9% | +0.2pp |
+| ±50% | 42.2% | 42.5% | +0.3pp |
+| mean \|error\| | 92.9% | 90.4% | **−2.5pp** |
+
+**Held-out test:** ±25% 30.0% (unchanged — neither filtered deal landed in the 20% test fold).
+
+**Tests:** 1,334 passing / 4 failing (unchanged).
+
+**What was NOT added to the filter:** Y-mAbs Therapeutics 2020 Danyelza → Sanofi ($40M / $1,359M, 3,299% err) — Danyelza was FDA-approved Nov 2020 but is tagged `phase3` in the corpus; this is a CORPUS tagging issue, should be fixed upstream in the Supabase `deals` table, not hidden behind a licensor filter. Cidara/Melinta antibiotic deals — economics different from typical rNPV but still commercial licensing; excluding them would be scope creep. Neither is added.
+
