@@ -4,6 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { validateExtractedDeal, extractAuditExcerpt } from './deal-extraction-validator';
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 const SEC_COMPANY_SEARCH = 'https://data.sec.gov/submissions';
@@ -517,8 +518,33 @@ Your task is to identify and extract structured deal data. Be precise and conser
 - Royalty percentages should be decimals (e.g., 0.15 for 15%)
 - Be especially careful with party roles: licensor grants rights, licensee receives rights
 
-MODALITY VALUES (use exactly):
+MODALITY VALUES (use exactly — case-sensitive):
 small_molecule, antibody, adc, bispecific, car_t, cell_therapy, gene_therapy, mrna, radiopharm, peptide, oligonucleotide, vaccine, other
+
+⚠ CRITICAL ANTI-FABRICATION RULES ⚠
+
+Before returning the extraction, verify the asset name suffix is CONSISTENT
+with the modality. If the filing does not clearly state a modality, set
+modality="other" — DO NOT guess.
+
+Consistency table (asset suffix → required modality class):
+  -mab, -mab (e.g., "trastuzumab", "pembrolizumab") → antibody / bispecific / adc
+  -tinib, -ciclib, -parib, -rafenib, -lisib (e.g., "imatinib", "palbociclib") → small_molecule
+  -tide (e.g., "semaglutide") → peptide
+  -sen, -rsen, -siran (e.g., "patisiran") → oligonucleotide / rnai
+  Anti-TARGET prefix → antibody / bispecific / adc
+
+If the filing appears to describe a deal but the licensor is a known
+single-platform company (e.g., Arrowhead does RNAi only; Intellia does
+CRISPR only; Moderna does mRNA only; Iovance does cell therapy only),
+verify the tagged modality matches their platform. If inconsistent,
+return {"is_deal": false, "reason": "licensor-modality inconsistent with known pipeline — likely misparsed"}.
+
+If the asset_name looks like a generic target-code placeholder (e.g.,
+"KRAS G12C-301", "Anti-PD-L1-501", "HER3-101") AND the filing does not
+explicitly state this asset name, set asset_name=null rather than
+inventing one. Real development codes have a company letter prefix
+(e.g., "KT-253" for Kymera, "TUB-040" for Tubulis, "ABBV-383" for AbbVie).
 
 INDICATION CATEGORIES (use exactly):
 solid_tumor, hematological, autoimmune, cns, cardiovascular, infectious, metabolic, rare_disease, respiratory, dermatology, ophthalmology, other
@@ -746,10 +772,33 @@ export async function runDailyIngestion(
         const content = await fetchFilingContent(filing.documentUrl);
         const deal = await extractDealFromFiling(content, anthropicApiKey);
 
-        if (deal && deal.confidence_score >= 75) {
-          // Validate company names before DB operations
-          if (!deal.licensor?.trim() || !deal.licensee?.trim()) {
-            console.warn(`Deal missing licensor or licensee name, skipping`);
+        if (deal && deal.confidence_score >= 85) {
+          // Phase 4 (2026-04-14): shared fabrication validator. Rejects
+          // extractions with asset-modality mismatches, placeholder asset
+          // codes, or licensor-modality inconsistencies BEFORE DB insert.
+          // Rejected extractions are logged to Sentry breadcrumbs and
+          // counted as `skipped` so the cron metrics reflect real signal.
+          const validation = validateExtractedDeal({
+            licensor: deal.licensor,
+            licensee: deal.licensee,
+            modality: deal.modality,
+            asset_name: deal.asset_name,
+            indication_specific: deal.indication_specific,
+            upfront_usd: deal.upfront_usd,
+            total_deal_value_usd: deal.total_deal_value_usd,
+            confidence_score: deal.confidence_score,
+            source_url: filing.documentUrl,
+            source_filing_id: filing.accessionNumber,
+          });
+          if (!validation.valid) {
+            console.warn(
+              `Deal rejected pre-insert [${validation.rejectCode}]: ` +
+              `${deal.licensor} → ${deal.licensee} (${deal.modality}) ` +
+              `— ${validation.rejectReason}`
+            );
+            errors.push(
+              `Validation-rejected (${validation.rejectCode}) ${filing.accessionNumber}: ${validation.rejectReason}`
+            );
             skipped++;
             continue;
           }
@@ -815,6 +864,12 @@ export async function runDailyIngestion(
             extraction_model: 'claude-sonnet-4-20250514',
             extraction_timestamp: new Date().toISOString(),
             therapeutic_area: therapeuticArea,
+            // Phase 4 (2026-04-14): explicit pending status + audit excerpt.
+            // verification_status was implicitly NULL before, which made it
+            // impossible to distinguish "never audited" from "audited and
+            // passed." Pending is now the default first-insert state.
+            verification_status: 'pending',
+            raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
           });
 
           if (insertError) {

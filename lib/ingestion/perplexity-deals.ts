@@ -15,6 +15,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
+import { validateExtractedDeal } from './deal-extraction-validator';
 
 const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
 
@@ -266,7 +267,32 @@ export async function runPerplexityDealDiscovery(
 
       for (const deal of sweepDeals) {
         if (!deal.licensor || !deal.licensee || !deal.asset_name) continue;
-        if (deal.confidence < 70) continue;
+        if (deal.confidence < 85) continue; // Phase 4: raised from 70
+
+        // Phase 4: shared fabrication validator. Perplexity's LLM is especially
+        // prone to inventing plausible-sounding but nonexistent deals, so this
+        // filter matters even more here than for SEC / press releases.
+        const validation = validateExtractedDeal({
+          licensor: deal.licensor,
+          licensee: deal.licensee,
+          modality: deal.modality || 'smallMolecule',
+          asset_name: deal.asset_name,
+          indication_specific: deal.indication,
+          upfront_usd: deal.upfront_usd,
+          total_deal_value_usd: deal.total_deal_value_usd,
+          confidence_score: deal.confidence,
+          source_url: deal.source_url,
+        });
+        if (!validation.valid) {
+          console.warn(
+            `[perplexity] Rejected [${validation.rejectCode}]: ` +
+            `${deal.licensor} → ${deal.licensee} — ${validation.rejectReason}`
+          );
+          result.errors.push(
+            `Validation-rejected (${validation.rejectCode}): ${deal.licensor}/${deal.licensee} — ${validation.rejectReason}`
+          );
+          continue;
+        }
 
         try {
           const ta = deal.therapeutic_area || deriveTherapeuticArea(deal.indication || '');
@@ -302,6 +328,7 @@ export async function runPerplexityDealDiscovery(
               source_url: deal.source_url,
               confidence_score: deal.confidence,
               extraction_notes: `Mega-deal sweep discovery. Confidence: ${deal.confidence}%`,
+              verification_status: 'pending', // Phase 4: explicit pending status
             });
 
             // Skip duplicates silently (unique index catches them)

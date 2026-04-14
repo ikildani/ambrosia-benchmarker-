@@ -5,6 +5,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ExtractedDeal } from './sec-edgar';
 import { fetchWithTimeout } from '../fetch-with-timeout';
+import { validateExtractedDeal, extractAuditExcerpt } from './deal-extraction-validator';
 
 // === RSS Feed Sources ===
 // Each source provides deal announcements that we filter and extract from
@@ -492,7 +493,30 @@ export async function runPressReleaseIngestion(
           // Extract deal using Claude
           const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
 
-          if (deal && deal.confidence_score >= 75 && deal.licensor && deal.licensee) {
+          if (deal && deal.confidence_score >= 85 && deal.licensor && deal.licensee) {
+            // Phase 4 (2026-04-14): shared fabrication validator.
+            const validation = validateExtractedDeal({
+              licensor: deal.licensor,
+              licensee: deal.licensee,
+              modality: deal.modality,
+              asset_name: deal.asset_name,
+              indication_specific: deal.indication_specific,
+              upfront_usd: deal.upfront_usd,
+              total_deal_value_usd: deal.total_deal_value_usd,
+              confidence_score: deal.confidence_score,
+              source_url: item.link,
+              source_filing_id: guid,
+            });
+            if (!validation.valid) {
+              console.warn(
+                `[press-releases] Rejected pre-insert [${validation.rejectCode}]: ` +
+                `${deal.licensor} → ${deal.licensee} — ${validation.rejectReason}`
+              );
+              errors.push(
+                `Validation-rejected (${validation.rejectCode}) ${guid}: ${validation.rejectReason}`
+              );
+              continue;
+            }
             dealsExtracted++;
 
             // Find or create companies
@@ -562,6 +586,9 @@ export async function runPressReleaseIngestion(
               extraction_model: 'claude-sonnet-4-20250514',
               extraction_timestamp: new Date().toISOString(),
               therapeutic_area: therapeuticArea,
+              // Phase 4 (2026-04-14): explicit pending status + audit excerpt
+              verification_status: 'pending',
+              raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
             });
 
             if (insertError) {
