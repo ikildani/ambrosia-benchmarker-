@@ -1031,3 +1031,21 @@ Test-set ±25% (30.0%) beats train-set ±25% (19.3%) by +10.7pp — **negative o
 
 **Next hypothesis:** Phase 3 now n=127 with median signed +81.9% — engine structurally overshoots phase 3 upfront on the wider corpus. Consider revisiting `getUpfrontPercent` for phase3 (currently 0.26, raised in R37). A lower 0.22-0.24 might reduce phase3 overshoot without breaking phase2 n=176 (already undershooting -23%).
 
+
+---
+
+## Round 47 — Phase 3 upfront ratio revisit on expanded corpus (NULL RESULT, 2026-04-14)
+
+**Hypothesis:** With core-scope phase3 n=127 showing median signed error +82%, the R37-raised ratio (0.18/0.26/0.36) may have been overtuned to the 206-deal corpus. Lowering phase3 median back to 0.22 (R2 value) or intermediate 0.24 should reduce systemic overshoot.
+
+**Sweep:**
+| phase3 ratio | core ±25% | core ±35% | core ±50% | test ±25% |
+|---:|---:|---:|---:|---:|
+| 0.22 (R47) | 20.8% | 30.7% | 42.6% | 26.7% |
+| 0.24 (R47b) | 20.8% | 30.0% | 42.9% | 26.7% |
+| **0.26 (R37, current)** | **21.5%** | **30.7%** | **42.2%** | **30.0%** |
+
+**Why null:** Both 0.22 and 0.24 regress core ±25% by ~0.7pp and held-out test ±25% by -3.3pp. The R37 0.26 calibration remains the empirical optimum across both the original 206-deal corpus and the expanded 303-deal corpus. Phase 3 signed error +82% is distributional — driven by ~15-20 specific phase3 × heavy-modality overshoots (oncology cell_therapy, ADC_TROP2, bispecific). The median ratio isn't the right dial; per-deal data-quality cleanup on those outliers would be.
+
+**Decision:** R37 phase3 ratio retained. No commit — code reverted, only log entry.
+
