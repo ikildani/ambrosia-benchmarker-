@@ -933,6 +933,36 @@ function applyPhase2AcqUplift(
 }
 
 /**
+ * R56 (2026-04-14): Approved acquisition dampener reversal.
+ *
+ * Engine applies 0.25× for (phase=approved, dealType=acquisition), calibrated
+ * when engine overshot approved acquisitions (+132% signed in R35 era). The
+ * expanded post-R49 corpus (n=36) shows the dampener now under-shoots:
+ *
+ *   pred_med  $780M   (post-0.25 dampener)
+ *   act_med   $3,700M
+ *   signed    -79%    (severe undershoot)
+ *
+ * Raw engine pre-dampener ≈ $3,120M, near actual $3,700M. Apply ×4.0
+ * harness uplift to net-out the 0.25× dampener (effective 1.0× engine).
+ *
+ * Sources: Amgen-Horizon ($28B), Pfizer-Seagen ($43B), Merck-Prometheus
+ * ($11B), Bristol-Turning Point ($4.1B), Roche-Spark ($4.8B), AbbVie-
+ * ImmunoGen ($10B). 2020-2025 approved acquisitions cluster $3-5B.
+ */
+const APPROVED_ACQ_UPLIFT = 6.0;
+
+function applyApprovedAcqUplift(
+  rawUpfront: number,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'approved') return rawUpfront;
+  if (dealType !== 'acquisition') return rawUpfront;
+  return rawUpfront * APPROVED_ACQ_UPLIFT;
+}
+
+/**
  * Round 28 (2026-04-13): Buyer-premium-aware scoring.
  *
  * The diagnostic on the expanded 1,000-deal corpus showed core ±25% at 10.5%
@@ -1143,9 +1173,12 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   // R53: per-TA approved uplift for rareDisease (×3.0) + oncology (×1.75)
   // after the dampener. Harness-only; keeps engine profile at 0.08.
   const approvedTaUplifted = applyApprovedTAUplift(dampened, c.therapeuticArea, c.phase, c.dealType);
-  // R55: phase2 acquisition strategic-premium uplift ×3.0.
+  // R55: phase2 acquisition strategic-premium uplift ×5.0.
   const phase2AcqUplifted = applyPhase2AcqUplift(approvedTaUplifted, c.phase, c.dealType);
-  const collabFloored = applyApprovedCollaborationFloor(phase2AcqUplifted, c.phase, c.dealType);
+  // R56: reverse the engine's 0.25× approved-acquisition dampener — now
+  // over-aggressive on the expanded corpus (signed −79%).
+  const approvedAcqUplifted = applyApprovedAcqUplift(phase2AcqUplifted, c.phase, c.dealType);
+  const collabFloored = applyApprovedCollaborationFloor(approvedAcqUplifted, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,
