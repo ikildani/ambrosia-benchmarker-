@@ -1067,24 +1067,72 @@ function findComparables(
   return { comparablesMedian: 0, n: 0, widenLevel: 4 };
 }
 
-function blendWithComparables(
+function findComparablesDistribution(
+  c: DealBacktestCase,
+  pool: DealBacktestCase[],
+): { p25: number; p50: number; p75: number; n: number; widenLevel: 0 | 1 | 2 | 3 | 4 } {
+  const result = findComparables(c, pool);
+  if (result.n === 0) return { p25: 0, p50: 0, p75: 0, n: 0, widenLevel: 4 };
+
+  // Re-run filter to get the raw values (findComparables only returned median)
+  const candidates = pool.filter(d => d.id !== c.id);
+  let matches: DealBacktestCase[];
+  switch (result.widenLevel) {
+    case 0:
+      matches = candidates.filter(d =>
+        d.therapeuticArea === c.therapeuticArea &&
+        d.modality === c.modality &&
+        phaseDistance(d.phase, c.phase) <= 1);
+      break;
+    case 1:
+      matches = candidates.filter(d =>
+        d.therapeuticArea === c.therapeuticArea &&
+        phaseDistance(d.phase, c.phase) <= 1);
+      break;
+    case 2:
+      matches = candidates.filter(d => d.therapeuticArea === c.therapeuticArea);
+      break;
+    case 3:
+      matches = candidates.filter(d => phaseDistance(d.phase, c.phase) <= 1);
+      break;
+    default:
+      matches = [];
+  }
+  const sorted = matches.map(d => d.actualUpfront_M).sort((a, b) => a - b);
+  const p = (q: number) => {
+    if (sorted.length === 0) return 0;
+    const idx = Math.max(0, Math.min(sorted.length - 1, Math.floor(q * sorted.length)));
+    return sorted[idx];
+  };
+  return { p25: p(0.25), p50: p(0.50), p75: p(0.75), n: matches.length, widenLevel: result.widenLevel };
+}
+
+/**
+ * R56 corridor strategy: don't AVERAGE rNPV with comparables (that flattens
+ * predictions toward the corpus mean and loses engine specificity). Instead,
+ * use the comparables distribution to CLAMP engine predictions into a
+ * plausible range. Engine predictions inside [p25 × 0.5, p75 × 2.0] pass
+ * through; outside predictions get pulled to the boundary.
+ *
+ * Widen level 0 (strict TA+modality+phase): tight corridor
+ * Widen level 1 (TA+phase): medium corridor
+ * Widen level 2+ (TA only or phase only): no corridor (too loose)
+ */
+function corridorClampWithComparables(
   enginePrediction: number,
   c: DealBacktestCase,
   trainPool: DealBacktestCase[],
 ): number {
-  const { comparablesMedian, n, widenLevel } = findComparables(c, trainPool);
-  if (n < 3 || widenLevel === 4) return enginePrediction;
+  const dist = findComparablesDistribution(c, trainPool);
+  if (dist.n < 5 || dist.widenLevel > 1) return enginePrediction;
 
-  // Weight based on sample size and widening level.
-  let compWeight: number;
-  if (widenLevel === 0 && n >= 8) compWeight = 0.60;
-  else if (widenLevel === 0 && n >= 5) compWeight = 0.50;
-  else if (widenLevel === 0 && n >= 3) compWeight = 0.35;
-  else if (widenLevel === 1 && n >= 5) compWeight = 0.30;
-  else if (widenLevel === 2 && n >= 5) compWeight = 0.20;
-  else compWeight = 0.15;
-
-  return enginePrediction * (1 - compWeight) + comparablesMedian * compWeight;
+  // Corridor: engine predictions inside [p25*floor_factor, p75*ceiling_factor]
+  // pass through unchanged; outliers get clamped to the boundary. Tighter
+  // corridor on higher-quality matches (strict TA+modality+phase) than on
+  // widened matches (modality widened out).
+  const floor = dist.p25 * (dist.widenLevel === 0 ? 0.5 : 0.35);
+  const ceiling = dist.p75 * (dist.widenLevel === 0 ? 2.0 : 2.75);
+  return Math.max(floor, Math.min(ceiling, enginePrediction));
 }
 
 function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): DealBacktestResult {
@@ -1118,10 +1166,13 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   // disclosed upfronts are never negative. Escape was visible in the
   // AC Immune → Takeda 2024 deal (−$48M predicted vs $100M actual).
   const engineUpfront = Math.max(0, premiumApplied);
-  // R56: Blend rNPV prediction with k-nearest comparables' median upfront
-  // retrieved from the TRAIN set only (prevents test-set leakage).
+  // R56: Corridor-clamp engine prediction using TRAIN-set comparables.
+  // Engine predictions inside [p25*0.4, p75*2.5] pass through; outside
+  // predictions get pulled to the corridor boundary. Prevents extreme
+  // outliers from the engine's overshoots/undershoots while preserving
+  // specificity within the plausible range.
   const predictedUpfront = trainPool.length > 0
-    ? Math.max(0, blendWithComparables(engineUpfront, c, trainPool))
+    ? Math.max(0, corridorClampWithComparables(engineUpfront, c, trainPool))
     : engineUpfront;
   const predictedTotal = Math.max(0, result.impliedDealValue?.totalDeal?.median ?? 0);
 
@@ -1311,7 +1362,13 @@ export function runDealBacktest(): BacktestReport {
   const coreCases = getCoreScopeBacktestCases();
   const coreIds = new Set(coreCases.map(c => c.id));
 
-  const fullResults = fullCases.map(scoreCase);
+  // R56: Build the train-only retrieval pool for comparables-blend prediction.
+  // Only CORE-scope + TRAIN-set deals go in — using full-scope would mix in
+  // option deals, acquisitions, phase1 etc. that distort the "what would
+  // a similar licensing deal price at" signal.
+  const trainPool = coreCases.filter(c => !isInHoldoutTestSet(c.id));
+
+  const fullResults = fullCases.map(c => scoreCase(c, trainPool));
   const coreResults = fullResults.filter(r => coreIds.has(r.case.id));
 
   const fullSummary = summarize(fullResults);
