@@ -83,24 +83,36 @@ function sanitizeString(s: string | null | undefined): string {
 async function main() {
   console.log('Fetching deals from Supabase...');
 
-  const { data, error } = await supabase
-    .from('deals')
-    .select(
-      'id, licensor_name, licensee_name, modality, phase_at_signing, indication_category, indication_specific, territory, therapeutic_area, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, verified, is_synthetic, confidence_score, source_type, source_url, asset_name',
-    )
-    .gt('upfront_usd', 0)
-    .gt('total_deal_value_usd', 0)
-    .eq('is_synthetic', false)
-    .in('phase_at_signing', ['phase_1', 'phase_2', 'phase_3', 'preclinical', 'approved'])
-    .in('deal_type', ['license', 'licensing', 'co_development', 'codevelopment', 'collaboration', 'acquisition', 'option'])
-    .gte('announced_date', '2020-01-01')
-    .not('therapeutic_area', 'is', null)
-    .not('indication_category', 'is', null)
-    .order('announced_date', { ascending: false })
-    .limit(1000);
+  // Paginate through all qualifying deals via .range() — Supabase PostgREST
+  // caps a single response at 1000 rows by default.
+  const PAGE_SIZE = 1000;
+  const MAX_PAGES = 4; // up to 4000 rows
+  const all: SupabaseDeal[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('deals')
+      .select(
+        'id, licensor_name, licensee_name, modality, phase_at_signing, indication_category, indication_specific, territory, therapeutic_area, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, verified, is_synthetic, confidence_score, source_type, source_url, asset_name',
+      )
+      .gt('upfront_usd', 0)
+      .gt('total_deal_value_usd', 0)
+      .eq('is_synthetic', false)
+      .in('phase_at_signing', ['phase_1', 'phase_2', 'phase_3', 'preclinical', 'approved'])
+      .in('deal_type', ['license', 'licensing', 'co_development', 'codevelopment', 'collaboration', 'acquisition', 'option'])
+      .gte('announced_date', '2020-01-01')
+      .not('therapeutic_area', 'is', null)
+      .not('indication_category', 'is', null)
+      .order('announced_date', { ascending: false })
+      .range(from, to);
 
-  if (error) throw error;
-  if (!data) throw new Error('No data returned');
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all.push(...(data as SupabaseDeal[]));
+    if (data.length < PAGE_SIZE) break;
+  }
+  const data = all;
 
   console.log(`Fetched ${data.length} raw rows`);
 
