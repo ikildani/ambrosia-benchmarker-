@@ -30,6 +30,22 @@ interface PeakSalesOverrideInputProps {
   indicationName?: string;
   /** Optional — engine default peak in $M for this indication, for hint */
   engineDefaultM?: number;
+  // R60d (2026-04-14): "Use analyst consensus" lookup. When all three are
+  // present, the component enables the "Use analyst consensus peak" button
+  // which calls /api/deals/peak-sales-consensus and pre-fills from
+  // Supabase-stored peak_sales_consensus_m data.
+  therapeuticArea?: string;
+  indicationSlug?: string;
+  phase?: string;
+}
+
+interface ConsensusLookup {
+  count: number;
+  median: number | null;
+  low?: number;
+  high?: number;
+  sampleAssets?: Array<{ asset: string | null; peak_M: number }>;
+  source?: string;
 }
 
 export default function PeakSalesOverrideInput({
@@ -37,14 +53,55 @@ export default function PeakSalesOverrideInput({
   onChange,
   indicationName,
   engineDefaultM,
+  therapeuticArea,
+  indicationSlug,
+  phase,
 }: PeakSalesOverrideInputProps) {
   // Use string state for the input so users can type freely (backspace to empty etc.)
   const [rawInput, setRawInput] = useState<string>(value === null ? '' : String(value));
+  const [consensus, setConsensus] = useState<ConsensusLookup | null>(null);
+  const [loadingConsensus, setLoadingConsensus] = useState(false);
 
   // Sync from prop changes (e.g., reset from outside)
   useEffect(() => {
     setRawInput(value === null ? '' : String(value));
   }, [value]);
+
+  // Fetch cohort consensus when TA + indication available.
+  useEffect(() => {
+    if (!therapeuticArea || !indicationSlug) {
+      setConsensus(null);
+      return;
+    }
+    let cancelled = false;
+    setLoadingConsensus(true);
+    const qs = new URLSearchParams({ ta: therapeuticArea, indication: indicationSlug });
+    if (phase) qs.set('phase', phase);
+    fetch(`/api/deals/peak-sales-consensus?${qs.toString()}`)
+      .then((r) => r.json())
+      .then((data: ConsensusLookup) => {
+        if (!cancelled) {
+          setConsensus(data);
+          setLoadingConsensus(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setConsensus(null);
+          setLoadingConsensus(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [therapeuticArea, indicationSlug, phase]);
+
+  const handleUseConsensus = () => {
+    if (consensus?.median != null) {
+      setRawInput(String(consensus.median));
+      onChange(consensus.median);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -125,6 +182,31 @@ export default function PeakSalesOverrideInput({
         <div className="mt-2 text-[11px] text-slate-400">
           Engine is using its calibrated indication-based default.
         </div>
+      )}
+
+      {/* R60d: analyst-consensus cohort lookup button */}
+      {consensus && consensus.count > 0 && consensus.median != null && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-teal-500/30 bg-teal-50/40 dark:bg-teal-950/20 px-3 py-2">
+          <div className="text-[11px] text-teal-800 dark:text-teal-300">
+            <span className="font-semibold">Analyst consensus:</span>{' '}
+            ${consensus.median.toLocaleString()}M median
+            {consensus.low != null && consensus.high != null && (
+              <> (${consensus.low.toLocaleString()}–${consensus.high.toLocaleString()}M IQR)</>
+            )}{' '}
+            across <span className="font-mono">{consensus.count}</span> disclosed deal
+            {consensus.count === 1 ? '' : 's'}.
+          </div>
+          <button
+            type="button"
+            onClick={handleUseConsensus}
+            className="shrink-0 rounded-md border border-teal-500/60 bg-teal-500/10 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300 hover:bg-teal-500/20 transition-colors"
+          >
+            Use consensus
+          </button>
+        </div>
+      )}
+      {loadingConsensus && !consensus && (
+        <div className="mt-2 text-[11px] text-slate-400">Checking analyst consensus…</div>
       )}
     </div>
   );

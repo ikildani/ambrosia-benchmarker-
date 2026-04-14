@@ -38,22 +38,52 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
+  // R60d: production uses snake_case indication_category ("hemophilia_b",
+  // "wet_amd") AND free-form indication_specific ("hemophilia B", "Wet AMD").
+  // Calculator sends camelCase slug ("hemophiliaB"). Normalize both sides
+  // (strip non-alphanum, lowercase) and compare client-side so we don't need
+  // to rebuild the Supabase data.
+  const normalize = (s: string): string => s.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const needle = normalize(indication);
+
   let query = supabase
     .from('deals')
-    .select('peak_sales_consensus_m, asset_name, phase_at_signing, modality')
+    .select('peak_sales_consensus_m, asset_name, phase_at_signing, modality, indication_category, indication_specific')
     .eq('therapeutic_area', ta)
-    .or(`indication_specific.eq.${indication},indication_category.eq.${indication}`)
     .not('peak_sales_consensus_m', 'is', null);
 
   if (phase) query = query.eq('phase_at_signing', phase);
   if (modality) query = query.eq('modality', modality);
 
-  const { data, error } = await query.limit(50);
+  const { data, error } = await query.limit(500);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const rows = (data ?? []) as Array<{ peak_sales_consensus_m: number | null; asset_name: string | null }>;
+  type Row = {
+    peak_sales_consensus_m: number | null;
+    asset_name: string | null;
+    indication_category: string | null;
+    indication_specific: string | null;
+  };
+  const allRows = (data ?? []) as Row[];
+  // Client-side normalized match: needle matches indication_category OR
+  // indication_specific (either stripped to alphanumeric lowercase).
+  const rows = allRows.filter((r) => {
+    const cat = r.indication_category ? normalize(r.indication_category) : '';
+    const spec = r.indication_specific ? normalize(r.indication_specific) : '';
+    // Match if needle is exactly equal to cat/spec, OR cat/spec contains needle
+    // as a prefix (e.g., "hemophiliab" matches "hemophiliabsevere"). This is
+    // stricter than raw substring to avoid "amd" matching "gastric".
+    return (
+      cat === needle ||
+      spec === needle ||
+      cat.startsWith(needle) ||
+      spec.startsWith(needle) ||
+      needle.startsWith(cat) && cat.length >= 4 ||
+      needle.startsWith(spec) && spec.length >= 4
+    );
+  });
   const peaks = rows
     .map((r) => r.peak_sales_consensus_m)
     .filter((v): v is number => v != null && v > 0)

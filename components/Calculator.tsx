@@ -718,6 +718,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                             onChange={actions.setPeakSalesOverrideM}
                             indicationName={state.indication}
                             engineDefaultM={getIndicationTypicalAssetPeak(state.indication) ?? undefined}
+                            // R60d: cohort lookup via /api/deals/peak-sales-consensus
+                            therapeuticArea={state.therapeuticArea}
+                            indicationSlug={state.indication}
+                            phase={state.phase || undefined}
                           />
                         )}
                       </>
