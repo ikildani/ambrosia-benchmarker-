@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { fetchUpcomingReadouts, getSupportedTAs } from '@/lib/market-intelligence/ct-gov-events';
+import { getAdCommCalendar } from '@/lib/market-intelligence/fda-adcomm';
 import { MarketIntelligenceSidebar } from '@/components/intelligence/MarketIntelligenceSidebar';
+import { AdCommCalendar } from '@/components/intelligence/AdCommCalendar';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
@@ -52,6 +54,13 @@ export default async function IntelligencePage({ searchParams }: Props) {
     })),
   );
 
+  // FDA AdComm calendar — curated static, fast + reliable
+  const adCommAll = getAdCommCalendar({ ta: selectedTA });
+  const adCommByTA = supportedTAs.map((ta) => ({
+    ta,
+    meetings: getAdCommCalendar({ ta }),
+  }));
+
   // Optionally filter to one TA via query param
   const visibleSections = selectedTA
     ? allReadouts.filter(s => s.ta === selectedTA)
@@ -59,6 +68,7 @@ export default async function IntelligencePage({ searchParams }: Props) {
 
   const totalReadouts = allReadouts.reduce((sum, s) => sum + s.readouts.length, 0);
   const imminent = allReadouts.flatMap(s => s.readouts).filter(r => r.daysToReadout <= 30).length;
+  const upcomingAdComms = adCommAll.filter(m => m.daysFromToday >= 0).length;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -70,20 +80,15 @@ export default async function IntelligencePage({ searchParams }: Props) {
             Live Market Intelligence
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            Phase 3 readouts that will move your deal pricing.{' '}
-            <span className="text-slate-200">{totalReadouts} upcoming events</span>{' '}
-            across six therapeutic areas in the next 90 days
-            {imminent > 0 && (
-              <>
-                {' '}&mdash;{' '}
-                <span className="text-amber-400">{imminent} imminent</span> (within 30 days).
-              </>
-            )}
+            Two pipelines that reset deal pricing: Phase 3 trial readouts ({totalReadouts} upcoming
+            {imminent > 0 && <>, <span className="text-amber-400">{imminent} imminent</span></>}) and
+            FDA Advisory Committee meetings ({upcomingAdComms} upcoming). Negotiations anchor on
+            what&rsquo;s about to happen, not what already happened.
           </p>
           <p className="mt-3 text-sm text-slate-500">
-            Live from <a href="https://clinicaltrials.gov/data-api/api" target="_blank" rel="noreferrer noopener" className="text-cyan-400 hover:text-cyan-300">ClinicalTrials.gov v2 API</a>.
-            Cached 1 hour. When a readout drops, comparable-deal pricing in the affected
-            indication moves 30-60% within weeks.
+            Readouts live from <a href="https://clinicaltrials.gov/data-api/api" target="_blank" rel="noreferrer noopener" className="text-cyan-400 hover:text-cyan-300">ClinicalTrials.gov v2 API</a>
+            (cached 1h). AdComm calendar curated monthly from <a href="https://www.fda.gov/advisory-committees/advisory-committee-calendar" target="_blank" rel="noreferrer noopener" className="text-cyan-400 hover:text-cyan-300">fda.gov</a>.
+            Both surface ±30-day comparable-deal-comp shifts.
           </p>
 
           {/* TA filter pills */}
@@ -117,11 +122,14 @@ export default async function IntelligencePage({ searchParams }: Props) {
         </div>
       </section>
 
-      {/* Grid of TA sections, each with a MarketIntelligenceSidebar */}
+      {/* Phase 3 readouts */}
       <section>
-        <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-4">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+            Phase 3 trial readouts (live · CT.gov)
+          </h2>
           {visibleSections.length === 0 ? (
-            <p className="py-12 text-center text-slate-500">No data for this TA right now.</p>
+            <p className="py-8 text-center text-slate-500">No readouts for this TA right now.</p>
           ) : (
             <div className={selectedTA ? '' : 'grid gap-5 md:grid-cols-2 lg:grid-cols-3'}>
               {visibleSections.map(({ ta, readouts }) => (
@@ -133,6 +141,45 @@ export default async function IntelligencePage({ searchParams }: Props) {
                 />
               ))}
             </div>
+          )}
+        </div>
+      </section>
+
+      {/* FDA AdComm calendar */}
+      <section className="border-t border-slate-800/60">
+        <div className="mx-auto max-w-6xl px-6 py-10">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+              FDA Advisory Committees (curated)
+            </h2>
+            <span className="text-xs text-slate-500">
+              {upcomingAdComms} upcoming · {adCommAll.length - upcomingAdComms} recent
+            </span>
+          </div>
+          {selectedTA ? (
+            adCommAll.length > 0 ? (
+              <AdCommCalendar meetings={adCommAll} taLabel={selectedTA} />
+            ) : (
+              <p className="py-8 text-center text-slate-500">No AdComm meetings for this TA in the current window.</p>
+            )
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {adCommByTA
+                .filter(({ meetings }) => meetings.length > 0)
+                .map(({ ta, meetings }) => (
+                  <AdCommCalendar
+                    key={ta}
+                    meetings={meetings}
+                    title={`${ta.replace(/([A-Z])/g, ' $1').trim()}`}
+                    taLabel={ta}
+                  />
+                ))}
+            </div>
+          )}
+          {!selectedTA && adCommByTA.every(({ meetings }) => meetings.length === 0) && (
+            <p className="py-8 text-center text-slate-500">
+              No AdComm meetings in the current window.
+            </p>
           )}
         </div>
       </section>

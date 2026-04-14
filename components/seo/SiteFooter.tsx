@@ -11,7 +11,6 @@ const footerLinks = {
     { label: 'Methodology', href: '/methodology' },
   ],
   Intelligence: [
-    { label: 'Model Accuracy', href: '/accuracy' },
     { label: 'Counterparty Playbooks', href: '/playbook' },
     { label: 'Deal Structure Trade Space', href: '/trade-space' },
     { label: 'Negotiation Simulator', href: '/simulator' },

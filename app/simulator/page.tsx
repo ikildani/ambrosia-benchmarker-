@@ -75,12 +75,6 @@ export default async function SimulatorPage() {
             >
               Deal-structure trade space →
             </Link>
-            <Link
-              href="/accuracy"
-              className="rounded-full border border-teal-500/30 bg-teal-500/5 px-3 py-1.5 text-teal-400 hover:bg-teal-500/10"
-            >
-              Model accuracy →
-            </Link>
           </div>
         </div>
       </section>

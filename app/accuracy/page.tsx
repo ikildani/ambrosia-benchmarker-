@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     description:
       'Live backtest accuracy of our deal-valuation engine vs. 1,000+ real disclosed deals.',
   },
+  // Internal-only: page is accessible via direct URL but not indexed
+  // and not linked from any public navigation surface.
+  robots: { index: false, follow: false, nocache: true },
 };
 
 const TARGETS = { hit25: 0.60, hit35: 0.70, hit50: 0.80 };
@@ -198,6 +201,38 @@ export default function AccuracyDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Per-TA held-out breakdown — where does the model generalize, where does it overfit? */}
+            {data.holdout.testByTA.length > 0 && (
+              <div className="mt-10">
+                <div className="mb-4 rounded-lg border border-teal-500/20 bg-teal-500/5 p-5">
+                  <h3 className="text-base font-semibold text-slate-100">
+                    Per-therapeutic-area generalization
+                  </h3>
+                  <p className="mt-2 max-w-3xl text-sm text-slate-400">
+                    The aggregate train/test gap can hide per-TA overfitting. This table
+                    shows the 20% held-out hit rate broken out by therapeutic area — so
+                    you can see exactly where our tuning generalizes (small gaps to the
+                    full-corpus TA table below) versus where it doesn&rsquo;t (big gaps =
+                    we memorized the specific deals, not the pricing pattern).
+                  </p>
+                </div>
+                <div className="grid gap-8 lg:grid-cols-2">
+                  <div>
+                    <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-teal-400">
+                      Test set (20%, never seen)
+                    </h4>
+                    <SliceTable rows={data.holdout.testByTA} dimension="TA" />
+                  </div>
+                  <div>
+                    <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-500">
+                      Train set (80%, tuned against)
+                    </h4>
+                    <SliceTable rows={data.holdout.trainByTA} dimension="TA" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -275,21 +310,36 @@ export default function AccuracyDashboard() {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <div>
-              <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+              <h3 className="mb-2 text-sm font-medium uppercase tracking-wider text-slate-500">
                 By Therapeutic Area
               </h3>
+              <p className="mb-3 text-xs text-slate-500 leading-relaxed">
+                TA-level accuracy exposes where our modality + indication profile coverage
+                is deepest (oncology, immunology) vs. where thin corpus coverage still
+                drives misses (rare disease, neurology).
+              </p>
               <SliceTable rows={data.slicesByTA} dimension="TA" />
             </div>
             <div>
-              <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+              <h3 className="mb-2 text-sm font-medium uppercase tracking-wider text-slate-500">
                 By Phase
               </h3>
+              <p className="mb-3 text-xs text-slate-500 leading-relaxed">
+                Phase 2 and Phase 3 are the rNPV sweet spot — structural variance is
+                highest at the early-stage edges and on approved-asset handoffs, which
+                the engine prices via different paths.
+              </p>
               <SliceTable rows={data.slicesByPhase} dimension="Phase" />
             </div>
             <div>
-              <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-slate-500">
+              <h3 className="mb-2 text-sm font-medium uppercase tracking-wider text-slate-500">
                 By Modality
               </h3>
+              <p className="mb-3 text-xs text-slate-500 leading-relaxed">
+                Modality accuracy traces which platform-specific profiles (ADC sub-types,
+                TCEs, cell therapy) we&rsquo;ve calibrated vs. still-coarse legacy buckets.
+                Fine-grain slugs from R20 are being activated as corpus tagging catches up.
+              </p>
               <SliceTable rows={data.slicesByModality} dimension="Modality" />
             </div>
           </div>

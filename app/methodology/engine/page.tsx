@@ -56,17 +56,11 @@ export default function EngineMethodology() {
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
             A finance-grade walkthrough of the Ambrosia rNPV engine: how it values assets, how
-            calibration works, how we measure accuracy publicly, and where the model is honestly
-            not ready. Written for BD teams, buy-side analysts, and pharma finance professionals
-            who need a model they can stand up to their investment committee.
+            calibration works, and where the model is honestly not ready. Written for BD teams,
+            buy-side analysts, and pharma finance professionals who need a model they can stand up
+            to their investment committee.
           </p>
           <div className="mt-6 flex flex-wrap gap-3 text-xs">
-            <Link
-              href="/accuracy"
-              className="rounded-full border border-teal-500/30 bg-teal-500/5 px-3 py-1.5 text-teal-400 hover:bg-teal-500/10"
-            >
-              See live accuracy →
-            </Link>
             <Link
               href="/playbook"
               className="rounded-full border border-slate-700 bg-slate-900/40 px-3 py-1.5 text-slate-300 hover:bg-slate-900"
@@ -137,9 +131,9 @@ export default function EngineMethodology() {
           </li>
           <li>
             <strong className="text-slate-200">One-sided corrections beat symmetric scaling.</strong> Our failed
-            rounds (published on <Link href="/accuracy" className="text-cyan-400 hover:text-cyan-300">/accuracy</Link>)
-            taught that per-indication scaling that can go both up and down tends to increase dispersion. Floor-only
-            and ceiling-only corrections, applied to specific failure modes, work.
+            rounds taught us that per-indication scaling that can go both up and down tends to
+            increase dispersion. Floor-only and ceiling-only corrections, applied to specific
+            failure modes, work.
           </li>
           <li>
             <strong className="text-slate-200">Held-out validation split.</strong> 80% of the corpus is used to
@@ -176,10 +170,9 @@ export default function EngineMethodology() {
           the wrong frame.
         </p>
         <p className="mt-4">
-          Live numbers update with each calibration round on the{' '}
-          <Link href="/accuracy" className="text-cyan-400 hover:text-cyan-300">accuracy dashboard</Link>.
-          We publish the failed rounds alongside the wins &mdash; the only platform in this space
-          that does.
+          Accuracy is measured on every calibration round against the held-out test set. We track
+          failed rounds alongside wins in the internal iteration log &mdash; the calibration
+          journey itself is part of the model&rsquo;s methodology.
         </p>
 
         <SectionAnchor id="limitations">5. Honest limitations</SectionAnchor>
@@ -251,7 +244,7 @@ git diff __tests__/backtest/baseline-errors.json`}</code>
         </pre>
         <p className="mt-4">
           Every commit to <code className="rounded bg-slate-800 px-1 py-0.5 text-sm">__tests__/backtest/baseline-errors.json</code> is
-          the live accuracy state the <Link href="/accuracy" className="text-cyan-400 hover:text-cyan-300">dashboard</Link> reads.
+          the live accuracy state read by the internal accuracy tracking system.
         </p>
 
         <SectionAnchor id="governance">8. Model governance</SectionAnchor>
@@ -260,7 +253,7 @@ git diff __tests__/backtest/baseline-errors.json`}</code>
         </p>
         <ul className="mt-4 space-y-2 pl-5 [&_li]:list-disc [&_li]:text-slate-400 [&_li::marker]:text-slate-600">
           <li>Every calibration round is a discrete, auditable commit in the git history with before/after numbers in the commit message.</li>
-          <li>Failed rounds are preserved publicly (see <Link href="/accuracy" className="text-cyan-400 hover:text-cyan-300">calibration journey</Link>) rather than rewritten out.</li>
+          <li>Failed rounds are preserved in the git history and internal iteration log rather than rewritten out.</li>
           <li>The iteration log at <code className="rounded bg-slate-800 px-1 py-0.5 text-sm">docs/calibration-iteration-log.md</code> captures the rationale, source citations, and deltas for every change.</li>
           <li>Golden master regressions require explicit re-baselining with documentation &mdash; silent drift is caught by the test suite.</li>
         </ul>

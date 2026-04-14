@@ -226,12 +226,6 @@ export default async function BriefPage({ params }: Props) {
           >
             Negotiation simulator — where to open
           </Link>
-          <Link
-            href="/accuracy"
-            className="block rounded-lg border border-slate-700 bg-slate-900/40 px-5 py-3.5 text-center text-sm text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-200"
-          >
-            How accurate is this model?
-          </Link>
         </div>
       </section>
 

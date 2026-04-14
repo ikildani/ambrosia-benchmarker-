@@ -55,7 +55,7 @@ export default function TradeSpacePage() {
           </p>
           <p className="mt-3 text-xs text-slate-500">
             Computed by <code className="rounded bg-slate-800 px-1 py-0.5 text-slate-400">optimizeDealStructure()</code>{' '}
-            (<Link href="/accuracy" className="underline hover:text-slate-300">backtest-validated engine</Link>).
+            (backtest-validated engine).
             Upfront, milestone allocation, and royalty structures vary by deal type per the{' '}
             <code className="rounded bg-slate-800 px-1 py-0.5 text-slate-400">DEAL_TYPE_CAPTURE</code> and{' '}
             <code className="rounded bg-slate-800 px-1 py-0.5 text-slate-400">PHASE_ALLOCATION</code>{' '}
