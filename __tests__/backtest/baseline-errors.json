@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-14T15:25:34.577Z",
+  "runAt": "2026-04-14T19:06:37.036Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -65,7 +65,7 @@
         "hitRate25": 0.25,
         "hitRate35": 0.39285714285714285,
         "meanSignedErrorPct": 0.3698086815529885,
-        "meanAbsErrorPct": 0.7960813724598677
+        "meanAbsErrorPct": 0.7960813724598678
       },
       "rareDisease": {
         "n": 27,
@@ -5816,32 +5816,6 @@
     },
     {
       "case": {
-        "id": "sb_3277f91d-431f-4913-9daa-ae18cc7283e1",
-        "year": 2026,
-        "licensor": "Centessa Pharmaceuticals",
-        "licensee": "Eli Lilly",
-        "therapeuticArea": "neurology",
-        "indication": "narcolepsy",
-        "modality": "smallMolecule",
-        "phase": "phase2",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 6300,
-        "actualTotalDeal_M": 7800,
-        "peakSalesMedian_M": 2250
-      },
-      "predictedUpfront_M": 719.4,
-      "predictedTotalDeal_M": 132,
-      "upfrontErrorPct": -0.8858095238095238,
-      "totalDealErrorPct": -0.9830769230769231,
-      "upfrontErrorAbs_M": -5580.6,
-      "totalDealErrorAbs_M": -7668,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_c839592d-1194-4043-8038-9206b7157cb5",
         "year": 2026,
         "licensor": "Insilico Medicine Inc.",
@@ -5865,6 +5839,32 @@
       "within25": false,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_3277f91d-431f-4913-9daa-ae18cc7283e1",
+        "year": 2026,
+        "licensor": "Centessa Pharmaceuticals",
+        "licensee": "Eli Lilly",
+        "therapeuticArea": "neurology",
+        "indication": "narcolepsy",
+        "modality": "smallMolecule",
+        "phase": "phase2",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 6300,
+        "actualTotalDeal_M": 7800,
+        "peakSalesMedian_M": 2250
+      },
+      "predictedUpfront_M": 719.4,
+      "predictedTotalDeal_M": 132,
+      "upfrontErrorPct": -0.8858095238095238,
+      "totalDealErrorPct": -0.9830769230769231,
+      "upfrontErrorAbs_M": -5580.6,
+      "totalDealErrorAbs_M": -7668,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -5946,32 +5946,6 @@
     },
     {
       "case": {
-        "id": "sb_4fbc5a8e-4e2f-4149-9f41-eed9ba2f28e3",
-        "year": 2026,
-        "licensor": "Ouro Medicines",
-        "licensee": "Gilead Sciences",
-        "therapeuticArea": "immunology",
-        "indication": "autoimmune_diseases",
-        "modality": "bispecific",
-        "phase": "phase1",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 1675,
-        "actualTotalDeal_M": 2175,
-        "peakSalesMedian_M": 3000
-      },
-      "predictedUpfront_M": 602.5,
-      "predictedTotalDeal_M": 106,
-      "upfrontErrorPct": -0.6402961194029851,
-      "totalDealErrorPct": -0.9512643678160919,
-      "upfrontErrorAbs_M": -1072.5,
-      "totalDealErrorAbs_M": -2069,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_877495a8-916e-4256-b9ce-2bac136a0996",
         "year": 2026,
         "licensor": "Kali Therapeutics",
@@ -5995,6 +5969,32 @@
       "within25": false,
       "within35": false,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_4fbc5a8e-4e2f-4149-9f41-eed9ba2f28e3",
+        "year": 2026,
+        "licensor": "Ouro Medicines",
+        "licensee": "Gilead Sciences",
+        "therapeuticArea": "immunology",
+        "indication": "autoimmune_diseases",
+        "modality": "bispecific",
+        "phase": "phase1",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 1675,
+        "actualTotalDeal_M": 2175,
+        "peakSalesMedian_M": 3000
+      },
+      "predictedUpfront_M": 602.5,
+      "predictedTotalDeal_M": 106,
+      "upfrontErrorPct": -0.6402961194029851,
+      "totalDealErrorPct": -0.9512643678160919,
+      "upfrontErrorAbs_M": -1072.5,
+      "totalDealErrorAbs_M": -2069,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -6154,32 +6154,6 @@
     },
     {
       "case": {
-        "id": "sb_b834d261-d247-43e1-a0eb-d9391901180b",
-        "year": 2026,
-        "licensor": "Sino Biopharmaceutical (Chia Tai Tianqing Pharmaceutical)",
-        "licensee": "Sanofi",
-        "therapeuticArea": "oncology",
-        "indication": "myelofibrosis, chronic graft-versus-host disease",
-        "modality": "smallMolecule",
-        "phase": "approved",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 135,
-        "actualTotalDeal_M": 1530,
-        "peakSalesMedian_M": 2500
-      },
-      "predictedUpfront_M": 356.7,
-      "predictedTotalDeal_M": 5058,
-      "upfrontErrorPct": 1.6418715555555554,
-      "totalDealErrorPct": 2.3058823529411763,
-      "upfrontErrorAbs_M": 221.7,
-      "totalDealErrorAbs_M": 3528,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_6279f661-afc3-41aa-bb74-ae32e27d072a",
         "year": 2026,
         "licensor": "3SBio",
@@ -6203,6 +6177,32 @@
       "within25": true,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_b834d261-d247-43e1-a0eb-d9391901180b",
+        "year": 2026,
+        "licensor": "Sino Biopharmaceutical (Chia Tai Tianqing Pharmaceutical)",
+        "licensee": "Sanofi",
+        "therapeuticArea": "oncology",
+        "indication": "myelofibrosis, chronic graft-versus-host disease",
+        "modality": "smallMolecule",
+        "phase": "approved",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 135,
+        "actualTotalDeal_M": 1530,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 356.7,
+      "predictedTotalDeal_M": 5058,
+      "upfrontErrorPct": 1.6418715555555554,
+      "totalDealErrorPct": 2.3058823529411763,
+      "upfrontErrorAbs_M": 221.7,
+      "totalDealErrorAbs_M": 3528,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -6960,32 +6960,6 @@
     },
     {
       "case": {
-        "id": "sb_4ece97e2-a63c-4bf5-988d-0b2ba4b852fd",
-        "year": 2024,
-        "licensor": "Protagonist Therapeutics",
-        "licensee": "Takeda",
-        "therapeuticArea": "cardiovascular",
-        "indication": "Polycythemia vera",
-        "modality": "peptide",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 300,
-        "actualTotalDeal_M": 2900,
-        "peakSalesMedian_M": 3000
-      },
-      "predictedUpfront_M": 557.6,
-      "predictedTotalDeal_M": 1677,
-      "upfrontErrorPct": 0.8586166666666668,
-      "totalDealErrorPct": -0.42172413793103447,
-      "upfrontErrorAbs_M": 257.6,
-      "totalDealErrorAbs_M": -1223,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_49f3d1c9-6276-44b3-b1fe-c54d8134eb82",
         "year": 2024,
         "licensor": "Prime Medicine",
@@ -7009,6 +6983,32 @@
       "within25": true,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_4ece97e2-a63c-4bf5-988d-0b2ba4b852fd",
+        "year": 2024,
+        "licensor": "Protagonist Therapeutics",
+        "licensee": "Takeda",
+        "therapeuticArea": "cardiovascular",
+        "indication": "Polycythemia vera",
+        "modality": "peptide",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 300,
+        "actualTotalDeal_M": 2900,
+        "peakSalesMedian_M": 3000
+      },
+      "predictedUpfront_M": 557.6,
+      "predictedTotalDeal_M": 1677,
+      "upfrontErrorPct": 0.8586166666666668,
+      "totalDealErrorPct": -0.42172413793103447,
+      "upfrontErrorAbs_M": 257.6,
+      "totalDealErrorAbs_M": -1223,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -8494,32 +8494,6 @@
     },
     {
       "case": {
-        "id": "sb_61d298d4-cc3f-4913-be11-7085945558cc",
-        "year": 2020,
-        "licensor": "Asklepios BioPharmaceutical",
-        "licensee": "Bayer",
-        "therapeuticArea": "rareDisease",
-        "indication": "Pompe Disease, Congestive Heart Failure",
-        "modality": "geneTherapy",
-        "phase": "phase1",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 2000,
-        "actualTotalDeal_M": 4000,
-        "peakSalesMedian_M": 900
-      },
-      "predictedUpfront_M": 134.4,
-      "predictedTotalDeal_M": 0,
-      "upfrontErrorPct": -0.9328,
-      "totalDealErrorPct": -1,
-      "upfrontErrorAbs_M": -1865.6,
-      "totalDealErrorAbs_M": -4000,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_30cd5800-bb52-48bb-a862-9dbf0943f1dc",
         "year": 2020,
         "licensor": "Kyowa Kirin",
@@ -8546,12 +8520,38 @@
     },
     {
       "case": {
-        "id": "sb_10d4f3e4-d308-4aa9-a574-de37c040ae87",
+        "id": "sb_61d298d4-cc3f-4913-be11-7085945558cc",
+        "year": 2020,
+        "licensor": "Asklepios BioPharmaceutical",
+        "licensee": "Bayer",
+        "therapeuticArea": "rareDisease",
+        "indication": "Pompe Disease, Congestive Heart Failure",
+        "modality": "geneTherapy",
+        "phase": "phase1",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 2000,
+        "actualTotalDeal_M": 4000,
+        "peakSalesMedian_M": 900
+      },
+      "predictedUpfront_M": 134.4,
+      "predictedTotalDeal_M": 0,
+      "upfrontErrorPct": -0.9328,
+      "totalDealErrorPct": -1,
+      "upfrontErrorAbs_M": -1865.6,
+      "totalDealErrorAbs_M": -4000,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "sb_a8de1d47-520d-49be-a96c-5a30770bd37e",
         "year": 2020,
         "licensor": "MyoKardia",
-        "licensee": "Bristol Myers Squibb",
+        "licensee": "Bristol-Myers Squibb",
         "therapeuticArea": "cardiovascular",
-        "indication": "Obstructive Hypertrophic Cardiomyopathy",
+        "indication": "Obstructive HCM",
         "modality": "allosteric_inhibitor",
         "phase": "phase3",
         "dealType": "acquisition",
