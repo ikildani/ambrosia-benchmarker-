@@ -902,8 +902,14 @@ function scoreCase(c: DealBacktestCase): DealBacktestResult {
   // Round 35 (2026-04-13): Phase 3 small-mol dampener for CV + infectious.
   const phase3SmallMolFixed = applyPhase3SmallMolDamper(phase2Uplifted, c.therapeuticArea, c.phase, c.modality);
   // Round 28: counterparty-premium scaling when buyer has ≥3 disclosed deals.
-  const predictedUpfront = applyCounterpartyPremium(phase3SmallMolFixed, c.licensee);
-  const predictedTotal = result.impliedDealValue?.totalDeal?.median ?? 0;
+  const premiumApplied = applyCounterpartyPremium(phase3SmallMolFixed, c.licensee);
+  // R52: safety floor at $0 — rNPV pipeline can produce negative
+  // predictions for Phase 2 deals where risk-adjusted NPV collapses
+  // (e.g., alzheimers antibodies with compounded PoS × high COGS). Real
+  // disclosed upfronts are never negative. Escape was visible in the
+  // AC Immune → Takeda 2024 deal (−$48M predicted vs $100M actual).
+  const predictedUpfront = Math.max(0, premiumApplied);
+  const predictedTotal = Math.max(0, result.impliedDealValue?.totalDeal?.median ?? 0);
 
   const upfrontErrorAbs_M = predictedUpfront - c.actualUpfront_M;
   const totalDealErrorAbs_M = predictedTotal - c.actualTotalDeal_M;
