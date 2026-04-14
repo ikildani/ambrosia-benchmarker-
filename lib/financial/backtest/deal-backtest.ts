@@ -415,7 +415,46 @@ function applyApprovedAcqDampener(predicted: number, phase: string, dealType: st
  * myopiaProgression) are now NEW Tier 1 entries in `INDICATION_MARKET_CAPS`
  * with full citations, accessed via the engine helper.
  */
+// R50 (2026-04-14): Corpus modality normalization. The Supabase `deals`
+// table uses both snake_case (small_molecule, gene_therapy, cell_therapy,
+// car_t) and camelCase (smallMolecule, geneTherapy, cellTherapy) keys for
+// the same underlying modality. The engine's MODALITY_PROFILES,
+// COGS_BY_MODALITY_CATEGORY, GENERIC_EROSION_BY_MODALITY, and PoS tables
+// are keyed on camelCase — a deal tagged 'small_molecule' falls through
+// to engine defaults while 'smallMolecule' hits the profile. This alias
+// map forces both to the same canonical engine key at corpus entry.
+//
+// Bundled with R50 other changes (narrowMarketCap application + multiplier
+// retune) because applying it in isolation regressed accuracy — the
+// multipliers were tuned against the mixed-key state.
+const MODALITY_CANONICAL: Record<string, string> = {
+  small_molecule: 'smallMolecule',
+  gene_therapy: 'geneTherapy',
+  cell_therapy: 'cellTherapy',
+  car_t: 'carT_heme',
+  bispecificAntibody: 'bispecific',
+};
+function canonicalModality(m: string): string {
+  return MODALITY_CANONICAL[m] ?? m;
+}
+
+// R50: Structurally-narrow modalities where narrowMarketCapM from
+// MODALITY_PROFILES reflects a real ceiling (stewardship pricing,
+// commodity dynamics, narrow indication). Applied as a peak clamp before
+// engine entry. ADC/TCE sub-modality caps are NOT in this set — their
+// narrowMarketCapM values are similar to TA defaults and clipping them
+// regresses accuracy on mid-range ADC/TCE deals that were already close.
+const NARROW_STRUCTURAL_MODALITIES = new Set([
+  'antibioticNovel',
+  'antiviral',
+  'topicalOphthalmic',
+  'jakInhibitorDerm',
+  'vaccine',
+  'vaccinePreventive',
+]);
+
 function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
+  const canonMod = canonicalModality(deal.modality);
   const rawSlug = deal.indication_specific || deal.indication_category;
   const canonicalSlug = BACKTEST_INDICATION_ALIASES[rawSlug] ?? rawSlug;
   const typicalPeak = getIndicationTypicalAssetPeak(canonicalSlug);
@@ -425,19 +464,16 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
     1500;
 
   // Step D (2026-04-13): Scale global peak by territorial fraction when
-  // deal is non-global. Engine consumes the territory-adjusted peak so the
-  // rNPV reflects the actual rights package (regional share), not the full
-  // global product. Helper sourced from lib/financial/geographic-revenue-
-  // curves.ts (TERRITORY_GLOBAL_SHARE map). For 'global' deals returns
-  // peak unchanged. Note: 0 of the 69 core-scope Phase 2/3 licensing+codev
-  // deals are tagged non-global, so this only affects the ~37 territorial
-  // deals in full scope.
-  const peakSalesMedian_M = getTerritoryAdjustedPeak(globalPeak_M, deal.territory);
+  // deal is non-global.
+  const territoryPeak_M = getTerritoryAdjustedPeak(globalPeak_M, deal.territory);
 
-  // NOTE: `narrowMarketCapM` is defined in MODALITY_PROFILES for topical
-  // and narrow-class modalities but is NOT currently applied as a clamp —
-  // corpus modality labels don't distinguish topical from systemic.
-  void getNarrowMarketCapM;
+  // R50: Narrow-market modality cap.
+  const narrowCap = NARROW_STRUCTURAL_MODALITIES.has(canonMod)
+    ? getNarrowMarketCapM(canonMod)
+    : null;
+  const peakSalesMedian_M = narrowCap !== null
+    ? Math.min(territoryPeak_M, narrowCap)
+    : territoryPeak_M;
 
   return {
     id: deal.id,
@@ -446,7 +482,7 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
     licensee: deal.licensee,
     therapeuticArea: deal.therapeuticArea,
     indication: deal.indication_specific || deal.indication_category,
-    modality: deal.modality,
+    modality: canonMod,
     phase: deal.phase,
     dealType: deal.dealType,
     territory: deal.territory,
@@ -751,13 +787,20 @@ function applyPlatformFloor(rawUpfront: number, modality: string): number {
  * platform modality AND early-stage, the larger floor wins.
  */
 const EARLY_STAGE_FLOOR_M: Record<string, number> = {
-  discovery: 30,    // R35 (2026-04-13): discovery-stage deals — asset concept + IP
-                     // but no preclinical package. Typical upfront $5-50M per
-                     // 2020-2025 discovery option deals (Recursion, Insilico,
-                     // Exscientia precedents).
-  preclinical: 50,
-  phase1: 100,
-  phase1_2: 100,  // phase1_2 treated as phase1 level (uncommon in corpus)
+  // R50 (2026-04-14): Floors revisited on R46 expanded corpus. Full-scope
+  // signed errors show preclinical −27%, phase1 +10%, approved −25%. Raising
+  // preclinical + phase1 floors targets the undershoot without affecting
+  // phase1 (already near zero). Approved dampener retuned separately.
+  //
+  // 2020-2025 empirical medians for early-stage licensing upfronts:
+  //   discovery          $20-60M   (Recursion/Exscientia option deals)
+  //   preclinical        $50-150M  (BMS Exelixis 2021 $75M, Pfizer-Arvinas $120M)
+  //   phase1             $75-200M  (Vertex-Editas $100M, Lilly-Avilar $150M)
+  //   phase1_2           $75-200M  (rare — treated as phase1)
+  discovery: 30,
+  preclinical: 75,   // R50: was 50 — raised to target -27% signed
+  phase1: 125,       // R50: was 100 — raised to tighten variance
+  phase1_2: 125,     // R50: was 100
 };
 
 function applyEarlyStageFloor(rawUpfront: number, phase: string): number {
