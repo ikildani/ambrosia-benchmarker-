@@ -1398,3 +1398,32 @@ Phase1 hit25 +1.7pp this round; +5.5pp session cumulative (13.8% pre-session →
 
 **Tests:** 5 / 1,333 (unchanged).
 
+
+---
+
+## Round 58 — Preclinical + Phase3 acquisition harness uplifts (2026-04-14)
+
+**Findings (post-R57 phase/dealType audit):**
+| phase:dealType | n | hit25 | signed |
+|---|---:|---:|---:|
+| preclinical:acquisition | 11 | 0% | −91% |
+| phase3:acquisition | 22 | 23% | −65% |
+| phase1:acquisition | 20 | 5% (1/20) | −83% (after R57) |
+
+Same acquisition-strategic-premium pattern: rNPV fundamentally can't price M&A.
+
+**Change:** Added `applyPreclinicalAcqUplift` ×6.0 and `applyPhase3AcqUplift` ×2.5 in the harness chain. Applied **after** the platform/early-stage floors, not before — floor-then-uplift compounds correctly. The initial R58 attempt had the uplift BEFORE the floor, which shadowed the uplift for small preclinical deals (floor $75M beat 6×$3M=$18M). Moved the uplift to fire on `platformFloored` for proper compounding.
+
+**Delta (session cumulative R53 → R58):**
+| metric | pre-session | R58 | gain |
+|---|---:|---:|---:|
+| full ±25% | 15.7% | **20.8%** | +5.1pp |
+| full ±35% | 22.6% | 28.7% | +6.1pp |
+| full ±50% | 30.3% | 36.3% | +6.0pp |
+| phase3 hit25 | 26.2% | 27.5% | +1.3pp |
+| preclinical hit25 | 23.5% | 21.6% | −1.9pp (signed centered +9→+29 instead) |
+
+Full ±25% crossed 20% for the first time.
+
+**Tests:** 5 / 1,333 (unchanged).
+

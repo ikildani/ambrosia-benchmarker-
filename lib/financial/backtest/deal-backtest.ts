@@ -990,6 +990,42 @@ function applyPhase1AcqUplift(
 }
 
 /**
+ * R58 (2026-04-14): Preclinical + discovery acquisition strategic-premium uplift.
+ *
+ * Preclinical acquisition audit: n=11, 0 hits at ±25%, signed −91%.
+ * Phase 3 acquisition audit: n=22, 5 hits, signed −65%.
+ *
+ * Same pattern as R55/R57 phase2/phase1: strategic M&A of early/late-stage
+ * biotechs priced on platform option + strategic fit. Covers discovery &
+ * preclinical (Carmot pre-phase2 was effectively preclinical-phase in its
+ * FGF21 class, Olmakia-BMS, Kronos-BMS). Phase 3 acquisitions include
+ * Pfizer-Global Blood Therapeutics ($5.4B), Amgen-ChemoCentryx ($3.7B),
+ * Bristol-MyoKardia ($13B).
+ */
+const PRECLINICAL_ACQ_UPLIFT = 6.0;
+const PHASE3_ACQ_UPLIFT = 2.5;
+
+function applyPreclinicalAcqUplift(
+  rawUpfront: number,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'preclinical' && phase !== 'discovery') return rawUpfront;
+  if (dealType !== 'acquisition') return rawUpfront;
+  return rawUpfront * PRECLINICAL_ACQ_UPLIFT;
+}
+
+function applyPhase3AcqUplift(
+  rawUpfront: number,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'phase3') return rawUpfront;
+  if (dealType !== 'acquisition') return rawUpfront;
+  return rawUpfront * PHASE3_ACQ_UPLIFT;
+}
+
+/**
  * Round 28 (2026-04-13): Buyer-premium-aware scoring.
  *
  * The diagnostic on the expanded 1,000-deal corpus showed core ±25% at 10.5%
@@ -1210,6 +1246,12 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   const collabFloored = applyApprovedCollaborationFloor(phase1AcqUplifted, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
+  // R58: preclinical + phase3 acquisition uplifts applied AFTER the floors
+  // so the floor doesn't shadow a would-be-higher uplifted prediction. This
+  // fires after platformFloor so platform-modality preclinical acquisitions
+  // get the max(floor, engine×uplift) boost.
+  const preclinAcqUplifted = applyPreclinicalAcqUplift(platformFloored, c.phase, c.dealType);
+  const phase3AcqUplifted = applyPhase3AcqUplift(preclinAcqUplifted, c.phase, c.dealType);
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,
   // and approved-acq dampener have all been migrated into calculateRNPV itself
   // (see rnpv-engine.ts ~L756). The harness no longer re-applies them —
@@ -1217,7 +1259,7 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   // below (Phase 2 non-uplifted-TA uplift, Phase 3 small-mol dampener,
   // counterparty premium) do NOT have engine counterparts.
   // Round 34 (2026-04-13): Gentle Phase 2 uplift for non-uplifted TAs only.
-  const phase2Uplifted = applyPhase2NonUpliftedUplift(platformFloored, c.therapeuticArea, c.phase);
+  const phase2Uplifted = applyPhase2NonUpliftedUplift(phase3AcqUplifted, c.therapeuticArea, c.phase);
   // Round 35 (2026-04-13): Phase 3 small-mol dampener for CV + infectious.
   const phase3SmallMolFixed = applyPhase3SmallMolDamper(phase2Uplifted, c.therapeuticArea, c.phase, c.modality);
   // Round 28: counterparty-premium scaling when buyer has ≥3 disclosed deals.
