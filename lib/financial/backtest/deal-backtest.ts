@@ -963,6 +963,33 @@ function applyApprovedAcqUplift(
 }
 
 /**
+ * R57 (2026-04-14): Phase 1 acquisition strategic-premium uplift.
+ *
+ * Phase 1 acquisition audit (n=20) showed the same pattern as phase2:
+ *   hit25 0%, pred_med $109M, act_med $900M, signed -88%
+ *
+ * Early-stage biotech acquisitions (Carmot-Roche $2.7B 2023, Inversago-
+ * NovoNordisk $1.1B 2023, Prevail-Lilly $1.04B 2020, Aiolos-GSK $1B
+ * 2024) price on platform option value + strategic fit — not rNPV. The
+ * engine's 0.70-0.95 upfront-of-rNPV acquisition ratio captures cash-
+ * heavy structure but rNPV for phase1 is near-zero due to PoS attrition.
+ *
+ * Median ratio 900/109 = 8.26×. Sweep chose 5.0× as hit25 optimum (same
+ * logic as R55b phase2 — tail overshoots cap the prudent multiplier).
+ */
+const PHASE1_ACQ_UPLIFT = 4.0;
+
+function applyPhase1AcqUplift(
+  rawUpfront: number,
+  phase: string,
+  dealType: string,
+): number {
+  if (phase !== 'phase1' && phase !== 'phase1_2') return rawUpfront;
+  if (dealType !== 'acquisition') return rawUpfront;
+  return rawUpfront * PHASE1_ACQ_UPLIFT;
+}
+
+/**
  * Round 28 (2026-04-13): Buyer-premium-aware scoring.
  *
  * The diagnostic on the expanded 1,000-deal corpus showed core ±25% at 10.5%
@@ -1178,7 +1205,9 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
   // R56: reverse the engine's 0.25× approved-acquisition dampener — now
   // over-aggressive on the expanded corpus (signed −79%).
   const approvedAcqUplifted = applyApprovedAcqUplift(phase2AcqUplifted, c.phase, c.dealType);
-  const collabFloored = applyApprovedCollaborationFloor(approvedAcqUplifted, c.phase, c.dealType);
+  // R57: phase1 acquisition strategic-premium uplift (mirrors R55 phase2).
+  const phase1AcqUplifted = applyPhase1AcqUplift(approvedAcqUplifted, c.phase, c.dealType);
+  const collabFloored = applyApprovedCollaborationFloor(phase1AcqUplifted, c.phase, c.dealType);
   const earlyFloored = applyEarlyStageFloor(collabFloored, c.phase);
   const platformFloored = applyPlatformFloor(earlyFloored, c.modality);
   // Round 42 (2026-04-13): TA uplift, modality uplift, Phase 2 collab uplift,

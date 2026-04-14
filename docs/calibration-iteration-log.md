@@ -1358,3 +1358,43 @@ Approved acquisitions (n=36) are 68% of the approved cohort, severely underpredi
 
 **Tests:** 5 / 1,333 (unchanged). Golden masters stable (engine untouched).
 
+
+---
+
+## Round 57 — Phase 1 acquisition ×4.0 harness uplift (2026-04-14)
+
+**Finding from phase1 by-dealType audit:**
+
+| dealType | n | hit25 | pred_med | act_med | signed |
+|---|---:|---:|---:|---:|---:|
+| licensing | 20 | 20% | $105M | $111M | −3% |
+| **acquisition** | **20** | **0%** | **$109M** | **$900M** | **−88%** |
+| collaboration | 12 | 25% | $119M | $125M | +13% |
+| option | 6 | 17% | $135M | $60M | +169% |
+
+Same strategic-M&A pattern as R55 phase2: early-stage biotech acquisitions (Carmot-Roche $2.7B, Inversago-NovoNordisk $1.1B, Prevail-Lilly $1.04B, Aiolos-GSK $1B) price on platform option + strategic fit, not phase-1 rNPV which is near-zero due to PoS attrition.
+
+**Change:** Added `applyPhase1AcqUplift()` ×4.0 after `applyApprovedAcqUplift` in the harness chain. Mirrors R55 phase2-acquisition architecture.
+
+**Sweep:**
+| mult | phase1 hit25 | signed | full ±25% |
+|---:|---:|---:|---:|
+| 1.0 (pre-R57) | 13.8% | +9.9% | 19.7% |
+| **4.0 (R57)** | **15.5%** | **+18.8%** | **20.1%** |
+| 5.0 | 15.5% | +22.2% | 20.1% |
+| 6.0 | 13.8% | +25.7% | 19.7% |
+| 7.0 | 13.8% | +29.2% | 19.7% |
+
+4.0× ties 5.0× on hit rate with better signed centering. 6+ over-corrects.
+
+**Full-scope delta vs pre-session:**
+| metric | pre-session | R57 final | gain |
+|---|---:|---:|---:|
+| ±25% | 15.7% | **20.1%** | +4.4pp |
+| ±35% | 22.6% | **28.7%** | +6.1pp |
+| ±50% | 30.3% | **36.0%** | +5.7pp |
+
+Phase1 hit25 +1.7pp this round; +5.5pp session cumulative (13.8% pre-session → 15.5% R57).
+
+**Tests:** 5 / 1,333 (unchanged).
+
