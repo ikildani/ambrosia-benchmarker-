@@ -972,3 +972,29 @@ Rules:
 - `lib/financial/rnpv-engine.ts` TA_UPLIFT_BY_PHASE — added neurology entry
 - `lib/financial/backtest/deal-backtest.ts` TA_EMPIRICAL_UPLIFT — mirror flag
 
+
+---
+
+## Round 44 — Per-indication TAM-share peak fallback (NULL RESULT, 2026-04-14)
+
+**Hypothesis:** Replace TA-default peak sales with `globalTAM_M × TYPICAL_ASSET_SHARE` from `INDICATION_MARKET_CAPS` Tier 1 data. Typical Phase 2/3 asset captures ~3-8% of class TAM at peak per Nat Rev Drug Discov 2024 class-concentration data. Expected to fix worst-10 specialty overshoots (immunology JAK-derm, ophthalmology topical, narrow metabolic) where TA averages dwarf actual indication TAM.
+
+**Change (reverted):** In `dealToCase()`, inserted a fallback step between `typicalAssetPeakSales_M` (explicit) and `PEAK_SALES_BY_TA_M[TA]` (TA default): `globalTAM_M × TYPICAL_ASSET_SHARE`.
+
+**Sweep results:**
+| share | core ±25% | core ±35% | core ±50% | median signed |
+|---:|---:|---:|---:|---:|
+| R43 baseline | 23.3% | 31.1% | 41.3% | −26.0% |
+| 0.05 | 20.4% | 27.7% | 37.4% | −33.5% |
+| 0.08 | 20.4% | 28.6% | 39.3% | −31.2% |
+| 0.12 | 22.8% | 29.1% | 40.3% | −26.0% |
+
+**Why null:** Every tested share regressed hit rates. The TA defaults in `PEAK_SALES_BY_TA_M` (R10-calibrated) are better aggregators than per-indication TAM × share because:
+1. Most indications in `INDICATION_MARKET_CAPS` are oncology (lung_nsclc $42B TAM, breast $14B, etc.) — 0.05 × $42B = $2,100M ≈ oncology TA default $2,500M. Nearly neutral for oncology (127 core deals).
+2. Non-oncology indications have narrow TAMs that, at share 0.05-0.12, produce peak sales LOWER than the TA default. This pushes signed error further negative for already-undershooting TAs (neurology, dermatology) and doesn't correct specialty overshoots enough to compensate.
+3. The explicit `typicalAssetPeakSales_M` field (14 curated values) already covers most of the overshoot-prone concentrated classes. Falling through to TA default for the rest was the correct design.
+
+**Decision:** Revert. The plan-file Round 4 hypothesis was a wrong model of where the accuracy gap lives. The remaining gap is distributional (small-n TA noise), not structural (indication peak anchor).
+
+**Next-round hypothesis to test instead:** counterparty-premium layer extension — the top-10 most-active buyers (Roche, Merck, BMS, Pfizer, J&J, Eli Lilly) have +25-60% premium over engine predictions. Current `applyCounterpartyPremium` only fires with ≥3 disclosed deals per buyer; loosening to ≥2 could cover ~20 more core deals.
+
