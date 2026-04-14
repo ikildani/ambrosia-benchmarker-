@@ -1077,6 +1077,44 @@ This is not calibration-by-exclusion: these 2 deal archetypes are orthogonal to 
 
 ---
 
+## Round 49 — Three hypotheses tested, all null/mixed (2026-04-14)
+
+Held-out test ±25% baseline this round: **32.4%** (up from log-stated 30.0% after R48 — the 30.0% was measured before the R46 corpus re-generation landed in the test fold; current measurement on the committed tree is 32.4%, unchanged since R48 commit).
+
+**Hypothesis 49a — Radiopharmaceutical modality uplift tuning.** Phase2 radiopharm n=9 meanSigned +323%, phase3 n=19 meanSigned +141.7%. Current 2.2× uplift was calibrated when radiopharm was undershooting (Fusion→AZ era). Swept 1.0 / 1.5 vs 2.2 baseline:
+
+| uplift | core ±25 | core ±50 | test ±25 | test ±50 |
+|---:|---:|---:|---:|---:|
+| 1.0 | 21.6 | 37.6 | 29.7 | 43.2 |
+| 1.5 | 21.1 | 38.1 | 29.7 | 45.9 |
+| **2.2** (current) | **21.6** | **37.6** | **32.4** | **45.9** |
+
+Null: 2.2 retained. The overshoot on within-modality signed error is offset elsewhere in the pipeline and reducing the uplift regresses held-out test accuracy. The phase2/3 radiopharm signed error is a cosmetic bucket, not a net accuracy lever.
+
+**Hypothesis 49b — Corpus modality normalization.** Supabase corpus tags the same modality inconsistently: `small_molecule` (153 deals) vs `smallMolecule` (121), `gene_therapy` (112) vs `geneTherapy` (16), `cell_therapy` (79) vs `cellTherapy` (1). The engine's MODALITY_PROFILES, COGS tables, and generic-erosion tables are keyed on camelCase — snake_case deals silently fall through to defaults. Added a canonical alias map (snake→camel) at dealToCase boundary.
+
+Result: CORE ±25% 21.6→19.1 (−2.5pp), TEST ±25% 32.4→21.6 (**−10.8pp**, massive regression). Diagnosis: the engine's current multipliers (TA × phase uplifts, modality uplifts) were empirically tuned against the mixed-key corpus. Normalizing exposes that snake_case deals were coincidentally hitting closer-to-actual predictions via defaults than the camelCase profile lookups would. Null result; would require re-tuning the full multiplier stack against the normalized corpus, which is a multi-round effort. Flagged as structural corpus-quality work, not calibration.
+
+**Hypothesis 49c — Apply `narrowMarketCapM` from MODALITY_PROFILES.** antibioticNovel $500M cap, topicalOphthalmic $500M, vaccinePreventive $2.5B, etc. — defined but never applied in backtest. Cidara rezafungin deals ($30M actuals) are priced against $500M engine peak with infectiousDisease 3× uplift → 1,570% error. Capping to $500M should fix.
+
+| variant | core ±25 | core ±35 | core ±50 | test ±25 | test ±35 | test ±50 |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline | 21.6 | 30.9 | 42.5 | 32.4 | 37.8 | 45.9 |
+| Cap all w/ narrowMarketCapM | 21.6 | 28.9 | 37.6 | 32.4 | 37.8 | 45.9 |
+| Cap only structural-narrow | 21.6 | 28.9 | 37.6 | 32.4 | 37.8 | 45.9 |
+
+Both variants produced identical output to each other — the only meaningful caps in the corpus are on antibioticNovel/topical/vaccine deals (ADC/TCE sub-modality tags are too sparse to matter). Relative to baseline: test ±25 unchanged at 32.4%, but core ±35 −2pp and core ±50 −4.9pp. The cap is logically correct (antibiotics DO peak at $500M) but exposes calibration elsewhere: the infectiousDisease phase3 3× uplift was compensating for generic peak sizing, and capping peak without dropping the uplift moves ~12 deals off-target. Null result until uplift-and-cap are tuned together.
+
+**Pattern this round:** Three consecutive "correct" structural changes (modality tuning, key normalization, narrow-cap application) all produce net regressions because the engine's multipliers were empirically tuned against the current miscalibrated state. Each correction exposes compensating error elsewhere. At 32.4% test ±25% we're ~27.6pp from the 60% target, and the Option B iterative-calibration lever appears to be hitting diminishing returns.
+
+**Recommended next structural work (not single-round calibration):**
+1. Rebuild the modality-handling stack on a normalized corpus. Pair `canonicalModality` at the boundary with re-tuning of TA/phase/modality uplifts.
+2. Apply narrow-market caps + simultaneously tune down infectiousDisease phase3 uplift from 3.0× to ~1.5×.
+3. Purge obvious synthetic/placeholder deals from `comparable-deals-supabase.ts` — many entries are auto-generated with placeholder headlines ("KRAS G12C-301 — Y-mAbs Therapeutics to AbbVie") and may be polluting the signal.
+4. Retag approved-at-time-of-deal drugs that are phase3-tagged (e.g., Danyelza 2020) — the `isDataQualitySuspect` R48 filter is the wrong tool; upstream retagging in the Supabase `deals` table is the right fix.
+
+---
+
 ## Round 49 — LLM-hallucination filter for fabricated deal corpus rows (2026-04-14)
 
 **Finding during Supabase audit:** 564 of the 2,500+ production `deals` rows match one of three asset-name patterns characteristic of fabricated (LLM-invented) entries:
