@@ -111,6 +111,26 @@ export default async function BriefPage({ params }: Props) {
     : 'Deal Brief';
   const phaseLabel = labels?.phase || '';
 
+  // Build LinkedIn-shareable insight card URL via /api/og/insight
+  const insightParams = new URLSearchParams();
+  insightParams.set('headline', `${labels?.modality ? labels.modality + ' ' : ''}${labels?.indication || 'Deal'} — fair value benchmark`);
+  if (totalDeal) {
+    insightParams.set('label', 'Fair Total Deal Value');
+    insightParams.set('primary', `${fmtMoney(totalDeal.low)} – ${fmtMoney(totalDeal.high)}`);
+  }
+  if (upfront) {
+    insightParams.set('secondary', `Implied upfront median ${fmtMoney(upfront.median)} · benchmarked across 1,000+ disclosed deals`);
+  }
+  if (labels) {
+    const attrParts = [labels.phase, labels.indication, labels.modality].filter(Boolean);
+    if (attrParts.length > 0) {
+      insightParams.set('attribution', attrParts.join(' • '));
+    }
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+  const insightCardUrl = `${baseUrl}/api/og/insight?${insightParams.toString()}`;
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${baseUrl}/brief/${token}`)}`;
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       {/* Mobile-first hero — readable on phone in 5 seconds */}
@@ -204,6 +224,45 @@ export default async function BriefPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* Shareable LinkedIn insight card preview */}
+      <section className="border-t border-slate-800/60 px-5 py-8">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Share on LinkedIn
+          </h2>
+          <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/40">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={insightCardUrl}
+              alt="LinkedIn insight card preview"
+              className="w-full"
+            />
+          </div>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <a
+              href={linkedInShareUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex-1 rounded-lg bg-[#0A66C2] px-4 py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              Post to LinkedIn →
+            </a>
+            <a
+              href={insightCardUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              download
+              className="flex-1 rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2.5 text-center text-sm text-slate-200 transition-colors hover:bg-slate-900"
+            >
+              Download card
+            </a>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            1200×630 branded image. LinkedIn auto-picks up via OG tags when you post the /brief link, or attach this image directly.
+          </p>
+        </div>
+      </section>
 
       {/* CTAs — three clear next moves */}
       <section className="px-5 py-8">

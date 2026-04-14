@@ -47,6 +47,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
+// Internal diagnostic page — render on-demand so loader runs with latest
+// baseline-errors.json state instead of being frozen at build time.
+export const dynamic = 'force-dynamic';
+
 const TARGETS = { hit25: 0.60, hit35: 0.70, hit50: 0.80 };
 
 function formatDate(iso: string): string {
