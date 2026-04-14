@@ -9,7 +9,7 @@
  * disclosed upfront + total value, announced 2020+, recognizable phase and
  * deal type. De-duplicated on (licensor, licensee, year, upfront).
  *
- * Generated: 2026-04-14T19:16:34.966Z
+ * Generated: 2026-04-14T19:27:24.985Z
  * Row count: 375
  *
  * @module data/comparable-deals-supabase
@@ -7482,7 +7482,7 @@ export const SUPABASE_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
 
 export const SUPABASE_CORPUS_STATS = {
   totalDeals: 375,
-  generatedAt: '2026-04-14T19:16:34.970Z',
+  generatedAt: '2026-04-14T19:27:24.989Z',
   sourceProject: 'mnzoulengniofgkwtfbo',
   dedupedDuplicates: 0,
 } as const;

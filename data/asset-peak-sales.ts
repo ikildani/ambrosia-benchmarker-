@@ -202,6 +202,135 @@ export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
   { brand: 'Ivonescimab', inn: 'ivonescimab', codes: ['AK112'], peakSales_M: 6000, therapeuticArea: 'oncology', source: 'Akeso/Summit PD-1×VEGF — beat Keytruda in HARMONi-2 — analyst peak $5-8B' },
   { brand: 'Golcadomide', inn: 'golcadomide', codes: ['CC-99282'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS CELMoD — lymphoma — analyst peak $2-3B' },
   { brand: 'Mezigdomide', inn: 'mezigdomide', codes: ['CC-92480'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS CELMoD — MM — analyst peak $2-3B' },
+
+  // ─── R62 EXPANSION (2026-04-14) — 80+ additional entries ─────────────
+  // Sourced from: 2024 10-K product revenues (still-current) + JPM Healthcare
+  // 2025 analyst decks + Barclays/Jefferies/Evercore ISI peak projections
+  // (publicly cited in BioCentury, Endpoints News, FierceBiotech).
+
+  // ─── Oncology — more TKIs / small mol ────────────────────────────
+  { brand: 'Braftovi', inn: 'encorafenib', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Pfizer 2024 — $600M growing (CRC/melanoma BRAF)' },
+  { brand: 'Mektovi', inn: 'binimetinib', codes: [], peakSales_M: 800, therapeuticArea: 'oncology', source: 'Pfizer 2024 — MEK inhibitor combos' },
+  { brand: 'Tabrecta', inn: 'capmatinib', codes: [], peakSales_M: 400, therapeuticArea: 'oncology', source: 'Novartis 2024 — MET NSCLC' },
+  { brand: 'Tepmetko', inn: 'tepotinib', codes: [], peakSales_M: 500, therapeuticArea: 'oncology', source: 'Merck KGaA 2024 — MET NSCLC' },
+  { brand: 'Retevmo', inn: 'selpercatinib', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Eli Lilly 2024 — $700M growing (RET NSCLC/MTC)' },
+  { brand: 'Gavreto', inn: 'pralsetinib', codes: [], peakSales_M: 500, therapeuticArea: 'oncology', source: 'Roche/Blueprint 2024 — RET' },
+  { brand: 'Lorbrena', inn: 'lorlatinib', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Pfizer 2024 — $850M (ALK NSCLC)' },
+  { brand: 'Alecensa', inn: 'alectinib', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Roche 2024 — $1.8B (ALK NSCLC)' },
+  { brand: 'Rozlytrek', inn: 'entrectinib', codes: [], peakSales_M: 400, therapeuticArea: 'oncology', source: 'Roche 2024 — TRK/ROS1' },
+  { brand: 'Vitrakvi', inn: 'larotrectinib', codes: [], peakSales_M: 400, therapeuticArea: 'oncology', source: 'Bayer/Loxo 2024 — TRK fusion' },
+  { brand: 'Krazati', inn: 'adagrasib', codes: ['MRTX-849'], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'BMS/Mirati 2024 — KRAS G12C NSCLC, CRC' },
+  { brand: 'Lumakras', inn: 'sotorasib', codes: ['AMG-510'], peakSales_M: 1000, therapeuticArea: 'oncology', source: 'Amgen 2024 — $200M first-gen KRAS G12C' },
+  { brand: 'Divarasib', inn: 'divarasib', codes: ['GDC-6036'], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Roche KRAS G12C phase 3 — analyst peak $3-4B' },
+  { brand: 'Mirdametinib', inn: 'mirdametinib', codes: ['PD-0325901'], peakSales_M: 1000, therapeuticArea: 'oncology', source: 'SpringWorks MEK NF1-PN — analyst peak $1B' },
+  { brand: 'Vimseltinib', inn: 'vimseltinib', codes: ['DCC-3014'], peakSales_M: 500, therapeuticArea: 'oncology', source: 'Deciphera TGCT — analyst peak $500M' },
+  { brand: 'Niraparib', inn: 'niraparib', codes: [], peakSales_M: 1000, therapeuticArea: 'oncology', source: 'GSK Zejula 2024 — PARP ovarian' },
+  { brand: 'Zejula', inn: 'niraparib', codes: [], peakSales_M: 1000, therapeuticArea: 'oncology', source: 'GSK 2024 — $700M' },
+  { brand: 'Rubraca', inn: 'rucaparib', codes: [], peakSales_M: 300, therapeuticArea: 'oncology', source: 'Clovis post-bankruptcy' },
+
+  // ─── Oncology — more ADC / bispecific / cell therapy ─────────────
+  { brand: 'Polivy', inn: 'polatuzumab vedotin', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Roche 2024 — $900M growing (DLBCL)' },
+  { brand: 'Blenrep', inn: 'belantamab mafodotin', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'GSK 2024 re-launch (BCMA ADC MM)' },
+  { brand: 'Columvi', inn: 'glofitamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Roche 2024 — CD20xCD3 bispecific DLBCL' },
+  { brand: 'Talvey', inn: 'talquetamab', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'J&J 2024 — GPRC5D×CD3 MM' },
+  { brand: 'Elrexfio', inn: 'elranatamab', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Pfizer 2024 — BCMA×CD3 MM' },
+  { brand: 'Erleada', inn: 'apalutamide', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'J&J 2024 — $2.4B (AR prostate)' },
+  { brand: 'Nubeqa', inn: 'darolutamide', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Bayer/Orion 2024 — $1.5B growing (AR prostate)' },
+  { brand: 'Xtandi', inn: 'enzalutamide', codes: [], peakSales_M: 7000, therapeuticArea: 'oncology', source: 'Astellas/Pfizer 2024 — $6.5B (AR prostate)' },
+  { brand: 'Pluvicto', inn: 'lutetium-177-PSMA-617', codes: [], peakSales_M: 5000, therapeuticArea: 'oncology', source: 'Novartis 2024 — $1.4B growing (PSMA radiopharm prostate)' },
+  { brand: 'Lutathera', inn: 'lutetium-177-dotatate', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Novartis 2024 — $680M (NET radiopharm)' },
+  { brand: 'Vanflyta', inn: 'quizartinib', codes: [], peakSales_M: 500, therapeuticArea: 'oncology', source: 'Daiichi 2024 — FLT3 AML' },
+  { brand: 'Rezlidhia', inn: 'olutasidenib', codes: [], peakSales_M: 300, therapeuticArea: 'oncology', source: 'Rigel 2024 — IDH1 AML' },
+  { brand: 'Tibsovo', inn: 'ivosidenib', codes: [], peakSales_M: 600, therapeuticArea: 'oncology', source: 'Servier 2024 — IDH1 AML/cholangiocarcinoma' },
+
+  // ─── Immunology — more ────────────────────────────────────────────
+  { brand: 'Xeljanz', inn: 'tofacitinib', codes: [], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'Pfizer 2024 — $1.7B (JAK RA/UC)' },
+  { brand: 'Olumiant', inn: 'baricitinib', codes: [], peakSales_M: 1200, therapeuticArea: 'immunology', source: 'Eli Lilly 2024 — $900M' },
+  { brand: 'Cibinqo', inn: 'abrocitinib', codes: [], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Pfizer 2024 — JAK AD' },
+  { brand: 'Kevzara', inn: 'sarilumab', codes: [], peakSales_M: 600, therapeuticArea: 'immunology', source: 'Sanofi/Regeneron 2024 — IL-6 RA' },
+  { brand: 'Actemra', inn: 'tocilizumab', codes: [], peakSales_M: 2500, therapeuticArea: 'immunology', source: 'Roche 2024 — post-biosimilar' },
+  { brand: 'Simponi', inn: 'golimumab', codes: [], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'J&J 2024 — post-biosimilar TNF' },
+  { brand: 'Nucala', inn: 'mepolizumab', codes: [], peakSales_M: 2200, therapeuticArea: 'immunology', source: 'GSK 2024 — $1.9B (IL-5 eosinophilic)' },
+  { brand: 'Fasenra', inn: 'benralizumab', codes: [], peakSales_M: 2500, therapeuticArea: 'immunology', source: 'AstraZeneca 2024 — $2.1B' },
+  { brand: 'Tezspire', inn: 'tezepelumab', codes: [], peakSales_M: 3500, therapeuticArea: 'immunology', source: 'AstraZeneca/Amgen 2024 — $900M growing (TSLP asthma)' },
+  { brand: 'Evenity', inn: 'romosozumab', codes: [], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Amgen/UCB 2024 — sclerostin osteoporosis' },
+  { brand: 'Prolia', inn: 'denosumab', codes: [], peakSales_M: 4500, therapeuticArea: 'immunology', source: 'Amgen 2024 — $4.3B osteoporosis' },
+  { brand: 'Xgeva', inn: 'denosumab (oncology)', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Amgen 2024 — bone metastasis' },
+
+  // ─── Neurology — more ────────────────────────────────────────────
+  { brand: 'Tafinlar', inn: 'dabrafenib', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Novartis 2024 — BRAF combo (moved from onc per indication)' },
+  { brand: 'Qulipta', inn: 'atogepant', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'AbbVie 2024 — $550M growing (CGRP migraine)' },
+  { brand: 'Ubrelvy', inn: 'ubrogepant', codes: [], peakSales_M: 1500, therapeuticArea: 'neurology', source: 'AbbVie 2024 — acute migraine CGRP' },
+  { brand: 'Nurtec', inn: 'rimegepant', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'Pfizer 2024 — $1.3B growing' },
+  { brand: 'Aimovig', inn: 'erenumab', codes: [], peakSales_M: 1200, therapeuticArea: 'neurology', source: 'Amgen/Novartis 2024 — CGRP migraine prev' },
+  { brand: 'Ajovy', inn: 'fremanezumab', codes: [], peakSales_M: 800, therapeuticArea: 'neurology', source: 'Teva 2024 — CGRP' },
+  { brand: 'Emgality', inn: 'galcanezumab', codes: [], peakSales_M: 900, therapeuticArea: 'neurology', source: 'Eli Lilly 2024 — CGRP' },
+  { brand: 'Mayzent', inn: 'siponimod', codes: [], peakSales_M: 800, therapeuticArea: 'neurology', source: 'Novartis 2024 — SPMS S1P' },
+  { brand: 'Ponvory', inn: 'ponesimod', codes: [], peakSales_M: 300, therapeuticArea: 'neurology', source: 'J&J 2024 — S1P MS' },
+  { brand: 'Zeposia', inn: 'ozanimod', codes: [], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'BMS 2024 — $460M growing (S1P MS/UC)' },
+  { brand: 'Kesimpta', inn: 'ofatumumab', codes: [], peakSales_M: 4000, therapeuticArea: 'neurology', source: 'Novartis 2024 — $2.2B growing (anti-CD20 MS)' },
+  { brand: 'Briumvi', inn: 'ublituximab', codes: [], peakSales_M: 500, therapeuticArea: 'neurology', source: 'TG Therapeutics 2024' },
+
+  // ─── Metabolic / CF — more ────────────────────────────────────────
+  { brand: 'Kalydeco', inn: 'ivacaftor', codes: [], peakSales_M: 1500, therapeuticArea: 'rareDisease', source: 'Vertex 2024 — CFTR G551D' },
+  { brand: 'Symdeko', inn: 'tezacaftor/ivacaftor', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Vertex 2024 — CF' },
+  { brand: 'Orkambi', inn: 'lumacaftor/ivacaftor', codes: [], peakSales_M: 400, therapeuticArea: 'rareDisease', source: 'Vertex 2024 post-Trikafta' },
+  { brand: 'Journavx', inn: 'suzetrigine', codes: ['VX-548'], peakSales_M: 5000, therapeuticArea: 'pain_management', source: 'Vertex 2025 launch — Nav1.8 non-opioid pain, analyst peak $5B' },
+  { brand: 'Sotyktu', inn: 'deucravacitinib', codes: [], peakSales_M: 4000, therapeuticArea: 'immunology', source: 'BMS 2024 — $1.2B growing (TYK2 psoriasis)' },
+  { brand: 'Tremfya', inn: 'guselkumab (expansion)', codes: [], peakSales_M: 4500, therapeuticArea: 'immunology', source: 'J&J 2024 — IL-23 franchise' },
+
+  // ─── Cardiovascular / factor XI / Lp(a) ───────────────────────────
+  { brand: 'Olpasiran', inn: 'olpasiran', codes: ['AMG-890'], peakSales_M: 3500, therapeuticArea: 'cardiovascular', source: 'Amgen Lp(a) siRNA phase 3 — analyst peak $3-4B' },
+  { brand: 'Pelacarsen', inn: 'pelacarsen', codes: ['TQJ-230'], peakSales_M: 4000, therapeuticArea: 'cardiovascular', source: 'Novartis/Akcea Lp(a) ASO phase 3 — analyst peak $3-5B' },
+  { brand: 'Lepodisiran', inn: 'lepodisiran', codes: ['LY3561774'], peakSales_M: 3500, therapeuticArea: 'cardiovascular', source: 'Eli Lilly Lp(a) siRNA — analyst peak' },
+  { brand: 'Plozasiran', inn: 'plozasiran', codes: ['ARO-APOC3'], peakSales_M: 2000, therapeuticArea: 'cardiovascular', source: 'Arrowhead/Amgen APOC3 siRNA — analyst peak $2B' },
+  { brand: 'Olezarsen', inn: 'olezarsen', codes: [], peakSales_M: 1500, therapeuticArea: 'cardiovascular', source: 'Ionis APOC3 ASO FCS — analyst peak' },
+  { brand: 'Tryngolza', inn: 'olezarsen', codes: [], peakSales_M: 1500, therapeuticArea: 'cardiovascular', source: 'Ionis 2024 launch — FCS' },
+  { brand: 'Mavyret', inn: 'glecaprevir/pibrentasvir', codes: [], peakSales_M: 2000, therapeuticArea: 'infectiousDisease', source: 'AbbVie 2024 — HCV' },
+
+  // ─── Rare disease / gene therapy — more ──────────────────────────
+  { brand: 'Vyjuvek', inn: 'beremagene geperpavec', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Krystal Bio DEB gene therapy 2024' },
+  { brand: 'Upstaza', inn: 'eladocagene exuparvovec', codes: [], peakSales_M: 300, therapeuticArea: 'rareDisease', source: 'PTC AADC gene therapy' },
+  { brand: 'Elfabrio', inn: 'pegunigalsidase alfa', codes: [], peakSales_M: 500, therapeuticArea: 'rareDisease', source: 'Chiesi/Protalix Fabry' },
+  { brand: 'Xenpozyme', inn: 'olipudase alfa', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Sanofi ASMD 2024' },
+  { brand: 'Joenja', inn: 'leniolisib', codes: [], peakSales_M: 400, therapeuticArea: 'rareDisease', source: 'Pharming APDS' },
+  { brand: 'Skyclarys', inn: 'omaveloxolone', codes: [], peakSales_M: 1200, therapeuticArea: 'rareDisease', source: 'Reata/Biogen 2024 — Friedreich ataxia' },
+  { brand: 'Pombiliti', inn: 'cipaglucosidase alfa', codes: [], peakSales_M: 500, therapeuticArea: 'rareDisease', source: 'Amicus Pompe' },
+  { brand: 'Elevidys', inn: 'delandistrogene moxeparvovec (expansion)', codes: [], peakSales_M: 4000, therapeuticArea: 'rareDisease', source: 'Sarepta DMD — expanded analyst peak $3-5B' },
+
+  // ─── Dermatology / topical ────────────────────────────────────────
+  { brand: 'Vtama', inn: 'tapinarof', codes: [], peakSales_M: 1200, therapeuticArea: 'dermatology', source: 'Organon/Dermavant — AhR psoriasis/AD' },
+  { brand: 'Zoryve', inn: 'roflumilast', codes: [], peakSales_M: 1500, therapeuticArea: 'dermatology', source: 'Arcutis 2024 — PDE4 topical psoriasis/AD' },
+  { brand: 'Opzelura', inn: 'ruxolitinib topical', codes: [], peakSales_M: 2000, therapeuticArea: 'dermatology', source: 'Incyte 2024 — $520M growing (JAK topical)' },
+  { brand: 'Winlevi', inn: 'clascoterone', codes: [], peakSales_M: 400, therapeuticArea: 'dermatology', source: 'Cassiopea acne AR' },
+
+  // ─── Infectious disease / antivirals ─────────────────────────────
+  { brand: 'Lagevrio', inn: 'molnupiravir', codes: [], peakSales_M: 1500, therapeuticArea: 'infectiousDisease', source: 'Merck 2024 — post-COVID decline' },
+  { brand: 'Remdesivir', inn: 'remdesivir', codes: [], peakSales_M: 2500, therapeuticArea: 'infectiousDisease', source: 'Gilead Veklury 2024' },
+  { brand: 'Veklury', inn: 'remdesivir', codes: [], peakSales_M: 2500, therapeuticArea: 'infectiousDisease', source: 'Gilead 2024 — $1.6B COVID antiviral' },
+  { brand: 'Shingrix', inn: 'zoster recombinant', codes: [], peakSales_M: 4500, therapeuticArea: 'infectiousDisease', source: 'GSK 2024 — $4.2B vaccine' },
+  { brand: 'Prevnar', inn: 'pneumococcal conjugate', codes: [], peakSales_M: 6500, therapeuticArea: 'infectiousDisease', source: 'Pfizer 2024 — $6.5B vaccine' },
+  { brand: 'Arexvy', inn: 'RSV vaccine adults', codes: [], peakSales_M: 3500, therapeuticArea: 'infectiousDisease', source: 'GSK 2024 — $1.6B launch' },
+  { brand: 'Abrysvo', inn: 'RSV vaccine adults/maternal', codes: [], peakSales_M: 3000, therapeuticArea: 'infectiousDisease', source: 'Pfizer 2024 — $890M growing' },
+  { brand: 'mRESVIA', inn: 'mRNA RSV vaccine', codes: ['mRNA-1345'], peakSales_M: 2000, therapeuticArea: 'infectiousDisease', source: 'Moderna 2024 approval' },
+  { brand: 'Beyfortus', inn: 'nirsevimab', codes: [], peakSales_M: 2500, therapeuticArea: 'infectiousDisease', source: 'Sanofi/AZ 2024 — $1.7B infant RSV mAb' },
+
+  // ─── Nephrology / renal ─────────────────────────────────────────
+  { brand: 'Filspari', inn: 'sparsentan', codes: [], peakSales_M: 1500, therapeuticArea: 'nephrology', source: 'Travere IgA nephropathy — analyst peak $1.5B' },
+  { brand: 'Tarpeyo', inn: 'budesonide delayed-release', codes: [], peakSales_M: 1000, therapeuticArea: 'nephrology', source: 'Calliditas IgA nephropathy' },
+  { brand: 'Atrasentan', inn: 'atrasentan', codes: [], peakSales_M: 1500, therapeuticArea: 'nephrology', source: 'Novartis/Chinook IgA nephropathy phase 3' },
+  { brand: 'Sibeprenlimab', inn: 'sibeprenlimab', codes: ['VIS649'], peakSales_M: 2500, therapeuticArea: 'nephrology', source: 'Visterra/Otsuka APRIL IgAN phase 3' },
+
+  // ─── Pulmonology ────────────────────────────────────────────────
+  { brand: 'Ofev', inn: 'nintedanib', codes: [], peakSales_M: 4500, therapeuticArea: 'pulmonology', source: 'Boehringer 2024 — $4.1B IPF' },
+  { brand: 'Esbriet', inn: 'pirfenidone', codes: [], peakSales_M: 1500, therapeuticArea: 'pulmonology', source: 'Roche 2024 — post-generic IPF' },
+
+  // ─── Ophthalmology — more ────────────────────────────────────────
+  { brand: 'Beovu', inn: 'brolucizumab', codes: [], peakSales_M: 500, therapeuticArea: 'ophthalmology', source: 'Novartis 2024 — anti-VEGF nAMD (post-safety-signal)' },
+  { brand: 'Durysta', inn: 'bimatoprost intracameral', codes: [], peakSales_M: 300, therapeuticArea: 'ophthalmology', source: 'AbbVie 2024' },
+  { brand: 'Cequa', inn: 'cyclosporine', codes: [], peakSales_M: 400, therapeuticArea: 'ophthalmology', source: 'Sun dry eye' },
+  { brand: 'Miebo', inn: 'perfluorohexyloctane', codes: [], peakSales_M: 800, therapeuticArea: 'ophthalmology', source: 'Bausch dry eye 2024' },
+  { brand: 'Xdemvy', inn: 'lotilaner', codes: [], peakSales_M: 600, therapeuticArea: 'ophthalmology', source: 'Tarsus Demodex blepharitis 2024' },
 ];
 
 // ---------------------------------------------------------------------------
