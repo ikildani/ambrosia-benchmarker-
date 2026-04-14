@@ -1445,3 +1445,42 @@ Every dampener regressed hit rates across scales. Root cause: the +56% signed is
 
 **Tests:** 5 / 1,333 (unchanged).
 
+
+---
+
+## Round 60 — Asset-specific peak-sales override (R60, 2026-04-14)
+
+**Problem:** The engine's rNPV anchors on `peak_sales_M`, which today resolves to an indication-level `typicalAssetPeakSales_M` or a TA default (e.g., oncology = $2,500M). This flattens legitimate per-asset variance:
+
+| Asset | Actual / peak | TA default used | Delta |
+|---|---:|---:|---:|
+| Opdivo (PD-1) | $9.3B 2024 | $2.5B | 3.7× |
+| Enhertu (HER2 ADC) | $12B peak | $2.5B | 4.8× |
+| Phase 2 MDM2 candidate | $200-400M realistic | $2.5B | 0.1-0.2× |
+
+25× spread collapsed to a single number.
+
+**Change:** Added `data/asset-peak-sales.ts` with a curated 82-entry blockbuster table (brands + INN + dev codes), sourced from 2024 10-K annual report disclosures and EvaluatePharma-cited analyst peaks. Wired `lookupAssetPeakSales_M` into `dealToCase` as top-priority override before `getIndicationTypicalAssetPeak` and `PEAK_SALES_BY_TA_M`.
+
+Coverage: Keytruda, Opdivo, Enhertu, Trodelvy, Padcev, Imbruvica, Tagrisso, Dupixent, Skyrizi, Humira, Ozempic, Mounjaro, Zepbound, Eliquis, Entresto, Leqembi, Ocrevus, Vabysmo, Eylea, Biktarvy, Trikafta, Casgevy, Carvykti, Tecvayli, and 58 others.
+
+**Match rate:** 7 / 354 deals in current Supabase corpus — most corpus deals are pre-approval (asset codes like "TUB-040", "BNT327", "KT-200", etc. don't match branded entries). Every match delivers meaningful peak-sales correction.
+
+**Delta:**
+| metric | R59 (rev) | R60 |
+|---|---:|---:|
+| full ±25% | 20.8% | **21.1%** |
+| full ±35% | 28.7% | **29.4%** |
+| full ±50% | 36.3% | **37.4%** |
+| approved hit25 | 18.9% | **20.8%** |
+| core ±25% | 22.9% | 22.9% |
+
+Approved hit25 +1.9pp — blockbusters show up disproportionately in approved deals (territorial re-licensing of Keytruda, Dupixent, etc.).
+
+**Tests:** 5 / 1,333 (unchanged).
+
+**Follow-up opportunities:**
+1. Expand the table with Phase 3 assets (analyst peak projections, not actuals): Telavant TL1A, Morphic α4β7, Cerevel emraclidine, etc. Each additional entry that matches a real deal gives per-asset correction.
+2. Supabase enrichment: populate `peakSalesConsensus_M` column on `deals` so the production calculator uses the same overrides as the backtest.
+3. Fuzzy-match fallback for INN variants (`trastuzumab-deruxtecan` vs `T-DXd` vs `Enhertu`).
+

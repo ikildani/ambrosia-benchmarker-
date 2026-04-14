@@ -1,0 +1,223 @@
+/**
+ * Asset-level peak sales consensus (R60 — 2026-04-14).
+ *
+ * The engine's rNPV anchors on peak_sales_M, which today uses either an
+ * indication-level `typicalAssetPeakSales_M` or a TA default. This flattens
+ * enormous real-world variance:
+ *
+ *   Opdivo (approved onc PD-1):         $9.3B 2024 actual
+ *   Enhertu (approved onc HER2 ADC):    $3.8B 2024 growing to ~$15B peak
+ *   Phase 2 MDM2 oncology candidate:    $200-400M realistic peak
+ *
+ * Using "oncology = $2,500M" for all three is a 25× compression of legitimate
+ * per-asset variance.
+ *
+ * This file exposes an asset-specific peak-sales override. Matched by
+ * normalized asset name (lowercase, ASCII-folded, brand OR INN). When
+ * matched, the backtest harness uses this value instead of the TA default.
+ *
+ * Sources: 2024 10-K annual report product revenues (Merck, BMS, Roche,
+ * AbbVie, Novo Nordisk, Eli Lilly, Pfizer, J&J, Gilead, AstraZeneca,
+ * Sanofi, Regeneron, Amgen). Peak projections for still-growing drugs
+ * taken from EvaluatePharma World Preview 2024-2025 (publicly cited in
+ * trade press) and company-disclosed 5-year guidance. No non-public
+ * proprietary data used.
+ *
+ * Coverage: the 50 most-cited blockbuster drugs. Does NOT purport to
+ * cover every asset in the backtest corpus — unmatched assets fall
+ * through to indication/TA defaults.
+ */
+
+export interface AssetPeakSalesEntry {
+  /** Brand name (e.g., 'Keytruda'). */
+  brand: string;
+  /** INN / generic name (e.g., 'pembrolizumab'). */
+  inn: string;
+  /** Company-recognized development code(s), if any. */
+  codes: string[];
+  /** Peak-sales anchor in $M — analyst consensus or actual 2024 sales for
+   * mature drugs, or 3-5 year projected peak for still-growing drugs. */
+  peakSales_M: number;
+  /** Therapeutic area (for sanity checks). */
+  therapeuticArea: string;
+  /** Short source citation. */
+  source: string;
+}
+
+/**
+ * Blockbuster asset table. Key = entry identifier; matched against the
+ * normalized asset_name / headline of the deal via `lookupAssetPeakSales()`.
+ */
+export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
+  // ─── Oncology (IO / targeted) ─────────────────────────────────────
+  { brand: 'Keytruda', inn: 'pembrolizumab', codes: ['MK-3475'], peakSales_M: 30000, therapeuticArea: 'oncology', source: 'Merck 2024 10-K — $29.5B 2024 actual; growing' },
+  { brand: 'Opdivo', inn: 'nivolumab', codes: ['BMS-936558'], peakSales_M: 10000, therapeuticArea: 'oncology', source: 'BMS 2024 10-K — $9.3B 2024 actual' },
+  { brand: 'Tecentriq', inn: 'atezolizumab', codes: [], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'Roche 2024 annual — ~$4B' },
+  { brand: 'Yervoy', inn: 'ipilimumab', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS 2024 10-K — $2.4B' },
+  { brand: 'Libtayo', inn: 'cemiplimab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Regeneron 2024 10-K — $1.3B growing' },
+
+  // ─── Oncology ADCs / targeted ────────────────────────────────────
+  { brand: 'Enhertu', inn: 'trastuzumab deruxtecan', codes: ['DS-8201'], peakSales_M: 12000, therapeuticArea: 'oncology', source: 'Daiichi/AZ 2024 — $3.8B actual; EvaluatePharma peak $12B' },
+  { brand: 'Kadcyla', inn: 'trastuzumab emtansine', codes: ['T-DM1'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Roche 2024' },
+  { brand: 'Trodelvy', inn: 'sacituzumab govitecan', codes: ['IMMU-132'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Gilead 2024 10-K — $1.3B; analyst peak $2.5B' },
+  { brand: 'Padcev', inn: 'enfortumab vedotin', codes: ['ASG-22CE'], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Pfizer/Astellas 2024 — $1.8B growing' },
+  { brand: 'Elahere', inn: 'mirvetuximab soravtansine', codes: ['IMGN853'], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'AbbVie 2024 — $500M growing' },
+  { brand: 'Tivdak', inn: 'tisotumab vedotin', codes: [], peakSales_M: 500, therapeuticArea: 'oncology', source: 'Seagen/Pfizer 2024' },
+  { brand: 'Lunsumio', inn: 'mosunetuzumab', codes: [], peakSales_M: 800, therapeuticArea: 'oncology', source: 'Roche 2024' },
+
+  // ─── Oncology TKIs / small mol ────────────────────────────────────
+  { brand: 'Tagrisso', inn: 'osimertinib', codes: ['AZD9291'], peakSales_M: 7000, therapeuticArea: 'oncology', source: 'AstraZeneca 2024 — $6.5B actual' },
+  { brand: 'Imbruvica', inn: 'ibrutinib', codes: [], peakSales_M: 4500, therapeuticArea: 'oncology', source: 'AbbVie/J&J 2024 — $4.2B declining' },
+  { brand: 'Revlimid', inn: 'lenalidomide', codes: [], peakSales_M: 6000, therapeuticArea: 'oncology', source: 'BMS 2024 — $6.3B (post-generic decline)' },
+  { brand: 'Pomalyst', inn: 'pomalidomide', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'BMS 2024 — $3.4B' },
+  { brand: 'Venclexta', inn: 'venetoclax', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'AbbVie 2024 — $2.4B' },
+  { brand: 'Darzalex', inn: 'daratumumab', codes: [], peakSales_M: 12000, therapeuticArea: 'oncology', source: 'J&J 2024 10-K — $11.7B' },
+  { brand: 'Calquence', inn: 'acalabrutinib', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'AstraZeneca 2024 — $3B growing' },
+  { brand: 'Lynparza', inn: 'olaparib', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'AstraZeneca 2024 — $3.3B' },
+
+  // ─── Oncology cell therapy / bispecifics ──────────────────────────
+  { brand: 'Carvykti', inn: 'ciltacabtagene autoleucel', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Legend/J&J 2024 — $960M growing; peak $3B' },
+  { brand: 'Abecma', inn: 'idecabtagene vicleucel', codes: [], peakSales_M: 600, therapeuticArea: 'oncology', source: 'BMS 2024 — $406M' },
+  { brand: 'Yescarta', inn: 'axicabtagene ciloleucel', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Gilead Kite 2024 — $1.5B' },
+  { brand: 'Breyanzi', inn: 'lisocabtagene maraleucel', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'BMS 2024 — $750M growing' },
+  { brand: 'Tecvayli', inn: 'teclistamab', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'J&J 2024 — $820M growing' },
+  { brand: 'Epkinly', inn: 'epcoritamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'AbbVie 2024' },
+
+  // ─── Immunology ──────────────────────────────────────────────────
+  { brand: 'Humira', inn: 'adalimumab', codes: [], peakSales_M: 10000, therapeuticArea: 'immunology', source: 'AbbVie 2024 — $9B (post-biosimilar)' },
+  { brand: 'Dupixent', inn: 'dupilumab', codes: [], peakSales_M: 20000, therapeuticArea: 'immunology', source: 'Sanofi/Regeneron 2024 — $14.2B growing' },
+  { brand: 'Skyrizi', inn: 'risankizumab', codes: [], peakSales_M: 17000, therapeuticArea: 'immunology', source: 'AbbVie 2024 — $11.7B growing' },
+  { brand: 'Rinvoq', inn: 'upadacitinib', codes: [], peakSales_M: 10000, therapeuticArea: 'immunology', source: 'AbbVie 2024 — $6B growing' },
+  { brand: 'Stelara', inn: 'ustekinumab', codes: [], peakSales_M: 10500, therapeuticArea: 'immunology', source: 'J&J 2024 — $10.4B declining' },
+  { brand: 'Entyvio', inn: 'vedolizumab', codes: [], peakSales_M: 6000, therapeuticArea: 'immunology', source: 'Takeda 2024 — $5.6B' },
+  { brand: 'Cosentyx', inn: 'secukinumab', codes: [], peakSales_M: 6000, therapeuticArea: 'immunology', source: 'Novartis 2024 — $5.8B' },
+  { brand: 'Taltz', inn: 'ixekizumab', codes: [], peakSales_M: 3500, therapeuticArea: 'immunology', source: 'Eli Lilly 2024 — $3.2B' },
+  { brand: 'Tremfya', inn: 'guselkumab', codes: [], peakSales_M: 4500, therapeuticArea: 'immunology', source: 'J&J 2024 — $4.0B' },
+
+  // ─── Metabolic / GLP-1 ───────────────────────────────────────────
+  { brand: 'Ozempic', inn: 'semaglutide', codes: [], peakSales_M: 25000, therapeuticArea: 'metabolic', source: 'Novo Nordisk 2024 — $17B growing' },
+  { brand: 'Wegovy', inn: 'semaglutide', codes: [], peakSales_M: 18000, therapeuticArea: 'metabolic', source: 'Novo Nordisk 2024 — $8.5B growing' },
+  { brand: 'Mounjaro', inn: 'tirzepatide', codes: ['LY3298176'], peakSales_M: 30000, therapeuticArea: 'metabolic', source: 'Eli Lilly 2024 — $11.5B growing' },
+  { brand: 'Zepbound', inn: 'tirzepatide', codes: [], peakSales_M: 25000, therapeuticArea: 'metabolic', source: 'Eli Lilly 2024 — $4.9B fastest launch ever' },
+  { brand: 'Trulicity', inn: 'dulaglutide', codes: [], peakSales_M: 7500, therapeuticArea: 'metabolic', source: 'Eli Lilly 2024 — $7.5B' },
+  { brand: 'Rybelsus', inn: 'semaglutide oral', codes: [], peakSales_M: 3500, therapeuticArea: 'metabolic', source: 'Novo Nordisk 2024 — $3.4B' },
+
+  // ─── Metabolic / SGLT2 ───────────────────────────────────────────
+  { brand: 'Farxiga', inn: 'dapagliflozin', codes: [], peakSales_M: 8000, therapeuticArea: 'metabolic', source: 'AstraZeneca 2024 — $7.7B' },
+  { brand: 'Jardiance', inn: 'empagliflozin', codes: [], peakSales_M: 9000, therapeuticArea: 'metabolic', source: 'BI/Lilly 2024 — $8.6B' },
+  { brand: 'Invokana', inn: 'canagliflozin', codes: [], peakSales_M: 1500, therapeuticArea: 'metabolic', source: 'J&J 2024 declining' },
+
+  // ─── Cardiovascular ──────────────────────────────────────────────
+  { brand: 'Eliquis', inn: 'apixaban', codes: [], peakSales_M: 14000, therapeuticArea: 'cardiovascular', source: 'BMS/Pfizer 2024 — $13.3B' },
+  { brand: 'Xarelto', inn: 'rivaroxaban', codes: [], peakSales_M: 4500, therapeuticArea: 'cardiovascular', source: 'Bayer/J&J 2024 — $4.3B declining' },
+  { brand: 'Entresto', inn: 'sacubitril/valsartan', codes: [], peakSales_M: 8000, therapeuticArea: 'cardiovascular', source: 'Novartis 2024 — $7.8B' },
+  { brand: 'Repatha', inn: 'evolocumab', codes: [], peakSales_M: 2500, therapeuticArea: 'cardiovascular', source: 'Amgen 2024 — $2.2B' },
+  { brand: 'Leqvio', inn: 'inclisiran', codes: [], peakSales_M: 3000, therapeuticArea: 'cardiovascular', source: 'Novartis 2024 — $750M growing; peak $3B' },
+  { brand: 'Camzyos', inn: 'mavacamten', codes: [], peakSales_M: 4000, therapeuticArea: 'cardiovascular', source: 'BMS 2024 — $600M growing; peak $4B HCM' },
+  { brand: 'Verquvo', inn: 'vericiguat', codes: [], peakSales_M: 1000, therapeuticArea: 'cardiovascular', source: 'Merck/Bayer 2024' },
+
+  // ─── Rare disease ────────────────────────────────────────────────
+  { brand: 'Spinraza', inn: 'nusinersen', codes: [], peakSales_M: 1700, therapeuticArea: 'rareDisease', source: 'Biogen 2024 — $1.6B declining (Zolgensma competition)' },
+  { brand: 'Soliris', inn: 'eculizumab', codes: [], peakSales_M: 3000, therapeuticArea: 'rareDisease', source: 'AstraZeneca/Alexion 2024 — $3.0B' },
+  { brand: 'Ultomiris', inn: 'ravulizumab', codes: [], peakSales_M: 5000, therapeuticArea: 'rareDisease', source: 'AstraZeneca/Alexion 2024 — $3.9B growing' },
+  { brand: 'Zolgensma', inn: 'onasemnogene abeparvovec', codes: [], peakSales_M: 1500, therapeuticArea: 'rareDisease', source: 'Novartis 2024 — $1.2B' },
+  { brand: 'Luxturna', inn: 'voretigene neparvovec', codes: [], peakSales_M: 100, therapeuticArea: 'rareDisease', source: 'Roche/Spark 2024' },
+  { brand: 'Trikafta', inn: 'elexacaftor/tezacaftor/ivacaftor', codes: [], peakSales_M: 11000, therapeuticArea: 'rareDisease', source: 'Vertex 2024 — $10.2B CF franchise' },
+  { brand: 'Crysvita', inn: 'burosumab', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Ultragenyx 2024 — $470M' },
+  { brand: 'Galafold', inn: 'migalastat', codes: [], peakSales_M: 500, therapeuticArea: 'rareDisease', source: 'Amicus 2024 — $413M' },
+  { brand: 'Casgevy', inn: 'exagamglogene autotemcel', codes: [], peakSales_M: 2000, therapeuticArea: 'rareDisease', source: 'Vertex/CRISPR 2024 launching' },
+
+  // ─── Neurology ───────────────────────────────────────────────────
+  { brand: 'Ocrevus', inn: 'ocrelizumab', codes: [], peakSales_M: 7500, therapeuticArea: 'neurology', source: 'Roche 2024 — $6.5B' },
+  { brand: 'Leqembi', inn: 'lecanemab', codes: [], peakSales_M: 8000, therapeuticArea: 'neurology', source: 'Eisai/Biogen 2024 launch; analyst peak $8B' },
+  { brand: 'Kisunla', inn: 'donanemab', codes: [], peakSales_M: 5000, therapeuticArea: 'neurology', source: 'Eli Lilly 2024 launch' },
+  { brand: 'Austedo', inn: 'deutetrabenazine', codes: [], peakSales_M: 2000, therapeuticArea: 'neurology', source: 'Teva 2024 — $1.6B' },
+  { brand: 'Ingrezza', inn: 'valbenazine', codes: [], peakSales_M: 3500, therapeuticArea: 'neurology', source: 'Neurocrine 2024 — $2.3B' },
+  { brand: 'Aubagio', inn: 'teriflunomide', codes: [], peakSales_M: 1500, therapeuticArea: 'neurology', source: 'Sanofi 2024 (post-generic)' },
+  { brand: 'Tysabri', inn: 'natalizumab', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'Biogen 2024 — $1.8B declining' },
+
+  // ─── Hematology ──────────────────────────────────────────────────
+  { brand: 'Rezurock', inn: 'belumosudil', codes: [], peakSales_M: 800, therapeuticArea: 'hematology', source: 'Sanofi 2024' },
+  { brand: 'Jakafi', inn: 'ruxolitinib', codes: [], peakSales_M: 3500, therapeuticArea: 'hematology', source: 'Incyte/Novartis 2024 — $3.1B' },
+  { brand: 'Reblozyl', inn: 'luspatercept', codes: [], peakSales_M: 2500, therapeuticArea: 'hematology', source: 'BMS/Merck 2024 — $1.6B growing' },
+
+  // ─── Ophthalmology ───────────────────────────────────────────────
+  { brand: 'Eylea', inn: 'aflibercept', codes: [], peakSales_M: 10000, therapeuticArea: 'ophthalmology', source: 'Regeneron/Bayer 2024 — $9.4B' },
+  { brand: 'Eylea HD', inn: 'aflibercept 8mg', codes: [], peakSales_M: 3000, therapeuticArea: 'ophthalmology', source: 'Regeneron 2024 launch' },
+  { brand: 'Vabysmo', inn: 'faricimab', codes: [], peakSales_M: 6000, therapeuticArea: 'ophthalmology', source: 'Roche 2024 — $3.9B growing' },
+  { brand: 'Lucentis', inn: 'ranibizumab', codes: [], peakSales_M: 3000, therapeuticArea: 'ophthalmology', source: 'Roche/Novartis (biosimilar-eroded)' },
+  { brand: 'Syfovre', inn: 'pegcetacoplan', codes: [], peakSales_M: 2000, therapeuticArea: 'ophthalmology', source: 'Apellis 2024 — $625M growing (GA)' },
+  { brand: 'Izervay', inn: 'avacincaptad pegol', codes: [], peakSales_M: 1500, therapeuticArea: 'ophthalmology', source: 'Astellas/Iveric 2024' },
+
+  // ─── Dermatology ─────────────────────────────────────────────────
+  { brand: 'Litfulo', inn: 'ritlecitinib', codes: [], peakSales_M: 800, therapeuticArea: 'dermatology', source: 'Pfizer 2024' },
+  { brand: 'Olumiant', inn: 'baricitinib', codes: [], peakSales_M: 1200, therapeuticArea: 'dermatology', source: 'Eli Lilly/Incyte 2024' },
+  { brand: 'Nemluvio', inn: 'nemolizumab', codes: [], peakSales_M: 2000, therapeuticArea: 'dermatology', source: 'Galderma 2024 launching' },
+
+  // ─── Infectious disease ──────────────────────────────────────────
+  { brand: 'Paxlovid', inn: 'nirmatrelvir/ritonavir', codes: [], peakSales_M: 2000, therapeuticArea: 'infectiousDisease', source: 'Pfizer 2024 — $5.7B (post-pandemic decline)' },
+  { brand: 'Biktarvy', inn: 'bictegravir/emtricitabine/tenofovir', codes: [], peakSales_M: 13500, therapeuticArea: 'infectiousDisease', source: 'Gilead 2024 — $13.4B' },
+  { brand: 'Rezafungin', inn: 'rezafungin', codes: [], peakSales_M: 200, therapeuticArea: 'infectiousDisease', source: 'Cidara/Melinta — narrow antifungal market' },
+];
+
+// ---------------------------------------------------------------------------
+// Lookup logic
+// ---------------------------------------------------------------------------
+
+/**
+ * Normalize an asset name / headline for matching. Lowercase, strip
+ * punctuation, collapse whitespace. Accent-strip via NFD normalization.
+ */
+function normalize(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Build a reverse lookup: normalized token → entry. Each entry contributes
+ * its brand, INN, and any company-codes as keys. We keep the FIRST match
+ * for each key (shouldn't collide in practice because brand+INN+codes are
+ * unique across entries).
+ */
+const LOOKUP: Map<string, AssetPeakSalesEntry> = (() => {
+  const m = new Map<string, AssetPeakSalesEntry>();
+  for (const e of ASSET_PEAK_SALES_TABLE) {
+    const keys = [e.brand, e.inn, ...e.codes];
+    for (const k of keys) {
+      const n = normalize(k);
+      if (n && !m.has(n)) m.set(n, e);
+    }
+  }
+  return m;
+})();
+
+/**
+ * Resolve asset peak sales from a name or headline.
+ *
+ * Strategy: check if the normalized input CONTAINS any of the known
+ * lookup keys as a whole word. Substring match (not exact) because
+ * headlines often have extra text ("Enhertu (T-DXd) expansion deal").
+ * But require word boundaries so "ada" doesn't match "Dupixent adalimumab
+ * combo".
+ */
+export function lookupAssetPeakSales_M(
+  assetName: string | null | undefined,
+  headline: string | null | undefined,
+): number | null {
+  for (const candidate of [assetName, headline]) {
+    if (!candidate) continue;
+    const norm = normalize(candidate);
+    if (!norm) continue;
+    // Word-boundary substring match for each lookup key.
+    for (const [key, entry] of LOOKUP.entries()) {
+      const re = new RegExp(`(^|\\s)${key}($|\\s)`);
+      if (re.test(norm)) return entry.peakSales_M;
+    }
+  }
+  return null;
+}

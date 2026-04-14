@@ -22,6 +22,7 @@ import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/c
 import { getCounterpartyPremiumMultiplier } from '@/data/counterparty-premiums-snapshot';
 import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
 import { getIndicationTypicalAssetPeak } from '../index-drugs';
+import { lookupAssetPeakSales_M } from '@/data/asset-peak-sales';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
 import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
 import { getTerritoryAdjustedPeak } from '../geographic-revenue-curves';
@@ -457,8 +458,15 @@ function dealToCase(deal: ExtendedComparableDeal): DealBacktestCase {
   const canonMod = canonicalModality(deal.modality);
   const rawSlug = deal.indication_specific || deal.indication_category;
   const canonicalSlug = BACKTEST_INDICATION_ALIASES[rawSlug] ?? rawSlug;
+  // R60 (2026-04-14): Asset-specific peak-sales override takes precedence
+  // over indication-typical and TA-default. Matches by brand/INN/dev-code
+  // against the blockbuster table (2024 10-K actuals + analyst consensus
+  // peaks). Collapses the 25× within-TA variance that a flat TA default
+  // cannot model.
+  const assetPeak_M = lookupAssetPeakSales_M(deal.assetName, deal.headline);
   const typicalPeak = getIndicationTypicalAssetPeak(canonicalSlug);
   const globalPeak_M =
+    assetPeak_M ??
     typicalPeak ??
     PEAK_SALES_BY_TA_M[deal.therapeuticArea] ??
     1500;
