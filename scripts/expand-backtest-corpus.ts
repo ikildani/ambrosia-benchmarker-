@@ -99,6 +99,13 @@ async function main() {
       .gt('upfront_usd', 0)
       .gt('total_deal_value_usd', 0)
       .eq('is_synthetic', false)
+      // R50 (2026-04-14): Corpus quality gate. Previously we took every
+      // non-synthetic row (1540 deals), but audit showed ~77% were auto-
+      // extracted rows with verification_status='pending' or 'rejected'
+      // and asset/modality mismatches (e.g., Y-mAbs tagged rnai+HER3-mab).
+      // Restricting to verified=true drops corpus from 1540→~337 but
+      // removes the garbage that was silently fitting into calibration.
+      .eq('verified', true)
       .in('phase_at_signing', ['phase_1', 'phase_2', 'phase_3', 'preclinical', 'approved'])
       .in('deal_type', ['license', 'licensing', 'co_development', 'codevelopment', 'collaboration', 'acquisition', 'option'])
       .gte('announced_date', '2020-01-01')
