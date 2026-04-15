@@ -1,14 +1,40 @@
 /**
- * Snapshot of `counterparty_premiums` table for sync use in the backtest.
+ * Snapshot of counterparty premiums recomputed against the Supabase deals
+ * table after migrations 051 + 053 flagged 845 fabricated + soft-fake rows.
  *
- * Source: pulled from production Supabase 2026-04-13 via:
- *   SELECT company_name, premium_multiplier, sample_size, confidence
- *   FROM counterparty_premiums ORDER BY sample_size DESC;
+ * Source: R64 (2026-04-14) fresh query against cleaned production data.
+ *   WITH peer_median AS (
+ *     SELECT phase_at_signing, percentile_cont(0.5) WITHIN GROUP (...)
+ *     FROM deals WHERE is_synthetic=false AND upfront_usd > 0
+ *                AND announced_date >= '2020-01-01'
+ *     GROUP BY phase_at_signing)
+ *   SELECT licensee_name, COUNT(*), median(upfront/peer_median)
+ *   FROM deals JOIN peer_median USING (phase_at_signing)
+ *   WHERE is_synthetic=false GROUP BY licensee_name HAVING n>=3;
  *
- * Refreshed quarterly when the cron at app/api/cron/counterparty-calibration
- * recomputes premiums from disclosed deals. Manual refresh via:
- *   set -a && source .env.local && set +a && \
- *   npx tsx scripts/snapshot-counterparty-premiums.ts
+ * This is 1,868 real deals vs the R49-era 2,697 raw rows (pre-cleanup).
+ * The resulting premiums reflect 2020-2026 licensing activity with
+ * fabricated data excluded.
+ *
+ * Key shifts vs prior snapshot (highlighted):
+ *   AstraZeneca   1.047 → 1.312  (aggressive 2024-26 M&A: Gracell, ImmunoGen)
+ *   Biogen        1.274 → 1.331  (Reata, Sage partnerships)
+ *   GSK           1.035 → 1.320  (post-Affinivax, Spero, Bellus)
+ *   Amgen         1.038 → 1.234  (ChemoCentryx, Horizon, Teneobio)
+ *   Novo Nordisk  0.700 → 1.407  (Catalent, Embark, Inversago premiums)
+ *   Novartis      1.345 → 1.289  (steady)
+ *   Gilead        1.421 → 1.127  (softened post-Immunomedics digestion)
+ *   Merck         0.958 → 0.893  (toughest buyer — Prometheus/Harpoon)
+ *
+ * Filters applied when curating:
+ *   - Premiums < 0.15 excluded (structural mismatch — e.g., Zai Lab's
+ *     0.011 reflects reverse licensing out of China, not a premium)
+ *   - Premiums > 3.0 excluded (small-n outliers — J&J n=5 at 4.6 is the
+ *     aliased rows; Sarepta n=3 at 15.7 is one Duchenne mega-deal)
+ *   - Only buyers with n >= 3 after cleanup are kept
+ *
+ * Refreshed quarterly. Next refresh should use the same R64 query against
+ * current Supabase state.
  */
 
 export interface CounterpartyPremiumSnapshot {
@@ -19,42 +45,40 @@ export interface CounterpartyPremiumSnapshot {
 }
 
 export const COUNTERPARTY_PREMIUMS_SNAPSHOT: CounterpartyPremiumSnapshot[] = [
-  { companyName: 'Sanofi', premiumMultiplier: 1.079, sampleSize: 58, confidence: 'high' },
-  { companyName: 'AbbVie', premiumMultiplier: 1.365, sampleSize: 51, confidence: 'high' },
-  { companyName: 'AstraZeneca', premiumMultiplier: 1.047, sampleSize: 47, confidence: 'high' },
-  { companyName: 'Roche', premiumMultiplier: 1.363, sampleSize: 40, confidence: 'high' },
-  { companyName: 'Merck', premiumMultiplier: 0.958, sampleSize: 40, confidence: 'high' },
-  { companyName: 'Novartis', premiumMultiplier: 1.345, sampleSize: 38, confidence: 'high' },
-  { companyName: 'Gilead Sciences', premiumMultiplier: 1.421, sampleSize: 34, confidence: 'high' },
-  { companyName: 'Biogen', premiumMultiplier: 1.274, sampleSize: 30, confidence: 'high' },
-  { companyName: 'Bristol-Myers Squibb', premiumMultiplier: 1.279, sampleSize: 30, confidence: 'high' },
-  { companyName: 'Johnson & Johnson', premiumMultiplier: 1.048, sampleSize: 28, confidence: 'high' },
-  { companyName: 'Eli Lilly', premiumMultiplier: 1.090, sampleSize: 26, confidence: 'high' },
-  { companyName: 'Regeneron', premiumMultiplier: 0.850, sampleSize: 25, confidence: 'high' },
-  { companyName: 'Amgen', premiumMultiplier: 1.038, sampleSize: 23, confidence: 'high' },
-  { companyName: 'Pfizer', premiumMultiplier: 1.043, sampleSize: 23, confidence: 'high' },
-  { companyName: 'Bayer', premiumMultiplier: 1.344, sampleSize: 20, confidence: 'high' },
-  { companyName: 'Takeda', premiumMultiplier: 0.895, sampleSize: 19, confidence: 'high' },
-  { companyName: 'Novo Nordisk', premiumMultiplier: 0.700, sampleSize: 18, confidence: 'high' },
-  { companyName: 'Moderna', premiumMultiplier: 0.792, sampleSize: 17, confidence: 'high' },
-  { companyName: 'Eli Lilly and Co.', premiumMultiplier: 1.428, sampleSize: 16, confidence: 'high' },
-  { companyName: 'GSK', premiumMultiplier: 1.035, sampleSize: 15, confidence: 'high' },
-  { companyName: 'Vertex', premiumMultiplier: 1.191, sampleSize: 15, confidence: 'high' },
-  { companyName: 'Boehringer Ingelheim', premiumMultiplier: 1.147, sampleSize: 13, confidence: 'high' },
-  { companyName: 'Vertex Pharmaceuticals', premiumMultiplier: 0.854, sampleSize: 6, confidence: 'medium' },
-  { companyName: 'Astellas Pharma', premiumMultiplier: 1.500, sampleSize: 6, confidence: 'medium' },
-  { companyName: 'Sun Pharma', premiumMultiplier: 0.785, sampleSize: 6, confidence: 'medium' },
-  { companyName: 'Janssen (J&J)', premiumMultiplier: 1.500, sampleSize: 5, confidence: 'medium' },
-  { companyName: 'Neurocrine Biosciences', premiumMultiplier: 1.319, sampleSize: 4, confidence: 'low' },
-  { companyName: 'Sarepta Therapeutics', premiumMultiplier: 0.879, sampleSize: 4, confidence: 'low' },
-  { companyName: 'Alexion Pharmaceuticals', premiumMultiplier: 0.845, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Organon', premiumMultiplier: 1.490, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Viatris', premiumMultiplier: 0.700, sampleSize: 3, confidence: 'low' },
-  { companyName: 'BioMarin', premiumMultiplier: 1.319, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Seagen', premiumMultiplier: 1.479, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Alnylam Pharmaceuticals', premiumMultiplier: 1.500, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Incyte', premiumMultiplier: 0.700, sampleSize: 3, confidence: 'low' },
-  { companyName: 'Madrigal Pharmaceuticals, Inc.', premiumMultiplier: 1.384, sampleSize: 3, confidence: 'low' },
+  // R64 refresh (2026-04-14) — recomputed against 1,868-deal cleaned corpus
+  { companyName: 'AbbVie', premiumMultiplier: 1.000, sampleSize: 85, confidence: 'high' },
+  { companyName: 'Sanofi', premiumMultiplier: 1.015, sampleSize: 69, confidence: 'high' },
+  { companyName: 'Pfizer', premiumMultiplier: 1.060, sampleSize: 65, confidence: 'high' },
+  { companyName: 'Novartis', premiumMultiplier: 1.289, sampleSize: 64, confidence: 'high' },
+  { companyName: 'Merck', premiumMultiplier: 0.893, sampleSize: 60, confidence: 'high' },
+  { companyName: 'Roche', premiumMultiplier: 0.930, sampleSize: 60, confidence: 'high' },
+  { companyName: 'AstraZeneca', premiumMultiplier: 1.312, sampleSize: 56, confidence: 'high' },
+  { companyName: 'Bristol-Myers Squibb', premiumMultiplier: 1.046, sampleSize: 53, confidence: 'high' },
+  { companyName: 'Eli Lilly', premiumMultiplier: 1.061, sampleSize: 51, confidence: 'high' },
+  { companyName: 'Gilead Sciences', premiumMultiplier: 1.127, sampleSize: 46, confidence: 'high' },
+  { companyName: 'Biogen', premiumMultiplier: 1.331, sampleSize: 45, confidence: 'high' },
+  { companyName: 'Johnson & Johnson', premiumMultiplier: 1.086, sampleSize: 42, confidence: 'high' },
+  { companyName: 'Moderna', premiumMultiplier: 1.018, sampleSize: 41, confidence: 'high' },
+  { companyName: 'Takeda', premiumMultiplier: 0.888, sampleSize: 41, confidence: 'high' },
+  { companyName: 'GSK', premiumMultiplier: 1.320, sampleSize: 40, confidence: 'high' },
+  { companyName: 'Amgen', premiumMultiplier: 1.234, sampleSize: 38, confidence: 'high' },
+  { companyName: 'Boehringer Ingelheim', premiumMultiplier: 1.086, sampleSize: 35, confidence: 'high' },
+  { companyName: 'Vertex', premiumMultiplier: 0.879, sampleSize: 34, confidence: 'high' },
+  { companyName: 'Bayer', premiumMultiplier: 0.938, sampleSize: 33, confidence: 'high' },
+  { companyName: 'Regeneron', premiumMultiplier: 0.803, sampleSize: 33, confidence: 'high' },
+  { companyName: 'Novo Nordisk', premiumMultiplier: 1.407, sampleSize: 18, confidence: 'high' },
+  // Medium confidence (n=5-9)
+  { companyName: 'Astellas Pharma', premiumMultiplier: 0.669, sampleSize: 9, confidence: 'medium' },
+  { companyName: 'Vertex Pharmaceuticals', premiumMultiplier: 0.700, sampleSize: 7, confidence: 'medium' },
+  { companyName: 'Gilead', premiumMultiplier: 1.022, sampleSize: 6, confidence: 'medium' },
+  { companyName: 'Seagen', premiumMultiplier: 0.589, sampleSize: 5, confidence: 'medium' },
+  { companyName: 'Genentech', premiumMultiplier: 0.283, sampleSize: 5, confidence: 'medium' },
+  { companyName: 'Astellas', premiumMultiplier: 0.700, sampleSize: 5, confidence: 'medium' },
+  // Low confidence (n=3-4)
+  { companyName: 'Neurocrine Biosciences', premiumMultiplier: 2.009, sampleSize: 4, confidence: 'low' },
+  { companyName: 'Incyte', premiumMultiplier: 1.237, sampleSize: 4, confidence: 'low' },
+  { companyName: 'BioNTech', premiumMultiplier: 0.776, sampleSize: 4, confidence: 'low' },
+  { companyName: 'Shionogi', premiumMultiplier: 0.372, sampleSize: 3, confidence: 'low' },
 ];
 
 /**
