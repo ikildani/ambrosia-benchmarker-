@@ -247,6 +247,7 @@ export async function GET(request: NextRequest) {
           .from('deals')
           .select('licensee, licensor, total_deal_value, deal_type, announced_date')
           .eq('therapeutic_area', topTa)
+          .eq('is_synthetic', false)  // R68
           .gte('announced_date', sevenDaysAgoDate)
           .order('total_deal_value', { ascending: false, nullsFirst: false })
           .limit(5);
@@ -261,6 +262,7 @@ export async function GET(request: NextRequest) {
             .from('deals')
             .select('licensee, licensor, total_deal_value, deal_type, announced_date')
             .eq('therapeutic_area', topTa)
+            .eq('is_synthetic', false)  // R68
             .order('announced_date', { ascending: false, nullsFirst: false })
             .limit(3);
           dealsToShow = fallbackDeals || [];

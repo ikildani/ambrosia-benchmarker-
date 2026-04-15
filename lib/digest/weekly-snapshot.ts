@@ -53,12 +53,14 @@ export async function generateWeeklySnapshot(supabase: SupabaseClient): Promise<
     supabase
       .from('deals')
       .select('*')
+      .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes from user digests
       .gte('announced_date', weekAgo)
       .order('upfront_usd', { ascending: false, nullsFirst: false }),
 
     supabase
       .from('deals')
       .select('modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd')
+      .eq('is_synthetic', false)  // R68
       .gte('announced_date', ninetyDaysAgo)
       .lt('announced_date', weekAgo),
 

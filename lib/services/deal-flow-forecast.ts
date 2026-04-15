@@ -566,6 +566,7 @@ export async function forecastDealFlow(
         .from('deals')
         .select('announced_date, therapeutic_area')
         .eq('therapeutic_area', therapeuticArea)
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', '2022-01-01')
         .order('announced_date', { ascending: true });
 
