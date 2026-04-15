@@ -126,11 +126,12 @@ export async function GET(request: NextRequest) {
     // NULL not 'pending'. Using the `not.eq` PostgREST operator via `.or()`
     // paired with `is.null` fixes this.
     // Queue rows from any source_type that has a fetchable URL or filing ID.
-    // Previously restricted to sec_8k; expanded 2026-04-15 once SEC queue
-    // was drained and remaining pending rows were mostly press_release +
-    // openfda sources. The extractor (extractDealFromFiling) works on any
-    // plain-text source so the shape doesn't matter at the prompt level —
-    // the validator catches fabrications regardless of origin.
+    // Supabase PostgREST has a quirk where chaining two .or() calls
+    // overwrites the first. Combining everything into a single .or() would
+    // produce OR semantics between the two filters which we don't want.
+    // Workaround: drop the "has URL" filter here and let the in-loop
+    // skippedNoSource counter catch rows without a URL. The DB roundtrip
+    // cost is negligible (20 rows/batch).
     const { data: rows, error: fetchErr } = await supabase
       .from('deals')
       .select(
@@ -139,7 +140,6 @@ export async function GET(request: NextRequest) {
       .eq('is_synthetic', false)
       .eq('verified', false)
       .or('verification_status.is.null,verification_status.eq.pending')
-      .or('source_filing_id.not.is.null,source_url.not.is.null')
       .in('source_type', ['sec_8k', 'sec_10k', 'press_release', 'openfda'])
       .order('announced_date', { ascending: true, nullsFirst: true })
       .limit(BATCH_SIZE);
