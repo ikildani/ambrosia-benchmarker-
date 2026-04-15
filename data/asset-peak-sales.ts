@@ -449,6 +449,23 @@ export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
   { brand: 'Olipudase', inn: 'olipudase alfa', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Sanofi Xenpozyme ASMD' },
   { brand: 'Avalglucosidase', inn: 'avalglucosidase alfa', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Sanofi late-onset Pompe' },
   { brand: 'Lonapegsomatropin', inn: 'lonapegsomatropin', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Ascendis Skytrofa pediatric GHD' },
+
+  // ─── R67b targeted — real dev codes identified in unmatched audit ─
+  { brand: 'Oxbryta', inn: 'voxelotor', codes: [], peakSales_M: 500, therapeuticArea: 'hematology', source: 'Global Blood Therapeutics/Pfizer sickle cell — $325M 2024 before withdrawal' },
+  { brand: 'Tavneos', inn: 'avacopan', codes: ['CCX-168'], peakSales_M: 1000, therapeuticArea: 'immunology', source: 'ChemoCentryx/Amgen C5aR ANCA vasculitis — $250M 2024 growing' },
+  { brand: 'MORF-057', inn: 'MORF-057', codes: [], peakSales_M: 3500, therapeuticArea: 'gastroenterology', source: 'Morphic/Lilly oral α4β7 integrin IBD — analyst peak $3-5B' },
+  { brand: 'RVT-3101', inn: 'tulisokibart', codes: ['PRA-023', 'MK-7240'], peakSales_M: 6000, therapeuticArea: 'gastroenterology', source: 'Roivant-KPL / Telavant-Roche TL1A IBD — analyst peak $5-7B' },
+  { brand: 'TERN-701', inn: 'TERN-701', codes: [], peakSales_M: 500, therapeuticArea: 'hematology', source: 'Terns Pharmaceuticals BCR-ABL CML' },
+  { brand: 'Cleminorexton', inn: 'cleminorexton', codes: ['ORX750'], peakSales_M: 6500, therapeuticArea: 'neurology', source: 'Centessa/Eli Lilly orexin-2R agonist narcolepsy — analyst peak $5-8B' },
+  { brand: 'ORX750', inn: 'cleminorexton', codes: [], peakSales_M: 6500, therapeuticArea: 'neurology', source: 'Centessa OX2R narcolepsy development code' },
+  { brand: 'Syfovre', inn: 'pegcetacoplan intravitreal', codes: [], peakSales_M: 2000, therapeuticArea: 'ophthalmology', source: 'Apellis — $625M 2024 growing (geographic atrophy)' },
+  { brand: 'Empaveli', inn: 'pegcetacoplan', codes: [], peakSales_M: 2000, therapeuticArea: 'hematology', source: 'Apellis PNH' },
+  { brand: 'Aficamten', inn: 'aficamten', codes: ['CK-274'], peakSales_M: 4500, therapeuticArea: 'cardiovascular', source: 'Cytokinetics cardiac myosin inhibitor HCM — alt to Camzyos' },
+  { brand: 'Fenebrutinib', inn: 'fenebrutinib', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'Roche BTK progressive MS' },
+  { brand: 'Evobrutinib', inn: 'evobrutinib', codes: [], peakSales_M: 2000, therapeuticArea: 'neurology', source: 'Merck KGaA/Sanofi BTK MS (phase 3 miss 2023 but reference)' },
+  { brand: 'Rilzabrutinib', inn: 'rilzabrutinib', codes: [], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Sanofi BTK ITP' },
+  { brand: 'Epcoritamab', inn: 'epcoritamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'AbbVie/Genmab CD20×CD3 Epkinly expansion' },
+  { brand: 'Trastuzumab duocarmazine', inn: 'vic-trastuzumab duocarmazine', codes: ['SYD985'], peakSales_M: 800, therapeuticArea: 'oncology', source: 'Byondis HER2 ADC' },
 ];
 
 // ---------------------------------------------------------------------------
