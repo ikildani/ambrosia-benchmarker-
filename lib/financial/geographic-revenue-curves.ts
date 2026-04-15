@@ -245,6 +245,12 @@ export const TERRITORY_GLOBAL_SHARE: Record<string, number> = {
   north_america: 0.88,   // US + Canada — slightly more than us_only
   asia_pacific: 0.30,    // APAC bundle retuned R53 — Japan+Korea+Taiwan+SEA total ~30% share
   ex_japan: 0.92,        // Global minus Japan (8% share of global)
+  // R64 (2026-04-14): 'regional' appears on 7 deals in the cleaned corpus,
+  // previously falling through to 1.0. These are typically single-region
+  // territorial licensing agreements where the specific region isn't
+  // disclosed but is sub-global. Conservative 0.35 anchor (midpoint of
+  // Japan/China/Europe typical values).
+  regional: 0.35,
   other: 1.00,           // Unclassified — default to global (conservative)
 };
 

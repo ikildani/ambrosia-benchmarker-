@@ -128,6 +128,58 @@ const LIFECYCLE_DEFAULTS = {
   combinationSteadyStateYears: 5,
 } as const;
 
+/**
+ * R65 (2026-04-14): Per-TA label-expansion probability + incremental peak.
+ *
+ * Replaces the crude isOncology binary (0.45 vs 0.30) with TA-specific
+ * probabilities grounded in FDA supplemental-approval history 2015-2024.
+ *
+ * Interpretation: `probability` = chance the asset gets a meaningful label
+ * expansion within the 10-year post-approval window, conditional on primary
+ * approval. `incrementalPct` = fraction of primary-indication peak that the
+ * expansion adds (an "Nx indication premium" proxy).
+ *
+ * Sources:
+ *   - FDA CDER Orange Book supplemental approvals 2015-2024
+ *   - Nature Reviews Drug Discovery 2022 lifecycle management analysis
+ *   - Keytruda (oncology IO): 40+ approvals as max-case anchor
+ *   - Dupixent (immunology): 6+ indications as IL-4/13 expansion case
+ *   - Ozempic/Mounjaro (metabolic): CV-outcomes and MASH expansions
+ *   - Soliris/Ultomiris (rare): orphan indications narrow by design
+ */
+const LIFECYCLE_BY_TA: Record<string, { probability: number; incrementalPct: number }> = {
+  // Oncology — highest due to IO platform expansion (Keytruda, Opdivo, Tagrisso)
+  oncology: { probability: 0.45, incrementalPct: 0.25 },
+  // Immunology — high due to IL-4/13, IL-17/23, JAK platforms (Dupixent, Skyrizi, Rinvoq)
+  immunology: { probability: 0.40, incrementalPct: 0.22 },
+  // Hematology — moderate-high (CAR-T franchise expansion, HemeLiquid expansions)
+  hematology: { probability: 0.35, incrementalPct: 0.20 },
+  // Gastroenterology — moderate-high (IBD biologics Entyvio, Stelara expand)
+  gastroenterology: { probability: 0.35, incrementalPct: 0.20 },
+  // Metabolic — moderate-high driven by GLP-1 CV/MASH/OSA expansions
+  metabolic: { probability: 0.35, incrementalPct: 0.20 },
+  // Dermatology — moderate (IL-17/23 psoriasis-to-AD-to-other)
+  dermatology: { probability: 0.30, incrementalPct: 0.18 },
+  // Cardiovascular — moderate (anticoagulation, HF outcomes)
+  cardiovascular: { probability: 0.25, incrementalPct: 0.15 },
+  // Infectious disease — moderate (vaccine series, resistant bacteria)
+  infectiousDisease: { probability: 0.25, incrementalPct: 0.15 },
+  // Ophthalmology — moderate (biosimilar/sublingual line extensions)
+  ophthalmology: { probability: 0.25, incrementalPct: 0.15 },
+  // Neurology — lower (narrow mechanisms, harder to expand)
+  neurology: { probability: 0.22, incrementalPct: 0.15 },
+  // Women's health — lower (narrow regulatory path)
+  womensHealth: { probability: 0.20, incrementalPct: 0.15 },
+  // Respiratory / pulmonology — lower
+  pulmonology: { probability: 0.20, incrementalPct: 0.15 },
+  // Nephrology — lower
+  nephrology: { probability: 0.18, incrementalPct: 0.12 },
+  // Rare disease — lowest by construction (orphan indication is narrow)
+  rareDisease: { probability: 0.12, incrementalPct: 0.10 },
+  // Hepatology — lower (narrow mechanisms, HCV went generic)
+  hepatology: { probability: 0.20, incrementalPct: 0.15 },
+};
+
 // ---------------------------------------------------------------------------
 // Helper: format currency for narratives
 // ---------------------------------------------------------------------------
@@ -506,9 +558,11 @@ export function calculateLifecycleExtensions(
   let totalIncremental = 0;
 
   // --- Label Expansion ---
-  const isOncology = input.therapeuticArea === 'oncology';
-  const labelProb = isOncology ? 0.45 : 0.30;
-  const labelIncrementalPct = isOncology ? 0.25 : 0.20;
+  // R65: per-TA probabilities + incremental peak. Falls back to 0.30/0.20
+  // for unmapped TAs (matches prior non-oncology default).
+  const taLcmDefaults = LIFECYCLE_BY_TA[input.therapeuticArea] ?? { probability: 0.30, incrementalPct: 0.20 };
+  const labelProb = taLcmDefaults.probability;
+  const labelIncrementalPct = taLcmDefaults.incrementalPct;
   const labelLag = LIFECYCLE_DEFAULTS.labelExpansionLagYears;
   const labelRamp = LIFECYCLE_DEFAULTS.labelExpansionRampYears;
   const labelSteadyState = LIFECYCLE_DEFAULTS.labelExpansionSteadyStateYears;
@@ -539,7 +593,7 @@ export function calculateLifecycleExtensions(
     lagYearsFromApproval: labelLag,
     rampYears: labelRamp,
     additionalExclusivityYears: 0,
-    narrative: isOncology
+    narrative: input.therapeuticArea === 'oncology'
       ? `Tumor-agnostic label expansion: ${(labelProb * 100).toFixed(0)}% probability of a second indication approval adding ~${(labelIncrementalPct * 100).toFixed(0)}% incremental peak sales (${fmtM(labelIncrementalPeak)}). Probability-weighted PV: ${fmtM(labelValue)}.`
       : `Label expansion into adjacent indication: ${(labelProb * 100).toFixed(0)}% probability adding ~${(labelIncrementalPct * 100).toFixed(0)}% incremental peak sales (${fmtM(labelIncrementalPeak)}). Probability-weighted PV: ${fmtM(labelValue)}.`,
   });
