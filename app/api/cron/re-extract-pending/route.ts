@@ -119,6 +119,12 @@ export async function GET(request: NextRequest) {
     // Prefer rows with source_filing_id (SEC) since those are most
     // reliably re-fetchable. Source URLs on press-release domains can
     // change, so deprioritize those.
+    // The `.neq('verification_status', 'rejected')` filter previously
+    // excluded rows with verification_status IS NULL (Postgres three-valued
+    // logic: x != 'rejected' is NULL when x IS NULL, which filters rows out).
+    // 102 sec_8k pending rows were silently stuck because their status was
+    // NULL not 'pending'. Using the `not.eq` PostgREST operator via `.or()`
+    // paired with `is.null` fixes this.
     const { data: rows, error: fetchErr } = await supabase
       .from('deals')
       .select(
@@ -126,7 +132,7 @@ export async function GET(request: NextRequest) {
       )
       .eq('is_synthetic', false)
       .eq('verified', false)
-      .neq('verification_status', 'rejected')
+      .or('verification_status.is.null,verification_status.eq.pending')
       .or('source_filing_id.not.is.null,source_url.not.is.null')
       .eq('source_type', 'sec_8k')
       .order('announced_date', { ascending: true, nullsFirst: true })
