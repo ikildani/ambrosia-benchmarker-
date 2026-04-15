@@ -331,6 +331,124 @@ export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
   { brand: 'Cequa', inn: 'cyclosporine', codes: [], peakSales_M: 400, therapeuticArea: 'ophthalmology', source: 'Sun dry eye' },
   { brand: 'Miebo', inn: 'perfluorohexyloctane', codes: [], peakSales_M: 800, therapeuticArea: 'ophthalmology', source: 'Bausch dry eye 2024' },
   { brand: 'Xdemvy', inn: 'lotilaner', codes: [], peakSales_M: 600, therapeuticArea: 'ophthalmology', source: 'Tarsus Demodex blepharitis 2024' },
+
+  // ─── R67 EXPANSION (2026-04-15) — 70+ current pipeline assets ─────
+  // Most-cited 2025-2026 JPM Healthcare / BD analyst decks. Focus on
+  // Phase 2 / Phase 3 pipeline assets that BD users are actively
+  // evaluating. Sources: JPM 2025/26 conference analyst notes, RBC/
+  // Jefferies/Evercore pipeline trackers, Endpoints/FierceBiotech.
+
+  // ─── GLP-1 / obesity next-gen ────────────────────────────────────
+  { brand: 'Retatrutide', inn: 'retatrutide', codes: ['LY3437943'], peakSales_M: 20000, therapeuticArea: 'metabolic', source: 'Eli Lilly GLP-1/GIP/GCG triple agonist — analyst peak $20B' },
+  { brand: 'Orforglipron', inn: 'orforglipron', codes: ['LY3502970'], peakSales_M: 15000, therapeuticArea: 'metabolic', source: 'Eli Lilly oral GLP-1 — analyst peak $15B (if Ph3 wins)' },
+  { brand: 'Survodutide', inn: 'survodutide', codes: ['BI-456906'], peakSales_M: 6000, therapeuticArea: 'metabolic', source: 'Boehringer/Zealand GLP-1/GCG MASH/obesity' },
+  { brand: 'CagriSema', inn: 'cagrilintide/semaglutide', codes: [], peakSales_M: 18000, therapeuticArea: 'metabolic', source: 'Novo Nordisk amylin+GLP-1 combo — analyst peak $15-20B' },
+  { brand: 'Amycretin', inn: 'amycretin', codes: [], peakSales_M: 10000, therapeuticArea: 'metabolic', source: 'Novo Nordisk oral GLP-1/amylin combo phase 2' },
+  { brand: 'Danuglipron', inn: 'danuglipron', codes: ['PF-06882961'], peakSales_M: 3000, therapeuticArea: 'metabolic', source: 'Pfizer oral GLP-1 — discontinued 2024 but reference' },
+  { brand: 'Ecnoglutide', inn: 'ecnoglutide', codes: [], peakSales_M: 2500, therapeuticArea: 'metabolic', source: 'Innovent GLP-1 (China-first)' },
+
+  // ─── Oral PCSK9 / Lipids next-gen ─────────────────────────────────
+  { brand: 'Enlicitide', inn: 'enlicitide decanoate', codes: ['MK-0616'], peakSales_M: 6000, therapeuticArea: 'cardiovascular', source: 'Merck oral PCSK9 phase 3 — analyst peak $5-7B' },
+  { brand: 'Recaticimab', inn: 'recaticimab', codes: [], peakSales_M: 1500, therapeuticArea: 'cardiovascular', source: 'Jiangsu Hengrui PCSK9 mAb' },
+
+  // ─── KRAS next-gen ────────────────────────────────────────────────
+  { brand: 'Glecirasib', inn: 'glecirasib', codes: ['JAB-21822'], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Jacobio KRAS G12C (China NSCLC)' },
+  { brand: 'Olomorasib', inn: 'olomorasib', codes: ['LY3537982'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Eli Lilly next-gen KRAS G12C' },
+  { brand: 'MRTX1133', inn: 'MRTX1133', codes: [], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'Mirati/BMS KRAS G12D PDAC — analyst peak $3-5B' },
+  { brand: 'RMC-6236', inn: 'RMC-6236', codes: [], peakSales_M: 5000, therapeuticArea: 'oncology', source: 'Revolution Medicines pan-RAS (multi-KRAS)' },
+  { brand: 'BBP-398', inn: 'BBP-398', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Navire/BridgeBio SHP2 inhibitor' },
+
+  // ─── ADC next-gen ────────────────────────────────────────────────
+  { brand: 'Zilovertamab vedotin', inn: 'zilovertamab vedotin', codes: ['MK-2140'], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Merck ROR1 ADC (ex-VelosBio) DLBCL/MCL' },
+  { brand: 'ARX788', inn: 'ARX788', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Ambrx HER2 ADC (breast)' },
+  { brand: 'Disitamab vedotin', inn: 'disitamab vedotin', codes: ['RC48'], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'RemeGen HER2 ADC (urothelial/gastric) — Seagen licensed' },
+  { brand: 'Firmonertinib', inn: 'firmonertinib', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'ArriVent/Allist EGFR NSCLC' },
+  { brand: 'STRO-002', inn: 'luveltamab tazevibulin', codes: [], peakSales_M: 1000, therapeuticArea: 'oncology', source: 'Sutro FolR1 ADC' },
+  { brand: 'Sacituzumab tirumotecan', inn: 'sacituzumab tirumotecan', codes: ['SKB-264', 'MK-2870'], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'Kelun-Biotech/Merck TROP2 ADC — alt to Trodelvy' },
+
+  // ─── Bispecific / T-cell engager next-gen ────────────────────────
+  { brand: 'Zanidatamab', inn: 'zanidatamab', codes: ['ZW25'], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Jazz/Zymeworks/BeiGene HER2 biparatopic — Ziihera 2024 approval' },
+  { brand: 'Ziihera', inn: 'zanidatamab', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Jazz 2024 approval — HER2 biparatopic' },
+  { brand: 'Nivolumab/relatlimab', inn: 'nivolumab/relatlimab', codes: [], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'BMS Opdualag LAG-3 combo — $1.2B 2024 growing' },
+  { brand: 'Opdualag', inn: 'nivolumab/relatlimab', codes: [], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'BMS 2024 — first LAG-3 combo' },
+  { brand: 'Tarlatamab', inn: 'tarlatamab', codes: ['AMG-757'], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Amgen Imdelltra DLL3 TCE SCLC — $150M 2024 growing' },
+  { brand: 'Imdelltra', inn: 'tarlatamab', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Amgen 2024 approval' },
+  { brand: 'Odronextamab', inn: 'odronextamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Regeneron CD20×CD3 follicular/DLBCL' },
+  { brand: 'Ordspono', inn: 'odronextamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Regeneron 2024 approval' },
+
+  // ─── Tau / AD / Parkinson's ──────────────────────────────────────
+  { brand: 'Remternetug', inn: 'remternetug', codes: ['LY3372993'], peakSales_M: 4500, therapeuticArea: 'neurology', source: 'Eli Lilly next-gen anti-amyloid' },
+  { brand: 'Trontinemab', inn: 'trontinemab', codes: [], peakSales_M: 6000, therapeuticArea: 'neurology', source: 'Roche Brainshuttle amyloid — analyst peak $5-7B' },
+  { brand: 'Gosuranemab', inn: 'gosuranemab', codes: [], peakSales_M: 2000, therapeuticArea: 'neurology', source: 'Biogen anti-tau' },
+  { brand: 'Prasinezumab', inn: 'prasinezumab', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'Roche/Prothena alpha-synuclein Parkinson' },
+  { brand: 'Buntanetap', inn: 'buntanetap', codes: [], peakSales_M: 1500, therapeuticArea: 'neurology', source: 'Annovis anti-neurodegeneration' },
+  { brand: 'Xanomeline-trospium', inn: 'xanomeline-trospium', codes: [], peakSales_M: 8000, therapeuticArea: 'neurology', source: 'BMS Cobenfy M1/M4 — ALS expansion' },
+
+  // ─── TYK2 next-gen ────────────────────────────────────────────────
+  { brand: 'Zasocitinib', inn: 'zasocitinib', codes: ['TAK-279', 'NDI-034858'], peakSales_M: 3500, therapeuticArea: 'immunology', source: 'Takeda TYK2 (acquired Nimbus)' },
+  { brand: 'Esuberaprost', inn: 'esuberaprost', codes: [], peakSales_M: 800, therapeuticArea: 'immunology', source: 'next-gen prostacyclin' },
+  { brand: 'ICP-332', inn: 'ICP-332', codes: [], peakSales_M: 1000, therapeuticArea: 'immunology', source: 'InnoCare TYK2 (China)' },
+
+  // ─── TL1A follow-ons ─────────────────────────────────────────────
+  { brand: 'RO7790121', inn: 'RO7790121 TL1A', codes: [], peakSales_M: 3500, therapeuticArea: 'immunology', source: 'Roche/Roivant-KPL licensed TL1A — alternative to tulisokibart' },
+  { brand: 'SAR-441566', inn: 'SAR441566 oral TNF', codes: [], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'Sanofi oral TNF inhibitor' },
+
+  // ─── IgA nephropathy / autoimmune kidney ─────────────────────────
+  { brand: 'Iptacopan', inn: 'iptacopan', codes: ['LNP023'], peakSales_M: 4500, therapeuticArea: 'nephrology', source: 'Novartis Fabhalta factor B PNH/C3G/IgAN — $100M 2024 growing' },
+  { brand: 'Fabhalta', inn: 'iptacopan', codes: [], peakSales_M: 4500, therapeuticArea: 'nephrology', source: 'Novartis 2024 launch' },
+  { brand: 'Pegcetacoplan', inn: 'pegcetacoplan (nephrology)', codes: [], peakSales_M: 2500, therapeuticArea: 'nephrology', source: 'Apellis C3G/IC-MPGN — Empaveli expansion' },
+  { brand: 'Zigakibart', inn: 'zigakibart', codes: [], peakSales_M: 2000, therapeuticArea: 'nephrology', source: 'Novartis/Chinook APRIL IgAN phase 3' },
+  { brand: 'Ravulizumab', inn: 'ravulizumab (gMG expansion)', codes: [], peakSales_M: 5500, therapeuticArea: 'immunology', source: 'AstraZeneca myasthenia gravis expansion' },
+
+  // ─── Chinese pipeline (increasingly licensed out) ────────────────
+  { brand: 'Ensartinib', inn: 'ensartinib', codes: ['X-396'], peakSales_M: 800, therapeuticArea: 'oncology', source: 'Betta Pharma/Xcovery ALK (US approval 2024)' },
+  { brand: 'Sintilimab', inn: 'sintilimab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Innovent PD-1 (China market)' },
+  { brand: 'Toripalimab', inn: 'toripalimab', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Junshi/Coherus Loqtorzi — US 2023 NPC approval' },
+  { brand: 'Loqtorzi', inn: 'toripalimab', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Coherus US 2024 launch' },
+  { brand: 'Tislelizumab', inn: 'tislelizumab', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'BeiGene Tevimbra PD-1' },
+  { brand: 'Tevimbra', inn: 'tislelizumab', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'BeiGene 2024 US launch' },
+  { brand: 'Envafolimab', inn: 'envafolimab', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Jiangsu Simcere subQ PD-L1' },
+
+  // ─── Radiopharmaceutical pipeline ─────────────────────────────────
+  { brand: 'Lu-177-PNT2002', inn: 'Lu-177-PNT2002', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Lantheus/POINT PSMA radiopharm prostate' },
+  { brand: 'Ac-225-PSMA', inn: 'Ac-225-PSMA', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Novartis/Fusion next-gen alpha radiopharm' },
+  { brand: 'FPI-2059', inn: 'FPI-2059', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Fusion/AstraZeneca NTSR1 actinium-225' },
+
+  // ─── Other 2024-25 launches I missed ─────────────────────────────
+  { brand: 'Rezzayo', inn: 'rezafungin', codes: [], peakSales_M: 200, therapeuticArea: 'infectiousDisease', source: 'Melinta/Cidara antifungal 2024 launch' },
+  { brand: 'Winrevair', inn: 'sotatercept', codes: [], peakSales_M: 4500, therapeuticArea: 'pulmonology', source: 'Merck PAH — $150M 2024 growing; analyst peak $5B+' },
+  { brand: 'Sotatercept', inn: 'sotatercept', codes: ['MK-7962'], peakSales_M: 4500, therapeuticArea: 'pulmonology', source: 'Merck Winrevair PAH' },
+  { brand: 'Piasky', inn: 'crovalimab', codes: [], peakSales_M: 1500, therapeuticArea: 'hematology', source: 'Roche PNH 2024 launch' },
+  { brand: 'Ojjaara', inn: 'momelotinib', codes: [], peakSales_M: 1200, therapeuticArea: 'hematology', source: 'GSK myelofibrosis 2023' },
+  { brand: 'Velsipity', inn: 'etrasimod', codes: [], peakSales_M: 2500, therapeuticArea: 'gastroenterology', source: 'Pfizer S1P — $150M 2024 growing' },
+  { brand: 'Tryngolza', inn: 'olezarsen', codes: [], peakSales_M: 1500, therapeuticArea: 'cardiovascular', source: 'Ionis FCS 2024 launch' },
+  { brand: 'Welireg', inn: 'belzutifan', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Merck HIF-2α VHL — $250M 2024' },
+  { brand: 'Augtyro', inn: 'repotrectinib', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'BMS ROS1 NSCLC 2023' },
+  { brand: 'Cabometyx', inn: 'cabozantinib', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'Exelixis — $1.9B 2024' },
+  { brand: 'Inlyta', inn: 'axitinib', codes: [], peakSales_M: 1200, therapeuticArea: 'oncology', source: 'Pfizer RCC' },
+
+  // ─── Hematology / BTK / CAR-T updates ────────────────────────────
+  { brand: 'Pirtobrutinib', inn: 'pirtobrutinib', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Eli Lilly Jaypirca non-covalent BTK CLL/MCL' },
+  { brand: 'Jaypirca', inn: 'pirtobrutinib', codes: [], peakSales_M: 3500, therapeuticArea: 'oncology', source: 'Eli Lilly 2023 launch' },
+  { brand: 'Zanubrutinib', inn: 'zanubrutinib', codes: [], peakSales_M: 6500, therapeuticArea: 'oncology', source: 'BeiGene Brukinsa — $2.3B 2024 growing' },
+  { brand: 'Brukinsa', inn: 'zanubrutinib', codes: [], peakSales_M: 6500, therapeuticArea: 'oncology', source: 'BeiGene 2024' },
+  { brand: 'Tolebrutinib', inn: 'tolebrutinib', codes: [], peakSales_M: 3000, therapeuticArea: 'neurology', source: 'Sanofi BTK progressive MS' },
+
+  // ─── Women's health ─────────────────────────────────────────────
+  { brand: 'Relugolix', inn: 'relugolix', codes: [], peakSales_M: 1200, therapeuticArea: 'womensHealth', source: 'Sumitomo/Pfizer Myfembree/Orgovyx' },
+  { brand: 'Myfembree', inn: 'relugolix combo', codes: [], peakSales_M: 800, therapeuticArea: 'womensHealth', source: 'Myovant/Pfizer uterine fibroids' },
+  { brand: 'Oriahnn', inn: 'elagolix', codes: [], peakSales_M: 500, therapeuticArea: 'womensHealth', source: 'AbbVie fibroids' },
+  { brand: 'Ryeqo', inn: 'relugolix combo EU', codes: [], peakSales_M: 1200, therapeuticArea: 'womensHealth', source: 'Sumitomo EU endometriosis' },
+
+  // ─── Vaccines ───────────────────────────────────────────────────
+  { brand: 'Flublok', inn: 'recombinant flu vaccine', codes: [], peakSales_M: 1500, therapeuticArea: 'infectiousDisease', source: 'Sanofi recombinant flu' },
+  { brand: 'Spikevax', inn: 'mRNA-1273', codes: [], peakSales_M: 3500, therapeuticArea: 'infectiousDisease', source: 'Moderna COVID (post-pandemic)' },
+  { brand: 'Comirnaty', inn: 'BNT162b2', codes: [], peakSales_M: 8000, therapeuticArea: 'infectiousDisease', source: 'Pfizer/BioNTech COVID — $7B 2024' },
+
+  // ─── Orphan / rare disease pipeline ──────────────────────────────
+  { brand: 'Olipudase', inn: 'olipudase alfa', codes: [], peakSales_M: 800, therapeuticArea: 'rareDisease', source: 'Sanofi Xenpozyme ASMD' },
+  { brand: 'Avalglucosidase', inn: 'avalglucosidase alfa', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Sanofi late-onset Pompe' },
+  { brand: 'Lonapegsomatropin', inn: 'lonapegsomatropin', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Ascendis Skytrofa pediatric GHD' },
 ];
 
 // ---------------------------------------------------------------------------
