@@ -47,6 +47,7 @@ import { resolveUpfrontStructure } from './deal-structure-classifier';
 import type { DealStructureClassification } from './deal-structure-classifier';
 import { getPatentCliffAdjustment } from './patent-cliffs';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
+import { computeEmpiricalMultiplier } from './empirical-multiplier';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -816,76 +817,28 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Sources: 2020-2025 disclosed deals per cohort, iteratively tuned
   // against disclosed upfronts. See docs/calibration-iteration-log.md.
   // =========================================================================
-  // R50 (2026-04-14): TA uplift retune on quality-filtered corpus
-  // (337 verified Supabase + 251 curated EXTENDED, down from 1540 mostly-
-  // pending-and-garbage). On the clean corpus the legacy uplifts — tuned
-  // against the polluted state — produced per-TA signed errors that
-  // revealed the calibration floor:
-  //   - oncology core scope: −5% signed (well-calibrated; reduced from
-  //     +174% on polluted data, so the old 3.0× was overcorrecting for
-  //     noise as much as for real bias). Kept 3.0× for phase2 because
-  //     n=5 is too small to lower without a bigger sample.
-  //   - infectiousDisease core scope: +47% signed (overshoot). Reduced
-  //     from 3.0× to 2.0× — Cidara/Arbutus/Assembly deals still have
-  //     relatively small upfronts vs engine's generic ID peak.
-  //   - neurology phase2: −28% (undershoot). Kept 2.0× — raising to
-  //     2.5× was tested and regressed held-out test set.
-  // Sources: Neurocrine-Takeda KarXT, Sage-Biogen zuranolone (neurology);
-  // Cidara-Merck CD388, RRPV-Moderna H5NX (infectiousDisease).
-  const TA_UPLIFT_BY_PHASE: Record<string, Record<string, number>> = {
-    oncology: { phase2: 3.0, phase2_3: 3.0, phase3: 1.3 },
-    infectiousDisease: { '*': 2.0 },
-    neurology: { phase2: 2.0, phase2_3: 2.0 },
-  };
-  // R50: smallMolecule damper 0.7. On cleaned corpus, smallMolecule n=18
-  // core overshoots +56% — driven by engine's generic peak sizing against
-  // the tighter actual small-molecule deal economics (specialty small-mol
-  // deals cluster at $30-150M upfronts while engine predicts $200-400M).
-  const MODALITY_UPLIFT: Record<string, number> = {
-    adc: 1.3, bispecific: 1.5, bispecificAntibody: 1.5,
-    rnai: 1.5, radiopharmaceutical: 2.2, protac: 1.5,
-    mrna: 1.7,
-    smallMolecule: 0.8,
-  };
-  const taUpliftMap = TA_UPLIFT_BY_PHASE[therapeuticArea];
-  const taUplift = taUpliftMap ? (taUpliftMap[phase] ?? taUpliftMap['*'] ?? 1.0) : 1.0;
-  const modUplift = MODALITY_UPLIFT[modality] ?? 1.0;
-  // R61 (2026-04-14): Expanded phase × dealType multipliers. The R42 engine
-  // migration encoded only three pairs; the R53-R58 session audits surfaced
-  // that rNPV fundamentally undershoots M&A upfronts by 5-50× because
-  // acquisitions price on bidding dynamics + defensive franchise protection,
-  // not rNPV fraction. These multipliers were first landed in the backtest
-  // harness (R55/56/57/58); R61 promotes them to the engine so every live
-  // calculator user — not just the backtest — sees the same calibrated
-  // output when valuing an M&A scenario.
+  // (R50 TA uplift + R61 phase×dealType tables moved to
+  // lib/financial/empirical-multiplier.ts in R67. Historical rationale
+  // preserved in that file's comment headers.)
+  // R67 (2026-04-15) — Unified empirical multiplier.
+  // REPLACES the R42+R50+R61 three-stack multiplicative composition with
+  // a single tier-gated, additive-blended, hard-capped function in
+  // `lib/financial/empirical-multiplier.ts`. The old stack was producing
+  // 15-20× outputs on Phase 2 oncology acquisitions because each prior
+  // calibration round had measured the same undershoot against the same
+  // reference deals and landed independent corrections — stacking them
+  // multiplicatively double-counted.
   //
-  // Representative deals per cohort:
-  //   preclinical:acq — early platform M&A, strategic option premium
-  //   phase1:acq — Carmot-Roche $2.7B, Inversago-Novo $1.1B, Prevail-Lilly $1.04B
-  //   phase2:acq — Prometheus-Merck $10.8B, Cerevel-AbbVie $8.7B, Telavant-Roche $7.1B
-  //   phase3:acq — Pfizer-GBT $5.4B, BMS-MyoKardia $13B, Amgen-ChemoCentryx $3.7B
-  //   approved:acq — Amgen-Horizon $28B, Pfizer-Seagen $43B, Roche-Spark $4.8B
+  // Semantics guaranteed:
+  //   - multiplier ∈ [0.25, 8.0] for all inputs (hard cap backstop)
+  //   - acquisition > licensing at same asset quality
+  //   - Tier-1 > Tier-2 at same (TA, phase, modality, dealType)
+  //   - TA_UPLIFT / MODALITY_UPLIFT / PHASE_DEALTYPE_BASE remain the
+  //     three calibration surfaces — tuned independently per round
   //
-  // R53 approved-licensing per-TA uplifts are also migrated: orphan
-  // exclusivity (rareDisease Alexion/Soliris) and blockbuster territorial
-  // rollout (oncology Keytruda/Opdivo) have distinct approved-stage
-  // economics that the flat 0.08 multiplier cannot model.
-  let phaseDealTypeMult = 1.0;
-  if (dealType === 'collaboration') {
-    if (phase === 'phase2' || phase === 'phase2_3') phaseDealTypeMult = 4.0;
-    else if (phase === 'phase3') phaseDealTypeMult = 3.0;
-  } else if (dealType === 'acquisition') {
-    if (phase === 'preclinical' || phase === 'discovery') phaseDealTypeMult = 6.0;
-    else if (phase === 'phase1' || phase === 'phase1_2') phaseDealTypeMult = 4.0;
-    else if (phase === 'phase2' || phase === 'phase2_3') phaseDealTypeMult = 5.0;
-    else if (phase === 'phase3') phaseDealTypeMult = 2.5;
-    else if (phase === 'approved' || phase === 'nda_filed') phaseDealTypeMult = 1.5;
-  } else if (dealType === 'licensing' && phase === 'approved') {
-    if (therapeuticArea === 'rareDisease') phaseDealTypeMult = 3.0;
-    else if (therapeuticArea === 'oncology') phaseDealTypeMult = 1.75;
-  }
-
-  const empiricalMultiplier = taUplift * modUplift * phaseDealTypeMult;
+  // Invariants verified by lib/financial/__tests__/empirical-multiplier.test.ts.
+  // Regression against closed deals in scripts/validate-empirical-calibration.ts.
+  const empiricalMultiplier = computeEmpiricalMultiplier(input);
 
   // calibratedRNPV scales with the empirical multiplier for ALL downstream
   // upfront + totalDeal computations. Invariant preserved: both upfront

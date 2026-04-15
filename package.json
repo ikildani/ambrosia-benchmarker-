@@ -16,7 +16,9 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:load": "k6 run -e SCENARIO=smoke load-tests/k6-smoke.js",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "validate:empirical": "tsx scripts/validate-empirical-calibration.ts",
+    "validate:empirical:verbose": "tsx scripts/validate-empirical-calibration.ts --verbose"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
