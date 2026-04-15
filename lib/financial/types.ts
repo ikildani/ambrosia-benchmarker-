@@ -571,6 +571,29 @@ export interface RNPVResult {
   modelAssumptions: string[];
 
   /**
+   * Deal-structure classification. The engine classifies every deal into
+   * one of six economically-distinct pricing regimes and routes the
+   * upfront-% calculation to a regime-specific distribution. Surfacing
+   * the classification lets the UI show users WHY the engine priced the
+   * deal the way it did — transparent reasoning matters for BD users
+   * who need to explain the number to a counterparty.
+   *
+   * See `lib/financial/deal-structure-classifier.ts` for the six regimes
+   * and the routing rules.
+   */
+  dealStructureClassification?: {
+    structure:
+      | 'classic_license'
+      | 'option_style'
+      | 'platform_collab'
+      | 'regional_license'
+      | 'biosimilar_license'
+      | 'strategic_acquisition';
+    confidence: number;
+    signals: string[];
+  };
+
+  /**
    * Result of the indication TAM ceiling check against the user's peak sales
    * assumption. Populated only when the indication maps to INDICATION_MARKET_CAPS.
    *   - severity 'critical' means the model hard-capped peak sales to 80% of TAM.

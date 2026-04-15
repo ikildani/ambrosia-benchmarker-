@@ -1233,6 +1233,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     discountRate,
     terminalValue: Math.round(terminalValue),
     modelAssumptions,
+    dealStructureClassification,
     peakSalesCeilingCheck: ceilingCheck.ok ? { ok: true } : ceilingCheck,
     ...(comboDynamicsUsed
       ? {

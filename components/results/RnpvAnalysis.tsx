@@ -9,6 +9,7 @@ import {
 import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sparkles, BarChart3, Globe } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
 import ConfidenceBand from '@/components/ConfidenceBand';
+import { DealStructureBadge } from '@/components/results/DealStructureBadge';
 import { CHART_COLORS } from '@/lib/chartTheme';
 import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult, MonteCarloResult } from '@/lib/financial/types';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
@@ -347,6 +348,18 @@ export default function RnpvAnalysis({
                 <p className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white font-mono">{paybackPeriod}</p>
               </div>
             </div>
+
+            {/* R57 (2026-04-14): Deal-structure classification badge.
+                Engine routes every prediction to one of six pricing regimes
+                (classic_license, option_style, platform_collab, etc.) and
+                uses regime-specific upfront fractions. Surfacing the routing
+                here lets BD users see WHY the engine priced the deal the way
+                it did and gives them a signal they can explain/contest. */}
+            {rnpvResult.dealStructureClassification && (
+              <div className="mb-4">
+                <DealStructureBadge classification={rnpvResult.dealStructureClassification} />
+              </div>
+            )}
 
             {/* R40 (2026-04-13): Visual confidence bands for upfront + total deal value.
                 Uses Monte Carlo P10/P90 when available, otherwise falls back to the
