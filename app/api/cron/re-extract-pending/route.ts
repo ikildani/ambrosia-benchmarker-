@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       )
       .eq('is_synthetic', false)
       .eq('verified', false)
-      .or('verification_status.is.null,verification_status.eq.pending')
+      .eq('verification_status', 'pending')
       .in('source_type', ['sec_8k', 'sec_10k', 'press_release', 'openfda'])
       .order('announced_date', { ascending: true, nullsFirst: true })
       .limit(BATCH_SIZE);
