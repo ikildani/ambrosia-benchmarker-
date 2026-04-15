@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-15T02:42:57.602Z",
+  "runAt": "2026-04-15T22:53:19.365Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -10,20 +10,20 @@
     "TIER4_PATENT_CLIFFS": false
   },
   "fullScope": {
-    "totalDeals": 307,
-    "hitRate25": 0.18241042345276873,
-    "hitRate35": 0.2931596091205212,
-    "hitRate50": 0.4006514657980456,
-    "meanAbsErrorPct": 1.4579534754899761,
-    "medianSignedErrorPct": -0.19437500000000002,
-    "rmseUpfront_M": 4442.5,
+    "totalDeals": 308,
+    "hitRate25": 0.19805194805194806,
+    "hitRate35": 0.30194805194805197,
+    "hitRate50": 0.4155844155844156,
+    "meanAbsErrorPct": 1.411079598787046,
+    "medianSignedErrorPct": -0.16,
+    "rmseUpfront_M": 4364.6,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 40,
-        "hitRate25": 0.25,
-        "hitRate35": 0.375,
-        "meanSignedErrorPct": -0.05350199121170139,
-        "meanAbsErrorPct": 0.6123439953513852
+        "hitRate25": 0.275,
+        "hitRate35": 0.4,
+        "meanSignedErrorPct": -0.03387557611736179,
+        "meanAbsErrorPct": 0.5927175802570456
       },
       "infectiousDisease": {
         "n": 19,
@@ -41,31 +41,31 @@
       },
       "womensHealth": {
         "n": 15,
-        "hitRate25": 0.13333333333333333,
-        "hitRate35": 0.26666666666666666,
-        "meanSignedErrorPct": 1.308505773658515,
-        "meanAbsErrorPct": 1.7901923782983198
+        "hitRate25": 0.2,
+        "hitRate35": 0.3333333333333333,
+        "meanSignedErrorPct": 1.362080083792825,
+        "meanAbsErrorPct": 1.7545736237195653
       },
       "oncology": {
-        "n": 39,
-        "hitRate25": 0.1794871794871795,
-        "hitRate35": 0.2564102564102564,
-        "meanSignedErrorPct": 0.21150631428332609,
-        "meanAbsErrorPct": 0.8649676990742938
+        "n": 40,
+        "hitRate25": 0.15,
+        "hitRate35": 0.225,
+        "meanSignedErrorPct": -0.0037361538841207214,
+        "meanAbsErrorPct": 0.676885507253884
       },
       "neurology": {
         "n": 29,
-        "hitRate25": 0.20689655172413793,
+        "hitRate25": 0.2413793103448276,
         "hitRate35": 0.27586206896551724,
-        "meanSignedErrorPct": 4.782761947465416,
-        "meanAbsErrorPct": 5.59385859412246
+        "meanSignedErrorPct": 4.8045212085491595,
+        "meanAbsErrorPct": 5.572099333038715
       },
       "immunology": {
         "n": 28,
-        "hitRate25": 0.17857142857142858,
-        "hitRate35": 0.39285714285714285,
-        "meanSignedErrorPct": 0.18750442615577523,
-        "meanAbsErrorPct": 0.7647195557081318
+        "hitRate25": 0.25,
+        "hitRate35": 0.42857142857142855,
+        "meanSignedErrorPct": 0.12369169980189142,
+        "meanAbsErrorPct": 0.688431969453841
       },
       "rareDisease": {
         "n": 27,
@@ -77,9 +77,9 @@
       "hematology": {
         "n": 27,
         "hitRate25": 0.18518518518518517,
-        "hitRate35": 0.2962962962962963,
-        "meanSignedErrorPct": -0.027361379264963626,
-        "meanAbsErrorPct": 0.8369278872659512
+        "hitRate35": 0.25925925925925924,
+        "meanSignedErrorPct": -0.1067657000420781,
+        "meanAbsErrorPct": 0.7985308251937295
       },
       "dermatology": {
         "n": 17,
@@ -90,17 +90,17 @@
       },
       "gastroenterology": {
         "n": 22,
-        "hitRate25": 0.09090909090909091,
-        "hitRate35": 0.18181818181818182,
-        "meanSignedErrorPct": 1.229406823143664,
-        "meanAbsErrorPct": 1.8243716599207467
+        "hitRate25": 0.18181818181818182,
+        "hitRate35": 0.2727272727272727,
+        "meanSignedErrorPct": 1.2863369590671594,
+        "meanAbsErrorPct": 1.7674415239972512
       },
       "metabolic": {
         "n": 12,
-        "hitRate25": 0.25,
+        "hitRate25": 0.16666666666666666,
         "hitRate35": 0.5833333333333334,
-        "meanSignedErrorPct": 0.7057854746480671,
-        "meanAbsErrorPct": 1.159554666766074
+        "meanSignedErrorPct": 0.745243474648067,
+        "meanAbsErrorPct": 1.1641140000994075
       },
       "hepatology": {
         "n": 2,
@@ -141,10 +141,10 @@
     "byPhase": {
       "phase3": {
         "n": 52,
-        "hitRate25": 0.21153846153846154,
-        "hitRate35": 0.3076923076923077,
-        "meanSignedErrorPct": 0.3362499333488318,
-        "meanAbsErrorPct": 0.8941225415304418
+        "hitRate25": 0.25,
+        "hitRate35": 0.3269230769230769,
+        "meanSignedErrorPct": 0.33418864380757324,
+        "meanAbsErrorPct": 0.8463399506606133
       },
       "preclinical": {
         "n": 55,
@@ -157,31 +157,31 @@
         "n": 63,
         "hitRate25": 0.14285714285714285,
         "hitRate35": 0.30158730158730157,
-        "meanSignedErrorPct": 0.015403306403173098,
-        "meanAbsErrorPct": 0.8046113320447988
+        "meanSignedErrorPct": 0.01524040424728586,
+        "meanAbsErrorPct": 0.8047742342006861
       },
       "approved": {
         "n": 55,
-        "hitRate25": 0.18181818181818182,
-        "hitRate35": 0.2545454545454545,
-        "meanSignedErrorPct": 3.676685245420684,
-        "meanAbsErrorPct": 4.099065570808685
+        "hitRate25": 0.21818181818181817,
+        "hitRate35": 0.2727272727272727,
+        "meanSignedErrorPct": 3.633369197268635,
+        "meanAbsErrorPct": 4.0610664827335965
       },
       "phase2": {
-        "n": 82,
-        "hitRate25": 0.17073170731707318,
-        "hitRate35": 0.2682926829268293,
-        "meanSignedErrorPct": 0.28294096984266603,
-        "meanAbsErrorPct": 1.0702390445364602
+        "n": 83,
+        "hitRate25": 0.18072289156626506,
+        "hitRate35": 0.27710843373493976,
+        "meanSignedErrorPct": 0.20864789727296304,
+        "meanAbsErrorPct": 0.9559612389941823
       }
     },
     "byModality": {
       "smallMolecule": {
-        "n": 116,
-        "hitRate25": 0.13793103448275862,
-        "hitRate35": 0.25862068965517243,
-        "meanSignedErrorPct": 1.8566692823563098,
-        "meanAbsErrorPct": 2.3747989574108397
+        "n": 117,
+        "hitRate25": 0.1623931623931624,
+        "hitRate35": 0.26495726495726496,
+        "meanSignedErrorPct": 1.7876300507766527,
+        "meanAbsErrorPct": 2.300555594637699
       },
       "rnai": {
         "n": 11,
@@ -192,10 +192,10 @@
       },
       "myosinInhibitor": {
         "n": 2,
-        "hitRate25": 0.5,
-        "hitRate35": 0.5,
-        "meanSignedErrorPct": -0.2757673282442748,
-        "meanAbsErrorPct": 0.2757673282442748
+        "hitRate25": 1,
+        "hitRate35": 1,
+        "meanSignedErrorPct": -0.08676732824427477,
+        "meanAbsErrorPct": 0.08676732824427477
       },
       "aso": {
         "n": 2,
@@ -255,10 +255,10 @@
       },
       "mab": {
         "n": 19,
-        "hitRate25": 0.3157894736842105,
-        "hitRate35": 0.42105263157894735,
-        "meanSignedErrorPct": 0.3626169370856774,
-        "meanAbsErrorPct": 0.8668269517347345
+        "hitRate25": 0.2631578947368421,
+        "hitRate35": 0.3684210526315789,
+        "meanSignedErrorPct": 0.3808333113546832,
+        "meanAbsErrorPct": 0.8850433260037402
       },
       "intravitreal": {
         "n": 2,
@@ -285,8 +285,8 @@
         "n": 2,
         "hitRate25": 0.5,
         "hitRate35": 0.5,
-        "meanSignedErrorPct": 0.15998484848484845,
-        "meanAbsErrorPct": 0.40365151515151515
+        "meanSignedErrorPct": 0.3491515151515151,
+        "meanAbsErrorPct": 0.3491515151515151
       },
       "hormoneTherapy": {
         "n": 1,
@@ -306,8 +306,8 @@
         "n": 16,
         "hitRate25": 0.0625,
         "hitRate35": 0.0625,
-        "meanSignedErrorPct": 0.21817478680881028,
-        "meanAbsErrorPct": 1.1178674263059438
+        "meanSignedErrorPct": -0.010506155814140647,
+        "meanAbsErrorPct": 0.8891864836829932
       },
       "complementInhibitor": {
         "n": 1,
@@ -339,17 +339,17 @@
       },
       "peptide": {
         "n": 10,
-        "hitRate25": 0.3,
+        "hitRate25": 0.2,
         "hitRate35": 0.4,
-        "meanSignedErrorPct": 0.3423223142857143,
-        "meanAbsErrorPct": 0.5959292857142857
+        "meanSignedErrorPct": 0.3896719142857143,
+        "meanAbsErrorPct": 0.6014004857142857
       },
       "tl1aInhibitor": {
         "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.954229411841419,
-        "meanAbsErrorPct": 0.954229411841419
+        "meanSignedErrorPct": -0.8426425104329682,
+        "meanAbsErrorPct": 0.8426425104329682
       },
       "s1pModulator": {
         "n": 1,
@@ -362,8 +362,8 @@
         "n": 1,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.8287148125,
-        "meanAbsErrorPct": 0.8287148125
+        "meanSignedErrorPct": -0.6634640625,
+        "meanAbsErrorPct": 0.6634640625
       },
       "jakInhibitor": {
         "n": 1,
@@ -395,10 +395,10 @@
       },
       "antibody": {
         "n": 33,
-        "hitRate25": 0.15151515151515152,
-        "hitRate35": 0.30303030303030304,
-        "meanSignedErrorPct": 0.7452411908368467,
-        "meanAbsErrorPct": 1.4755219156871453
+        "hitRate25": 0.24242424242424243,
+        "hitRate35": 0.36363636363636365,
+        "meanSignedErrorPct": 0.795107858039376,
+        "meanAbsErrorPct": 1.440528254834588
       },
       "microRNA": {
         "n": 1,
@@ -439,8 +439,8 @@
         "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 0.4801221111111112,
-        "meanAbsErrorPct": 1.2661801111111113
+        "meanSignedErrorPct": -0.576560746031746,
+        "meanAbsErrorPct": 0.576560746031746
       },
       "rna": {
         "n": 1,
@@ -501,20 +501,20 @@
     }
   },
   "coreScope": {
-    "totalDeals": 76,
-    "hitRate25": 0.19736842105263158,
-    "hitRate35": 0.2894736842105263,
-    "hitRate50": 0.3684210526315789,
-    "meanAbsErrorPct": 0.7131582001973228,
-    "medianSignedErrorPct": -0.19041499999999995,
-    "rmseUpfront_M": 321.4,
+    "totalDeals": 77,
+    "hitRate25": 0.19480519480519481,
+    "hitRate35": 0.2857142857142857,
+    "hitRate50": 0.37662337662337664,
+    "meanAbsErrorPct": 0.7006474510604945,
+    "medianSignedErrorPct": -0.16,
+    "rmseUpfront_M": 317.4,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 14,
-        "hitRate25": 0.07142857142857142,
-        "hitRate35": 0.21428571428571427,
-        "meanSignedErrorPct": -0.04178671715761774,
-        "meanAbsErrorPct": 0.6486838600147606
+        "hitRate25": 0.14285714285714285,
+        "hitRate35": 0.2857142857142857,
+        "meanSignedErrorPct": 0.014288754540495465,
+        "meanAbsErrorPct": 0.5926083883166474
       },
       "infectiousDisease": {
         "n": 8,
@@ -534,15 +534,15 @@
         "n": 5,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": 0.2586140419580419,
-        "meanAbsErrorPct": 0.5875125034965034
+        "meanSignedErrorPct": 0.2791617342657342,
+        "meanAbsErrorPct": 0.566964811188811
       },
       "neurology": {
         "n": 8,
-        "hitRate25": 0.125,
+        "hitRate25": 0.25,
         "hitRate35": 0.25,
-        "meanSignedErrorPct": -0.4580465300546448,
-        "meanAbsErrorPct": 0.8330465300546448
+        "meanSignedErrorPct": -0.42962986338797815,
+        "meanAbsErrorPct": 0.8046298633879782
       },
       "rareDisease": {
         "n": 3,
@@ -566,18 +566,18 @@
         "meanAbsErrorPct": 0.7842117333333334
       },
       "oncology": {
-        "n": 9,
-        "hitRate25": 0.3333333333333333,
-        "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": -0.18838183495233304,
-        "meanAbsErrorPct": 0.4372440571745552
+        "n": 10,
+        "hitRate25": 0.2,
+        "hitRate35": 0.2,
+        "meanSignedErrorPct": -0.18521981307326135,
+        "meanAbsErrorPct": 0.47841803529548355
       },
       "hematology": {
         "n": 6,
         "hitRate25": 0.3333333333333333,
         "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": 0.42851009401709406,
-        "meanAbsErrorPct": 1.1790632393162392
+        "meanSignedErrorPct": 0.4784175299145299,
+        "meanAbsErrorPct": 1.1726070854700854
       },
       "rare_disease": {
         "n": 1,
@@ -602,35 +602,35 @@
       },
       "metabolic": {
         "n": 3,
-        "hitRate25": 0.6666666666666666,
+        "hitRate25": 0.3333333333333333,
         "hitRate35": 0.6666666666666666,
-        "meanSignedErrorPct": 1.3992546666666665,
-        "meanAbsErrorPct": 1.5388493333333333
+        "meanSignedErrorPct": 1.5570866666666665,
+        "meanAbsErrorPct": 1.5570866666666665
       }
     },
     "byPhase": {
       "phase3": {
         "n": 30,
-        "hitRate25": 0.16666666666666666,
-        "hitRate35": 0.26666666666666666,
-        "meanSignedErrorPct": 0.19361033159314747,
-        "meanAbsErrorPct": 0.7436415673967519
+        "hitRate25": 0.2,
+        "hitRate35": 0.3,
+        "meanSignedErrorPct": 0.23318498761636947,
+        "meanAbsErrorPct": 0.7127571677837861
       },
       "phase2": {
-        "n": 46,
-        "hitRate25": 0.21739130434782608,
-        "hitRate35": 0.30434782608695654,
-        "meanSignedErrorPct": -0.073249569415087,
-        "meanAbsErrorPct": 0.6932777433281306
+        "n": 47,
+        "hitRate25": 0.19148936170212766,
+        "hitRate35": 0.2765957446808511,
+        "meanSignedErrorPct": -0.060115159062176286,
+        "meanAbsErrorPct": 0.6929178446413724
       }
     },
     "byModality": {
       "smallMolecule": {
-        "n": 26,
-        "hitRate25": 0.11538461538461539,
-        "hitRate35": 0.11538461538461539,
-        "meanSignedErrorPct": 0.15956542559654,
-        "meanAbsErrorPct": 0.8223255068043923
+        "n": 27,
+        "hitRate25": 0.1111111111111111,
+        "hitRate35": 0.1111111111111111,
+        "meanSignedErrorPct": 0.15391197790923553,
+        "meanAbsErrorPct": 0.7916126236620328
       },
       "rnai": {
         "n": 4,
@@ -641,10 +641,10 @@
       },
       "myosinInhibitor": {
         "n": 1,
-        "hitRate25": 0,
-        "hitRate35": 0,
-        "meanSignedErrorPct": -0.396,
-        "meanAbsErrorPct": 0.396
+        "hitRate25": 1,
+        "hitRate35": 1,
+        "meanSignedErrorPct": -0.018,
+        "meanAbsErrorPct": 0.018
       },
       "aso": {
         "n": 1,
@@ -711,10 +711,10 @@
       },
       "mab": {
         "n": 9,
-        "hitRate25": 0.3333333333333333,
-        "hitRate35": 0.3333333333333333,
-        "meanSignedErrorPct": 0.3588488122605364,
-        "meanAbsErrorPct": 0.8835556321839081
+        "hitRate25": 0.2222222222222222,
+        "hitRate35": 0.2222222222222222,
+        "meanSignedErrorPct": 0.39730560238399315,
+        "meanAbsErrorPct": 0.9220124223073649
       },
       "radiopharmaceutical": {
         "n": 1,
@@ -725,10 +725,10 @@
       },
       "peptide": {
         "n": 5,
-        "hitRate25": 0.4,
+        "hitRate25": 0.2,
         "hitRate35": 0.4,
-        "meanSignedErrorPct": 0.6443391999999999,
-        "meanAbsErrorPct": 0.7280959999999999
+        "meanSignedErrorPct": 0.7390383999999999,
+        "meanAbsErrorPct": 0.7390383999999999
       },
       "bispecific": {
         "n": 3,
@@ -746,10 +746,10 @@
       },
       "antibody": {
         "n": 7,
-        "hitRate25": 0.2857142857142857,
+        "hitRate25": 0.42857142857142855,
         "hitRate35": 0.7142857142857143,
-        "meanSignedErrorPct": -0.46686210989010984,
-        "meanAbsErrorPct": 0.46686210989010984
+        "meanSignedErrorPct": -0.39160811721611727,
+        "meanAbsErrorPct": 0.42885207326007324
       },
       "allosteric_inhibitor": {
         "n": 1,
@@ -1103,16 +1103,16 @@
         "territory": "global",
         "actualUpfront_M": 500,
         "actualTotalDeal_M": 2000,
-        "peakSalesMedian_M": 3000
+        "peakSalesMedian_M": 4500
       },
-      "predictedUpfront_M": 302,
-      "predictedTotalDeal_M": 813,
-      "upfrontErrorPct": -0.396,
-      "totalDealErrorPct": -0.5935,
-      "upfrontErrorAbs_M": -198,
-      "totalDealErrorAbs_M": -1187,
-      "within25": false,
-      "within35": false,
+      "predictedUpfront_M": 491,
+      "predictedTotalDeal_M": 1322,
+      "upfrontErrorPct": -0.018,
+      "totalDealErrorPct": -0.339,
+      "upfrontErrorAbs_M": -9,
+      "totalDealErrorAbs_M": -678,
+      "within25": true,
+      "within35": true,
       "within50": true
     },
     {
@@ -1701,14 +1701,14 @@
         "territory": "global",
         "actualUpfront_M": 3000,
         "actualTotalDeal_M": 3000,
-        "peakSalesMedian_M": 800
+        "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 2269,
-      "predictedTotalDeal_M": 2476,
-      "upfrontErrorPct": -0.24366666666666667,
-      "totalDealErrorPct": -0.17466666666666666,
-      "upfrontErrorAbs_M": -731,
-      "totalDealErrorAbs_M": -524,
+      "predictedUpfront_M": 3404,
+      "predictedTotalDeal_M": 3713,
+      "upfrontErrorPct": 0.13466666666666666,
+      "totalDealErrorPct": 0.23766666666666666,
+      "upfrontErrorAbs_M": 404,
+      "totalDealErrorAbs_M": 713,
       "within25": true,
       "within35": true,
       "within50": true
@@ -1883,14 +1883,14 @@
         "territory": "global",
         "actualUpfront_M": 200,
         "actualTotalDeal_M": 1400,
-        "peakSalesMedian_M": 500
+        "peakSalesMedian_M": 1500
       },
       "predictedUpfront_M": 247.4,
-      "predictedTotalDeal_M": 229,
+      "predictedTotalDeal_M": 687,
       "upfrontErrorPct": 0.23700000000000018,
-      "totalDealErrorPct": -0.8364285714285714,
+      "totalDealErrorPct": -0.5092857142857142,
       "upfrontErrorAbs_M": 47.4,
-      "totalDealErrorAbs_M": -1171,
+      "totalDealErrorAbs_M": -713,
       "within25": true,
       "within35": true,
       "within50": true
@@ -2299,17 +2299,17 @@
         "territory": "global",
         "actualUpfront_M": 5400,
         "actualTotalDeal_M": 5400,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 500
       },
-      "predictedUpfront_M": 6989.6,
-      "predictedTotalDeal_M": 7194,
-      "upfrontErrorPct": 0.29437777777777785,
-      "totalDealErrorPct": 0.3322222222222222,
-      "upfrontErrorAbs_M": 1589.6,
-      "totalDealErrorAbs_M": 1794,
+      "predictedUpfront_M": 1552.9,
+      "predictedTotalDeal_M": 1599,
+      "upfrontErrorPct": -0.7124259259259259,
+      "totalDealErrorPct": -0.7038888888888889,
+      "upfrontErrorAbs_M": -3847.1,
+      "totalDealErrorAbs_M": -3801,
       "within25": false,
-      "within35": true,
-      "within50": true
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -2559,14 +2559,14 @@
         "territory": "global",
         "actualUpfront_M": 7100,
         "actualTotalDeal_M": 7100,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 6000
       },
-      "predictedUpfront_M": 592.4,
-      "predictedTotalDeal_M": 455,
-      "upfrontErrorPct": -0.916561971830986,
-      "totalDealErrorPct": -0.9359154929577465,
-      "upfrontErrorAbs_M": -6507.6,
-      "totalDealErrorAbs_M": -6645,
+      "predictedUpfront_M": 2176.9,
+      "predictedTotalDeal_M": 1672,
+      "upfrontErrorPct": -0.6933881690140846,
+      "totalDealErrorPct": -0.7645070422535212,
+      "upfrontErrorAbs_M": -4923.1,
+      "totalDealErrorAbs_M": -5428,
       "within25": false,
       "within35": false,
       "within50": false
@@ -2585,14 +2585,14 @@
         "territory": "global",
         "actualUpfront_M": 3200,
         "actualTotalDeal_M": 3200,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 3500
       },
-      "predictedUpfront_M": 548.1,
-      "predictedTotalDeal_M": 369,
-      "upfrontErrorPct": -0.8287148125,
-      "totalDealErrorPct": -0.8846875,
-      "upfrontErrorAbs_M": -2651.9,
-      "totalDealErrorAbs_M": -2831,
+      "predictedUpfront_M": 1076.9,
+      "predictedTotalDeal_M": 725,
+      "upfrontErrorPct": -0.6634640625,
+      "totalDealErrorPct": -0.7734375,
+      "upfrontErrorAbs_M": -2123.1,
+      "totalDealErrorAbs_M": -2475,
       "within25": false,
       "within35": false,
       "within50": false
@@ -2845,17 +2845,17 @@
         "territory": "global",
         "actualUpfront_M": 3680,
         "actualTotalDeal_M": 3680,
-        "peakSalesMedian_M": 3000
+        "peakSalesMedian_M": 1500
       },
-      "predictedUpfront_M": 2783.7,
-      "predictedTotalDeal_M": 1959,
-      "upfrontErrorPct": -0.2435491847826088,
-      "totalDealErrorPct": -0.4676630434782609,
-      "upfrontErrorAbs_M": -896.3,
-      "totalDealErrorAbs_M": -1721,
-      "within25": true,
-      "within35": true,
-      "within50": true
+      "predictedUpfront_M": 1202.2,
+      "predictedTotalDeal_M": 846,
+      "upfrontErrorPct": -0.6733244565217392,
+      "totalDealErrorPct": -0.7701086956521739,
+      "upfrontErrorAbs_M": -2477.8,
+      "totalDealErrorAbs_M": -2834,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -3081,11 +3081,11 @@
         "actualTotalDeal_M": 1050,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 4225.7,
+      "predictedUpfront_M": 1993.8,
       "predictedTotalDeal_M": 4732,
-      "upfrontErrorPct": 5.927337704918034,
+      "upfrontErrorPct": 2.2684426229508197,
       "totalDealErrorPct": 3.506666666666667,
-      "upfrontErrorAbs_M": 3615.7,
+      "upfrontErrorAbs_M": 1383.8,
       "totalDealErrorAbs_M": 3682,
       "within25": false,
       "within35": false,
@@ -3547,15 +3547,15 @@
         "territory": "global",
         "actualUpfront_M": 4000,
         "actualTotalDeal_M": 6000,
-        "peakSalesMedian_M": 3000
+        "peakSalesMedian_M": 3500
       },
-      "predictedUpfront_M": 2979.2,
-      "predictedTotalDeal_M": 3355,
-      "upfrontErrorPct": -0.2551899999999999,
-      "totalDealErrorPct": -0.44083333333333335,
-      "upfrontErrorAbs_M": -1020.8,
-      "totalDealErrorAbs_M": -2645,
-      "within25": false,
+      "predictedUpfront_M": 3506.7,
+      "predictedTotalDeal_M": 3949,
+      "upfrontErrorPct": -0.123322,
+      "totalDealErrorPct": -0.3418333333333333,
+      "upfrontErrorAbs_M": -493.3,
+      "totalDealErrorAbs_M": -2051,
+      "within25": true,
       "within35": true,
       "within50": true
     },
@@ -3885,16 +3885,16 @@
         "territory": "global",
         "actualUpfront_M": 4200,
         "actualTotalDeal_M": 4200,
-        "peakSalesMedian_M": 800
+        "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 2709.4,
-      "predictedTotalDeal_M": 2788,
-      "upfrontErrorPct": -0.3549142857142857,
-      "totalDealErrorPct": -0.3361904761904762,
-      "upfrontErrorAbs_M": -1490.6,
-      "totalDealErrorAbs_M": -1412,
-      "within25": false,
-      "within35": false,
+      "predictedUpfront_M": 4064,
+      "predictedTotalDeal_M": 4182,
+      "upfrontErrorPct": -0.032371428571428475,
+      "totalDealErrorPct": -0.004285714285714286,
+      "upfrontErrorAbs_M": -136,
+      "totalDealErrorAbs_M": -18,
+      "within25": true,
+      "within35": true,
       "within50": true
     },
     {
@@ -3913,14 +3913,14 @@
         "actualTotalDeal_M": 325,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 45.7,
+      "predictedUpfront_M": 61.2,
       "predictedTotalDeal_M": 113,
-      "upfrontErrorPct": 0.014999999999999937,
+      "upfrontErrorPct": 0.36111111111111094,
       "totalDealErrorPct": -0.6523076923076923,
-      "upfrontErrorAbs_M": 0.7,
+      "upfrontErrorAbs_M": 16.2,
       "totalDealErrorAbs_M": -212,
-      "within25": true,
-      "within35": true,
+      "within25": false,
+      "within35": false,
       "within50": true
     },
     {
@@ -4303,11 +4303,11 @@
         "actualTotalDeal_M": 1000,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 4462.9,
+      "predictedUpfront_M": 1993.8,
       "predictedTotalDeal_M": 3381,
-      "upfrontErrorPct": 3.46292,
+      "upfrontErrorPct": 0.99375,
       "totalDealErrorPct": 2.381,
-      "upfrontErrorAbs_M": 3462.9,
+      "upfrontErrorAbs_M": 993.8,
       "totalDealErrorAbs_M": 2381,
       "within25": false,
       "within35": false,
@@ -5785,67 +5785,15 @@
         "actualTotalDeal_M": 5000,
         "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 8650.9,
+      "predictedUpfront_M": 1993.8,
       "predictedTotalDeal_M": 7676,
-      "upfrontErrorPct": 1.7463022222222224,
+      "upfrontErrorPct": -0.36706349206349204,
       "totalDealErrorPct": 0.5352,
-      "upfrontErrorAbs_M": 5500.9,
+      "upfrontErrorAbs_M": -1156.2,
       "totalDealErrorAbs_M": 2676,
       "within25": false,
       "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_3277f91d-431f-4913-9daa-ae18cc7283e1",
-        "year": 2026,
-        "licensor": "Centessa Pharmaceuticals",
-        "licensee": "Eli Lilly",
-        "therapeuticArea": "neurology",
-        "indication": "narcolepsy",
-        "modality": "smallMolecule",
-        "phase": "phase2",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 6300,
-        "actualTotalDeal_M": 7800,
-        "peakSalesMedian_M": 2250
-      },
-      "predictedUpfront_M": 700.3,
-      "predictedTotalDeal_M": 660,
-      "upfrontErrorPct": -0.888847619047619,
-      "totalDealErrorPct": -0.9153846153846154,
-      "upfrontErrorAbs_M": -5599.7,
-      "totalDealErrorAbs_M": -7140,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_74daa5e7-ab34-4a95-9e43-00121edfebf3",
-        "year": 2026,
-        "licensor": "Apellis Pharmaceuticals",
-        "licensee": "Biogen",
-        "therapeuticArea": "immunology",
-        "indication": "complement_c3g",
-        "modality": "mab",
-        "phase": "approved",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 5600,
-        "actualTotalDeal_M": 6000,
-        "peakSalesMedian_M": 2000
-      },
-      "predictedUpfront_M": 10589.4,
-      "predictedTotalDeal_M": 8679,
-      "upfrontErrorPct": 0.8909707142857143,
-      "totalDealErrorPct": 0.4465,
-      "upfrontErrorAbs_M": 4989.4,
-      "totalDealErrorAbs_M": 2679,
-      "within25": false,
-      "within35": false,
-      "within50": false
+      "within50": true
     },
     {
       "case": {
@@ -5872,6 +5820,58 @@
       "within25": false,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_3277f91d-431f-4913-9daa-ae18cc7283e1",
+        "year": 2026,
+        "licensor": "Centessa Pharmaceuticals",
+        "licensee": "Eli Lilly",
+        "therapeuticArea": "neurology",
+        "indication": "narcolepsy",
+        "modality": "smallMolecule",
+        "phase": "phase2",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 6300,
+        "actualTotalDeal_M": 7800,
+        "peakSalesMedian_M": 6500
+      },
+      "predictedUpfront_M": 3243.5,
+      "predictedTotalDeal_M": 3057,
+      "upfrontErrorPct": -0.48516238095238096,
+      "totalDealErrorPct": -0.6080769230769231,
+      "upfrontErrorAbs_M": -3056.5,
+      "totalDealErrorAbs_M": -4743,
+      "within25": false,
+      "within35": false,
+      "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_74daa5e7-ab34-4a95-9e43-00121edfebf3",
+        "year": 2026,
+        "licensor": "Apellis Pharmaceuticals",
+        "licensee": "Biogen",
+        "therapeuticArea": "immunology",
+        "indication": "complement_c3g",
+        "modality": "mab",
+        "phase": "approved",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 5600,
+        "actualTotalDeal_M": 6000,
+        "peakSalesMedian_M": 2000
+      },
+      "predictedUpfront_M": 10589.4,
+      "predictedTotalDeal_M": 8679,
+      "upfrontErrorPct": 0.8909707142857143,
+      "totalDealErrorPct": 0.4465,
+      "upfrontErrorAbs_M": 4989.4,
+      "totalDealErrorAbs_M": 2679,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -5939,40 +5939,14 @@
         "territory": "global",
         "actualUpfront_M": 6700,
         "actualTotalDeal_M": 6700,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 500
       },
-      "predictedUpfront_M": 158.1,
-      "predictedTotalDeal_M": 177,
-      "upfrontErrorPct": -0.9764088059701493,
-      "totalDealErrorPct": -0.9735820895522388,
-      "upfrontErrorAbs_M": -6541.9,
-      "totalDealErrorAbs_M": -6523,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
-        "id": "sb_4fbc5a8e-4e2f-4149-9f41-eed9ba2f28e3",
-        "year": 2026,
-        "licensor": "Ouro Medicines",
-        "licensee": "Gilead Sciences",
-        "therapeuticArea": "immunology",
-        "indication": "autoimmune_diseases",
-        "modality": "bispecific",
-        "phase": "phase1",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 1675,
-        "actualTotalDeal_M": 2175,
-        "peakSalesMedian_M": 3000
-      },
-      "predictedUpfront_M": 476.7,
-      "predictedTotalDeal_M": 423,
-      "upfrontErrorPct": -0.715390447761194,
-      "totalDealErrorPct": -0.8055172413793104,
-      "upfrontErrorAbs_M": -1198.3,
-      "totalDealErrorAbs_M": -1752,
+      "predictedUpfront_M": 89.3,
+      "predictedTotalDeal_M": 0,
+      "upfrontErrorPct": -0.9866716417910447,
+      "totalDealErrorPct": -1,
+      "upfrontErrorAbs_M": -6610.7,
+      "totalDealErrorAbs_M": -6700,
       "within25": false,
       "within35": false,
       "within50": false
@@ -6005,26 +5979,26 @@
     },
     {
       "case": {
-        "id": "sb_237a3411-90d7-433c-9a4c-1a2c1793770c",
+        "id": "sb_4fbc5a8e-4e2f-4149-9f41-eed9ba2f28e3",
         "year": 2026,
-        "licensor": "Synnovation Therapeutics",
-        "licensee": "Novartis",
-        "therapeuticArea": "oncology",
-        "indication": "HR+/HER2- breast cancer and advanced solid tumors",
-        "modality": "smallMolecule",
+        "licensor": "Ouro Medicines",
+        "licensee": "Gilead Sciences",
+        "therapeuticArea": "immunology",
+        "indication": "autoimmune_diseases",
+        "modality": "bispecific",
         "phase": "phase1",
         "dealType": "acquisition",
         "territory": "global",
-        "actualUpfront_M": 2000,
-        "actualTotalDeal_M": 3000,
-        "peakSalesMedian_M": 2500
+        "actualUpfront_M": 1675,
+        "actualTotalDeal_M": 2175,
+        "peakSalesMedian_M": 3000
       },
-      "predictedUpfront_M": 141.8,
-      "predictedTotalDeal_M": 110,
-      "upfrontErrorPct": -0.9291050000000001,
-      "totalDealErrorPct": -0.9633333333333334,
-      "upfrontErrorAbs_M": -1858.2,
-      "totalDealErrorAbs_M": -2890,
+      "predictedUpfront_M": 476.7,
+      "predictedTotalDeal_M": 423,
+      "upfrontErrorPct": -0.715390447761194,
+      "totalDealErrorPct": -0.8055172413793104,
+      "upfrontErrorAbs_M": -1198.3,
+      "totalDealErrorAbs_M": -1752,
       "within25": false,
       "within35": false,
       "within50": false
@@ -6051,6 +6025,32 @@
       "totalDealErrorPct": 8.19108280254777,
       "upfrontErrorAbs_M": 5964,
       "totalDealErrorAbs_M": 6430,
+      "within25": false,
+      "within35": false,
+      "within50": false
+    },
+    {
+      "case": {
+        "id": "sb_237a3411-90d7-433c-9a4c-1a2c1793770c",
+        "year": 2026,
+        "licensor": "Synnovation Therapeutics",
+        "licensee": "Novartis",
+        "therapeuticArea": "oncology",
+        "indication": "HR+/HER2- breast cancer and advanced solid tumors",
+        "modality": "smallMolecule",
+        "phase": "phase1",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 2000,
+        "actualTotalDeal_M": 3000,
+        "peakSalesMedian_M": 2500
+      },
+      "predictedUpfront_M": 141.8,
+      "predictedTotalDeal_M": 110,
+      "upfrontErrorPct": -0.9291050000000001,
+      "totalDealErrorPct": -0.9633333333333334,
+      "upfrontErrorAbs_M": -1858.2,
+      "totalDealErrorAbs_M": -2890,
       "within25": false,
       "within35": false,
       "within50": false
@@ -6615,17 +6615,17 @@
         "territory": "japan",
         "actualUpfront_M": 53,
         "actualTotalDeal_M": 665,
-        "peakSalesMedian_M": 450
+        "peakSalesMedian_M": 675
       },
-      "predictedUpfront_M": 12.2,
-      "predictedTotalDeal_M": 71,
-      "upfrontErrorPct": -0.7699245283018867,
-      "totalDealErrorPct": -0.8932330827067669,
-      "upfrontErrorAbs_M": -40.8,
-      "totalDealErrorAbs_M": -594,
+      "predictedUpfront_M": 33.8,
+      "predictedTotalDeal_M": 193,
+      "upfrontErrorPct": -0.36286792452830186,
+      "totalDealErrorPct": -0.7097744360902256,
+      "upfrontErrorAbs_M": -19.2,
+      "totalDealErrorAbs_M": -472,
       "within25": false,
       "within35": false,
-      "within50": false
+      "within50": true
     },
     {
       "case": {
@@ -6745,17 +6745,17 @@
         "territory": "global",
         "actualUpfront_M": 3200,
         "actualTotalDeal_M": 3200,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 3500
       },
-      "predictedUpfront_M": 1580.5,
-      "predictedTotalDeal_M": 1064,
-      "upfrontErrorPct": -0.5061045000000001,
-      "totalDealErrorPct": -0.6675,
-      "upfrontErrorAbs_M": -1619.5,
-      "totalDealErrorAbs_M": -2136,
-      "within25": false,
-      "within35": false,
-      "within50": false
+      "predictedUpfront_M": 2645.5,
+      "predictedTotalDeal_M": 1781,
+      "upfrontErrorPct": -0.17328206250000022,
+      "totalDealErrorPct": -0.4434375,
+      "upfrontErrorAbs_M": -554.5,
+      "totalDealErrorAbs_M": -1419,
+      "within25": true,
+      "within35": true,
+      "within50": true
     },
     {
       "case": {
@@ -7019,32 +7019,6 @@
     },
     {
       "case": {
-        "id": "sb_4ece97e2-a63c-4bf5-988d-0b2ba4b852fd",
-        "year": 2024,
-        "licensor": "Protagonist Therapeutics",
-        "licensee": "Takeda",
-        "therapeuticArea": "cardiovascular",
-        "indication": "Polycythemia vera",
-        "modality": "peptide",
-        "phase": "phase3",
-        "dealType": "licensing",
-        "territory": "global",
-        "actualUpfront_M": 300,
-        "actualTotalDeal_M": 2900,
-        "peakSalesMedian_M": 3000
-      },
-      "predictedUpfront_M": 553.2,
-      "predictedTotalDeal_M": 1677,
-      "upfrontErrorPct": 0.8440800000000002,
-      "totalDealErrorPct": -0.42172413793103447,
-      "upfrontErrorAbs_M": 253.2,
-      "totalDealErrorAbs_M": -1223,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_49f3d1c9-6276-44b3-b1fe-c54d8134eb82",
         "year": 2024,
         "licensor": "Prime Medicine",
@@ -7068,6 +7042,32 @@
       "within25": false,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_4ece97e2-a63c-4bf5-988d-0b2ba4b852fd",
+        "year": 2024,
+        "licensor": "Protagonist Therapeutics",
+        "licensee": "Takeda",
+        "therapeuticArea": "cardiovascular",
+        "indication": "Polycythemia vera",
+        "modality": "peptide",
+        "phase": "phase3",
+        "dealType": "licensing",
+        "territory": "global",
+        "actualUpfront_M": 300,
+        "actualTotalDeal_M": 2900,
+        "peakSalesMedian_M": 3000
+      },
+      "predictedUpfront_M": 553.2,
+      "predictedTotalDeal_M": 1677,
+      "upfrontErrorPct": 0.8440800000000002,
+      "totalDealErrorPct": -0.42172413793103447,
+      "upfrontErrorAbs_M": 253.2,
+      "totalDealErrorAbs_M": -1223,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -7187,16 +7187,16 @@
         "territory": "global",
         "actualUpfront_M": 7250,
         "actualTotalDeal_M": 7250,
-        "peakSalesMedian_M": 3000
+        "peakSalesMedian_M": 6000
       },
-      "predictedUpfront_M": 3824,
-      "predictedTotalDeal_M": 2937,
-      "upfrontErrorPct": -0.47255531034482756,
-      "totalDealErrorPct": -0.5948965517241379,
-      "upfrontErrorAbs_M": -3426,
-      "totalDealErrorAbs_M": -4313,
-      "within25": false,
-      "within35": false,
+      "predictedUpfront_M": 8084.1,
+      "predictedTotalDeal_M": 6209,
+      "upfrontErrorPct": 0.11505075862068959,
+      "totalDealErrorPct": -0.14358620689655172,
+      "upfrontErrorAbs_M": 834.1,
+      "totalDealErrorAbs_M": -1041,
+      "within25": true,
+      "within35": true,
       "within50": true
     },
     {
@@ -7213,15 +7213,15 @@
         "territory": "global",
         "actualUpfront_M": 45,
         "actualTotalDeal_M": 2220,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 2500
       },
-      "predictedUpfront_M": 32.6,
-      "predictedTotalDeal_M": 181,
-      "upfrontErrorPct": -0.27666666666666656,
-      "totalDealErrorPct": -0.9184684684684684,
-      "upfrontErrorAbs_M": -12.4,
-      "totalDealErrorAbs_M": -2039,
-      "within25": false,
+      "predictedUpfront_M": 42.8,
+      "predictedTotalDeal_M": 237,
+      "upfrontErrorPct": -0.049333333333333305,
+      "totalDealErrorPct": -0.8932432432432432,
+      "upfrontErrorAbs_M": -2.2,
+      "totalDealErrorAbs_M": -1983,
+      "within25": true,
       "within35": true,
       "within50": true
     },
@@ -7551,14 +7551,14 @@
         "territory": "global",
         "actualUpfront_M": 40,
         "actualTotalDeal_M": 500,
-        "peakSalesMedian_M": 1000
+        "peakSalesMedian_M": 3500
       },
       "predictedUpfront_M": 100,
-      "predictedTotalDeal_M": 6,
+      "predictedTotalDeal_M": 110,
       "upfrontErrorPct": 1.5,
-      "totalDealErrorPct": -0.988,
+      "totalDealErrorPct": -0.78,
       "upfrontErrorAbs_M": 60,
-      "totalDealErrorAbs_M": -494,
+      "totalDealErrorAbs_M": -390,
       "within25": false,
       "within35": false,
       "within50": false
@@ -7603,15 +7603,15 @@
         "territory": "global",
         "actualUpfront_M": 350,
         "actualTotalDeal_M": 1600,
-        "peakSalesMedian_M": 4000
+        "peakSalesMedian_M": 6000
       },
-      "predictedUpfront_M": 276.7,
-      "predictedTotalDeal_M": 931,
-      "upfrontErrorPct": -0.20939199999999997,
-      "totalDealErrorPct": -0.418125,
-      "upfrontErrorAbs_M": -73.3,
-      "totalDealErrorAbs_M": -669,
-      "within25": true,
+      "predictedUpfront_M": 442.4,
+      "predictedTotalDeal_M": 1486,
+      "upfrontErrorPct": 0.26410399999999995,
+      "totalDealErrorPct": -0.07125,
+      "upfrontErrorAbs_M": 92.4,
+      "totalDealErrorAbs_M": -114,
+      "within25": false,
       "within35": true,
       "within50": true
     },
@@ -7655,14 +7655,40 @@
         "territory": "global",
         "actualUpfront_M": 7250,
         "actualTotalDeal_M": 7250,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 6000
       },
-      "predictedUpfront_M": 1942.6,
-      "predictedTotalDeal_M": 1492,
-      "upfrontErrorPct": -0.7320573793103449,
-      "totalDealErrorPct": -0.7942068965517242,
-      "upfrontErrorAbs_M": -5307.4,
-      "totalDealErrorAbs_M": -5758,
+      "predictedUpfront_M": 5793.9,
+      "predictedTotalDeal_M": 4450,
+      "upfrontErrorPct": -0.20084137931034476,
+      "totalDealErrorPct": -0.38620689655172413,
+      "upfrontErrorAbs_M": -1456.1,
+      "totalDealErrorAbs_M": -2800,
+      "within25": true,
+      "within35": true,
+      "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_a6a27d71-cb35-4ba5-b392-edb95b54183c",
+        "year": 2022,
+        "licensor": "Blueprint Medicines",
+        "licensee": "Roche",
+        "therapeuticArea": "oncology",
+        "indication": "Systemic Mastocytosis, GIST",
+        "modality": "smallMolecule",
+        "phase": "phase2",
+        "dealType": "licensing",
+        "territory": "ex_us",
+        "actualUpfront_M": 275,
+        "actualTotalDeal_M": 1025,
+        "peakSalesMedian_M": 2125
+      },
+      "predictedUpfront_M": 136.7,
+      "predictedTotalDeal_M": 366,
+      "upfrontErrorPct": -0.5028727272727272,
+      "totalDealErrorPct": -0.6429268292682927,
+      "upfrontErrorAbs_M": -138.3,
+      "totalDealErrorAbs_M": -659,
       "within25": false,
       "within35": false,
       "within50": false
@@ -7785,17 +7811,17 @@
         "territory": "global",
         "actualUpfront_M": 3700,
         "actualTotalDeal_M": 3700,
-        "peakSalesMedian_M": 3000
+        "peakSalesMedian_M": 1000
       },
-      "predictedUpfront_M": 11524.3,
-      "predictedTotalDeal_M": 10188,
-      "upfrontErrorPct": 2.1146827027027024,
-      "totalDealErrorPct": 1.7535135135135136,
-      "upfrontErrorAbs_M": 7824.3,
-      "totalDealErrorAbs_M": 6488,
-      "within25": false,
-      "within35": false,
-      "within50": false
+      "predictedUpfront_M": 3841.4,
+      "predictedTotalDeal_M": 3396,
+      "upfrontErrorPct": 0.038227567567567566,
+      "totalDealErrorPct": -0.08216216216216216,
+      "upfrontErrorAbs_M": 141.4,
+      "totalDealErrorAbs_M": -304,
+      "within25": true,
+      "within35": true,
+      "within50": true
     },
     {
       "case": {
@@ -7941,17 +7967,17 @@
         "territory": "global",
         "actualUpfront_M": 1900,
         "actualTotalDeal_M": 1900,
-        "peakSalesMedian_M": 2250
+        "peakSalesMedian_M": 1200
       },
-      "predictedUpfront_M": 5476.7,
-      "predictedTotalDeal_M": 4149,
-      "upfrontErrorPct": 1.882463157894737,
-      "totalDealErrorPct": 1.183684210526316,
-      "upfrontErrorAbs_M": 3576.7,
-      "totalDealErrorAbs_M": 2249,
+      "predictedUpfront_M": 2766.7,
+      "predictedTotalDeal_M": 2096,
+      "upfrontErrorPct": 0.4561684210526317,
+      "totalDealErrorPct": 0.1031578947368421,
+      "upfrontErrorAbs_M": 866.7,
+      "totalDealErrorAbs_M": 196,
       "within25": false,
       "within35": false,
-      "within50": false
+      "within50": true
     },
     {
       "case": {
@@ -8435,14 +8461,14 @@
         "territory": "ex_china",
         "actualUpfront_M": 650,
         "actualTotalDeal_M": 2200,
-        "peakSalesMedian_M": 2070
+        "peakSalesMedian_M": 2760
       },
-      "predictedUpfront_M": 540.1,
-      "predictedTotalDeal_M": 1837,
-      "upfrontErrorPct": -0.1690907692307692,
-      "totalDealErrorPct": -0.165,
-      "upfrontErrorAbs_M": -109.9,
-      "totalDealErrorAbs_M": -363,
+      "predictedUpfront_M": 734.7,
+      "predictedTotalDeal_M": 2502,
+      "upfrontErrorPct": 0.13035384615384601,
+      "totalDealErrorPct": 0.13727272727272727,
+      "upfrontErrorAbs_M": 84.7,
+      "totalDealErrorAbs_M": 302,
       "within25": true,
       "within35": true,
       "within50": true
@@ -8513,14 +8539,14 @@
         "territory": "us_only",
         "actualUpfront_M": 650,
         "actualTotalDeal_M": 4850,
-        "peakSalesMedian_M": 680
+        "peakSalesMedian_M": 1020
       },
-      "predictedUpfront_M": 115.5,
-      "predictedTotalDeal_M": 477,
-      "upfrontErrorPct": -0.8222461538461538,
-      "totalDealErrorPct": -0.9016494845360825,
-      "upfrontErrorAbs_M": -534.5,
-      "totalDealErrorAbs_M": -4373,
+      "predictedUpfront_M": 182.3,
+      "predictedTotalDeal_M": 755,
+      "upfrontErrorPct": -0.7195076923076922,
+      "totalDealErrorPct": -0.8443298969072165,
+      "upfrontErrorAbs_M": -467.7,
+      "totalDealErrorAbs_M": -4095,
       "within25": false,
       "within35": false,
       "within50": false
@@ -8605,32 +8631,6 @@
     },
     {
       "case": {
-        "id": "sb_61d298d4-cc3f-4913-be11-7085945558cc",
-        "year": 2020,
-        "licensor": "Asklepios BioPharmaceutical",
-        "licensee": "Bayer",
-        "therapeuticArea": "rareDisease",
-        "indication": "Pompe Disease, Congestive Heart Failure",
-        "modality": "geneTherapy",
-        "phase": "phase1",
-        "dealType": "acquisition",
-        "territory": "global",
-        "actualUpfront_M": 2000,
-        "actualTotalDeal_M": 4000,
-        "peakSalesMedian_M": 900
-      },
-      "predictedUpfront_M": 93.8,
-      "predictedTotalDeal_M": 0,
-      "upfrontErrorPct": -0.9531000000000001,
-      "totalDealErrorPct": -1,
-      "upfrontErrorAbs_M": -1906.2,
-      "totalDealErrorAbs_M": -4000,
-      "within25": false,
-      "within35": false,
-      "within50": false
-    },
-    {
-      "case": {
         "id": "sb_30cd5800-bb52-48bb-a862-9dbf0943f1dc",
         "year": 2020,
         "licensor": "Kyowa Kirin",
@@ -8654,6 +8654,32 @@
       "within25": false,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "sb_61d298d4-cc3f-4913-be11-7085945558cc",
+        "year": 2020,
+        "licensor": "Asklepios BioPharmaceutical",
+        "licensee": "Bayer",
+        "therapeuticArea": "rareDisease",
+        "indication": "Pompe Disease, Congestive Heart Failure",
+        "modality": "geneTherapy",
+        "phase": "phase1",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 2000,
+        "actualTotalDeal_M": 4000,
+        "peakSalesMedian_M": 900
+      },
+      "predictedUpfront_M": 93.8,
+      "predictedTotalDeal_M": 0,
+      "upfrontErrorPct": -0.9531000000000001,
+      "totalDealErrorPct": -1,
+      "upfrontErrorAbs_M": -1906.2,
+      "totalDealErrorAbs_M": -4000,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {
@@ -9022,20 +9048,20 @@
   ],
   "holdout": {
     "coreTrain": {
-      "totalDeals": 60,
-      "hitRate25": 0.18333333333333332,
-      "hitRate35": 0.26666666666666666,
-      "hitRate50": 0.36666666666666664,
-      "meanAbsErrorPct": 0.7317431854543516,
-      "medianSignedErrorPct": -0.1645453846153846,
-      "rmseUpfront_M": 322.1,
+      "totalDeals": 61,
+      "hitRate25": 0.18032786885245902,
+      "hitRate35": 0.2786885245901639,
+      "hitRate50": 0.36065573770491804,
+      "meanAbsErrorPct": 0.7220563759255229,
+      "medianSignedErrorPct": -0.16,
+      "rmseUpfront_M": 318.9,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 11,
-          "hitRate25": 0.09090909090909091,
-          "hitRate35": 0.18181818181818182,
-          "meanSignedErrorPct": -0.0801899556277056,
-          "meanAbsErrorPct": 0.658604501082251
+          "hitRate25": 0.18181818181818182,
+          "hitRate35": 0.2727272727272727,
+          "meanSignedErrorPct": -0.04582631926406922,
+          "meanAbsErrorPct": 0.6242408647186147
         },
         "infectiousDisease": {
           "n": 8,
@@ -9090,15 +9116,15 @@
           "n": 6,
           "hitRate25": 0.3333333333333333,
           "hitRate35": 0.3333333333333333,
-          "meanSignedErrorPct": 0.42851009401709406,
-          "meanAbsErrorPct": 1.1790632393162392
+          "meanSignedErrorPct": 0.4784175299145299,
+          "meanAbsErrorPct": 1.1726070854700854
         },
         "oncology": {
-          "n": 4,
+          "n": 5,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": -0.004348172413793067,
-          "meanAbsErrorPct": 0.5567881724137931
+          "meanSignedErrorPct": -0.1040530833855799,
+          "meanAbsErrorPct": 0.54600508338558
         },
         "rare_disease": {
           "n": 1,
@@ -9123,42 +9149,42 @@
         },
         "metabolic": {
           "n": 3,
-          "hitRate25": 0.6666666666666666,
+          "hitRate25": 0.3333333333333333,
           "hitRate35": 0.6666666666666666,
-          "meanSignedErrorPct": 1.3992546666666665,
-          "meanAbsErrorPct": 1.5388493333333333
+          "meanSignedErrorPct": 1.5570866666666665,
+          "meanAbsErrorPct": 1.5570866666666665
         }
       },
       "byPhase": {
         "phase3": {
           "n": 24,
-          "hitRate25": 0.16666666666666666,
-          "hitRate35": 0.25,
-          "meanSignedErrorPct": 0.19814429897487526,
-          "meanAbsErrorPct": 0.7466251202170439
+          "hitRate25": 0.20833333333333334,
+          "hitRate35": 0.2916666666666667,
+          "meanSignedErrorPct": 0.22637115794923424,
+          "meanAbsErrorPct": 0.7292610817555055
         },
         "phase2": {
-          "n": 36,
-          "hitRate25": 0.19444444444444445,
-          "hitRate35": 0.2777777777777778,
-          "meanSignedErrorPct": 0.0035265488318874413,
-          "meanAbsErrorPct": 0.7218218956125568
+          "n": 37,
+          "hitRate25": 0.16216216216216217,
+          "hitRate35": 0.2702702702702703,
+          "meanSignedErrorPct": 0.0026372710993302945,
+          "meanAbsErrorPct": 0.7173830532249938
         }
       },
       "byModality": {
         "smallMolecule": {
-          "n": 20,
-          "hitRate25": 0.15,
-          "hitRate35": 0.15,
-          "meanSignedErrorPct": 0.23580625404957073,
-          "meanAbsErrorPct": 0.7971974126170961
+          "n": 21,
+          "hitRate25": 0.14285714285714285,
+          "hitRate35": 0.14285714285714285,
+          "meanSignedErrorPct": 0.2006310644627946,
+          "meanAbsErrorPct": 0.7831819514102214
         },
         "myosinInhibitor": {
           "n": 1,
-          "hitRate25": 0,
-          "hitRate35": 0,
-          "meanSignedErrorPct": -0.396,
-          "meanAbsErrorPct": 0.396
+          "hitRate25": 1,
+          "hitRate35": 1,
+          "meanSignedErrorPct": -0.018,
+          "meanAbsErrorPct": 0.018
         },
         "aso": {
           "n": 1,
@@ -9248,8 +9274,8 @@
           "n": 5,
           "hitRate25": 0.4,
           "hitRate35": 0.8,
-          "meanSignedErrorPct": -0.3982736205128205,
-          "meanAbsErrorPct": 0.3982736205128205
+          "meanSignedErrorPct": -0.33838469743589744,
+          "meanAbsErrorPct": 0.39052623589743585
         },
         "allosteric_inhibitor": {
           "n": 1,
@@ -9267,10 +9293,10 @@
         },
         "peptide": {
           "n": 4,
-          "hitRate25": 0.5,
+          "hitRate25": 0.25,
           "hitRate35": 0.5,
-          "meanSignedErrorPct": 0.50808,
-          "meanAbsErrorPct": 0.612776
+          "meanSignedErrorPct": 0.626454,
+          "meanAbsErrorPct": 0.626454
         },
         "cellTherapy": {
           "n": 1,
@@ -9284,18 +9310,18 @@
     "coreTest": {
       "totalDeals": 16,
       "hitRate25": 0.25,
-      "hitRate35": 0.375,
-      "hitRate50": 0.375,
-      "meanAbsErrorPct": 0.6434645054834653,
-      "medianSignedErrorPct": -0.2543333333333333,
-      "rmseUpfront_M": 318.7,
+      "hitRate35": 0.3125,
+      "hitRate50": 0.4375,
+      "meanAbsErrorPct": 0.6190259250125735,
+      "medianSignedErrorPct": -0.20912499999999995,
+      "rmseUpfront_M": 311.9,
       "byTherapeuticArea": {
         "cardiovascular": {
           "n": 3,
           "hitRate25": 0,
           "hitRate35": 0.3333333333333333,
-          "meanSignedErrorPct": 0.09902515723270446,
-          "meanAbsErrorPct": 0.6123081761006289
+          "meanSignedErrorPct": 0.2347106918238994,
+          "meanAbsErrorPct": 0.47662264150943395
         },
         "ophthalmology": {
           "n": 2,
@@ -9313,10 +9339,10 @@
         },
         "oncology": {
           "n": 5,
-          "hitRate25": 0.6,
-          "hitRate35": 0.6,
-          "meanSignedErrorPct": -0.335608764983165,
-          "meanAbsErrorPct": 0.34160876498316495
+          "hitRate25": 0.4,
+          "hitRate35": 0.4,
+          "meanSignedErrorPct": -0.26638654276094276,
+          "meanAbsErrorPct": 0.41083098720538713
         },
         "dermatology": {
           "n": 1,
@@ -9327,17 +9353,17 @@
         },
         "neurology": {
           "n": 2,
-          "hitRate25": 0,
+          "hitRate25": 0.5,
           "hitRate35": 0.5,
-          "meanSignedErrorPct": -0.6383333333333333,
-          "meanAbsErrorPct": 0.6383333333333333
+          "meanSignedErrorPct": -0.5246666666666666,
+          "meanAbsErrorPct": 0.5246666666666666
         },
         "womensHealth": {
           "n": 1,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": -0.8222461538461538,
-          "meanAbsErrorPct": 0.8222461538461538
+          "meanSignedErrorPct": -0.7195076923076922,
+          "meanAbsErrorPct": 0.7195076923076922
         }
       },
       "byPhase": {
@@ -9345,15 +9371,15 @@
           "n": 6,
           "hitRate25": 0.16666666666666666,
           "hitRate35": 0.3333333333333333,
-          "meanSignedErrorPct": 0.1754744620662357,
-          "meanAbsErrorPct": 0.7317073561155825
+          "meanSignedErrorPct": 0.26044030628491016,
+          "meanAbsErrorPct": 0.6467415118969081
         },
         "phase2": {
           "n": 10,
           "hitRate25": 0.3,
-          "hitRate35": 0.4,
-          "meanSignedErrorPct": -0.34964359510419507,
-          "meanAbsErrorPct": 0.590518795104195
+          "hitRate35": 0.3,
+          "meanSignedErrorPct": -0.29229915065975065,
+          "meanAbsErrorPct": 0.6023965728819729
         }
       },
       "byModality": {
@@ -9375,8 +9401,8 @@
           "n": 6,
           "hitRate25": 0,
           "hitRate35": 0,
-          "meanSignedErrorPct": -0.09457066924689567,
-          "meanAbsErrorPct": 0.9060858207620471
+          "meanSignedErrorPct": -0.009604825028221242,
+          "meanAbsErrorPct": 0.8211199765433728
         },
         "radiopharmaceutical": {
           "n": 1,
@@ -9387,10 +9413,10 @@
         },
         "mab": {
           "n": 1,
-          "hitRate25": 1,
-          "hitRate35": 1,
-          "meanSignedErrorPct": 0.014999999999999937,
-          "meanAbsErrorPct": 0.014999999999999937
+          "hitRate25": 0,
+          "hitRate35": 0,
+          "meanSignedErrorPct": 0.36111111111111094,
+          "meanAbsErrorPct": 0.36111111111111094
         },
         "peptide": {
           "n": 1,
@@ -9408,10 +9434,10 @@
         },
         "antibody": {
           "n": 2,
-          "hitRate25": 0,
+          "hitRate25": 0.5,
           "hitRate35": 0.5,
-          "meanSignedErrorPct": -0.6383333333333333,
-          "meanAbsErrorPct": 0.6383333333333333
+          "meanSignedErrorPct": -0.5246666666666666,
+          "meanAbsErrorPct": 0.5246666666666666
         },
         "geneTherapy": {
           "n": 1,
@@ -9423,10 +9449,10 @@
       }
     },
     "overfittingGap": {
-      "hit25": -0.06666666666666668,
-      "hit35": -0.10833333333333334,
-      "hit50": -0.00833333333333336,
-      "meanAbsErrorPct": -0.08827867997088623
+      "hit25": -0.06967213114754098,
+      "hit35": -0.03381147540983609,
+      "hit50": -0.07684426229508196,
+      "meanAbsErrorPct": -0.10303045091294938
     }
   }
 }
