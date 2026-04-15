@@ -35,6 +35,9 @@ export function PeerBenchmarkPanel(props: Props) {
     input.modality,
     input.candidateUpfront_M,
     input.candidateTotalDeal_M,
+    input.dealStructure,
+    input.dealType,
+    input.territory,
   ]);
 
   if (benchmark.n < 3) {

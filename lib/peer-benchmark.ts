@@ -10,6 +10,7 @@
 
 import { EXTENDED_COMPARABLE_DEALS } from '@/data/comparable-deals-extended';
 import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
+import { classifyDealStructure, type DealStructure } from '@/lib/financial/deal-structure-classifier';
 
 export interface PeerBenchmarkInput {
   therapeuticArea?: string;
@@ -19,6 +20,17 @@ export interface PeerBenchmarkInput {
   candidateUpfront_M?: number;
   /** Candidate total deal value ($M). */
   candidateTotalDeal_M?: number;
+  /** Candidate deal's classified structure. When present, peer
+   *  benchmark filters comparables to the same structure so the
+   *  comparison is apples-to-apples (option deals to option deals,
+   *  classic licenses to classic licenses). The existing TA/phase/
+   *  modality widening still applies on top. */
+  dealStructure?: DealStructure;
+  /** Deal type — used to classify corpus deals when dealStructure is
+   *  supplied (classifier needs dealType on both sides). */
+  dealType?: string;
+  /** Territory — used to classify corpus deals. */
+  territory?: string;
 }
 
 export interface PeerBenchmarkResult {
@@ -44,20 +56,37 @@ interface MinimalDeal {
   modality: string;
   upfront: number;
   totalDealValue: number;
+  /** Pre-computed deal-structure classification for this corpus row.
+   *  Cached at corpus load so per-benchmark calls don't re-classify. */
+  structure: DealStructure;
 }
 
+let cachedCorpus: MinimalDeal[] | null = null;
+
 function combinedCorpus(): MinimalDeal[] {
+  if (cachedCorpus) return cachedCorpus;
   const rows: MinimalDeal[] = [];
   for (const d of [...EXTENDED_COMPARABLE_DEALS, ...SUPABASE_COMPARABLE_DEALS]) {
     if (!d.upfront || !d.totalDealValue || d.upfront <= 0 || d.totalDealValue <= 0) continue;
+    const { structure } = classifyDealStructure({
+      phase: d.phase,
+      dealType: d.dealType ?? 'license',
+      modality: d.modality,
+      therapeuticArea: d.therapeuticArea,
+      territory: d.territory ?? 'global',
+      licensor: d.licensor,
+      licensee: d.licensee,
+    });
     rows.push({
       therapeuticArea: d.therapeuticArea,
       phase: d.phase,
       modality: d.modality,
       upfront: d.upfront,
       totalDealValue: d.totalDealValue,
+      structure,
     });
   }
+  cachedCorpus = rows;
   return rows;
 }
 
@@ -84,10 +113,12 @@ function matchesFilter(d: MinimalDeal, filter: {
   ta?: string;
   phase?: string;
   modality?: string;
+  structure?: DealStructure;
 }): boolean {
   if (filter.ta && d.therapeuticArea !== filter.ta) return false;
   if (filter.phase && d.phase !== filter.phase) return false;
   if (filter.modality && d.modality !== filter.modality) return false;
+  if (filter.structure && d.structure !== filter.structure) return false;
   return true;
 }
 
@@ -180,7 +211,29 @@ const MIN_POOL_FOR_TA = 5;
 export function computePeerBenchmark(input: PeerBenchmarkInput): PeerBenchmarkResult {
   const corpus = combinedCorpus();
 
-  // Try strict
+  // Try strict — including dealStructure match when supplied. If the
+  // same-structure pool is too small, we drop the structure filter
+  // before dropping TA/phase/modality (structure is a coarser-grained
+  // cut than the others and often drains the pool faster).
+  if (input.dealStructure) {
+    const strictStructure = corpus.filter(d => matchesFilter(d, {
+      ta: input.therapeuticArea,
+      phase: input.phase,
+      modality: input.modality,
+      structure: input.dealStructure,
+    }));
+    if (strictStructure.length >= MIN_POOL_FOR_STRICT) {
+      return computeStats(strictStructure, input, 'strict');
+    }
+    const structureOnlyTA = corpus.filter(d => matchesFilter(d, {
+      ta: input.therapeuticArea,
+      structure: input.dealStructure,
+    }));
+    if (structureOnlyTA.length >= MIN_POOL_FOR_TA) {
+      return computeStats(structureOnlyTA, input, 'ta-only');
+    }
+  }
+
   const strict = corpus.filter(d => matchesFilter(d, {
     ta: input.therapeuticArea,
     phase: input.phase,
