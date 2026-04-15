@@ -80,6 +80,7 @@ export async function GET(
         terms_disclosed
       `)
       .eq('licensee_id', companyId)
+      .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes
       .order('announced_date', { ascending: false })
       .limit(10);
 

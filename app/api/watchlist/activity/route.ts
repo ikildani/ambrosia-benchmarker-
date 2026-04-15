@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
         .from('deals')
         .select('id, licensor_name, licensee_name, modality, upfront_usd, announced_date, asset_name')
         .in('modality', modalityWatches)
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);
@@ -77,6 +78,7 @@ export async function GET(request: NextRequest) {
         .from('deals')
         .select('id, licensor_name, licensee_name, licensee_id, licensor_id, modality, upfront_usd, announced_date, asset_name')
         .or(`licensee_id.in.(${companyWatches.join(',')}),licensor_id.in.(${companyWatches.join(',')})`)
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);
@@ -99,6 +101,7 @@ export async function GET(request: NextRequest) {
         .from('deals')
         .select('id, licensor_name, licensee_name, indication_category, indication_specific, modality, announced_date, asset_name')
         .or(`indication_category.in.(${indicationWatches.join(',')}),indication_specific.in.(${indicationWatches.join(',')})`)
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);

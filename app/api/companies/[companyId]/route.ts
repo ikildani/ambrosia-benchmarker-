@@ -56,10 +56,12 @@ export async function GET(
       allDealsForTrend,
     ] = await Promise.all([
       // Recent deals (last 12 months) — only real (non-synthetic) deals
+      // R68 (2026-04-15): comment said "only real" but filter was missing.
       supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
+        .eq('is_synthetic', false)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -72,11 +74,12 @@ export async function GET(
         .in('status', ['recruiting', 'active_not_recruiting', 'enrolling_by_invitation', 'not_yet_recruiting'])
         .order('start_date', { ascending: false }),
 
-      // All deals for trend (3 years) — only real deals
+      // All deals for trend (3 years) — only real deals (R68: added filter)
       supabase
         .from('deals')
         .select('announced_date, modality, upfront_usd, indication_category')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
+        .eq('is_synthetic', false)
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);
@@ -188,6 +191,7 @@ export async function GET(
         .from('deals')
         .select('licensee_id, licensor_id, modality')
         .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(','))
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', oneYearAgo);
 
       if (peerDeals) {
@@ -235,6 +239,7 @@ export async function GET(
       const { data: marketAvgData } = await supabase
         .from('deals')
         .select('upfront_usd')
+        .eq('is_synthetic', false)  // R68
         .gte('announced_date', oneYearAgo)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);

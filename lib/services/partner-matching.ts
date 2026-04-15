@@ -547,6 +547,7 @@ export async function findPartnerMatches(
           'id, asset_name, licensor_id, licensee_id, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
         )
         .or(`licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`)
+        .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes
         .gte('announced_date', new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('announced_date', { ascending: false }),
       supabase
@@ -793,6 +794,7 @@ async function buildDealTypePreferenceMap(
       .or(
         `licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`,
       )
+      .eq('is_synthetic', false)  // R68
       .gte('announced_date', thirtySixMonthsAgo)
       .order('announced_date', { ascending: false })
       .limit(2000);
@@ -1971,6 +1973,7 @@ export async function fetchCompanyDeals(
       'id, asset_name, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
     )
     .or(`licensor_id.eq.${companyId},licensee_id.eq.${companyId}`)
+    .eq('is_synthetic', false)  // R68
     .order('announced_date', { ascending: false })
     .limit(limit);
 
@@ -2041,6 +2044,7 @@ export async function getDealHistoryCrossReference(
         'licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, indication_category, indication_specific, deal_type'
       )
       .or(`licensor_id.eq.${match.company_id},licensee_id.eq.${match.company_id}`)
+      .eq('is_synthetic', false)  // R68
       .order('announced_date', { ascending: false })
       .limit(maxDealsPerPartner * 2);
 

@@ -119,6 +119,11 @@ export async function GET(request: NextRequest) {
         licensor_id
       `, { count: 'exact' });
 
+    // R68 (2026-04-15): exclude 845 flagged fabricated rows from the main
+    // deals API — /api/deals is consumed by multiple frontend routes
+    // (calculator comparable widget, partner pages, intelligence feed).
+    query = query.eq('is_synthetic', false);
+
     // Apply filters
     const therapeuticArea = searchParams.get('therapeutic_area');
     if (therapeuticArea) {
@@ -260,6 +265,7 @@ async function getDistinctValues(
       .from('deals')
       .select(column)
       .not(column, 'is', null)
+      .eq('is_synthetic', false)  // R68
       .order(column)
       .range(offset, offset + pageSize - 1);
 
