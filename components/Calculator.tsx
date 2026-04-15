@@ -722,6 +722,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                             therapeuticArea={state.therapeuticArea}
                             indicationSlug={state.indication}
                             phase={state.phase || undefined}
+                            // R63: branded-asset lookup (Enhertu, Ozempic etc.)
+                            assetName={state.assetName}
+                            onAssetNameChange={actions.setAssetName}
                           />
                         )}
                       </>

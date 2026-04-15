@@ -124,6 +124,13 @@ export interface CalculatorFormState {
   // null/undefined or 0 = use engine default based on indication/TA.
   peakSalesOverrideM: number | null;
 
+  // R63 (2026-04-14): Asset name — used to look up brand/INN in the
+  // ASSET_PEAK_SALES_TABLE (222 curated blockbuster + pipeline assets).
+  // When matched, the calculator surfaces "{brand}: $X peak" and offers a
+  // one-click Use-consensus action. Optional — empty string means user
+  // didn't provide a specific asset.
+  assetName: string;
+
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -182,6 +189,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   biologicExperience: 'biologic_naive',
   endoscopicEndpoint: 'endoscopic_improvement',
   peakSalesOverrideM: null,  // R23: null = use engine default
+  assetName: '',  // R63: empty = no branded lookup
   wizardStep: 0,
   quickMode: true,
   showTemplates: true,
@@ -403,6 +411,8 @@ export interface CalculatorActions {
   setDataQuality: (v: DataQuality) => void;
   /** R23: Set asset-specific peak sales override in $M. null = use engine default. */
   setPeakSalesOverrideM: (v: number | null) => void;
+  /** R63: Set asset name for branded-asset lookup (ASSET_PEAK_SALES_TABLE). */
+  setAssetName: (v: string) => void;
   setRegulatoryDesignations: (v: RegulatoryDesignations) => void;
   setBbbPenetration: (v: BBBPenetration) => void;
   setDiseaseProgression: (v: DiseaseProgression) => void;
@@ -471,6 +481,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     setCompetitivePosition: (v) => dispatch({ type: 'SET_FIELD', field: 'competitivePosition', value: v }),
     setDataQuality: (v) => dispatch({ type: 'SET_FIELD', field: 'dataQuality', value: v }),
     setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),
+    setAssetName: (v) => dispatch({ type: 'SET_FIELD', field: 'assetName', value: v }),
     setRegulatoryDesignations: (v) => dispatch({ type: 'SET_FIELD', field: 'regulatoryDesignations', value: v }),
     setBbbPenetration: (v) => dispatch({ type: 'SET_FIELD', field: 'bbbPenetration', value: v }),
     setDiseaseProgression: (v) => dispatch({ type: 'SET_FIELD', field: 'diseaseProgression', value: v }),

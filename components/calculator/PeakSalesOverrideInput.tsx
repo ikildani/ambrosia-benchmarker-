@@ -20,7 +20,8 @@
  *   - Clear button: resets to engine default
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { lookupAssetPeakSales_M, ASSET_PEAK_SALES_TABLE } from '@/data/asset-peak-sales';
 
 interface PeakSalesOverrideInputProps {
   /** Current override value in $M. null = use engine default. */
@@ -37,6 +38,12 @@ interface PeakSalesOverrideInputProps {
   therapeuticArea?: string;
   indicationSlug?: string;
   phase?: string;
+  // R63 (2026-04-14): Asset-name lookup against ASSET_PEAK_SALES_TABLE.
+  // User types "Enhertu" or "trastuzumab deruxtecan" → in-repo lookup
+  // returns the analyst-consensus peak → surfaced as a one-click
+  // Use-consensus action.
+  assetName?: string;
+  onAssetNameChange?: (v: string) => void;
 }
 
 interface ConsensusLookup {
@@ -56,11 +63,31 @@ export default function PeakSalesOverrideInput({
   therapeuticArea,
   indicationSlug,
   phase,
+  assetName,
+  onAssetNameChange,
 }: PeakSalesOverrideInputProps) {
   // Use string state for the input so users can type freely (backspace to empty etc.)
   const [rawInput, setRawInput] = useState<string>(value === null ? '' : String(value));
   const [consensus, setConsensus] = useState<ConsensusLookup | null>(null);
   const [loadingConsensus, setLoadingConsensus] = useState(false);
+
+  // R63: in-repo lookup against the 222-entry blockbuster table. Fires
+  // whenever assetName changes; returns a matching entry + peak.
+  const assetMatch = useMemo(() => {
+    if (!assetName || assetName.trim().length < 2) return null;
+    const peak = lookupAssetPeakSales_M(assetName, null);
+    if (peak === null) return null;
+    // Find the full entry so we can surface brand/INN details.
+    const entry = ASSET_PEAK_SALES_TABLE.find((e) => e.peakSales_M === peak);
+    return entry ? { entry, peak } : null;
+  }, [assetName]);
+
+  const handleUseAssetPeak = () => {
+    if (assetMatch) {
+      setRawInput(String(assetMatch.peak));
+      onChange(assetMatch.peak);
+    }
+  };
 
   // Sync from prop changes (e.g., reset from outside)
   useEffect(() => {
@@ -125,6 +152,46 @@ export default function PeakSalesOverrideInput({
 
   return (
     <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 p-4">
+      {/* R63: Asset name input for branded-asset peak lookup. */}
+      {onAssetNameChange && (
+        <div className="mb-3">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+            Asset name <span className="text-slate-400 normal-case font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={assetName ?? ''}
+            onChange={(e) => onAssetNameChange(e.target.value)}
+            placeholder="e.g., Enhertu, pembrolizumab, TUB-040"
+            className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/30 transition-colors"
+          />
+          {assetMatch && (
+            <div className="mt-2 flex items-center justify-between gap-3 rounded-md border border-teal-500/30 bg-teal-50/40 dark:bg-teal-950/20 px-3 py-2">
+              <div className="text-[11px] text-teal-800 dark:text-teal-300">
+                Matched <span className="font-semibold">{assetMatch.entry.brand}</span>
+                {assetMatch.entry.inn && assetMatch.entry.inn !== assetMatch.entry.brand && (
+                  <> ({assetMatch.entry.inn})</>
+                )}
+                {' — '}analyst peak <span className="font-mono font-semibold">${assetMatch.peak.toLocaleString()}M</span>
+                <div className="text-slate-500 dark:text-slate-400 mt-0.5">{assetMatch.entry.source}</div>
+              </div>
+              <button
+                type="button"
+                onClick={handleUseAssetPeak}
+                className="shrink-0 rounded-md border border-teal-500/60 bg-teal-500/10 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300 hover:bg-teal-500/20 transition-colors"
+              >
+                Use this peak
+              </button>
+            </div>
+          )}
+          {!assetMatch && assetName && assetName.trim().length >= 2 && (
+            <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+              No match in curated blockbuster table. Engine will use indication default.
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-start justify-between gap-3 mb-2">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
