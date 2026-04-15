@@ -91,12 +91,17 @@ export async function calibrateIntentWeights(
   const threeYearsAgo = new Date();
   threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
 
-  // 1. Fetch all deals from the last 3 years
+  // 1. Fetch all deals from the last 3 years.
+  // R66 (2026-04-14): Filter is_synthetic=false so migrations 051 + 053
+  // flagged fakes don't pollute the positive-sample set for weight
+  // calibration. Without this filter, LLM-fabricated Y-mAbs/PI3K-101
+  // style rows were training the intent model as if real signals.
   const { data: deals, error: dealsError } = await supabase
     .from('deals')
     .select(
       'id, licensee_id, licensee_name, licensor_id, modality, indication_category, announced_date, deal_type, upfront_usd, total_deal_value_usd'
     )
+    .eq('is_synthetic', false)
     .gte('announced_date', threeYearsAgo.toISOString())
     .order('announced_date', { ascending: false });
 

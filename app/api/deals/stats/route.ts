@@ -22,7 +22,8 @@ export async function GET() {
         const { count } = await supabase
           .from('deals')
           .select('id', { count: 'exact', head: true })
-          .eq('therapeutic_area', ta);
+          .eq('therapeutic_area', ta)
+          .eq('is_synthetic', false);  // R66: exclude flagged fakes
         return { ta, count: count || 0 };
       })
     );

@@ -78,10 +78,13 @@ export async function GET(request: NextRequest) {
       .eq('status', 'active');
 
     // Auto-update deal count in constants.ts if rounded value changed
-    // Query verified deals (excluding 'other' TA, matching /api/deals/stats)
+    // Query verified deals (excluding 'other' TA, matching /api/deals/stats).
+    // R66 (2026-04-14): also exclude is_synthetic=true so the LIVE_DEAL_COUNT
+    // doesn't include the 845 fabricated rows flagged by migrations 051 + 053.
     const { count: verifiedDeals } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true })
+      .eq('is_synthetic', false)
       .not('therapeutic_area', 'eq', 'other')
       .not('therapeutic_area', 'like', '_%');
 

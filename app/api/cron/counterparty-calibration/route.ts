@@ -42,9 +42,12 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     // Pull disclosed deals with total_deal_value + indication + phase.
+    // R66 (2026-04-14): Filter is_synthetic=false so migrations 051 + 053
+    // flagged fakes don't skew computed buyer premiums.
     const { data: dealRows, error: dealErr } = await supabase
       .from('deals')
       .select('id, licensee_id, licensee_name, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, modality, therapeutic_area')
+      .eq('is_synthetic', false)
       .not('total_deal_value_usd', 'is', null)
       .not('licensee_id', 'is', null)
       .limit(5000);
