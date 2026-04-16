@@ -27,7 +27,7 @@ const TERRITORY_DATA: Record<string, { population: number; pricingIndexVsUS: num
   mena: { population: 430_000_000, pricingIndexVsUS: 0.20 },
 };
 
-/** Market share assumptions by competitive position */
+/** Market share assumptions by competitive position (TA-neutral baseline). */
 const MARKET_SHARE_BY_POSITION: Record<string, { low: number; median: number; high: number }> = {
   firstInClass: { low: 0.25, median: 0.35, high: 0.50 },
   firstToPivotal: { low: 0.20, median: 0.30, high: 0.40 },
@@ -36,6 +36,41 @@ const MARKET_SHARE_BY_POSITION: Record<string, { low: number; median: number; hi
   behind: { low: 0.05, median: 0.10, high: 0.18 },
   crowded: { low: 0.03, median: 0.08, high: 0.12 },
 };
+
+/**
+ * TA-specific adjustments to competitive share (R68 tactical win, Task 4).
+ *
+ * Rare disease orphan markets concentrate share on the first approved (FIC
+ * captures 55-80% vs 25-50% in oncology). Oncology is crowded — even FIC
+ * assets face rapid follow-on approvals capping median share. Hematology's
+ * biomarker-driven markets have more predictable capture. This replaces the
+ * previously-declared-but-unused COMPETITIVE_SHARE_TA_MULTIPLIER in
+ * pos-tables.ts with a consuming implementation.
+ *
+ * Applied as a MULTIPLIER on the base share assumption, then clamped to
+ * [0, 0.95] (no asset captures >95% of market).
+ *
+ * Sources: EvaluatePharma orphan drug launches 2015-2024, IQVIA oncology
+ * market share curves, McKinsey pharma launch excellence.
+ */
+const TA_SHARE_MULTIPLIER: Record<string, number> = {
+  rareDisease: 1.35,         // Orphan concentration
+  hematology: 1.15,          // Biomarker-driven predictability
+  dermatology: 1.10,         // Visible endpoints → clear differentiation
+  ophthalmology: 1.15,       // Narrow specialist channel
+  oncology: 0.85,            // Crowded category, rapid FU approvals
+  gastroenterology: 1.05,    // Moderate competition
+  // immunology/neurology/metabolic/cardiovascular/infectiousDisease/womensHealth: 1.00 implicit
+};
+
+function applyTAShareMultiplier(
+  base: { low: number; median: number; high: number },
+  therapeuticArea: string,
+): { low: number; median: number; high: number } {
+  const mult = TA_SHARE_MULTIPLIER[therapeuticArea] ?? 1.0;
+  const clamp = (v: number) => Math.min(0.95, Math.max(0, v * mult));
+  return { low: clamp(base.low), median: clamp(base.median), high: clamp(base.high) };
+}
 
 /**
  * Estimate market size for an indication in a given territory.
@@ -51,6 +86,7 @@ export function estimateMarketSize(
   territory: string,
   competitivePosition: string,
   epidemiologyData: EpidemiologyData,
+  therapeuticArea?: string,
 ): MarketSizeEstimate {
   const fallbackReasons: string[] = [];
   let territoryInfo = TERRITORY_DATA[territory];
@@ -61,7 +97,12 @@ export function estimateMarketSize(
       console.warn(`[market-size] Unknown territory '${territory}', falling back to global`);
     }
   }
-  const shareAssumption = MARKET_SHARE_BY_POSITION[competitivePosition] || MARKET_SHARE_BY_POSITION.racing;
+  const baseShare = MARKET_SHARE_BY_POSITION[competitivePosition] || MARKET_SHARE_BY_POSITION.racing;
+  // TA-aware share adjustment — R68 tactical win Task 4.
+  // Rare disease FIC captures more share than oncology FIC at same competitive tier.
+  const shareAssumption = therapeuticArea
+    ? applyTAShareMultiplier(baseShare, therapeuticArea)
+    : baseShare;
 
   // Patient funnel calculation
   const totalPopulation = territoryInfo.population;

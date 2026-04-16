@@ -1049,6 +1049,23 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     dermatology: benchmarks.dermatologyPhaseBaselines,
     gastroenterology: benchmarks.gastroenterologyPhaseBaselines,
   };
+
+  // Rare disease is split by modality: chronic (ERT / substrate-reduction /
+  // small-molecule chronic — recurring-revenue franchises like BioMarin,
+  // Amicus) vs. gene therapy (one-time curative cliff economics like
+  // Spark/Audentes). Route to the correct sub-baseline; fall through to
+  // the base rareDiseasePhaseBaselines for antibodies, oligonucleotides,
+  // RNAi, and any other modality.
+  let rareDiseaseBaselines = benchmarks.rareDiseasePhaseBaselines;
+  if (isRareDisease) {
+    if (input.modality === 'geneTherapyRare' || input.modality === 'geneTherapy') {
+      rareDiseaseBaselines = benchmarks.rareDiseaseGeneTherapyPhaseBaselines;
+    } else if (input.modality === 'enzymeReplacement' || input.modality === 'substrateReduction' || input.modality === 'smallMolecule') {
+      rareDiseaseBaselines = benchmarks.rareDiseaseChronicPhaseBaselines;
+    }
+    phaseBaselineMap.rareDisease = rareDiseaseBaselines;
+  }
+
   const phaseBaseline = (phaseBaselineMap[input.therapeuticArea] || benchmarks.phaseBaselines)[input.phase];
 
   const phaseConfigMap: Record<string, any> = {

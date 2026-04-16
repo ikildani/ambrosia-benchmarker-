@@ -30,6 +30,7 @@ module.exports = async () => {
           '<rootDir>/__tests__/report.test.ts',
           '<rootDir>/__tests__/data-accuracy.test.ts',
           '<rootDir>/__tests__/empirical-multiplier.test.ts',
+          '<rootDir>/__tests__/ta-share-multiplier.test.ts',
         ],
         setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       },

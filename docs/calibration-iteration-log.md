@@ -1518,3 +1518,103 @@ Approved hit25 +1.9pp — blockbusters show up disproportionately in approved de
 - R71: Add bust-era reference entries (bluebird, uniQure/CSL, Rocket CRL, Audentes writedown) to `comparable-deals-extended.ts`
 - R72: TA-aware competitive-position premium (cap rareDisease firstInClass at +15% — baseline already bakes in FIC positioning)
 
+---
+
+## Round 69 — Split rareDisease into chronic vs. gene-therapy sub-baselines (2026-04-15)
+
+**Problem:** Since the 2023-2025 rare-disease regime shift, "rare disease" as a single calibration category conflates two economically opposite deal profiles:
+
+- **Chronic rare** (enzyme-replacement therapies, substrate reduction, small-molecule chronic) — recurring-revenue franchises like BioMarin's Voxzogo, Alnylam's Amvuttra, Amicus's Galafold, Takeda's Takhzyro — continue commanding a premium over base rare-disease terms due to orphan pricing power, predictable reimbursement, and long durability.
+- **Transformative / one-time rare** (AAV gene therapies, ex-vivo gene edit) — cliff economics like Spark / Roctavian / Skysona / Zolgensma — have repriced significantly after the bluebird take-private, Audentes writedown, and Rocket CRL. Market now prices in durability risk, ultra-narrow patient populations, and manufacturing capex.
+
+Post-Round-68, the single `rareDiseasePhaseBaselines` block splits the difference between these two regimes — under-valuing chronic franchises and over-valuing gene therapy.
+
+**Change:** Added two sub-baselines to `benchmarks.json`, derived from the Round-68 base by scaling low/median/high uniformly (royalties unchanged):
+
+- `rareDiseaseChronicPhaseBaselines`: ×1.125 (+12.5% vs. Round-68 base)
+- `rareDiseaseGeneTherapyPhaseBaselines`: ×0.75 (-25% vs. Round-68 base)
+
+Extended `Benchmarks` interface and `PhaseBaselinesKey` union in `lib/benchmarks.ts` with the two new keys.
+
+**Routing** — in `lib/calculations.ts` (phaseBaselineMap, near line 1050):
+```ts
+if (isRareDisease) {
+  if (input.modality === 'geneTherapyRare' || input.modality === 'geneTherapy') {
+    rareDiseaseBaselines = benchmarks.rareDiseaseGeneTherapyPhaseBaselines;
+  } else if (input.modality === 'enzymeReplacement' || input.modality === 'substrateReduction' || input.modality === 'smallMolecule') {
+    rareDiseaseBaselines = benchmarks.rareDiseaseChronicPhaseBaselines;
+  }
+  phaseBaselineMap.rareDisease = rareDiseaseBaselines;
+}
+```
+
+Antibodies, oligonucleotides, RNAi, and any other modality fall through to the base `rareDiseasePhaseBaselines` (Round-68 post-bust values) — preserving conservative behavior for modalities that don't clearly sort into either bucket.
+
+**Supabase future-proofing:** `getBenchmarksSync()` in `lib/benchmarks.ts:307-330` extended so a `phase_baseline` calibration row with `therapeutic_area='rareDisease'` + `modality` set routes to the correct sub-baseline. Current rows with no modality still hit the base `rareDiseasePhaseBaselines` (no behavior change).
+
+**Example deltas** — phase 2 median upfront by modality:
+
+| Modality | Pre-Round-68 | Round-68 base | Round-69 result |
+|---|---:|---:|---:|
+| smallMolecule (e.g., Galafold) | 150 | 105 | **118** (chronic) |
+| enzymeReplacement (e.g., Nexviazyme) | 150 | 105 | **118** (chronic) |
+| antibody (e.g., Crysvita) | 150 | 105 | **105** (base) |
+| geneTherapyRare (e.g., Roctavian) | 150 | 105 | **79** (gene therapy) |
+| oligonucleotide (e.g., Spinraza) | 150 | 105 | **105** (base) |
+
+Metadata: version 5.3 → 5.4.
+
+**Tests:** 191/191 passing (golden masters + data accuracy + financial properties). Zero TS errors introduced by this round. Pre-existing TS errors in unrelated files (empirical-multiplier test, tier3-coverage test, untracked deck-engine-output script) left as-is.
+
+**Files touched:** `data/benchmarks.json`, `lib/benchmarks.ts`, `lib/calculations.ts`.
+
+---
+
+## Round 70 — Time-weighted recency decay (halflife 2.5yr from 2026, 2026-04-15)
+
+**Problem:** The calibration corpus (~1,100 deals after EXTENDED + SUPABASE dedup) was weighted equally across 2018–2025 vintages. A 2019 Audentes-style pre-bust deal contributed the same signal as a 2025 Sarepta-style post-bust deal. Reported calibration quality therefore reflected a *blended* historical regime — which misrepresents how the engine performs on today's deals. Per-TA searches for "year", "recency", "decay", "halflife", "weight" in `lib/financial/` returned zero hits before this round.
+
+**Change:** Introduced a shared `recencyWeight(dealYear, referenceYear=2026, halflifeYears=2.5)` helper, exported from `lib/financial/calibration.ts`:
+
+```ts
+export function recencyWeight(dealYear, referenceYear = 2026, halflifeYears = 2.5) {
+  const yearsAgo = Math.max(0, referenceYear - dealYear);
+  return Math.pow(0.5, yearsAgo / halflifeYears);
+}
+```
+
+Halflife **2.5 years** from **2026** →  2025 weight 1.00, 2024 0.76, 2023 0.57, 2022 0.43, 2021 0.33, 2020 0.25, 2019 0.19. The mid-2023 rare-disease regime shift is therefore ~0.57-weighted (half-in, half-out of the "new regime" window).
+
+**Application points** (all in `lib/financial/backtest/deal-backtest.ts`):
+
+1. **Corridor clamp** (`findComparablesDistribution`, `weightedMedianUpfront`) — the comparable-distribution p25/p50/p75 used to clamp engine predictions are now recency-weighted quantiles. Recent deals dominate the corridor boundaries.
+2. **Slice aggregates** (`summarizeSlice`) — per-TA/phase/modality hit rates (±25/35), mean signed / mean abs error weighted.
+3. **Full-corpus aggregates** (`summarize`) — hit rates (±25/35/50), mean abs, weighted-median signed, weighted RMSE.
+
+**Unchanged:** Per-deal `scoreCase()` predictions. The prediction for any single deal is independent of its age — only the reported aggregate quality is weighted. This is essential so that predictions for today's new deals (which have weight 1.0 and no "history") are not themselves weighted.
+
+**Shared helper** (`weightedQuantile(pairs, q)`) added near the existing `medianOf` utility; used for all three percentile/median needs (corridor distribution, full-corpus signed-error median, slice-level quantiles if needed later).
+
+**Reference-year choice:** 2026 per the current calibration series' "now." Callers can override by passing `recencyWeight(year, 2025, 2.5)` for backward reproducibility; default 2026 keeps the default path clean.
+
+**Full-corpus backtest delta (n=308 deals, equal-weight → recency-weighted):**
+
+| metric | pre-R70 (equal) | post-R70 (recency-weighted) |
+|---|---:|---:|
+| hit ±25% | 17.2% | 15.1% |
+| hit ±35% | 27.9% | 25.9% |
+| hit ±50% | 39.6% | 39.2% |
+| mean abs err | 125.8% | 164.8% |
+| median signed | -26.3% | -25.8% |
+| RMSE ($M) | 4,546.5 | 3,106.5 |
+
+Hit rates drop ~2pp because recency weighting emphasizes 2024–2025 deals, where the engine is systematically harder-calibrated than on older deals (which the old equal-weight mean had smoothed out). **This is exactly what recency weighting is supposed to expose** — the engine's calibration gap on the current regime. R71 (bust-era comps) will close some of this; subsequent rounds can use these weighted metrics as the honest target.
+
+RMSE drops 32% because large-error pre-bust mega-deals are down-weighted; weighted RMSE is a cleaner signal-to-noise read on current calibration quality.
+
+**Held-out train/test gap widens (±25% gap 13.4% → 13.5%)** — the held-out test set (n=16) is disproportionately 2024–2025 deals, so recency weighting raises the reported train/test gap. Not a regression: it correctly reveals overfit risk on pre-2024 vintages.
+
+**Tests:** 191/191 passing (golden masters + data accuracy + financial properties — none of which depend on aggregate metrics, so no drift). The pre-existing `__tests__/lib/comparable-deals-backtest.test.ts` 2 failures are unrelated to R70 — confirmed via stash-A/B: the test uses its own `runBacktest()` / `results.filter()` aggregator, not `summarize()`, and the same 2 failures reproduce on pre-R70 working state.
+
+**Files touched:** `lib/financial/calibration.ts` (added `recencyWeight` export), `lib/financial/backtest/deal-backtest.ts` (corridor clamp + slice aggregates + full-corpus aggregates), `__tests__/backtest/baseline-errors.json` (regenerated).
+

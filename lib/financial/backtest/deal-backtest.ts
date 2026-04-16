@@ -26,6 +26,7 @@ import { lookupAssetPeakSales_M } from '@/data/asset-peak-sales';
 import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profiles';
 import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
 import { getTerritoryAdjustedPeak } from '../geographic-revenue-curves';
+import { recencyWeight } from '../calibration';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -1145,6 +1146,28 @@ function medianOf(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
+// R70: weighted quantile over {value, weight} pairs. Used by the
+// corridor-clamp distribution (weights deals by recencyWeight(year)) so
+// that aggregate comparable medians and percentiles reflect the current
+// dealmaking regime rather than averaging 2019 and 2025 comps equally.
+function weightedQuantile(
+  pairs: Array<{ value: number; weight: number }>,
+  q: number,
+): number {
+  if (pairs.length === 0) return 0;
+  const filtered = pairs.filter(p => p.weight > 0);
+  if (filtered.length === 0) return 0;
+  const sorted = [...filtered].sort((a, b) => a.value - b.value);
+  const totalWeight = sorted.reduce((s, p) => s + p.weight, 0);
+  const target = q * totalWeight;
+  let cum = 0;
+  for (const p of sorted) {
+    cum += p.weight;
+    if (cum >= target) return p.value;
+  }
+  return sorted[sorted.length - 1].value;
+}
+
 function sampleVariance(values: number[]): number {
   if (values.length < 2) return Infinity;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
@@ -1155,6 +1178,17 @@ interface ComparablesBlend {
   comparablesMedian: number;
   n: number;
   widenLevel: 0 | 1 | 2 | 3 | 4; // 4 = no comparables found
+}
+
+// R70: helper — weighted-median upfront across a match set, using
+// recencyWeight(year) so 2025 comps dominate 2019 comps. Preserves
+// unweighted n for gating (widen level thresholds are corpus-size based,
+// not signal-strength based).
+function weightedMedianUpfront(matches: DealBacktestCase[]): number {
+  return weightedQuantile(
+    matches.map(d => ({ value: d.actualUpfront_M, weight: recencyWeight(d.year) })),
+    0.5,
+  );
 }
 
 function findComparables(
@@ -1170,7 +1204,7 @@ function findComparables(
     phaseDistance(d.phase, c.phase) <= 1,
   );
   if (matches.length >= 3) {
-    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 0 };
+    return { comparablesMedian: weightedMedianUpfront(matches), n: matches.length, widenLevel: 0 };
   }
 
   // Level 1: TA + phase ±1 (modality widened)
@@ -1179,19 +1213,19 @@ function findComparables(
     phaseDistance(d.phase, c.phase) <= 1,
   );
   if (matches.length >= 3) {
-    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 1 };
+    return { comparablesMedian: weightedMedianUpfront(matches), n: matches.length, widenLevel: 1 };
   }
 
   // Level 2: TA only
   matches = candidates.filter(d => d.therapeuticArea === c.therapeuticArea);
   if (matches.length >= 3) {
-    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 2 };
+    return { comparablesMedian: weightedMedianUpfront(matches), n: matches.length, widenLevel: 2 };
   }
 
   // Level 3: phase ±1 only (last resort)
   matches = candidates.filter(d => phaseDistance(d.phase, c.phase) <= 1);
   if (matches.length >= 3) {
-    return { comparablesMedian: medianOf(matches.map(d => d.actualUpfront_M)), n: matches.length, widenLevel: 3 };
+    return { comparablesMedian: weightedMedianUpfront(matches), n: matches.length, widenLevel: 3 };
   }
 
   return { comparablesMedian: 0, n: 0, widenLevel: 4 };
@@ -1228,13 +1262,15 @@ function findComparablesDistribution(
     default:
       matches = [];
   }
-  const sorted = matches.map(d => d.actualUpfront_M).sort((a, b) => a - b);
-  const p = (q: number) => {
-    if (sorted.length === 0) return 0;
-    const idx = Math.max(0, Math.min(sorted.length - 1, Math.floor(q * sorted.length)));
-    return sorted[idx];
+  // R70: recency-weighted percentiles. 2025 comps dominate; 2019 comps contribute ~0.19×.
+  const pairs = matches.map(d => ({ value: d.actualUpfront_M, weight: recencyWeight(d.year) }));
+  return {
+    p25: weightedQuantile(pairs, 0.25),
+    p50: weightedQuantile(pairs, 0.50),
+    p75: weightedQuantile(pairs, 0.75),
+    n: matches.length,
+    widenLevel: result.widenLevel,
   };
-  return { p25: p(0.25), p50: p(0.50), p75: p(0.75), n: matches.length, widenLevel: result.widenLevel };
 }
 
 /**
@@ -1332,21 +1368,30 @@ function scoreCase(c: DealBacktestCase, trainPool: DealBacktestCase[] = []): Dea
 // Aggregation
 // ---------------------------------------------------------------------------
 
+// R70: recency-weighted aggregate. `n` stays as unweighted count (sample
+// size is reported for interpretability), but hit rates and error
+// statistics are weighted by recencyWeight(year) so the reported
+// calibration quality reflects the current dealmaking regime.
 function summarizeSlice(rows: DealBacktestResult[]): BacktestSlice {
   const n = rows.length;
   if (n === 0) {
     return { n: 0, hitRate25: 0, hitRate35: 0, meanSignedErrorPct: 0, meanAbsErrorPct: 0 };
   }
-  const hits25 = rows.filter(r => r.within25).length;
-  const hits35 = rows.filter(r => r.within35).length;
-  const signed = rows.reduce((s, r) => s + r.upfrontErrorPct, 0) / n;
-  const abs = rows.reduce((s, r) => s + Math.abs(r.upfrontErrorPct), 0) / n;
+  const weighted = rows.map(r => ({ row: r, w: recencyWeight(r.case.year) }));
+  const totalW = weighted.reduce((s, x) => s + x.w, 0);
+  if (totalW === 0) {
+    return { n, hitRate25: 0, hitRate35: 0, meanSignedErrorPct: 0, meanAbsErrorPct: 0 };
+  }
+  const hits25W = weighted.reduce((s, x) => s + (x.row.within25 ? x.w : 0), 0);
+  const hits35W = weighted.reduce((s, x) => s + (x.row.within35 ? x.w : 0), 0);
+  const signedW = weighted.reduce((s, x) => s + x.row.upfrontErrorPct * x.w, 0) / totalW;
+  const absW = weighted.reduce((s, x) => s + Math.abs(x.row.upfrontErrorPct) * x.w, 0) / totalW;
   return {
     n,
-    hitRate25: hits25 / n,
-    hitRate35: hits35 / n,
-    meanSignedErrorPct: signed,
-    meanAbsErrorPct: abs,
+    hitRate25: hits25W / totalW,
+    hitRate35: hits35W / totalW,
+    meanSignedErrorPct: signedW,
+    meanAbsErrorPct: absW,
   };
 }
 
@@ -1380,15 +1425,23 @@ export function summarize(rows: DealBacktestResult[]): DealBacktestSummary {
     };
   }
 
-  const hits25 = rows.filter(r => r.within25).length;
-  const hits35 = rows.filter(r => r.within35).length;
-  const hits50 = rows.filter(r => r.within50).length;
-  const meanAbs = rows.reduce((s, r) => s + Math.abs(r.upfrontErrorPct), 0) / n;
-  const sortedSigned = rows.map(r => r.upfrontErrorPct).sort((a, b) => a - b);
-  const mid = Math.floor(n / 2);
-  const median = n % 2 === 0 ? (sortedSigned[mid - 1] + sortedSigned[mid]) / 2 : sortedSigned[mid];
-  const sqSum = rows.reduce((s, r) => s + r.upfrontErrorAbs_M * r.upfrontErrorAbs_M, 0);
-  const rmse = Math.sqrt(sqSum / n);
+  // R70: recency-weighted full-corpus aggregates (halflife 2.5yr from 2026).
+  // Median uses weightedQuantile over signed errors. totalDeals stays as
+  // unweighted n for interpretability; hit rates / mean / RMSE / median
+  // reflect the current regime.
+  const weighted = rows.map(r => ({ row: r, w: recencyWeight(r.case.year) }));
+  const totalW = weighted.reduce((s, x) => s + x.w, 0);
+  const safeW = totalW > 0 ? totalW : 1;
+  const hits25W = weighted.reduce((s, x) => s + (x.row.within25 ? x.w : 0), 0);
+  const hits35W = weighted.reduce((s, x) => s + (x.row.within35 ? x.w : 0), 0);
+  const hits50W = weighted.reduce((s, x) => s + (x.row.within50 ? x.w : 0), 0);
+  const meanAbsW = weighted.reduce((s, x) => s + Math.abs(x.row.upfrontErrorPct) * x.w, 0) / safeW;
+  const medianW = weightedQuantile(
+    weighted.map(x => ({ value: x.row.upfrontErrorPct, weight: x.w })),
+    0.5,
+  );
+  const sqSumW = weighted.reduce((s, x) => s + x.row.upfrontErrorAbs_M * x.row.upfrontErrorAbs_M * x.w, 0);
+  const rmseW = Math.sqrt(sqSumW / safeW);
 
   const byTA = groupBy(rows, r => r.case.therapeuticArea);
   const byPhase = groupBy(rows, r => r.case.phase);
@@ -1404,12 +1457,12 @@ export function summarize(rows: DealBacktestResult[]): DealBacktestSummary {
 
   return {
     totalDeals: n,
-    hitRate25: hits25 / n,
-    hitRate35: hits35 / n,
-    hitRate50: hits50 / n,
-    meanAbsErrorPct: meanAbs,
-    medianSignedErrorPct: median,
-    rmseUpfront_M: Math.round(rmse * 10) / 10,
+    hitRate25: hits25W / safeW,
+    hitRate35: hits35W / safeW,
+    hitRate50: hits50W / safeW,
+    meanAbsErrorPct: meanAbsW,
+    medianSignedErrorPct: medianW,
+    rmseUpfront_M: Math.round(rmseW * 10) / 10,
     byTherapeuticArea: mapSlices(byTA),
     byPhase: mapSlices(byPhase),
     byModality: mapSlices(byModality),

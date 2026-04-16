@@ -20,6 +20,32 @@
  * @module lib/financial/calibration
  */
 
+/**
+ * Exponential recency decay for calibration comparables.
+ *
+ * Weight a historical deal by how representative it is of the current
+ * dealmaking regime. A 2.5-year halflife tracks the mid-2023 rare-disease
+ * regime shift: 2025 deals weight ~1.0, 2022 deals ~0.43, 2019 deals ~0.19.
+ * Applied in aggregate statistics (corridor clamps, hit-rate metrics, RMSE,
+ * signed-error medians) so the backtest auto-anchors to the current regime
+ * as new deals land — without requiring per-round corpus curation.
+ *
+ * Per-deal predictions (scoreCase) are NOT weighted: the prediction for
+ * any single deal is independent of its age. Only the reported aggregate
+ * calibration quality is weighted.
+ *
+ * Reference year defaults to 2026 (the "now" for the current calibration
+ * series); pass an explicit value to freeze a historical snapshot.
+ */
+export function recencyWeight(
+  dealYear: number,
+  referenceYear: number = 2026,
+  halflifeYears: number = 2.5,
+): number {
+  const yearsAgo = Math.max(0, referenceYear - dealYear);
+  return Math.pow(0.5, yearsAgo / halflifeYears);
+}
+
 export interface CalibrationDeal {
   /** Unique identifier */
   id: string;
