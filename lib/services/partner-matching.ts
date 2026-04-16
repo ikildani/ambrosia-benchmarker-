@@ -13,7 +13,13 @@ import {
   EnhancedPartnerMatchData,
 } from '@/types/partner-breakdown';
 import { getRecencyWeight } from '@/lib/comparableDeals';
-import { calculatePharmaIntent, type TrialForIntent, type PressReleaseForIntent, type ResearchSignalForIntent } from '@/lib/services/pharma-intent';
+import {
+  calculatePharmaIntent,
+  getCalibratedIntentWeights,
+  type TrialForIntent,
+  type PressReleaseForIntent,
+  type ResearchSignalForIntent,
+} from '@/lib/services/pharma-intent';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -490,6 +496,14 @@ export async function findPartnerMatches(
   options: FindPartnerMatchesOptions = {}
 ): Promise<MatchResult> {
   const { limit = 50, includeEnhancedBreakdown = false } = options;
+
+  // R70 (2026-04-15): resolve calibrated intent weights ONCE per request.
+  // Wednesday 3am UTC cron retrains these from the cleaned corpus; this
+  // call loads the latest row (with confidence-gated fallback to the
+  // hardcoded baseline if the calibration is stale / low-accuracy / too
+  // small a sample). Passed to every calculatePharmaIntent invocation
+  // below so the whole match runs on the same weight snapshot.
+  const intentWeightsResolved = await getCalibratedIntentWeights(supabase);
   // Fetch companies that are either actively acquiring OR have closed at least
   // one deal in the last 12 months. This ensures licensing-active companies
   // (which may not be flagged as "actively_acquiring") are included so we can
@@ -728,6 +742,7 @@ export async function findPartnerMatches(
             companyResearch,
             input.development_phase || undefined, // targetPhase for company type × phase interaction
             input.therapeutic_area || undefined,   // targetTA for TA-specific patent cliff relevance
+            intentWeightsResolved.weights,         // R70: calibrated weights (or hardcoded fallback)
           );
         } catch (err) {
           console.error(`[PharmaIntent] Error for ${company.name}:`, err);

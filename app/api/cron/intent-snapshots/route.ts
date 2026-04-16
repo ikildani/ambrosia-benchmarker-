@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { calculatePharmaIntent } from '@/lib/services/pharma-intent';
+import { calculatePharmaIntent, getCalibratedIntentWeights } from '@/lib/services/pharma-intent';
 import type { TrialForIntent, DealForIntent } from '@/lib/services/pharma-intent';
 import { timingSafeEqual } from 'crypto';
 
@@ -44,6 +44,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient();
+    // R70: resolve calibrated intent weights once for this snapshot run.
+    // Wed 3am cron retrains from cleaned corpus; snapshots (run on a
+    // separate schedule) should pick up the latest calibration too.
+    const intentWeightsResolved = await getCalibratedIntentWeights(supabase);
     // 1. Fetch top 100 companies by data_quality_score
     const { data: companies, error: compError } = await supabase
       .from('companies')
@@ -141,6 +145,7 @@ export async function GET(request: NextRequest) {
             undefined,
             undefined,
             combo.indication, // targetTA
+            intentWeightsResolved.weights,  // R70: calibrated weights
           );
 
           rows.push({

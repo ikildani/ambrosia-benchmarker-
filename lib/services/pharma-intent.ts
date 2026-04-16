@@ -163,7 +163,23 @@ export interface ResearchSignalForIntent {
 
 // ─── Factor Weights (v3: 10 factors) ────────────────────
 
-const W = {
+/** Hardcoded baseline weights — used as fallback when calibration is
+ *  unavailable / stale / low-confidence. Calibrated weights from the
+ *  Wednesday 3am UTC cron feed into these via getCalibratedIntentWeights. */
+export type IntentWeights = {
+  patentCliff: number;
+  dealVelocity: number;
+  pipelineGap: number;
+  alignment: number;
+  competitive: number;
+  strategic: number;
+  research: number;
+  persistence: number;
+  saturation: number;
+  portfolioBalance: number;
+};
+
+const W: IntentWeights = {
   patentCliff: 0.16,
   dealVelocity: 0.14,
   pipelineGap: 0.14,
@@ -175,6 +191,211 @@ const W = {
   saturation: 0.07,     // NEW: suppresses intent if recently acquired in same space
   portfolioBalance: 0.07, // NEW: concentration risk drives diversification
 };
+
+// ─── Calibration Feedback Loop ──────────────────────────
+//
+// R70 (2026-04-15): Close the Wednesday 3am UTC cron feedback loop.
+// The intent-calibration cron computes 9-factor weights from 3 years of
+// real deal outcomes and stores them in `intent_calibration_results`,
+// but previously nothing read them — the live score used hardcoded W.
+//
+// Map calibration's 9-factor output to the live 10-factor schema with
+// semantic correspondence. Gated by confidence (accuracy ≥ 0.55, sample
+// size ≥ 100, age ≤ 35 days) so a bad / stale calibration doesn't
+// silently override the hardcoded baseline.
+
+/**
+ * Minimum cross-validation accuracy for a calibration to be trusted.
+ * The hardcoded W was tuned manually against the same ground truth to
+ * roughly this level; below this, the calibration is worse than the
+ * prior and shouldn't override it.
+ */
+const MIN_CALIBRATION_ACCURACY = 0.55;
+
+/** Minimum sample size for a calibration to be statistically meaningful. */
+const MIN_CALIBRATION_SAMPLE = 100;
+
+/** Maximum age (days) of a calibration before we treat it as stale. */
+const MAX_CALIBRATION_AGE_DAYS = 35;
+
+/**
+ * Supabase client shape the helper needs (avoids full SupabaseClient import here).
+ */
+interface MinimalSupabase {
+  from: (table: string) => {
+    select: (cols: string) => {
+      order: (col: string, opts: { ascending: boolean }) => {
+        limit: (n: number) => Promise<{ data: unknown; error: unknown }>;
+      };
+    };
+  };
+}
+
+/** Latest calibration record shape (projection we pull from the table). */
+interface CalibrationRow {
+  calibrated_weights: Record<string, number>;
+  accuracy_estimate: number;
+  sample_size: number;
+  created_at: string;
+}
+
+/**
+ * Map the calibration's 9-factor output onto the live 10-factor W shape.
+ *
+ * Calibrated field → live W field mapping, with semantic rationale:
+ *   hasPatentCliff        → patentCliff     (identical concept)
+ *   pipelineGap           → pipelineGap     (identical concept)
+ *   dealVelocity          → dealVelocity    (identical concept)
+ *   modalityAligned+indicationAligned → alignment (both are alignment dims)
+ *   activelyAcquiring     → strategic       (intent-to-acquire signal)
+ *   revenueAtRisk         → competitive     (LOE pressure = replacement need)
+ *   dealsCount12mo        → persistence     (serial-acquirer pattern proxy)
+ *   trialCountInSpace     → research        (in-space trial activity)
+ *   (no calibrated equiv) → saturation      (keep hardcoded W)
+ *   (no calibrated equiv) → portfolioBalance (keep hardcoded W)
+ *
+ * Unmapped live factors retain their hardcoded W values. Final result is
+ * renormalized so the 10 weights sum to 1.0 (preserves score scale).
+ */
+function mapCalibratedToLive(cal: Record<string, number>): IntentWeights {
+  const raw: IntentWeights = {
+    patentCliff: Math.max(0, cal.hasPatentCliff ?? W.patentCliff),
+    dealVelocity: Math.max(0, cal.dealVelocity ?? W.dealVelocity),
+    pipelineGap: Math.max(0, cal.pipelineGap ?? W.pipelineGap),
+    alignment: Math.max(0, (cal.modalityAligned ?? 0) + (cal.indicationAligned ?? 0)) || W.alignment,
+    competitive: Math.max(0, cal.revenueAtRisk ?? W.competitive),
+    strategic: Math.max(0, cal.activelyAcquiring ?? W.strategic),
+    research: Math.max(0, cal.trialCountInSpace ?? W.research),
+    persistence: Math.max(0, cal.dealsCount12mo ?? W.persistence),
+    saturation: W.saturation,              // no calibrated equivalent
+    portfolioBalance: W.portfolioBalance,  // no calibrated equivalent
+  };
+
+  // Renormalize so the 10 weights sum to 1.0 (preserves score scale).
+  const total = Object.values(raw).reduce((a, b) => a + b, 0);
+  if (total <= 0) return W;  // guard against all-zero degenerate calibration
+  const scale = 1.0 / total;
+  return {
+    patentCliff: raw.patentCliff * scale,
+    dealVelocity: raw.dealVelocity * scale,
+    pipelineGap: raw.pipelineGap * scale,
+    alignment: raw.alignment * scale,
+    competitive: raw.competitive * scale,
+    strategic: raw.strategic * scale,
+    research: raw.research * scale,
+    persistence: raw.persistence * scale,
+    saturation: raw.saturation * scale,
+    portfolioBalance: raw.portfolioBalance * scale,
+  };
+}
+
+/**
+ * Result of the weight resolution — the weights plus provenance so the
+ * caller can log / surface WHICH weights were used.
+ */
+export interface ResolvedIntentWeights {
+  weights: IntentWeights;
+  source: 'calibrated' | 'hardcoded_baseline';
+  /** Reason the fallback was used (only set when source='hardcoded_baseline') */
+  fallbackReason?:
+    | 'no_calibration_row'
+    | 'accuracy_below_threshold'
+    | 'sample_size_below_threshold'
+    | 'calibration_stale'
+    | 'query_error'
+    | 'degenerate_weights';
+  /** Metadata from the calibration record, when available */
+  calibratedAt?: string;
+  accuracyEstimate?: number;
+  sampleSize?: number;
+}
+
+/**
+ * Fetch the most-recent calibration and return the live-schema weights,
+ * or fall back to hardcoded W if the calibration fails confidence gates.
+ *
+ * Callers should resolve weights ONCE per request and pass to
+ * calculatePharmaIntent — avoids per-score DB hits.
+ */
+export async function getCalibratedIntentWeights(
+  supabase: MinimalSupabase,
+): Promise<ResolvedIntentWeights> {
+  try {
+    const res = await supabase
+      .from('intent_calibration_results')
+      .select('calibrated_weights, accuracy_estimate, sample_size, created_at')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (res.error) {
+      return { weights: W, source: 'hardcoded_baseline', fallbackReason: 'query_error' };
+    }
+
+    const rows = (res.data as CalibrationRow[] | null) ?? [];
+    const latest = rows[0];
+    if (!latest) {
+      return { weights: W, source: 'hardcoded_baseline', fallbackReason: 'no_calibration_row' };
+    }
+
+    if (latest.accuracy_estimate < MIN_CALIBRATION_ACCURACY) {
+      return {
+        weights: W,
+        source: 'hardcoded_baseline',
+        fallbackReason: 'accuracy_below_threshold',
+        accuracyEstimate: latest.accuracy_estimate,
+        sampleSize: latest.sample_size,
+        calibratedAt: latest.created_at,
+      };
+    }
+    if (latest.sample_size < MIN_CALIBRATION_SAMPLE) {
+      return {
+        weights: W,
+        source: 'hardcoded_baseline',
+        fallbackReason: 'sample_size_below_threshold',
+        accuracyEstimate: latest.accuracy_estimate,
+        sampleSize: latest.sample_size,
+        calibratedAt: latest.created_at,
+      };
+    }
+    const ageDays =
+      (Date.now() - new Date(latest.created_at).getTime()) / (24 * 60 * 60 * 1000);
+    if (ageDays > MAX_CALIBRATION_AGE_DAYS) {
+      return {
+        weights: W,
+        source: 'hardcoded_baseline',
+        fallbackReason: 'calibration_stale',
+        accuracyEstimate: latest.accuracy_estimate,
+        sampleSize: latest.sample_size,
+        calibratedAt: latest.created_at,
+      };
+    }
+
+    const mapped = mapCalibratedToLive(latest.calibrated_weights);
+    // Sanity check: if mapping collapsed to effectively hardcoded (all zeros
+    // would have been caught, but defensive), fall back.
+    const totalRaw = Object.values(mapped).reduce((a, b) => a + b, 0);
+    if (!Number.isFinite(totalRaw) || totalRaw < 0.9 || totalRaw > 1.1) {
+      return {
+        weights: W,
+        source: 'hardcoded_baseline',
+        fallbackReason: 'degenerate_weights',
+        accuracyEstimate: latest.accuracy_estimate,
+        sampleSize: latest.sample_size,
+        calibratedAt: latest.created_at,
+      };
+    }
+
+    return {
+      weights: mapped,
+      source: 'calibrated',
+      accuracyEstimate: latest.accuracy_estimate,
+      sampleSize: latest.sample_size,
+      calibratedAt: latest.created_at,
+    };
+  } catch {
+    return { weights: W, source: 'hardcoded_baseline', fallbackReason: 'query_error' };
+  }
+}
 
 // ─── Core Function ───────────────────────────────────────
 
@@ -189,9 +410,15 @@ export function calculatePharmaIntent(
   researchSignals?: ResearchSignalForIntent[],
   targetPhase?: string,
   targetTA?: string,
+  /** R70: optional weights override. When omitted, the hardcoded baseline
+   *  W is used. Pass weights resolved via getCalibratedIntentWeights() to
+   *  let the Wednesday 3am UTC cron feed back into live scoring. */
+  weightsOverride?: IntentWeights,
 ): PharmaIntentResult {
   const factors: IntentFactor[] = [];
   const allDeals = allRecentDeals || [];
+  // R70: effective weights — caller-provided calibrated weights or baseline.
+  const w: IntentWeights = weightsOverride ?? W;
 
   // Separate in-licensing deals (company as licensee) from out-licensing (company as licensor)
   const inLicensingDeals = companyDeals.filter(d => d.licensee_id === company.id);
@@ -199,43 +426,43 @@ export function calculatePharmaIntent(
 
   // ── 1. Patent Cliff Pressure — TA-specific (16%) ──
   const f1 = scorePatentCliff(company, targetTA, targetIndication);
-  factors.push({ ...f1, weight: W.patentCliff });
+  factors.push({ ...f1, weight: w.patentCliff });
 
   // ── 2. Deal Velocity — in-licensing only, decay-weighted (14%) ──
   const f2 = scoreDealVelocity(company, inLicensingDeals, targetModality, targetIndication);
-  factors.push({ ...f2, weight: W.dealVelocity });
+  factors.push({ ...f2, weight: w.dealVelocity });
 
   // ── 3. Pipeline Gap — trial-based with terminated detection (14%) ──
   const f3 = scorePipelineGap(company, companyTrials, targetModality, targetIndication);
-  factors.push({ ...f3, weight: W.pipelineGap });
+  factors.push({ ...f3, weight: w.pipelineGap });
 
   // ── 4. Modality × Phase × Company Type Alignment (12%) ──
   const f4 = scoreAlignment(company, targetModality, targetIndication, targetPhase);
-  factors.push({ ...f4, weight: W.alignment });
+  factors.push({ ...f4, weight: w.alignment });
 
   // ── 5. Competitive Pressure — non-linear (10%) ──
   const f5 = scoreCompetitivePressure(company, allDeals, targetModality, targetIndication);
-  factors.push({ ...f5, weight: W.competitive });
+  factors.push({ ...f5, weight: w.competitive });
 
   // ── 6. Strategic Signals — press NLP (8%) ──
   const f6 = scoreStrategicSignals(company, targetModality, targetIndication, pressReleases);
-  factors.push({ ...f6, weight: W.strategic });
+  factors.push({ ...f6, weight: w.strategic });
 
   // ── 7. Research Investment (6%) ──
   const f7 = scoreResearchInvestment(researchSignals, targetModality, targetIndication);
-  factors.push({ ...f7, weight: W.research });
+  factors.push({ ...f7, weight: w.research });
 
   // ── 8. Deal Persistence (6%) ──
   const f8 = scorePersistence(company, inLicensingDeals, targetModality, targetIndication);
-  factors.push({ ...f8, weight: W.persistence });
+  factors.push({ ...f8, weight: w.persistence });
 
   // ── 9. Self-Saturation Penalty (7%) ──
   const f9 = scoreSelfSaturation(company, inLicensingDeals, targetModality, targetIndication);
-  factors.push({ ...f9, weight: W.saturation });
+  factors.push({ ...f9, weight: w.saturation });
 
   // ── 10. Portfolio Balance (7%) ──
   const f10 = scorePortfolioBalance(company, inLicensingDeals, companyTrials, targetModality, targetIndication, targetTA);
-  factors.push({ ...f10, weight: W.portfolioBalance });
+  factors.push({ ...f10, weight: w.portfolioBalance });
 
   // ── Composite Score ──
   const rawScore = factors.reduce((sum, f) => sum + f.score * f.weight, 0);
