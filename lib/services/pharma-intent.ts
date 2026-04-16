@@ -225,7 +225,7 @@ interface MinimalSupabase {
   from: (table: string) => {
     select: (cols: string) => {
       order: (col: string, opts: { ascending: boolean }) => {
-        limit: (n: number) => Promise<{ data: unknown; error: unknown }>;
+        limit: (n: number) => PromiseLike<{ data: unknown; error: unknown }>;
       };
     };
   };
