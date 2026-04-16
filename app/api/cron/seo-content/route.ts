@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
 
         // Generate — bumped max_tokens for 2,500-3,500 word articles
         const message = await client.messages.create({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-opus-4-6',
           max_tokens: 12000,
           messages: [{ role: 'user', content: prompt }],
         });

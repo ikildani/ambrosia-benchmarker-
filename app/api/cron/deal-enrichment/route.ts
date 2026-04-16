@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       // Extract structured data with Claude
       const anthropic = new Anthropic({ apiKey: anthropicKey, timeout: 30_000 });
       const extraction = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-opus-4-6',
         max_tokens: 800,
         system: 'Extract deal details. Return ONLY valid JSON. Use null for unknown.',
         messages: [{

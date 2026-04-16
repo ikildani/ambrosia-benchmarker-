@@ -256,7 +256,7 @@ export async function GET(request: NextRequest) {
           verification_notes:
             `[2026-04-14 Phase3] Re-extracted from source using hardened Phase4 prompt. Original extraction garbled (pre-hardening). Validation passed.`,
           raw_text_excerpt: extractAuditExcerpt(text, extracted.licensee ?? '', 500),
-          extraction_model: 'claude-sonnet-4-20250514',
+          extraction_model: 'claude-opus-4-6',
           extraction_timestamp: new Date().toISOString(),
         })
         .eq('id', row.id);

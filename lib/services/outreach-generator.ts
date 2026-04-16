@@ -299,7 +299,7 @@ export class OutreachGenerator {
     const prompt = buildStrategyPrompt(context);
 
     const message = await this.client.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-opus-4-6',
       max_tokens: 768,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -369,7 +369,7 @@ export class OutreachGenerator {
     const prompt = buildEmailPrompt(emailContext);
 
     const message = await this.client.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-opus-4-6',
       max_tokens: 512,
       messages: [{ role: 'user', content: prompt }],
     });

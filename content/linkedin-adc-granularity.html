@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADC Granularity — Ambrosia Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #060910;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 1080px;
+    height: 1080px;
+    background: #080b12;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Single ambient glow — asymmetric, top-right */
+  .ambient {
+    position: absolute;
+    top: -500px;
+    right: -400px;
+    width: 1200px;
+    height: 1200px;
+    background: radial-gradient(circle, rgba(20,184,166,0.022) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 60px 72px 52px;
+  }
+
+  /* ── Logo ── */
+  .logo-img {
+    height: auto;
+    width: 220px;
+    opacity: 1;
+    margin-bottom: 0;
+  }
+
+  /* ── Top half: the spread number ── */
+  .top-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 40px;
+  }
+
+  .pre-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .big-number-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    line-height: 1;
+  }
+
+  .number {
+    font-size: 200px;
+    font-weight: 900;
+    color: #14b8a6;
+    letter-spacing: -10px;
+    line-height: 0.8;
+  }
+
+  .times {
+    font-size: 96px;
+    font-weight: 300;
+    color: #0f766e;
+    letter-spacing: -3px;
+    margin-left: 8px;
+  }
+
+  .number-context {
+    font-size: 18px;
+    font-weight: 500;
+    color: #475569;
+    margin-top: 14px;
+    letter-spacing: -0.2px;
+    max-width: 760px;
+  }
+
+  .number-context .em { color: #cbd5e1; font-weight: 600; }
+
+  /* ── Divider ── */
+  .mid-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(20,184,166,0.12) 0%, rgba(20,184,166,0.03) 50%, transparent 100%);
+  }
+
+  /* ── Bottom half: the data ── */
+  .bottom-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 36px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* ── ADC rows — bar-scaled ── */
+  .adc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: auto;
+  }
+
+  .adc-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 120px;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .adc-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #cbd5e1;
+    letter-spacing: -0.3px;
+  }
+
+  .adc-name .target {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: #475569;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .adc-bar-track {
+    height: 28px;
+    background: rgba(20,184,166,0.04);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .adc-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #14b8a6 0%, #0d9488 100%);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .adc-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: #14b8a6;
+    box-shadow: 0 0 6px rgba(20,184,166,0.5);
+  }
+
+  .adc-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #14b8a6;
+    letter-spacing: -0.8px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Punchline ── */
+  .punchline {
+    margin-top: 36px;
+  }
+
+  .punch-1 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #475569;
+    letter-spacing: -0.1px;
+  }
+
+  .punch-2 {
+    font-size: 22px;
+    font-weight: 900;
+    color: #e2e8f0;
+    letter-spacing: -0.6px;
+    margin-top: 2px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0;
+    padding-top: 24px;
+  }
+
+  .footer-url {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .footer-deals {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="ambient"></div>
+
+  <div class="inner">
+    <img src="../public/logo-white.png" alt="Ambrosia Ventures" class="logo-img">
+
+    <!-- Top Half: The 7× Spread -->
+    <div class="top-half">
+      <div class="pre-label">ADC 2025 REVENUE — TOP vs BOTTOM</div>
+      <div class="big-number-row">
+        <span class="number">7</span><span class="times">×</span>
+      </div>
+      <div class="number-context">
+        spread between the largest and smallest approved ADC — <span class="em">priced through the same comp table.</span>
+      </div>
+    </div>
+
+    <div class="mid-line"></div>
+
+    <!-- Bottom Half: The Data -->
+    <div class="bottom-half">
+      <div class="section-label">TOP 5 BY 2025 REVENUE — OF 15 FDA-APPROVED ADCs</div>
+
+      <div class="adc-list">
+        <div class="adc-row">
+          <div class="adc-name">Enhertu<span class="target">HER2</span></div>
+          <div class="adc-bar-track"><div class="adc-bar-fill" style="width: 100%;"></div></div>
+          <div class="adc-value">$5.0B</div>
+        </div>
+        <div class="adc-row">
+          <div class="adc-name">Kadcyla<span class="target">HER2</span></div>
+          <div class="adc-bar-track"><div class="adc-bar-fill" style="width: 44%;"></div></div>
+          <div class="adc-value">$2.2B</div>
+        </div>
+        <div class="adc-row">
+          <div class="adc-name">Padcev<span class="target">NECTIN-4</span></div>
+          <div class="adc-bar-track"><div class="adc-bar-fill" style="width: 46%;"></div></div>
+          <div class="adc-value">$2.3B</div>
+        </div>
+        <div class="adc-row">
+          <div class="adc-name">Trodelvy<span class="target">TROP2</span></div>
+          <div class="adc-bar-track"><div class="adc-bar-fill" style="width: 28%;"></div></div>
+          <div class="adc-value">$1.4B</div>
+        </div>
+        <div class="adc-row">
+          <div class="adc-name">Elahere<span class="target">FOLR1</span></div>
+          <div class="adc-bar-track"><div class="adc-bar-fill" style="width: 14%;"></div></div>
+          <div class="adc-value">$690M</div>
+        </div>
+      </div>
+
+      <div class="punchline">
+        <div class="punch-1">The math says they're interchangeable.</div>
+        <div class="punch-2">The market says they aren't.</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-url">calculator.ambrosiaventures.co</div>
+      <div class="footer-deals">3,500+ transactions tracked</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

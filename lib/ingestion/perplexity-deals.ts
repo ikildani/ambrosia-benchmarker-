@@ -140,7 +140,7 @@ async function queryPerplexityForDeals(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      preset: 'fast-search',
+      model: 'sonar-pro',
       input: query,
     }),
   });
@@ -177,7 +177,7 @@ async function extractDealsFromText(
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-6',
     max_tokens: 4000,
     system: `You extract structured biopharma deal data from text. Return ONLY valid JSON — an array of deal objects. Be precise: only include deals with enough information to be useful (at minimum: two company names and an asset/program name). Use null for unknown values. Do not invent or hallucinate data.`,
     messages: [{
@@ -413,7 +413,7 @@ export async function runPerplexityDealDiscovery(
               verified: false,
               therapeutic_area: derivedTA === 'other' ? ta : derivedTA,
               extraction_notes: `Perplexity discovery → Claude extraction`,
-              extraction_model: 'perplexity+claude-sonnet-4',
+              extraction_model: 'perplexity+claude-opus-4-6',
               extraction_timestamp: new Date().toISOString(),
             });
 

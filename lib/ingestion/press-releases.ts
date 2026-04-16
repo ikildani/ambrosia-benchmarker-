@@ -400,7 +400,7 @@ ${content}`;
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-opus-4-6',
       max_tokens: 4000,
       messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
@@ -583,7 +583,7 @@ export async function runPressReleaseIngestion(
               terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
               confidence_score: deal.confidence_score,
               extraction_notes: `Source: ${source.name}. ${deal.extraction_notes || ''}`.trim(),
-              extraction_model: 'claude-sonnet-4-20250514',
+              extraction_model: 'claude-opus-4-6',
               extraction_timestamp: new Date().toISOString(),
               therapeutic_area: therapeuticArea,
               // Phase 4 (2026-04-14): explicit pending status + audit excerpt

@@ -118,7 +118,7 @@ async function extractPublicDeals(
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-6',
     max_tokens: 4000,
     system: `You extract structured biopharma deal data from text. Return ONLY valid JSON — an array of deal objects. Deduplicate: if the same deal appears multiple times across search results, include it only once. Use null for unknown values. Do not invent or hallucinate data.`,
     messages: [{

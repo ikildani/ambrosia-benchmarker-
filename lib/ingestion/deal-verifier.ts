@@ -130,7 +130,7 @@ export async function verifyPendingDeals(
       };
 
       const claudeResponse = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-opus-4-6',
         max_tokens: 600,
         system: 'You verify biopharma deal data. Compare a database record against web search results. Return ONLY valid JSON.',
         messages: [{

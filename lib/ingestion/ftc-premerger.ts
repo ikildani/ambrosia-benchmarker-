@@ -103,7 +103,7 @@ async function extractFTCDeals(
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-6',
     max_tokens: 4000,
     system: `You extract structured data about FTC (Federal Trade Commission) actions on biopharma mergers and acquisitions. Return ONLY valid JSON — an array of deal objects. Be precise: only include actual FTC enforcement actions or HSR filings involving pharmaceutical/biotech companies. Use null for unknown values. Do not invent or hallucinate data.`,
     messages: [{
@@ -297,7 +297,7 @@ export async function runFTCIngestion(
             divestiture_required: deal.divestiture_required,
             divestiture_details: deal.divestiture_details,
             extraction_notes: `FTC ${deal.ftc_action}: ${deal.summary}`,
-            extraction_model: 'perplexity+claude-sonnet-4',
+            extraction_model: 'perplexity+claude-opus-4-6',
             extraction_timestamp: new Date().toISOString(),
           });
 

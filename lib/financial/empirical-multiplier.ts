@@ -70,8 +70,8 @@ export const TA_UPLIFT: Record<string, Record<string, Partial<Record<string, num
     phase2:    { acquisition: 3.0, licensing: 1.5, codevelopment: 2.0, collaboration: 1.8, option: 1.4 },
     phase2_3:  { acquisition: 3.0, licensing: 1.5, codevelopment: 2.0, collaboration: 1.8 },
     phase3:    { acquisition: 1.3, licensing: 1.1, codevelopment: 1.2, collaboration: 1.15 },
-    nda_filed: { acquisition: 1.2, licensing: 1.4 },
-    approved:  { acquisition: 1.1, licensing: 1.75 },
+    nda_filed: { acquisition: 1.2, licensing: 1.3 },
+    approved:  { acquisition: 1.1, licensing: 1.3 }, // R72: reduced from 1.75. Oncology approved-licensing premium was anchored to Keytruda-class territorial rollout; most approved oncology licensing is smaller.
   },
   neurology: {
     phase2:    { acquisition: 2.0, licensing: 1.4, codevelopment: 1.6, collaboration: 1.5 },
@@ -84,7 +84,7 @@ export const TA_UPLIFT: Record<string, Record<string, Partial<Record<string, num
     phase2:    { acquisition: 2.2, licensing: 1.5, codevelopment: 1.7 },
     phase2_3:  { acquisition: 2.2, licensing: 1.5 },
     phase3:    { acquisition: 1.8, licensing: 1.4 },
-    approved:  { acquisition: 1.3, licensing: 3.0 }, // orphan exclusivity premium preserved
+    approved:  { acquisition: 1.3, licensing: 2.0 }, // R72: reduced from 3.0. Orphan exclusivity premium was overcalibrated against Alexion Soliris-class ultra-rare monopolies; most approved rare disease licensing is commodity ERT/substrate reduction.
   },
 };
 
@@ -300,14 +300,20 @@ export function computeEmpiricalMultiplier(
   const additiveCapped = Math.min(rawComposition, ADDITIVE_CAP);
   let combined = 1.0 + additiveCapped;
 
-  // Fix #4 (R71): licensing-specific conservatism for Phase 2/3 when there's
-  // no indication-level ceiling to rely on. Dampens the most-over-predicted
-  // cohort (phase 2 licensing) across the board.
-  if (
-    dealType === 'licensing' &&
-    (phase === 'phase2' || phase === 'phase2_3' || phase === 'phase3')
-  ) {
-    combined *= LICENSING_CONSERVATISM_FACTOR;
+  // Fix #4 (R71): licensing-specific conservatism. Dampens the most-over-
+  // predicted cohorts across the board.
+  if (dealType === 'licensing') {
+    if (phase === 'phase2' || phase === 'phase2_3' || phase === 'phase3') {
+      combined *= LICENSING_CONSERVATISM_FACTOR;
+    }
+    // R72: approved-licensing hard dampener. Approved baselines are calibrated
+    // against blockbuster-scale products (Humira, Keytruda). Most contacts
+    // in outreach have niche approved products ($200-600M revenue). Dampen
+    // approved licensing by additional 0.60x to prevent Karyopharm/Ardelyx-style
+    // $6B upfronts on $300M-revenue drugs.
+    if (phase === 'approved' || phase === 'nda_filed') {
+      combined *= 0.60;
+    }
   }
 
   const hardCapped = Math.min(combined, HARD_CAP);

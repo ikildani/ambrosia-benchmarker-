@@ -193,7 +193,7 @@ export class ContentGenerator {
     const prompt = selectBlogPrompt(category, promptParams);
 
     const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-opus-4-6',
       max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -212,7 +212,7 @@ export class ContentGenerator {
     const prompt = generateLandingPagePrompt(promptParams);
 
     const message = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-opus-4-6',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });

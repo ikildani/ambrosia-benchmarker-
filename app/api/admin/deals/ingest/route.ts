@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 25_000 });
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-opus-4-6',
       max_tokens: 2000,
       system: `You are an expert biopharma deal analyst. Extract structured deal information from articles and press releases. Be precise — only extract explicitly stated information, use null for unknown fields. Financial values in USD (full numbers, not millions shorthand).`,
       messages: [
@@ -212,7 +212,7 @@ ${textContent}`,
         verified: true,
         verification_status: 'verified',
         confidence_score: 85,
-        extraction_model: 'claude-sonnet-4-20250514',
+        extraction_model: 'claude-opus-4-6',
         extraction_timestamp: new Date().toISOString(),
         therapeutic_area: therapeuticArea,
       })

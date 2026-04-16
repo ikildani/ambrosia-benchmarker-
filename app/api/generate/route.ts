@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
             indication: parameters.indication,
             ai_generated: true,
             ai_prompt_used: target_keyword,
-            generation_model: 'claude-sonnet-4-20250514',
+            generation_model: 'claude-opus-4-6',
             status: 'draft',
             sources: content.sources || [],
           })

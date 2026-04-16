@@ -385,14 +385,14 @@ export class DealMemoGenerator {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           log.info('AI call starting', {
-            model: 'claude-haiku-4-5-20251001',
+            model: 'claude-opus-4-6',
             attempt: attempt + 1,
             maxAttempts,
             circuitState: circuitBreaker.getState(),
           });
 
           const message = await this.client.messages.create({
-            model: 'claude-haiku-4-5-20251001',
+            model: 'claude-opus-4-6',
             max_tokens: 2500,
             messages: [{ role: 'user', content: prompt }],
           });

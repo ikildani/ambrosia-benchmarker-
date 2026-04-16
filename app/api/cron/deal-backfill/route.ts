@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
           terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
           confidence_score: deal.confidence_score,
           extraction_notes: deal.extraction_notes,
-          extraction_model: 'claude-sonnet-4-20250514',
+          extraction_model: 'claude-opus-4-6',
           extraction_timestamp: new Date().toISOString(),
           therapeutic_area: ta,
           milestone_details: deal.milestone_details,

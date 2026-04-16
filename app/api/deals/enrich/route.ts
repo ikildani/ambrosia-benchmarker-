@@ -80,7 +80,7 @@ async function extractStructuredEnrichment(
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 30_000 });
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-6',
     max_tokens: 1000,
     system: 'Extract deal details from text. Return ONLY valid JSON. Use null for unknown values.',
     messages: [{
