@@ -59,6 +59,36 @@ interface MinimalDeal {
   /** Pre-computed deal-structure classification for this corpus row.
    *  Cached at corpus load so per-benchmark calls don't re-classify. */
   structure: DealStructure;
+  /** Full metadata for UI display — not used for matching/percentiles. */
+  licensor: string;
+  licensee: string;
+  year: number;
+  indication: string;
+  dealType: string;
+  headline?: string;
+  sourceUrl?: string;
+}
+
+/** Public shape for the calculator results page. Each match is a real
+ *  disclosed deal with enough metadata for a BD user to verify it. */
+export interface ComparableDealForUI {
+  licensor: string;
+  licensee: string;
+  year: number;
+  therapeuticArea: string;
+  phase: string;
+  modality: string;
+  indication: string;
+  dealType: string;
+  upfrontM: number;
+  totalDealValueM: number;
+  headline?: string;
+  sourceUrl?: string;
+  /** How well this deal matches the candidate (composite score 0-1).
+   *  Higher = closer match. Used for ranking display. */
+  matchScore: number;
+  /** Human-readable reason this deal was selected. */
+  matchReason: string;
 }
 
 let cachedCorpus: MinimalDeal[] | null = null;
@@ -84,10 +114,145 @@ function combinedCorpus(): MinimalDeal[] {
       upfront: d.upfront,
       totalDealValue: d.totalDealValue,
       structure,
+      licensor: d.licensor,
+      licensee: d.licensee,
+      year: d.year,
+      indication: d.indication_specific || d.indication_category || '',
+      dealType: d.dealType ?? 'license',
+      headline: d.headline ?? undefined,
+      sourceUrl: (() => {
+        // Extended deals embed the source URL in `source` field as
+        // "press_release — https://..."; extract URL if present.
+        const src = d.source ?? '';
+        const match = src.match(/(https?:\/\/[^\s]+)/);
+        return match ? match[1] : undefined;
+      })(),
     });
   }
   cachedCorpus = rows;
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Closest-comparables retrieval for UI display
+// ---------------------------------------------------------------------------
+
+/**
+ * Return the top-N closest comparable deals for UI display. Unlike the
+ * percentile-based computePeerBenchmark which returns aggregate stats,
+ * this returns actual deal rows with full metadata so the calculator
+ * results page can show named comparables the BD user can verify.
+ *
+ * Match ranking scores each corpus deal on:
+ *   TA match      : 1.0 (required — hard filter)
+ *   Phase match   : 0.3  (exact), 0.15 (±1 phase), 0.0 otherwise
+ *   Modality match: 0.3  (exact), 0.15 (same family), 0.0 otherwise
+ *   Structure match: 0.2 (when candidate structure supplied)
+ *   Recency       : 0.2 × (deal year - 2015) / 11  (favors recent)
+ *
+ * Max score = 1.0 (perfect TA + phase + modality + structure + recency).
+ * Ties broken by recency then by |candidate.upfront - comp.upfront|.
+ */
+export function getClosestComparables(
+  input: PeerBenchmarkInput & { limit?: number },
+): ComparableDealForUI[] {
+  const corpus = combinedCorpus();
+  if (!input.therapeuticArea) return [];
+  const limit = input.limit ?? 8;
+
+  const FAMILY: Record<string, string[]> = {
+    antibody: ['mab', 'antibody', 'bispecific', 'bispecificAntibody', 'adc'],
+    smallMolecule: ['small_molecule', 'smallMolecule', 'protac'],
+    oligonucleotide: ['oligonucleotide', 'rnai', 'aso', 'mrna'],
+    cellTherapy: ['cell_therapy', 'cellTherapy', 'car_t', 'carT_heme', 'carT_solid', 'til_therapy'],
+    geneTherapy: ['gene_therapy', 'geneTherapy', 'crispr_base_editing', 'crispr_prime_editing', 'geneEditing'],
+  };
+  function sameFamily(a: string, b: string): boolean {
+    for (const fam of Object.values(FAMILY)) {
+      if (fam.includes(a) && fam.includes(b)) return true;
+    }
+    return false;
+  }
+
+  const phaseOrder = ['preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'approved'];
+  function phaseDistance(a: string, b: string): number {
+    const ia = phaseOrder.indexOf(a);
+    const ib = phaseOrder.indexOf(b);
+    if (ia < 0 || ib < 0) return Infinity;
+    return Math.abs(ia - ib);
+  }
+
+  const matches = corpus
+    .filter(d => d.therapeuticArea === input.therapeuticArea)
+    .map(d => {
+      let score = 0;
+      const reasons: string[] = ['same TA'];
+
+      // Phase
+      if (input.phase) {
+        const dist = phaseDistance(d.phase, input.phase);
+        if (dist === 0) {
+          score += 0.3;
+          reasons.push('exact phase');
+        } else if (dist === 1) {
+          score += 0.15;
+          reasons.push('±1 phase');
+        }
+      }
+
+      // Modality
+      if (input.modality) {
+        if (d.modality === input.modality) {
+          score += 0.3;
+          reasons.push('exact modality');
+        } else if (sameFamily(d.modality, input.modality)) {
+          score += 0.15;
+          reasons.push('same modality family');
+        }
+      }
+
+      // Structure
+      if (input.dealStructure && d.structure === input.dealStructure) {
+        score += 0.2;
+        reasons.push('same deal structure');
+      }
+
+      // Recency
+      const years = 11; // 2015-2026 window
+      const normalizedRecency = Math.max(0, Math.min(1, (d.year - 2015) / years));
+      score += 0.2 * normalizedRecency;
+
+      return { deal: d, score, reasons };
+    })
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.deal.year !== a.deal.year) return b.deal.year - a.deal.year;
+      // Tiebreak: prefer smaller absolute delta vs candidate upfront.
+      if (input.candidateUpfront_M) {
+        const da = Math.abs(a.deal.upfront - input.candidateUpfront_M);
+        const db = Math.abs(b.deal.upfront - input.candidateUpfront_M);
+        return da - db;
+      }
+      return 0;
+    })
+    .slice(0, limit);
+
+  return matches.map(m => ({
+    licensor: m.deal.licensor,
+    licensee: m.deal.licensee,
+    year: m.deal.year,
+    therapeuticArea: m.deal.therapeuticArea,
+    phase: m.deal.phase,
+    modality: m.deal.modality,
+    indication: m.deal.indication,
+    dealType: m.deal.dealType,
+    upfrontM: m.deal.upfront,
+    totalDealValueM: m.deal.totalDealValue,
+    headline: m.deal.headline,
+    sourceUrl: m.deal.sourceUrl,
+    matchScore: Math.round(m.score * 100) / 100,
+    matchReason: m.reasons.join(' · '),
+  }));
 }
 
 function percentile(sorted: number[], p: number): number {

@@ -10,6 +10,8 @@ import { Calculator, Lock, ChevronDown, ChevronRight, Layers, Shield, Target, Sp
 import { formatCurrency } from '@/lib/calculations';
 import ConfidenceBand from '@/components/ConfidenceBand';
 import { DealStructureBadge } from '@/components/results/DealStructureBadge';
+import { DirectionalRangeHero } from '@/components/results/DirectionalRangeHero';
+import { ComparableDealsPanel } from '@/components/results/ComparableDealsPanel';
 import { CHART_COLORS } from '@/lib/chartTheme';
 import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult, MonteCarloResult } from '@/lib/financial/types';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
@@ -27,6 +29,13 @@ interface RnpvAnalysisProps {
   realOptions?: RealOptionsResult;
   /** R24: Monte Carlo distribution for rendering 80% CI band around rNPV point estimate */
   monteCarloResult?: MonteCarloResult;
+  /** Directional-reframe: threaded asset profile fields so the benchmark
+   *  range hero and comparable-deals panel can query peers. */
+  therapeuticArea?: string;
+  phase?: string;
+  modality?: string;
+  dealType?: string;
+  territory?: string;
 }
 
 const fmt = (v: number) => {
@@ -86,6 +95,11 @@ export default function RnpvAnalysis({
   competitiveDynamics,
   realOptions,
   monteCarloResult,
+  therapeuticArea,
+  phase,
+  modality,
+  dealType,
+  territory,
 }: RnpvAnalysisProps) {
   // Fix 2: Use a Set so multiple sections can be open simultaneously; scenarios + waterfall open by default
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['scenarios', 'waterfall']));
@@ -347,6 +361,38 @@ export default function RnpvAnalysis({
                 <p className="text-[10px] font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-1">Payback (if appr.)</p>
                 <p className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white font-mono">{paybackPeriod}</p>
               </div>
+            </div>
+
+            {/* R70 (2026-04-15): Directional-range hero + comparable deals
+                panel. Product repositioned as a benchmark/directional tool
+                (not a prediction engine — AlaricAI handles predictive).
+                Users land on the real-deal percentile range first; engine
+                point estimate shown as a secondary model view. Below: the
+                5-8 closest real disclosed deals with source URLs they can
+                verify. Rationale in peer-benchmark.ts:getClosestComparables. */}
+            <div className="mb-4">
+              <DirectionalRangeHero
+                rnpvResult={rnpvResult}
+                therapeuticArea={therapeuticArea}
+                phase={phase}
+                modality={modality}
+                dealType={dealType}
+                territory={territory}
+                dealStructure={rnpvResult.dealStructureClassification?.structure}
+              />
+            </div>
+
+            <div className="mb-4">
+              <ComparableDealsPanel
+                therapeuticArea={therapeuticArea}
+                phase={phase}
+                modality={modality}
+                dealType={dealType}
+                territory={territory}
+                dealStructure={rnpvResult.dealStructureClassification?.structure}
+                candidateUpfront_M={rnpvResult.impliedDealValue?.upfront?.median}
+                candidateTotalDeal_M={rnpvResult.impliedDealValue?.totalDeal?.median}
+              />
             </div>
 
             {/* R57 (2026-04-14): Deal-structure classification badge.

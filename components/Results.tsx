@@ -1633,6 +1633,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 competitiveDynamics={financialModel.competitiveDynamics}
                 realOptions={financialModel.realOptions}
                 monteCarloResult={financialModel.monteCarlo}
+                therapeuticArea={fullInputs?.therapeuticArea}
+                phase={fullInputs?.phase}
+                modality={fullInputs?.modality}
+                dealType={fullInputs?.dealType}
+                territory={fullInputs?.territory}
               />
             </FinancialErrorBoundary>
             </div>
