@@ -1484,3 +1484,37 @@ Approved hit25 +1.9pp — blockbusters show up disproportionately in approved de
 2. Supabase enrichment: populate `peakSalesConsensus_M` column on `deals` so the production calculator uses the same overrides as the backtest.
 3. Fuzzy-match fallback for INN variants (`trastuzumab-deruxtecan` vs `T-DXd` vs `Enhertu`).
 
+---
+
+## Round 68 — rareDisease phase-baseline downshift 25-40% (2026-04-15)
+
+**Problem:** `rareDiseasePhaseBaselines` in `data/benchmarks.json` were calibrated in the 2020-2022 gene-therapy premium era and have not been re-anchored since the 2023-2025 "rare disease bust" — bluebird bio stranded assets / Carlyle take-private (2024), uniQure / CSL Behring partnership dissolution, Rocket Pharmaceuticals Kresladi CRL, Astellas $2.7B Audentes writedown, Sarepta's contracting current-era licensing terms. User-facing calculator has been systematically overshooting 2024-2026 closed rare-disease deals (Ultragenyx, Alnylam, Sarepta comps) by 25-40%.
+
+**Change:** Downshifted every phase of `rareDiseasePhaseBaselines` per the recalibration table below. `low` and `high` scaled by the same per-phase ratio as the median to preserve percentile spread. Royalty bases/caps unchanged (royalties are structural, not era-sensitive). Metadata bumped: `lastUpdated` 2026-03 → 2026-04-15, version 5.2 → 5.3.
+
+| Phase | upfront.median | totalValue.median | upfront ratio | totalValue ratio |
+|---|---:|---:|---:|---:|
+| discovery    | 8 → 6    | 350 → 240   | 0.750 | 0.686 |
+| preclinical  | 25 → 18  | 650 → 460   | 0.720 | 0.708 |
+| phase1       | 60 → 45  | 1100 → 780  | 0.750 | 0.709 |
+| phase1_2     | 90 → 65  | 1500 → 1050 | 0.722 | 0.700 |
+| phase2       | 150 → 105| 2200 → 1450 | 0.700 | 0.659 |
+| phase2_3     | 250 → 175| 3200 → 2200 | 0.700 | 0.688 |
+| phase3       | 400 → 290| 4500 → 3100 | 0.725 | 0.689 |
+| nda_filed    | 600 → 450| 5500 → 3900 | 0.750 | 0.709 |
+| approved     | 1200 → 900| 8000 → 5800| 0.750 | 0.725 |
+
+**Scope note — consumer coupling:** `rareDiseasePhaseBaselines` in `benchmarks.json` is consumed exclusively by the production quick-calculator via `lib/calculations.ts:1047,1052` (`phaseBaselineMap[input.therapeuticArea]`). It is **not** imported by `lib/financial/` — the rNPV engine and `scripts/run-deal-backtest.ts` harness have independent internal baselines. Grep confirms zero imports of `benchmarks.json` from `lib/financial/`.
+
+**Deal-backtest delta (A/B stash test):** Zero movement. Pre-edit and post-edit runs produced identical per-TA metrics across the 308-deal corpus — rareDisease n=3 hit25=0.0%, hit35=33.3%, meanSigned=+9.0% in both runs. This is expected given the consumer coupling above and not a regression. Approved-stage rare-disease rNPV calibration is already in the engine's own tuning (see R53 per-TA approved uplift at rareDisease ×3.0).
+
+**Impact that is NOT captured by the rNPV backtest:** Production quick-calculator results for rare-disease inputs now return ~25-30% lower upfront medians, directly addressing the user-reported overshoot against 2024-2026 comps (Ultragenyx, Alnylam, Sarepta, Horizon). This is a `lib/calculations.ts` path change, validated by construction (direct JSON table lookup).
+
+**Files touched:** `data/benchmarks.json` only.
+
+**Follow-up in this calibration series (Rounds 69-72):**
+- R69: Split rareDisease into chronic (ERT/SRT/smallMolecule, +12.5%) vs. gene-therapy (-25%) sub-baselines — modality-routed
+- R70: Time-weighted recency decay (halflife 2.5yr from 2026) in deal-backtest aggregate pass — will auto-anchor future rounds to post-bust regime
+- R71: Add bust-era reference entries (bluebird, uniQure/CSL, Rocket CRL, Audentes writedown) to `comparable-deals-extended.ts`
+- R72: TA-aware competitive-position premium (cap rareDisease firstInClass at +15% — baseline already bakes in FIC positioning)
+

@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "lastUpdated": "2026-03",
-    "version": "5.2",
-    "nextUpdate": "2026-04",
+    "lastUpdated": "2026-04-15",
+    "version": "5.3",
+    "nextUpdate": "2026-05",
     "updateFrequency": "monthly",
     "sources": [
       "Publicly announced deal terms (SEC filings, press releases)",
@@ -1319,14 +1319,14 @@
   "rareDiseasePhaseBaselines": {
     "discovery": {
       "upfront": {
-        "low": 4,
-        "median": 8,
-        "high": 18
+        "low": 3,
+        "median": 6,
+        "high": 14
       },
       "totalValue": {
-        "low": 150,
-        "median": 350,
-        "high": 800
+        "low": 103,
+        "median": 240,
+        "high": 549
       },
       "royalty": {
         "base": 3,
@@ -1335,14 +1335,14 @@
     },
     "preclinical": {
       "upfront": {
-        "low": 12,
-        "median": 25,
-        "high": 58
+        "low": 9,
+        "median": 18,
+        "high": 42
       },
       "totalValue": {
-        "low": 280,
-        "median": 650,
-        "high": 1500
+        "low": 198,
+        "median": 460,
+        "high": 1062
       },
       "royalty": {
         "base": 4,
@@ -1351,14 +1351,14 @@
     },
     "phase1": {
       "upfront": {
-        "low": 30,
-        "median": 60,
-        "high": 140
+        "low": 23,
+        "median": 45,
+        "high": 105
       },
       "totalValue": {
-        "low": 480,
-        "median": 1100,
-        "high": 2500
+        "low": 340,
+        "median": 780,
+        "high": 1773
       },
       "royalty": {
         "base": 5,
@@ -1367,14 +1367,14 @@
     },
     "phase1_2": {
       "upfront": {
-        "low": 45,
-        "median": 90,
-        "high": 210
+        "low": 33,
+        "median": 65,
+        "high": 152
       },
       "totalValue": {
-        "low": 650,
-        "median": 1500,
-        "high": 3400
+        "low": 455,
+        "median": 1050,
+        "high": 2380
       },
       "royalty": {
         "base": 6,
@@ -1383,14 +1383,14 @@
     },
     "phase2": {
       "upfront": {
-        "low": 75,
-        "median": 150,
-        "high": 350
+        "low": 53,
+        "median": 105,
+        "high": 245
       },
       "totalValue": {
-        "low": 950,
-        "median": 2200,
-        "high": 5000
+        "low": 626,
+        "median": 1450,
+        "high": 3295
       },
       "royalty": {
         "base": 7,
@@ -1399,14 +1399,14 @@
     },
     "phase2_3": {
       "upfront": {
-        "low": 125,
-        "median": 250,
-        "high": 575
+        "low": 88,
+        "median": 175,
+        "high": 403
       },
       "totalValue": {
-        "low": 1400,
-        "median": 3200,
-        "high": 7200
+        "low": 963,
+        "median": 2200,
+        "high": 4950
       },
       "royalty": {
         "base": 8,
@@ -1415,14 +1415,14 @@
     },
     "phase3": {
       "upfront": {
-        "low": 200,
-        "median": 400,
-        "high": 900
+        "low": 145,
+        "median": 290,
+        "high": 653
       },
       "totalValue": {
-        "low": 2000,
-        "median": 4500,
-        "high": 10000
+        "low": 1378,
+        "median": 3100,
+        "high": 6889
       },
       "royalty": {
         "base": 10,
@@ -1431,14 +1431,14 @@
     },
     "nda_filed": {
       "upfront": {
-        "low": 300,
-        "median": 600,
-        "high": 1400
+        "low": 225,
+        "median": 450,
+        "high": 1050
       },
       "totalValue": {
-        "low": 2500,
-        "median": 5500,
-        "high": 12500
+        "low": 1773,
+        "median": 3900,
+        "high": 8864
       },
       "royalty": {
         "base": 12,
@@ -1447,14 +1447,14 @@
     },
     "approved": {
       "upfront": {
-        "low": 600,
-        "median": 1200,
-        "high": 2800
+        "low": 450,
+        "median": 900,
+        "high": 2100
       },
       "totalValue": {
-        "low": 3500,
-        "median": 8000,
-        "high": 18000
+        "low": 2538,
+        "median": 5800,
+        "high": 13050
       },
       "royalty": {
         "base": 15,
