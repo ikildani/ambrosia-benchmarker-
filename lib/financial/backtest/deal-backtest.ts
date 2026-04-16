@@ -715,10 +715,11 @@ export function getCoreScopeBacktestCases(): DealBacktestCase[] {
 
 // Extended input type: the engine's deal-structure classifier reads
 // licensor/licensee/realTerritory via a typed extension on RNPVInput.
+// Source corpus rows may have null values for these, so include null.
 type RNPVInputWithExtensions = RNPVInput & {
-  licensor?: string;
-  licensee?: string;
-  realTerritory?: string;
+  licensor?: string | null;
+  licensee?: string | null;
+  realTerritory?: string | null;
 };
 
 function buildInputForCase(c: DealBacktestCase): RNPVInputWithExtensions {
