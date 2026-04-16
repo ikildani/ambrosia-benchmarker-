@@ -129,9 +129,10 @@ describe('empirical-multiplier regression — pre-refactor explosions now bounde
       competitivePosition: 'firstInClass', dataQuality: 'strongPhase2',
       regulatoryDesignations: { breakthrough: false, orphan: true, fastTrack: false, prime: false },
     }));
-    // Tier-1 rare disease licensing: should be ~2-3x (1.5x TA + 0.3x modality + 0 PDT, full tier)
+    // Tier-1 rare disease licensing: ~1.8x raw (1.5 TA + 0.3 mod + 0 PDT)
+    // × 0.80 licensing conservatism (R71 Fix #4) = ~1.44x final
     expect(m).toBeLessThanOrEqual(3.0);
-    expect(m).toBeGreaterThanOrEqual(1.5);
+    expect(m).toBeGreaterThanOrEqual(1.2);
   });
 
   it('Phase 2 rare disease FIC licensing sub-tier (no breakthrough/orphan) stays low', () => {

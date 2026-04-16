@@ -1,0 +1,1553 @@
+{
+  "_meta": {
+    "generated": "2026-04-16T00:50:56.909Z",
+    "sourceTotalDeals": 1871,
+    "indicationGroups": 122,
+    "taGroups": 98,
+    "description": "P90 upfront/TDV ceilings per (indication, phase, dealType). Fall back to TA if indication n<3."
+  },
+  "byIndication": {
+    "MASH::preclinical::licensing": {
+      "p90Upfront": 120,
+      "p90TDV": 2120,
+      "medianUpfront": 120,
+      "medianTDV": 2120,
+      "n": 2
+    },
+    "Multiple Myeloma::approved::option": {
+      "p90Upfront": 2641,
+      "p90TDV": 12630,
+      "medianUpfront": 2641,
+      "medianTDV": 12630,
+      "n": 2
+    },
+    "MDS::approved::acquisition": {
+      "p90Upfront": 2932,
+      "p90TDV": 15997,
+      "medianUpfront": 2932,
+      "medianTDV": 15997,
+      "n": 2
+    },
+    "CLL::preclinical::licensing": {
+      "p90Upfront": 103,
+      "p90TDV": 1259,
+      "medianUpfront": 103,
+      "medianTDV": 784,
+      "n": 3
+    },
+    "NSCLC::preclinical::collaboration": {
+      "p90Upfront": 86,
+      "p90TDV": 1375,
+      "medianUpfront": 86,
+      "medianTDV": 1375,
+      "n": 2
+    },
+    "SCLC::preclinical::option": {
+      "p90Upfront": 120,
+      "p90TDV": 1478,
+      "medianUpfront": 73,
+      "medianTDV": 799,
+      "n": 3
+    },
+    "Sarcoma::discovery::codevelopment": {
+      "p90Upfront": 51,
+      "p90TDV": 1283,
+      "medianUpfront": 51,
+      "medianTDV": 1283,
+      "n": 2
+    },
+    "Breast (HR+)::preclinical::collaboration": {
+      "p90Upfront": 144,
+      "p90TDV": 1400,
+      "medianUpfront": 90,
+      "medianTDV": 976,
+      "n": 4
+    },
+    "ALL::preclinical::collaboration": {
+      "p90Upfront": 105,
+      "p90TDV": 850,
+      "medianUpfront": 105,
+      "medianTDV": 850,
+      "n": 2
+    },
+    "Breast (TNBC)::discovery::option": {
+      "p90Upfront": 19,
+      "p90TDV": 337,
+      "medianUpfront": 19,
+      "medianTDV": 337,
+      "n": 2
+    },
+    "AML::preclinical::option": {
+      "p90Upfront": 113,
+      "p90TDV": 1345,
+      "medianUpfront": 113,
+      "medianTDV": 1345,
+      "n": 2
+    },
+    "Bladder::preclinical::codevelopment": {
+      "p90Upfront": 81,
+      "p90TDV": 1249,
+      "medianUpfront": 81,
+      "medianTDV": 810,
+      "n": 3
+    },
+    "Multiple Myeloma::discovery::collaboration": {
+      "p90Upfront": 15,
+      "p90TDV": 290,
+      "medianUpfront": 15,
+      "medianTDV": 290,
+      "n": 2
+    },
+    "DLBCL::approved::codevelopment": {
+      "p90Upfront": 3763,
+      "p90TDV": 13268,
+      "medianUpfront": 1281,
+      "medianTDV": 4658,
+      "n": 3
+    },
+    "NSCLC::approved::collaboration": {
+      "p90Upfront": 1467,
+      "p90TDV": 8142,
+      "medianUpfront": 1467,
+      "medianTDV": 8142,
+      "n": 2
+    },
+    "Dry Eye Disease::approved::acquisition": {
+      "p90Upfront": 1750,
+      "p90TDV": 1750,
+      "medianUpfront": 1750,
+      "medianTDV": 1750,
+      "n": 2
+    },
+    "RCC::approved::codevelopment": {
+      "p90Upfront": 2490,
+      "p90TDV": 14455,
+      "medianUpfront": 2490,
+      "medianTDV": 14455,
+      "n": 2
+    },
+    "covid::preclinical::collaboration": {
+      "p90Upfront": 75,
+      "p90TDV": 800,
+      "medianUpfront": 75,
+      "medianTDV": 800,
+      "n": 2
+    },
+    "amrBacterial::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 200,
+      "medianUpfront": 0,
+      "medianTDV": 200,
+      "n": 2
+    },
+    "hemophilia::approved::licensing": {
+      "p90Upfront": 375,
+      "p90TDV": 2400,
+      "medianUpfront": 375,
+      "medianTDV": 2400,
+      "n": 2
+    },
+    "atopic dermatitis::approved::acquisition": {
+      "p90Upfront": 175,
+      "p90TDV": 1200,
+      "medianUpfront": 175,
+      "medianTDV": 1200,
+      "n": 2
+    },
+    "fabry::approved::licensing": {
+      "p90Upfront": 100,
+      "p90TDV": 3200,
+      "medianUpfront": 100,
+      "medianTDV": 3200,
+      "n": 2
+    },
+    "RCC::discovery::licensing": {
+      "p90Upfront": 55,
+      "p90TDV": 924,
+      "medianUpfront": 55,
+      "medianTDV": 924,
+      "n": 2
+    },
+    "atopicderm::approved::collaboration": {
+      "p90Upfront": 0,
+      "p90TDV": 13000,
+      "medianUpfront": 0,
+      "medianTDV": 13000,
+      "n": 2
+    },
+    "Autoimmune Diseases::preclinical::acquisition": {
+      "p90Upfront": 400,
+      "p90TDV": 400,
+      "medianUpfront": 400,
+      "medianTDV": 400,
+      "n": 2
+    },
+    "Breast (TNBC)::approved::collaboration": {
+      "p90Upfront": 4457,
+      "p90TDV": 20475,
+      "medianUpfront": 2643,
+      "medianTDV": 14806,
+      "n": 3
+    },
+    "Breast (HER2+)::approved::acquisition": {
+      "p90Upfront": 3643,
+      "p90TDV": 11571,
+      "medianUpfront": 2008,
+      "medianTDV": 9563,
+      "n": 4
+    },
+    "Ovarian::approved::collaboration": {
+      "p90Upfront": 2816,
+      "p90TDV": 11646,
+      "medianUpfront": 2816,
+      "medianTDV": 11646,
+      "n": 2
+    },
+    "Colorectal::approved::licensing": {
+      "p90Upfront": 2309,
+      "p90TDV": 11260,
+      "medianUpfront": 2309,
+      "medianTDV": 11260,
+      "n": 2
+    },
+    "Gastric::approved::collaboration": {
+      "p90Upfront": 2901,
+      "p90TDV": 11008,
+      "medianUpfront": 2901,
+      "medianTDV": 11008,
+      "n": 2
+    },
+    "solid_tumors::preclinical::licensing": {
+      "p90Upfront": 70,
+      "p90TDV": 1800,
+      "medianUpfront": 40,
+      "medianTDV": 1170,
+      "n": 4
+    },
+    "solid_tumors::preclinical::acquisition": {
+      "p90Upfront": 1400,
+      "p90TDV": 1400,
+      "medianUpfront": 450,
+      "medianTDV": 1330,
+      "n": 4
+    },
+    "Breast (HER2+)::approved::option": {
+      "p90Upfront": 2616,
+      "p90TDV": 9726,
+      "medianUpfront": 1500,
+      "medianTDV": 7461,
+      "n": 3
+    },
+    "Melanoma::approved::acquisition": {
+      "p90Upfront": 1935,
+      "p90TDV": 10033,
+      "medianUpfront": 1185,
+      "medianTDV": 5680,
+      "n": 3
+    },
+    "NSCLC::approved::codevelopment": {
+      "p90Upfront": 4364,
+      "p90TDV": 15000,
+      "medianUpfront": 2595,
+      "medianTDV": 9684,
+      "n": 4
+    },
+    "GBM::approved::option": {
+      "p90Upfront": 2302,
+      "p90TDV": 9571,
+      "medianUpfront": 2302,
+      "medianTDV": 9571,
+      "n": 2
+    },
+    "Follicular Lymphoma::approved::option": {
+      "p90Upfront": 2118,
+      "p90TDV": 8308,
+      "medianUpfront": 2118,
+      "medianTDV": 8308,
+      "n": 2
+    },
+    "Follicular Lymphoma::approved::licensing": {
+      "p90Upfront": 2381,
+      "p90TDV": 12261,
+      "medianUpfront": 2381,
+      "medianTDV": 12261,
+      "n": 2
+    },
+    "atopic_dermatitis::preclinical::acquisition": {
+      "p90Upfront": 1250,
+      "p90TDV": 1250,
+      "medianUpfront": 1250,
+      "medianTDV": 1250,
+      "n": 2
+    },
+    "HIV-1 PrEP::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 440,
+      "medianUpfront": 0,
+      "medianTDV": 440,
+      "n": 2
+    },
+    "solid_tumors::preclinical::collaboration": {
+      "p90Upfront": 1000,
+      "p90TDV": 1750,
+      "medianUpfront": 65,
+      "medianTDV": 1400,
+      "n": 4
+    },
+    "drug_discovery::preclinical::collaboration": {
+      "p90Upfront": 150,
+      "p90TDV": 1700,
+      "medianUpfront": 150,
+      "medianTDV": 1700,
+      "n": 2
+    },
+    "psoriasis::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 8200,
+      "medianUpfront": 0,
+      "medianTDV": 2800,
+      "n": 6
+    },
+    "ulcerativeColitis::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 3200,
+      "medianUpfront": 0,
+      "medianTDV": 2100,
+      "n": 4
+    },
+    "ulcerativeColitis::approved::collaboration": {
+      "p90Upfront": 160,
+      "p90TDV": 5100,
+      "medianUpfront": 160,
+      "medianTDV": 5100,
+      "n": 2
+    },
+    "Follicular Lymphoma::approved::codevelopment": {
+      "p90Upfront": 1507,
+      "p90TDV": 8392,
+      "medianUpfront": 1507,
+      "medianTDV": 8392,
+      "n": 2
+    },
+    "RCC::discovery::collaboration": {
+      "p90Upfront": 48,
+      "p90TDV": 922,
+      "medianUpfront": 48,
+      "medianTDV": 922,
+      "n": 2
+    },
+    "Breast (TNBC)::approved::option": {
+      "p90Upfront": 2221,
+      "p90TDV": 12867,
+      "medianUpfront": 2221,
+      "medianTDV": 12867,
+      "n": 2
+    },
+    "Mantle Cell Lymphoma::preclinical::codevelopment": {
+      "p90Upfront": 0,
+      "p90TDV": 1303,
+      "medianUpfront": 0,
+      "medianTDV": 1303,
+      "n": 2
+    },
+    "Mesothelioma::approved::collaboration": {
+      "p90Upfront": 2471,
+      "p90TDV": 10001,
+      "medianUpfront": 2471,
+      "medianTDV": 10001,
+      "n": 2
+    },
+    "Multiple Myeloma::approved::acquisition": {
+      "p90Upfront": 1940,
+      "p90TDV": 10461,
+      "medianUpfront": 1940,
+      "medianTDV": 10461,
+      "n": 2
+    },
+    "NSCLC::discovery::option": {
+      "p90Upfront": 39,
+      "p90TDV": 793,
+      "medianUpfront": 39,
+      "medianTDV": 793,
+      "n": 2
+    },
+    "Head & Neck::approved::licensing": {
+      "p90Upfront": 2105,
+      "p90TDV": 6324,
+      "medianUpfront": 2105,
+      "medianTDV": 6324,
+      "n": 2
+    },
+    "Breast (HR+)::discovery::option": {
+      "p90Upfront": 39,
+      "p90TDV": 536,
+      "medianUpfront": 27,
+      "medianTDV": 529,
+      "n": 3
+    },
+    "contraceptionNovel::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 350,
+      "medianUpfront": 0,
+      "medianTDV": 350,
+      "n": 2
+    },
+    "NSCLC::preclinical::acquisition": {
+      "p90Upfront": 96,
+      "p90TDV": 1031,
+      "medianUpfront": 96,
+      "medianTDV": 1031,
+      "n": 2
+    },
+    "hemophilia B::approved::licensing": {
+      "p90Upfront": 375,
+      "p90TDV": 400,
+      "medianUpfront": 375,
+      "medianTDV": 400,
+      "n": 3
+    },
+    "PNH and aHUS::approved::acquisition": {
+      "p90Upfront": 39000,
+      "p90TDV": 39000,
+      "medianUpfront": 39000,
+      "medianTDV": 39000,
+      "n": 2
+    },
+    "HCC::approved::option": {
+      "p90Upfront": 3035,
+      "p90TDV": 15876,
+      "medianUpfront": 2164,
+      "medianTDV": 12285,
+      "n": 3
+    },
+    "Mantle Cell Lymphoma::approved::codevelopment": {
+      "p90Upfront": 1583,
+      "p90TDV": 5824,
+      "medianUpfront": 1583,
+      "medianTDV": 5824,
+      "n": 2
+    },
+    "Breast (HER2+)::approved::licensing": {
+      "p90Upfront": 3762,
+      "p90TDV": 21037,
+      "medianUpfront": 3762,
+      "medianTDV": 21037,
+      "n": 2
+    },
+    "Pancreatic::approved::option": {
+      "p90Upfront": 3731,
+      "p90TDV": 19904,
+      "medianUpfront": 3731,
+      "medianTDV": 19904,
+      "n": 2
+    },
+    "Sarcoma::approved::licensing": {
+      "p90Upfront": 2989,
+      "p90TDV": 15973,
+      "medianUpfront": 2989,
+      "medianTDV": 15973,
+      "n": 2
+    },
+    "atopicderm::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 1600,
+      "medianUpfront": 0,
+      "medianTDV": 1600,
+      "n": 2
+    },
+    "Mesothelioma::approved::codevelopment": {
+      "p90Upfront": 1334,
+      "p90TDV": 7920,
+      "medianUpfront": 1334,
+      "medianTDV": 7920,
+      "n": 2
+    },
+    "Prostate::discovery::acquisition": {
+      "p90Upfront": 28,
+      "p90TDV": 323,
+      "medianUpfront": 28,
+      "medianTDV": 323,
+      "n": 2
+    },
+    "obesity::preclinical::licensing": {
+      "p90Upfront": 1200,
+      "p90TDV": 18500,
+      "medianUpfront": 75,
+      "medianTDV": 2000,
+      "n": 4
+    },
+    "Head & Neck::approved::acquisition": {
+      "p90Upfront": 1404,
+      "p90TDV": 5529,
+      "medianUpfront": 1404,
+      "medianTDV": 5529,
+      "n": 2
+    },
+    "CNS diseases::discovery::licensing": {
+      "p90Upfront": 46,
+      "p90TDV": 1400,
+      "medianUpfront": 46,
+      "medianTDV": 1400,
+      "n": 2
+    },
+    "SCLC::approved::licensing": {
+      "p90Upfront": 2988,
+      "p90TDV": 14942,
+      "medianUpfront": 2988,
+      "medianTDV": 14942,
+      "n": 2
+    },
+    "Prostate::approved::collaboration": {
+      "p90Upfront": 3744,
+      "p90TDV": 13628,
+      "medianUpfront": 2380,
+      "medianTDV": 13517,
+      "n": 3
+    },
+    "Head & Neck::approved::option": {
+      "p90Upfront": 2893,
+      "p90TDV": 13387,
+      "medianUpfront": 2893,
+      "medianTDV": 13387,
+      "n": 2
+    },
+    "RCC::preclinical::licensing": {
+      "p90Upfront": 89,
+      "p90TDV": 1233,
+      "medianUpfront": 40,
+      "medianTDV": 603,
+      "n": 3
+    },
+    "AML::preclinical::licensing": {
+      "p90Upfront": 26,
+      "p90TDV": 406,
+      "medianUpfront": 22,
+      "medianTDV": 321,
+      "n": 3
+    },
+    "Colorectal::discovery::acquisition": {
+      "p90Upfront": 37,
+      "p90TDV": 388,
+      "medianUpfront": 37,
+      "medianTDV": 388,
+      "n": 2
+    },
+    "Cholangiocarcinoma::preclinical::collaboration": {
+      "p90Upfront": 111,
+      "p90TDV": 1638,
+      "medianUpfront": 111,
+      "medianTDV": 1638,
+      "n": 2
+    },
+    "HCC::preclinical::licensing": {
+      "p90Upfront": 38,
+      "p90TDV": 937,
+      "medianUpfront": 38,
+      "medianTDV": 937,
+      "n": 2
+    },
+    "T-cell Lymphoma::discovery::collaboration": {
+      "p90Upfront": 46,
+      "p90TDV": 772,
+      "medianUpfront": 46,
+      "medianTDV": 772,
+      "n": 2
+    },
+    "Colorectal::preclinical::collaboration": {
+      "p90Upfront": 53,
+      "p90TDV": 534,
+      "medianUpfront": 53,
+      "medianTDV": 534,
+      "n": 2
+    },
+    "Mesothelioma::preclinical::licensing": {
+      "p90Upfront": 64,
+      "p90TDV": 613,
+      "medianUpfront": 64,
+      "medianTDV": 613,
+      "n": 2
+    },
+    "solid tumors::preclinical::collaboration": {
+      "p90Upfront": 80,
+      "p90TDV": 1680,
+      "medianUpfront": 80,
+      "medianTDV": 1680,
+      "n": 2
+    },
+    "hemophilia B::approved::acquisition": {
+      "p90Upfront": 375,
+      "p90TDV": 400,
+      "medianUpfront": 375,
+      "medianTDV": 400,
+      "n": 2
+    },
+    "MPN::discovery::option": {
+      "p90Upfront": 36,
+      "p90TDV": 480,
+      "medianUpfront": 24,
+      "medianTDV": 365,
+      "n": 3
+    },
+    "Cholangiocarcinoma::preclinical::licensing": {
+      "p90Upfront": 53,
+      "p90TDV": 481,
+      "medianUpfront": 53,
+      "medianTDV": 481,
+      "n": 2
+    },
+    "Ovarian::preclinical::option": {
+      "p90Upfront": 54,
+      "p90TDV": 714,
+      "medianUpfront": 54,
+      "medianTDV": 714,
+      "n": 2
+    },
+    "Multiple Myeloma::discovery::option": {
+      "p90Upfront": 35,
+      "p90TDV": 734,
+      "medianUpfront": 35,
+      "medianTDV": 734,
+      "n": 2
+    },
+    "ALL::discovery::codevelopment": {
+      "p90Upfront": 25,
+      "p90TDV": 276,
+      "medianUpfront": 25,
+      "medianTDV": 276,
+      "n": 2
+    },
+    "Pancreatic::approved::licensing": {
+      "p90Upfront": 2113,
+      "p90TDV": 10576,
+      "medianUpfront": 2113,
+      "medianTDV": 10576,
+      "n": 2
+    },
+    "Pancreatic::discovery::acquisition": {
+      "p90Upfront": 46,
+      "p90TDV": 490,
+      "medianUpfront": 46,
+      "medianTDV": 490,
+      "n": 2
+    },
+    "Mantle Cell Lymphoma::discovery::collaboration": {
+      "p90Upfront": 8,
+      "p90TDV": 121,
+      "medianUpfront": 8,
+      "medianTDV": 121,
+      "n": 2
+    },
+    "HCC::discovery::collaboration": {
+      "p90Upfront": 61,
+      "p90TDV": 1072,
+      "medianUpfront": 8,
+      "medianTDV": 93,
+      "n": 3
+    },
+    "SCLC::discovery::acquisition": {
+      "p90Upfront": 70,
+      "p90TDV": 1100,
+      "medianUpfront": 64,
+      "medianTDV": 991,
+      "n": 4
+    },
+    "DLBCL::preclinical::option": {
+      "p90Upfront": 113,
+      "p90TDV": 1769,
+      "medianUpfront": 113,
+      "medianTDV": 1769,
+      "n": 2
+    },
+    "Ovarian::discovery::collaboration": {
+      "p90Upfront": 18,
+      "p90TDV": 297,
+      "medianUpfront": 18,
+      "medianTDV": 297,
+      "n": 2
+    },
+    "Endometrial::approved::collaboration": {
+      "p90Upfront": 1848,
+      "p90TDV": 10326,
+      "medianUpfront": 1848,
+      "medianTDV": 10326,
+      "n": 2
+    },
+    "Pancreatic::preclinical::licensing": {
+      "p90Upfront": 30,
+      "p90TDV": 308,
+      "medianUpfront": 30,
+      "medianTDV": 308,
+      "n": 2
+    },
+    "Bladder::approved::collaboration": {
+      "p90Upfront": 2420,
+      "p90TDV": 14313,
+      "medianUpfront": 2420,
+      "medianTDV": 14313,
+      "n": 2
+    },
+    "Sarcoma::discovery::acquisition": {
+      "p90Upfront": 57,
+      "p90TDV": 999,
+      "medianUpfront": 57,
+      "medianTDV": 999,
+      "n": 2
+    },
+    "Sarcoma::preclinical::licensing": {
+      "p90Upfront": 54,
+      "p90TDV": 851,
+      "medianUpfront": 54,
+      "medianTDV": 851,
+      "n": 2
+    },
+    "PTSD::discovery::acquisition": {
+      "p90Upfront": 50,
+      "p90TDV": 812,
+      "medianUpfront": 50,
+      "medianTDV": 812,
+      "n": 2
+    },
+    "Endometrial::discovery::codevelopment": {
+      "p90Upfront": 22,
+      "p90TDV": 341,
+      "medianUpfront": 22,
+      "medianTDV": 341,
+      "n": 2
+    },
+    "SCLC::discovery::option": {
+      "p90Upfront": 40,
+      "p90TDV": 568,
+      "medianUpfront": 24,
+      "medianTDV": 485,
+      "n": 3
+    },
+    "HCC::approved::codevelopment": {
+      "p90Upfront": 985,
+      "p90TDV": 2984,
+      "medianUpfront": 985,
+      "medianTDV": 2984,
+      "n": 2
+    },
+    "GBM::preclinical::codevelopment": {
+      "p90Upfront": 45,
+      "p90TDV": 516,
+      "medianUpfront": 45,
+      "medianTDV": 516,
+      "n": 2
+    },
+    "Follicular Lymphoma::preclinical::licensing": {
+      "p90Upfront": 53,
+      "p90TDV": 481,
+      "medianUpfront": 53,
+      "medianTDV": 481,
+      "n": 2
+    },
+    "Bladder::preclinical::acquisition": {
+      "p90Upfront": 120,
+      "p90TDV": 1299,
+      "medianUpfront": 120,
+      "medianTDV": 1212,
+      "n": 3
+    },
+    "Head & Neck::discovery::option": {
+      "p90Upfront": 13,
+      "p90TDV": 148,
+      "medianUpfront": 13,
+      "medianTDV": 148,
+      "n": 2
+    },
+    "Gastric::discovery::collaboration": {
+      "p90Upfront": 43,
+      "p90TDV": 681,
+      "medianUpfront": 43,
+      "medianTDV": 681,
+      "n": 2
+    },
+    "NSCLC::approved::licensing": {
+      "p90Upfront": 3758,
+      "p90TDV": 19681,
+      "medianUpfront": 3758,
+      "medianTDV": 19681,
+      "n": 2
+    },
+    "DLBCL::discovery::option": {
+      "p90Upfront": 24,
+      "p90TDV": 272,
+      "medianUpfront": 24,
+      "medianTDV": 272,
+      "n": 2
+    },
+    "Breast (HR+)::discovery::collaboration": {
+      "p90Upfront": 22,
+      "p90TDV": 459,
+      "medianUpfront": 22,
+      "medianTDV": 459,
+      "n": 2
+    },
+    "Mesothelioma::discovery::codevelopment": {
+      "p90Upfront": 65,
+      "p90TDV": 853,
+      "medianUpfront": 65,
+      "medianTDV": 853,
+      "n": 2
+    },
+    "Breast (HER2+)::preclinical::licensing": {
+      "p90Upfront": 91,
+      "p90TDV": 871,
+      "medianUpfront": 91,
+      "medianTDV": 871,
+      "n": 2
+    },
+    "MPN::approved::collaboration": {
+      "p90Upfront": 783,
+      "p90TDV": 4272,
+      "medianUpfront": 783,
+      "medianTDV": 4272,
+      "n": 2
+    },
+    "GBM::discovery::codevelopment": {
+      "p90Upfront": 15,
+      "p90TDV": 1297,
+      "medianUpfront": 15,
+      "medianTDV": 1297,
+      "n": 2
+    },
+    "HCC::discovery::licensing": {
+      "p90Upfront": 41,
+      "p90TDV": 672,
+      "medianUpfront": 41,
+      "medianTDV": 672,
+      "n": 2
+    },
+    "Melanoma::preclinical::codevelopment": {
+      "p90Upfront": 125,
+      "p90TDV": 1745,
+      "medianUpfront": 125,
+      "medianTDV": 1745,
+      "n": 2
+    },
+    "CLL::discovery::option": {
+      "p90Upfront": 71,
+      "p90TDV": 1082,
+      "medianUpfront": 71,
+      "medianTDV": 1082,
+      "n": 2
+    },
+    "Follicular Lymphoma::approved::acquisition": {
+      "p90Upfront": 2497,
+      "p90TDV": 12769,
+      "medianUpfront": 2497,
+      "medianTDV": 12769,
+      "n": 2
+    },
+    "Cholangiocarcinoma::preclinical::option": {
+      "p90Upfront": 70,
+      "p90TDV": 1009,
+      "medianUpfront": 70,
+      "medianTDV": 1009,
+      "n": 2
+    },
+    "Ovarian::preclinical::codevelopment": {
+      "p90Upfront": 78,
+      "p90TDV": 1193,
+      "medianUpfront": 78,
+      "medianTDV": 1193,
+      "n": 2
+    },
+    "CLL::preclinical::collaboration": {
+      "p90Upfront": 0,
+      "p90TDV": 1407,
+      "medianUpfront": 0,
+      "medianTDV": 1407,
+      "n": 2
+    }
+  },
+  "byTA": {
+    "neurology::approved::licensing": {
+      "p90Upfront": 2285,
+      "p90TDV": 9646,
+      "medianUpfront": 478,
+      "medianTDV": 9646,
+      "n": 3
+    },
+    "other::discovery::licensing": {
+      "p90Upfront": 200,
+      "p90TDV": 1700,
+      "medianUpfront": 200,
+      "medianTDV": 1700,
+      "n": 2
+    },
+    "metabolic::preclinical::licensing": {
+      "p90Upfront": 1200,
+      "p90TDV": 18500,
+      "medianUpfront": 120,
+      "medianTDV": 2000,
+      "n": 10
+    },
+    "oncology::approved::licensing": {
+      "p90Upfront": 3722,
+      "p90TDV": 15973,
+      "medianUpfront": 2217,
+      "medianTDV": 7303,
+      "n": 36
+    },
+    "oncology::approved::option": {
+      "p90Upfront": 3035,
+      "p90TDV": 15876,
+      "medianUpfront": 2072,
+      "medianTDV": 7461,
+      "n": 27
+    },
+    "oncology::approved::acquisition": {
+      "p90Upfront": 21000,
+      "p90TDV": 21000,
+      "medianUpfront": 2400,
+      "medianTDV": 10022,
+      "n": 37
+    },
+    "oncology::preclinical::licensing": {
+      "p90Upfront": 115,
+      "p90TDV": 1239,
+      "medianUpfront": 44,
+      "medianTDV": 613,
+      "n": 41
+    },
+    "oncology::preclinical::collaboration": {
+      "p90Upfront": 150,
+      "p90TDV": 1700,
+      "medianUpfront": 71,
+      "medianTDV": 976,
+      "n": 37
+    },
+    "oncology::discovery::option": {
+      "p90Upfront": 48,
+      "p90TDV": 793,
+      "medianUpfront": 24,
+      "medianTDV": 365,
+      "n": 30
+    },
+    "oncology::discovery::codevelopment": {
+      "p90Upfront": 55,
+      "p90TDV": 923,
+      "medianUpfront": 22,
+      "medianTDV": 323,
+      "n": 21
+    },
+    "infectiousDisease::preclinical::collaboration": {
+      "p90Upfront": 225,
+      "p90TDV": 2725,
+      "medianUpfront": 150,
+      "medianTDV": 176,
+      "n": 8
+    },
+    "neurology::discovery::collaboration": {
+      "p90Upfront": 80,
+      "p90TDV": 1100,
+      "medianUpfront": 35,
+      "medianTDV": 320,
+      "n": 5
+    },
+    "oncology::preclinical::option": {
+      "p90Upfront": 113,
+      "p90TDV": 1478,
+      "medianUpfront": 70,
+      "medianTDV": 873,
+      "n": 23
+    },
+    "oncology::preclinical::codevelopment": {
+      "p90Upfront": 125,
+      "p90TDV": 1303,
+      "medianUpfront": 43,
+      "medianTDV": 611,
+      "n": 21
+    },
+    "oncology::preclinical::acquisition": {
+      "p90Upfront": 1300,
+      "p90TDV": 1330,
+      "medianUpfront": 95,
+      "medianTDV": 965,
+      "n": 19
+    },
+    "oncology::discovery::collaboration": {
+      "p90Upfront": 53,
+      "p90TDV": 1094,
+      "medianUpfront": 37,
+      "medianTDV": 528,
+      "n": 30
+    },
+    "oncology::discovery::acquisition": {
+      "p90Upfront": 62,
+      "p90TDV": 991,
+      "medianUpfront": 33,
+      "medianTDV": 388,
+      "n": 22
+    },
+    "rareDisease::approved::acquisition": {
+      "p90Upfront": 39000,
+      "p90TDV": 39000,
+      "medianUpfront": 7300,
+      "medianTDV": 7300,
+      "n": 14
+    },
+    "rareDisease::preclinical::acquisition": {
+      "p90Upfront": 3200,
+      "p90TDV": 3200,
+      "medianUpfront": 1100,
+      "medianTDV": 1100,
+      "n": 4
+    },
+    "other::preclinical::licensing": {
+      "p90Upfront": 115,
+      "p90TDV": 2865,
+      "medianUpfront": 115,
+      "medianTDV": 2865,
+      "n": 2
+    },
+    "immunology::discovery::collaboration": {
+      "p90Upfront": 85,
+      "p90TDV": 1925,
+      "medianUpfront": 85,
+      "medianTDV": 1925,
+      "n": 1
+    },
+    "neurology::approved::acquisition": {
+      "p90Upfront": 11600,
+      "p90TDV": 11600,
+      "medianUpfront": 1900,
+      "medianTDV": 3300,
+      "n": 11
+    },
+    "cardiovascular::discovery::collaboration": {
+      "p90Upfront": 200,
+      "p90TDV": 2000,
+      "medianUpfront": 100,
+      "medianTDV": 1800,
+      "n": 3
+    },
+    "dermatology::approved::acquisition": {
+      "p90Upfront": 3700,
+      "p90TDV": 3700,
+      "medianUpfront": 540,
+      "medianTDV": 1200,
+      "n": 7
+    },
+    "neurology::discovery::licensing": {
+      "p90Upfront": 46,
+      "p90TDV": 1400,
+      "medianUpfront": 18,
+      "medianTDV": 1046,
+      "n": 4
+    },
+    "oncology::approved::codevelopment": {
+      "p90Upfront": 3763,
+      "p90TDV": 13268,
+      "medianUpfront": 1334,
+      "medianTDV": 5824,
+      "n": 31
+    },
+    "oncology::approved::collaboration": {
+      "p90Upfront": 3054,
+      "p90TDV": 14806,
+      "medianUpfront": 2076,
+      "medianTDV": 8142,
+      "n": 33
+    },
+    "ophthalmology::approved::acquisition": {
+      "p90Upfront": 5900,
+      "p90TDV": 5900,
+      "medianUpfront": 1750,
+      "medianTDV": 1750,
+      "n": 9
+    },
+    "metabolic::approved::acquisition": {
+      "p90Upfront": 16500,
+      "p90TDV": 16500,
+      "medianUpfront": 2900,
+      "medianTDV": 2900,
+      "n": 3
+    },
+    "metabolic::preclinical::collaboration": {
+      "p90Upfront": 115,
+      "p90TDV": 2865,
+      "medianUpfront": 100,
+      "medianTDV": 920,
+      "n": 4
+    },
+    "ophthalmology::discovery::collaboration": {
+      "p90Upfront": 400,
+      "p90TDV": 1200,
+      "medianUpfront": 400,
+      "medianTDV": 1200,
+      "n": 1
+    },
+    "ophthalmology::approved::licensing": {
+      "p90Upfront": 3400,
+      "p90TDV": 7000,
+      "medianUpfront": 3400,
+      "medianTDV": 5300,
+      "n": 4
+    },
+    "ophthalmology::preclinical::acquisition": {
+      "p90Upfront": 150,
+      "p90TDV": 280,
+      "medianUpfront": 150,
+      "medianTDV": 280,
+      "n": 1
+    },
+    "cardiovascular::preclinical::option": {
+      "p90Upfront": 68,
+      "p90TDV": 603,
+      "medianUpfront": 68,
+      "medianTDV": 603,
+      "n": 1
+    },
+    "dermatology::preclinical::licensing": {
+      "p90Upfront": 50,
+      "p90TDV": 1040,
+      "medianUpfront": 50,
+      "medianTDV": 1040,
+      "n": 1
+    },
+    "cardiovascular::preclinical::collaboration": {
+      "p90Upfront": 100,
+      "p90TDV": 2700,
+      "medianUpfront": 60,
+      "medianTDV": 1200,
+      "n": 4
+    },
+    "immunology::approved::acquisition": {
+      "p90Upfront": 39000,
+      "p90TDV": 39000,
+      "medianUpfront": 9500,
+      "medianTDV": 9500,
+      "n": 6
+    },
+    "cardiovascular::approved::licensing": {
+      "p90Upfront": 185,
+      "p90TDV": 1600,
+      "medianUpfront": 185,
+      "medianTDV": 800,
+      "n": 4
+    },
+    "cardiovascular::approved::acquisition": {
+      "p90Upfront": 30000,
+      "p90TDV": 30000,
+      "medianUpfront": 30000,
+      "medianTDV": 30000,
+      "n": 2
+    },
+    "infectiousDisease::approved::licensing": {
+      "p90Upfront": 950,
+      "p90TDV": 3500,
+      "medianUpfront": 150,
+      "medianTDV": 440,
+      "n": 12
+    },
+    "rareDisease::approved::licensing": {
+      "p90Upfront": 450,
+      "p90TDV": 6500,
+      "medianUpfront": 375,
+      "medianTDV": 2400,
+      "n": 12
+    },
+    "womensHealth::approved::acquisition": {
+      "p90Upfront": 5100,
+      "p90TDV": 5100,
+      "medianUpfront": 561,
+      "medianTDV": 1200,
+      "n": 9
+    },
+    "other::discovery::collaboration": {
+      "p90Upfront": 20,
+      "p90TDV": 2220,
+      "medianUpfront": 20,
+      "medianTDV": 2220,
+      "n": 1
+    },
+    "hematology::approved::acquisition": {
+      "p90Upfront": 74000,
+      "p90TDV": 74000,
+      "medianUpfront": 4800,
+      "medianTDV": 4800,
+      "n": 6
+    },
+    "hematology::discovery::collaboration": {
+      "p90Upfront": 150,
+      "p90TDV": 1850,
+      "medianUpfront": 150,
+      "medianTDV": 1850,
+      "n": 1
+    },
+    "oncology::discovery::licensing": {
+      "p90Upfront": 55,
+      "p90TDV": 924,
+      "medianUpfront": 35,
+      "medianTDV": 495,
+      "n": 12
+    },
+    "hematology::approved::licensing": {
+      "p90Upfront": 2000,
+      "p90TDV": 2000,
+      "medianUpfront": 375,
+      "medianTDV": 400,
+      "n": 5
+    },
+    "ophthalmology::preclinical::codevelopment": {
+      "p90Upfront": 50,
+      "p90TDV": 599,
+      "medianUpfront": 50,
+      "medianTDV": 599,
+      "n": 2
+    },
+    "womensHealth::approved::collaboration": {
+      "p90Upfront": 1600,
+      "p90TDV": 8700,
+      "medianUpfront": 1600,
+      "medianTDV": 8700,
+      "n": 2
+    },
+    "immunology::approved::collaboration": {
+      "p90Upfront": 500,
+      "p90TDV": 13000,
+      "medianUpfront": 500,
+      "medianTDV": 13000,
+      "n": 2
+    },
+    "rareDisease::preclinical::collaboration": {
+      "p90Upfront": 1000,
+      "p90TDV": 3400,
+      "medianUpfront": 300,
+      "medianTDV": 1350,
+      "n": 3
+    },
+    "rareDisease::approved::collaboration": {
+      "p90Upfront": 1000,
+      "p90TDV": 2600,
+      "medianUpfront": 1000,
+      "medianTDV": 2600,
+      "n": 2
+    },
+    "immunology::preclinical::acquisition": {
+      "p90Upfront": 63000,
+      "p90TDV": 63000,
+      "medianUpfront": 550,
+      "medianTDV": 1400,
+      "n": 8
+    },
+    "infectiousDisease::preclinical::licensing": {
+      "p90Upfront": 75,
+      "p90TDV": 1500,
+      "medianUpfront": 75,
+      "medianTDV": 5,
+      "n": 3
+    },
+    "infectiousDisease::preclinical::codevelopment": {
+      "p90Upfront": 2,
+      "p90TDV": 2,
+      "medianUpfront": 2,
+      "medianTDV": 2,
+      "n": 1
+    },
+    "gastroenterology::approved::acquisition": {
+      "p90Upfront": 450,
+      "p90TDV": 450,
+      "medianUpfront": 450,
+      "medianTDV": 450,
+      "n": 1
+    },
+    "neurology::preclinical::licensing": {
+      "p90Upfront": 165,
+      "p90TDV": 1950,
+      "medianUpfront": 50,
+      "medianTDV": 1320,
+      "n": 11
+    },
+    "neurology::preclinical::collaboration": {
+      "p90Upfront": 200,
+      "p90TDV": 2500,
+      "medianUpfront": 80,
+      "medianTDV": 1707,
+      "n": 7
+    },
+    "womensHealth::approved::licensing": {
+      "p90Upfront": 200,
+      "p90TDV": 6400,
+      "medianUpfront": 50,
+      "medianTDV": 300,
+      "n": 7
+    },
+    "neurology::approved::codevelopment": {
+      "p90Upfront": 543,
+      "p90TDV": 2700,
+      "medianUpfront": 512,
+      "medianTDV": 2147,
+      "n": 3
+    },
+    "rareDisease::preclinical::licensing": {
+      "p90Upfront": 1125,
+      "p90TDV": 1418,
+      "medianUpfront": 18,
+      "medianTDV": 1125,
+      "n": 5
+    },
+    "dermatology::preclinical::acquisition": {
+      "p90Upfront": 1250,
+      "p90TDV": 1250,
+      "medianUpfront": 850,
+      "medianTDV": 850,
+      "n": 3
+    },
+    "gastroenterology::preclinical::licensing": {
+      "p90Upfront": 150,
+      "p90TDV": 4400,
+      "medianUpfront": 60,
+      "medianTDV": 1710,
+      "n": 3
+    },
+    "ophthalmology::preclinical::collaboration": {
+      "p90Upfront": 20,
+      "p90TDV": 1280,
+      "medianUpfront": 20,
+      "medianTDV": 1280,
+      "n": 1
+    },
+    "cardiovascular::preclinical::acquisition": {
+      "p90Upfront": 1500,
+      "p90TDV": 2498,
+      "medianUpfront": 1500,
+      "medianTDV": 2498,
+      "n": 2
+    },
+    "_mega_deals::discovery::collaboration": {
+      "p90Upfront": 115,
+      "p90TDV": 2865,
+      "medianUpfront": 115,
+      "medianTDV": 2865,
+      "n": 2
+    },
+    "_mega_deals::discovery::licensing": {
+      "p90Upfront": 115,
+      "p90TDV": 2750,
+      "medianUpfront": 115,
+      "medianTDV": 2750,
+      "n": 1
+    },
+    "immunology::preclinical::collaboration": {
+      "p90Upfront": 100,
+      "p90TDV": 713,
+      "medianUpfront": 48,
+      "medianTDV": 585,
+      "n": 5
+    },
+    "cardiovascular::preclinical::licensing": {
+      "p90Upfront": 185,
+      "p90TDV": 4200,
+      "medianUpfront": 185,
+      "medianTDV": 4200,
+      "n": 2
+    },
+    "dermatology::approved::collaboration": {
+      "p90Upfront": 0,
+      "p90TDV": 13000,
+      "medianUpfront": 0,
+      "medianTDV": 13000,
+      "n": 1
+    },
+    "ophthalmology::preclinical::option": {
+      "p90Upfront": 20,
+      "p90TDV": 315,
+      "medianUpfront": 20,
+      "medianTDV": 315,
+      "n": 2
+    },
+    "dermatology::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 8200,
+      "medianUpfront": 0,
+      "medianTDV": 1400,
+      "n": 10
+    },
+    "gastroenterology::approved::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 3200,
+      "medianUpfront": 0,
+      "medianTDV": 2100,
+      "n": 4
+    },
+    "gastroenterology::approved::collaboration": {
+      "p90Upfront": 160,
+      "p90TDV": 5100,
+      "medianUpfront": 160,
+      "medianTDV": 5100,
+      "n": 2
+    },
+    "_mega_deals::preclinical::licensing": {
+      "p90Upfront": 45,
+      "p90TDV": 0,
+      "medianUpfront": 45,
+      "medianTDV": 0,
+      "n": 1
+    },
+    "hematology::preclinical::collaboration": {
+      "p90Upfront": 110,
+      "p90TDV": 3610,
+      "medianUpfront": 110,
+      "medianTDV": 3610,
+      "n": 2
+    },
+    "gastroenterology::preclinical::collaboration": {
+      "p90Upfront": 35,
+      "p90TDV": 1900,
+      "medianUpfront": 35,
+      "medianTDV": 1900,
+      "n": 2
+    },
+    "infectiousDisease::approved::collaboration": {
+      "p90Upfront": 0,
+      "p90TDV": 0,
+      "medianUpfront": 0,
+      "medianTDV": 0,
+      "n": 1
+    },
+    "metabolic::approved::licensing": {
+      "p90Upfront": 300,
+      "p90TDV": 1500,
+      "medianUpfront": 300,
+      "medianTDV": 495,
+      "n": 3
+    },
+    "immunology::approved::licensing": {
+      "p90Upfront": 15,
+      "p90TDV": 800,
+      "medianUpfront": 15,
+      "medianTDV": 800,
+      "n": 2
+    },
+    "rareDisease::discovery::licensing": {
+      "p90Upfront": 500,
+      "p90TDV": 10000,
+      "medianUpfront": 500,
+      "medianTDV": 10000,
+      "n": 2
+    },
+    "metabolic::preclinical::acquisition": {
+      "p90Upfront": 0,
+      "p90TDV": 7600,
+      "medianUpfront": 0,
+      "medianTDV": 7600,
+      "n": 1
+    },
+    "neurology::discovery::option": {
+      "p90Upfront": 65,
+      "p90TDV": 2015,
+      "medianUpfront": 65,
+      "medianTDV": 2015,
+      "n": 1
+    },
+    "immunology::preclinical::licensing": {
+      "p90Upfront": 300,
+      "p90TDV": 1900,
+      "medianUpfront": 150,
+      "medianTDV": 1750,
+      "n": 8
+    },
+    "metabolic::discovery::licensing": {
+      "p90Upfront": 0,
+      "p90TDV": 812,
+      "medianUpfront": 0,
+      "medianTDV": 812,
+      "n": 2
+    },
+    "rareDisease::discovery::collaboration": {
+      "p90Upfront": 50,
+      "p90TDV": 0,
+      "medianUpfront": 50,
+      "medianTDV": 0,
+      "n": 1
+    },
+    "metabolic::discovery::collaboration": {
+      "p90Upfront": 0,
+      "p90TDV": 1300,
+      "medianUpfront": 0,
+      "medianTDV": 1300,
+      "n": 2
+    },
+    "ophthalmology::preclinical::licensing": {
+      "p90Upfront": 50,
+      "p90TDV": 963,
+      "medianUpfront": 50,
+      "medianTDV": 963,
+      "n": 1
+    },
+    "metabolic::preclinical::codevelopment": {
+      "p90Upfront": 45,
+      "p90TDV": 2045,
+      "medianUpfront": 45,
+      "medianTDV": 2045,
+      "n": 1
+    },
+    "infectiousDisease::approved::acquisition": {
+      "p90Upfront": 2200,
+      "p90TDV": 2200,
+      "medianUpfront": 462,
+      "medianTDV": 462,
+      "n": 3
+    },
+    "womensHealth::preclinical::licensing": {
+      "p90Upfront": 12,
+      "p90TDV": 500,
+      "medianUpfront": 12,
+      "medianTDV": 500,
+      "n": 1
+    },
+    "neurology::discovery::acquisition": {
+      "p90Upfront": 50,
+      "p90TDV": 812,
+      "medianUpfront": 50,
+      "medianTDV": 812,
+      "n": 2
+    },
+    "ophthalmology::approved::collaboration": {
+      "p90Upfront": 20,
+      "p90TDV": 0,
+      "medianUpfront": 20,
+      "medianTDV": 0,
+      "n": 1
+    },
+    "infectiousDisease::preclinical::option": {
+      "p90Upfront": 0,
+      "p90TDV": 1000,
+      "medianUpfront": 0,
+      "medianTDV": 1000,
+      "n": 1
+    },
+    "neurology::preclinical::option": {
+      "p90Upfront": 25,
+      "p90TDV": 378,
+      "medianUpfront": 25,
+      "medianTDV": 378,
+      "n": 1
+    },
+    "neurology::preclinical::acquisition": {
+      "p90Upfront": 1300,
+      "p90TDV": 1300,
+      "medianUpfront": 1200,
+      "medianTDV": 1200,
+      "n": 4
+    },
+    "neurology::discovery::codevelopment": {
+      "p90Upfront": 23,
+      "p90TDV": 232,
+      "medianUpfront": 23,
+      "medianTDV": 232,
+      "n": 1
+    },
+    "metabolic::discovery::codevelopment": {
+      "p90Upfront": 0,
+      "p90TDV": 500,
+      "medianUpfront": 0,
+      "medianTDV": 500,
+      "n": 1
+    }
+  }
+}

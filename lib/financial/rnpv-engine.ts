@@ -48,6 +48,7 @@ import type { DealStructureClassification } from './deal-structure-classifier';
 import { getPatentCliffAdjustment } from './patent-cliffs';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 import { computeEmpiricalMultiplier } from './empirical-multiplier';
+import { getCeiling, clampRange } from './indication-ceilings';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -845,18 +846,25 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // and totalDeal move proportionally.
   const calibratedRNPV = riskAdjustedNPV * empiricalMultiplier;
 
+  // R71 Fix #1: Indication-level hard ceiling clamp.
+  // Apply P90 (indication || TA fallback) deal-corpus ceiling to prevent
+  // over-prediction for assets in historically weak deal indications.
+  const ceiling = getCeiling(input.indication, phase, dealType, therapeuticArea);
+  const upfrontPre = {
+    low: calibratedRNPV * upfrontPercent.low,
+    median: calibratedRNPV * upfrontPercent.median,
+    high: calibratedRNPV * upfrontPercent.high,
+  };
+  const totalDealPre = {
+    low: baseTotalDealLow * empiricalMultiplier,
+    median: baseTotalDealMedian * empiricalMultiplier,
+    high: baseTotalDealHigh * empiricalMultiplier,
+  };
+  const upfrontClamped = clampRange(upfrontPre, ceiling.ceilingUpfront);
+  const totalDealClamped = clampRange(totalDealPre, ceiling.ceilingTDV);
   const impliedDealValue: RNPVResult['impliedDealValue'] = {
-    upfront: {
-      low: calibratedRNPV * upfrontPercent.low,
-      median: calibratedRNPV * upfrontPercent.median,
-      high: calibratedRNPV * upfrontPercent.high,
-    },
-    totalDeal: {
-      // Scale baseTotalDeal* proportionally to match calibratedRNPV
-      low: baseTotalDealLow * empiricalMultiplier,
-      median: baseTotalDealMedian * empiricalMultiplier,
-      high: baseTotalDealHigh * empiricalMultiplier,
-    },
+    upfront: { low: upfrontClamped.low, median: upfrontClamped.median, high: upfrontClamped.high },
+    totalDeal: { low: totalDealClamped.low, median: totalDealClamped.median, high: totalDealClamped.high },
   };
 
   // -------------------------------------------------------------------------

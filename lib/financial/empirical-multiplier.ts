@@ -156,18 +156,51 @@ export const FLOOR = 0.25;
 /** Tier-1 assets (breakthrough+FIC+strong data) earn full premium.
  *  Tier-2 assets get this dampener applied to both the TA uplift and the
  *  phase×dealType M&A premium — modality uplift is structural and not
- *  tier-gated. */
+ *  tier-gated. Tier-3 (R71, Fix #2) adds a deeper dampener for assets
+ *  in historically weak-deal-track-record indications with no regulatory
+ *  designations (DNA vaccines, post-bust gene therapy, etc.). */
 export const SUB_TIER_DAMPENER = 0.5;
+export const TIER3_DAMPENER = 0.25;
 export const TIER1_DAMPENER = 1.0;
+
+/**
+ * Fix #2 (R71) — Tier-3 indications with weak historical deal track record.
+ *
+ * Sources (indications that have never closed a deal above $500M TDV or
+ * have documented failed/stranded programs):
+ *   - HPV RRP (respiratory papillomatosis, Inovio INO-3107 — no deal)
+ *   - Cancer DNA vaccines broadly (poor deal class)
+ *   - Some rare pediatric gene therapies post-2022 bust
+ *   - Orphan skin/eye conditions with tiny patient populations
+ *
+ * NOTE: This set is deliberately small — false-positives hurt pricing more
+ * than false-negatives. Expand via calibration rounds as new bust signal
+ * emerges.
+ */
+const TIER3_INDICATIONS: ReadonlySet<string> = new Set([
+  'hpv_rrp', 'hpvRrp',
+  'dna_vaccine_generic',
+  'batten', 'batten_disease',
+  'aplasticAnemia',
+  'rettSyndrome',
+]);
+
+/**
+ * Fix #4 (R71) — licensing-specific conservatism fallback for Phase 2/3
+ * assets when no indication ceiling is available. Crude but bounded.
+ */
+export const LICENSING_CONSERVATISM_FACTOR = 0.80;
 
 // ═══════════════════════════════════════════════════════════════════════
 // PUBLIC API
 // ═══════════════════════════════════════════════════════════════════════
 
 /**
- * Asset-quality tier classification. Tier-1 = the kind of asset that
- * historically commanded the top-of-distribution acquisition premium
- * (Prometheus, Karuna, Mirati, Seagen, Cerevel). Everything else = Tier-2.
+ * Asset-quality tier classification.
+ *   Tier-1: Prometheus/Karuna/Mirati class — full premium.
+ *   Tier-2: generic FIC / established — 50% dampener.
+ *   Tier-3: assets in historically weak-deal-track-record indications
+ *           with zero regulatory designations — 25% dampener. (R71 Fix #2)
  */
 export function isTier1Asset(input: RNPVInput): boolean {
   const regDes = input.regulatoryDesignations;
@@ -180,6 +213,20 @@ export function isTier1Asset(input: RNPVInput): boolean {
     input.dataQuality === 'strongPhase2' ||
     input.dataQuality === 'pivotalReady';
   return isFIC && hasStrongData && (hasBreakthrough || hasOrphan);
+}
+
+export function isTier3Asset(input: RNPVInput): boolean {
+  const regDes = input.regulatoryDesignations;
+  const noDesignations =
+    !regDes?.breakthrough && !regDes?.orphan && !regDes?.fastTrack && !regDes?.prime;
+  const weakIndication = TIER3_INDICATIONS.has(input.indication);
+  return noDesignations && weakIndication;
+}
+
+export function assetTier(input: RNPVInput): 1 | 2 | 3 {
+  if (isTier1Asset(input)) return 1;
+  if (isTier3Asset(input)) return 3;
+  return 2;
 }
 
 export interface EmpiricalMultiplierBreakdown {
@@ -232,9 +279,15 @@ export function computeEmpiricalMultiplier(
   // ─── Layer 3: Phase × dealType M&A base premium ────────────────────
   const phaseDealBaseRaw = PHASE_DEALTYPE_BASE[dealType]?.[phase] ?? 1.0;
 
-  // ─── Tier gating (Tier-1 full premium, Tier-2 dampened) ────────────
-  const tier1 = isTier1Asset(input);
-  const tierDampener = tier1 ? TIER1_DAMPENER : SUB_TIER_DAMPENER;
+  // ─── Tier gating ──────────────────────────────────────────────────
+  // Tier-1: full premium. Tier-2: 50% dampener. Tier-3 (R71): 25% dampener
+  // for assets in historically weak-deal-track-record indications.
+  const tier = assetTier(input);
+  const tierDampener =
+    tier === 1 ? TIER1_DAMPENER :
+    tier === 3 ? TIER3_DAMPENER :
+    SUB_TIER_DAMPENER;
+  const tier1 = tier === 1;
 
   // ─── Additive composition (replaces multiplicative stacking) ───────
   // Convert each multiplier to a "premium above 1.0" and sum.
@@ -245,7 +298,17 @@ export function computeEmpiricalMultiplier(
 
   const rawComposition = taPremium + modPremium + phaseDealTypePremium;
   const additiveCapped = Math.min(rawComposition, ADDITIVE_CAP);
-  const combined = 1.0 + additiveCapped;
+  let combined = 1.0 + additiveCapped;
+
+  // Fix #4 (R71): licensing-specific conservatism for Phase 2/3 when there's
+  // no indication-level ceiling to rely on. Dampens the most-over-predicted
+  // cohort (phase 2 licensing) across the board.
+  if (
+    dealType === 'licensing' &&
+    (phase === 'phase2' || phase === 'phase2_3' || phase === 'phase3')
+  ) {
+    combined *= LICENSING_CONSERVATISM_FACTOR;
+  }
 
   const hardCapped = Math.min(combined, HARD_CAP);
   const floored = Math.max(hardCapped, FLOOR);
