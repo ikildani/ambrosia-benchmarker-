@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-04-16T00:33:12.353Z",
+  "runAt": "2026-04-16T00:38:35.092Z",
   "featureFlags": {
     "TIER2_TIME_WINDOWED_POS": false,
     "TIER2_COMBO_THERAPY": false,
@@ -10,13 +10,13 @@
     "TIER4_PATENT_CLIFFS": false
   },
   "fullScope": {
-    "totalDeals": 322,
-    "hitRate25": 0.15104491395499267,
-    "hitRate35": 0.2590086659802338,
-    "hitRate50": 0.3919552147929652,
-    "meanAbsErrorPct": 1.647713433842776,
-    "medianSignedErrorPct": -0.2580952380952381,
-    "rmseUpfront_M": 3106.5,
+    "totalDeals": 323,
+    "hitRate25": 0.15032143123074912,
+    "hitRate35": 0.25776805290456345,
+    "hitRate50": 0.3900778074764608,
+    "meanAbsErrorPct": 2.2646490151192338,
+    "medianSignedErrorPct": -0.25408000000000003,
+    "rmseUpfront_M": 3110.1,
     "byTherapeuticArea": {
       "cardiovascular": {
         "n": 41,
@@ -68,11 +68,11 @@
         "meanAbsErrorPct": 0.7223925726600948
       },
       "rareDisease": {
-        "n": 27,
-        "hitRate25": 0.1268347174390316,
-        "hitRate35": 0.24590622472559945,
-        "meanSignedErrorPct": -0.06253813635089159,
-        "meanAbsErrorPct": 0.8708695867912045
+        "n": 28,
+        "hitRate25": 0.11799552738065598,
+        "hitRate35": 0.22876886753526993,
+        "meanSignedErrorPct": 9.032841369342227,
+        "meanAbsErrorPct": 9.901199329821555
       },
       "hematology": {
         "n": 27,
@@ -161,11 +161,11 @@
         "meanAbsErrorPct": 0.7735362225975034
       },
       "approved": {
-        "n": 58,
-        "hitRate25": 0.17176261570832355,
-        "hitRate35": 0.22500283241297167,
-        "meanSignedErrorPct": 5.470853549164895,
-        "meanAbsErrorPct": 5.888576935347855
+        "n": 59,
+        "hitRate25": 0.16711378163429158,
+        "hitRate35": 0.2189130274239083,
+        "meanSignedErrorPct": 8.853424878420403,
+        "meanAbsErrorPct": 9.259842389321951
       },
       "phase2": {
         "n": 84,
@@ -317,11 +317,11 @@
         "meanAbsErrorPct": 0.4705911794871795
       },
       "geneTherapyRare": {
-        "n": 1,
+        "n": 2,
         "hitRate25": 0,
         "hitRate35": 0,
-        "meanSignedErrorPct": -0.5388888888888889,
-        "meanAbsErrorPct": 0.5388888888888889
+        "meanSignedErrorPct": 82.66194522281896,
+        "meanAbsErrorPct": 83.05513676446692
       },
       "carT_heme": {
         "n": 3,
@@ -2180,6 +2180,32 @@
       "within25": false,
       "within35": true,
       "within50": true
+    },
+    {
+      "case": {
+        "id": "rare-bust-001",
+        "year": 2025,
+        "licensor": "Bluebird Bio",
+        "licensee": "Carlyle + SK Capital",
+        "therapeuticArea": "rareDisease",
+        "indication": "sickleCellDisease",
+        "modality": "geneTherapyRare",
+        "phase": "approved",
+        "dealType": "acquisition",
+        "territory": "global",
+        "actualUpfront_M": 29,
+        "actualTotalDeal_M": 128,
+        "peakSalesMedian_M": 900
+      },
+      "predictedUpfront_M": 3812,
+      "predictedTotalDeal_M": 4158,
+      "upfrontErrorPct": 130.44827586206895,
+      "totalDealErrorPct": 31.484375,
+      "upfrontErrorAbs_M": 3783,
+      "totalDealErrorAbs_M": 4030,
+      "within25": false,
+      "within35": false,
+      "within50": false
     },
     {
       "case": {

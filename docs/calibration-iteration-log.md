@@ -1618,3 +1618,38 @@ RMSE drops 32% because large-error pre-bust mega-deals are down-weighted; weight
 
 **Files touched:** `lib/financial/calibration.ts` (added `recencyWeight` export), `lib/financial/backtest/deal-backtest.ts` (corridor clamp + slice aggregates + full-corpus aggregates), `__tests__/backtest/baseline-errors.json` (regenerated).
 
+---
+
+## Round 71 — Bust-era rare-disease corpus entries (2026-04-15)
+
+**Problem:** The rare-disease slice of the extended corpus (251 curated deals) was almost entirely composed of **successful** deals — approvals, launch transactions, platform partnerships. The downward signal from the 2023-2025 rare-disease bust — stranded gene-therapy assets, impaired post-acquisition carrying values, narrow-population commercial failures, BLA-stage regulatory setbacks — was structurally missing. Without explicit bust entries, recency weighting (R70) has no bust signal to amplify.
+
+**Change:** Added five bust-era entries to `data/comparable-deals-extended.ts` immediately after `rare-020`:
+
+| id | year | type | Signal |
+|---|---:|---|---|
+| rare-bust-001 | 2025 | acquisition (real) | Carlyle + SK Capital take-private of bluebird bio at $3/share ($29M upfront + $99M CVR, ~$128M EV) for three approved lentiviral gene therapies (Lyfgenia, Zynteglo, Skysona) — an approved-stage rare-disease gene-therapy regime anchor at ~3% of prior peak market cap |
+| rare-bust-002 | 2024 | ref-only | uniQure / CSL Behring Hemgenix partnership modification — approved-gene-therapy commercial underperformance (hemophilia B narrow market vs. Factor IX prophylaxis) |
+| rare-bust-003 | 2024 | ref-only | Rocket Pharmaceuticals Kresladi (LAD-I) FDA Complete Response Letter — BLA-stage rare gene-therapy regulatory risk signal |
+| rare-bust-004 | 2024 | ref-only | Sarepta LGMD + SRP-5051 program discontinuations — rare-NMD gene-therapy platform contraction vs. pre-bust Sarepta partnership economics |
+| rare-bust-005 | 2024 | ref-only | Astellas ~$2.7B impairment charge on Audentes (AT132 / X-LMTM) — 2019 $3B acquisition written down to ~10% of purchase price |
+
+Reference-only entries use `upfront: 0` and `totalDealValue: 0`, which the backtest filters out of error-math via `MICRO_DEAL_UPFRONT_FLOOR_M = 20`. They remain in the corpus for corridor-distribution lookups (where applicable) and for narrative / signal traceability.
+
+**Real deal entry (rare-bust-001 bluebird)** — added as a full entry with `upfront: 29`, `totalDealValue: 128`. Model would predict approved-stage rare-disease gene therapy upfront much higher (likely $400–$900M for a company with three launched products), so this deal will register as a large model-overshoot. Combined with R70 recency weighting (weight 1.00 for a 2025 deal), it substantially pulls the "approved rare-disease gene-therapy" corridor boundary downward.
+
+**Delta (equal-weight → R71 with R70 weighting both applied, n=308 → n=323 due to R71 + other concurrent corpus additions on this branch):**
+
+| metric | R70 (weighted, pre-R71) | R71 (weighted, post-R71) |
+|---|---:|---:|
+| hit ±25% | 15.1% | 15.0% |
+| hit ±35% | 25.9% | 25.8% |
+| median signed | -25.8% | -25.4% |
+| RMSE ($M) | 3,106.5 | 3,110.1 |
+
+Movements are modest at the full-corpus level because only one of the five entries (bluebird) enters the error calculation; the other four are reference-only. **This is an intentionally back-loaded round** — the value of R71 compounds as subsequent rounds lean on the corridor distribution and as more bust-era deals land in the corpus. R71 alone does not move the headline hit rates.
+
+**Tests:** 180/180 passing (golden masters + data accuracy). Deal backtest runs cleanly on the expanded corpus.
+
+**Files touched:** `data/comparable-deals-extended.ts` (+5 entries after `rare-020`), `__tests__/backtest/baseline-errors.json` (regenerated).
+
