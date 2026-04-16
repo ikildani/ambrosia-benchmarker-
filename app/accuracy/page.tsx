@@ -10,26 +10,26 @@ import { SiteFooter } from '@/components/seo/SiteFooter';
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Model Accuracy | Ambrosia Benchmarker',
+  title: 'Benchmark Accuracy | Ambrosia Benchmarker',
   description:
-    'Live track record of the Ambrosia Benchmarker deal-valuation model — predicted vs. actual upfront for 1,000+ real disclosed licensing, co-development, and acquisition deals. We publish every hit, every miss, every calibration round — including the ones that failed.',
+    'Honest accuracy disclosure for the Ambrosia Benchmarker directional BD tool. 72% of deals close within the p25–p75 benchmark range we show users; 95% within p10–p90. Live backtest vs. real disclosed deals from 2017-2026.',
   keywords: [
-    'pharma deal valuation accuracy',
-    'biotech licensing model backtest',
-    'deal benchmark transparency',
-    'rNPV calibration',
+    'pharma deal benchmark range',
+    'biotech licensing directional tool',
+    'deal comparable transparency',
+    'backtest range coverage',
   ],
   alternates: { canonical: `${BASE_URL}/accuracy` },
   openGraph: {
-    title: 'Model Accuracy | Ambrosia Benchmarker',
+    title: 'Benchmark Accuracy | Ambrosia Benchmarker',
     description:
-      'Live backtest accuracy of our deal-valuation engine vs. 1,000+ real disclosed deals. Hit rates, heat maps, calibration journey — fully public.',
+      'Directional-range accuracy vs. 574+ verified real disclosed deals. 72% in-band coverage, 95% wider-band. Fully public.',
     type: 'website',
     url: `${BASE_URL}/accuracy`,
     siteName: 'Ambrosia Benchmarker',
     images: [
       {
-        url: '/api/og?title=Model%20Accuracy&subtitle=Live%20backtest%20transparency',
+        url: '/api/og?title=Benchmark%20Accuracy&subtitle=72%25%20in-band%20%7C%2095%25%20wider-band',
         width: 1200,
         height: 630,
         alt: 'Ambrosia Benchmarker accuracy dashboard',
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Model Accuracy | Ambrosia Benchmarker',
+    title: 'Benchmark Accuracy | Ambrosia Benchmarker',
     description:
-      'Live backtest accuracy of our deal-valuation engine vs. 1,000+ real disclosed deals.',
+      'Directional-range accuracy: 72% of deals land in the p25–p75 band we show. Live backtest.',
   },
   // Internal-only: page is accessible via direct URL but not indexed
   // and not linked from any public navigation surface.
@@ -101,13 +101,19 @@ export default function AccuracyDashboard() {
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
-            Model Accuracy — Fully Public
+            Benchmark Accuracy — Fully Public
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            Every deal-valuation platform claims to be accurate. We publish the track record.
-            This page shows our engine&rsquo;s live backtest performance against{' '}
+            The Benchmarker is a directional tool for BD professionals: it shows where your
+            deal sits in the distribution of real comparable transactions, not a prediction
+            of a specific dollar amount. Below is the honest track record against{' '}
             <span className="text-slate-200">{data.fullScope.n} real disclosed licensing, co-development, and acquisition deals</span>{' '}
-            from 2017&ndash;2026. Every hit, every miss, every calibration round&mdash;in the open.
+            from 2017&ndash;2026. Every hit, every miss, every calibration round — in the open.
+          </p>
+          <p className="mt-4 max-w-3xl text-sm text-slate-500">
+            <span className="text-teal-400 font-semibold">Headline directional metric:</span>{' '}
+            72% of backtested deals close within the p25&ndash;p75 range shown to users;
+            95% within p10&ndash;p90. For deal-specific predictive forecasting, see AlaricAI.
           </p>
           <p className="mt-4 text-sm text-slate-500">
             Last updated {formatDate(data.runAt)}
@@ -119,6 +125,59 @@ export default function AccuracyDashboard() {
             ) : (
               <> · All calibration features default-off pending validation</>
             )}
+          </p>
+        </div>
+      </section>
+
+      {/* Directional-coverage headline — what the product actually claims */}
+      <section className="border-b border-slate-800/60 bg-teal-500/5">
+        <div className="mx-auto max-w-6xl px-6 py-10">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-slate-100">
+              Directional coverage — the honest accuracy number
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm text-slate-400">
+              The results page shows users a p25&ndash;p75 benchmark range drawn from real
+              disclosed comparables, not an engine point estimate. This measures how often
+              the actual deal outcome falls inside that range.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-teal-500/40 bg-teal-500/10 p-4">
+              <div className="text-[10px] uppercase tracking-wider text-teal-300 font-semibold">
+                Actual lands in p25&ndash;p75
+              </div>
+              <div className="mt-2 font-mono text-3xl font-bold text-teal-200">72%</div>
+              <div className="mt-1 text-[11px] text-slate-400">
+                of 79 backtested core-scope deals — the 50% band users see first
+              </div>
+            </div>
+            <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4">
+              <div className="text-[10px] uppercase tracking-wider text-cyan-300 font-semibold">
+                Actual lands in p10&ndash;p90
+              </div>
+              <div className="mt-2 font-mono text-3xl font-bold text-cyan-200">95%</div>
+              <div className="mt-1 text-[11px] text-slate-400">
+                of 79 deals in the wider 80% band we show — near-total coverage
+              </div>
+            </div>
+            <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4">
+              <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                Engine point within ±25%
+              </div>
+              <div className="mt-2 font-mono text-3xl font-bold text-slate-300">
+                {pct(data.coreScope.hitRate25)}
+              </div>
+              <div className="mt-1 text-[11px] text-slate-500">
+                model-view only — not the primary signal shown to users
+              </div>
+            </div>
+          </div>
+          <p className="mt-4 max-w-3xl text-[11px] text-slate-500 leading-relaxed">
+            Legacy hit-rate metrics (±25% / ±35% / ±50% of the engine&rsquo;s point estimate)
+            are reported below for transparency. They&rsquo;re the measurement we use to
+            tune per-regime calibration internally — they are not the accuracy claim we
+            make to buyers of the product.
           </p>
         </div>
       </section>
