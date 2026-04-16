@@ -1518,3 +1518,53 @@ Approved hit25 +1.9pp — blockbusters show up disproportionately in approved de
 - R71: Add bust-era reference entries (bluebird, uniQure/CSL, Rocket CRL, Audentes writedown) to `comparable-deals-extended.ts`
 - R72: TA-aware competitive-position premium (cap rareDisease firstInClass at +15% — baseline already bakes in FIC positioning)
 
+---
+
+## Round 69 — Split rareDisease into chronic vs. gene-therapy sub-baselines (2026-04-15)
+
+**Problem:** Since the 2023-2025 rare-disease regime shift, "rare disease" as a single calibration category conflates two economically opposite deal profiles:
+
+- **Chronic rare** (enzyme-replacement therapies, substrate reduction, small-molecule chronic) — recurring-revenue franchises like BioMarin's Voxzogo, Alnylam's Amvuttra, Amicus's Galafold, Takeda's Takhzyro — continue commanding a premium over base rare-disease terms due to orphan pricing power, predictable reimbursement, and long durability.
+- **Transformative / one-time rare** (AAV gene therapies, ex-vivo gene edit) — cliff economics like Spark / Roctavian / Skysona / Zolgensma — have repriced significantly after the bluebird take-private, Audentes writedown, and Rocket CRL. Market now prices in durability risk, ultra-narrow patient populations, and manufacturing capex.
+
+Post-Round-68, the single `rareDiseasePhaseBaselines` block splits the difference between these two regimes — under-valuing chronic franchises and over-valuing gene therapy.
+
+**Change:** Added two sub-baselines to `benchmarks.json`, derived from the Round-68 base by scaling low/median/high uniformly (royalties unchanged):
+
+- `rareDiseaseChronicPhaseBaselines`: ×1.125 (+12.5% vs. Round-68 base)
+- `rareDiseaseGeneTherapyPhaseBaselines`: ×0.75 (-25% vs. Round-68 base)
+
+Extended `Benchmarks` interface and `PhaseBaselinesKey` union in `lib/benchmarks.ts` with the two new keys.
+
+**Routing** — in `lib/calculations.ts` (phaseBaselineMap, near line 1050):
+```ts
+if (isRareDisease) {
+  if (input.modality === 'geneTherapyRare' || input.modality === 'geneTherapy') {
+    rareDiseaseBaselines = benchmarks.rareDiseaseGeneTherapyPhaseBaselines;
+  } else if (input.modality === 'enzymeReplacement' || input.modality === 'substrateReduction' || input.modality === 'smallMolecule') {
+    rareDiseaseBaselines = benchmarks.rareDiseaseChronicPhaseBaselines;
+  }
+  phaseBaselineMap.rareDisease = rareDiseaseBaselines;
+}
+```
+
+Antibodies, oligonucleotides, RNAi, and any other modality fall through to the base `rareDiseasePhaseBaselines` (Round-68 post-bust values) — preserving conservative behavior for modalities that don't clearly sort into either bucket.
+
+**Supabase future-proofing:** `getBenchmarksSync()` in `lib/benchmarks.ts:307-330` extended so a `phase_baseline` calibration row with `therapeutic_area='rareDisease'` + `modality` set routes to the correct sub-baseline. Current rows with no modality still hit the base `rareDiseasePhaseBaselines` (no behavior change).
+
+**Example deltas** — phase 2 median upfront by modality:
+
+| Modality | Pre-Round-68 | Round-68 base | Round-69 result |
+|---|---:|---:|---:|
+| smallMolecule (e.g., Galafold) | 150 | 105 | **118** (chronic) |
+| enzymeReplacement (e.g., Nexviazyme) | 150 | 105 | **118** (chronic) |
+| antibody (e.g., Crysvita) | 150 | 105 | **105** (base) |
+| geneTherapyRare (e.g., Roctavian) | 150 | 105 | **79** (gene therapy) |
+| oligonucleotide (e.g., Spinraza) | 150 | 105 | **105** (base) |
+
+Metadata: version 5.3 → 5.4.
+
+**Tests:** 191/191 passing (golden masters + data accuracy + financial properties). Zero TS errors introduced by this round. Pre-existing TS errors in unrelated files (empirical-multiplier test, tier3-coverage test, untracked deck-engine-output script) left as-is.
+
+**Files touched:** `data/benchmarks.json`, `lib/benchmarks.ts`, `lib/calculations.ts`.
+

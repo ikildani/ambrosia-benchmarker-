@@ -59,6 +59,8 @@ export interface Benchmarks {
   ophthalmologyPhaseBaselines: PhaseBaselines;
   womensHealthPhaseBaselines: PhaseBaselines;
   rareDiseasePhaseBaselines: PhaseBaselines;
+  rareDiseaseChronicPhaseBaselines: PhaseBaselines;
+  rareDiseaseGeneTherapyPhaseBaselines: PhaseBaselines;
   hematologyPhaseBaselines: PhaseBaselines;
   dermatologyPhaseBaselines: PhaseBaselines;
   gastroenterologyPhaseBaselines: PhaseBaselines;
@@ -201,7 +203,7 @@ interface CalibrationRow {
 }
 
 // Map therapeutic_area to the correct baselines key in Benchmarks
-type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines' | 'cardiovascularPhaseBaselines' | 'infectiousDiseasePhaseBaselines' | 'ophthalmologyPhaseBaselines' | 'womensHealthPhaseBaselines' | 'rareDiseasePhaseBaselines' | 'hematologyPhaseBaselines' | 'dermatologyPhaseBaselines' | 'gastroenterologyPhaseBaselines';
+type PhaseBaselinesKey = 'phaseBaselines' | 'neurologyPhaseBaselines' | 'immunologyPhaseBaselines' | 'metabolicPhaseBaselines' | 'cardiovascularPhaseBaselines' | 'infectiousDiseasePhaseBaselines' | 'ophthalmologyPhaseBaselines' | 'womensHealthPhaseBaselines' | 'rareDiseasePhaseBaselines' | 'rareDiseaseChronicPhaseBaselines' | 'rareDiseaseGeneTherapyPhaseBaselines' | 'hematologyPhaseBaselines' | 'dermatologyPhaseBaselines' | 'gastroenterologyPhaseBaselines';
 const TA_BASELINES_KEY: Record<string, PhaseBaselinesKey> = {
   'oncology': 'phaseBaselines',
   'neurology': 'neurologyPhaseBaselines',
@@ -305,8 +307,19 @@ export function getBenchmarksSync(): Benchmarks {
     if (cal.sample_size < 5) continue;
 
     if (cal.calibration_type === 'phase_baseline' && cal.phase && cal.therapeutic_area) {
-      // Find the correct baselines key for this therapeutic area
-      const baselinesKey = TA_BASELINES_KEY[cal.therapeutic_area];
+      // Find the correct baselines key for this therapeutic area.
+      // For rareDisease, if modality is set, route to the chronic or
+      // gene-therapy sub-baseline (mirrors the same modality-routing
+      // used by the production quick-calculator in lib/calculations.ts).
+      // Otherwise fall back to the base key.
+      let baselinesKey: PhaseBaselinesKey | undefined = TA_BASELINES_KEY[cal.therapeutic_area];
+      if (cal.therapeutic_area === 'rareDisease' && cal.modality) {
+        if (cal.modality === 'geneTherapyRare' || cal.modality === 'geneTherapy') {
+          baselinesKey = 'rareDiseaseGeneTherapyPhaseBaselines';
+        } else if (cal.modality === 'enzymeReplacement' || cal.modality === 'substrateReduction' || cal.modality === 'smallMolecule') {
+          baselinesKey = 'rareDiseaseChronicPhaseBaselines';
+        }
+      }
       if (!baselinesKey) continue;
 
       const baselines = merged[baselinesKey];

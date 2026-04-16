@@ -1,7 +1,7 @@
 {
   "metadata": {
     "lastUpdated": "2026-04-15",
-    "version": "5.3",
+    "version": "5.4",
     "nextUpdate": "2026-05",
     "updateFrequency": "monthly",
     "sources": [
@@ -1460,6 +1460,100 @@
         "base": 15,
         "max": 27
       }
+    }
+  },
+  "rareDiseaseChronicPhaseBaselines": {
+    "discovery": {
+      "upfront": { "low": 3, "median": 7, "high": 16 },
+      "totalValue": { "low": 116, "median": 270, "high": 618 },
+      "royalty": { "base": 3, "max": 6 }
+    },
+    "preclinical": {
+      "upfront": { "low": 10, "median": 20, "high": 47 },
+      "totalValue": { "low": 223, "median": 518, "high": 1195 },
+      "royalty": { "base": 4, "max": 8 }
+    },
+    "phase1": {
+      "upfront": { "low": 26, "median": 51, "high": 118 },
+      "totalValue": { "low": 383, "median": 878, "high": 1995 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase1_2": {
+      "upfront": { "low": 37, "median": 73, "high": 171 },
+      "totalValue": { "low": 512, "median": 1181, "high": 2678 },
+      "royalty": { "base": 6, "max": 12 }
+    },
+    "phase2": {
+      "upfront": { "low": 60, "median": 118, "high": 276 },
+      "totalValue": { "low": 704, "median": 1631, "high": 3707 },
+      "royalty": { "base": 7, "max": 14 }
+    },
+    "phase2_3": {
+      "upfront": { "low": 99, "median": 197, "high": 453 },
+      "totalValue": { "low": 1083, "median": 2475, "high": 5569 },
+      "royalty": { "base": 8, "max": 16 }
+    },
+    "phase3": {
+      "upfront": { "low": 163, "median": 326, "high": 735 },
+      "totalValue": { "low": 1550, "median": 3488, "high": 7750 },
+      "royalty": { "base": 10, "max": 18 }
+    },
+    "nda_filed": {
+      "upfront": { "low": 253, "median": 506, "high": 1181 },
+      "totalValue": { "low": 1995, "median": 4388, "high": 9972 },
+      "royalty": { "base": 12, "max": 22 }
+    },
+    "approved": {
+      "upfront": { "low": 506, "median": 1013, "high": 2363 },
+      "totalValue": { "low": 2855, "median": 6525, "high": 14681 },
+      "royalty": { "base": 15, "max": 27 }
+    }
+  },
+  "rareDiseaseGeneTherapyPhaseBaselines": {
+    "discovery": {
+      "upfront": { "low": 2, "median": 5, "high": 11 },
+      "totalValue": { "low": 77, "median": 180, "high": 412 },
+      "royalty": { "base": 3, "max": 6 }
+    },
+    "preclinical": {
+      "upfront": { "low": 7, "median": 14, "high": 32 },
+      "totalValue": { "low": 149, "median": 345, "high": 797 },
+      "royalty": { "base": 4, "max": 8 }
+    },
+    "phase1": {
+      "upfront": { "low": 17, "median": 34, "high": 79 },
+      "totalValue": { "low": 255, "median": 585, "high": 1330 },
+      "royalty": { "base": 5, "max": 10 }
+    },
+    "phase1_2": {
+      "upfront": { "low": 25, "median": 49, "high": 114 },
+      "totalValue": { "low": 341, "median": 788, "high": 1785 },
+      "royalty": { "base": 6, "max": 12 }
+    },
+    "phase2": {
+      "upfront": { "low": 40, "median": 79, "high": 184 },
+      "totalValue": { "low": 470, "median": 1088, "high": 2471 },
+      "royalty": { "base": 7, "max": 14 }
+    },
+    "phase2_3": {
+      "upfront": { "low": 66, "median": 131, "high": 302 },
+      "totalValue": { "low": 722, "median": 1650, "high": 3713 },
+      "royalty": { "base": 8, "max": 16 }
+    },
+    "phase3": {
+      "upfront": { "low": 109, "median": 218, "high": 490 },
+      "totalValue": { "low": 1034, "median": 2325, "high": 5167 },
+      "royalty": { "base": 10, "max": 18 }
+    },
+    "nda_filed": {
+      "upfront": { "low": 169, "median": 338, "high": 788 },
+      "totalValue": { "low": 1330, "median": 2925, "high": 6648 },
+      "royalty": { "base": 12, "max": 22 }
+    },
+    "approved": {
+      "upfront": { "low": 338, "median": 675, "high": 1575 },
+      "totalValue": { "low": 1904, "median": 4350, "high": 9788 },
+      "royalty": { "base": 15, "max": 27 }
     }
   },
   "hematologyPhaseBaselines": {
