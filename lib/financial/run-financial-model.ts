@@ -200,6 +200,7 @@ export function runFinancialModel(
       inputs.territory,
       inputs.competitivePosition || 'racing',
       epiData,
+      inputs.therapeuticArea,  // R68 Task 4: TA-aware share adjustment
     );
     // Use epidemiology-derived peak sales for rNPV
     peakSalesFromMarket = marketSize.peakSales;
