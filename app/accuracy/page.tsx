@@ -166,7 +166,7 @@ export default function AccuracyDashboard() {
                 Engine point within ±25%
               </div>
               <div className="mt-2 font-mono text-3xl font-bold text-slate-300">
-                {pct(data.coreScope.hitRate25)}
+                {pct(data.coreScope.hit25)}
               </div>
               <div className="mt-1 text-[11px] text-slate-500">
                 model-view only — not the primary signal shown to users
