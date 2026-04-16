@@ -713,7 +713,15 @@ export function getCoreScopeBacktestCases(): DealBacktestCase[] {
 // Running the engine
 // ---------------------------------------------------------------------------
 
-function buildInputForCase(c: DealBacktestCase): RNPVInput {
+// Extended input type: the engine's deal-structure classifier reads
+// licensor/licensee/realTerritory via a typed extension on RNPVInput.
+type RNPVInputWithExtensions = RNPVInput & {
+  licensor?: string;
+  licensee?: string;
+  realTerritory?: string;
+};
+
+function buildInputForCase(c: DealBacktestCase): RNPVInputWithExtensions {
   // Allowed phases from calculateRNPV — keep mapping narrow so unexpected
   // phase labels land on phase2 rather than silently mispredicting.
   const phaseMap: Record<string, string> = {
@@ -747,16 +755,21 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
     c.territory === 'global' || c.territory === 'us_only' || c.territory === 'ex_us'
       ? c.territory
       : 'global';
-  return {
+  // R57 (2026-04-14): Pass licensor/licensee/realTerritory through as
+  // structural extension fields the engine reads via `as unknown as {...}`
+  // cast. These are NOT declared on RNPVInput type, so we build the object
+  // loosely typed and cast at the return boundary to satisfy the strict
+  // TypeScript build.
+  const input: RNPVInput & {
+    licensor?: string | null;
+    licensee?: string | null;
+    realTerritory?: string | null;
+  } = {
     therapeuticArea: c.therapeuticArea as RNPVInput['therapeuticArea'],
     indication: c.indication,
     modality: c.modality as RNPVInput['modality'],
     phase: phase as RNPVInput['phase'],
     territory: narrowedTerritory,
-    // Extension fields read by classifier (not on RNPVInput type).
-    licensor: c.licensor,
-    licensee: c.licensee,
-    realTerritory: c.territory,
     dealType: c.dealType as RNPVInput['dealType'],
     peakSalesEstimate: {
       low: c.peakSalesMedian_M * 0.5,
@@ -772,7 +785,11 @@ function buildInputForCase(c: DealBacktestCase): RNPVInput {
       orphan: false,
       prime: false,
     },
+    licensor: c.licensor,
+    licensee: c.licensee,
+    realTerritory: c.territory,
   };
+  return input;
 }
 
 /**
