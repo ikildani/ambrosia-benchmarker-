@@ -15,6 +15,7 @@ import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
 import { isTimeBudgetExceeded } from '@/lib/cron-utils';
+import { validateExtractedDeal } from './deal-extraction-validator';
 
 const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
 
@@ -311,6 +312,7 @@ export async function runCompletenessAudit(
   // Step 5: Auto-ingest missing deals
   let dealsAutoIngested = 0;
 
+  let dealsRejected = 0;
   for (const deal of missingDeals) {
     if (isTimeBudgetExceeded(startTime, timeBudgetMs)) {
       errors.push('Time budget exceeded during auto-ingestion');
@@ -318,6 +320,31 @@ export async function runCompletenessAudit(
     }
 
     try {
+      // R69 (2026-04-15): Fabrication gate. Completeness-audit uses
+      // Perplexity + Claude to discover and extract public deals. Without
+      // validation, Claude-hallucinated rows (TARGET-NNN placeholders,
+      // Anti-TARGET prefixes, suffix/modality mismatches — the same
+      // patterns that produced 845 fabricated rows pre-R49) would be
+      // inserted directly. Apply the shared validator from R42.
+      const validation = validateExtractedDeal({
+        licensor: deal.licensor,
+        licensee: deal.licensee,
+        modality: null,  // completeness-audit doesn't extract modality
+        asset_name: deal.asset_name,
+        indication_specific: deal.therapeutic_area,
+        upfront_usd: null,
+        total_deal_value_usd: deal.total_value_usd,
+        confidence_score: null,
+        source_url: null,
+      });
+      if (!validation.valid) {
+        dealsRejected++;
+        errors.push(
+          `Rejected hallucinated deal ${deal.licensor}→${deal.licensee} "${deal.asset_name}": ${validation.rejectCode} — ${validation.rejectReason}`,
+        );
+        continue;
+      }
+
       // Find or create company records
       const licenseeCompany = await findOrCreateCompany(supabase, deal.licensee);
       const licensorCompany = await findOrCreateCompany(supabase, deal.licensor);
@@ -339,6 +366,8 @@ export async function runCompletenessAudit(
         announced_date: deal.announced_date || weekStart,
         source_type: 'completeness_audit',
         verification_status: 'pending',
+        is_synthetic: false,  // R69: explicit — default should not be NULL
+        verified: false,       // R69: explicit pending review
       });
 
       if (insertError) {

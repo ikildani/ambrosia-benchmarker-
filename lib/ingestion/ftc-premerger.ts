@@ -18,6 +18,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
+import { validateExtractedDeal } from './deal-extraction-validator';
 
 const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
 
@@ -231,6 +232,30 @@ export async function runFTCIngestion(
             continue;
           }
 
+          // R69 (2026-04-15): Fabrication gate. FTC pipeline uses
+          // Perplexity + Claude to extract enforcement actions. The
+          // constructed asset_name "${target} (FTC ${action})" is
+          // deterministic-looking but Claude could still hallucinate
+          // target/acquirer names with TARGET-NNN / Anti-TARGET patterns.
+          // Run the shared validator for defense in depth.
+          const validation = validateExtractedDeal({
+            licensor: deal.target,
+            licensee: deal.acquirer,
+            modality: 'other',  // FTC always uses 'other'
+            asset_name: deal.target,  // validator examines raw name pattern
+            indication_specific: deal.indication,
+            upfront_usd: null,
+            total_deal_value_usd: deal.deal_value_usd,
+            confidence_score: deal.confidence,
+            source_url: deal.source_url,
+          });
+          if (!validation.valid) {
+            console.warn(
+              `[ftc] Rejected hallucinated ${deal.target}→${deal.acquirer}: ${validation.rejectCode}`,
+            );
+            continue;
+          }
+
           // Resolve company IDs
           const acquirerId = await findOrCreateCompany(supabase, deal.acquirer, true).catch(() => null);
           const targetId = await findOrCreateCompany(supabase, deal.target, false).catch(() => null);
@@ -264,6 +289,7 @@ export async function runFTCIngestion(
             source_type: 'ftc_premerger',
             source_url: deal.source_url,
             confidence_score: deal.confidence,
+            is_synthetic: false,  // R69: explicit
             verified: false,
             terms_disclosed: deal.deal_value_usd !== null,
             ftc_action: deal.ftc_action,
