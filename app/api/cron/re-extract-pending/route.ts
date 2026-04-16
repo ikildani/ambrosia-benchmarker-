@@ -164,6 +164,17 @@ export async function GET(request: NextRequest) {
         filingUrl = sourceUrlFromFilingId(co?.sec_cik ?? null, row.source_filing_id);
       }
       if (!filingUrl) {
+        // Mark as 'skipped' so the row falls out of the re-extract queue
+        // and into the admin-audit queue where a human can research it
+        // manually. Without this, skippedNoSource rows stay pending and
+        // keep occupying queue slots on every cron run indefinitely.
+        await supabase
+          .from('deals')
+          .update({
+            verification_status: 'skipped',
+            verification_notes: `[2026-04-16] Cron re-extract skipped: no source_url or source_filing_id available for fetch. Eligible for manual admin audit at /admin/deal-audit.`,
+          })
+          .eq('id', row.id);
         metrics.skippedNoSource++;
         continue;
       }
