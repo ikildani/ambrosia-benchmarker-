@@ -106,6 +106,15 @@ export interface Benchmarks {
     lineOfTherapy: MultiplierCategory;
     combinationPotential: MultiplierCategory;
     competitivePosition: MultiplierCategory;
+    /**
+     * R72: TA-specific overrides for competitive-position multipliers.
+     * When a TA is present here (e.g., rareDisease), its entries take
+     * precedence over the global competitivePosition map in lib/
+     * calculations.ts. Currently only rareDisease is populated (FIC cap
+     * because rare baselines already bake in FIC positioning). Other
+     * TAs fall through to the global map unchanged.
+     */
+    competitivePositionByTA?: Record<string, MultiplierCategory>;
     dataQuality: MultiplierCategory;
     treatmentApproach: MultiplierCategory;
     bbbPenetration: MultiplierCategory;

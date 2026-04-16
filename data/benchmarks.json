@@ -1,7 +1,7 @@
 {
   "metadata": {
     "lastUpdated": "2026-04-15",
-    "version": "5.4",
+    "version": "5.5",
     "nextUpdate": "2026-05",
     "updateFrequency": "monthly",
     "sources": [
@@ -5920,6 +5920,25 @@
         "multiplier": 0.7,
         "label": "Crowded with approved drugs",
         "context": "Must differentiate to gain share"
+      }
+    },
+    "competitivePositionByTA": {
+      "rareDisease": {
+        "firstInClass": {
+          "multiplier": 1.15,
+          "label": "First-in-class (Rare — premium capped)",
+          "context": "Rare-disease phase baselines already bake in FIC positioning (most orphan indications are structurally first-in-class by default), so the generic +25% FIC multiplier double-counts. Cap at +15% for true novelty premium above the orphan baseline."
+        },
+        "firstToPivotal": {
+          "multiplier": 1.1,
+          "label": "First to pivotal (Rare)",
+          "context": "Rare-disease pivotal timing premium tempered vs. general +15%; baselines already reflect pivotal scarcity in rare indications."
+        },
+        "bestInClass": {
+          "multiplier": 1.08,
+          "label": "Best-in-class (Rare)",
+          "context": "Rare-disease best-in-class premium tempered vs. general +10%; differentiation leverage is diluted in orphan markets with captive patient populations."
+        }
       }
     },
     "dataQuality": {

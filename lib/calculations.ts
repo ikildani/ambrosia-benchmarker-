@@ -1178,8 +1178,17 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     modifiers.push({ name: comboData?.label ?? input.combinationPotential, multiplier: comboMultiplier, context: comboData?.context });
   }
 
-  // Get competitive position multiplier
-  const compData = benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
+  // Get competitive position multiplier. R72: prefer the TA-specific
+  // override in competitivePositionByTA when present (caps rareDisease
+  // firstInClass at +15% because rare-disease phase baselines already
+  // structurally assume first-in-class positioning — most orphan
+  // indications have no prior drugs — so the generic +25% FIC
+  // multiplier double-counts the premium). Fall back to the global
+  // competitivePosition map for TAs without an override.
+  const competitivePositionByTA = benchmarks.multiplierConfig.competitivePositionByTA;
+  const taCompMap = competitivePositionByTA?.[input.therapeuticArea];
+  const compData = taCompMap?.[input.competitivePosition]
+    ?? benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
   const competitiveMultiplier = compData?.multiplier ?? 1.0;
   if (competitiveMultiplier !== 1.0) {
     modifiers.push({ name: compData?.label ?? input.competitivePosition, multiplier: competitiveMultiplier, context: compData?.context });

@@ -1653,3 +1653,56 @@ Movements are modest at the full-corpus level because only one of the five entri
 
 **Files touched:** `data/comparable-deals-extended.ts` (+5 entries after `rare-020`), `__tests__/backtest/baseline-errors.json` (regenerated).
 
+---
+
+## Round 72 — TA-aware competitive-position premium (rareDisease FIC cap, 2026-04-15)
+
+**Problem:** The production quick-calculator at `lib/calculations.ts:1182` applied a flat `competitivePosition.firstInClass: 1.25` multiplier across all therapeutic areas. For rare disease, this double-counts: **most orphan indications are structurally first-in-class by default** (no prior drugs in the indication), so the rare-disease phase baselines already bake in FIC positioning as their reference case. Stacking the generic +25% FIC premium on top over-values rare-disease first-in-class assets relative to comparable-phase non-FIC rare assets.
+
+Note on scope: `lib/financial/pos-tables.ts:1541` also defines a `COMPETITIVE_SHARE_ADJUSTMENT` object with `firstInClass: 1.40`, but a full-codebase grep confirms it's **dead code** (zero consumer imports, only referenced in a comment in `lib/financial/types.ts:87`). The live multiplier consumed by the production calculator is in `data/benchmarks.json` at `multiplierConfig.competitivePosition`. R72 targets the live path only; the dead constant in pos-tables.ts is left as-is to avoid churn.
+
+**Change:** Added `multiplierConfig.competitivePositionByTA` to `data/benchmarks.json` as a new sibling of `competitivePosition`. Only `rareDisease` is populated initially:
+
+```json
+"competitivePositionByTA": {
+  "rareDisease": {
+    "firstInClass":   { "multiplier": 1.15, "label": "First-in-class (Rare — premium capped)" },
+    "firstToPivotal": { "multiplier": 1.10, "label": "First to pivotal (Rare)" },
+    "bestInClass":    { "multiplier": 1.08, "label": "Best-in-class (Rare)" }
+  }
+}
+```
+
+Rationale per position:
+- **firstInClass** 1.25 → 1.15 (−10pp): cap premium for true novelty above the already-FIC-like orphan baseline
+- **firstToPivotal** 1.15 → 1.10 (−5pp): pivotal-timing premium tempered in orphan indications where pivotal scarcity is structural, not competitive
+- **bestInClass** 1.10 → 1.08 (−2pp): differentiation leverage diluted in orphan markets with captive patient populations
+
+Other positions (`racing`, `behind`, `crowded`) deliberately unchanged — the crowded/behind positions should continue to impose full penalties, since they represent genuine competitive disadvantage regardless of orphan status.
+
+**Lookup** — extended `lib/calculations.ts:1182` with TA-aware fallback:
+
+```ts
+const taCompMap = benchmarks.multiplierConfig.competitivePositionByTA?.[input.therapeuticArea];
+const compData = taCompMap?.[input.competitivePosition]
+  ?? benchmarks.multiplierConfig.competitivePosition[input.competitivePosition];
+```
+
+Other TAs (oncology, immunology, neurology, ...) fall through to the global `competitivePosition` map cleanly — zero behavior change outside rare disease. `competitivePositionByTA` is optional in the `Benchmarks` interface so code that instantiates partial Benchmarks objects isn't broken.
+
+**Impact** — example: phase 2 rare-disease small-molecule FIC asset through the production quick-calculator:
+
+| Layer | Pre-R68 | R68 (downshift) | R69 (chronic routing) | R72 (FIC cap) |
+|---|---:|---:|---:|---:|
+| phase baseline (upfront median) | $150M | $105M | $118M | $118M |
+| × competitivePosition FIC multiplier | × 1.25 | × 1.25 | × 1.25 | × **1.15** |
+| = upfront median recommended | $188M | $131M | $148M | $136M |
+
+Metadata: version 5.4 → 5.5.
+
+**Tests:** 191/191 passing (golden masters + data accuracy + financial properties). Golden masters don't drift because they exercise the rNPV engine (separate codepath from `lib/calculations.ts`). Data accuracy and financial properties tests pass because `competitivePositionByTA` is additive and the fallback preserves all non-rare-disease behavior. Zero TS errors in changed files.
+
+**Files touched:** `data/benchmarks.json` (+ `competitivePositionByTA.rareDisease`; metadata bump), `lib/benchmarks.ts` (added optional field to `multiplierConfig`), `lib/calculations.ts` (TA-aware lookup with fallback).
+
+**End of calibration series R68-R72.** Rounds 68/69/72 act on the production quick-calculator path (`lib/calculations.ts` + `data/benchmarks.json`). Rounds 70/71 act on the rNPV deal-backtest harness (`lib/financial/backtest/deal-backtest.ts` + `data/comparable-deals-extended.ts`). The rNPV engine itself was deliberately not modified — its rare-disease calibration was already reasonable (meanSigned=+9% pre-R70, tightening after recency weighting + bust-era comps).
+
