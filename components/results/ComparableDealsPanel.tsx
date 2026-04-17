@@ -208,7 +208,8 @@ export function ComparableDealsPanel(props: Props) {
       <div className="mt-3 pt-3 border-t border-slate-700/30 text-[11px] leading-relaxed text-slate-500">
         <span className="font-semibold text-slate-400">Directional benchmark:</span>{' '}
         your deal&apos;s actual value falls within the 25th–75th percentile of
-        similar disclosed comparables for ~72% of backtested deals. This is a
+        similar disclosed comparables. Ranges are wide by nature — biopharma deal
+        upfronts genuinely span $20M to $1B+ within any TA segment. This is a
         decision-support tool, not a forecast — for deal-specific predictive
         modeling, see AlaricAI.
       </div>

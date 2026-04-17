@@ -162,11 +162,13 @@ export function DirectionalRangeHero({
         <span className="rounded-full bg-slate-700/40 px-2 py-0.5">
           {scopeDescription}
         </span>
-        {hasBenchmark && (
+        {hasBenchmark && p25 != null && p75 != null && (
           <span className="text-slate-500">
-            · Actual deal lands in p25–p75 band for{' '}
-            <span className="font-semibold text-teal-400">72%</span> of backtested
-            comparables
+            · Range spans{' '}
+            <span className="font-mono text-slate-300">
+              {fmtM(p75! - p25!)}
+            </span>
+            {' '}— use as directional ballpark, not a point target
           </span>
         )}
       </div>
