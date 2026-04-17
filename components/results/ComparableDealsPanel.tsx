@@ -80,6 +80,23 @@ function matchLabel(score: number): string {
   return 'Loose match';
 }
 
+function matchStars(score: number): { count: number; color: string } {
+  if (score >= 0.80) return { count: 3, color: 'text-teal-400' };
+  if (score >= 0.60) return { count: 2, color: 'text-cyan-400' };
+  return { count: 1, color: 'text-slate-400' };
+}
+
+function StarBadge({ score }: { score: number }) {
+  const { count, color } = matchStars(score);
+  return (
+    <span className={`inline-flex items-center gap-0.5 ${color}`} aria-label={`${count} star match`}>
+      {Array.from({ length: 3 }, (_, i) => (
+        <span key={i} className={i < count ? '' : 'opacity-20'}>&#9733;</span>
+      ))}
+    </span>
+  );
+}
+
 export function ComparableDealsPanel(props: Props) {
   const comparables: ComparableDealForUI[] = useMemo(
     () =>
@@ -142,19 +159,20 @@ export function ComparableDealsPanel(props: Props) {
         {comparables.map((d, i) => (
           <div
             key={`${d.licensor}-${d.licensee}-${d.year}-${i}`}
-            className="rounded-md border border-slate-700/40 bg-slate-950/30 p-3 hover:bg-slate-950/50 transition-colors"
+            className="rounded-md border border-slate-700/40 bg-slate-800/40 p-3 hover:bg-slate-800/60 transition-colors"
           >
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-semibold text-slate-100">
+                  <span className="font-semibold text-white">
                     {d.licensor}
                   </span>
                   <span className="text-slate-500">→</span>
-                  <span className="font-semibold text-slate-100">
+                  <span className="font-semibold text-white">
                     {d.licensee}
                   </span>
                   <span className="text-xs text-slate-500">· {d.year}</span>
+                  <StarBadge score={d.matchScore} />
                 </div>
                 <div className="mt-0.5 text-xs text-slate-400">
                   {phaseLabel(d.phase)} · {modalityLabel(d.modality)} ·{' '}
@@ -195,9 +213,12 @@ export function ComparableDealsPanel(props: Props) {
                   href={d.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-cyan-400 hover:text-cyan-300 whitespace-nowrap"
+                  className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:text-cyan-300 whitespace-nowrap transition-colors"
                 >
-                  Source ↗
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Source
                 </a>
               )}
             </div>
