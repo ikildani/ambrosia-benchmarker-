@@ -330,14 +330,83 @@ export async function POST(request: NextRequest) {
         console.log('Payment succeeded:', invoice.id);
 
         const invoiceCustomerId = invoice.customer as string;
-        // Normalized to lowercase so the .eq('email', …) lookup matches stored emails.
         const invoiceEmail = invoice.customer_email ? invoice.customer_email.trim().toLowerCase() : null;
         const invoiceSubId = (invoice as unknown as { subscription: string | null }).subscription;
 
-        // Safety net: ensure paying users are Pro regardless of how the subscription was created.
-        // This catches cases where checkout.session.completed was missed or the sub was created in Stripe Dashboard.
+        // ─── R72: One-time invoice Pro activation (3-month engagements) ───
+        // If this is a non-subscription invoice (no sub ID) with engagement
+        // metadata, activate Pro with a 3-month expiration and send
+        // confirmation email. This handles Mehdi-style custom engagements
+        // where payment is via invoice, not subscription.
+        const engagementType = invoice.metadata?.engagement;
+        if (!invoiceSubId && engagementType && invoiceEmail) {
+          const { data: engProfile } = await supabase
+            .from('user_profiles')
+            .select('id, full_name, tier')
+            .eq('email', invoiceEmail)
+            .single();
+
+          if (engProfile) {
+            const now = new Date();
+            // Default 3 months; parse from metadata if present
+            const months = engagementType.includes('6-month') ? 6 : engagementType.includes('12-month') ? 12 : 3;
+            const expiresAt = new Date(now);
+            expiresAt.setMonth(expiresAt.getMonth() + months);
+
+            await supabase
+              .from('user_profiles')
+              .update({
+                tier: 'pro',
+                subscription_status: 'active',
+                stripe_customer_id: invoiceCustomerId,
+                pro_activated_at: now.toISOString(),
+                pro_expires_at: expiresAt.toISOString(),
+                pro_engagement_type: engagementType,
+                updated_at: now.toISOString(),
+              })
+              .eq('id', engProfile.id);
+            console.log(`Pro activated via invoice for ${invoiceEmail}: expires ${expiresAt.toISOString()}`);
+
+            // Send confirmation email
+            try {
+              const { sendProEngagementConfirmation } = await import('@/lib/email/pro-engagement');
+              await sendProEngagementConfirmation({
+                to: invoiceEmail,
+                name: engProfile.full_name || '',
+                expiresAt,
+                months,
+              });
+              console.log(`Pro confirmation email sent to ${invoiceEmail}`);
+            } catch (emailErr) {
+              console.error('Pro confirmation email failed:', emailErr);
+            }
+
+            // Notify admin via Slack
+            notifyProSubscription({
+              email: invoiceEmail,
+            }).catch(err => console.error('Webhook: Slack engagement notification error:', err));
+
+            // Track engagement activation
+            await supabase.from('events').insert({
+              event_type: 'pro_engagement_activated',
+              event_data: {
+                stripe_customer_id: invoiceCustomerId,
+                invoice_id: invoice.id,
+                amount_paid: invoice.amount_paid,
+                currency: invoice.currency,
+                engagement_type: engagementType,
+                months,
+                expires_at: expiresAt.toISOString(),
+              },
+              user_id: engProfile.id,
+              user_tier: 'pro',
+            });
+          }
+          break; // handled — skip the subscription path
+        }
+
+        // ─── Subscription invoice path (existing logic) ───
         if (invoiceSubId && invoiceEmail) {
-          // Try to find and upgrade user by email
           const { data: invoiceProfile } = await supabase
             .from('user_profiles')
             .select('id, tier, stripe_customer_id')
@@ -357,12 +426,10 @@ export async function POST(request: NextRequest) {
               .eq('id', invoiceProfile.id);
             console.log('User upgraded to pro via invoice payment:', invoiceEmail);
 
-            // Notify admin via Slack
             notifyProSubscription({
               email: invoiceEmail,
             }).catch(err => console.error('Webhook: Slack invoice upgrade notification error:', err));
           } else if (invoiceProfile && !invoiceProfile.stripe_customer_id) {
-            // User is already Pro but missing Stripe IDs — backfill them
             await supabase
               .from('user_profiles')
               .update({
