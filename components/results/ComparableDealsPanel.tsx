@@ -173,6 +173,11 @@ export function ComparableDealsPanel(props: Props) {
                   </span>
                   <span className="text-xs text-slate-500">· {d.year}</span>
                   <StarBadge score={d.matchScore} />
+                  {!d.verified && (
+                    <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                      Unverified
+                    </span>
+                  )}
                 </div>
                 <div className="mt-0.5 text-xs text-slate-400">
                   {phaseLabel(d.phase)} · {modalityLabel(d.modality)} ·{' '}

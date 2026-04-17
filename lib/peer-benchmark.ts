@@ -67,6 +67,7 @@ interface MinimalDeal {
   dealType: string;
   headline?: string;
   sourceUrl?: string;
+  verified: boolean;
 }
 
 /** Public shape for the calculator results page. Each match is a real
@@ -89,6 +90,9 @@ export interface ComparableDealForUI {
   matchScore: number;
   /** Human-readable reason this deal was selected. */
   matchReason: string;
+  /** True if human-verified. False = pending/unaudited (show "Unverified"
+   *  badge in UI so users know the data hasn't been confirmed). */
+  verified: boolean;
 }
 
 let cachedCorpus: MinimalDeal[] | null = null;
@@ -121,12 +125,11 @@ function combinedCorpus(): MinimalDeal[] {
       dealType: d.dealType ?? 'license',
       headline: d.headline ?? undefined,
       sourceUrl: (() => {
-        // Extended deals embed the source URL in `source` field as
-        // "press_release — https://..."; extract URL if present.
         const src = d.source ?? '';
         const match = src.match(/(https?:\/\/[^\s]+)/);
         return match ? match[1] : undefined;
       })(),
+      verified: d.verified !== false,
     });
   }
   cachedCorpus = rows;
@@ -252,6 +255,7 @@ export function getClosestComparables(
     sourceUrl: m.deal.sourceUrl,
     matchScore: Math.round(m.score * 100) / 100,
     matchReason: m.reasons.join(' · '),
+    verified: m.deal.verified,
   }));
 }
 
