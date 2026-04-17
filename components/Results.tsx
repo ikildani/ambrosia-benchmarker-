@@ -58,7 +58,8 @@ import { shouldShowResultsTour } from '@/lib/tour';
 import { runFinancialModel, type FinancialModelResult } from '@/lib/financial/run-financial-model';
 import type { CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
 import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity';
-import { findComparableDeals } from '@/lib/comparableDeals';
+// R70: findComparableDeals import removed — inline "Top 3" table replaced
+// by ComparableDealsPanel (structure-aware, ranked, with source URLs).
 import epiData from '@/data/epidemiology.json';
 
 // Dynamic import for TornadoChart (Recharts-heavy, below the fold)
@@ -1479,39 +1480,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           )}
         </div>
 
-        {/* Inline Comparable Deals (top 3, compact — Pro/Report only) */}
-        {hasFullAccess && fullInputs && (() => {
-          const topDeals = findComparableDeals(
-            { therapeuticArea: fullInputs.therapeuticArea, modality: fullInputs.modality, indication: fullInputs.indication, phase: fullInputs.phase, dealType: fullInputs.dealType },
-            3
-          );
-          if (topDeals.length === 0) return null;
-          return (
-            <div className="mt-3 sm:mt-4 rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800">
-              <div className="px-3 py-2 bg-neutral-50 dark:bg-slate-700/50 border-b border-neutral-200 dark:border-slate-600">
-                <p className="text-xs font-semibold text-neutral-600 dark:text-slate-300 uppercase tracking-wider">Top Comparable Deals</p>
-              </div>
-              <table className="w-full text-xs sm:text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-100 dark:border-slate-700 text-neutral-500 dark:text-slate-400">
-                    <th className="text-left px-3 py-1.5 font-medium">Parties</th>
-                    <th className="text-right px-3 py-1.5 font-medium font-mono">Value</th>
-                    <th className="text-right px-3 py-1.5 font-medium font-mono">Year</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
-                  {topDeals.map((d) => (
-                    <tr key={d.id} className="hover:bg-neutral-50 dark:hover:bg-slate-700/50">
-                      <td className="px-3 py-1.5 text-neutral-800 dark:text-slate-200 truncate max-w-[200px]">{d.parties}</td>
-                      <td className="px-3 py-1.5 text-right font-mono font-semibold text-neutral-900 dark:text-white">{d.totalValue}</td>
-                      <td className="px-3 py-1.5 text-right font-mono text-neutral-600 dark:text-slate-400">{d.year}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        })()}
+        {/* R70 (2026-04-16): Removed inline "Top 3 Comparable Deals" table.
+            Replaced by the structure-aware ComparableDealsPanel inside
+            RnpvAnalysis which shows 5-8 ranked deals with match reasoning,
+            source URLs, and deal-structure awareness. The full
+            <ComparableDeals> section below remains as the expanded deep-dive. */}
 
         {/* Interactive Charts Section */}
         <div id={TOUR_STEP_IDS.WATERFALL}>
