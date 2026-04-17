@@ -955,7 +955,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             transition={{ type: 'spring', stiffness: 200, damping: 24 }}
           >
             <WatchlistProvider tier={tier}>
-            <div ref={resultsRef} className="mt-8 results-container scroll-mt-24" aria-live="polite">
+            <div ref={resultsRef} className="mt-8 results-container scroll-mt-24 relative" aria-live="polite">
+              {/* Recalculation overlay — dims old results while new ones compute */}
+              {calc.isCalculating && calc.result && (
+                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+                  <div className="text-teal-400 animate-pulse text-lg font-medium">Recalculating...</div>
+                </div>
+              )}
               <Results
                 result={calc.result}
                 tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
