@@ -581,7 +581,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                       };
                       const groups = modalityMap[state.therapeuticArea] || modalityOptions;
                       return groups.map(g => (
-                        <optgroup key={g.label} label={g.label}>
+                        <optgroup key={g.group} label={g.group}>
                           {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </optgroup>
                       ));
