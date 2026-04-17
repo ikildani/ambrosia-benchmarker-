@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { toast } from 'sonner';
 import type {
   TherapeuticArea,
   Phase,
@@ -109,7 +110,7 @@ type EffectiveTier = 'free' | 'report' | 'pro';
 
 export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
   // ── Custom hooks ───────────────────────────────────────────────────────────
-  const [state, actions] = useCalculatorState();
+  const [state, actions, wasRestored] = useCalculatorState();
   const { trackCalculation, trackParameterChange, sessionId, anonymousId } = useTracking();
   const { user, isAuthenticated, openAuthModal } = useAuth();
   const prefersReducedMotion = useReducedMotion();
@@ -141,6 +142,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const hadPrefillRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const prevResultRef = useRef(calc.result);
+
+  // Show toast when form was restored from localStorage
+  useEffect(() => {
+    if (wasRestored) {
+      toast.info('Form restored from your last session', { duration: 3000 });
+    }
+  }, [wasRestored]);
 
   // Scroll to results when they first appear
   useEffect(() => {

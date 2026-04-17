@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useMemo } from 'react';
+import { useReducer, useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import type {
   TherapeuticArea,
   Phase,
@@ -439,10 +439,86 @@ export interface CalculatorActions {
   dispatch: React.Dispatch<CalculatorAction>;
 }
 
+// ── localStorage persistence ────────────────────────────────────────────────
+
+const STORAGE_KEY = 'calculator-form-state';
+
+/** Fields to persist — excludes UI-only state. */
+const FORM_FIELDS: (keyof CalculatorFormState)[] = [
+  'therapeuticArea', 'phase', 'dealType', 'modality', 'indication', 'territory',
+  'biomarker', 'lineOfTherapy', 'treatmentApproach', 'combinationPotential',
+  'competitivePosition', 'dataQuality', 'regulatoryDesignations',
+  'bbbPenetration', 'diseaseProgression', 'biomarkerValidation',
+  'immuneResetPotential', 'targetSpecificity', 'diseaseSeverity', 'treatmentGoal',
+  'mechanismDifferentiation', 'weightLossEfficacy', 'routeOfAdministration',
+  'comorbidityBreadth', 'metabolicTreatmentApproach',
+  'cvOutcomeBenefit', 'cvTrialEndpoint', 'cvPopulationRisk',
+  'resistanceProfile', 'infectionChronicity', 'publicHealthPriority',
+  'ocularDelivery', 'treatmentDurability', 'visionImpact',
+  'whTargetPopulation', 'whUnmetNeed', 'whRegulatory',
+  'orphanDesignation', 'patientPopulationSize', 'geneticBasis',
+  'hemeLineage', 'transplantEligibility', 'mrdStatus',
+  'skinSeverity', 'chronicityProfile', 'topicalVsSystemic',
+  'giSegment', 'biologicExperience', 'endoscopicEndpoint',
+  'peakSalesOverrideM', 'assetName',
+];
+
+function loadSavedState(): Partial<CalculatorFormState> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Validate it's an object with at least one expected field
+    if (parsed && typeof parsed === 'object' && ('therapeuticArea' in parsed || 'phase' in parsed)) {
+      return parsed;
+    }
+  } catch { /* corrupt data */ }
+  return null;
+}
+
+function saveFormState(state: CalculatorFormState) {
+  if (typeof window === 'undefined') return;
+  try {
+    const toSave: Record<string, unknown> = {};
+    for (const key of FORM_FIELDS) {
+      toSave[key] = state[key];
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch { /* storage full or unavailable */ }
+}
+
+export function clearSavedFormState() {
+  if (typeof window === 'undefined') return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+}
+
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
+export function useCalculatorState(): [CalculatorFormState, CalculatorActions, boolean] {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+  const [wasRestored, setWasRestored] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Restore from localStorage on mount
+  useEffect(() => {
+    const saved = loadSavedState();
+    if (saved && Object.keys(saved).length > 0) {
+      // Only restore if at least one meaningful field was set
+      const hasContent = saved.phase || saved.modality || saved.dealType;
+      if (hasContent) {
+        dispatch({ type: 'BULK_SET', fields: saved });
+        setWasRestored(true);
+      }
+    }
+  }, []);
+
+  // Debounce-save to localStorage on every state change (300ms)
+  useEffect(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => saveFormState(state), 300);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [state]);
 
   const actions: CalculatorActions = useMemo(() => ({
     setTherapeuticArea: (v) => dispatch({ type: 'SET_FIELD', field: 'therapeuticArea', value: v }),
@@ -503,9 +579,9 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     clearHighlights: () => dispatch({ type: 'CLEAR_HIGHLIGHTS' }),
     bulkSet: (fields) => dispatch({ type: 'BULK_SET', fields }),
     switchTherapeuticArea: (area) => dispatch({ type: 'SET_THERAPEUTIC_AREA', area }),
-    reset: () => dispatch({ type: 'RESET' }),
+    reset: () => { clearSavedFormState(); dispatch({ type: 'RESET' }); },
     dispatch,
   }), [dispatch]);
 
-  return [state, actions];
+  return [state, actions, wasRestored];
 }

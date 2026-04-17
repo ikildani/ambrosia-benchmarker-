@@ -12,6 +12,7 @@ import {
 import { incrementUsage, getUsage } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
+import { clearSavedFormState } from './useCalculatorState';
 
 /** Check if minimum fields are filled for quick-calc (phase + modality required).
  *  dealType and indication will use smart defaults if not explicitly set. */
@@ -252,8 +253,9 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
         hasPDF: false,
       });
 
-      // Clear wizard progress
+      // Clear wizard progress and saved form state (fresh start next time)
       sessionStorage.removeItem('wizard_progress');
+      clearSavedFormState();
 
       // Increment usage + check if limit reached (free tier only)
       if (tier === 'free') {
