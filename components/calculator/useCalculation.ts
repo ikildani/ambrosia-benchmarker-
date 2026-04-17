@@ -143,137 +143,133 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     setSaveError(null);
     setCalculationError(null);
 
-    requestAnimationFrame(() => {
-      setTimeout(async () => {
-        try {
-          const input = buildCalculationInput(state);
-          const calculatedResult = calculateDealTerms(input);
-          setResult(calculatedResult);
+    try {
+      const input = buildCalculationInput(state);
+      const calculatedResult = calculateDealTerms(input);
+      setResult(calculatedResult);
 
-          calculationCountRef.current += 1;
+      calculationCountRef.current += 1;
 
-          // Track calculation event
-          trackCalculation(
-            {
-              modality: state.modality || 'smallMolecule',
-              development_phase: state.phase || 'phase2',
-              indication_category: (state.indication || 'lung_nsclc').split('_')[0],
-              indication_specific: state.indication || 'lung_nsclc',
-              territory_scope: state.territory,
-              deal_type: state.dealType || 'licensing',
-            },
-            {
-              upfront_low: calculatedResult.terms.upfront.low,
-              upfront_mid: calculatedResult.terms.upfront.median,
-              upfront_high: calculatedResult.terms.upfront.high,
-              milestones_total: calculatedResult.terms.devMilestones.median +
-                calculatedResult.terms.regMilestones.median +
-                calculatedResult.terms.commMilestones.median,
-              royalty_low: calculatedResult.tieredRoyalties.base.low,
-              royalty_high: calculatedResult.tieredRoyalties.highTier.high,
-              total_deal_value_low: calculatedResult.terms.totalDealValue.low,
-              total_deal_value_high: calculatedResult.terms.totalDealValue.high,
-            },
-            calculationCountRef.current,
-          );
+      // Track calculation event (non-blocking)
+      trackCalculation(
+        {
+          modality: state.modality || 'smallMolecule',
+          development_phase: state.phase || 'phase2',
+          indication_category: (state.indication || 'lung_nsclc').split('_')[0],
+          indication_specific: state.indication || 'lung_nsclc',
+          territory_scope: state.territory,
+          deal_type: state.dealType || 'licensing',
+        },
+        {
+          upfront_low: calculatedResult.terms.upfront.low,
+          upfront_mid: calculatedResult.terms.upfront.median,
+          upfront_high: calculatedResult.terms.upfront.high,
+          milestones_total: calculatedResult.terms.devMilestones.median +
+            calculatedResult.terms.regMilestones.median +
+            calculatedResult.terms.commMilestones.median,
+          royalty_low: calculatedResult.tieredRoyalties.base.low,
+          royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+          total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+          total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+        },
+        calculationCountRef.current,
+      );
 
-          // Save calculation to database (non-blocking)
-          fetch('/api/calculations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              session_id: sessionId,
-              anonymous_id: anonymousId,
-              user_id: isAuthenticated && userId ? userId : null,
-              therapeutic_area: state.therapeuticArea,
-              modality: state.modality,
-              development_phase: state.phase,
-              indication_category: state.indication.split('_')[0],
-              indication_specific: state.indication,
-              territory_scope: state.territory,
-              deal_type: state.dealType,
-              outputs: {
-                upfront_low: calculatedResult.terms.upfront.low,
-                upfront_mid: calculatedResult.terms.upfront.median,
-                upfront_high: calculatedResult.terms.upfront.high,
-                milestones_total: calculatedResult.terms.devMilestones.median +
-                  calculatedResult.terms.regMilestones.median +
-                  calculatedResult.terms.commMilestones.median,
-                royalty_low: calculatedResult.tieredRoyalties.base.low,
-                royalty_high: calculatedResult.tieredRoyalties.highTier.high,
-                total_deal_value_low: calculatedResult.terms.totalDealValue.low,
-                total_deal_value_high: calculatedResult.terms.totalDealValue.high,
-              },
-            }),
-          })
-            .then(async (response) => {
-              if (!response.ok) {
-                throw new Error('Server returned an error');
-              }
-            })
-            .catch(error => {
-              console.error('Failed to save calculation to database:', error);
-              toast.warning('Unable to save calculation. Your results are shown but may not be synced.');
-            });
-
-          // Save to local history
-          addToHistory({
-            inputs: {
-              therapeuticArea: state.therapeuticArea,
-              phase: state.phase || 'phase2',
-              modality: state.modality || 'smallMolecule',
-              indication: state.indication || 'lung_nsclc',
-              territory: state.territory,
-              biomarker: state.biomarker,
-              lineOfTherapy: state.lineOfTherapy,
-              treatmentApproach: state.treatmentApproach,
-              combinationPotential: state.combinationPotential,
-              competitivePosition: state.competitivePosition,
-              dataQuality: state.dataQuality,
-              dealType: state.dealType || 'licensing',
-              regulatoryDesignations: state.regulatoryDesignations,
-            },
-            results: {
-              upfrontLow: calculatedResult.terms.upfront.low,
-              upfrontHigh: calculatedResult.terms.upfront.high,
-              upfrontMedian: calculatedResult.terms.upfront.median,
-              totalValueLow: calculatedResult.terms.totalDealValue.low,
-              totalValueHigh: calculatedResult.terms.totalDealValue.high,
-              totalValueMedian: calculatedResult.terms.totalDealValue.median,
-            },
-            labels: calculatedResult.labels,
-            hasPDF: false,
-          });
-
-          // Clear wizard progress
-          sessionStorage.removeItem('wizard_progress');
-
-          // Increment usage + check if limit reached (free tier only)
-          if (tier === 'free') {
-            incrementUsage();
-            calculationCountRef.current++;
-            if (calculationCountRef.current >= FREE_CALC_LIMIT) {
-              setLimitHit(true);
-            }
+      // Save calculation to database (non-blocking background)
+      fetch('/api/calculations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          anonymous_id: anonymousId,
+          user_id: isAuthenticated && userId ? userId : null,
+          therapeutic_area: state.therapeuticArea,
+          modality: state.modality,
+          development_phase: state.phase,
+          indication_category: state.indication.split('_')[0],
+          indication_specific: state.indication,
+          territory_scope: state.territory,
+          deal_type: state.dealType,
+          outputs: {
+            upfront_low: calculatedResult.terms.upfront.low,
+            upfront_mid: calculatedResult.terms.upfront.median,
+            upfront_high: calculatedResult.terms.upfront.high,
+            milestones_total: calculatedResult.terms.devMilestones.median +
+              calculatedResult.terms.regMilestones.median +
+              calculatedResult.terms.commMilestones.median,
+            royalty_low: calculatedResult.tieredRoyalties.base.low,
+            royalty_high: calculatedResult.tieredRoyalties.highTier.high,
+            total_deal_value_low: calculatedResult.terms.totalDealValue.low,
+            total_deal_value_high: calculatedResult.terms.totalDealValue.high,
+          },
+        }),
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error('Server returned an error');
           }
+        })
+        .catch(error => {
+          console.error('Failed to save calculation to database:', error);
+          toast.warning('Unable to save calculation. Your results are shown but may not be synced.');
+        });
 
-          // Scroll to results
-          setTimeout(() => {
-            document.querySelector('.results-container')?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-            });
-          }, 100);
-        } catch (error) {
-          console.error('Calculation error:', error);
-          setCalculationError('Calculation failed. Please check your inputs and try again.');
-          toast.error('Calculation failed. Please try again.');
-        } finally {
-          setIsCalculating(false);
-          calculatingRef.current = false;
+      // Save to local history (sync, fast)
+      addToHistory({
+        inputs: {
+          therapeuticArea: state.therapeuticArea,
+          phase: state.phase || 'phase2',
+          modality: state.modality || 'smallMolecule',
+          indication: state.indication || 'lung_nsclc',
+          territory: state.territory,
+          biomarker: state.biomarker,
+          lineOfTherapy: state.lineOfTherapy,
+          treatmentApproach: state.treatmentApproach,
+          combinationPotential: state.combinationPotential,
+          competitivePosition: state.competitivePosition,
+          dataQuality: state.dataQuality,
+          dealType: state.dealType || 'licensing',
+          regulatoryDesignations: state.regulatoryDesignations,
+        },
+        results: {
+          upfrontLow: calculatedResult.terms.upfront.low,
+          upfrontHigh: calculatedResult.terms.upfront.high,
+          upfrontMedian: calculatedResult.terms.upfront.median,
+          totalValueLow: calculatedResult.terms.totalDealValue.low,
+          totalValueHigh: calculatedResult.terms.totalDealValue.high,
+          totalValueMedian: calculatedResult.terms.totalDealValue.median,
+        },
+        labels: calculatedResult.labels,
+        hasPDF: false,
+      });
+
+      // Clear wizard progress
+      sessionStorage.removeItem('wizard_progress');
+
+      // Increment usage + check if limit reached (free tier only)
+      if (tier === 'free') {
+        incrementUsage();
+        calculationCountRef.current++;
+        if (calculationCountRef.current >= FREE_CALC_LIMIT) {
+          setLimitHit(true);
         }
-      }, 600);
-    });
+      }
+
+      // Scroll to results (deferred to next frame so DOM updates first)
+      requestAnimationFrame(() => {
+        document.querySelector('.results-container')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
+    } catch (error) {
+      console.error('Calculation error:', error);
+      setCalculationError('Calculation failed. Please check your inputs and try again.');
+      toast.error('Calculation failed. Please try again.');
+    } finally {
+      setIsCalculating(false);
+      calculatingRef.current = false;
+    }
   }, [isAuthenticated, isCalculating, tier, sessionId, anonymousId, userId, trackCalculation, openAuthModal]);
 
   const handleSensitivityApply = useCallback((
