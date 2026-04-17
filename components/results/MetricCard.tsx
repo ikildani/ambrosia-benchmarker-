@@ -5,6 +5,11 @@ import DrillDownPanel from './DrillDownPanel';
 import InfoTooltip from '@/components/calculator/InfoTooltip';
 import AnimatedValue from './AnimatedValue';
 
+interface PercentileContext {
+  percentile: number; // 0-100, where the user's value falls
+  label: string; // e.g., "below market", "at market", "above market"
+}
+
 interface MetricCardProps {
   title: string;
   icon: React.ReactNode;
@@ -27,6 +32,8 @@ interface MetricCardProps {
   previousValue?: number;
   currentValue?: number;
   warningText?: string;
+  percentileContext?: PercentileContext;
+  confidenceLevel?: 'high' | 'medium' | 'low';
 }
 
 const badgeColorClasses: Record<string, string> = {
@@ -83,7 +90,9 @@ function MetricCardInner({
   contextLine,
   previousValue,
   currentValue,
-  warningText
+  warningText,
+  percentileContext,
+  confidenceLevel
 }: MetricCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -131,10 +140,23 @@ function MetricCardInner({
               </div>
             </div>
             <div>
-              <p className="text-sm xl:text-[15px] font-semibold text-neutral-800 dark:text-slate-100 leading-tight">
-                {title}
-                {tooltipContent && <InfoTooltip content={tooltipContent} />}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm xl:text-[15px] font-semibold text-neutral-800 dark:text-slate-100 leading-tight">
+                  {title}
+                  {tooltipContent && <InfoTooltip content={tooltipContent} />}
+                </p>
+                {confidenceLevel && (
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border whitespace-nowrap ${
+                    confidenceLevel === 'high'
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      : confidenceLevel === 'medium'
+                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                      : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                  }`}>
+                    {confidenceLevel === 'high' ? 'High confidence' : confidenceLevel === 'medium' ? 'Moderate confidence' : 'Estimate range'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
@@ -203,6 +225,28 @@ function MetricCardInner({
             transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 100, damping: 20, delay: idx * 0.05 + 0.2 }}
           />
         </div>
+
+        {/* Percentile context — "You vs. Market" */}
+        {percentileContext && (
+          <div className="mt-3">
+            <div className="relative h-1.5 bg-slate-200 dark:bg-slate-700/60 rounded-full overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/30 via-teal-400/30 to-emerald-400/30 rounded-full" />
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-100 border-2 border-teal-500 shadow-sm"
+                style={{ left: `calc(${Math.min(Math.max(percentileContext.percentile, 2), 98)}% - 5px)` }}
+              />
+            </div>
+            <p className={`mt-1.5 text-xs ${
+              percentileContext.percentile < 25
+                ? 'text-amber-400'
+                : percentileContext.percentile > 75
+                ? 'text-emerald-400'
+                : 'text-teal-400'
+            }`}>
+              Your estimate: p{Math.round(percentileContext.percentile)} — {percentileContext.label}
+            </p>
+          </div>
+        )}
 
         {/* Context line */}
         {contextLine && (

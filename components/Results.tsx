@@ -61,6 +61,7 @@ import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity
 // R70: findComparableDeals import removed — inline "Top 3" table replaced
 // by ComparableDealsPanel (structure-aware, ranked, with source URLs).
 import epiData from '@/data/epidemiology.json';
+import { computePeerBenchmark } from '@/lib/peer-benchmark';
 
 // Dynamic import for TornadoChart (Recharts-heavy, below the fold)
 const TornadoChart = dynamic(() => import('./TornadoChart'), { ssr: false, loading: () => <ChartSkeleton /> });
@@ -498,6 +499,49 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     }
     return map;
   }, [result.warnings]);
+
+  // Peer benchmark for percentile context on MetricCards
+  const peerBenchmark = useMemo(() => {
+    if (!fullInputs) return null;
+    const bm = computePeerBenchmark({
+      therapeuticArea: fullInputs.therapeuticArea,
+      phase: fullInputs.phase,
+      modality: fullInputs.modality,
+      dealType: fullInputs.dealType,
+      territory: fullInputs.territory,
+    });
+    return bm.n >= 3 ? bm : null;
+  }, [fullInputs]);
+
+  // Compute percentile context for a given metric value against the peer benchmark upfront percentiles
+  const getPercentileContext = useCallback((metricMedian: number): { percentile: number; label: string } | undefined => {
+    if (!peerBenchmark) return undefined;
+    const { p10, p25, p50, p75, p90 } = peerBenchmark.upfrontPercentiles;
+    // Linear interpolation to estimate percentile
+    const points = [
+      { p: 10, v: p10 },
+      { p: 25, v: p25 },
+      { p: 50, v: p50 },
+      { p: 75, v: p75 },
+      { p: 90, v: p90 },
+    ];
+    let percentile = 50;
+    if (metricMedian <= points[0].v) {
+      percentile = points[0].p * (metricMedian / Math.max(points[0].v, 1));
+    } else if (metricMedian >= points[points.length - 1].v) {
+      percentile = Math.min(99, points[points.length - 1].p + (10 * (metricMedian - points[points.length - 1].v) / Math.max(points[points.length - 1].v, 1)));
+    } else {
+      for (let i = 0; i < points.length - 1; i++) {
+        if (metricMedian >= points[i].v && metricMedian <= points[i + 1].v) {
+          const ratio = (metricMedian - points[i].v) / Math.max(points[i + 1].v - points[i].v, 1);
+          percentile = points[i].p + ratio * (points[i + 1].p - points[i].p);
+          break;
+        }
+      }
+    }
+    const label = percentile < 25 ? 'below market' : percentile > 75 ? 'above market' : 'at market';
+    return { percentile, label };
+  }, [peerBenchmark]);
 
   // Deal-type-aware labels — prevents licensing terminology from leaking into acquisitions, options, etc.
   const metricBadges = getMetricBadges(dealTypeLabels);
@@ -1279,6 +1323,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             previousValue={previousTerms?.upfront}
             currentValue={terms.upfront.median}
             warningText={fieldWarnings['upfront']}
+            percentileContext={getPercentileContext(terms.upfront.median)}
+            confidenceLevel="high"
           />
 
           {/* Total Deal Value — locked for free users */}
@@ -1309,6 +1355,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             previousValue={previousTerms?.totalDealValue}
             currentValue={terms.totalDealValue.median}
             warningText={fieldWarnings['totalDealValue']}
+            percentileContext={getPercentileContext(terms.totalDealValue.median)}
+            confidenceLevel="high"
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '100ms' }} onClick={onBuyReport}>
@@ -1335,6 +1383,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.devMilestones} isExpanded={expandedCard === 'devMilestones'} onToggle={() => toggleCard('devMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={2} tooltipContent={metricTooltips.devMilestones}
             previousValue={previousTerms?.devMilestones} currentValue={terms.devMilestones.median} warningText={fieldWarnings['devMilestones'] || fieldWarnings['milestones']}
+            confidenceLevel="medium"
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '200ms' }} onClick={onBuyReport}>
@@ -1357,6 +1406,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.regMilestones} isExpanded={expandedCard === 'regMilestones'} onToggle={() => toggleCard('regMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={3} tooltipContent={metricTooltips.regMilestones}
             previousValue={previousTerms?.regMilestones} currentValue={terms.regMilestones.median} warningText={fieldWarnings['regMilestones']}
+            confidenceLevel="medium"
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '300ms' }} onClick={onBuyReport}>
@@ -1379,6 +1429,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.commMilestones} isExpanded={expandedCard === 'commMilestones'} onToggle={() => toggleCard('commMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={4} tooltipContent={metricTooltips.commMilestones}
             previousValue={previousTerms?.commMilestones} currentValue={terms.commMilestones.median} warningText={fieldWarnings['commMilestones']}
+            confidenceLevel="low"
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '400ms' }} onClick={onBuyReport}>
