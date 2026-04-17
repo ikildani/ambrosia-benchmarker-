@@ -161,7 +161,7 @@ export default function AccuracyDashboard() {
                 Core ±50% hit rate (model view)
               </div>
               <div className="mt-2 font-mono text-3xl font-bold text-cyan-200">
-                {pct(data.coreScope.hitRate50)}
+                {pct(data.coreScope.hit50)}
               </div>
               <div className="mt-1 text-[11px] text-slate-400">
                 of {data.coreScope.n} core-scope deals — within half to double of actual
