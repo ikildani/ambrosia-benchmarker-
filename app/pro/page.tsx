@@ -909,65 +909,63 @@ export default function ProPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            TEAM TIER — multi-seat CTA
+            TEAM TIER — multi-seat CTA (A+ redesign)
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
-          <div className="max-w-5xl mx-auto">
-            <div className="relative bg-gradient-to-br from-[#0d1420] to-[#0f1628] border border-indigo-500/15 rounded-2xl overflow-hidden">
-              {/* Ambient glow */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_20%,rgba(99,102,241,0.08),transparent)]" />
+        <section className="py-24 px-4 border-t border-white/[0.04]">
+          <div className="max-w-6xl mx-auto">
+            {/* Section header */}
+            <div className="text-center mb-14">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-5">
+                <Users className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Team Access</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.1]">
+                One platform.<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400">Every seat at the deal table.</span>
+              </h2>
+              <p className="mt-5 text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Multi-seat Pro access for BD, Corp Dev, and Alliance Management teams — per-seat pricing, shared partner intelligence, pre-loaded against your pipeline.
+              </p>
+            </div>
 
-              <div className="relative grid lg:grid-cols-2 gap-12 p-10 lg:p-14">
-                {/* Left: Copy */}
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
-                    <Users className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Team Access</span>
+            {/* Feature grid — 4 cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+              {[
+                { icon: Layers, title: 'Full Pro per seat', desc: 'All 14 engines, unlimited calculations, PDF & Excel exports for every team member.', accent: 'from-indigo-500/20 to-purple-500/20', border: 'border-indigo-500/20', iconColor: 'text-indigo-400' },
+                { icon: Users, title: 'Dedicated onboarding', desc: '30-minute kickoff walkthrough. Your team runs live calculations before the session ends.', accent: 'from-purple-500/20 to-fuchsia-500/20', border: 'border-purple-500/20', iconColor: 'text-purple-400' },
+                { icon: Search, title: 'Pre-loaded intelligence', desc: 'Partner profiles and counterparty data configured for your therapeutic focus from day one.', accent: 'from-cyan-500/20 to-indigo-500/20', border: 'border-cyan-500/20', iconColor: 'text-cyan-400' },
+                { icon: Shield, title: 'Direct support line', desc: 'Email access to Ambrosia for engine questions, methodology queries, and deal-readiness support.', accent: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/20', iconColor: 'text-teal-400' },
+              ].map(item => (
+                <div key={item.title} className={`group relative bg-[#0d1420] border ${item.border} rounded-2xl p-7 hover:border-indigo-500/30 transition-all duration-300 overflow-hidden`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${item.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                  <div className="relative">
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.accent} border ${item.border} flex items-center justify-center mb-5`}>
+                      <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+                    </div>
+                    <h3 className="text-base font-semibold text-white mb-2">{item.title}</h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
                   </div>
-
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white tracking-tight leading-[1.15]">
-                    Multi-seat Pro access<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">for your deal team.</span>
-                  </h2>
-
-                  <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-md">
-                    Per-seat pricing for BD, Corp Dev, and Alliance Management teams.
-                    Every seat gets the full 14-engine platform — same access, shared partner intelligence,
-                    pre-loaded against your pipeline.
-                  </p>
                 </div>
+              ))}
+            </div>
 
-                {/* Right: What's included */}
-                <div className="flex flex-col justify-center">
-                  <div className="space-y-4">
-                    {[
-                      { title: 'Full Pro per seat', desc: 'All 14 engines, unlimited calculations, PDF & Excel exports' },
-                      { title: 'Dedicated onboarding', desc: '30-minute kickoff walkthrough for your team' },
-                      { title: 'Pre-loaded intelligence', desc: 'Partner profiles and counterparty data configured for your therapeutic focus' },
-                      { title: 'Direct support line', desc: 'Email access to the Ambrosia team for engine questions during the engagement' },
-                    ].map(item => (
-                      <div key={item.title} className="flex items-start gap-3">
-                        <div className="mt-0.5 w-5 h-5 rounded-full bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-indigo-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">{item.title}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-8">
-                    <Link
-                      href="mailto:ikildani@ambrosiaventures.co?subject=Team%20access%20—%20Ambrosia%20Benchmarker&body=Hi%20Issa%2C%0A%0AWe%27re%20interested%20in%20multi-seat%20Pro%20access%20for%20our%20team.%0A%0ATeam%20size%3A%20%0ATherapeutic%20focus%3A%20%0ATimeline%3A%20%0A%0AThanks"
-                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-indigo-500 text-white text-base font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:bg-indigo-400 hover:-translate-y-0.5 transition-all"
-                    >
-                      Contact for team pricing
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                    <p className="text-xs text-slate-600 mt-3">Typically responds same day</p>
-                  </div>
+            {/* CTA banner */}
+            <div className="relative bg-gradient-to-r from-indigo-500/[0.08] via-purple-500/[0.06] to-indigo-500/[0.08] border border-indigo-500/15 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(99,102,241,0.06),transparent)]" />
+              <div className="relative flex flex-col sm:flex-row items-center justify-between gap-8 px-10 py-10 lg:px-16">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Ready to bring your team on?</h3>
+                  <p className="text-slate-400 mt-2 max-w-lg">Send your team size, therapeutic focus, and timeline. Pricing and access delivered same day.</p>
+                </div>
+                <div className="flex flex-col items-center sm:items-end gap-3 flex-shrink-0">
+                  <Link
+                    href="mailto:ikildani@ambrosiaventures.co?subject=Team%20access%20—%20Ambrosia%20Benchmarker&body=Hi%20Issa%2C%0A%0AWe%27re%20interested%20in%20multi-seat%20Pro%20access%20for%20our%20team.%0A%0ATeam%20size%3A%20%0ATherapeutic%20focus%3A%20%0ATimeline%3A%20%0A%0AThanks"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 bg-indigo-500 text-white text-base font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-400 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    Contact for team pricing
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <p className="text-xs text-slate-500">Typically responds same day</p>
                 </div>
               </div>
             </div>
