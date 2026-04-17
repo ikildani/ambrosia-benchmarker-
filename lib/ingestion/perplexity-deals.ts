@@ -17,7 +17,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
 import { validateExtractedDeal } from './deal-extraction-validator';
 
-const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
+// Perplexity uses the OpenAI-compatible Chat Completions format.
+// Previously used /v1/responses which returned 400 after API update.
+const PERPLEXITY_API = 'https://api.perplexity.ai/chat/completions';
 
 interface PerplexityDeal {
   licensor: string;
@@ -141,17 +143,23 @@ async function queryPerplexityForDeals(
     },
     body: JSON.stringify({
       model: 'sonar-pro',
-      input: query,
+      messages: [{ role: 'user', content: query }],
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Perplexity API error: ${response.status}`);
+    const body = await response.text().catch(() => '');
+    throw new Error(`Perplexity API error: ${response.status} ${body.substring(0, 200)}`);
   }
 
   const data = await response.json();
 
-  // Extract text from response
+  // Chat Completions format: data.choices[0].message.content
+  if (data.choices?.[0]?.message?.content) {
+    return data.choices[0].message.content;
+  }
+
+  // Fallback: try the Responses API format (legacy)
   let text = '';
   for (const item of data.output || []) {
     if (item.type === 'message') {
