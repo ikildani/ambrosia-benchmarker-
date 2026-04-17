@@ -844,15 +844,24 @@ const EARLY_STAGE_FLOOR_M: Record<string, number> = {
   //   phase1             $75-200M  (Vertex-Editas $100M, Lilly-Avilar $150M)
   //   phase1_2           $75-200M  (rare — treated as phase1)
   discovery: 30,
-  preclinical: 75,   // R50: was 50 — raised to target -27% signed
-  phase1: 100,       // R54 (2026-04-14): lowered back from 125 → 100
-                     // phase1 signed was +37.3% (overshooting). Audit showed
-                     // 33/58 deals landed $100-150M where floor compressed
-                     // small-TAM deals into that band, inflating predictions.
-                     // Modality-gated floor (R54 first attempt) over-corrected
-                     // to −38% signed by removing floor from non-platform.
-                     // Middle ground: keep floor universal but lower it.
+  preclinical: 75,
+  phase1: 100,
   phase1_2: 100,
+  // R70 (2026-04-16): Phase 2 option-value floor. Backtest audit showed 5
+  // extreme undershoots (PTC→Novartis $1B actual/$26M predicted, Alector→GSK
+  // $700M/$16M, Kartos→Roche $200M/$3M, AC Immune→Takeda $100M/$0, Stoke→
+  // Biogen $165M/$0). All are phase2 deals in high-attrition TAs (neurology,
+  // hematology) where rNPV collapses due to 12-30% cumulative PoS × high
+  // COGS. Real-world pricing: buyers pay strategic optionality premium for
+  // development progress — no disclosed phase2 licensing deal in the 2020-
+  // 2026 corpus has an upfront below $20M, and the median is ~$100M.
+  // Floor at $60M is conservative: prevents the $0-$26M collapse while
+  // leaving headroom for the engine to differentiate high vs low within
+  // the phase2 band. Applied via max(rawUpfront, floor).
+  phase2: 60,
+  phase_2: 60,
+  phase2_3: 70,
+  phase_2_3: 70,
 };
 
 function applyEarlyStageFloor(rawUpfront: number, phase: string): number {

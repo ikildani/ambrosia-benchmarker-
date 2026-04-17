@@ -862,8 +862,30 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   };
   const upfrontClamped = clampRange(upfrontPre, ceiling.ceilingUpfront);
   const totalDealClamped = clampRange(totalDealPre, ceiling.ceilingTDV);
+  // R70 (2026-04-16): Phase 2 option-value floor for the PRODUCTION ENGINE.
+  // rNPV collapses to near-zero for phase2 deals in high-attrition TAs
+  // (neurology 12.8% cumulative PoS, hematology 28.5%) because cumulative
+  // PoS × high COGS × long timelines = negligible risk-adjusted NPV. Real
+  // phase2 licensing deals are $60M-$1B because buyers pay for development
+  // optionality. Without this floor, the calculator shows "$0 upfront" for
+  // neurology phase2 assets — instantly losing credibility with any BD user.
+  //
+  // Floor is conservative at $60M (below the $100M corpus median for phase2)
+  // and only triggers when the calibrated prediction is below that level.
+  // Phase 3 has no floor because rNPV is typically positive at that stage.
+  const PHASE2_OPTION_FLOOR_M: Record<string, number> = {
+    phase2: 60,
+    phase2_3: 70,
+  };
+  const phase2Floor = PHASE2_OPTION_FLOOR_M[phase] ?? 0;
+  const flooredUpfront = {
+    low: phase2Floor > 0 ? Math.max(upfrontClamped.low, phase2Floor * 0.6) : upfrontClamped.low,
+    median: phase2Floor > 0 ? Math.max(upfrontClamped.median, phase2Floor) : upfrontClamped.median,
+    high: phase2Floor > 0 ? Math.max(upfrontClamped.high, phase2Floor * 1.5) : upfrontClamped.high,
+  };
+
   const impliedDealValue: RNPVResult['impliedDealValue'] = {
-    upfront: { low: upfrontClamped.low, median: upfrontClamped.median, high: upfrontClamped.high },
+    upfront: flooredUpfront,
     totalDeal: { low: totalDealClamped.low, median: totalDealClamped.median, high: totalDealClamped.high },
   };
 

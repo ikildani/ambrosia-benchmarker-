@@ -380,6 +380,23 @@ export function calculateBuyerSpecificValuation(
     high: genericUpfront.high * upfrontMultiplier,
   };
 
+  // R70 (2026-04-16): Phase 2 option-value floor for buyer-specific
+  // predictions. When rNPV collapses to near-zero (neurology/hematology
+  // with low cumulative PoS), the multiplicative strategic premium
+  // produces near-zero buyer-specific values ($10M × 1.49 = $15M). Real
+  // phase2 deals with named buyers are $60M-$1B. Floor ensures the
+  // buyer-specific output is at least as credible as the engine's phase2
+  // floor, preserving differentiation from the strategic premium above it.
+  if (rnpvResult.cumulativePoS < 0.35 && buyerUpfront.median < 60) {
+    const floor = 60;
+    buyerUpfront.low = Math.max(buyerUpfront.low, floor * 0.6);
+    buyerUpfront.median = Math.max(buyerUpfront.median, floor);
+    buyerUpfront.high = Math.max(buyerUpfront.high, floor * 1.5);
+    buyerSpecificDealValue.low = Math.max(buyerSpecificDealValue.low, floor * 2);
+    buyerSpecificDealValue.median = Math.max(buyerSpecificDealValue.median, floor * 4);
+    buyerSpecificDealValue.high = Math.max(buyerSpecificDealValue.high, floor * 6);
+  }
+
   const upfrontPremium = buyerUpfront.median - genericUpfront.median;
 
   // ── 8. Negotiation leverage assessment ──

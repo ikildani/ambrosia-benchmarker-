@@ -208,6 +208,29 @@ export function calculateCompetitiveDynamics(
   baseResult: RNPVResult,
   pipelineData?: PipelineIntelligence,
 ): CompetitiveDynamicsResult {
+  // R70 (2026-04-16): Guard against near-zero rNPV base. When rNPV
+  // collapses (neurology/hematology phase2 with 12-30% cumulative PoS),
+  // modeling competitive share erosion on a $0-$10M revenue base produces
+  // meaningless fractional results that cascade through downstream engines.
+  // Return a minimal result with an honest narrative instead.
+  if (baseResult.riskAdjustedNPV < 20) {
+    return {
+      competitorTimeline: [],
+      baselineRevenue: [],
+      adjustedRevenue: [],
+      priceIndex: [],
+      volumeIndex: [],
+      peakShareErosion: 0,
+      peakPriceErosion: 0,
+      revenueImpact: 0,
+      volumeImpact: 0,
+      priceImpact: 0,
+      peakErosionYear: 0,
+      confidence: 'low' as const,
+      dataSource: 'calibrated' as const,
+      narrative: `Base rNPV ($${baseResult.riskAdjustedNPV.toFixed(0)}M) is below competitive-dynamics modeling threshold. This asset's deal value is driven by development optionality rather than baseline cash flow — competitive dynamics are less relevant than strategic premium, platform value, and buyer urgency.`,
+    };
+  }
   // Project-relative launch year — cashFlows[i].year uses the same frame
   const launchYear = Math.ceil(baseResult.yearsToMarket);
 
