@@ -1124,65 +1124,6 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         </div>
 
-        {/* Applied Modifiers - Horizontal scroll on mobile */}
-        {modifiers.length > 0 && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
-            <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
-              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              <p className="text-xs sm:text-sm font-semibold text-neutral-700 dark:text-slate-200">Applied Adjustments</p>
-              {modifiers.length > 2 && (
-                <span className="sm:hidden text-xs text-neutral-400 dark:text-slate-500 ml-auto flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  Scroll
-                </span>
-              )}
-            </div>
-            {/* Mobile: horizontal scroll, Desktop: wrap */}
-            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
-              {modifiers.map((mod, idx) => (
-                <div key={idx} className="group relative flex-shrink-0">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium transition-all duration-300 cursor-help ${
-                      mod.multiplier > 1
-                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30'
-                        : mod.multiplier < 1
-                        ? 'bg-warning-50 dark:bg-amber-500/20 text-warning-700 dark:text-amber-300 border border-warning-200 dark:border-amber-500/30'
-                        : 'bg-neutral-50 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600'
-                    }`}
-                  >
-                    {mod.multiplier > 1 ? (
-                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                      </svg>
-                    ) : mod.multiplier < 1 ? (
-                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    ) : null}
-                    <span className="whitespace-nowrap">{mod.name}</span>
-                    {mod.multiplier !== 1 && (
-                      <span className="font-bold whitespace-nowrap">
-                        ({mod.multiplier > 1 ? '+' : ''}{Math.round((mod.multiplier - 1) * 100)}%)
-                      </span>
-                    )}
-                  </span>
-                  {/* Tooltip with context */}
-                  {mod.context && (
-                    <div className="invisible group-hover:visible sm:group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
-                      {mod.context}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800 dark:border-t-slate-700" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Expandable hint for free users */}
         {!hasFullAccess && (
           <div className="mb-4 flex items-center gap-2 text-xs text-neutral-500 dark:text-slate-400">
@@ -1299,7 +1240,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Terms Grid — visible when email captured or authenticated */}
-        <div id={TOUR_STEP_IDS.DEAL_TERMS} className={`grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-7 ${!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro ? 'hidden' : ''}`}>
+        <div id={TOUR_STEP_IDS.DEAL_TERMS} className={`grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-3.5 lg:gap-4 ${!emailSubmitted && !sessionStorage?.getItem?.('email_captured') && !userId && !isPro ? 'hidden' : ''}`}>
           {/* Upfront Payment */}
           <MetricCard
             title={dtl?.upfrontLabel || 'Upfront Payment'}
@@ -1539,6 +1480,46 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
           )}
         </div>
+
+        {/* Applied Adjustments — moved below metric cards for above-fold density */}
+        {modifiers.length > 0 && (
+          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-xl border border-neutral-200 dark:border-slate-600 shadow-inner-soft">
+            <div className="flex items-center gap-2 mb-2">
+              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              <p className="text-xs sm:text-sm font-semibold text-neutral-700 dark:text-slate-200">Applied Adjustments</p>
+            </div>
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
+              {modifiers.map((mod, idx) => (
+                <div key={idx} className="group relative flex-shrink-0">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 cursor-help ${
+                      mod.multiplier > 1
+                        ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30'
+                        : mod.multiplier < 1
+                        ? 'bg-warning-50 dark:bg-amber-500/20 text-warning-700 dark:text-amber-300 border border-warning-200 dark:border-amber-500/30'
+                        : 'bg-neutral-50 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600'
+                    }`}
+                  >
+                    <span className="whitespace-nowrap">{mod.name}</span>
+                    {mod.multiplier !== 1 && (
+                      <span className="font-bold whitespace-nowrap">
+                        ({mod.multiplier > 1 ? '+' : ''}{Math.round((mod.multiplier - 1) * 100)}%)
+                      </span>
+                    )}
+                  </span>
+                  {mod.context && (
+                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
+                      {mod.context}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800 dark:border-t-slate-700" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* R70 (2026-04-16): Removed inline "Top 3 Comparable Deals" table.
             Replaced by the structure-aware ComparableDealsPanel inside

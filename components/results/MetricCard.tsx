@@ -130,7 +130,7 @@ function MetricCardInner({
       initial={prefersReducedMotion ? false : 'hidden'}
       animate="visible"
       whileHover={prefersReducedMotion ? undefined : { y: -2, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className={`group metric-card p-5 sm:p-6 xl:p-7 rounded-xl bg-white dark:bg-slate-800/80 border border-neutral-100 dark:border-slate-700/60 hover:border-teal-200/60 dark:hover:border-teal-500/30 hover:shadow-lg dark:hover:shadow-teal-500/5 transition-all duration-300 ${isExpanded ? 'ring-1 ring-teal-300/50 dark:ring-teal-500/30' : ''}`}
+      className={`group metric-card p-3.5 sm:p-4 xl:p-5 rounded-xl bg-white dark:bg-slate-800/80 border border-neutral-100 dark:border-slate-700/60 hover:border-teal-200/60 dark:hover:border-teal-500/30 hover:shadow-lg dark:hover:shadow-teal-500/5 transition-all duration-300 ${isExpanded ? 'ring-1 ring-teal-300/50 dark:ring-teal-500/30' : ''}`}
     >
       <div
         className={`${(canExpand || drillDown) ? 'cursor-pointer' : ''}`}
@@ -142,9 +142,9 @@ function MetricCardInner({
         onKeyDown={handleHeaderKeyDown}
       >
         {/* Header row */}
-        <div className="flex items-start justify-between gap-3 mb-5">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 sm:w-11 sm:h-11 xl:w-12 xl:h-12 rounded-xl flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-sm`}>
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex-shrink-0 ${iconBgClasses[badgeColor] || iconBgClasses.teal} flex items-center justify-center shadow-sm`}>
               <div className={iconTextClasses[badgeColor] || iconTextClasses.teal}>
                 {icon}
               </div>
@@ -196,8 +196,8 @@ function MetricCardInner({
         </div>
 
         {/* Value */}
-        <div className="relative flex items-center gap-2 mb-3">
-          <p className="text-2xl sm:text-[28px] xl:text-[32px] font-bold text-neutral-900 dark:text-white number-animate tracking-tight">
+        <div className="relative flex items-center gap-2 mb-2">
+          <p className="text-xl sm:text-2xl xl:text-[26px] font-bold text-neutral-900 dark:text-white number-animate tracking-tight">
             {value}
           </p>
           <button
@@ -219,7 +219,7 @@ function MetricCardInner({
         </div>
 
         {/* Expected + change indicator */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-[13px] text-neutral-500 dark:text-slate-400">
             Expected: <span className={`font-bold ${expectedColor}`}>
               {currentValue !== undefined ? (
