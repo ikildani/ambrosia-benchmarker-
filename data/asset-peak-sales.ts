@@ -466,6 +466,76 @@ export const ASSET_PEAK_SALES_TABLE: AssetPeakSalesEntry[] = [
   { brand: 'Rilzabrutinib', inn: 'rilzabrutinib', codes: [], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Sanofi BTK ITP' },
   { brand: 'Epcoritamab', inn: 'epcoritamab', codes: [], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'AbbVie/Genmab CD20×CD3 Epkinly expansion' },
   { brand: 'Trastuzumab duocarmazine', inn: 'vic-trastuzumab duocarmazine', codes: ['SYD985'], peakSales_M: 800, therapeuticArea: 'oncology', source: 'Byondis HER2 ADC' },
+
+  // ─── R72 EXPANSION (2026-04-13) — JPM 2025/2026 BD pipeline focus ──────
+  // Phase 1/2 and Phase 2/3 assets most actively discussed at JPM Healthcare
+  // 2025/2026 and in BD deal conversations. Sources: JPM 2025 conference
+  // decks, ASCO 2024/2025 analyst previews, Barclays/Jefferies/SVB pipeline
+  // tracker. Covers modalities, indications and mechanisms that are driving
+  // deal activity right now.
+
+  // ─── Obesity / cardiometabolic next-gen (hottest BD space 2025/26) ───
+  { brand: 'Mazdutide', inn: 'mazdutide', codes: ['IBI362'], peakSales_M: 5000, therapeuticArea: 'metabolic', source: 'Innovent GLP-1/GCG dual — China approved, OUS licensing interest' },
+  { brand: 'Pemvidutide', inn: 'pemvidutide', codes: ['ALT-801'], peakSales_M: 4000, therapeuticArea: 'metabolic', source: 'Altimmune GLP-1/GCG dual — MASH/obesity, analyst peak $3-5B' },
+  { brand: 'ECC5004', inn: 'ECC5004', codes: [], peakSales_M: 8000, therapeuticArea: 'metabolic', source: 'AstraZeneca oral GLP-1 phase 1/2 — potential $8B+' },
+  { brand: 'AZD9550', inn: 'AZD9550', codes: [], peakSales_M: 5000, therapeuticArea: 'metabolic', source: 'AZ/Ionis Lp(a) siRNA oral phase 2 — differentiated oral modality' },
+  { brand: 'Semaglutide oral 25mg', inn: 'semaglutide oral 25mg', codes: ['OW25'], peakSales_M: 12000, therapeuticArea: 'metabolic', source: 'Novo Nordisk next-dose SGLT2+GLP-1 strat — analyst peak $10-14B' },
+  { brand: 'Bimagrumab', inn: 'bimagrumab', codes: [], peakSales_M: 3000, therapeuticArea: 'metabolic', source: 'Versanis/Lilly anti-ActRIIB lean mass preservation in obesity — JPM25 highlight' },
+  { brand: 'LY3849891', inn: 'LY3849891', codes: [], peakSales_M: 6000, therapeuticArea: 'metabolic', source: 'Eli Lilly oral GLP-1 candidate (distinct from orforglipron)' },
+
+  // ─── Oncology — Phase 2 assets discussed at ASCO/JPM 2025 ───────────
+  { brand: 'NX-2127', inn: 'NX-2127', codes: [], peakSales_M: 3000, therapeuticArea: 'oncology', source: 'Nurix BTK degrader (PROTAC) CLL/lymphoma — JPM25 BD active' },
+  { brand: 'CFT7455', inn: 'CFT7455', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'C4 Therapeutics molecular glue IKZF1/3 MM' },
+  { brand: 'CC-99282', inn: 'golcadomide', codes: [], peakSales_M: 2500, therapeuticArea: 'oncology', source: 'BMS CELMoD IKZF1/3 — alternative INN ref' },
+  { brand: 'KYV-101', inn: 'KYV-101', codes: [], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'Kyverna anti-CD19 CAR-T autoimmune (SLE/SS/SSc) — JPM26 highlight' },
+  { brand: 'Obecabtagene autoleucel', inn: 'obecabtagene autoleucel', codes: ['obe-cel'], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Autolus fast-off CAR-T ALL' },
+  { brand: 'Anitocabtagene autoleucel', inn: 'anitocabtagene autoleucel', codes: ['anito-cel'], peakSales_M: 1500, therapeuticArea: 'oncology', source: 'Iovance/BMS BCMA CAR-T' },
+  { brand: 'Linvoseltamab', inn: 'linvoseltamab', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Regeneron BCMA×CD3 bispecific MM' },
+  { brand: 'HER3-DXd-breast', inn: 'patritumab deruxtecan breast', codes: ['U3-1402-breast'], peakSales_M: 4000, therapeuticArea: 'oncology', source: 'Daiichi/Merck HER3-DXd breast-first label — distinct registration' },
+  { brand: 'Telisotuzumab vedotin', inn: 'telisotuzumab vedotin', codes: ['ABBV-399', 'TeliV'], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'AbbVie MET ADC NSCLC — ASCO 2025 data' },
+  { brand: 'BBO-8520', inn: 'BBO-8520', codes: [], peakSales_M: 2000, therapeuticArea: 'oncology', source: 'Blueprint SHP2 inhibitor KRAS-driven tumors' },
+
+  // ─── NASH/MASH beyond resmetirom ────────────────────────────────────
+  { brand: 'Obeticholic acid', inn: 'obeticholic acid', codes: ['OCA'], peakSales_M: 1000, therapeuticArea: 'hepatology', source: 'Intercept PBC (lost NASH NDA); MASH ongoing' },
+  { brand: 'Lanifibranor', inn: 'lanifibranor', codes: [], peakSales_M: 2000, therapeuticArea: 'hepatology', source: 'Inventiva pan-PPAR MASH phase 3 — EMA breakthrough' },
+  { brand: 'Semaglutide MASH', inn: 'semaglutide (MASH NDA)', codes: ['GLP-1-MASH'], peakSales_M: 8000, therapeuticArea: 'hepatology', source: 'Novo Nordisk NASH/MASH expansion NDA 2025 — analyst peak $5-8B incremental' },
+  { brand: 'Efruxifermin', inn: 'efruxifermin', codes: ['EFX'], peakSales_M: 2000, therapeuticArea: 'hepatology', source: 'Akero FGF21 analog MASH — phase 3 enrolling' },
+  { brand: 'Pegozafermin', inn: 'pegozafermin', codes: ['BIO89-100'], peakSales_M: 1500, therapeuticArea: 'hepatology', source: '89bio FGF21 MASH — JPM25 spotlight' },
+  { brand: 'Aldafermin', inn: 'aldafermin', codes: ['NGM282'], peakSales_M: 1000, therapeuticArea: 'hepatology', source: 'NGM Bio FGF19 analog MASH' },
+
+  // ─── CNS — Alzheimer / Parkinson / psychiatric pipeline ─────────────
+  { brand: 'CT1812', inn: 'CT1812', codes: [], peakSales_M: 2500, therapeuticArea: 'neurology', source: 'Cognition Therapeutics sigma-2 AD — LEAPS trial' },
+  { brand: 'Salsalate', inn: 'salsalate (AD)', codes: [], peakSales_M: 500, therapeuticArea: 'neurology', source: 'Academic HDAC tau AD — small orphan class' },
+  { brand: 'NLY01', inn: 'NLY01', codes: [], peakSales_M: 2000, therapeuticArea: 'neurology', source: 'Neuraly GLP-1R Parkinson — AbbVie licensed $1.5B+' },
+  { brand: 'Lixisenatide', inn: 'lixisenatide (PD)', codes: [], peakSales_M: 1500, therapeuticArea: 'neurology', source: 'Lilly/Denali GLP-1 Parkinson repurposing trial 2025' },
+  { brand: 'Aducanumab', inn: 'aducanumab', codes: ['BIIB037'], peakSales_M: 300, therapeuticArea: 'neurology', source: 'Biogen Aduhelm — voluntarily withdrawn 2024; reference' },
+
+  // ─── Autoimmune / immunology next-wave ───────────────────────────────
+  { brand: 'Izokibep', inn: 'izokibep', codes: ['ABY-035'], peakSales_M: 2000, therapeuticArea: 'immunology', source: 'Affibody/AstraZeneca IL-17A mini-protein — JPM25 platform deal' },
+  { brand: 'Spesolimab', inn: 'spesolimab', codes: ['BI-655130'], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Boehringer/J&J anti-IL-36R pustular psoriasis (Spevigo)' },
+  { brand: 'Spevigo', inn: 'spesolimab', codes: [], peakSales_M: 1500, therapeuticArea: 'immunology', source: 'Boehringer 2022 approval — GPP' },
+  { brand: 'Bepirovirsen', inn: 'bepirovirsen', codes: ['GSK3228836'], peakSales_M: 2000, therapeuticArea: 'infectiousDisease', source: 'GSK S-antigen HBV ASO — functional cure JPM25' },
+  { brand: 'JNJ-3989', inn: 'JNJ-3989', codes: ['ARO-HBV'], peakSales_M: 2500, therapeuticArea: 'infectiousDisease', source: 'J&J/Arrowhead HBV RNAi — phase 3 combination HBsAg clearance' },
+  { brand: 'VIR-2218', inn: 'VIR-2218', codes: [], peakSales_M: 1500, therapeuticArea: 'infectiousDisease', source: 'Vir Biotech/Alnylam HBV siRNA combination' },
+
+  // ─── Rare disease — gene therapy Phase 1/2 pipeline ─────────────────
+  { brand: 'Fordadistrogene movaparvovec', inn: 'fordadistrogene movaparvovec', codes: ['PF-06939926'], peakSales_M: 2500, therapeuticArea: 'rareDisease', source: 'Pfizer DMD gene therapy' },
+  { brand: 'Valoctocogene', inn: 'valoctocogene roxaparvovec', codes: ['BMN-270'], peakSales_M: 400, therapeuticArea: 'rareDisease', source: 'BioMarin hemophilia A gene therapy — Roctavian' },
+  { brand: 'SPK-8011', inn: 'SPK-8011', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Spark/Roche hemophilia A gene therapy' },
+  { brand: 'HMI-203', inn: 'HMI-203', codes: [], peakSales_M: 1500, therapeuticArea: 'rareDisease', source: 'Homology Medicines PKU gene therapy' },
+  { brand: 'OTL-200', inn: 'OTL-200', codes: [], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Orchard MLD gene therapy (Libmeldy EU)' },
+  { brand: 'Libmeldy', inn: 'atidarsagene autotemcel', codes: ['OTL-200'], peakSales_M: 600, therapeuticArea: 'rareDisease', source: 'Orchard EU MLD' },
+
+  // ─── Pulmonology / respiratory beyond PAH ────────────────────────────
+  { brand: 'Itepekimab', inn: 'itepekimab', codes: ['REGN3500'], peakSales_M: 3000, therapeuticArea: 'pulmonology', source: 'Sanofi/Regeneron anti-IL-33 COPD/asthma' },
+  { brand: 'Dupilumab COPD', inn: 'dupilumab (COPD)', codes: [], peakSales_M: 5000, therapeuticArea: 'pulmonology', source: 'Sanofi/Regeneron type 2 COPD FDA approved 2024 — incremental to base dupilumab' },
+  { brand: 'Astegolimab', inn: 'astegolimab', codes: ['GYM329'], peakSales_M: 3500, therapeuticArea: 'pulmonology', source: 'Roche anti-IL-33 severe asthma/COPD — JPM25 spotlight' },
+  { brand: 'Tezepelumab expansion', inn: 'tezepelumab COPD', codes: [], peakSales_M: 4500, therapeuticArea: 'pulmonology', source: 'AstraZeneca/Amgen TSLP COPD expansion on top of asthma $900M base' },
+
+  // ─── Pain / neuroscience beyond Nav1.8 ───────────────────────────────
+  { brand: 'Tanezumab', inn: 'tanezumab', codes: [], peakSales_M: 1000, therapeuticArea: 'pain_management', source: 'Pfizer/Lilly anti-NGF OA pain — terminated; reference for FAAH/opioid-sparing' },
+  { brand: 'Cebranopadol', inn: 'cebranopadol', codes: [], peakSales_M: 800, therapeuticArea: 'pain_management', source: 'Grünenthal NOP/MOR agonist — phase 3 chronic pain' },
+  { brand: 'SRF-0187', inn: 'SRF-0187', codes: [], peakSales_M: 1500, therapeuticArea: 'pain_management', source: 'Surface Oncology/Vertex Nav1.7 inhibitor — non-opioid chronic pain' },
 ];
 
 // ---------------------------------------------------------------------------

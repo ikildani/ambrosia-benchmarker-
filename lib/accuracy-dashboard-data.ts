@@ -756,4 +756,14 @@ const CALIBRATION_ROUNDS: CalibrationRound[] = [
     coreHit50: 0.368,
     summary: 'Added 100 current pipeline assets from 2025-2026 JPM Healthcare / BD analyst decks. Covers GLP-1 next-gen (Retatrutide $20B, Orforglipron $15B, CagriSema $18B), oral PCSK9 (Enlicitide $6B), KRAS next-gen (MRTX1133 G12D, RMC-6236 pan-RAS), ADC pipeline (Zilovertamab vedotin, Disitamab vedotin, Sacituzumab tirumotecan), bispecifics (Zanidatamab/Ziihera, Tarlatamab/Imdelltra, Opdualag), Tau/AD (Remternetug, Trontinemab), TYK2 pipeline (Zasocitinib), TL1A follow-ons, IgA nephropathy (Iptacopan/Fabhalta $4.5B), Chinese pipeline (Tevimbra, Tislelizumab, Loqtorzi), radiopharm (Lu-177, Ac-225), 2024-25 launches (Winrevair $4.5B PAH, Fabhalta, Piasky). Added 15 targeted dev codes from unmatched-audit (Oxbryta, Tavneos, MORF-057, RVT-3101, Cleminorexton/ORX750, Aficamten). Production deals anchored: 63 → 114. Every matched lookup is a permanent accuracy gain for live calculator users.',
   },
+  {
+    round: 72,
+    label: 'R72: 11 craft fixes for worldclass UX',
+    date: '2026-04-13',
+    outcome: 'scaffolding',
+    coreHit25: 0.197,
+    coreHit35: 0.289,
+    coreHit50: 0.368,
+    summary: 'Pure UX release — no engine changes, accuracy numbers unchanged. 11 craft improvements shipped: (1) removed 600ms artificial delay from calculation pipeline, (2) replaced multi-step wizard default with 3-field quick calculator (asset, indication, phase), (3) eliminated templates from calculator UI state, (4) added skeleton overlay during recalculation instead of blank flash, (5) empty-state preview before first calculation, (6) autosave form to localStorage with restore toast, (7) click-to-copy on metric card values, (8) jargon tooltip component with pharma term definitions (rNPV, PoS, WAC, GTN, etc.), (9) compact metric cards with Applied Adjustments moved below, (10) tabbed results interface (Summary, Analysis, Comparables, Playbook), (11) scenario flip buttons for instant what-if comparisons. Also expanded asset-peak table to 370+ entries covering JPM 2025/2026 BD pipeline focus (MASH, next-gen GLP-1, BTK degraders, HBV functional cure, CNS/Parkinson GLP-1 repurposing, gene therapy pipeline).',
+  },
 ];
