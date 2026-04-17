@@ -20,19 +20,25 @@ import { validateSessionNonce, SESSION_NONCE_COOKIE } from './session-enforcemen
  * Returns null if session is valid. Returns a 401 NextResponse if the
  * session nonce is stale (another login has occurred).
  *
- * Non-blocking for:
- *   - Unauthenticated requests (handled by route's own auth check)
- *   - Free-tier users (no session enforcement)
- *   - Users who haven't logged in since the migration (no nonce in DB yet)
+ * Accepts both Request (Web API) and NextRequest (Next.js) — routes use
+ * different param types depending on whether they import NextRequest.
  */
 export async function requireSingleSession(
-  request: NextRequest,
+  request: Request | NextRequest,
 ): Promise<NextResponse | null> {
   try {
-    const user = await getAuthenticatedUser(request);
-    if (!user?.id) return null; // not authenticated — let route handle auth
+    const user = await getAuthenticatedUser(request as NextRequest);
+    if (!user?.id) return null;
 
-    const cookieNonce = request.cookies.get(SESSION_NONCE_COOKIE)?.value;
+    // Extract cookie — works for both NextRequest (.cookies) and plain Request (Cookie header)
+    let cookieNonce: string | undefined;
+    if ('cookies' in request && typeof (request as NextRequest).cookies?.get === 'function') {
+      cookieNonce = (request as NextRequest).cookies.get(SESSION_NONCE_COOKIE)?.value;
+    } else {
+      const cookieHeader = request.headers.get('cookie') || '';
+      const match = cookieHeader.match(new RegExp(`${SESSION_NONCE_COOKIE}=([^;]+)`));
+      cookieNonce = match?.[1];
+    }
     const result = await validateSessionNonce(user.id, cookieNonce);
 
     if (!result.valid) {
