@@ -1119,9 +1119,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const posModifierNote = modifierKeys.length > 0
     ? ` (indication-adjusted: ${modifierKeys.join(', ')} → ${indicationModifier >= 1 ? '+' : ''}${((indicationModifier - 1) * 100).toFixed(1)}%)`
     : '';
+  // R71 (2026-04-16): Source citations on every assumption. Grade-A+
+  // institutional standard: every number should be traceable. BD users
+  // need to explain these to counterparties in a negotiation room.
   const modelAssumptions = [
-    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} WACC${mfgPremium > 0 ? ` + ${(mfgPremium * 100).toFixed(1)}pp CMC premium` : ''}${territory ? `, ${territory}` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType}` : ''})`,
-    `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote}`,
+    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} WACC${mfgPremium > 0 ? ` + ${(mfgPremium * 100).toFixed(1)}pp CMC premium` : ''}${territory ? `, ${territory}` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType}` : ''}) [Source: Damodaran 2024 biotech WACC + EvaluatePharma phase-risk premium]`,
+    `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote} [Source: BIO Industry Analysis 2024, Wong-Siah-Lo 2019 Nature Biotech, FDA CDER approval statistics]`,
     `Years to market: ${yearsToMarket.toFixed(1)} years${accessDelay > 0 ? ` (incl. ${accessDelay}mo market access lag)` : ''}${timelineMultiplier !== 1.0 ? ` (data quality: ${dataQuality} → ${timelineMultiplier > 1 ? '+' : ''}${((timelineMultiplier - 1) * 100).toFixed(0)}% P3 duration)` : ''}`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M${genericMultiplier < 1.0 ? ` (×${genericMultiplier.toFixed(2)} generic entrenchment penalty)` : ''}`,
     ...(peakSalesCheck.indexDrug ? [`Index drug: ${peakSalesCheck.indexDrug.name} at $${peakSalesCheck.indexDrug.peakSalesM.toLocaleString()}M — model is ${(peakSalesCheck.indexRatio * 100).toFixed(0)}% of index (${peakSalesCheck.confidence})`] : []),

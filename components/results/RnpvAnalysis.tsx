@@ -12,6 +12,7 @@ import ConfidenceBand from '@/components/ConfidenceBand';
 import { DealStructureBadge } from '@/components/results/DealStructureBadge';
 import { DirectionalRangeHero } from '@/components/results/DirectionalRangeHero';
 import { ComparableDealsPanel } from '@/components/results/ComparableDealsPanel';
+import { QueryConfidenceBadge } from '@/components/results/QueryConfidenceBadge';
 import { CHART_COLORS } from '@/lib/chartTheme';
 import type { RNPVResult, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult, MonteCarloResult } from '@/lib/financial/types';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
@@ -392,6 +393,22 @@ export default function RnpvAnalysis({
                 dealStructure={rnpvResult.dealStructureClassification?.structure}
                 candidateUpfront_M={rnpvResult.impliedDealValue?.upfront?.median}
                 candidateTotalDeal_M={rnpvResult.impliedDealValue?.totalDeal?.median}
+              />
+            </div>
+
+            {/* R71 (2026-04-16): Per-query confidence badge. Goldman-grade:
+                shows how many comparable deals exist for THIS SPECIFIC input
+                combination and how well the engine performs against them. Not
+                a global average — segment-specific honesty. */}
+            <div className="mb-4">
+              <QueryConfidenceBadge
+                therapeuticArea={therapeuticArea}
+                phase={phase}
+                modality={modality}
+                dealType={dealType}
+                territory={territory}
+                dealStructure={rnpvResult.dealStructureClassification?.structure}
+                engineUpfrontMedian={rnpvResult.impliedDealValue?.upfront?.median}
               />
             </div>
 
