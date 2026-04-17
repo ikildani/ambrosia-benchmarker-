@@ -45,8 +45,8 @@ export default function SharedCalculationView({ results, labels, financialSummar
     <div className="space-y-4">
       {/* ── Valuation Headline (R24): rNPV + 80% CI band + PoS ── */}
       {financialSummary && (
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15]">
-          <div className="flex items-center justify-between mb-5">
+        <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15]">
+          <div className="flex items-center justify-between mb-4 md:mb-5">
             <div className="flex items-center gap-3">
               <Icon>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,21 +55,29 @@ export default function SharedCalculationView({ results, labels, financialSummar
               </Icon>
               <div>
                 <p className="text-sm font-semibold text-slate-300">Risk-Adjusted NPV (rNPV)</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Valuation with 80% confidence band (P10 – P90) from Monte Carlo</p>
+                <p className="hidden md:block text-[11px] text-slate-500 mt-0.5">Valuation with 80% confidence band (P10 – P90) from Monte Carlo</p>
               </div>
             </div>
             <Tag>Institutional</Tag>
           </div>
-          <div className="grid sm:grid-cols-3 gap-5 items-end">
-            <div className="sm:col-span-2">
-              <p className="text-4xl sm:text-5xl font-black text-teal-400 tracking-tight font-mono">
+          {/* Mobile: stacked layout. Desktop: grid */}
+          <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5 md:items-end">
+            <div className="md:col-span-2">
+              <p className="text-3xl md:text-4xl lg:text-5xl font-black text-teal-400 tracking-tight font-mono">
                 {formatCurrency(financialSummary.riskAdjustedNPV)}
               </p>
-              <p className="text-sm text-slate-400 mt-2 font-mono">
-                80% CI: <span className="text-slate-300">{formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}</span>
-              </p>
             </div>
-            <div className="text-right">
+            {/* CI band — full width on mobile */}
+            <div className="md:hidden rounded-lg bg-white/[0.04] border border-white/[0.06] p-3">
+              <p className="text-lg font-semibold text-slate-300 font-mono">
+                80% CI: {formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">P10 – P90 from Monte Carlo simulation</p>
+            </div>
+            <p className="hidden md:block text-sm text-slate-400 mt-2 font-mono md:col-span-2">
+              80% CI: <span className="text-slate-300">{formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}</span>
+            </p>
+            <div className="text-left md:text-right">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cumulative PoS</p>
               <p className="text-2xl font-black text-white tracking-tight font-mono">
                 {Math.round(financialSummary.cumulativePoS * 100)}%
@@ -80,8 +88,8 @@ export default function SharedCalculationView({ results, labels, financialSummar
       )}
 
       {/* ── Key Metrics ── */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div className="p-6 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-teal-500/20 transition-colors">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 md:p-6 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-teal-500/20 transition-colors">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <Icon>
@@ -91,12 +99,12 @@ export default function SharedCalculationView({ results, labels, financialSummar
             </div>
             <Tag>Guaranteed</Tag>
           </div>
-          <p className="text-3xl font-black text-white tracking-tight">{formatRange(terms.upfront)}</p>
+          <p className="text-2xl md:text-3xl font-black text-white tracking-tight">{formatRange(terms.upfront)}</p>
           <p className="text-sm text-slate-500 mt-1.5">Expected: <span className="font-bold text-teal-400">{formatCurrency(terms.upfront.median)}</span></p>
           <Bar pct={Math.round((terms.upfront.median / maxVal) * 100)} />
         </div>
 
-        <div className="p-6 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-emerald-500/20 transition-colors">
+        <div className="p-4 md:p-6 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-emerald-500/20 transition-colors">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <Icon v="emerald">
@@ -106,7 +114,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
             </div>
             <Tag c="emerald">Potential</Tag>
           </div>
-          <p className="text-3xl font-black text-emerald-400 tracking-tight">{formatRange(terms.totalDealValue)}</p>
+          <p className="text-2xl md:text-3xl font-black text-emerald-400 tracking-tight">{formatRange(terms.totalDealValue)}</p>
           <p className="text-sm text-slate-500 mt-1.5">Expected: <span className="font-bold text-emerald-400">{formatCurrency(terms.totalDealValue.median)}</span></p>
           <Bar pct={85} color="from-emerald-500 to-emerald-400" />
         </div>
@@ -137,7 +145,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
       </div>
 
       {/* ── Milestones ── */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {([
           { label: 'Development', data: terms.devMilestones, tag: 'If Achieved', v: 'cyan' as const, bar: 'from-cyan-500 to-blue-400', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> },
           { label: 'Regulatory', data: terms.regMilestones, tag: 'Upon Approval', v: 'teal' as const, bar: 'from-teal-500 to-cyan-400', icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg> },
@@ -169,7 +177,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
             <p className="text-xs text-slate-600">Escalating on net sales thresholds</p>
           </div>
         </div>
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {([
             { label: 'Base (<$500M)', data: tieredRoyalties.base, hl: false },
             { label: 'Mid ($500M–$1B)', data: tieredRoyalties.midTier, hl: false },
@@ -230,6 +238,21 @@ export default function SharedCalculationView({ results, labels, financialSummar
             </span>
           </div>
         ))}
+      </div>
+
+      {/* ── Bottom CTA — thumb-reachable on mobile ── */}
+      <div className="mt-8 p-4 md:p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15] text-center">
+        <p className="text-sm font-semibold text-slate-300 mb-2">Get the full analysis for this asset</p>
+        <p className="text-xs text-slate-500 mb-4">Comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF</p>
+        <a
+          href="https://calculator.ambrosiaventures.co/calculator"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 text-sm"
+        >
+          Run your own benchmark
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
       </div>
 
       {/* ── Disclaimer ── */}
