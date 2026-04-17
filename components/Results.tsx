@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useMemo, useEffect, createRef } from 're
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { toast as sonnerToast } from 'sonner';
-import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore, type GuardrailWarning } from '@/lib/calculations';
+import { CalculationResult, CalculationInput, formatCurrency, formatRange, calculateRiskScore, calculateDealTerms, type GuardrailWarning } from '@/lib/calculations';
 import type { PartnerForPDF } from '@/lib/report';
 const ReportGenerationModal = dynamic(() => import('./ReportGenerationModal'), { ssr: false });
 const ShareModal = dynamic(() => import('./ShareModal'), { ssr: false });
@@ -551,6 +551,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const dtl = dealTypeLabels; // shorthand
   const hasFullAccess = isPro || isReport;
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
+  const [activeTab, setActiveTab] = useState<'summary' | 'analysis' | 'comparables' | 'playbook'>('summary');
+  const [scenarioFlip, setScenarioFlip] = useState<{ label: string; field: string; newValue: string; result: CalculationResult } | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [partnerMatches, setPartnerMatches] = useState<PartnerForPDF[]>([]);
   const [buyerSpecificValuations, setBuyerSpecificValuations] = useState<any>(null);
@@ -1105,7 +1107,35 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         </div>
       )}
 
+      {/* Tab bar */}
+      <div className="sticky top-0 z-20 px-4 sm:px-6 lg:px-8 py-2.5 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50">
+        <div className="flex gap-1.5">
+          {([
+            { id: 'summary' as const, label: 'Summary' },
+            { id: 'analysis' as const, label: 'Analysis' },
+            { id: 'comparables' as const, label: 'Comparables' },
+            { id: 'playbook' as const, label: 'Playbook' },
+          ]).map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                  : 'bg-slate-800 text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
+
+        {/* ═══ TAB 1: SUMMARY ═══ */}
+        {activeTab === 'summary' && (
+        <>
         {/* Deal Structure Recommendation */}
         <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
           <div className="flex items-start gap-3 sm:gap-4">
@@ -1521,12 +1551,75 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
-        {/* R70 (2026-04-16): Removed inline "Top 3 Comparable Deals" table.
-            Replaced by the structure-aware ComparableDealsPanel inside
-            RnpvAnalysis which shows 5-8 ranked deals with match reasoning,
-            source URLs, and deal-structure awareness. The full
-            <ComparableDeals> section below remains as the expanded deep-dive. */}
+        {/* Scenario Flip Buttons */}
+        {fullInputs && (
+          <div className="mt-4">
+            <div className="flex flex-wrap gap-2">
+              {fullInputs.phase === 'phase2' && (
+                <button
+                  onClick={() => {
+                    const flipped = calculateDealTerms({ ...fullInputs, phase: 'phase3' });
+                    setScenarioFlip({ label: 'Phase 3', field: 'phase', newValue: 'phase3', result: flipped });
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium border border-slate-600 text-slate-300 hover:border-teal-500 hover:text-teal-300 rounded-full transition-all"
+                >
+                  What if Phase 3?
+                </button>
+              )}
+              {fullInputs.dealType === 'licensing' && (
+                <button
+                  onClick={() => {
+                    const flipped = calculateDealTerms({ ...fullInputs, dealType: 'acquisition' });
+                    setScenarioFlip({ label: 'Acquisition', field: 'dealType', newValue: 'acquisition', result: flipped });
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium border border-slate-600 text-slate-300 hover:border-teal-500 hover:text-teal-300 rounded-full transition-all"
+                >
+                  What if Acquisition?
+                </button>
+              )}
+              {fullInputs.territory === 'global' && (
+                <button
+                  onClick={() => {
+                    const flipped = calculateDealTerms({ ...fullInputs, territory: 'us_only' });
+                    setScenarioFlip({ label: 'US-only', field: 'territory', newValue: 'us_only', result: flipped });
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium border border-slate-600 text-slate-300 hover:border-teal-500 hover:text-teal-300 rounded-full transition-all"
+                >
+                  What if US-only territory?
+                </button>
+              )}
+            </div>
+            {scenarioFlip && (
+              <div className="mt-3 p-3 rounded-lg border border-teal-500/30 bg-teal-500/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm text-slate-300">
+                    <span className="font-medium text-white">{scenarioFlip.label}:</span>{' '}
+                    {formatCurrency(terms.upfront.median)} upfront{' '}
+                    <span className="text-slate-500">-&gt;</span>{' '}
+                    <span className="font-bold text-teal-300">{formatCurrency(scenarioFlip.result.terms.upfront.median)}</span>
+                    {' '}
+                    <span className={`text-xs font-semibold ${
+                      scenarioFlip.result.terms.upfront.median > terms.upfront.median ? 'text-emerald-400' : 'text-amber-400'
+                    }`}>
+                      ({scenarioFlip.result.terms.upfront.median > terms.upfront.median ? '+' : ''}
+                      {Math.round(((scenarioFlip.result.terms.upfront.median - terms.upfront.median) / Math.max(terms.upfront.median, 1)) * 100)}%)
+                    </span>
+                  </div>
+                  <button onClick={() => setScenarioFlip(null)} className="text-slate-500 hover:text-slate-300 p-1" aria-label="Dismiss scenario">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
+        </>
+        )}
+
+        {/* ═══ TAB 2: ANALYSIS ═══ */}
+        {activeTab === 'analysis' && (
+        <>
         {/* Interactive Charts Section */}
         <div id={TOUR_STEP_IDS.WATERFALL}>
         <ChartSection
@@ -1610,6 +1703,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           ) : null
         )}
 
+        </>
+        )}
+
+        {/* ═══ TAB 3: COMPARABLES ═══ */}
+        {activeTab === 'comparables' && (
+        <>
         {/* Comparable Deals */}
         <div id="section-comparable-deals">
         {fullInputs && (
@@ -1632,6 +1731,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </FinancialErrorBoundary>
         )}
 
+        </>
+        )}
+
+        {/* ═══ TAB 2 CONTINUED: ANALYSIS (Financial Modeling) ═══ */}
+        {activeTab === 'analysis' && (
+        <>
         {/* Financial Modeling — World-Class Tier */}
         {financialModel && (
           <>
@@ -1769,6 +1874,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </>
         )}
 
+        </>
+        )}
+
+        {/* ═══ TAB 4: PLAYBOOK ═══ */}
+        {activeTab === 'playbook' && (
+        <>
         {/* AI Deal Memo */}
         <div id={TOUR_STEP_IDS.AI_TOOLS}>
         <FinancialErrorBoundary fallbackTitle="Deal Memo unavailable">
@@ -2017,6 +2128,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             }
           }}
         />
+
+        </>
+        )}
 
         {/* Upgrade CTA for Free Users */}
         {!hasFullAccess && (
