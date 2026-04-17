@@ -3458,8 +3458,16 @@ export function getIndicationMarketCap(indication: string): IndicationMarketCap 
  */
 export function getIndicationTypicalAssetPeak(indication: string): number | null {
   const cap = getIndicationMarketCap(indication);
-  if (!cap) return null;
-  return cap.typicalAssetPeakSales_M ?? null;
+  // R72 (2026-04-16): Fall through to indication-peak-consensus for the
+  // 40 indications that have INDICATION_MARKET_CAPS entries but no
+  // typicalAssetPeakSales_M. The consensus file provides sourced per-
+  // indication peaks based on 10-K actuals and analyst consensus.
+  if (cap?.typicalAssetPeakSales_M) return cap.typicalAssetPeakSales_M;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { INDICATION_PEAK_CONSENSUS } = require('./indication-peak-consensus');
+  const consensus = INDICATION_PEAK_CONSENSUS[indication];
+  if (consensus?.typicalAssetPeakSales_M) return consensus.typicalAssetPeakSales_M;
+  return null;
 }
 
 /**
