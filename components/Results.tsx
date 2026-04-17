@@ -39,6 +39,7 @@ const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPa
 const IndexDrugComparison = dynamic(() => import('./results/IndexDrugComparison'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const DealStructureToggle = dynamic(() => import('./results/DealStructureToggle'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const AssetReadinessScore = dynamic(() => import('./results/AssetReadinessScore'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const NextStepsDrawer = dynamic(() => import('./results/NextStepsDrawer'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -1621,11 +1622,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Comparable Deals */}
+        <div id="section-comparable-deals">
         {fullInputs && (
           <FinancialErrorBoundary fallbackTitle="Comparable Deals unavailable">
             <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
           </FinancialErrorBoundary>
         )}
+        </div>
 
         {/* Pipeline Intelligence — Clinical Trials */}
         {fullInputs && (
@@ -1862,7 +1865,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         </div>
 
         {/* Negotiation Playbook CTA */}
-        <div className="relative mt-6 sm:mt-8">
+        <div id="section-playbook" className="relative mt-6 sm:mt-8">
           <div className={`p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl ${!hasFullAccess ? 'blur-sm pointer-events-none' : ''}`}>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-glow flex-shrink-0">
@@ -2004,6 +2007,28 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
+        {/* Sticky Next Steps Drawer */}
+        <NextStepsDrawer
+          onShare={() => setShowShareModal(true)}
+          onPlaybook={() => {
+            const el = document.getElementById('section-playbook');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            else setShowPlaybookModal(true);
+          }}
+          onCompareDeals={() => {
+            const el = document.getElementById('section-comparable-deals');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onDownloadReport={() => {
+            if (hasFullAccess) {
+              setReportFormat('pdf');
+              setShowReportModal(true);
+            } else {
+              onBuyReport?.();
+            }
+          }}
+        />
+
         {/* Upgrade CTA for Free Users */}
         {!hasFullAccess && (
           <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-r from-navy-800 to-navy-900 rounded-xl text-center">
@@ -2049,6 +2074,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
         {/* World-Class Disclaimer */}
         <ResultsDisclaimer />
+
+        {/* Spacer for sticky NextStepsDrawer */}
+        <div className="h-16 lg:h-14" />
       </div>
 
       {/* Results Tour — guided walkthrough for Pro/Report users */}
