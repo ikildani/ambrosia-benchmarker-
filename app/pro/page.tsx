@@ -909,6 +909,72 @@ export default function ProPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════
+            TEAM TIER — multi-seat CTA
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 border-t border-white/[0.04]">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative bg-gradient-to-br from-[#0d1420] to-[#0f1628] border border-indigo-500/15 rounded-2xl overflow-hidden">
+              {/* Ambient glow */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_20%,rgba(99,102,241,0.08),transparent)]" />
+
+              <div className="relative grid lg:grid-cols-2 gap-12 p-10 lg:p-14">
+                {/* Left: Copy */}
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
+                    <Users className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Team Access</span>
+                  </div>
+
+                  <h2 className="text-3xl lg:text-4xl font-bold text-white tracking-tight leading-[1.15]">
+                    Multi-seat Pro access<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">for your deal team.</span>
+                  </h2>
+
+                  <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-md">
+                    Per-seat pricing for BD, Corp Dev, and Alliance Management teams.
+                    Every seat gets the full 14-engine platform — same access, shared partner intelligence,
+                    pre-loaded against your pipeline.
+                  </p>
+                </div>
+
+                {/* Right: What's included */}
+                <div className="flex flex-col justify-center">
+                  <div className="space-y-4">
+                    {[
+                      { title: 'Full Pro per seat', desc: 'All 14 engines, unlimited calculations, PDF & Excel exports' },
+                      { title: 'Dedicated onboarding', desc: '30-minute kickoff walkthrough for your team' },
+                      { title: 'Pre-loaded intelligence', desc: 'Partner profiles and counterparty data configured for your therapeutic focus' },
+                      { title: 'Direct support line', desc: 'Email access to the Ambrosia team for engine questions during the engagement' },
+                    ].map(item => (
+                      <div key={item.title} className="flex items-start gap-3">
+                        <div className="mt-0.5 w-5 h-5 rounded-full bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 text-indigo-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{item.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8">
+                    <Link
+                      href="mailto:ikildani@ambrosiaventures.co?subject=Team%20access%20—%20Ambrosia%20Benchmarker&body=Hi%20Issa%2C%0A%0AWe%27re%20interested%20in%20multi-seat%20Pro%20access%20for%20our%20team.%0A%0ATeam%20size%3A%20%0ATherapeutic%20focus%3A%20%0ATimeline%3A%20%0A%0AThanks"
+                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-indigo-500 text-white text-base font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:bg-indigo-400 hover:-translate-y-0.5 transition-all"
+                    >
+                      Contact for team pricing
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <p className="text-xs text-slate-600 mt-3">Typically responds same day</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
             WHO USES PRO
         ═══════════════════════════════════════════════════════════════════ */}
         <section className="py-20 px-4 border-t border-white/[0.04] bg-[#080d16]">
