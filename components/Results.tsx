@@ -53,6 +53,7 @@ import MetricCard from './results/MetricCard';
 import DrillDownPanel from './results/DrillDownPanel';
 import DealMemoSection from './results/DealMemoSection';
 import ResultsDisclaimer from './results/ResultsDisclaimer';
+import JargonTooltip from './ui/JargonTooltip';
 const ResultsTour = dynamic(() => import('./ResultsTour'), { ssr: false });
 import { TOUR_STEP_IDS } from './ResultsTour';
 import { shouldShowResultsTour } from '@/lib/tour';
@@ -1215,15 +1216,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {hasFullAccess && <div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
           <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-slate-600">
             {[
-              { label: dtl?.upfrontLabel || 'Upfront', value: formatCurrency(terms.upfront.median) },
+              { label: dtl?.upfrontLabel || 'Upfront', value: formatCurrency(terms.upfront.median), jargon: 'Upfront' },
               { label: 'Milestones', value: formatCurrency(terms.devMilestones.median + terms.regMilestones.median + terms.commMilestones.median) },
               { label: 'Royalty', value: `${tieredRoyalties.base.low}-${tieredRoyalties.highTier.high}%` },
-              { label: dtl?.totalValueLabel || 'Total', value: formatCurrency(terms.totalDealValue.median) },
-              ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV) }] : []),
-              ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%` }] : []),
-            ].map((item, idx) => (
+              { label: dtl?.totalValueLabel || 'Total', value: formatCurrency(terms.totalDealValue.median), jargon: 'TDV' },
+              ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV), jargon: 'rNPV' }] : []),
+              ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%`, jargon: 'PoS' }] : []),
+            ].map((item: { label: string; value: string; jargon?: string }, idx) => (
               <div key={idx} className="flex-1 min-w-[80px] px-2 sm:px-3 py-2 text-center">
-                <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">{item.label}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">
+                  {item.jargon ? <JargonTooltip term={item.jargon}>{item.label}</JargonTooltip> : item.label}
+                </p>
                 <p className="font-mono text-sm sm:text-base font-bold text-neutral-900 dark:text-white leading-tight mt-0.5">{item.value}</p>
               </div>
             ))}
