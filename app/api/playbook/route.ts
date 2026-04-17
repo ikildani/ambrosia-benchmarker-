@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 export const maxDuration = 60;
 
 import { NextRequest } from 'next/server';
@@ -40,6 +41,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   const elapsed = log.startTimer();
 
   try {
+    // R72: Single-session enforcement — block stale sessions
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
+
     // SECURITY: Require Pro tier — this is an expensive AI endpoint
     const supabase = createServiceClient();
     let authorized = false;

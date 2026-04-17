@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { isAdminEmail, isProEmail } from '@/lib/config/authorized-emails';
@@ -12,6 +13,10 @@ export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
+    // R72: Single-session enforcement — block stale sessions
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
+
     // Auth check
     const authUser = await getAuthenticatedUser(request);
     const userId = authUser?.id || null;

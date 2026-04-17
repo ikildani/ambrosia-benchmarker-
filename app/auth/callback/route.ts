@@ -162,6 +162,39 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // R72: Single-session enforcement — set session nonce + log IP.
+    // Every subsequent Pro API call validates this nonce. If another login
+    // occurs (credential sharing), the nonce changes and the old session
+    // gets force-signed-out on next API call.
+    if (data.user) {
+      try {
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+          || request.headers.get('x-real-ip')
+          || null;
+        const ua = request.headers.get('user-agent') || null;
+        const { setSessionNonce, SESSION_NONCE_COOKIE } = await import('@/lib/auth/session-enforcement');
+        const nonce = await setSessionNonce(data.user.id, ip, ua);
+
+        const successUrl = new URL('/', requestUrl.origin);
+        successUrl.searchParams.set('verified', 'true');
+        const response = NextResponse.redirect(successUrl);
+        response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        response.headers.set('Pragma', 'no-cache');
+        // Set the session nonce cookie — checked by Pro API routes
+        response.cookies.set(SESSION_NONCE_COOKIE, nonce, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 90 * 24 * 60 * 60, // 90 days
+        });
+        return response;
+      } catch (err) {
+        console.error('[Auth Callback] Session nonce error:', err);
+        // Fall through to default redirect if nonce fails — don't block login
+      }
+    }
+
     // Redirect to the app with success message
     const successUrl = new URL('/', requestUrl.origin);
     successUrl.searchParams.set('verified', 'true');

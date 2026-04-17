@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 export const maxDuration = 60;
 
 import { createServiceClient } from '@/lib/supabase/server';
@@ -29,6 +30,10 @@ export async function POST(request: Request): Promise<Response> {
   const elapsed = log.startTimer();
 
   try {
+    // R72: Single-session enforcement — block stale sessions
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
+
     const body = (await request.json()) as DealMemoRequest;
 
     const parsed = dealMemoSchema.safeParse(body);
