@@ -242,6 +242,6 @@ export async function applyOptimization(
   });
 
   if (logError) {
-    console.error(`[ctr-optimizer] Failed to write optimization log: ${logError.message}`);
+    throw new Error(`Failed to write optimization log: ${logError.message}`);
   }
 }

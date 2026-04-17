@@ -40,9 +40,10 @@ export async function GET(request: NextRequest) {
   try {
     const gsc = new GSCClient();
     if (!gsc.isConfigured()) {
+      console.warn('[gsc-sync] GOOGLE_SERVICE_ACCOUNT_JSON not set — GSC sync disabled. CTR optimization will have no candidates until this is configured.');
       await logCronRun(supabase, 'gsc-sync', {
         processed: 0,
-        parameters: { status: 'not_configured' },
+        parameters: { status: 'not_configured', fix: 'Set GOOGLE_SERVICE_ACCOUNT_JSON env var on Vercel (base64-encoded service account JSON with Search Console API access)' },
       });
       return NextResponse.json({ message: 'GSC not configured', skipped: true });
     }
