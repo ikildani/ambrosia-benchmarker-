@@ -11,7 +11,7 @@ const input: CalculationInput = {
   modality: 'adc',
   indication: 'breast_her2',
   territory: 'global',
-  biomarker: 'HER2+',
+  biomarker: 'selected' as const,
   lineOfTherapy: '2L',
   treatmentApproach: 'diseaseModifying',
   combinationPotential: 'some',
