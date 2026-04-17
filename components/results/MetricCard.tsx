@@ -96,13 +96,14 @@ function MetricCardInner({
 }: MetricCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
+  // Allow expanding for preview even when canExpand is false, as long as there's drill-down data
   const handleHeaderClick = useCallback(() => {
-    if (canExpand) {
+    if (canExpand || drillDown) {
       onToggle();
     } else if (!isPro) {
       onProClick();
     }
-  }, [canExpand, isPro, onToggle, onProClick]);
+  }, [canExpand, isPro, onToggle, onProClick, drillDown]);
 
   const handleHeaderKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -123,10 +124,10 @@ function MetricCardInner({
       className={`group metric-card p-5 sm:p-6 xl:p-7 rounded-xl bg-white dark:bg-slate-800/80 border border-neutral-100 dark:border-slate-700/60 hover:border-teal-200/60 dark:hover:border-teal-500/30 hover:shadow-lg dark:hover:shadow-teal-500/5 transition-all duration-300 ${isExpanded ? 'ring-1 ring-teal-300/50 dark:ring-teal-500/30' : ''}`}
     >
       <div
-        className={`${canExpand ? 'cursor-pointer' : ''}`}
+        className={`${(canExpand || drillDown) ? 'cursor-pointer' : ''}`}
         role="button"
         tabIndex={0}
-        aria-expanded={canExpand ? isExpanded : undefined}
+        aria-expanded={(canExpand || drillDown) ? isExpanded : undefined}
         aria-label={`${title}: ${value}. ${canExpand ? (isExpanded ? 'Collapse details' : 'Expand details') : ''}`}
         onClick={handleHeaderClick}
         onKeyDown={handleHeaderKeyDown}
@@ -163,7 +164,7 @@ function MetricCardInner({
             <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap uppercase tracking-wider ${badgeColorClasses[badgeColor] || badgeColorClasses.teal}`}>
               {badge}
             </span>
-            {canExpand && (
+            {(canExpand || drillDown) && (
               <motion.svg
                 className="w-4 h-4 text-neutral-400"
                 fill="none"
@@ -175,7 +176,7 @@ function MetricCardInner({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </motion.svg>
             )}
-            {!canExpand && !isPro && (
+            {!canExpand && !drillDown && !isPro && (
               <div className="p-1 bg-neutral-100 dark:bg-slate-600 rounded">
                 <svg className="w-3 h-3 text-neutral-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -273,7 +274,11 @@ function MetricCardInner({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             style={{ overflow: 'hidden' }}
           >
-            <DrillDownPanel data={drillDown} />
+            <DrillDownPanel
+              data={drillDown}
+              previewMode={!canExpand && !isPro}
+              onUpgradeClick={onProClick}
+            />
           </motion.div>
         )}
       </AnimatePresence>
