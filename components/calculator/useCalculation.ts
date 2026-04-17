@@ -13,10 +13,19 @@ import { incrementUsage, getUsage } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
 
-/** Check if required fields are filled (not empty string) before calculating. */
+/** Check if minimum fields are filled for quick-calc (phase + modality required).
+ *  dealType and indication will use smart defaults if not explicitly set. */
 export function isReadyToCalculate(s: CalculatorFormState): boolean {
-  return s.phase !== '' && s.dealType !== '' && s.modality !== '' && s.indication !== '';
+  return s.phase !== '' && s.modality !== '';
 }
+
+/** Default indication per therapeutic area for quick-calc when user hasn't selected one. */
+const DEFAULT_INDICATION: Record<string, string> = {
+  oncology: 'lung_nsclc', neurology: 'alzheimers', immunology: 'ulcerativeColitis',
+  metabolic: 'obesity', cardiovascular: 'heartFailure', infectiousDisease: 'hepatitisB',
+  ophthalmology: 'wetAmd', womensHealth: 'endometriosis', rareDisease: 'spinalMuscularAtrophy',
+  hematology: 'dlbcl', dermatology: 'atopicDermatitis', gastroenterology: 'ulcerativeColitis',
+};
 
 /** Build a CalculationInput from the full form state.
  *  Casts fields with safe fallbacks — isReadyToCalculate should be checked first. */
@@ -26,7 +35,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     phase: (s.phase || 'phase2') as Phase,
     dealType: (s.dealType || 'licensing') as DealType,
     modality: (s.modality || 'smallMolecule') as Modality,
-    indication: (s.indication || 'lung_nsclc') as Indication,
+    indication: (s.indication || DEFAULT_INDICATION[s.therapeuticArea] || 'lung_nsclc') as Indication,
     territory: s.territory,
     biomarker: s.biomarker,
     lineOfTherapy: s.lineOfTherapy,
@@ -112,7 +121,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const handleCalculate = useCallback((state: CalculatorFormState) => {
     // Require all primary fields to be selected
     if (!isReadyToCalculate(state)) {
-      toast.error('Please select all required fields (phase, deal type, modality, and indication) before calculating.');
+      toast.error('Please select phase and modality before calculating.');
       return;
     }
 

@@ -136,6 +136,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const [pendingAreaSwitch, setPendingAreaSwitch] = useState<TherapeuticArea | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const hadPrefillRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -538,7 +539,102 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             hasResult={!!calc.result}
           />
 
-          {/* Wizard + Live Preview layout */}
+          {/* Quick-Calc: 3 prominent fields + Calculate button */}
+          {!showAdvanced && (
+            <div className="space-y-6">
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">Phase</label>
+                  <select
+                    value={state.phase}
+                    onChange={(e) => { trackParameterChange('phase', state.phase, e.target.value); actions.setPhase(e.target.value as Phase); }}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                  >
+                    <option value="" disabled>Select phase...</option>
+                    {phaseOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">Modality</label>
+                  <select
+                    value={state.modality}
+                    onChange={(e) => { trackParameterChange('modality', state.modality, e.target.value); actions.setModality(e.target.value as Modality); }}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                  >
+                    <option value="" disabled>Select modality...</option>
+                    {(() => {
+                      const modalityMap: Record<TherapeuticArea, GroupedOption[]> = {
+                        oncology: modalityOptions, neurology: neurologyModalityOptions, immunology: immunologyModalityOptions,
+                        metabolic: metabolicModalityOptions, cardiovascular: cardiovascularModalityOptions,
+                        infectiousDisease: infectiousDiseaseModalityOptions, ophthalmology: ophthalmologyModalityOptions,
+                        womensHealth: womensHealthModalityOptions, rareDisease: rareDiseaseModalityOptions,
+                        hematology: hematologyModalityOptions, dermatology: dermatologyModalityOptions,
+                        gastroenterology: gastroenterologyModalityOptions,
+                      };
+                      const groups = modalityMap[state.therapeuticArea] || modalityOptions;
+                      return groups.map(g => (
+                        <optgroup key={g.label} label={g.label}>
+                          {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </optgroup>
+                      ));
+                    })()}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">Deal Type</label>
+                  <select
+                    value={state.dealType}
+                    onChange={(e) => { trackParameterChange('dealType', state.dealType, e.target.value); actions.setDealType(e.target.value as DealType); }}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                  >
+                    <option value="" disabled>Select deal type...</option>
+                    {dealTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Calculate button */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => calc.handleCalculate(state)}
+                  disabled={calc.isCalculating || (state.phase === '' && state.modality === '')}
+                  className="flex-1 sm:flex-none px-8 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                >
+                  {calc.isCalculating ? 'Calculating...' : 'Calculate Deal Terms'}
+                </button>
+                <button
+                  onClick={() => setShowAdvanced(true)}
+                  className="text-sm text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                  Advanced options
+                </button>
+              </div>
+
+              {/* Live preview strip */}
+              <LiveDealPreview
+                totalDealValue={previewResult.terms.totalDealValue}
+                upfront={previewResult.terms.upfront}
+              />
+            </div>
+          )}
+
+          {/* Advanced: Full wizard + Live Preview layout */}
+          {showAdvanced && (
+          <>
+          <div className="mb-4">
+            <button
+              onClick={() => setShowAdvanced(false)}
+              className="text-sm text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to quick calculator
+            </button>
+          </div>
           <div className="grid md:grid-cols-[1fr_280px] xl:grid-cols-[1fr_320px] gap-6 lg:gap-8 xl:gap-10">
             <WizardStepper
               steps={activeSteps}
@@ -753,6 +849,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               upfront={previewResult.terms.upfront}
             />
           </div>
+          </>
+          )}
 
           {/* Save Error Warning */}
           {calc.saveError && (
