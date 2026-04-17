@@ -1473,10 +1473,15 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200 truncate">
-                    {dtl?.royaltyLabel || 'Tiered Royalties'}
-                    <InfoTooltip content={metricTooltips.royalties} />
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-neutral-700 dark:text-slate-200 truncate">
+                      {dtl?.royaltyLabel || 'Tiered Royalties'}
+                      <InfoTooltip content={metricTooltips.royalties} />
+                    </p>
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full border whitespace-nowrap bg-amber-500/20 text-amber-400 border-amber-500/30">
+                      Moderate confidence
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300">
