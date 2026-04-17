@@ -99,14 +99,15 @@ async function main() {
       .gt('upfront_usd', 0)
       .gt('total_deal_value_usd', 0)
       .eq('is_synthetic', false)
-      // R72 (2026-04-16): Expanded from verified-only to all non-rejected
-      // non-synthetic deals. This surfaces ~1,170 deals (574 verified +
-      // 596 pending) instead of ~574 verified-only. Pending deals carry
-      // verified=false in the output so the UI can badge them as
-      // "Unverified" — the user sees them as directional context but
-      // knows they haven't been human-audited. Rejected and synthetic
-      // deals remain excluded. Phase 1 fabrication filters already
-      // removed the worst garbage from the pending pool.
+      // R72 (2026-04-16): Expanded from verified-only to verified + high-
+      // quality pending. Background audit of 2,705 deals showed:
+      //   - confidence < 80: 100% fabrication rate in sample
+      //   - confidence 80-84: borderline (55 deals, some real)
+      //   - confidence >= 85: predominantly real in sample
+      // Filter: verified=true OR (pending + confidence >= 85).
+      // Bare-target-name and TARGET-NNN patterns filtered downstream
+      // by the fabrication validator. ~967 deals pass this filter.
+      .or('verified.eq.true,confidence_score.gte.85')
       .neq('verification_status', 'rejected')
       .in('phase_at_signing', ['phase_1', 'phase_2', 'phase_3', 'preclinical', 'approved'])
       .in('deal_type', ['license', 'licensing', 'co_development', 'codevelopment', 'collaboration', 'acquisition', 'option'])
@@ -138,8 +139,23 @@ async function main() {
   }
   console.log(`After dedup: ${deduped.length} unique deals`);
 
+  // R72 quality filters from background audit:
+  // 1. Bare target names as asset (PD-1, HER2, KRAS etc.) = hallucinated
+  // 2. TARGET-NNN fabricated suffix (TIM-3-301, Nectin-4-101) = hallucinated
+  // 3. FDA Approval entries are regulatory events, not deals
+  const BARE_TARGET_PATTERN = /^(PD-?[1L]|HER[23]|KRAS|EGFR|VEGF|CDK[0-9]?|BTK|JAK|PARP|BCL-?[2X]?|FLT3|ALK|BRAF|MEK|mTOR|PI3K|TIGIT|LAG-?3|TIM-?3|CTLA-?4|CD\d+|GD2|PSMA|DLL3|GPC3|CLDN\d*|BCMA|FcRn|TROP-?2|Nectin-?4|B7-?H[34]|ATR|WEE1|MDM2|TGF-?β?|MET|RET|NTRK)$/i;
+  const TARGET_NNN_PATTERN = /^(Anti-)?[A-Z][A-Za-z0-9/]*-[0-9]{2,3}$/;
+  const qualityFiltered = deduped.filter(d => {
+    const asset = (d.asset_name || '').trim();
+    if (BARE_TARGET_PATTERN.test(asset)) return false;
+    if (TARGET_NNN_PATTERN.test(asset) && !d.verified) return false;
+    if (d.licensee_name === 'FDA Approval') return false;
+    return true;
+  });
+  console.log(`After quality filter: ${qualityFiltered.length} deals (${deduped.length - qualityFiltered.length} hallucinated/FDA removed)`);
+
   // Further filter: only deals with minimum required fields
-  const valid = deduped.filter(
+  const valid = qualityFiltered.filter(
     (d) =>
       d.licensor_name &&
       d.licensee_name &&
