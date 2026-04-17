@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DrillDownData, formatCurrency } from '@/lib/calculations';
 import DrillDownPanel from './DrillDownPanel';
@@ -113,6 +113,15 @@ function MetricCardInner({
   }, [handleHeaderClick]);
 
   const idx = animationIndex ?? 0;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyValue = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => { /* clipboard not available */ });
+  }, [value]);
 
   return (
     <motion.div
@@ -187,9 +196,27 @@ function MetricCardInner({
         </div>
 
         {/* Value */}
-        <p className="text-2xl sm:text-[28px] xl:text-[32px] font-bold text-neutral-900 dark:text-white mb-3 number-animate tracking-tight">
-          {value}
-        </p>
+        <div className="relative flex items-center gap-2 mb-3">
+          <p className="text-2xl sm:text-[28px] xl:text-[32px] font-bold text-neutral-900 dark:text-white number-animate tracking-tight">
+            {value}
+          </p>
+          <button
+            onClick={handleCopyValue}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-slate-500 hover:text-teal-400 focus:opacity-100 focus:text-teal-400"
+            aria-label={copied ? 'Copied' : `Copy ${title} value`}
+            title={copied ? 'Copied!' : 'Copy value'}
+          >
+            {copied ? (
+              <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            )}
+          </button>
+        </div>
 
         {/* Expected + change indicator */}
         <div className="flex items-center justify-between mb-3">
