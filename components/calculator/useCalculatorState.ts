@@ -51,7 +51,6 @@ import type {
   EndoscopicEndpoint,
 } from '@/lib/calculations';
 import { getFieldResets } from '@/lib/input-filters';
-import type { DealTemplate } from './types';
 
 // ── State shape ──────────────────────────────────────────────────────────────
 
@@ -134,6 +133,7 @@ export interface CalculatorFormState {
   // UI state
   wizardStep: number;
   quickMode: boolean;
+  /** @deprecated Templates removed — kept for backwards compatibility with serialized state */
   showTemplates: boolean;
   highlightedFields: Set<string>;
 }
@@ -192,7 +192,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   assetName: '',  // R63: empty = no branded lookup
   wizardStep: 0,
   quickMode: true,
-  showTemplates: true,
+  showTemplates: false,
   highlightedFields: new Set(),
 };
 
@@ -201,7 +201,6 @@ export const INITIAL_STATE: CalculatorFormState = {
 type CalculatorAction =
   | { type: 'SET_FIELD'; field: keyof CalculatorFormState; value: CalculatorFormState[keyof CalculatorFormState] }
   | { type: 'SET_THERAPEUTIC_AREA'; area: TherapeuticArea }
-  | { type: 'APPLY_TEMPLATE'; template: DealTemplate }
   | { type: 'SET_STEP'; step: number }
   | { type: 'TOGGLE_REGULATORY'; designation: keyof RegulatoryDesignations }
   | { type: 'CLEAR_HIGHLIGHTS' }
@@ -229,7 +228,6 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
     case 'SET_THERAPEUTIC_AREA': {
       const base: Partial<CalculatorFormState> = {
         therapeuticArea: action.area,
-        showTemplates: true,
       };
       if (action.area === 'neurology') {
         return { ...state, ...base, indication: 'alzheimers' as Indication, modality: 'smallMolecule', treatmentApproach: 'symptomatic' };
@@ -341,26 +339,6 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
       return { ...state, ...base, indication: 'lung_nsclc' as Indication, modality: 'smallMolecule', lineOfTherapy: '2L' };
     }
 
-    case 'APPLY_TEMPLATE': {
-      const { values } = action.template;
-      const fieldsSet = new Set<string>();
-      const patch: Partial<CalculatorFormState> = {};
-      for (const [key, val] of Object.entries(values)) {
-        if (val !== undefined) {
-          (patch as Record<string, unknown>)[key] = val;
-          fieldsSet.add(key);
-        }
-      }
-      return {
-        ...state,
-        ...patch,
-        highlightedFields: fieldsSet,
-        showTemplates: false,
-        quickMode: false,
-        wizardStep: 0,
-      };
-    }
-
     case 'SET_STEP':
       return { ...state, wizardStep: action.step };
 
@@ -454,7 +432,6 @@ export interface CalculatorActions {
   setQuickMode: (v: boolean) => void;
   setShowTemplates: (v: boolean) => void;
   toggleRegulatory: (designation: keyof RegulatoryDesignations) => void;
-  applyTemplate: (template: DealTemplate) => void;
   clearHighlights: () => void;
   bulkSet: (fields: Partial<CalculatorFormState>) => void;
   switchTherapeuticArea: (area: TherapeuticArea) => void;
@@ -523,7 +500,6 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     setQuickMode: (v) => dispatch({ type: 'SET_FIELD', field: 'quickMode', value: v }),
     setShowTemplates: (v) => dispatch({ type: 'SET_FIELD', field: 'showTemplates', value: v }),
     toggleRegulatory: (d) => dispatch({ type: 'TOGGLE_REGULATORY', designation: d }),
-    applyTemplate: (t) => dispatch({ type: 'APPLY_TEMPLATE', template: t }),
     clearHighlights: () => dispatch({ type: 'CLEAR_HIGHLIGHTS' }),
     bulkSet: (fields) => dispatch({ type: 'BULK_SET', fields }),
     switchTherapeuticArea: (area) => dispatch({ type: 'SET_THERAPEUTIC_AREA', area }),

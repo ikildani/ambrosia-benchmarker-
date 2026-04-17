@@ -76,11 +76,10 @@ import type { OnboardingStep } from './OnboardingModal';
 const PaywallModal = dynamic(() => import('./PaywallModal'), { ssr: false });
 const OnboardingModal = dynamic(() => import('./OnboardingModal'), { ssr: false });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
-import { DealTemplatesGrid, TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
+import { TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
 import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
 import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
 import { getValidationWarnings } from '@/lib/validationWarnings';
-import type { DealTemplate } from './calculator/index';
 import type { WizardStep } from './calculator/index';
 
 import { useCalculatorState } from './calculator/useCalculatorState';
@@ -490,15 +489,6 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     calc.setResult(null);
   };
 
-  const highlightTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const handleApplyTemplate = (template: DealTemplate) => {
-    actions.applyTemplate(template);
-    // Clear highlight after animation
-    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-    highlightTimerRef.current = setTimeout(() => actions.clearHighlights(), 2000);
-    trackParameterChange('template', 'none', template.id);
-  };
-
   const onSensitivityApply = (newInputs: Partial<CalculationInput>) => {
     calc.handleSensitivityApply(state, newInputs, actions.bulkSet);
   };
@@ -537,17 +527,6 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
             </div>
           </div>
         </div>
-
-        {/* Template Selection */}
-        {state.showTemplates && (
-          <DealTemplatesGrid
-            therapeuticArea={state.therapeuticArea}
-            highlightedFields={state.highlightedFields}
-            onApplyTemplate={handleApplyTemplate}
-            onHideTemplates={() => actions.setShowTemplates(false)}
-            isCalculating={calc.isCalculating}
-          />
-        )}
 
         {/* Form */}
         <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
