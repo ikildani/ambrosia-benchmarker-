@@ -16,6 +16,11 @@ import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { getNextTopic } from '@/lib/seo/topic-rotation';
 import { publishBlogPost, notifySEOContentGenerated } from '@/lib/seo/blog-publisher';
 import { generateSEOBlogPrompt, type SEOBlogPromptParams } from '@/lib/ai/prompts/seo-blog';
+import {
+  generateReactiveBlogPrompt,
+  type ReactiveBlogPromptParams,
+  type ReactiveTopicParams,
+} from '@/lib/ai/prompts/seo-blog-reactive';
 import { type GeneratedBlogContent } from '@/lib/ai/content-generator';
 import { COMPARABLE_DEALS } from '@/lib/comparableDeals';
 import { EXTENDED_COMPARABLE_DEALS } from '@/data/comparable-deals-extended';
@@ -128,6 +133,67 @@ function parseJsonResponse<T>(text: string): T {
   return JSON.parse(jsonMatch[0]) as T;
 }
 
+// ── Reactive Slack notification ─────────────────────────────────────────────
+
+async function notifyReactiveBlogPublished(
+  slug: string,
+  title: string,
+  triggerHeadline: string,
+  hoursAfterDetection: number,
+): Promise<void> {
+  const webhookUrl = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `Reactive blog published: ${title}`,
+        attachments: [
+          {
+            color: '#e74c3c',
+            blocks: [
+              {
+                type: 'header',
+                text: {
+                  type: 'plain_text',
+                  text: '\uD83D\uDD25 Reactive Blog Published',
+                  emoji: true,
+                },
+              },
+              {
+                type: 'section',
+                fields: [
+                  { type: 'mrkdwn', text: `*Title:*\n${title}` },
+                  { type: 'mrkdwn', text: `*Slug:*\n/blog/${slug}` },
+                  { type: 'mrkdwn', text: `*Triggered by:*\n${triggerHeadline}` },
+                  {
+                    type: 'mrkdwn',
+                    text: `*Published within:*\n${hoursAfterDetection}h of detection`,
+                  },
+                ],
+              },
+              {
+                type: 'actions',
+                elements: [
+                  {
+                    type: 'button',
+                    text: { type: 'plain_text', text: 'View Post' },
+                    url: `https://calculator.ambrosiaventures.co/blog/${slug}`,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    });
+  } catch (err) {
+    console.error('[seo-content] Reactive Slack notification failed:', err);
+  }
+}
+
 // ── Route handler ────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -159,12 +225,129 @@ export async function GET(request: NextRequest) {
   }
   const client = new Anthropic({ apiKey });
 
-  const published: Array<{ slug: string; title: string; topicKey: string }> = [];
+  const published: Array<{ slug: string; title: string; topicKey: string; reactive: boolean }> = [];
   const errors: string[] = [];
 
   try {
-    // Generate up to ARTICLES_PER_RUN articles per run
-    for (let i = 0; i < ARTICLES_PER_RUN; i++) {
+    // ── Phase 1: Process queued reactive items first ──────────────────────
+    const { data: queueItems } = await supabase
+      .from('seo_content_queue')
+      .select('*')
+      .eq('status', 'pending')
+      .order('priority', { ascending: false })
+      .order('created_at', { ascending: true })
+      .limit(5);
+
+    if (queueItems && queueItems.length > 0) {
+      for (const queueItem of queueItems) {
+        const remainingTime = 780_000 - (Date.now() - startTime);
+        if (remainingTime < 70_000) break;
+
+        try {
+          // Mark as generating (claim the item)
+          await supabase
+            .from('seo_content_queue')
+            .update({ status: 'generating' })
+            .eq('id', queueItem.id)
+            .eq('status', 'pending'); // Optimistic lock
+
+          const topicParams = queueItem.topic_params as ReactiveTopicParams;
+          const ta = topicParams.therapeuticArea || 'oncology';
+          const phase = topicParams.phase || 'phase2';
+          const modality = topicParams.modality || 'smallMolecule';
+          const dealType = topicParams.dealType || 'licensing';
+
+          const phaseData = getPhaseData(phase);
+          const comparableDeals = getComparableDeals(ta);
+
+          const reactiveParams: ReactiveBlogPromptParams = {
+            topicParams,
+            taLabel: TA_LABELS[ta] || ta,
+            phaseLabel: PHASE_LABELS[phase] || phase,
+            modalityLabel: MODALITY_LABELS[modality] || modality,
+            dealTypeLabel: DEAL_TYPE_LABELS[dealType] || dealType,
+            phaseData,
+            comparableDeals,
+          };
+
+          const prompt = generateReactiveBlogPrompt(reactiveParams);
+
+          // Use claude-sonnet-4-6 for reactive (faster, cheaper — speed matters)
+          const message = await client.messages.create({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 8000,
+            messages: [{ role: 'user', content: prompt }],
+          });
+
+          const textContent = message.content.find((c) => c.type === 'text');
+          if (!textContent || textContent.type !== 'text') {
+            throw new Error('No text content in Claude response');
+          }
+
+          const blogContent = parseJsonResponse<GeneratedBlogContent>(textContent.text);
+
+          // Publish via existing publisher
+          const topicKey = `reactive:${ta}:${Date.now()}`;
+          const result = await publishBlogPost(supabase, blogContent, {
+            therapeuticArea: ta,
+            modality,
+            phase,
+            topicKey,
+          });
+
+          if (!result.success) {
+            throw new Error(`Publish failed: ${result.error}`);
+          }
+
+          // Update queue item: published
+          await supabase
+            .from('seo_content_queue')
+            .update({
+              status: 'published',
+              generated_slug: result.slug,
+              processed_at: new Date().toISOString(),
+            })
+            .eq('id', queueItem.id);
+
+          published.push({
+            slug: result.slug!,
+            title: blogContent.title,
+            topicKey,
+            reactive: true,
+          });
+
+          // Send reactive-specific Slack notification for high-priority items
+          if (queueItem.priority >= 80) {
+            const triggerEvent = queueItem.trigger_event as { title?: string };
+            const hoursAgo = Math.round(
+              (Date.now() - new Date(queueItem.created_at).getTime()) / (1000 * 60 * 60) * 10
+            ) / 10;
+
+            await notifyReactiveBlogPublished(
+              result.slug!,
+              blogContent.title,
+              triggerEvent.title || 'Unknown trigger',
+              hoursAgo,
+            );
+          }
+        } catch (reactiveErr) {
+          const msg = reactiveErr instanceof Error ? reactiveErr.message : String(reactiveErr);
+          errors.push(`Reactive [${queueItem.id}]: ${msg}`);
+
+          // Mark as failed — stays in queue for retry on next run
+          // Self-healing: failed items get retried (status back to pending) after 1 hour
+          await supabase
+            .from('seo_content_queue')
+            .update({ status: 'failed', processed_at: new Date().toISOString() })
+            .eq('id', queueItem.id);
+        }
+      }
+    }
+
+    // ── Phase 2: Fill remaining slots with rotation topics ───────────────
+    const rotationSlots = ARTICLES_PER_RUN - published.length;
+
+    for (let i = 0; i < rotationSlots; i++) {
       // Time budget safety: leave ~60s per remaining article
       const remainingTime = 780_000 - (Date.now() - startTime);
       if (remainingTime < 70_000) {
@@ -227,30 +410,51 @@ export async function GET(request: NextRequest) {
           slug: result.slug!,
           title: blogContent.title,
           topicKey: topic.topicKey,
+          reactive: false,
         });
 
       } catch (articleErr) {
         const msg = articleErr instanceof Error ? articleErr.message : String(articleErr);
-        errors.push(`Article ${i + 1}: ${msg}`);
+        errors.push(`Article ${published.length + 1}: ${msg}`);
         // Continue with next article
       }
     }
 
-    // Single notification for the entire batch (instead of 10 separate Slack messages)
-    if (published.length > 0) {
+    // ── Phase 3: Self-healing — reset failed queue items older than 1 hour back to pending ──
+    await supabase
+      .from('seo_content_queue')
+      .update({ status: 'pending', processed_at: null })
+      .eq('status', 'failed')
+      .lt('processed_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
+
+    // Also reset stuck "generating" items older than 30 minutes (crashed mid-generation)
+    await supabase
+      .from('seo_content_queue')
+      .update({ status: 'pending', processed_at: null })
+      .eq('status', 'generating')
+      .lt('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString());
+
+    // Single notification for the rotation batch
+    const rotationArticles = published.filter((p) => !p.reactive);
+    if (rotationArticles.length > 0) {
       await notifySEOContentGenerated(
-        published[0].slug,
-        `Batch: ${published.length} new articles — "${published[0].title}" + ${published.length - 1} more`,
+        rotationArticles[0].slug,
+        `Batch: ${rotationArticles.length} new articles — "${rotationArticles[0].title}" + ${rotationArticles.length - 1} more`,
       );
     }
 
     // Log cron run
+    const reactiveCount = published.filter((p) => p.reactive).length;
+    const rotationCount = published.filter((p) => !p.reactive).length;
+
     await logCronRun(supabase, 'seo-content', {
       processed: published.length,
       inserted: published.length,
       errors: errors.slice(0, 10),
       parameters: {
         articlesGenerated: published.length,
+        reactiveArticles: reactiveCount,
+        rotationArticles: rotationCount,
         articlesRequested: ARTICLES_PER_RUN,
         slugs: published.map((p) => p.slug),
       },
@@ -261,6 +465,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       published: published.length,
+      reactive: reactiveCount,
+      rotation: rotationCount,
       articles: published,
       errors: errors.length,
       durationMs,

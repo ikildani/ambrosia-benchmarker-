@@ -19,6 +19,129 @@ export const maxDuration = 120;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Extract deal parameters from an analyzed competitor entry for the SEO content queue.
+ * Infers TA, modality, companies, and deal value from title + description.
+ */
+function extractTopicParams(entry: AnalyzedEntry): Record<string, unknown> {
+  const text = `${entry.title} ${entry.description}`.toLowerCase();
+
+  // Infer therapeutic area
+  const taMap: Record<string, string> = {
+    oncology: 'oncology', cancer: 'oncology', tumor: 'oncology',
+    neuro: 'neurology', alzheimer: 'neurology', parkinson: 'neurology', cns: 'neurology',
+    immun: 'immunology', autoimmune: 'immunology', 'rheumatoid': 'immunology',
+    metabolic: 'metabolic', diabetes: 'metabolic', obesity: 'metabolic', 'glp-1': 'metabolic',
+    cardio: 'cardiovascular', heart: 'cardiovascular',
+    rare: 'rareDisease', orphan: 'rareDisease',
+    hemato: 'hematology', leukemia: 'hematology', lymphoma: 'hematology', myeloma: 'hematology',
+    infectious: 'infectiousDisease', antiviral: 'infectiousDisease', antibiotic: 'infectiousDisease',
+    ophthal: 'ophthalmology', retina: 'ophthalmology', eye: 'ophthalmology',
+    dermat: 'dermatology', skin: 'dermatology', psoriasis: 'dermatology',
+    gastro: 'gastroenterology', ibd: 'gastroenterology', crohn: 'gastroenterology',
+  };
+
+  let therapeuticArea = 'oncology'; // default
+  for (const [keyword, ta] of Object.entries(taMap)) {
+    if (text.includes(keyword)) {
+      therapeuticArea = ta;
+      break;
+    }
+  }
+
+  // Infer modality
+  const modalityMap: Record<string, string> = {
+    adc: 'adc', 'antibody-drug conjugate': 'adc',
+    bispecific: 'bispecific',
+    'small molecule': 'smallMolecule',
+    monoclonal: 'mab', antibody: 'mab',
+    'gene therapy': 'geneTherapy',
+    'cell therapy': 'cellTherapy', 'car-t': 'carT_heme',
+    rnai: 'rnai', sirna: 'rnai',
+    mrna: 'mrna',
+    protac: 'protac',
+    peptide: 'peptide',
+    radiopharm: 'radiopharmaceutical',
+    'glp-1': 'glp1Agonist',
+  };
+
+  let modality = 'smallMolecule'; // default
+  for (const [keyword, mod] of Object.entries(modalityMap)) {
+    if (text.includes(keyword)) {
+      modality = mod;
+      break;
+    }
+  }
+
+  // Infer deal type
+  const dealTypeMap: Record<string, string> = {
+    licens: 'licensing', acquisition: 'acquisition', acquire: 'acquisition',
+    'co-develop': 'codevelopment', collaborat: 'collaboration', option: 'option',
+  };
+
+  let dealType = 'licensing'; // default
+  for (const [keyword, dt] of Object.entries(dealTypeMap)) {
+    if (text.includes(keyword)) {
+      dealType = dt;
+      break;
+    }
+  }
+
+  // Infer phase
+  const phaseMap: Record<string, string> = {
+    'phase 3': 'phase3', 'phase 2': 'phase2', 'phase 1': 'phase1',
+    'phase3': 'phase3', 'phase2': 'phase2', 'phase1': 'phase1',
+    preclinical: 'preclinical', approved: 'approved',
+  };
+
+  let phase = 'phase2'; // default
+  for (const [keyword, p] of Object.entries(phaseMap)) {
+    if (text.includes(keyword)) {
+      phase = p;
+      break;
+    }
+  }
+
+  // Extract company names (heuristic: look for known patterns)
+  const companies: string[] = [];
+  // Try to extract from title patterns like "Company A and Company B" or "Company A / Company B"
+  const titleParts = entry.title.split(/\s+(?:and|&|\/|,)\s+/i);
+  if (titleParts.length >= 2) {
+    // Take first word(s) from each part as potential company names
+    for (const part of titleParts.slice(0, 2)) {
+      const cleaned = part.replace(/[^a-zA-Z0-9\s]/g, '').trim().split(/\s+/).slice(0, 3).join(' ');
+      if (cleaned.length > 1 && cleaned.length < 40) {
+        companies.push(cleaned);
+      }
+    }
+  }
+
+  // Extract deal value if mentioned
+  const valueMatch = text.match(/\$\s*([\d,.]+)\s*(billion|million|[bm])\b/i);
+  let dealValue: string | undefined;
+  if (valueMatch) {
+    const num = parseFloat(valueMatch[1].replace(/,/g, ''));
+    const unit = valueMatch[2].toLowerCase();
+    if (unit.startsWith('b')) {
+      dealValue = `$${num}B`;
+    } else {
+      dealValue = `$${num}M`;
+    }
+  }
+
+  return {
+    therapeuticArea,
+    headline: entry.title,
+    companies,
+    dealValue,
+    modality,
+    phase,
+    dealType,
+    suggestedResponse: entry.suggestedResponse,
+    sourceUrl: entry.url,
+  };
+}
+
 function buildSlackPayload(entries: AnalyzedEntry[]) {
   const lines = entries.map(
     (e) =>
@@ -136,6 +259,42 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 5b. Push high-relevance entries (>= 0.75) to SEO content queue for reactive blog generation
+    const queueCandidates = analyzed.filter((e) => e.relevanceScore >= 0.75);
+    let queued = 0;
+
+    for (const entry of queueCandidates) {
+      try {
+        // Extract deal info from the title/description for topic_params
+        const topicParams = extractTopicParams(entry);
+
+        const { error: queueError } = await supabase.from('seo_content_queue').insert({
+          source: 'competitor_intel',
+          trigger_event: {
+            title: entry.title,
+            url: entry.url,
+            source: entry.source,
+            description: entry.description,
+            publishedAt: entry.publishedAt,
+            relevanceScore: entry.relevanceScore,
+            analysis: entry.analysis,
+            suggestedResponse: entry.suggestedResponse,
+          },
+          priority: 90,
+          status: 'pending',
+          topic_params: topicParams,
+        });
+
+        if (queueError) {
+          console.error('[competitor-intel] Queue insert failed:', queueError.message);
+        } else {
+          queued++;
+        }
+      } catch (qErr) {
+        console.error('[competitor-intel] Queue push error:', qErr);
+      }
+    }
+
     // 6. Send alerts for high-relevance entries (> 0.5)
     const highRelevance = analyzed.filter((e) => e.relevanceScore > 0.5);
 
@@ -184,6 +343,7 @@ export async function GET(request: NextRequest) {
         newEntries: newEntries.length,
         analyzed: analyzed.length,
         highRelevance: highRelevance.length,
+        queuedForBlog: queued,
       },
     });
 
@@ -196,6 +356,7 @@ export async function GET(request: NextRequest) {
       analyzed: analyzed.length,
       inserted,
       highRelevance: highRelevance.length,
+      queuedForBlog: queued,
       errors: errors.length,
       durationMs,
     });
