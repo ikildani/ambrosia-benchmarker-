@@ -589,35 +589,15 @@
 
   /* ── PRINT STYLES ── */
   @media print {
-    body { background: #FFFFFF; color: #1E293B; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .cover { min-height: auto; page-break-after: always; background: #FFFFFF; }
-    .cover h1 { color: #0F172A; }
-    .cover h2 { color: #64748B; }
-    .cover-label { color: #0D9488; }
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    .cover { min-height: auto; page-break-after: always; }
     .executive-takeaway { page-break-after: always; }
     .section { page-break-inside: avoid; }
     .section.page-break { page-break-before: always; }
-    .sticky-header { position: static; background: #FFFFFF; border-bottom: 2px solid #E2E8F0; }
-    .stat-card { background: #F8FAFC; border-color: #E2E8F0; }
-    .stat-card .value, h4, h5 { color: #0F172A; }
-    .stat-card .label { color: #64748B; }
-    .stat-card .sub { color: #94A3B8; }
-    .stat-card.teal .value { color: #0D9488; }
-    thead th { color: #475569; border-color: #CBD5E1; background: #F8FAFC; }
-    tbody td { border-color: #E2E8F0; color: #334155; }
-    tbody td.h { color: #0D9488; }
-    .insight { background: #F0FDFA; border-color: #99F6E4; }
-    .insight .insight-label { color: #0D9488; }
-    .insight p { color: #334155; }
-    table { border-color: #E2E8F0; }
-    .bar-outer { background: #F1F5F9; border-color: #E2E8F0; }
+    .sticky-header { position: static; }
     .confidential { display: none; }
-    .chart-title { color: #334155; }
-    p, .source { color: #64748B; }
-    p.lead { color: #334155; }
-    .toc-row { border-color: #E2E8F0; }
-    .pipeline-card { background: #F8FAFC; border-color: #E2E8F0; }
-    .heatmap-cell { border: 1px solid #E2E8F0; }
   }
 </style>
 </head>
