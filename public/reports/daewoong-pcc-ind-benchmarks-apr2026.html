@@ -6,818 +6,402 @@
 <title>PCC-to-IND Deal Benchmarks | Prepared for Daewoong Pharmaceutical</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0B1120;
-    color: #CBD5E1;
-    line-height: 1.6;
-    font-size: 14px;
-  }
-
-  .page { max-width: 900px; margin: 0 auto; padding: 60px 48px; }
-
-  /* Cover */
-  .cover {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 80px 48px;
-    border-bottom: 1px solid #1E293B;
-  }
-  .cover-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #14B8A6;
-    margin-bottom: 24px;
-  }
-  .cover h1 {
-    font-size: 36px;
-    font-weight: 700;
-    color: #F1F5F9;
-    line-height: 1.2;
-    margin-bottom: 16px;
-  }
-  .cover h2 {
-    font-size: 20px;
-    font-weight: 400;
-    color: #64748B;
-    margin-bottom: 48px;
-  }
-  .cover-meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    border-top: 1px solid #1E293B;
-    padding-top: 32px;
-  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0B1120; color: #CBD5E1; line-height: 1.6; font-size: 14px; }
+  .page { max-width: 960px; margin: 0 auto; padding: 60px 48px; }
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 80px 48px; border-bottom: 1px solid #1E293B; }
+  .cover-label { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #14B8A6; margin-bottom: 24px; }
+  .cover h1 { font-size: 36px; font-weight: 700; color: #F1F5F9; line-height: 1.2; margin-bottom: 16px; }
+  .cover h2 { font-size: 20px; font-weight: 400; color: #64748B; margin-bottom: 48px; }
+  .cover-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid #1E293B; padding-top: 32px; }
   .cover-meta dt { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #475569; font-weight: 600; }
   .cover-meta dd { font-size: 14px; color: #94A3B8; margin-top: 4px; }
-
-  /* Sections */
   .section { padding: 48px 0; border-bottom: 1px solid #1E293B; }
   .section:last-child { border-bottom: none; }
-
-  h3 {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #14B8A6;
-    margin-bottom: 8px;
-  }
-  h4 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #F1F5F9;
-    margin-bottom: 16px;
-  }
+  h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #14B8A6; margin-bottom: 8px; }
+  h4 { font-size: 22px; font-weight: 600; color: #F1F5F9; margin-bottom: 16px; }
+  h5 { font-size: 15px; font-weight: 600; color: #E2E8F0; margin: 24px 0 12px; }
   p { margin-bottom: 16px; color: #94A3B8; }
   p.lead { font-size: 16px; color: #CBD5E1; }
-
-  /* Tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 24px 0;
-    font-size: 13px;
-  }
-  thead th {
-    text-align: left;
-    padding: 10px 12px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #64748B;
-    border-bottom: 2px solid #1E293B;
-    white-space: nowrap;
-  }
-  thead th.right { text-align: right; }
-  tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #1E293B;
-    color: #CBD5E1;
-  }
-  tbody td.right { text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
-  tbody td.muted { color: #64748B; }
-  tbody td.highlight { color: #14B8A6; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; }
+  thead th { text-align: left; padding: 10px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; border-bottom: 2px solid #1E293B; white-space: nowrap; }
+  thead th.r { text-align: right; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid #1E293B; color: #CBD5E1; }
+  tbody td.r { text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+  tbody td.m { color: #64748B; }
+  tbody td.h { color: #14B8A6; font-weight: 600; }
   tbody tr:hover { background: #111827; }
-
-  /* Stat cards */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
-  .stat-card {
-    background: #111827;
-    border: 1px solid #1E293B;
-    border-radius: 8px;
-    padding: 16px;
-  }
+  .stat-card { background: #111827; border: 1px solid #1E293B; border-radius: 8px; padding: 16px; }
   .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; font-weight: 600; }
-  .stat-card .value { font-size: 28px; font-weight: 700; color: #F1F5F9; margin-top: 4px; font-family: 'SF Mono', monospace; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: #F1F5F9; margin-top: 4px; font-family: monospace; }
   .stat-card .sub { font-size: 11px; color: #475569; margin-top: 2px; }
-  .stat-card.teal { border-color: rgba(20, 184, 166, 0.3); }
+  .stat-card.teal { border-color: rgba(20,184,166,0.3); }
   .stat-card.teal .value { color: #14B8A6; }
-
-  /* Bar chart (CSS-only) */
-  .bar-row { display: flex; align-items: center; margin: 8px 0; }
-  .bar-label { width: 140px; font-size: 12px; color: #94A3B8; flex-shrink: 0; }
-  .bar-container { flex: 1; height: 24px; background: #111827; border-radius: 4px; position: relative; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 10px; font-weight: 600; color: #0B1120; min-width: 40px; }
-  .bar-fill.teal { background: linear-gradient(90deg, #0D9488, #14B8A6); }
-  .bar-fill.cyan { background: linear-gradient(90deg, #0891B2, #06B6D4); }
-  .bar-fill.indigo { background: linear-gradient(90deg, #4F46E5, #6366F1); }
-  .bar-fill.amber { background: linear-gradient(90deg, #D97706, #F59E0B); }
-
-  /* Range visualization */
-  .range-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #111827; }
-  .range-label { width: 120px; font-size: 12px; color: #94A3B8; font-weight: 500; }
-  .range-bar { flex: 1; height: 8px; background: #111827; border-radius: 4px; position: relative; }
-  .range-band { position: absolute; height: 100%; background: rgba(20, 184, 166, 0.3); border-radius: 4px; border: 1px solid rgba(20, 184, 166, 0.5); }
-  .range-median { position: absolute; width: 3px; height: 16px; top: -4px; background: #14B8A6; border-radius: 2px; }
-  .range-values { width: 200px; font-size: 11px; color: #64748B; text-align: right; font-family: monospace; }
-
-  /* Footnotes */
-  .footnote { font-size: 11px; color: #475569; margin-top: 8px; line-height: 1.5; }
-  .source { font-size: 10px; color: #334155; font-style: italic; margin-top: 16px; }
-
-  /* Callout */
-  .callout {
-    background: rgba(20, 184, 166, 0.05);
-    border: 1px solid rgba(20, 184, 166, 0.2);
-    border-radius: 8px;
-    padding: 20px 24px;
-    margin: 24px 0;
-  }
-  .callout h5 { font-size: 13px; font-weight: 600; color: #14B8A6; margin-bottom: 8px; }
+  .callout { background: rgba(20,184,166,0.05); border: 1px solid rgba(20,184,166,0.2); border-radius: 8px; padding: 20px 24px; margin: 24px 0; }
+  .callout h5 { font-size: 13px; font-weight: 600; color: #14B8A6; margin: 0 0 8px; }
   .callout p { font-size: 13px; color: #94A3B8; margin-bottom: 0; }
-
-  /* Print */
+  .source { font-size: 10px; color: #334155; font-style: italic; margin-top: 16px; }
+  .chart-wrap { margin: 28px 0; }
+  .chart-title { font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .bar-row { display: flex; align-items: center; margin: 6px 0; }
+  .bar-label { width: 180px; font-size: 12px; color: #94A3B8; flex-shrink: 0; text-align: right; padding-right: 12px; }
+  .bar-outer { flex: 1; height: 28px; background: #111827; border-radius: 4px; position: relative; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #F1F5F9; min-width: 50px; }
+  .bar-range { position: absolute; height: 100%; background: rgba(255,255,255,0.06); border-left: 2px solid rgba(255,255,255,0.15); border-right: 2px solid rgba(255,255,255,0.15); }
+  .bar-n { width: 40px; text-align: right; font-size: 10px; color: #475569; padding-left: 8px; flex-shrink: 0; }
+  .gradient-teal { background: linear-gradient(90deg, #0D9488, #14B8A6); }
+  .gradient-cyan { background: linear-gradient(90deg, #0891B2, #06B6D4); }
+  .gradient-indigo { background: linear-gradient(90deg, #4F46E5, #6366F1); }
+  .gradient-amber { background: linear-gradient(90deg, #B45309, #F59E0B); }
+  .gradient-purple { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+  .gradient-rose { background: linear-gradient(90deg, #BE123C, #FB7185); }
+  .heatmap { margin: 24px 0; }
+  .heatmap-grid { display: grid; gap: 2px; }
+  .heatmap-cell { padding: 8px 6px; border-radius: 4px; text-align: center; font-size: 11px; font-weight: 600; font-family: monospace; }
+  .heatmap-header { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748B; padding: 4px 6px; text-align: center; }
+  .heatmap-row-label { font-size: 11px; color: #94A3B8; padding: 8px 8px 8px 0; text-align: right; }
+  .confidential { position: fixed; bottom: 16px; right: 24px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: #334155; font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   @media print {
     body { background: white; color: #1E293B; }
     .cover { min-height: auto; page-break-after: always; }
     .section { page-break-inside: avoid; }
     .stat-card { background: #F8FAFC; border-color: #E2E8F0; }
     .stat-card .value, h4 { color: #0F172A; }
-    .bar-container { background: #F1F5F9; }
     thead th { color: #475569; border-color: #CBD5E1; }
     tbody td { border-color: #E2E8F0; color: #334155; }
-  }
-
-  .confidential {
-    position: fixed;
-    bottom: 16px;
-    right: 24px;
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #334155;
-    font-weight: 600;
   }
 </style>
 </head>
 <body>
-
 <div class="confidential">Confidential &mdash; Prepared for Daewoong Pharmaceutical</div>
 
-<!-- Cover -->
+<!-- ═══════════════ COVER ═══════════════ -->
 <div class="cover">
   <div class="cover-label">Ambrosia Ventures &mdash; Deal Intelligence</div>
   <h1>PCC-to-IND Licensing Benchmarks</h1>
-  <h2>Upfront payment ranges and deal structure benchmarks for preclinical-stage assets across oncology, metabolism, and immunology &mdash; by modality and global region</h2>
+  <h2>Upfront payment ranges, deal structure, and regional pricing for preclinical-to-IND-stage assets across oncology, metabolism, immunology &mdash; by modality and global region</h2>
   <div class="cover-meta">
-    <div>
-      <dt>Prepared for</dt>
-      <dd>Kevin Sha, Investment, Collaboration &amp; Business Development<br>Daewoong Pharmaceutical Co., Ltd.</dd>
-    </div>
-    <div>
-      <dt>Date</dt>
-      <dd>April 2026</dd>
-    </div>
-    <div>
-      <dt>Scope</dt>
-      <dd>Preclinical / IND-enabling stage<br>Bispecifics, Peptides, Small Molecules, siRNAs</dd>
-    </div>
-    <div>
-      <dt>Data source</dt>
-      <dd>Ambrosia Benchmarker &mdash; 2,700+ biopharma transactions<br>SEC EDGAR, ClinicalTrials.gov, press releases (2022&ndash;2026)</dd>
-    </div>
+    <div><dt>Prepared for</dt><dd>Kevin Sha, Investment, Collaboration &amp; Business Development<br>Daewoong Pharmaceutical Co., Ltd.</dd></div>
+    <div><dt>Date</dt><dd>April 2026</dd></div>
+    <div><dt>Scope</dt><dd>Preclinical / IND-enabling / Phase 1<br>Bispecifics, Peptides, Small Molecules, siRNAs<br>10 global regions</dd></div>
+    <div><dt>Data</dt><dd><strong>330 disclosed PCC-to-IND transactions</strong><br>From 2,700+ deal corpus (2020&ndash;2026)<br>SEC EDGAR, ClinicalTrials.gov, press releases</dd></div>
   </div>
 </div>
 
-<!-- Executive Summary -->
 <div class="page">
-  <div class="section">
-    <h3>Section 1</h3>
-    <h4>Executive Summary</h4>
-    <p class="lead">
-      This report benchmarks upfront payment ranges and deal structures for preclinical-to-IND-stage
-      licensing, collaboration, and option deals across three therapeutic areas (oncology, metabolism,
-      immunology/inflammation) and four modalities (bispecifics, peptides, small molecules, siRNAs).
-      Data covers 162 disclosed preclinical transactions from January 2022 through April 2026.
-    </p>
 
-    <div class="stat-grid">
-      <div class="stat-card teal">
-        <div class="label">Median upfront</div>
-        <div class="value">$75M</div>
-        <div class="sub">Global preclinical deals</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">p25&ndash;p75 range</div>
-        <div class="value">$40&ndash;154M</div>
-        <div class="sub">Interquartile range</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Median total deal</div>
-        <div class="value">$740M</div>
-        <div class="sub">Upfront + milestones</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Upfront % of total</div>
-        <div class="value">8&ndash;22%</div>
-        <div class="sub">Varies by territory</div>
-      </div>
+<!-- ═══════════════ 1. EXECUTIVE SUMMARY ═══════════════ -->
+<div class="section">
+  <h3>Section 1</h3>
+  <h4>Executive Summary</h4>
+  <p class="lead">This report benchmarks upfront payment ranges and deal structures for 330 disclosed preclinical-to-IND-stage licensing transactions across three therapeutic areas and four modalities, with pricing broken out across 10 global regions including emerging markets.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card teal">
+      <div class="label">Total deals analyzed</div>
+      <div class="value">330</div>
+      <div class="sub">PCC / Discovery / Phase 1</div>
     </div>
-
-    <div class="callout">
-      <h5>Key finding</h5>
-      <p>
-        Preclinical upfronts vary 5&ndash;10&times; depending on modality and territory. Bispecific antibodies
-        in immunology command the highest premiums ($300&ndash;600M upfront) due to platform scarcity and
-        validated targets. Small molecule preclinical deals in oncology cluster at $50&ndash;100M. Regional
-        (ex-China, Japan, APAC) deals price at 30&ndash;50% of global-rights packages.
-      </p>
+    <div class="stat-card teal">
+      <div class="label">Median upfront (global)</div>
+      <div class="value">$110M</div>
+      <div class="sub">All modalities combined</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Median total deal</div>
+      <div class="value">$944M</div>
+      <div class="sub">Upfront + milestones</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Upfront as % of total</div>
+      <div class="value">8&ndash;22%</div>
+      <div class="sub">Varies by modality &amp; territory</div>
     </div>
   </div>
 
-  <!-- Modality Benchmarks -->
-  <div class="section">
-    <h3>Section 2</h3>
-    <h4>Upfront Benchmarks by Modality &amp; Therapeutic Area</h4>
-    <p>Median upfront payment ($M) for preclinical/discovery-stage licensing deals, 2022&ndash;2026. Sample sizes shown; segments with n&lt;2 excluded.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Modality</th>
-          <th>Therapeutic Area</th>
-          <th class="right">n</th>
-          <th class="right">p25</th>
-          <th class="right">Median</th>
-          <th class="right">p75</th>
-          <th class="right">Median Total</th>
-          <th class="right">Upfront %</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="highlight">Bispecific</td>
-          <td>Immunology</td>
-          <td class="right">2</td>
-          <td class="right">$375M</td>
-          <td class="right highlight">$450M</td>
-          <td class="right">$525M</td>
-          <td class="right">$1,075M</td>
-          <td class="right">41%</td>
-        </tr>
-        <tr>
-          <td class="highlight">Bispecific</td>
-          <td>Oncology</td>
-          <td class="right">7</td>
-          <td class="right">$42M</td>
-          <td class="right highlight">$50M</td>
-          <td class="right">$67M</td>
-          <td class="right">$648M</td>
-          <td class="right">9%</td>
-        </tr>
-        <tr>
-          <td>Small molecule</td>
-          <td>Metabolic</td>
-          <td class="right">4</td>
-          <td class="right">$71M</td>
-          <td class="right highlight">$98M</td>
-          <td class="right">$120M</td>
-          <td class="right">$1,925M</td>
-          <td class="right">6%</td>
-        </tr>
-        <tr>
-          <td>Small molecule</td>
-          <td>Oncology</td>
-          <td class="right">5</td>
-          <td class="right">$46M</td>
-          <td class="right highlight">$54M</td>
-          <td class="right">$56M</td>
-          <td class="right">$807M</td>
-          <td class="right">8%</td>
-        </tr>
-        <tr>
-          <td>Peptide</td>
-          <td>Oncology</td>
-          <td class="right">3</td>
-          <td class="right">$31M</td>
-          <td class="right highlight">$53M</td>
-          <td class="right">$56M</td>
-          <td class="right">$481M</td>
-          <td class="right">10%</td>
-        </tr>
-        <tr>
-          <td>RNAi / siRNA</td>
-          <td>Oncology</td>
-          <td class="right">3</td>
-          <td class="right">$40M</td>
-          <td class="right highlight">$41M</td>
-          <td class="right">$96M</td>
-          <td class="right">$740M</td>
-          <td class="right">12%</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p class="source">Source: Ambrosia Benchmarker deal corpus (2,700+ transactions), filtered to preclinical/discovery stage, disclosed upfront + total, 2022&ndash;2026. Financial terms from SEC 8-K filings, press releases, and ClinicalTrials.gov.</p>
-
-    <div class="callout">
-      <h5>Modality insight</h5>
-      <p>
-        <strong>Bispecifics</strong> in immunology command the highest premiums due to platform scarcity
-        (limited validated bispecific platforms for autoimmune targets). The Dren Bio &rarr; Sanofi deal
-        ($600M upfront) and Chimagen &rarr; GSK ($300M) set the upper benchmark.<br><br>
-        <strong>Small molecules in metabolism</strong> (especially GLP-1/obesity) show lower upfront percentages
-        (~6% of total) but the highest total deal values ($1.9B median) because milestone-heavy structures
-        dominate this space. Gubra &rarr; AbbVie ($350M/$2.2B) and Regor &rarr; Lilly ($60M/$1.7B) are recent anchors.<br><br>
-        <strong>siRNAs</strong> price at a premium over small molecules for the same indication due to
-        differentiated mechanism and longer exclusivity protection. Arrowhead &rarr; Takeda ($150M/$740M) is
-        the leading preclinical RNAi oncology benchmark.
-      </p>
-    </div>
-  </div>
-
-  <!-- Regional Analysis -->
-  <div class="section">
-    <h3>Section 3</h3>
-    <h4>Regional Pricing &mdash; Territory Rights Packages</h4>
-    <p>How upfront payments scale by territorial scope. Global rights command the highest upfronts; regional packages (ex-China, Japan, APAC) trade at significant discounts.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Territory</th>
-          <th class="right">Deals</th>
-          <th class="right">p25 Upfront</th>
-          <th class="right">Median Upfront</th>
-          <th class="right">p75 Upfront</th>
-          <th class="right">Avg Total</th>
-          <th class="right">Upfront %</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="highlight">Global</td>
-          <td class="right">116</td>
-          <td class="right">$40M</td>
-          <td class="right highlight">$75M</td>
-          <td class="right">$154M</td>
-          <td class="right">$1,273M</td>
-          <td class="right">22%</td>
-        </tr>
-        <tr>
-          <td>Ex-China (ROW)</td>
-          <td class="right">20</td>
-          <td class="right">$43M</td>
-          <td class="right highlight">$56M</td>
-          <td class="right">$72M</td>
-          <td class="right">$890M</td>
-          <td class="right">8%</td>
-        </tr>
-        <tr>
-          <td>Europe</td>
-          <td class="right">5</td>
-          <td class="right">$32M</td>
-          <td class="right highlight">$56M</td>
-          <td class="right">$87M</td>
-          <td class="right">$863M</td>
-          <td class="right">7%</td>
-        </tr>
-        <tr>
-          <td>Japan</td>
-          <td class="right">4</td>
-          <td class="right">$35M</td>
-          <td class="right highlight">$48M</td>
-          <td class="right">$64M</td>
-          <td class="right">$506M</td>
-          <td class="right">10%</td>
-        </tr>
-        <tr>
-          <td>Asia-Pacific</td>
-          <td class="right">3</td>
-          <td class="right">$22M</td>
-          <td class="right highlight">$35M</td>
-          <td class="right">$44M</td>
-          <td class="right">$410M</td>
-          <td class="right">8%</td>
-        </tr>
-        <tr>
-          <td>China-only</td>
-          <td class="right">3</td>
-          <td class="right">$16M</td>
-          <td class="right highlight">$23M</td>
-          <td class="right">$31M</td>
-          <td class="right">$249M</td>
-          <td class="right">9%</td>
-        </tr>
-        <tr>
-          <td>US-only</td>
-          <td class="right">6</td>
-          <td class="right">$2M</td>
-          <td class="right highlight">$20M</td>
-          <td class="right">$40M</td>
-          <td class="right">$260M</td>
-          <td class="right">69%</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p class="source">Source: Ambrosia Benchmarker. US-only deals show high upfront % because they are often small, focused territorial carve-outs with limited milestone structures.</p>
-
-    <div class="callout">
-      <h5>Regional pricing rule of thumb</h5>
-      <p>
-        For a preclinical asset with global-rights upfront of $X:<br>
-        &bull; <strong>Ex-China / ROW:</strong> ~75% of global ($0.75X)<br>
-        &bull; <strong>Europe:</strong> ~65&ndash;75% of global<br>
-        &bull; <strong>Japan:</strong> ~45&ndash;65% of global<br>
-        &bull; <strong>China-only:</strong> ~20&ndash;30% of global<br>
-        &bull; <strong>Asia-Pacific bundle:</strong> ~35&ndash;45% of global<br><br>
-        These ratios reflect the revenue share each territory contributes to global pharmaceutical sales
-        (IMS Health/IQVIA 2024: US 42%, EU5 22%, Japan 8%, China 12%, ROW 16%).
-      </p>
-    </div>
-  </div>
-
-  <!-- Comparable Transactions -->
-  <div class="section">
-    <h3>Section 4</h3>
-    <h4>Named Comparable Transactions (2022&ndash;2026)</h4>
-    <p>Selected preclinical/discovery-stage deals in the target modalities and therapeutic areas, ranked by upfront payment. All terms disclosed publicly via SEC filings or press releases.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Licensor</th>
-          <th>Licensee</th>
-          <th>Modality</th>
-          <th>Indication</th>
-          <th>Territory</th>
-          <th class="right">Upfront</th>
-          <th class="right">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="muted">2025-01</td>
-          <td>Gubra</td>
-          <td>AbbVie</td>
-          <td>Peptide</td>
-          <td>Obesity</td>
-          <td>Global</td>
-          <td class="right highlight">$350M</td>
-          <td class="right">$2,225M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-10</td>
-          <td>Chimagen</td>
-          <td>GSK</td>
-          <td>Bispecific</td>
-          <td>Lupus</td>
-          <td>Global</td>
-          <td class="right highlight">$300M</td>
-          <td class="right">$850M</td>
-        </tr>
-        <tr>
-          <td class="muted">2023-09</td>
-          <td>Arrowhead</td>
-          <td>Takeda</td>
-          <td>siRNA</td>
-          <td>Pancreatic Cancer</td>
-          <td>Global</td>
-          <td class="right highlight">$150M</td>
-          <td class="right">$740M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-07</td>
-          <td>Schr&ouml;dinger</td>
-          <td>Novartis</td>
-          <td>Small mol.</td>
-          <td>Oncology platform</td>
-          <td>Global</td>
-          <td class="right highlight">$150M</td>
-          <td class="right">$1,040M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-07</td>
-          <td>Kumquat Bio</td>
-          <td>Takeda</td>
-          <td>Small mol.</td>
-          <td>Immuno-oncology</td>
-          <td>Global</td>
-          <td class="right highlight">$130M</td>
-          <td class="right">$1,330M</td>
-        </tr>
-        <tr>
-          <td class="muted">2025-07</td>
-          <td>CSPC</td>
-          <td>Madrigal</td>
-          <td>Small mol.</td>
-          <td>MASH</td>
-          <td>Ex-China</td>
-          <td class="right highlight">$120M</td>
-          <td class="right">$2,120M</td>
-        </tr>
-        <tr>
-          <td class="muted">2026-03</td>
-          <td>Insilico</td>
-          <td>Eli Lilly</td>
-          <td>Small mol.</td>
-          <td>Metabolic</td>
-          <td>Global</td>
-          <td class="right highlight">$115M</td>
-          <td class="right">$2,865M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-10</td>
-          <td>IGM Biosciences</td>
-          <td>Pfizer</td>
-          <td>Bispecific</td>
-          <td>Cholangiocarcinoma</td>
-          <td>Ex-China</td>
-          <td class="right highlight">$94M</td>
-          <td class="right">$659M</td>
-        </tr>
-        <tr>
-          <td class="muted">2026-03</td>
-          <td>CytomX</td>
-          <td>Astellas</td>
-          <td>Bispecific</td>
-          <td>Solid tumors</td>
-          <td>Global</td>
-          <td class="right highlight">$80M</td>
-          <td class="right">$1,680M</td>
-        </tr>
-        <tr>
-          <td class="muted">2025-07</td>
-          <td>Lexicon</td>
-          <td>Novo Nordisk</td>
-          <td>Small mol.</td>
-          <td>Obesity</td>
-          <td>Global</td>
-          <td class="right highlight">$75M</td>
-          <td class="right">$1,000M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-07</td>
-          <td>Chengdu Baiyu</td>
-          <td>Novartis</td>
-          <td>Small mol.</td>
-          <td>Solid tumors</td>
-          <td>Ex-China</td>
-          <td class="right highlight">$70M</td>
-          <td class="right">$1,170M</td>
-        </tr>
-        <tr>
-          <td class="muted">2024-02</td>
-          <td>Regor</td>
-          <td>Eli Lilly</td>
-          <td>Small mol.</td>
-          <td>Obesity / T2D</td>
-          <td>Ex-China</td>
-          <td class="right highlight">$60M</td>
-          <td class="right">$1,730M</td>
-        </tr>
-        <tr>
-          <td class="muted">2023-03</td>
-          <td>Kronos Bio</td>
-          <td>Amgen</td>
-          <td>Peptide</td>
-          <td>Breast (TNBC)</td>
-          <td>Ex-China</td>
-          <td class="right highlight">$58M</td>
-          <td class="right">$665M</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p class="source">Source: SEC 8-K filings, company press releases, Ambrosia Benchmarker verified deal corpus. All values in USD. "Total" includes upfront + development/regulatory/commercial milestones.</p>
-  </div>
-
-  <!-- Deal Structure -->
-  <div class="section">
-    <h3>Section 5</h3>
-    <h4>Typical Deal Structure &mdash; PCC-to-IND Stage</h4>
-    <p>How preclinical deals are typically structured beyond the upfront payment. Based on disclosed terms from 162 preclinical transactions.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Component</th>
-          <th>Typical Range</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="highlight">Upfront payment</td>
-          <td>$30M &ndash; $150M</td>
-          <td>6&ndash;22% of total deal value. Higher for platform modalities (bispecifics, siRNA).</td>
-        </tr>
-        <tr>
-          <td>Development milestones</td>
-          <td>$100M &ndash; $400M</td>
-          <td>IND filing ($10&ndash;25M), Phase 1 start ($15&ndash;30M), Phase 2 data ($25&ndash;50M), Phase 3 start ($50&ndash;75M).</td>
-        </tr>
-        <tr>
-          <td>Regulatory milestones</td>
-          <td>$50M &ndash; $200M</td>
-          <td>NDA/BLA filing ($25&ndash;50M), FDA approval ($50&ndash;100M), EU/Japan approvals ($25&ndash;50M each).</td>
-        </tr>
-        <tr>
-          <td>Commercial milestones</td>
-          <td>$100M &ndash; $500M</td>
-          <td>Net sales thresholds: $500M ($25&ndash;50M), $1B ($50&ndash;100M), $2B+ ($75&ndash;150M).</td>
-        </tr>
-        <tr>
-          <td>Royalties</td>
-          <td>Low-single to mid-single digit</td>
-          <td>3&ndash;7% tiered on net sales. Higher (8&ndash;12%) for exclusive global + later-stage assets.</td>
-        </tr>
-        <tr>
-          <td>Equity component</td>
-          <td>$0M &ndash; $50M</td>
-          <td>~30% of preclinical deals include an equity investment in the licensor at signing.</td>
-        </tr>
-        <tr>
-          <td>Option structure</td>
-          <td>Common</td>
-          <td>~40% of preclinical deals include an opt-in right (typically at Phase 2 data) with exercise fee ($50&ndash;200M).</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p class="source">Source: Ambrosia Benchmarker deal corpus analysis. Milestone breakdown estimated from SEC 8-K filings where individual milestone amounts are disclosed. Royalty ranges from BioCentury 2024 deal survey + DealForma licensing analytics.</p>
-  </div>
-
-  <!-- Daewoong Context -->
-  <div class="section">
-    <h3>Section 6</h3>
-    <h4>Contextual Reference &mdash; Recent Korean Pharma Out-Licensing</h4>
-    <p>For additional context, recent out-licensing activity from Korean pharmaceutical companies in the target therapeutic areas:</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Licensor</th>
-          <th>Licensee</th>
-          <th>Asset</th>
-          <th>TA</th>
-          <th class="right">Upfront</th>
-          <th class="right">Total</th>
-          <th>Territory</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="muted">Dec 2025</td>
-          <td>iN Therapeutics<br><span style="font-size:10px;color:#475569">(Daewoong spinoff)</span></td>
-          <td>Niroda</td>
-          <td>Aneratrigine (NaV1.7)</td>
-          <td>Pain</td>
-          <td class="right">Undisclosed</td>
-          <td class="right highlight">$506M</td>
-          <td>US/EU</td>
-        </tr>
-        <tr>
-          <td class="muted">Apr 2023</td>
-          <td>Daewoong</td>
-          <td>Vitalli Bio</td>
-          <td>DWP213388 (BTK/ITK)</td>
-          <td>Autoimmune</td>
-          <td class="right">$11M</td>
-          <td class="right">$488M</td>
-          <td>Global ex-Korea</td>
-        </tr>
-        <tr>
-          <td class="muted">2024</td>
-          <td>Regor (China)</td>
-          <td>Eli Lilly</td>
-          <td>RGT-075</td>
-          <td>Obesity/T2D</td>
-          <td class="right highlight">$60M</td>
-          <td class="right">$1,730M</td>
-          <td>Ex-China</td>
-        </tr>
-        <tr>
-          <td class="muted">2025</td>
-          <td>CSPC (China)</td>
-          <td>Madrigal</td>
-          <td>SYH2086</td>
-          <td>MASH</td>
-          <td class="right highlight">$120M</td>
-          <td class="right">$2,120M</td>
-          <td>Ex-China</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="callout">
-      <h5>Relevance to Daewoong&rsquo;s pipeline</h5>
-      <p>
-        <strong>Metabolic / Obesity:</strong> Daewoong&rsquo;s microneedle GLP-1 patch and monthly injectable
-        programs target the obesity market where single-asset peak sales reach $45&ndash;50B (Wegovy/Ozempic,
-        Mounjaro/Zepbound). Delivery-differentiated GLP-1 assets with demonstrated PK advantages at the
-        PCC-to-IND stage would benchmark against the Gubra &rarr; AbbVie ($350M/$2.2B) and Lexicon &rarr;
-        Novo Nordisk ($75M/$1B) precedents.<br><br>
-        <strong>Immunology / INI:</strong> The DWP213388 experience ($11M upfront) reflects an early-stage
-        autoimmune asset with limited clinical validation. The broader immunology market for preclinical
-        bispecifics and small molecules shows significantly higher upfronts ($150M&ndash;$600M for global
-        rights) when the target is validated and the platform is differentiated.<br><br>
-        <strong>Oncology:</strong> Preclinical bispecific and small molecule assets in oncology benchmark at
-        $50&ndash;$200M upfront for global rights. Korean/Asian origin licensors typically out-license
-        ex-China or ex-Asia rights at 60&ndash;75% of the global-rights equivalent.
-      </p>
-    </div>
-
-    <p class="source">Sources: Korea Biomedical Review, Korea Herald, PR Newswire, SEC 8-K filings, company press releases. iN Therapeutics Niroda deal: koreabiomed.com/news/articleView.html?idxno=30034. Daewoong DWP213388: prnewswire.com (Apr 2023).</p>
-  </div>
-
-  <!-- Methodology -->
-  <div class="section">
-    <h3>Section 7</h3>
-    <h4>Methodology &amp; Data Sources</h4>
-    <p>This report draws on the Ambrosia Benchmarker deal intelligence platform, which aggregates biopharma transaction data from multiple authoritative sources:</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Source</th>
-          <th>Coverage</th>
-          <th>Update frequency</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>SEC EDGAR (8-K filings)</td>
-          <td>All US-listed biopharma deal announcements</td>
-          <td>Every 2 hours (automated)</td>
-        </tr>
-        <tr>
-          <td>Press releases (FierceBiotech, BioPharma Dive, etc.)</td>
-          <td>Global deal announcements from 10+ biotech news feeds</td>
-          <td>Daily (automated)</td>
-        </tr>
-        <tr>
-          <td>Perplexity AI discovery</td>
-          <td>Cross-source deal sweep for last 7 days, 6 TA rotations</td>
-          <td>Every 4 hours (automated)</td>
-        </tr>
-        <tr>
-          <td>ClinicalTrials.gov v2 API</td>
-          <td>Phase/trial status for 562 indications across 12 TAs</td>
-          <td>Weekly (automated)</td>
-        </tr>
-        <tr>
-          <td>Company 10-K / annual reports</td>
-          <td>Peak sales, revenue curves for 164 index drugs</td>
-          <td>Annual (manual)</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p><strong>Quality assurance:</strong> 574 deals are human-verified with source attribution. An additional ~370 deals carry confidence scores &ge;85 from the AI extraction pipeline and pass a 3-layer fabrication filter (asset-modality suffix check, bare-target-name exclusion, known-pipeline consistency). All unverified deals are labeled as such when presented.</p>
-
-    <p><strong>Scope limitations:</strong> This analysis covers disclosed deal terms only. Undisclosed or confidential transactions are not included. Preclinical-stage deals represent a subset where financial terms are publicly available; many preclinical deals have undisclosed upfronts. The dataset may therefore skew toward larger, more prominent transactions.</p>
-
-    <p class="source">For questions about methodology or custom analysis: hello@ambrosiaventures.co &middot; calculator.ambrosiaventures.co</p>
-  </div>
-
-  <!-- Disclaimer -->
-  <div class="section" style="border-bottom: none;">
-    <p style="font-size: 10px; color: #334155; line-height: 1.6;">
-      <strong>Disclaimer:</strong> This report is provided for informational and directional benchmarking purposes only.
-      It does not constitute investment advice, a valuation opinion, or a recommendation to pursue any specific
-      transaction structure. Deal terms vary significantly based on asset-specific factors (data quality,
-      competitive landscape, patent position, indication size) that are not fully captured in aggregate
-      benchmarks. Ambrosia Ventures is not a registered investment adviser. All data is sourced from public
-      filings and press releases; no confidential or material non-public information was used.
-      &copy; 2026 Ambrosia Ventures. All rights reserved.
+  <div class="callout">
+    <h5>Key findings</h5>
+    <p>
+      <strong>1.</strong> Upfronts vary 5&ndash;15&times; by modality: immunology bispecifics ($450M median) vs oncology PROTACs ($57M).<br>
+      <strong>2.</strong> Regional discount from global rights: Ex-China ~60%, Japan ~48%, APAC ~38%, China ~75%, LATAM/GCC ~20&ndash;30%.<br>
+      <strong>3.</strong> Metabolic/obesity is the hottest space: peptide assets command $156M median upfront with $2B+ total deals (Gubra&rarr;AbbVie, Regor&rarr;Lilly precedents).<br>
+      <strong>4.</strong> siRNAs price at a premium over small molecules for the same indication (differentiated MOA + longer exclusivity).
     </p>
   </div>
-
 </div>
 
+<!-- ═══════════════ 2. MODALITY BENCHMARKS ═══════════════ -->
+<div class="section">
+  <h3>Section 2</h3>
+  <h4>Upfront Benchmarks by Modality</h4>
+  <p>Median upfront payment ($M) for PCC-to-IND stage deals (2020&ndash;2026). Filtered to modalities relevant to Daewoong&rsquo;s pipeline. Sample sizes in parentheses.</p>
+
+  <!-- BAR CHART: Modality comparison -->
+  <div class="chart-wrap">
+    <div class="chart-title">Median Upfront by Modality &amp; TA ($M)</div>
+
+    <div class="bar-row">
+      <div class="bar-label">Bispecific &mdash; Immuno</div>
+      <div class="bar-outer"><div class="bar-fill gradient-teal" style="width:90%">$450M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Peptide &mdash; Metabolic</div>
+      <div class="bar-outer"><div class="bar-fill gradient-amber" style="width:31%">$156M</div></div>
+      <div class="bar-n">n=4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">mRNA &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-purple" style="width:24%">$120M</div></div>
+      <div class="bar-n">n=11</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sm. Molecule &mdash; Metabolic</div>
+      <div class="bar-outer"><div class="bar-fill gradient-cyan" style="width:24%">$120M</div></div>
+      <div class="bar-n">n=7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Peptide &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-amber" style="width:22%">$109M</div></div>
+      <div class="bar-n">n=9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">mAb &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-indigo" style="width:18%">$89M</div></div>
+      <div class="bar-n">n=13</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">RNAi / siRNA &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-rose" style="width:18%">$88M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Bispecific &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-teal" style="width:16%">$80M</div></div>
+      <div class="bar-n">n=19</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">PROTAC &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-purple" style="width:11%">$57M</div></div>
+      <div class="bar-n">n=14</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sm. Molecule &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill gradient-cyan" style="width:10%">$50M</div></div>
+      <div class="bar-n">n=16</div>
+    </div>
+  </div>
+
+  <!-- FULL DATA TABLE -->
+  <h5>Detailed Benchmarks (p25 / Median / p75)</h5>
+  <table>
+    <thead><tr><th>Modality</th><th>TA</th><th class="r">n</th><th class="r">p25</th><th class="r">Median</th><th class="r">p75</th><th class="r">Med. Total</th><th class="r">Up %</th></tr></thead>
+    <tbody>
+      <tr><td class="h">Bispecific</td><td>Immunology</td><td class="r">6</td><td class="r">$210M</td><td class="r h">$450M</td><td class="r">$1,088M</td><td class="r">$1,240M</td><td class="r">46%</td></tr>
+      <tr><td class="h">Bispecific</td><td>Oncology</td><td class="r">19</td><td class="r">$50M</td><td class="r h">$80M</td><td class="r">$175M</td><td class="r">$690M</td><td class="r">21%</td></tr>
+      <tr><td>Small molecule</td><td>Metabolic</td><td class="r">7</td><td class="r">$80M</td><td class="r h">$120M</td><td class="r">$135M</td><td class="r">$1,835M</td><td class="r">6%</td></tr>
+      <tr><td>Small molecule</td><td>Oncology</td><td class="r">16</td><td class="r">$39M</td><td class="r h">$50M</td><td class="r">$81M</td><td class="r">$699M</td><td class="r">12%</td></tr>
+      <tr><td class="h">Peptide</td><td>Metabolic</td><td class="r">4</td><td class="r">$94M</td><td class="r h">$156M</td><td class="r">$238M</td><td class="r">$2,006M</td><td class="r">10%</td></tr>
+      <tr><td class="h">Peptide</td><td>Oncology</td><td class="r">9</td><td class="r">$53M</td><td class="r h">$109M</td><td class="r">$149M</td><td class="r">$1,046M</td><td class="r">11%</td></tr>
+      <tr><td class="h">RNAi / siRNA</td><td>Oncology</td><td class="r">6</td><td class="r">$45M</td><td class="r h">$88M</td><td class="r">$143M</td><td class="r">$756M</td><td class="r">11%</td></tr>
+      <tr><td>Antibody</td><td>Immunology</td><td class="r">5</td><td class="r">$111M</td><td class="r h">$150M</td><td class="r">$150M</td><td class="r">$1,111M</td><td class="r">27%</td></tr>
+      <tr><td>PROTAC</td><td>Oncology</td><td class="r">14</td><td class="r">$32M</td><td class="r h">$57M</td><td class="r">$87M</td><td class="r">$682M</td><td class="r">10%</td></tr>
+      <tr><td>ADC</td><td>Oncology</td><td class="r">12</td><td class="r">$29M</td><td class="r h">$54M</td><td class="r">$129M</td><td class="r">$1,003M</td><td class="r">15%</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Source: Ambrosia Benchmarker deal corpus (2,700+ transactions). 330 PCC-to-IND deals with disclosed financial terms, 2020&ndash;2026. SEC 8-K filings, press releases, ClinicalTrials.gov.</p>
+</div>
+
+<!-- ═══════════════ 3. REGIONAL PRICING ═══════════════ -->
+<div class="section">
+  <h3>Section 3</h3>
+  <h4>Regional Pricing &mdash; 10 Global Territory Packages</h4>
+  <p>How upfront payments scale by territorial scope. Includes observed data for 7 regions + directional estimates for 3 emerging regions (Australia/NZ, LATAM, GCC) based on pharmaceutical revenue share modeling.</p>
+
+  <!-- BAR CHART: Regional upfronts -->
+  <div class="chart-wrap">
+    <div class="chart-title">Median Upfront by Territory ($M)</div>
+
+    <div class="bar-row">
+      <div class="bar-label">Global rights</div>
+      <div class="bar-outer"><div class="bar-fill gradient-teal" style="width:100%">$110M</div></div>
+      <div class="bar-n">n=225</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">China (in-license)</div>
+      <div class="bar-outer"><div class="bar-fill gradient-amber" style="width:75%">$82M</div></div>
+      <div class="bar-n">n=20</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Ex-China (ROW)</div>
+      <div class="bar-outer"><div class="bar-fill gradient-cyan" style="width:61%">$67M</div></div>
+      <div class="bar-n">n=42</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Japan</div>
+      <div class="bar-outer"><div class="bar-fill gradient-indigo" style="width:48%">$53M</div></div>
+      <div class="bar-n">n=9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Europe (EU5)</div>
+      <div class="bar-outer"><div class="bar-fill gradient-purple" style="width:48%">$52M</div></div>
+      <div class="bar-n">n=8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Asia-Pacific bundle</div>
+      <div class="bar-outer"><div class="bar-fill gradient-rose" style="width:38%">$42M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">US-only</div>
+      <div class="bar-outer"><div class="bar-fill gradient-cyan" style="width:37%">$41M</div></div>
+      <div class="bar-n">n=11</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:#64748B">Australia / NZ *</div>
+      <div class="bar-outer"><div class="bar-fill" style="width:14%;background:linear-gradient(90deg,#334155,#475569)">$15&ndash;25M</div></div>
+      <div class="bar-n" style="color:#475569">est.</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:#64748B">LATAM *</div>
+      <div class="bar-outer"><div class="bar-fill" style="width:11%;background:linear-gradient(90deg,#334155,#475569)">$12&ndash;22M</div></div>
+      <div class="bar-n" style="color:#475569">est.</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:#64748B">GCC / Middle East *</div>
+      <div class="bar-outer"><div class="bar-fill" style="width:7%;background:linear-gradient(90deg,#334155,#475569)">$8&ndash;15M</div></div>
+      <div class="bar-n" style="color:#475569">est.</div>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:#475569;">* Estimates for Australia/NZ, LATAM, and GCC are modeled from the observed global:regional pricing ratios in the dataset, scaled by IQVIA MIDAS 2024 pharmaceutical revenue shares: Australia/NZ ~2.5% of global, LATAM (Brazil+Mexico+Argentina) ~4%, GCC (Saudi+UAE+Kuwait) ~1.5%. No disclosed PCC-to-IND deals with these specific territory tags exist in the current corpus.</p>
+
+  <h5>Regional Pricing Rules of Thumb</h5>
+  <table>
+    <thead><tr><th>Territory</th><th class="r">Typical % of Global Upfront</th><th class="r">Estimated Range ($M)</th><th>Pharma Revenue Share</th></tr></thead>
+    <tbody>
+      <tr><td class="h">Global</td><td class="r h">100%</td><td class="r">$110M (median)</td><td>100% (reference)</td></tr>
+      <tr><td>Ex-China (ROW)</td><td class="r">55&ndash;65%</td><td class="r">$60&ndash;72M</td><td>~88% of global revenue</td></tr>
+      <tr><td>China</td><td class="r">65&ndash;80%</td><td class="r">$72&ndash;88M</td><td>~12% of global, but strategic premium for access</td></tr>
+      <tr><td>Japan</td><td class="r">40&ndash;55%</td><td class="r">$44&ndash;61M</td><td>~8% of global (IQVIA 2024)</td></tr>
+      <tr><td>Europe (EU5)</td><td class="r">40&ndash;55%</td><td class="r">$44&ndash;61M</td><td>~22% of global</td></tr>
+      <tr><td>US-only</td><td class="r">35&ndash;45%</td><td class="r">$39&ndash;50M</td><td>~42% of global, but lower as carved-out package</td></tr>
+      <tr><td>Asia-Pacific bundle</td><td class="r">30&ndash;40%</td><td class="r">$33&ndash;44M</td><td>~15% of global (ex-Japan, ex-China)</td></tr>
+      <tr><td class="m">Australia / New Zealand</td><td class="r">12&ndash;20%</td><td class="r">$13&ndash;22M</td><td>~2.5% of global (TGA-regulated)</td></tr>
+      <tr><td class="m">LATAM (Brazil, Mexico, Arg.)</td><td class="r">10&ndash;18%</td><td class="r">$11&ndash;20M</td><td>~4% of global (ANVISA/COFEPRIS)</td></tr>
+      <tr><td class="m">GCC (Saudi, UAE, Kuwait)</td><td class="r">7&ndash;12%</td><td class="r">$8&ndash;13M</td><td>~1.5% of global (SFDA-regulated)</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Revenue shares: IQVIA MIDAS Q4 2024 global pharmaceutical market data. Regional estimates: proportional scaling from observed global/ex-China/Japan/APAC ratios in the 330-deal corpus, cross-referenced with published territory-specific licensing precedents (BioCentury 2024).</p>
+</div>
+
+<!-- ═══════════════ 4. COMPARABLE TRANSACTIONS ═══════════════ -->
+<div class="section">
+  <h3>Section 4</h3>
+  <h4>Named Comparable Transactions (2022&ndash;2026)</h4>
+  <p>15 selected PCC-to-IND stage deals in the target modalities, ranked by upfront. All terms from public SEC filings or press releases.</p>
+
+  <table>
+    <thead><tr><th>Date</th><th>Licensor</th><th>Licensee</th><th>Modality</th><th>Indication</th><th>Territory</th><th class="r">Upfront</th><th class="r">Total</th></tr></thead>
+    <tbody>
+      <tr><td class="m">2025-03</td><td>Dren Bio</td><td>Sanofi</td><td>Bispecific</td><td>Autoimmune</td><td>Global</td><td class="r h">$600M</td><td class="r">$1,300M</td></tr>
+      <tr><td class="m">2025-01</td><td>Gubra</td><td>AbbVie</td><td>Peptide</td><td>Obesity</td><td>Global</td><td class="r h">$350M</td><td class="r">$2,225M</td></tr>
+      <tr><td class="m">2024-10</td><td>Chimagen</td><td>GSK</td><td>Bispecific</td><td>Lupus</td><td>Global</td><td class="r h">$300M</td><td class="r">$850M</td></tr>
+      <tr><td class="m">2023-09</td><td>Arrowhead</td><td>Takeda</td><td>siRNA</td><td>Pancreatic CA</td><td>Global</td><td class="r h">$150M</td><td class="r">$740M</td></tr>
+      <tr><td class="m">2024-07</td><td>Schr&ouml;dinger</td><td>Novartis</td><td>Sm. molecule</td><td>Oncology</td><td>Global</td><td class="r h">$150M</td><td class="r">$1,040M</td></tr>
+      <tr><td class="m">2024-07</td><td>Kumquat Bio</td><td>Takeda</td><td>Sm. molecule</td><td>IO</td><td>Global</td><td class="r h">$130M</td><td class="r">$1,330M</td></tr>
+      <tr><td class="m">2025-07</td><td>CSPC</td><td>Madrigal</td><td>Sm. molecule</td><td>MASH</td><td>Ex-China</td><td class="r h">$120M</td><td class="r">$2,120M</td></tr>
+      <tr><td class="m">2026-03</td><td>Insilico</td><td>Eli Lilly</td><td>Sm. molecule</td><td>Metabolic</td><td>Global</td><td class="r h">$115M</td><td class="r">$2,865M</td></tr>
+      <tr><td class="m">2024-10</td><td>IGM Biosciences</td><td>Pfizer</td><td>Bispecific</td><td>Cholangio.</td><td>Ex-China</td><td class="r h">$94M</td><td class="r">$659M</td></tr>
+      <tr><td class="m">2026-03</td><td>CytomX</td><td>Astellas</td><td>Bispecific</td><td>Solid tumors</td><td>Global</td><td class="r h">$80M</td><td class="r">$1,680M</td></tr>
+      <tr><td class="m">2025-04</td><td>Pyxis Onco</td><td>Merck</td><td>Sm. molecule</td><td>GBM</td><td>Ex-China</td><td class="r h">$77M</td><td class="r">$809M</td></tr>
+      <tr><td class="m">2025-07</td><td>Lexicon</td><td>Novo Nordisk</td><td>Sm. molecule</td><td>Obesity</td><td>Global</td><td class="r h">$75M</td><td class="r">$1,000M</td></tr>
+      <tr><td class="m">2024-07</td><td>Chengdu Baiyu</td><td>Novartis</td><td>Sm. molecule</td><td>Solid tumors</td><td>Ex-China</td><td class="r h">$70M</td><td class="r">$1,170M</td></tr>
+      <tr><td class="m">2024-02</td><td>Regor</td><td>Eli Lilly</td><td>Sm. molecule</td><td>Obesity/T2D</td><td>Ex-China</td><td class="r h">$60M</td><td class="r">$1,730M</td></tr>
+      <tr><td class="m">2023-03</td><td>Kronos Bio</td><td>Amgen</td><td>Peptide</td><td>TNBC</td><td>Ex-China</td><td class="r h">$58M</td><td class="r">$665M</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Source: SEC 8-K filings, company press releases. All values USD. &ldquo;Total&rdquo; = upfront + development + regulatory + commercial milestones.</p>
+</div>
+
+<!-- ═══════════════ 5. DAEWOONG CONTEXT ═══════════════ -->
+<div class="section">
+  <h3>Section 5</h3>
+  <h4>Contextual Benchmarks &mdash; Korean &amp; Asian-Origin Out-Licensing</h4>
+  <p>Recent precedents from Korean and Asian pharmaceutical companies out-licensing preclinical/early-stage assets to global partners.</p>
+
+  <table>
+    <thead><tr><th>Date</th><th>Licensor</th><th>Licensee</th><th>Asset</th><th>TA</th><th class="r">Upfront</th><th class="r">Total</th><th>Territory</th></tr></thead>
+    <tbody>
+      <tr><td class="m">Dec 2025</td><td>iN Therapeutics<br><span style="font-size:10px;color:#475569">(Daewoong spinoff)</span></td><td>Niroda</td><td>Aneratrigine (NaV1.7)</td><td>Pain</td><td class="r">Undiscl.</td><td class="r h">$506M</td><td>US/EU</td></tr>
+      <tr><td class="m">Apr 2023</td><td>Daewoong</td><td>Vitalli Bio</td><td>DWP213388 (BTK/ITK)</td><td>Autoimmune</td><td class="r">$11M</td><td class="r">$488M</td><td>Global ex-Korea</td></tr>
+      <tr><td class="m">2025-07</td><td>CSPC (China)</td><td>Madrigal</td><td>SYH2086</td><td>MASH</td><td class="r h">$120M</td><td class="r">$2,120M</td><td>Ex-China</td></tr>
+      <tr><td class="m">2024-02</td><td>Regor (China)</td><td>Eli Lilly</td><td>RGT-075</td><td>Obesity/T2D</td><td class="r h">$60M</td><td class="r">$1,730M</td><td>Ex-China</td></tr>
+      <tr><td class="m">2024-07</td><td>Chengdu Baiyu (China)</td><td>Novartis</td><td>Sm. molecule</td><td>Oncology</td><td class="r h">$70M</td><td class="r">$1,170M</td><td>Ex-China</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <h5>Relevance to Daewoong&rsquo;s pipeline</h5>
+    <p>
+      <strong>Metabolic / Obesity:</strong> Daewoong&rsquo;s microneedle GLP-1 patch and monthly injectable programs target a $100B+ TAM where single-asset peaks reach $45&ndash;50B (Wegovy, Zepbound). Delivery-differentiated GLP-1 assets benchmark against Gubra&rarr;AbbVie ($350M/$2.2B) and Lexicon&rarr;Novo ($75M/$1B).<br><br>
+      <strong>Immunology:</strong> The DWP213388 experience ($11M upfront) reflects early-stage autoimmune with limited clinical validation. Differentiated bispecifics/peptides in immunology command $150&ndash;600M upfront globally when targets are validated.<br><br>
+      <strong>Korean ex-Asia out-licensing:</strong> Asian-origin licensors typically out-license ex-China or ex-Asia rights at 55&ndash;65% of global-rights equivalent. iN Therapeutics/Niroda ($506M total for US/EU) anchors the upper end for Korean-origin assets.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════ 6. DEAL STRUCTURE ═══════════════ -->
+<div class="section">
+  <h3>Section 6</h3>
+  <h4>Typical Deal Structure &mdash; PCC-to-IND Stage</h4>
+
+  <table>
+    <thead><tr><th>Component</th><th>Typical Range</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="h">Upfront payment</td><td>$30M &ndash; $200M</td><td>6&ndash;22% of total. Higher for bispecifics/platforms, lower for small molecules.</td></tr>
+      <tr><td>Development milestones</td><td>$100M &ndash; $400M</td><td>IND ($10&ndash;25M), Ph1 start ($15&ndash;30M), Ph2 data ($25&ndash;50M), Ph3 start ($50&ndash;75M).</td></tr>
+      <tr><td>Regulatory milestones</td><td>$50M &ndash; $200M</td><td>NDA filing ($25&ndash;50M), FDA approval ($50&ndash;100M), EU/Japan ($25&ndash;50M each).</td></tr>
+      <tr><td>Commercial milestones</td><td>$100M &ndash; $500M</td><td>Net sales: $500M ($25&ndash;50M), $1B ($50&ndash;100M), $2B+ ($75&ndash;150M).</td></tr>
+      <tr><td>Royalties</td><td>Low-single to mid-single</td><td>3&ndash;7% tiered on net sales. 8&ndash;12% for exclusive global.</td></tr>
+      <tr><td>Equity component</td><td>$0M &ndash; $50M</td><td>~30% of preclinical deals include equity at signing.</td></tr>
+      <tr><td>Option structure</td><td>Common (~40%)</td><td>Opt-in at Phase 2 data, exercise fee $50&ndash;200M.</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Milestone breakdown from SEC 8-K filings with individual milestones disclosed. Royalty ranges from BioCentury 2024 deal survey + DealForma licensing analytics.</p>
+</div>
+
+<!-- ═══════════════ 7. METHODOLOGY ═══════════════ -->
+<div class="section">
+  <h3>Section 7</h3>
+  <h4>Methodology &amp; Data Sources</h4>
+
+  <table>
+    <thead><tr><th>Source</th><th>Coverage</th><th>Update</th></tr></thead>
+    <tbody>
+      <tr><td>SEC EDGAR (8-K filings)</td><td>US-listed biopharma deal announcements</td><td>Every 2 hours</td></tr>
+      <tr><td>Press releases (FierceBiotech, BioPharma Dive, etc.)</td><td>Global deals from 10+ biotech news feeds</td><td>Daily</td></tr>
+      <tr><td>Perplexity AI discovery</td><td>Cross-source deal sweep, 6 TA rotations</td><td>Every 4 hours</td></tr>
+      <tr><td>ClinicalTrials.gov v2 API</td><td>562 indications, 12 therapeutic areas</td><td>Weekly</td></tr>
+      <tr><td>Company 10-K / annual reports</td><td>164 index drugs with peak sales</td><td>Annual</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Quality assurance:</strong> 574 human-verified deals with source attribution. Additional ~370 AI-extracted deals with confidence &ge;85 and 3-layer fabrication filter. All unverified deals labeled when presented. Total corpus: 2,700+ transactions.</p>
+  <p><strong>Regional estimates:</strong> Australia/NZ, LATAM, and GCC pricing estimated from observed global:regional ratios in the corpus, scaled by IQVIA MIDAS 2024 pharmaceutical revenue share data. No disclosed PCC-to-IND deals with these territory tags exist in the current corpus; estimates are directional.</p>
+
+  <p class="source">For questions about methodology or custom analysis: hello@ambrosiaventures.co &middot; calculator.ambrosiaventures.co</p>
+</div>
+
+<!-- ═══════════════ DISCLAIMER ═══════════════ -->
+<div class="section" style="border-bottom:none;">
+  <p style="font-size:10px;color:#334155;line-height:1.6;">
+    <strong>Disclaimer:</strong> This report is for informational and directional benchmarking purposes only. It does not constitute investment advice, a valuation opinion, or a recommendation to pursue any specific transaction structure. Deal terms vary significantly based on asset-specific factors (data quality, competitive landscape, patent position, indication size). Ambrosia Ventures is not a registered investment adviser. All data from public filings and press releases; no confidential information used. &copy; 2026 Ambrosia Ventures. All rights reserved.
+  </p>
+</div>
+
+</div>
 </body>
 </html>
