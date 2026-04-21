@@ -220,8 +220,8 @@ export default function SecurityPage() {
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Responsible Disclosure</h2>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
               If you discover a security vulnerability, please report it to{' '}
-              <a href="mailto:security@ambrosiaventures.co" className="text-teal-400 hover:text-teal-300 transition-colors">
-                security@ambrosiaventures.co
+              <a href="mailto:support@ambrosiaventures.co" className="text-teal-400 hover:text-teal-300 transition-colors">
+                support@ambrosiaventures.co
               </a>. We take all reports seriously and will respond within 48 hours.
             </p>
             <p className="text-xs text-slate-500">
@@ -240,8 +240,8 @@ export default function SecurityPage() {
             <Link href="/methodology" className="text-sm text-teal-400 hover:text-teal-300 transition-colors underline underline-offset-4">
               Methodology
             </Link>
-            <a href="mailto:security@ambrosiaventures.co" className="text-sm text-teal-400 hover:text-teal-300 transition-colors underline underline-offset-4">
-              security@ambrosiaventures.co
+            <a href="mailto:support@ambrosiaventures.co" className="text-sm text-teal-400 hover:text-teal-300 transition-colors underline underline-offset-4">
+              support@ambrosiaventures.co
             </a>
           </div>
         </div>
