@@ -194,6 +194,161 @@
     </div>
   </div>
 
+  <!-- HEAT MAP: Modality x TA -->
+  <div class="chart-wrap">
+    <div class="chart-title">Heat Map &mdash; Median Upfront ($M) by Modality &times; Therapeutic Area</div>
+    <div style="overflow-x:auto;">
+      <div class="heatmap-grid" style="grid-template-columns: 160px repeat(5, 1fr); min-width: 700px;">
+        <!-- Header row -->
+        <div class="heatmap-header"></div>
+        <div class="heatmap-header">Oncology</div>
+        <div class="heatmap-header">Metabolic</div>
+        <div class="heatmap-header">Immunology</div>
+        <div class="heatmap-header">Neurology</div>
+        <div class="heatmap-header">Cardiovasc.</div>
+
+        <!-- Bispecific -->
+        <div class="heatmap-row-label">Bispecific</div>
+        <div class="heatmap-cell" style="background:rgba(20,184,166,0.25);color:#5EEAD4;">$80M <span style="font-size:9px;opacity:0.6">n=19</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:rgba(20,184,166,0.65);color:#F0FDFA;">$450M <span style="font-size:9px;opacity:0.6">n=6</span></div>
+        <div class="heatmap-cell" style="background:rgba(20,184,166,0.35);color:#99F6E4;">$133M <span style="font-size:9px;opacity:0.6">n=3</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- Small molecule -->
+        <div class="heatmap-row-label">Small Molecule</div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.2);color:#67E8F9;">$50M <span style="font-size:9px;opacity:0.6">n=16</span></div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.35);color:#A5F3FC;">$120M <span style="font-size:9px;opacity:0.6">n=7</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">limited</div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.25);color:#67E8F9;">$80M <span style="font-size:9px;opacity:0.6">n=7</span></div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.4);color:#CFFAFE;">$143M <span style="font-size:9px;opacity:0.6">n=4</span></div>
+
+        <!-- Peptide -->
+        <div class="heatmap-row-label">Peptide</div>
+        <div class="heatmap-cell" style="background:rgba(245,158,11,0.3);color:#FCD34D;">$109M <span style="font-size:9px;opacity:0.6">n=9</span></div>
+        <div class="heatmap-cell" style="background:rgba(245,158,11,0.45);color:#FDE68A;">$156M <span style="font-size:9px;opacity:0.6">n=4</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- siRNA / RNAi -->
+        <div class="heatmap-row-label">siRNA / RNAi</div>
+        <div class="heatmap-cell" style="background:rgba(251,113,133,0.25);color:#FDA4AF;">$88M <span style="font-size:9px;opacity:0.6">n=6</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:rgba(251,113,133,0.15);color:#FCA5A5;">$46M <span style="font-size:9px;opacity:0.6">n=3</span></div>
+        <div class="heatmap-cell" style="background:rgba(251,113,133,0.4);color:#FEE2E2;">$150M <span style="font-size:9px;opacity:0.6">n=3</span></div>
+
+        <!-- ADC -->
+        <div class="heatmap-row-label">ADC</div>
+        <div class="heatmap-cell" style="background:rgba(99,102,241,0.2);color:#A5B4FC;">$54M <span style="font-size:9px;opacity:0.6">n=12</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- PROTAC -->
+        <div class="heatmap-row-label">PROTAC</div>
+        <div class="heatmap-cell" style="background:rgba(167,139,250,0.2);color:#C4B5FD;">$57M <span style="font-size:9px;opacity:0.6">n=14</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+      </div>
+    </div>
+    <p style="font-size:10px;color:#475569;margin-top:8px;">Color intensity = relative upfront magnitude. &ldquo;&mdash;&rdquo; = fewer than 3 disclosed deals in cell. All values median of disclosed PCC-to-IND transactions, 2020&ndash;2026.</p>
+  </div>
+
+  <!-- RANGE CHART: p25-median-p75 whisker bars -->
+  <div class="chart-wrap">
+    <div class="chart-title">Upfront Range (p25 &mdash; Median &mdash; p75) by Modality</div>
+    <p style="font-size:11px;color:#64748B;margin:-8px 0 16px;">The spread matters. A tight range means pricing is predictable; a wide range means deal-specific factors dominate.</p>
+
+    <!-- Each range bar: left-pad to p25, fill to p75, diamond at median -->
+    <svg viewBox="0 0 800 340" style="width:100%;max-width:800px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Scale: 0 to $500M, 1px = $500M/700 = ~$0.71M per px. offset 100px for labels -->
+      <!-- Grid lines -->
+      <line x1="100" y1="10" x2="100" y2="330" stroke="#1E293B" stroke-width="1"/>
+      <line x1="240" y1="10" x2="240" y2="330" stroke="#1E293B" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="380" y1="10" x2="380" y2="330" stroke="#1E293B" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="520" y1="10" x2="520" y2="330" stroke="#1E293B" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="660" y1="10" x2="660" y2="330" stroke="#1E293B" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="800" y1="10" x2="800" y2="330" stroke="#1E293B" stroke-width="1"/>
+      <!-- Scale labels -->
+      <text x="100" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$0</text>
+      <text x="240" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$100M</text>
+      <text x="380" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$200M</text>
+      <text x="520" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$300M</text>
+      <text x="660" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$400M</text>
+      <text x="800" y="340" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$500M</text>
+
+      <!-- Row 1: Bispecific Immuno — p25=$210, med=$450, p75=$1088 (capped at 500 for viz) -->
+      <text x="95" y="35" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Bispecific (Immuno)</text>
+      <rect x="394" y="24" width="406" height="16" rx="3" fill="rgba(20,184,166,0.2)" stroke="rgba(20,184,166,0.4)" stroke-width="1"/>
+      <line x1="394" y1="24" x2="394" y2="40" stroke="#14B8A6" stroke-width="2"/>
+      <line x1="800" y1="24" x2="800" y2="40" stroke="#14B8A6" stroke-width="2"/>
+      <circle cx="730" cy="32" r="5" fill="#14B8A6"/>
+      <text x="730" y="20" fill="#14B8A6" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$450M</text>
+
+      <!-- Row 2: Peptide Metab — p25=$94, med=$156, p75=$238 -->
+      <text x="95" y="75" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Peptide (Metabolic)</text>
+      <rect x="231" y="64" width="202" height="16" rx="3" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+      <line x1="231" y1="64" x2="231" y2="80" stroke="#F59E0B" stroke-width="2"/>
+      <line x1="433" y1="64" x2="433" y2="80" stroke="#F59E0B" stroke-width="2"/>
+      <circle cx="318" cy="72" r="5" fill="#F59E0B"/>
+      <text x="318" y="60" fill="#F59E0B" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$156M</text>
+
+      <!-- Row 3: SmMol Metabolic — p25=$80, med=$120, p75=$135 -->
+      <text x="95" y="115" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Sm. Molecule (Metab.)</text>
+      <rect x="212" y="104" width="77" height="16" rx="3" fill="rgba(6,182,212,0.2)" stroke="rgba(6,182,212,0.4)" stroke-width="1"/>
+      <line x1="212" y1="104" x2="212" y2="120" stroke="#06B6D4" stroke-width="2"/>
+      <line x1="289" y1="104" x2="289" y2="120" stroke="#06B6D4" stroke-width="2"/>
+      <circle cx="268" cy="112" r="5" fill="#06B6D4"/>
+      <text x="268" y="100" fill="#06B6D4" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$120M</text>
+
+      <!-- Row 4: Peptide Onc — p25=$53, med=$109, p75=$149 -->
+      <text x="95" y="155" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Peptide (Oncology)</text>
+      <rect x="174" y="144" width="134" height="16" rx="3" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+      <line x1="174" y1="144" x2="174" y2="160" stroke="#F59E0B" stroke-width="2"/>
+      <line x1="308" y1="144" x2="308" y2="160" stroke="#F59E0B" stroke-width="2"/>
+      <circle cx="253" cy="152" r="5" fill="#F59E0B"/>
+      <text x="253" y="140" fill="#F59E0B" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$109M</text>
+
+      <!-- Row 5: siRNA Onc — p25=$45, med=$88, p75=$143 -->
+      <text x="95" y="195" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">siRNA (Oncology)</text>
+      <rect x="163" y="184" width="137" height="16" rx="3" fill="rgba(251,113,133,0.15)" stroke="rgba(251,113,133,0.3)" stroke-width="1"/>
+      <line x1="163" y1="184" x2="163" y2="200" stroke="#FB7185" stroke-width="2"/>
+      <line x1="300" y1="184" x2="300" y2="200" stroke="#FB7185" stroke-width="2"/>
+      <circle cx="223" cy="192" r="5" fill="#FB7185"/>
+      <text x="223" y="180" fill="#FB7185" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$88M</text>
+
+      <!-- Row 6: Bispecific Onc — p25=$50, med=$80, p75=$175 -->
+      <text x="95" y="235" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Bispecific (Oncology)</text>
+      <rect x="170" y="224" width="175" height="16" rx="3" fill="rgba(20,184,166,0.12)" stroke="rgba(20,184,166,0.25)" stroke-width="1"/>
+      <line x1="170" y1="224" x2="170" y2="240" stroke="#14B8A6" stroke-width="2"/>
+      <line x1="345" y1="224" x2="345" y2="240" stroke="#14B8A6" stroke-width="2"/>
+      <circle cx="212" cy="232" r="5" fill="#14B8A6"/>
+      <text x="212" y="220" fill="#14B8A6" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$80M</text>
+
+      <!-- Row 7: PROTAC Onc — p25=$32, med=$57, p75=$87 -->
+      <text x="95" y="275" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">PROTAC (Oncology)</text>
+      <rect x="145" y="264" width="77" height="16" rx="3" fill="rgba(167,139,250,0.15)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+      <line x1="145" y1="264" x2="145" y2="280" stroke="#A78BFA" stroke-width="2"/>
+      <line x1="222" y1="264" x2="222" y2="280" stroke="#A78BFA" stroke-width="2"/>
+      <circle cx="180" cy="272" r="5" fill="#A78BFA"/>
+      <text x="180" y="260" fill="#A78BFA" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$57M</text>
+
+      <!-- Row 8: SmMol Onc — p25=$39, med=$50, p75=$81 -->
+      <text x="95" y="315" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter">Sm. Molecule (Onc.)</text>
+      <rect x="155" y="304" width="59" height="16" rx="3" fill="rgba(6,182,212,0.12)" stroke="rgba(6,182,212,0.25)" stroke-width="1"/>
+      <line x1="155" y1="304" x2="155" y2="320" stroke="#06B6D4" stroke-width="2"/>
+      <line x1="213" y1="304" x2="213" y2="320" stroke="#06B6D4" stroke-width="2"/>
+      <circle cx="170" cy="312" r="5" fill="#06B6D4"/>
+      <text x="170" y="300" fill="#06B6D4" font-size="10" text-anchor="middle" font-family="monospace" font-weight="600">$50M</text>
+    </svg>
+    <p style="font-size:10px;color:#475569;margin-top:4px;">Vertical lines = p25 and p75 boundaries. Dot = median. Shaded band = interquartile range (50% of deals fall here). Bispecific Immunology p75 ($1.1B) extends beyond chart scale.</p>
+  </div>
+
   <!-- FULL DATA TABLE -->
   <h5>Detailed Benchmarks (p25 / Median / p75)</h5>
   <table>
