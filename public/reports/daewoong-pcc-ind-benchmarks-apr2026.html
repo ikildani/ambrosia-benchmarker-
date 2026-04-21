@@ -7,24 +7,24 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', -apple-system, sans-serif; background: #0B1120; color: #CBD5E1; line-height: 1.6; font-size: 14px; }
-  .page { max-width: 960px; margin: 0 auto; padding: 60px 48px; }
-  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 80px 48px; border-bottom: 1px solid #1E293B; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0B1120; color: #CBD5E1; line-height: 1.7; font-size: 14px; -webkit-font-smoothing: antialiased; }
+  .page { max-width: 960px; margin: 0 auto; padding: 64px 56px; }
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 80px 56px; border-bottom: 1px solid #1E293B; background: linear-gradient(180deg, #0B1120 0%, #0F172A 100%); }
   .cover-label { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #14B8A6; margin-bottom: 24px; }
-  .cover h1 { font-size: 36px; font-weight: 700; color: #F1F5F9; line-height: 1.2; margin-bottom: 16px; }
-  .cover h2 { font-size: 20px; font-weight: 400; color: #64748B; margin-bottom: 48px; }
+  .cover h1 { font-size: 40px; font-weight: 700; color: #F1F5F9; line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.02em; }
+  .cover h2 { font-size: 18px; font-weight: 400; color: #64748B; margin-bottom: 56px; line-height: 1.6; }
   .cover-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid #1E293B; padding-top: 32px; }
   .cover-meta dt { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #475569; font-weight: 600; }
   .cover-meta dd { font-size: 14px; color: #94A3B8; margin-top: 4px; }
-  .section { padding: 48px 0; border-bottom: 1px solid #1E293B; }
+  .section { padding: 56px 0; border-bottom: 1px solid rgba(30,41,59,0.7); }
   .section:last-child { border-bottom: none; }
-  h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #14B8A6; margin-bottom: 8px; }
-  h4 { font-size: 22px; font-weight: 600; color: #F1F5F9; margin-bottom: 16px; }
+  h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #14B8A6; margin-bottom: 10px; }
+  h4 { font-size: 24px; font-weight: 600; color: #F1F5F9; margin-bottom: 20px; letter-spacing: -0.01em; }
   h5 { font-size: 15px; font-weight: 600; color: #E2E8F0; margin: 24px 0 12px; }
   p { margin-bottom: 16px; color: #94A3B8; }
   p.lead { font-size: 16px; color: #CBD5E1; }
-  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; }
-  thead th { text-align: left; padding: 10px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; border-bottom: 2px solid #1E293B; white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; margin: 28px 0; font-size: 13px; }
+  thead th { text-align: left; padding: 12px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; border-bottom: 2px solid rgba(20,184,166,0.2); white-space: nowrap; background: rgba(15,23,42,0.5); }
   thead th.r { text-align: right; }
   tbody td { padding: 10px 12px; border-bottom: 1px solid #1E293B; color: #CBD5E1; }
   tbody td.r { text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
@@ -32,22 +32,23 @@
   tbody td.h { color: #14B8A6; font-weight: 600; }
   tbody tr:hover { background: #111827; }
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
-  .stat-card { background: #111827; border: 1px solid #1E293B; border-radius: 8px; padding: 16px; }
-  .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; font-weight: 600; }
-  .stat-card .value { font-size: 28px; font-weight: 700; color: #F1F5F9; margin-top: 4px; font-family: monospace; }
-  .stat-card .sub { font-size: 11px; color: #475569; margin-top: 2px; }
-  .stat-card.teal { border-color: rgba(20,184,166,0.3); }
-  .stat-card.teal .value { color: #14B8A6; }
-  .callout { background: rgba(20,184,166,0.05); border: 1px solid rgba(20,184,166,0.2); border-radius: 8px; padding: 20px 24px; margin: 24px 0; }
-  .callout h5 { font-size: 13px; font-weight: 600; color: #14B8A6; margin: 0 0 8px; }
-  .callout p { font-size: 13px; color: #94A3B8; margin-bottom: 0; }
+  .stat-card { background: linear-gradient(135deg, #111827 0%, #0F172A 100%); border: 1px solid #1E293B; border-radius: 12px; padding: 20px 22px; transition: border-color 0.2s; }
+  .stat-card:hover { border-color: #334155; }
+  .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748B; font-weight: 600; }
+  .stat-card .value { font-size: 30px; font-weight: 700; color: #F1F5F9; margin-top: 6px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .stat-card .sub { font-size: 11px; color: #475569; margin-top: 4px; }
+  .stat-card.teal { border-color: rgba(20,184,166,0.35); background: linear-gradient(135deg, rgba(20,184,166,0.06) 0%, #0F172A 100%); }
+  .stat-card.teal .value { color: #2DD4BF; }
+  .callout { background: linear-gradient(135deg, rgba(20,184,166,0.06) 0%, rgba(20,184,166,0.02) 100%); border: 1px solid rgba(20,184,166,0.2); border-left: 3px solid #14B8A6; border-radius: 0 10px 10px 0; padding: 24px 28px; margin: 28px 0; }
+  .callout h5 { font-size: 13px; font-weight: 700; color: #2DD4BF; margin: 0 0 10px; letter-spacing: 0.02em; }
+  .callout p { font-size: 13px; color: #94A3B8; margin-bottom: 0; line-height: 1.7; }
   .source { font-size: 10px; color: #334155; font-style: italic; margin-top: 16px; }
   .chart-wrap { margin: 28px 0; }
   .chart-title { font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
-  .bar-row { display: flex; align-items: center; margin: 6px 0; }
-  .bar-label { width: 180px; font-size: 12px; color: #94A3B8; flex-shrink: 0; text-align: right; padding-right: 12px; }
-  .bar-outer { flex: 1; height: 28px; background: #111827; border-radius: 4px; position: relative; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #F1F5F9; min-width: 50px; }
+  .bar-row { display: flex; align-items: center; margin: 7px 0; }
+  .bar-label { width: 185px; font-size: 12px; color: #94A3B8; flex-shrink: 0; text-align: right; padding-right: 14px; font-weight: 500; }
+  .bar-outer { flex: 1; height: 32px; background: rgba(17,24,39,0.6); border-radius: 6px; position: relative; overflow: hidden; border: 1px solid rgba(30,41,59,0.4); }
+  .bar-fill { height: 100%; border-radius: 5px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; color: #F1F5F9; min-width: 55px; }
   .bar-range { position: absolute; height: 100%; background: rgba(255,255,255,0.06); border-left: 2px solid rgba(255,255,255,0.15); border-right: 2px solid rgba(255,255,255,0.15); }
   .bar-n { width: 40px; text-align: right; font-size: 10px; color: #475569; padding-left: 8px; flex-shrink: 0; }
   .gradient-teal { background: linear-gradient(90deg, #0D9488, #14B8A6); }
@@ -79,16 +80,9 @@
 
 <!-- ═══════════════ COVER ═══════════════ -->
 <div class="cover">
-  <div style="margin-bottom:40px;">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 555 100" style="width:240px;height:auto;display:block;margin-bottom:12px;">
-      <defs><linearGradient id="rg1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#b0c4e8"/><stop offset="100%" stop-color="#7c85b3"/></linearGradient><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#9499d1"/><stop offset="100%" stop-color="#7c85b3"/></linearGradient></defs>
-      <path d="M30 8 C30 8, 48 22, 30 38 C12 54, 48 70, 30 88" fill="none" stroke="url(#rg1)" stroke-width="3.8" stroke-linecap="round"/>
-      <path d="M54 8 C54 8, 36 22, 54 38 C72 54, 36 70, 54 88" fill="none" stroke="url(#rg1)" stroke-width="3.8" stroke-linecap="round"/>
-      <g transform="translate(28, 30)"><circle cx="16" cy="16" r="10" fill="none" stroke="url(#rg2)" stroke-width="3"/><circle cx="16" cy="16" r="4" fill="url(#rg2)" opacity="0.35"/></g>
-      <text x="120" y="62" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-      <text x="283" y="62" font-family="'Libre Franklin','Helvetica Neue',sans-serif" font-size="28" font-weight="300" fill="#CBD5E1" letter-spacing="2.5">Ventures</text>
-    </svg>
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#14B8A6;">Deal Intelligence</div>
+  <div style="margin-bottom:48px;">
+    <img src="/logo-white.png" alt="Ambrosia Ventures" style="width:260px;height:auto;display:block;margin-bottom:16px;" onerror="this.style.display='none'"/>
+    <div style="font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#14B8A6;">Deal Intelligence</div>
   </div>
   <h1>PCC-to-IND Licensing Benchmarks</h1>
   <h2>Upfront payment ranges, deal structure, and regional pricing for preclinical-to-IND-stage assets across oncology, metabolism, immunology &mdash; by modality and global region</h2>
@@ -100,19 +94,13 @@
   </div>
   <div style="margin-top:48px;padding-top:24px;border-top:1px solid #1E293B;display:flex;justify-content:space-between;align-items:center;">
     <div style="font-size:10px;color:#334155;">CONFIDENTIAL &mdash; For internal use by Daewoong Pharmaceutical only.</div>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="120 20 435 65" style="width:100px;height:auto;opacity:0.25;">
-      <text x="120" y="62" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-      <text x="283" y="62" font-family="'Libre Franklin','Helvetica Neue',sans-serif" font-size="28" font-weight="300" fill="#CBD5E1" letter-spacing="2.5">Ventures</text>
-    </svg>
+    <img src="/logo-white.png" alt="" style="width:100px;height:auto;opacity:0.3;" onerror="this.style.display='none'"/>
   </div>
 </div>
 
 <!-- Sticky header with logo -->
 <div style="position:sticky;top:0;z-index:50;background:rgba(11,17,32,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #1E293B;padding:12px 48px;display:flex;justify-content:space-between;align-items:center;">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="120 20 435 65" style="width:140px;height:auto;opacity:0.8;">
-    <text x="120" y="62" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="0.5">Ambrosia</text>
-    <text x="283" y="62" font-family="'Libre Franklin','Helvetica Neue',sans-serif" font-size="28" font-weight="300" fill="#CBD5E1" letter-spacing="2.5">Ventures</text>
-  </svg>
+  <img src="/logo-white.png" alt="Ambrosia Ventures" style="width:150px;height:auto;opacity:0.85;" onerror="this.style.display='none'"/>
   <div style="font-size:9px;color:#334155;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;">PCC-to-IND Benchmarks &bull; Daewoong Pharmaceutical &bull; April 2026</div>
 </div>
 
