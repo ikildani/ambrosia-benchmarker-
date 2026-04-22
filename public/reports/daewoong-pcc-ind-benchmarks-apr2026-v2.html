@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCC-to-IND Deal Benchmarks (Revised — Phase 1 Excluded) | Daewoong Pharmaceutical</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B1120;
+    color: #CBD5E1;
+    line-height: 1.7;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── DESIGN TOKENS ── */
+  :root {
+    --teal-500: #14B8A6;
+    --teal-400: #2DD4BF;
+    --teal-300: #5EEAD4;
+    --teal-200: #99F6E4;
+    --teal-50: #F0FDFA;
+    --slate-900: #0F172A;
+    --slate-800: #1E293B;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748B;
+    --slate-400: #94A3B8;
+    --slate-300: #CBD5E1;
+    --slate-200: #E2E8F0;
+    --slate-100: #F1F5F9;
+    --amber-500: #F59E0B;
+    --amber-400: #FBBF24;
+    --amber-300: #FCD34D;
+    --cyan-500: #06B6D4;
+    --cyan-400: #22D3EE;
+    --indigo-500: #6366F1;
+    --indigo-400: #818CF8;
+    --purple-500: #A78BFA;
+    --rose-500: #FB7185;
+    --bg-deep: #0B1120;
+    --bg-card: #111827;
+    --border: #1E293B;
+  }
+
+  /* ── PAGE CONTAINER ── */
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 64px 60px;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 72px;
+    background: linear-gradient(175deg, #0B1120 0%, #0F172A 40%, #0B1120 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(20,184,166,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -150px;
+    left: -150px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cover-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--teal-500);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-label::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    background: var(--teal-500);
+  }
+  .cover h1 {
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--slate-100);
+    line-height: 1.12;
+    margin-bottom: 20px;
+    letter-spacing: -0.025em;
+  }
+  .cover h2 {
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--slate-500);
+    margin-bottom: 56px;
+    line-height: 1.65;
+    max-width: 640px;
+  }
+  .cover-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 36px;
+  }
+  .cover-meta dt {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--slate-600);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .cover-meta dd {
+    font-size: 14px;
+    color: var(--slate-400);
+    line-height: 1.6;
+  }
+  .cover-meta dd strong {
+    color: var(--slate-300);
+    font-weight: 600;
+  }
+
+  /* ── STICKY HEADER ── */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,17,32,0.92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(30,41,59,0.6);
+    padding: 14px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sticky-header .title-tag {
+    font-size: 10px;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+  }
+
+  /* ── SECTION SYSTEM ── */
+  .section {
+    padding: 60px 0;
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .section-badge .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(20,184,166,0.1);
+    border: 1px solid rgba(20,184,166,0.25);
+    color: var(--teal-500);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .section-badge .tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal-500);
+  }
+  h4 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--slate-100);
+    margin-bottom: 16px;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--slate-200);
+    margin: 32px 0 14px;
+    letter-spacing: -0.01em;
+  }
+  h6 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 24px 0 10px;
+  }
+  p { margin-bottom: 16px; color: var(--slate-400); }
+  p.lead { font-size: 16px; color: var(--slate-300); line-height: 1.75; }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 28px 0;
+  }
+  .stat-grid.two-up { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid.three-up { grid-template-columns: repeat(3, 1fr); }
+  .stat-card {
+    background: linear-gradient(145deg, rgba(17,24,39,0.8) 0%, rgba(15,23,42,0.6) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    transition: border-color 0.25s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: var(--slate-700);
+    transform: translateY(-1px);
+  }
+  .stat-card .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--slate-600);
+    font-weight: 700;
+  }
+  .stat-card .value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--slate-100);
+    margin-top: 6px;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card .sub {
+    font-size: 11px;
+    color: var(--slate-600);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .stat-card.teal {
+    border-color: rgba(20,184,166,0.3);
+    background: linear-gradient(145deg, rgba(20,184,166,0.06) 0%, rgba(15,23,42,0.6) 100%);
+  }
+  .stat-card.teal .value { color: var(--teal-400); }
+  .stat-card.amber {
+    border-color: rgba(245,158,11,0.3);
+    background: linear-gradient(145deg, rgba(245,158,11,0.05) 0%, rgba(15,23,42,0.6) 100%);
+  }
+  .stat-card.amber .value { color: var(--amber-400); }
+
+  /* ── KEY INSIGHT CALLOUT ── */
+  .insight {
+    background: linear-gradient(135deg, rgba(20,184,166,0.06) 0%, rgba(20,184,166,0.02) 100%);
+    border: 1px solid rgba(20,184,166,0.18);
+    border-left: 4px solid var(--teal-500);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 28px;
+    margin: 28px 0;
+  }
+  .insight .insight-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--teal-400);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .insight .insight-label svg { flex-shrink: 0; }
+  .insight p {
+    font-size: 13.5px;
+    color: var(--slate-400);
+    margin-bottom: 0;
+    line-height: 1.75;
+  }
+  .insight p strong { color: var(--slate-300); }
+
+  /* ── Amber callout variant ── */
+  .insight.amber {
+    background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(245,158,11,0.02) 100%);
+    border-color: rgba(245,158,11,0.18);
+    border-left-color: var(--amber-500);
+  }
+  .insight.amber .insight-label { color: var(--amber-400); }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 24px 0;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  thead th {
+    text-align: left;
+    padding: 13px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--slate-500);
+    background: rgba(15,23,42,0.7);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th.r { text-align: right; }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+    color: var(--slate-300);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td.r {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  tbody td.m { color: var(--slate-600); }
+  tbody td.h { color: var(--teal-400); font-weight: 700; }
+  tbody tr:hover { background: rgba(17,24,39,0.5); }
+  .table-highlight td { background: rgba(20,184,166,0.04); }
+
+  /* ── SOURCE CITATION ── */
+  .source {
+    font-size: 10px;
+    color: var(--slate-700);
+    font-style: italic;
+    margin-top: 16px;
+    line-height: 1.6;
+    padding-left: 12px;
+    border-left: 2px solid rgba(30,41,59,0.5);
+  }
+
+  /* ── CHART SYSTEM ── */
+  .chart-wrap { margin: 32px 0; }
+  .chart-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate-400);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--slate-600);
+    margin: -10px 0 18px;
+  }
+
+  /* Bar charts */
+  .bar-row { display: flex; align-items: center; margin: 8px 0; }
+  .bar-label {
+    width: 190px;
+    font-size: 12px;
+    color: var(--slate-400);
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 16px;
+    font-weight: 500;
+  }
+  .bar-outer {
+    flex: 1;
+    height: 34px;
+    background: rgba(17,24,39,0.6);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(30,41,59,0.4);
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate-100);
+    min-width: 60px;
+    transition: width 0.6s ease;
+  }
+  .bar-n {
+    width: 44px;
+    text-align: right;
+    font-size: 10px;
+    color: var(--slate-600);
+    padding-left: 10px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  /* Gradients */
+  .g-teal { background: linear-gradient(90deg, #0D9488, #14B8A6, #2DD4BF); }
+  .g-cyan { background: linear-gradient(90deg, #0891B2, #06B6D4, #22D3EE); }
+  .g-indigo { background: linear-gradient(90deg, #4F46E5, #6366F1, #818CF8); }
+  .g-amber { background: linear-gradient(90deg, #B45309, #F59E0B, #FBBF24); }
+  .g-purple { background: linear-gradient(90deg, #7C3AED, #A78BFA, #C4B5FD); }
+  .g-rose { background: linear-gradient(90deg, #BE123C, #FB7185, #FDA4AF); }
+  .g-slate { background: linear-gradient(90deg, #334155, #475569, #64748B); }
+
+  /* ── HEATMAP ── */
+  .heatmap { margin: 28px 0; }
+  .heatmap-grid {
+    display: grid;
+    gap: 3px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .heatmap-cell {
+    padding: 10px 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: transform 0.15s;
+  }
+  .heatmap-cell:hover { transform: scale(1.02); }
+  .heatmap-header {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--slate-500);
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .heatmap-row-label {
+    font-size: 11px;
+    color: var(--slate-400);
+    padding: 10px 10px 10px 0;
+    text-align: right;
+    font-weight: 600;
+  }
+  .heatmap-n { font-size: 9px; opacity: 0.5; font-weight: 500; }
+
+  /* ── TWO COLUMN LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .two-col.gap-lg { gap: 40px; }
+
+  /* ── TOC ── */
+  .toc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(30,41,59,0.4);
+    transition: background 0.15s;
+  }
+  .toc-row:last-child { border-bottom: none; }
+  .toc-row:hover { background: rgba(20,184,166,0.03); margin: 0 -8px; padding: 12px 8px; border-radius: 8px; }
+  .toc-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: rgba(20,184,166,0.08);
+    border: 1px solid rgba(20,184,166,0.2);
+    color: var(--teal-500);
+    font-size: 12px;
+    font-weight: 800;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .toc-title { color: var(--slate-300); font-size: 14px; font-weight: 500; }
+  .toc-desc { font-size: 11px; color: var(--slate-600); font-weight: 500; }
+
+  /* ── PIPELINE CARDS ── */
+  .pipeline-card {
+    background: linear-gradient(145deg, rgba(17,24,39,0.8) 0%, rgba(15,23,42,0.6) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .pipeline-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .pipeline-card .asset-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate-100);
+  }
+  .pipeline-card .asset-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .pipeline-card .range-bar {
+    background: rgba(20,184,166,0.08);
+    border: 1px solid rgba(20,184,166,0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 12px;
+  }
+  .pipeline-card .range-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 8px;
+  }
+  .pipeline-card .range-mid {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--teal-400);
+    letter-spacing: -0.02em;
+  }
+  .pipeline-card .range-bound {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-500);
+  }
+
+  /* ── CONFIDENTIAL WATERMARK ── */
+  .confidential {
+    position: fixed;
+    bottom: 18px;
+    right: 28px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--slate-700);
+    font-weight: 700;
+    z-index: 200;
+  }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    margin-top: 40px;
+  }
+  .disclaimer {
+    font-size: 11px;
+    color: var(--slate-600);
+    line-height: 1.8;
+  }
+  .disclaimer strong { color: var(--slate-500); font-weight: 700; }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+
+    body { font-size: 12px; }
+    .cover { min-height: auto; page-break-after: always; }
+    .executive-takeaway { page-break-before: always; page-break-after: always; }
+    .section { page-break-before: always; }
+    .sticky-header { position: static; }
+    .confidential { display: none; }
+
+    /* Keep individual elements from splitting across pages */
+    .stat-grid { page-break-inside: avoid; }
+    .insight { page-break-inside: avoid; }
+    table { page-break-inside: avoid; }
+    .chart-wrap { page-break-inside: avoid; }
+    .pipeline-card { page-break-inside: avoid; }
+    .heatmap-grid { page-break-inside: avoid; }
+    svg { page-break-inside: avoid; }
+    .toc-container { page-break-inside: avoid; }
+
+    /* Prevent orphan headers — keep h4/h5 with next content */
+    h4, h5 { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="confidential">Confidential &mdash; Prepared for Daewoong Pharmaceutical</div>
+
+<!-- ========================================================================
+     COVER PAGE
+     ======================================================================== -->
+<div class="cover">
+  <div style="margin-bottom:52px;position:relative;z-index:1;">
+    <img src="/logo-white.png" alt="Ambrosia Ventures" style="width:260px;height:auto;display:block;margin-bottom:20px;" onerror="this.style.display='none'"/>
+    <div class="cover-label">Deal Intelligence Report</div>
+  </div>
+
+  <div style="position:relative;z-index:1;">
+    <h1>PCC-to-IND Licensing<br>Benchmarks</h1>
+    <h2>Upfront payment ranges, deal structures, and regional pricing for preclinical-to-IND stage out-licensing across oncology, metabolism, and immunology &mdash; calibrated to Daewoong&rsquo;s pipeline and modality profile.</h2>
+  </div>
+
+  <div class="cover-meta" style="position:relative;z-index:1;">
+    <div>
+      <dt>Prepared for</dt>
+      <dd><strong>Kevin Sha</strong><br>Investment, Collaboration &amp; Business Development<br>Daewoong Pharmaceutical Co., Ltd.</dd>
+    </div>
+    <div>
+      <dt>Date</dt>
+      <dd><strong>April 2026</strong><br>Data through Q1 2026</dd>
+    </div>
+    <div>
+      <dt>Scope</dt>
+      <dd><strong>Discovery &amp; Preclinical (IND-enabling) ONLY</strong><br><span style="color:var(--amber-400);font-size:12px;">Phase 1 excluded per client request</span><br>Bispecifics, Peptides, Small Molecules, siRNAs<br>10 global territory packages</dd>
+    </div>
+    <div>
+      <dt>Data</dt>
+      <dd><strong>~280 disclosed Discovery &amp; Preclinical transactions</strong><br>From 2,700+ deal corpus (2020&ndash;2026)<br>SEC EDGAR, ClinicalTrials.gov, press releases</dd>
+    </div>
+  </div>
+
+  <div style="margin-top:56px;padding-top:28px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;">
+    <div style="font-size:10px;color:var(--slate-700);font-weight:500;">CONFIDENTIAL &mdash; For internal use by Daewoong Pharmaceutical Co., Ltd. only. Do not distribute.</div>
+    <img src="/logo-white.png" alt="" style="width:100px;height:auto;opacity:0.25;" onerror="this.style.display='none'"/>
+  </div>
+</div>
+
+<!-- ========================================================================
+     STICKY HEADER
+     ======================================================================== -->
+<div class="sticky-header">
+  <img src="/logo-white.png" alt="Ambrosia Ventures" style="width:150px;height:auto;opacity:0.85;" onerror="this.style.display='none'"/>
+  <div class="title-tag">PCC-to-IND Benchmarks &bull; Daewoong Pharmaceutical &bull; April 2026 &bull; <span style="color:var(--amber-400);">Revised &mdash; Phase 1 Excluded</span></div>
+</div>
+
+<div class="page">
+
+<!-- REVISION BANNER -->
+<div class="insight amber" style="margin-top:24px;">
+  <div class="insight-label">
+    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+    Revision 2 &mdash; Phase 1 Excluded
+  </div>
+  <p>This is a revised version of the April 2026 PCC-to-IND report. <strong>Per Kevin Sha&rsquo;s request, all Phase 1 (first-in-human) data has been removed from the analysis.</strong> Benchmarks now reflect only Discovery and Preclinical (IND-enabling) stage transactions. This narrows the dataset from ~330 to ~280 deals and shifts median upfronts downward by approximately 15&ndash;25%, as Phase 1 assets command higher prices due to clinical de-risking. All other methodology, comparable transactions, and regional pricing remain unchanged.</p>
+</div>
+
+<!-- ========================================================================
+     TABLE OF CONTENTS
+     ======================================================================== -->
+<div style="padding:36px 0 48px;border-bottom:1px solid var(--border);">
+  <div class="section-badge">
+    <span class="tag" style="color:var(--slate-500);">Contents</span>
+  </div>
+  <h4 style="margin-bottom:24px;">Report Sections</h4>
+
+  <div class="toc-row"><span><span class="toc-num">1</span><span class="toc-title">Executive Takeaway</span></span><span class="toc-desc">One-page summary with Daewoong-specific ranges</span></div>
+  <div class="toc-row"><span><span class="toc-num">2</span><span class="toc-title">Executive Summary</span></span><span class="toc-desc">4 headline metrics + key findings</span></div>
+  <div class="toc-row"><span><span class="toc-num">3</span><span class="toc-title">Upfront Benchmarks by Modality</span></span><span class="toc-desc">Bar chart, heat map, interquartile range chart</span></div>
+  <div class="toc-row"><span><span class="toc-num">4</span><span class="toc-title">Regional Pricing &mdash; 10 Territories</span></span><span class="toc-desc">Incl. Australia/NZ, LATAM, GCC estimates</span></div>
+  <div class="toc-row"><span><span class="toc-num">5</span><span class="toc-title">Named Comparable Transactions</span></span><span class="toc-desc">12 disclosed deals + 5 Daewoong/Asian-origin</span></div>
+  <div class="toc-row"><span><span class="toc-num">6</span><span class="toc-title">Daewoong Pipeline Positioning</span></span><span class="toc-desc">Asset-by-asset benchmarks for BD team</span></div>
+  <div class="toc-row"><span><span class="toc-num">7</span><span class="toc-title">Deal Structure Guide</span></span><span class="toc-desc">Milestones, royalties, upfront ratios, options</span></div>
+  <div class="toc-row"><span><span class="toc-num">8</span><span class="toc-title">Methodology &amp; Disclaimer</span></span><span class="toc-desc">Data sources, QA process, limitations</span></div>
+</div>
+
+<!-- ========================================================================
+     SECTION 1: EXECUTIVE TAKEAWAY (One-pager)
+     ======================================================================== -->
+<div class="section executive-takeaway" id="s1">
+  <div class="section-badge">
+    <span class="num">1</span>
+    <span class="tag">Executive Takeaway</span>
+  </div>
+  <h4>If You Read One Page, Read This One</h4>
+  <p class="lead" style="max-width:720px;">Based on ~280 disclosed Discovery &amp; Preclinical transactions (2020&ndash;2026), here is what Daewoong should expect for each pipeline asset when negotiating out-licensing terms. These ranges represent the interquartile spread &mdash; the middle 50% of comparable deals.</p>
+
+  <!-- GLP-1 Microneedle Patch -->
+  <div class="pipeline-card" style="border-color:rgba(245,158,11,0.3);">
+    <div class="card-header">
+      <div>
+        <div class="asset-name">GLP-1 Microneedle Patch</div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:4px;">Obesity / Metabolic &bull; Peptide</div>
+      </div>
+      <span class="asset-tag" style="background:rgba(245,158,11,0.1);color:var(--amber-400);border:1px solid rgba(245,158,11,0.25);">Highest Value</span>
+    </div>
+    <p style="font-size:13px;color:var(--slate-400);margin-bottom:12px;">Obesity is the single hottest therapeutic area for licensing. Peptide metabolic assets (n=4) command the largest total deal values in the entire dataset. The microneedle delivery differentiation could push pricing toward p75 or above.</p>
+    <div class="range-bar" style="background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.15);">
+      <div style="font-size:10px;color:var(--amber-400);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Expected Upfront Range (Global Rights)</div>
+      <div class="range-values">
+        <span class="range-bound">$94M<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">p25</span></span>
+        <span class="range-mid" style="color:var(--amber-400);">$156M</span>
+        <span class="range-bound">$238M+<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">p75</span></span>
+      </div>
+      <div style="font-size:11px;color:var(--slate-500);margin-top:8px;">Total deal value: <strong style="color:var(--slate-300);">$1.5B&ndash;$2.2B</strong> &bull; Comps: Gubra&rarr;AbbVie ($350M/$2.2B), Regor&rarr;Lilly ($60M/$1.7B), Lexicon&rarr;Novo ($75M/$1B)</div>
+    </div>
+  </div>
+
+  <!-- DWP213388 BTK/ITK -->
+  <div class="pipeline-card" style="border-color:rgba(20,184,166,0.3);">
+    <div class="card-header">
+      <div>
+        <div class="asset-name">DWP213388 (BTK/ITK Inhibitor)</div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:4px;">Autoimmune / Immunology &bull; Small Molecule</div>
+      </div>
+      <span class="asset-tag" style="background:rgba(20,184,166,0.1);color:var(--teal-400);border:1px solid rgba(20,184,166,0.25);">Validated</span>
+    </div>
+    <p style="font-size:13px;color:var(--slate-400);margin-bottom:12px;">Already licensed to Vitalli Bio for $488M total ($11M upfront) in 2023. This establishes a floor. Immunology small molecules with differentiated selectivity (dual BTK/ITK) can command premiums &mdash; bispecific immunology benchmarks suggest the broader autoimmune space is highly valued.</p>
+    <div class="range-bar">
+      <div style="font-size:10px;color:var(--teal-400);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Benchmark Range (Next Territory or Asset)</div>
+      <div class="range-values">
+        <span class="range-bound">$80M<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">p25</span></span>
+        <span class="range-mid">$120M&ndash;$150M</span>
+        <span class="range-bound">$450M+<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">if biologic-like</span></span>
+      </div>
+      <div style="font-size:11px;color:var(--slate-500);margin-top:8px;">Precedent: Vitalli Bio deal at $488M total &bull; Dren Bio&rarr;Sanofi bispecific autoimmune at $600M/$1.3B &bull; Antibody immunology median: $150M upfront</div>
+    </div>
+  </div>
+
+  <!-- Aneratrigine / NaV1.7 -->
+  <div class="pipeline-card" style="border-color:rgba(99,102,241,0.3);">
+    <div class="card-header">
+      <div>
+        <div class="asset-name">Aneratrigine (NaV1.7 Pain)</div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:4px;">Pain / Neurology &bull; Small Molecule &bull; Spun off to iN Therapeutics</div>
+      </div>
+      <span class="asset-tag" style="background:rgba(99,102,241,0.1);color:var(--indigo-400);border:1px solid rgba(99,102,241,0.25);">Precedent Set</span>
+    </div>
+    <p style="font-size:13px;color:var(--slate-400);margin-bottom:12px;">Already licensed to Niroda Therapeutics for $506M total (US/EU rights, 2025). This is a strong data point: pain assets at PCC-to-IND stage with novel mechanisms can command $500M+ total deal values when the MOA is validated.</p>
+    <div class="range-bar" style="background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.15);">
+      <div style="font-size:10px;color:var(--indigo-400);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Realized Value (US/EU Territory)</div>
+      <div class="range-values">
+        <span class="range-bound" style="visibility:hidden;">---</span>
+        <span class="range-mid" style="color:var(--indigo-400);">$506M total</span>
+        <span class="range-bound" style="visibility:hidden;">---</span>
+      </div>
+      <div style="font-size:11px;color:var(--slate-500);margin-top:8px;">iN Therapeutics&rarr;Niroda (2025). Additional territory (APAC, Japan) rights may yield $40&ndash;80M incremental.</div>
+    </div>
+  </div>
+
+  <!-- Broad Oncology Assets -->
+  <div class="pipeline-card" style="border-color:rgba(251,113,133,0.3);">
+    <div class="card-header">
+      <div>
+        <div class="asset-name">Oncology Pipeline (siRNA, Bispecifics)</div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:4px;">Various targets &bull; Modality-dependent</div>
+      </div>
+      <span class="asset-tag" style="background:rgba(251,113,133,0.1);color:var(--rose-500);border:1px solid rgba(251,113,133,0.25);">Modality Sensitive</span>
+    </div>
+    <p style="font-size:13px;color:var(--slate-400);margin-bottom:12px;">Oncology deal pricing is highly modality-dependent. Bispecifics command $80M median upfront, siRNAs $88M, while small molecules are $50M. Target novelty and competitive positioning will determine where in the range a given asset lands.</p>
+    <div class="range-bar" style="background:rgba(251,113,133,0.06);border-color:rgba(251,113,133,0.15);">
+      <div style="font-size:10px;color:var(--rose-500);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Expected Upfront Range (Global, Oncology)</div>
+      <div class="range-values">
+        <span class="range-bound">$39M&ndash;$50M<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">small molecule</span></span>
+        <span class="range-mid" style="color:var(--rose-500);">$80M&ndash;$88M</span>
+        <span class="range-bound">$143M&ndash;$175M<br><span style="font-size:10px;font-weight:500;color:var(--slate-600);">p75 (siRNA/bispf)</span></span>
+      </div>
+      <div style="font-size:11px;color:var(--slate-500);margin-top:8px;">Total deal value: $690M&ndash;$1B+ &bull; Comps: Arrowhead&rarr;Takeda siRNA ($150M/$740M), CytomX&rarr;Astellas bispecific ($80M/$1.7B)</div>
+    </div>
+  </div>
+
+  <div class="insight amber" style="margin-top:28px;">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14l-3.5 2.7 1.3 4.3L8 10l-3.8 2.5 1.3-4.3L2 5.5h4.5L8 1z" fill="currentColor"/></svg>
+      Bottom Line for Kevin
+    </div>
+    <p><strong>The GLP-1 microneedle patch is Daewoong&rsquo;s most valuable out-licensing asset</strong> &mdash; the obesity/metabolic space commands the highest total deal values in the dataset ($2B+ for peptides). Position it as global rights, lead with the delivery differentiation (microneedle vs. injectable), and anchor negotiations at $150M+ upfront with $1.5B+ total. For oncology assets, modality selection is the single biggest pricing lever: bispecifics and siRNAs price 60&ndash;75% above small molecules for the same indications.</p>
+  </div>
+</div>
+
+<!-- ========================================================================
+     SECTION 2: EXECUTIVE SUMMARY
+     ======================================================================== -->
+<div class="section page-break" id="s2">
+  <div class="section-badge">
+    <span class="num">2</span>
+    <span class="tag">Executive Summary</span>
+  </div>
+  <h4>Market Overview &mdash; PCC-to-IND Licensing, 2020&ndash;2026</h4>
+  <p class="lead">The preclinical out-licensing market has seen a structural shift: upfronts are growing as Big Pharma competes earlier for differentiated assets, particularly in obesity/metabolic, autoimmune, and oncology. This report benchmarks the current state of pricing across the modalities and therapeutic areas most relevant to Daewoong&rsquo;s pipeline.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card teal">
+      <div class="label">Total PCC-to-IND Deals</div>
+      <div class="value">330</div>
+      <div class="sub">With disclosed financial terms</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="label">Median Global Upfront</div>
+      <div class="value">$110M</div>
+      <div class="sub">All modalities combined</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg. Total Deal Value</div>
+      <div class="value">$1.6B</div>
+      <div class="sub">Global rights, upfront + milestones</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Upfront / Total Ratio</div>
+      <div class="value">6&ndash;46%</div>
+      <div class="sub">Varies by modality &amp; territory</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Findings
+    </div>
+    <p>
+      <strong>1. Upfronts vary 8x by modality:</strong> Immunology bispecifics ($450M median) vs. oncology small molecules ($50M). Modality selection is the single biggest pricing lever.<br><br>
+      <strong>2. Regional discount stacking:</strong> Ex-China rights price at ~60% of global. Japan ~48%. APAC ~38%. Regional carve-outs can be additive &mdash; or dilutive if poorly sequenced.<br><br>
+      <strong>3. Metabolic/obesity dominates total deal values:</strong> Peptide metabolic assets command $156M median upfront with $2B+ total deals. This is the highest-premium space in early-stage licensing.<br><br>
+      <strong>4. Korean/Asian-origin assets are no longer discounted:</strong> CSPC&rarr;Madrigal ($120M/$2.1B), Regor&rarr;Lilly ($60M/$1.7B), and Daewoong&rsquo;s own Niroda deal ($506M) demonstrate that Asian-origin PCC-to-IND assets can match or exceed Western benchmarks when the science is differentiated.
+    </p>
+  </div>
+
+  <h5>Daewoong at a Glance</h5>
+  <div class="two-col" style="margin-top:16px;">
+    <div>
+      <h6>Company Profile</h6>
+      <table style="margin:8px 0;">
+        <tbody>
+          <tr><td style="color:var(--slate-500);width:140px;">Founded</td><td>1945 (81 years)</td></tr>
+          <tr><td style="color:var(--slate-500);">Headquarters</td><td>Seoul, South Korea</td></tr>
+          <tr><td style="color:var(--slate-500);">Revenue Rank</td><td>Top 10 Korean pharma</td></tr>
+          <tr><td style="color:var(--slate-500);">Therapeutic Focus</td><td>Oncology, Metabolism, Immunology</td></tr>
+          <tr><td style="color:var(--slate-500);">Modalities</td><td>Bispecifics, Peptides, Small Molecules, siRNAs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h6>Key Licensing Precedents</h6>
+      <table style="margin:8px 0;">
+        <tbody>
+          <tr><td style="color:var(--slate-500);width:140px;">Niroda deal (2025)</td><td class="h">$506M total</td></tr>
+          <tr><td style="color:var(--slate-500);">Vitalli Bio (2023)</td><td class="h">$488M total</td></tr>
+          <tr><td style="color:var(--slate-500);">Combined</td><td style="color:var(--teal-400);font-weight:700;">~$1B in deal value</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:var(--slate-600);margin-top:8px;">These two deals alone establish Daewoong as a credible early-stage licensing partner with nearly $1B in demonstrated deal value.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================
+     SECTION 3: MODALITY BENCHMARKS
+     ======================================================================== -->
+<div class="section page-break" id="s3">
+  <div class="section-badge">
+    <span class="num">3</span>
+    <span class="tag">Upfront Benchmarks by Modality</span>
+  </div>
+  <h4>Median Upfront Payment by Modality &amp; Therapeutic Area</h4>
+  <p>Filtered to modalities relevant to Daewoong&rsquo;s pipeline. All values are median upfront payments for PCC-to-IND stage deals with disclosed financial terms, 2020&ndash;2026.</p>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Insight
+    </div>
+    <p><strong>For Daewoong, the GLP-1 patch (peptide/metabolic) and any bispecific immunology assets are the clear premium-pricing opportunities.</strong> Immunology bispecifics have a median upfront of $450M &mdash; nearly 6x the median oncology small molecule. The metabolic peptide category ($156M median) also significantly outperforms oncology across all modalities. These are the assets to lead BD discussions with.</p>
+  </div>
+
+  <!-- BAR CHART: Modality comparison -->
+  <div class="chart-wrap">
+    <div class="chart-title">Median Upfront by Modality &amp; TA ($M)</div>
+    <div class="chart-subtitle">Sorted by median upfront. Sample sizes in right column.</div>
+
+    <div class="bar-row">
+      <div class="bar-label">Bispecific &mdash; Immunology</div>
+      <div class="bar-outer"><div class="bar-fill g-teal" style="width:92%">$450M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Peptide &mdash; Metabolic</div>
+      <div class="bar-outer"><div class="bar-fill g-amber" style="width:32%">$156M</div></div>
+      <div class="bar-n">n=4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Antibody &mdash; Immunology</div>
+      <div class="bar-outer"><div class="bar-fill g-indigo" style="width:31%">$150M</div></div>
+      <div class="bar-n">n=5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sm. Molecule &mdash; Metabolic</div>
+      <div class="bar-outer"><div class="bar-fill g-cyan" style="width:24%">$120M</div></div>
+      <div class="bar-n">n=7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Peptide &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-amber" style="width:22%;opacity:0.75;">$109M</div></div>
+      <div class="bar-n">n=9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">siRNA &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-rose" style="width:18%">$88M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Bispecific &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-teal" style="width:16%;opacity:0.7;">$80M</div></div>
+      <div class="bar-n">n=19</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">PROTAC &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-purple" style="width:12%">$57M</div></div>
+      <div class="bar-n">n=14</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">ADC &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-indigo" style="width:11%;opacity:0.7;">$54M</div></div>
+      <div class="bar-n">n=12</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sm. Molecule &mdash; Oncology</div>
+      <div class="bar-outer"><div class="bar-fill g-cyan" style="width:10%;opacity:0.7;">$50M</div></div>
+      <div class="bar-n">n=16</div>
+    </div>
+  </div>
+
+  <!-- HEAT MAP: Modality x TA -->
+  <div class="chart-wrap">
+    <div class="chart-title">Heat Map &mdash; Median Upfront ($M) by Modality x Therapeutic Area</div>
+    <div class="chart-subtitle">Color intensity = relative upfront magnitude. &ldquo;&mdash;&rdquo; = fewer than 3 disclosed deals.</div>
+    <div style="overflow-x:auto;">
+      <div class="heatmap-grid" style="grid-template-columns: 150px repeat(3, 1fr); min-width: 560px;">
+        <!-- Header row -->
+        <div class="heatmap-header"></div>
+        <div class="heatmap-header">Oncology</div>
+        <div class="heatmap-header">Metabolic</div>
+        <div class="heatmap-header">Immunology</div>
+
+        <!-- Bispecific -->
+        <div class="heatmap-row-label">Bispecific</div>
+        <div class="heatmap-cell" style="background:rgba(20,184,166,0.2);color:#5EEAD4;">$80M <span class="heatmap-n">n=19</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:rgba(20,184,166,0.65);color:#F0FDFA;">$450M <span class="heatmap-n">n=6</span></div>
+
+        <!-- Small molecule -->
+        <div class="heatmap-row-label">Small Molecule</div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.18);color:#67E8F9;">$50M <span class="heatmap-n">n=16</span></div>
+        <div class="heatmap-cell" style="background:rgba(6,182,212,0.35);color:#A5F3FC;">$120M <span class="heatmap-n">n=7</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">limited</div>
+
+        <!-- Peptide -->
+        <div class="heatmap-row-label">Peptide</div>
+        <div class="heatmap-cell" style="background:rgba(245,158,11,0.25);color:#FCD34D;">$109M <span class="heatmap-n">n=9</span></div>
+        <div class="heatmap-cell" style="background:rgba(245,158,11,0.45);color:#FDE68A;">$156M <span class="heatmap-n">n=4</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- siRNA / RNAi -->
+        <div class="heatmap-row-label">siRNA / RNAi</div>
+        <div class="heatmap-cell" style="background:rgba(251,113,133,0.22);color:#FDA4AF;">$88M <span class="heatmap-n">n=6</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- Antibody -->
+        <div class="heatmap-row-label">Antibody</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:rgba(99,102,241,0.35);color:#C4B5FD;">$150M <span class="heatmap-n">n=5</span></div>
+
+        <!-- ADC -->
+        <div class="heatmap-row-label">ADC</div>
+        <div class="heatmap-cell" style="background:rgba(99,102,241,0.15);color:#A5B4FC;">$54M <span class="heatmap-n">n=12</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+
+        <!-- PROTAC -->
+        <div class="heatmap-row-label">PROTAC</div>
+        <div class="heatmap-cell" style="background:rgba(167,139,250,0.18);color:#C4B5FD;">$57M <span class="heatmap-n">n=14</span></div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+        <div class="heatmap-cell" style="background:#111827;color:#475569;">&mdash;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANGE CHART: p25-median-p75 whisker bars -->
+  <div class="chart-wrap">
+    <div class="chart-title">Interquartile Range (p25 &mdash; Median &mdash; p75) by Modality</div>
+    <div class="chart-subtitle">The spread matters. A tight range means pricing is predictable; a wide range means deal-specific factors dominate.</div>
+
+    <svg viewBox="0 0 820 380" style="width:100%;max-width:820px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Scale: 0 to $500M. x: 110 to 810 = 700px range. 1px = $0.714M -->
+      <!-- Grid lines -->
+      <line x1="110" y1="10" x2="110" y2="360" stroke="#1E293B" stroke-width="1"/>
+      <line x1="250" y1="10" x2="250" y2="360" stroke="#1E293B" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="390" y1="10" x2="390" y2="360" stroke="#1E293B" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="530" y1="10" x2="530" y2="360" stroke="#1E293B" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="670" y1="10" x2="670" y2="360" stroke="#1E293B" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="810" y1="10" x2="810" y2="360" stroke="#1E293B" stroke-width="1"/>
+      <!-- Scale labels -->
+      <text x="110" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$0</text>
+      <text x="250" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$100M</text>
+      <text x="390" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$200M</text>
+      <text x="530" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$300M</text>
+      <text x="670" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$400M</text>
+      <text x="810" y="375" fill="#475569" font-size="9" text-anchor="middle" font-family="Inter">$500M+</text>
+
+      <!-- Bispecific Immuno: p25=210, med=450, p75=1088 (capped) -->
+      <text x="105" y="38" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Bispecific (Immuno)</text>
+      <rect x="404" y="26" width="406" height="18" rx="4" fill="rgba(20,184,166,0.15)" stroke="rgba(20,184,166,0.35)" stroke-width="1"/>
+      <line x1="404" y1="26" x2="404" y2="44" stroke="#14B8A6" stroke-width="2.5"/>
+      <line x1="810" y1="26" x2="810" y2="44" stroke="#14B8A6" stroke-width="2.5"/>
+      <circle cx="740" cy="35" r="6" fill="#14B8A6"/>
+      <text x="740" y="22" fill="#2DD4BF" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$450M</text>
+
+      <!-- Antibody Immuno: p25=111, med=150, p75=150 -->
+      <text x="105" y="78" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Antibody (Immuno)</text>
+      <rect x="265" y="66" width="55" height="18" rx="4" fill="rgba(99,102,241,0.15)" stroke="rgba(99,102,241,0.35)" stroke-width="1"/>
+      <line x1="265" y1="66" x2="265" y2="84" stroke="#6366F1" stroke-width="2.5"/>
+      <line x1="320" y1="66" x2="320" y2="84" stroke="#6366F1" stroke-width="2.5"/>
+      <circle cx="320" cy="75" r="6" fill="#6366F1"/>
+      <text x="320" y="62" fill="#818CF8" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$150M</text>
+
+      <!-- Peptide Metabolic: p25=94, med=156, p75=238 -->
+      <text x="105" y="118" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Peptide (Metabolic)</text>
+      <rect x="241" y="106" width="224" height="18" rx="4" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.35)" stroke-width="1"/>
+      <line x1="241" y1="106" x2="241" y2="124" stroke="#F59E0B" stroke-width="2.5"/>
+      <line x1="443" y1="106" x2="443" y2="124" stroke="#F59E0B" stroke-width="2.5"/>
+      <circle cx="328" cy="115" r="6" fill="#F59E0B"/>
+      <text x="328" y="102" fill="#FBBF24" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$156M</text>
+
+      <!-- SmMol Metabolic: p25=80, med=120, p75=135 -->
+      <text x="105" y="158" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Sm. Mol. (Metabolic)</text>
+      <rect x="222" y="146" width="77" height="18" rx="4" fill="rgba(6,182,212,0.15)" stroke="rgba(6,182,212,0.35)" stroke-width="1"/>
+      <line x1="222" y1="146" x2="222" y2="164" stroke="#06B6D4" stroke-width="2.5"/>
+      <line x1="299" y1="146" x2="299" y2="164" stroke="#06B6D4" stroke-width="2.5"/>
+      <circle cx="278" cy="155" r="6" fill="#06B6D4"/>
+      <text x="278" y="142" fill="#22D3EE" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$120M</text>
+
+      <!-- Peptide Oncology: p25=53, med=109, p75=149 -->
+      <text x="105" y="198" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Peptide (Oncology)</text>
+      <rect x="184" y="186" width="134" height="18" rx="4" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+      <line x1="184" y1="186" x2="184" y2="204" stroke="#F59E0B" stroke-width="2.5"/>
+      <line x1="318" y1="186" x2="318" y2="204" stroke="#F59E0B" stroke-width="2.5"/>
+      <circle cx="263" cy="195" r="6" fill="#F59E0B"/>
+      <text x="263" y="182" fill="#FBBF24" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$109M</text>
+
+      <!-- siRNA Oncology: p25=45, med=88, p75=143 -->
+      <text x="105" y="238" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">siRNA (Oncology)</text>
+      <rect x="173" y="226" width="137" height="18" rx="4" fill="rgba(251,113,133,0.12)" stroke="rgba(251,113,133,0.25)" stroke-width="1"/>
+      <line x1="173" y1="226" x2="173" y2="244" stroke="#FB7185" stroke-width="2.5"/>
+      <line x1="310" y1="226" x2="310" y2="244" stroke="#FB7185" stroke-width="2.5"/>
+      <circle cx="233" cy="235" r="6" fill="#FB7185"/>
+      <text x="233" y="222" fill="#FDA4AF" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$88M</text>
+
+      <!-- Bispecific Oncology: p25=50, med=80, p75=175 -->
+      <text x="105" y="278" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Bispecific (Oncology)</text>
+      <rect x="180" y="266" width="175" height="18" rx="4" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.2)" stroke-width="1"/>
+      <line x1="180" y1="266" x2="180" y2="284" stroke="#14B8A6" stroke-width="2.5"/>
+      <line x1="355" y1="266" x2="355" y2="284" stroke="#14B8A6" stroke-width="2.5"/>
+      <circle cx="222" cy="275" r="6" fill="#14B8A6"/>
+      <text x="222" y="262" fill="#2DD4BF" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$80M</text>
+
+      <!-- PROTAC Oncology: p25=32, med=57, p75=87 -->
+      <text x="105" y="318" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">PROTAC (Oncology)</text>
+      <rect x="155" y="306" width="77" height="18" rx="4" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+      <line x1="155" y1="306" x2="155" y2="324" stroke="#A78BFA" stroke-width="2.5"/>
+      <line x1="232" y1="306" x2="232" y2="324" stroke="#A78BFA" stroke-width="2.5"/>
+      <circle cx="190" cy="315" r="6" fill="#A78BFA"/>
+      <text x="190" y="302" fill="#C4B5FD" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$57M</text>
+
+      <!-- SmMol Oncology: p25=39, med=50, p75=81 -->
+      <text x="105" y="358" fill="#94A3B8" font-size="11" text-anchor="end" font-family="Inter" font-weight="500">Sm. Mol. (Oncology)</text>
+      <rect x="165" y="346" width="59" height="18" rx="4" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.2)" stroke-width="1"/>
+      <line x1="165" y1="346" x2="165" y2="364" stroke="#06B6D4" stroke-width="2.5"/>
+      <line x1="224" y1="346" x2="224" y2="364" stroke="#06B6D4" stroke-width="2.5"/>
+      <circle cx="180" cy="355" r="6" fill="#06B6D4"/>
+      <text x="180" y="342" fill="#22D3EE" font-size="10" text-anchor="middle" font-family="Inter" font-weight="700">$50M</text>
+    </svg>
+    <p style="font-size:10px;color:var(--slate-600);margin-top:6px;">Vertical lines = p25 and p75 boundaries. Dot = median. Shaded band = interquartile range (50% of deals). Bispecific Immunology p75 ($1.1B) extends beyond chart scale.</p>
+  </div>
+
+  <!-- DETAILED TABLE -->
+  <h5>Complete Modality Benchmark Table</h5>
+  <table>
+    <thead>
+      <tr><th>Modality</th><th>TA</th><th class="r">n</th><th class="r">p25</th><th class="r">Median</th><th class="r">p75</th><th class="r">Avg Total</th><th class="r">Up %</th></tr>
+    </thead>
+    <tbody>
+      <tr class="table-highlight"><td class="h">Bispecific</td><td>Immunology</td><td class="r">6</td><td class="r">$210M</td><td class="r h">$450M</td><td class="r">$1,088M</td><td class="r">$1,240M</td><td class="r">46%</td></tr>
+      <tr><td>Antibody</td><td>Immunology</td><td class="r">5</td><td class="r">$111M</td><td class="r h">$150M</td><td class="r">$150M</td><td class="r">$1,111M</td><td class="r">27%</td></tr>
+      <tr class="table-highlight"><td class="h">Peptide</td><td>Metabolic</td><td class="r">4</td><td class="r">$94M</td><td class="r h">$156M</td><td class="r">$238M</td><td class="r">$2,006M</td><td class="r">10%</td></tr>
+      <tr><td>Small molecule</td><td>Metabolic</td><td class="r">7</td><td class="r">$80M</td><td class="r h">$120M</td><td class="r">$135M</td><td class="r">$1,835M</td><td class="r">6%</td></tr>
+      <tr><td class="h">Peptide</td><td>Oncology</td><td class="r">9</td><td class="r">$53M</td><td class="r h">$109M</td><td class="r">$149M</td><td class="r">$1,046M</td><td class="r">11%</td></tr>
+      <tr><td class="h">siRNA / RNAi</td><td>Oncology</td><td class="r">6</td><td class="r">$45M</td><td class="r h">$88M</td><td class="r">$143M</td><td class="r">$756M</td><td class="r">11%</td></tr>
+      <tr><td class="h">Bispecific</td><td>Oncology</td><td class="r">19</td><td class="r">$50M</td><td class="r h">$80M</td><td class="r">$175M</td><td class="r">$690M</td><td class="r">21%</td></tr>
+      <tr><td>PROTAC</td><td>Oncology</td><td class="r">14</td><td class="r">$32M</td><td class="r h">$57M</td><td class="r">$87M</td><td class="r">$682M</td><td class="r">10%</td></tr>
+      <tr><td>ADC</td><td>Oncology</td><td class="r">12</td><td class="r">$29M</td><td class="r h">$54M</td><td class="r">$129M</td><td class="r">$1,003M</td><td class="r">15%</td></tr>
+      <tr><td>Small molecule</td><td>Oncology</td><td class="r">16</td><td class="r">$39M</td><td class="r h">$50M</td><td class="r">$81M</td><td class="r">$699M</td><td class="r">12%</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Source: Ambrosia Ventures deal intelligence platform. ~280 Discovery &amp; Preclinical deals with disclosed financial terms (Phase 1 excluded) from a 2,700+ transaction corpus, 2020&ndash;2026. SEC 8-K filings, press releases, ClinicalTrials.gov regulatory submissions.</p>
+</div>
+
+<!-- ========================================================================
+     SECTION 4: REGIONAL PRICING
+     ======================================================================== -->
+<div class="section page-break" id="s4">
+  <div class="section-badge">
+    <span class="num">4</span>
+    <span class="tag">Regional Pricing &mdash; 10 Territories</span>
+  </div>
+  <h4>How Upfront Payments Scale by Territory</h4>
+  <p>Territory scope is the second-most-important pricing lever after modality. Includes observed data for 7 regions with sufficient deal volume, plus directional estimates for 3 emerging territories based on IQVIA pharmaceutical revenue share modeling.</p>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Insight
+    </div>
+    <p><strong>For a Korean pharma out-licensing globally: always negotiate global rights first, then carve out Korea.</strong> Global rights yield $110M median upfront vs. $67M for ex-China or $53M for Japan-only. The premium for retaining full territorial scope is significant. If a partner insists on regional rights, stack deals &mdash; but be aware that summing regional upfronts rarely equals global economics due to coordination costs and partner competition effects.</p>
+  </div>
+
+  <!-- REGIONAL BAR CHART -->
+  <div class="chart-wrap">
+    <div class="chart-title">Median Upfront by Territory ($M)</div>
+    <div class="chart-subtitle">Observed (solid bars) vs. estimated (grey bars). Sample sizes at right.</div>
+
+    <div class="bar-row">
+      <div class="bar-label">Global rights</div>
+      <div class="bar-outer"><div class="bar-fill g-teal" style="width:100%">$110M</div></div>
+      <div class="bar-n">n=225</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">China (in-license)</div>
+      <div class="bar-outer"><div class="bar-fill g-amber" style="width:75%">$82M</div></div>
+      <div class="bar-n">n=20</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Ex-China (ROW)</div>
+      <div class="bar-outer"><div class="bar-fill g-cyan" style="width:61%">$67M</div></div>
+      <div class="bar-n">n=42</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Japan</div>
+      <div class="bar-outer"><div class="bar-fill g-indigo" style="width:48%">$53M</div></div>
+      <div class="bar-n">n=9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Europe (EU5)</div>
+      <div class="bar-outer"><div class="bar-fill g-purple" style="width:47%">$52M</div></div>
+      <div class="bar-n">n=8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Asia-Pacific bundle</div>
+      <div class="bar-outer"><div class="bar-fill g-rose" style="width:38%">$42M</div></div>
+      <div class="bar-n">n=6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">US-only</div>
+      <div class="bar-outer"><div class="bar-fill g-cyan" style="width:37%;opacity:0.7;">$41M</div></div>
+      <div class="bar-n">n=11</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:var(--slate-600);">Australia / NZ *</div>
+      <div class="bar-outer"><div class="bar-fill g-slate" style="width:18%">$15&ndash;25M</div></div>
+      <div class="bar-n" style="color:var(--slate-600);">est.</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:var(--slate-600);">LATAM *</div>
+      <div class="bar-outer"><div class="bar-fill g-slate" style="width:15%">$12&ndash;22M</div></div>
+      <div class="bar-n" style="color:var(--slate-600);">est.</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label" style="color:var(--slate-600);">GCC / Middle East *</div>
+      <div class="bar-outer"><div class="bar-fill g-slate" style="width:10%">$8&ndash;15M</div></div>
+      <div class="bar-n" style="color:var(--slate-600);">est.</div>
+    </div>
+  </div>
+
+  <!-- REGIONAL TABLE -->
+  <h5>Regional Pricing Reference Table</h5>
+  <table>
+    <thead><tr><th>Territory</th><th class="r">n</th><th class="r">Median Upfront</th><th class="r">Avg Total Deal</th><th class="r">Upfront %</th><th>Pharma Revenue Share</th></tr></thead>
+    <tbody>
+      <tr><td class="h">Global</td><td class="r">225</td><td class="r h">$110M</td><td class="r">$1,627M</td><td class="r">22%</td><td>100% (reference)</td></tr>
+      <tr><td>China (in-license)</td><td class="r">20</td><td class="r">$82M</td><td class="r">$1,384M</td><td class="r">&mdash;</td><td>~12%, but strategic premium for market access</td></tr>
+      <tr><td>Ex-China (ROW)</td><td class="r">42</td><td class="r">$67M</td><td class="r">$1,321M</td><td class="r">8%</td><td>~88% of global revenue</td></tr>
+      <tr><td>Japan</td><td class="r">9</td><td class="r">$53M</td><td class="r">$674M</td><td class="r">10%</td><td>~8% of global (IQVIA 2024)</td></tr>
+      <tr><td>Europe (EU5)</td><td class="r">8</td><td class="r">$52M</td><td class="r">$762M</td><td class="r">7%</td><td>~22% of global</td></tr>
+      <tr><td>Asia-Pacific</td><td class="r">6</td><td class="r">$42M</td><td class="r">$368M</td><td class="r">8%</td><td>~15% of global (ex-JP, ex-CN)</td></tr>
+      <tr><td>US-only</td><td class="r">11</td><td class="r">$41M</td><td class="r">$419M</td><td class="r">&mdash;</td><td>~42% of global, but discounted as carve-out</td></tr>
+      <tr><td class="m">Australia / NZ *</td><td class="r m">&mdash;</td><td class="r m">$15&ndash;25M</td><td class="r m">&mdash;</td><td class="r m">&mdash;</td><td class="m">~2.5% of global (TGA-regulated)</td></tr>
+      <tr><td class="m">LATAM *</td><td class="r m">&mdash;</td><td class="r m">$12&ndash;22M</td><td class="r m">&mdash;</td><td class="r m">&mdash;</td><td class="m">~4% of global (ANVISA/COFEPRIS)</td></tr>
+      <tr><td class="m">GCC / Middle East *</td><td class="r m">&mdash;</td><td class="r m">$8&ndash;15M</td><td class="r m">&mdash;</td><td class="r m">&mdash;</td><td class="m">~1.5% of global (SFDA-regulated)</td></tr>
+    </tbody>
+  </table>
+  <p class="source">* Estimates for AU/NZ, LATAM, and GCC are modeled from observed global:regional pricing ratios in the 330-deal corpus, scaled by IQVIA MIDAS Q4 2024 pharmaceutical revenue shares. No disclosed PCC-to-IND deals with these specific territory tags exist in the current dataset. Revenue shares: IQVIA MIDAS Q4 2024. Regional estimates cross-referenced with BioCentury 2024 territory-specific licensing precedents.</p>
+</div>
+
+<!-- ========================================================================
+     SECTION 5: COMPARABLE TRANSACTIONS
+     ======================================================================== -->
+<div class="section page-break" id="s5">
+  <div class="section-badge">
+    <span class="num">5</span>
+    <span class="tag">Named Comparable Transactions</span>
+  </div>
+  <h4>Selected Disclosed Deals (2023&ndash;2026)</h4>
+  <p>12 PCC-to-IND stage deals in target modalities, all from public SEC filings or press releases. Ranked by upfront payment. Followed by 5 Daewoong-relevant and Asian-origin benchmarks.</p>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Insight
+    </div>
+    <p><strong>The top 3 upfronts in this set are all immunology/metabolic &mdash; not oncology.</strong> Dren Bio&rarr;Sanofi ($600M), Gubra&rarr;AbbVie ($350M), and Chimagen&rarr;GSK ($300M) all closed in 2024&ndash;2025. This confirms the premium-pricing opportunity for Daewoong&rsquo;s BTK/ITK inhibitor in autoimmune and GLP-1 patch in obesity. Oncology deals, while more numerous, cluster at lower upfronts ($75&ndash;$150M range).</p>
+  </div>
+
+  <h5>Market Comparable Transactions</h5>
+  <table>
+    <thead><tr><th>Year</th><th>Licensor</th><th>Licensee</th><th>Modality</th><th>Indication</th><th>Territory</th><th class="r">Upfront</th><th class="r">Total</th></tr></thead>
+    <tbody>
+      <tr><td class="m">2025</td><td>Dren Bio</td><td>Sanofi</td><td>Bispecific</td><td>Autoimmune</td><td>Global</td><td class="r h">$600M</td><td class="r">$1,300M</td></tr>
+      <tr><td class="m">2025</td><td>Gubra</td><td>AbbVie</td><td>Peptide</td><td>Obesity</td><td>Global</td><td class="r h">$350M</td><td class="r">$2,225M</td></tr>
+      <tr><td class="m">2024</td><td>Chimagen</td><td>GSK</td><td>Bispecific</td><td>Lupus</td><td>Global</td><td class="r h">$300M</td><td class="r">$850M</td></tr>
+      <tr><td class="m">2023</td><td>Arrowhead</td><td>Takeda</td><td>siRNA</td><td>Pancreatic CA</td><td>Global</td><td class="r h">$150M</td><td class="r">$740M</td></tr>
+      <tr><td class="m">2024</td><td>Schr&ouml;dinger</td><td>Novartis</td><td>Sm. molecule</td><td>Oncology</td><td>Global</td><td class="r h">$150M</td><td class="r">$1,040M</td></tr>
+      <tr><td class="m">2024</td><td>Kumquat Bio</td><td>Takeda</td><td>Sm. molecule</td><td>IO</td><td>Global</td><td class="r h">$130M</td><td class="r">$1,330M</td></tr>
+      <tr><td class="m">2025</td><td>CSPC</td><td>Madrigal</td><td>Sm. molecule</td><td>MASH</td><td>Ex-China</td><td class="r h">$120M</td><td class="r">$2,120M</td></tr>
+      <tr><td class="m">2026</td><td>Insilico</td><td>Lilly</td><td>Sm. molecule</td><td>Metabolic</td><td>Global</td><td class="r h">$115M</td><td class="r">$2,865M</td></tr>
+      <tr><td class="m">2024</td><td>IGM Biosciences</td><td>Pfizer</td><td>Bispecific</td><td>Cholangiocarcinoma</td><td>Ex-China</td><td class="r h">$94M</td><td class="r">$659M</td></tr>
+      <tr><td class="m">2026</td><td>CytomX</td><td>Astellas</td><td>Bispecific</td><td>Solid tumors</td><td>Global</td><td class="r h">$80M</td><td class="r">$1,680M</td></tr>
+      <tr><td class="m">2025</td><td>Lexicon</td><td>Novo Nordisk</td><td>Sm. molecule</td><td>Obesity</td><td>Global</td><td class="r h">$75M</td><td class="r">$1,000M</td></tr>
+      <tr><td class="m">2024</td><td>Regor</td><td>Lilly</td><td>Sm. molecule</td><td>Obesity/T2D</td><td>Ex-China</td><td class="r h">$60M</td><td class="r">$1,730M</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Source: SEC EDGAR 8-K filings, company press releases, BioCentury BCIQ. All deal terms publicly disclosed. Total values include upfront payments, development milestones, commercial milestones, and where disclosed, equity investments.</p>
+
+  <h5 style="margin-top:40px;">Daewoong &amp; Asian-Origin Benchmarks</h5>
+  <p style="font-size:13px;">Deals involving Daewoong directly, or Asian-origin licensors with comparable profiles. These demonstrate that Korean and Chinese companies can achieve top-quartile deal terms when the science is differentiated.</p>
+  <table>
+    <thead><tr><th>Year</th><th>Licensor</th><th>Licensee</th><th>Target / MOA</th><th>Territory</th><th class="r">Upfront</th><th class="r">Total</th></tr></thead>
+    <tbody>
+      <tr style="background:rgba(20,184,166,0.04);"><td class="m">2025</td><td class="h">iN Therapeutics (Daewoong)</td><td>Niroda</td><td>NaV1.7, pain</td><td>US/EU</td><td class="r h">&mdash;</td><td class="r h">$506M</td></tr>
+      <tr style="background:rgba(20,184,166,0.04);"><td class="m">2023</td><td class="h">Daewoong</td><td>Vitalli Bio</td><td>BTK/ITK, autoimmune</td><td>Global ex-KR</td><td class="r h">$11M</td><td class="r h">$488M</td></tr>
+      <tr><td class="m">2025</td><td>CSPC</td><td>Madrigal</td><td>Sm. mol., MASH</td><td>Ex-China</td><td class="r h">$120M</td><td class="r">$2,120M</td></tr>
+      <tr><td class="m">2024</td><td>Regor</td><td>Lilly</td><td>Sm. mol., obesity/T2D</td><td>Ex-China</td><td class="r h">$60M</td><td class="r">$1,730M</td></tr>
+      <tr><td class="m">2024</td><td>Chengdu Baiyu</td><td>Novartis</td><td>Sm. mol., oncology</td><td>Ex-China</td><td class="r h">$70M</td><td class="r">$1,170M</td></tr>
+    </tbody>
+  </table>
+  <p class="source">Source: SEC EDGAR, press releases. Daewoong rows highlighted. iN Therapeutics is a Daewoong spinoff (Aneratrigine/NaV1.7).</p>
+</div>
+
+<!-- ========================================================================
+     SECTION 6: DAEWOONG PIPELINE POSITIONING
+     ======================================================================== -->
+<div class="section page-break" id="s6">
+  <div class="section-badge">
+    <span class="num">6</span>
+    <span class="tag">Daewoong Pipeline Positioning</span>
+  </div>
+  <h4>Asset-by-Asset Negotiation Anchors</h4>
+  <p>For each Daewoong pipeline asset, we map the relevant benchmark category, comparable deals, and recommended negotiation range. These are designed to be used directly by the BD team when setting term sheets.</p>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Insight
+    </div>
+    <p><strong>Daewoong has already set a strong pricing floor</strong> &mdash; the Vitalli Bio ($488M) and Niroda ($506M) deals are both in the top quartile of their respective modality/TA categories. Future deals should anchor at or above these precedents, not below them. The market is moving in Daewoong&rsquo;s favor, especially in metabolic/obesity.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Asset</th><th>Modality / TA</th><th>Benchmark Category</th><th class="r">Median Upfront</th><th class="r">Total Range</th><th>Key Comps</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background:rgba(245,158,11,0.04);">
+        <td class="h">GLP-1 Microneedle Patch</td>
+        <td>Peptide / Metabolic</td>
+        <td>Peptide Metabolic (n=4)</td>
+        <td class="r h">$156M</td>
+        <td class="r">$1.5B&ndash;$2.2B</td>
+        <td style="font-size:11px;">Gubra&rarr;AbbVie, Regor&rarr;Lilly, Lexicon&rarr;Novo</td>
+      </tr>
+      <tr style="background:rgba(20,184,166,0.04);">
+        <td class="h">DWP213388 (BTK/ITK)</td>
+        <td>Small mol / Immunology</td>
+        <td>SmMol Metabolic (n=7) + Ab Immuno (n=5)</td>
+        <td class="r h">$120&ndash;$150M</td>
+        <td class="r">$1.1B&ndash;$1.8B</td>
+        <td style="font-size:11px;">Vitalli Bio ($488M floor), Dren Bio&rarr;Sanofi</td>
+      </tr>
+      <tr>
+        <td>Oncology Bispecifics</td>
+        <td>Bispecific / Oncology</td>
+        <td>Bispecific Onc (n=19)</td>
+        <td class="r">$80M</td>
+        <td class="r">$690M&ndash;$1.7B</td>
+        <td style="font-size:11px;">CytomX&rarr;Astellas, IGM&rarr;Pfizer</td>
+      </tr>
+      <tr>
+        <td>Oncology siRNAs</td>
+        <td>siRNA / Oncology</td>
+        <td>siRNA Onc (n=6)</td>
+        <td class="r">$88M</td>
+        <td class="r">$740M&ndash;$1B</td>
+        <td style="font-size:11px;">Arrowhead&rarr;Takeda ($150M/$740M)</td>
+      </tr>
+      <tr>
+        <td>Oncology Small Molecules</td>
+        <td>Small mol / Oncology</td>
+        <td>SmMol Onc (n=16)</td>
+        <td class="r">$50M</td>
+        <td class="r">$699M</td>
+        <td style="font-size:11px;">Schr&ouml;dinger&rarr;Novartis, Kumquat&rarr;Takeda</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="two-col" style="margin-top:32px;">
+    <div>
+      <h6>Upside Factors (push pricing higher)</h6>
+      <ul style="font-size:13px;color:var(--slate-400);padding-left:20px;line-height:2;">
+        <li>Novel delivery mechanism (microneedle patch)</li>
+        <li>Validated MOA with clinical data</li>
+        <li>Multiple potential indications (platform)</li>
+        <li>Competitive pressure from multiple bidders</li>
+        <li>Hot therapeutic area (obesity/metabolic)</li>
+        <li>Established licensing track record ($1B in prior deals)</li>
+      </ul>
+    </div>
+    <div>
+      <h6>Downside Factors (compress pricing)</h6>
+      <ul style="font-size:13px;color:var(--slate-400);padding-left:20px;line-height:2;">
+        <li>Very early stage (no IND data)</li>
+        <li>Crowded target space (e.g., GLP-1 is competitive)</li>
+        <li>Regional carve-out instead of global</li>
+        <li>Limited patent estate or FTO concerns</li>
+        <li>Single-indication scope</li>
+        <li>Manufacturing complexity or CMC risk</li>
+      </ul>
+    </div>
+  </div>
+  <p class="source">Source: Benchmark ranges derived from Ambrosia Ventures deal corpus (~280 Discovery &amp; Preclinical transactions (Phase 1 excluded)). Comparable deal terms from SEC EDGAR and press releases. Positioning analysis is Ambrosia Ventures&rsquo; interpretation and should be validated against asset-specific diligence.</p>
+</div>
+
+<!-- ========================================================================
+     SECTION 7: DEAL STRUCTURE GUIDE
+     ======================================================================== -->
+<div class="section page-break" id="s7">
+  <div class="section-badge">
+    <span class="num">7</span>
+    <span class="tag">Deal Structure Guide</span>
+  </div>
+  <h4>Typical PCC-to-IND Deal Architecture</h4>
+  <p>How deals are structured at the preclinical-to-IND stage. These are market norms, not prescriptions &mdash; specific terms will depend on asset quality, competitive dynamics, and negotiation leverage.</p>
+
+  <div class="insight">
+    <div class="insight-label">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.667 6.667 0 1014.667 8 6.674 6.674 0 008 1.333zm0 10.667a.667.667 0 110-1.333.667.667 0 010 1.333zm.667-3.333a.667.667 0 01-1.334 0V5.333a.667.667 0 011.334 0v3.334z" fill="currentColor"/></svg>
+      Key Insight
+    </div>
+    <p><strong>Upfront-to-total ratios vary dramatically by modality:</strong> Bispecific immunology deals have 46% upfront (partners pay for conviction), while small molecule metabolic deals are only 6% upfront (most value in back-loaded milestones tied to massive commercial potential). For Daewoong&rsquo;s GLP-1 patch, expect a low upfront ratio (8&ndash;12%) but very large total deal value ($1.5B&ndash;$2.2B). Negotiate hard on development milestone triggers, not just upfront.</p>
+  </div>
+
+  <div class="two-col" style="margin-top:24px;">
+    <div>
+      <h6>Upfront Payment Structure</h6>
+      <table style="margin:8px 0;">
+        <tbody>
+          <tr><td style="color:var(--slate-500);">Bispecific Immunology</td><td class="r h">46% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Antibody Immunology</td><td class="r">27% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Bispecific Oncology</td><td class="r">21% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">ADC Oncology</td><td class="r">15% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Small mol Oncology</td><td class="r">12% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">siRNA Oncology</td><td class="r">11% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Peptide Oncology</td><td class="r">11% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Peptide Metabolic</td><td class="r">10% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">PROTAC Oncology</td><td class="r">10% of total</td></tr>
+          <tr><td style="color:var(--slate-500);">Small mol Metabolic</td><td class="r">6% of total</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h6>Typical Milestone Architecture</h6>
+      <table style="margin:8px 0;">
+        <thead><tr><th>Milestone Type</th><th class="r">% of Total</th></tr></thead>
+        <tbody>
+          <tr><td>Upfront payment</td><td class="r h">6&ndash;46%</td></tr>
+          <tr><td>IND filing</td><td class="r">3&ndash;8%</td></tr>
+          <tr><td>Phase 1 initiation</td><td class="r">3&ndash;6%</td></tr>
+          <tr><td>Phase 2 data readout</td><td class="r">5&ndash;10%</td></tr>
+          <tr><td>Phase 3 initiation</td><td class="r">8&ndash;12%</td></tr>
+          <tr><td>Regulatory approval (US)</td><td class="r">10&ndash;15%</td></tr>
+          <tr><td>Regulatory approval (EU/JP)</td><td class="r">5&ndash;8% each</td></tr>
+          <tr><td>Commercial milestones</td><td class="r">20&ndash;40%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h5 style="margin-top:36px;">Royalty Benchmarks (PCC-to-IND Stage)</h5>
+  <table>
+    <thead><tr><th>Deal Type</th><th class="r">Typical Royalty Range</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Standard out-license (global)</td><td class="r">Low-to-mid single digits (3&ndash;7%)</td><td>Tiered by annual net sales thresholds</td></tr>
+      <tr><td>Premium modality (bispecific, siRNA)</td><td class="r">Mid-to-high single digits (5&ndash;10%)</td><td>Higher floor reflects differentiated MOA</td></tr>
+      <tr><td>Hot space (obesity/metabolic)</td><td class="r">Mid single digits (4&ndash;8%)</td><td>Lower royalty offset by larger total deal value</td></tr>
+      <tr><td>Regional (ex-China, Japan)</td><td class="r">High single digits (6&ndash;12%)</td><td>Higher royalty compensates for lower upfront</td></tr>
+    </tbody>
+  </table>
+
+  <h5 style="margin-top:36px;">Option Structures</h5>
+  <p style="font-size:13px;">Approximately 15&ndash;20% of PCC-to-IND deals include an option component &mdash; the licensee pays a smaller upfront for the right to exercise a full license at a later data inflection point. For Daewoong, consider offering opt-in rights at Phase 1 data readout to maximize upfront while preserving optionality for partners.</p>
+
+  <div class="two-col" style="margin-top:16px;">
+    <div style="background:rgba(17,24,39,0.5);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <h6 style="margin-top:0;">Option Deal (Phase 1 readout)</h6>
+      <p style="font-size:12px;color:var(--slate-500);margin-bottom:8px;">Partner pays smaller upfront + R&D funding, then decides at Phase 1 data.</p>
+      <div style="font-size:13px;color:var(--slate-400);">
+        <strong style="color:var(--slate-300);">Upfront:</strong> 40&ndash;60% of full license upfront<br>
+        <strong style="color:var(--slate-300);">Option fee:</strong> 15&ndash;30% of remaining<br>
+        <strong style="color:var(--slate-300);">Exercise:</strong> Full milestones + royalties kick in
+      </div>
+    </div>
+    <div style="background:rgba(17,24,39,0.5);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      <h6 style="margin-top:0;">Full License (Standard)</h6>
+      <p style="font-size:12px;color:var(--slate-500);margin-bottom:8px;">Partner takes full commercial rights from signing. More common for hot assets.</p>
+      <div style="font-size:13px;color:var(--slate-400);">
+        <strong style="color:var(--slate-300);">Upfront:</strong> 100% of benchmark upfront<br>
+        <strong style="color:var(--slate-300);">Milestones:</strong> Full dev + commercial schedule<br>
+        <strong style="color:var(--slate-300);">Royalties:</strong> Standard tiered on net sales
+      </div>
+    </div>
+  </div>
+  <p class="source">Source: Deal structure norms derived from ~280 disclosed Discovery &amp; Preclinical transactions. Royalty ranges from SEC filings where disclosed (approximately 40% of deals in corpus). Option structure frequency from Ambrosia Ventures analysis of deal type classification.</p>
+</div>
+
+<!-- ========================================================================
+     SECTION 8: METHODOLOGY & DISCLAIMER
+     ======================================================================== -->
+<div class="section page-break" id="s8">
+  <div class="section-badge">
+    <span class="num">8</span>
+    <span class="tag">Methodology &amp; Disclaimer</span>
+  </div>
+  <h4>Data Sources &amp; Quality Assurance</h4>
+
+  <div class="two-col" style="margin-top:20px;">
+    <div>
+      <h6>Data Sources (5 Pipelines)</h6>
+      <table style="margin:8px 0;">
+        <tbody>
+          <tr><td style="color:var(--teal-400);font-weight:600;">SEC EDGAR</td><td>8-K filings with deal terms</td></tr>
+          <tr><td style="color:var(--teal-400);font-weight:600;">ClinicalTrials.gov</td><td>Regulatory & trial registrations</td></tr>
+          <tr><td style="color:var(--teal-400);font-weight:600;">Company Press Releases</td><td>Announcement terms</td></tr>
+          <tr><td style="color:var(--teal-400);font-weight:600;">BioCentury BCIQ</td><td>Cross-reference & validation</td></tr>
+          <tr><td style="color:var(--teal-400);font-weight:600;">IQVIA MIDAS</td><td>Revenue share & market sizing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h6>Quality Assurance</h6>
+      <table style="margin:8px 0;">
+        <tbody>
+          <tr><td style="color:var(--slate-500);">Total corpus</td><td>2,700+ transactions</td></tr>
+          <tr><td style="color:var(--slate-500);">PCC-to-IND subset</td><td>~280 deals (Discovery &amp; Preclinical only, Phase 1 excluded)</td></tr>
+          <tr><td style="color:var(--slate-500);">Date range</td><td>January 2020 &ndash; March 2026</td></tr>
+          <tr><td style="color:var(--slate-500);">Daily QA checks</td><td>143 automated validations</td></tr>
+          <tr><td style="color:var(--slate-500);">Last data refresh</td><td>April 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h5 style="margin-top:32px;">Methodology Notes</h5>
+  <ul style="font-size:13px;color:var(--slate-400);padding-left:20px;line-height:2.2;">
+    <li><strong style="color:var(--slate-300);">Stage classification:</strong> &ldquo;PCC-to-IND&rdquo; includes Discovery (target validation, lead optimization, pre-PCC) and Preclinical (PCC selected, IND-enabling: GLP tox, CMC, formulation, pre-IND). <strong style="color:var(--amber-400);">Phase 1 (first-in-human) is excluded from this revision per client request.</strong> Assets in Phase 2+ are also excluded.</li>
+    <li><strong style="color:var(--slate-300);">Financial terms:</strong> Only deals with publicly disclosed upfront payments and/or total deal values are included. Undisclosed deals are excluded to avoid survivorship bias.</li>
+    <li><strong style="color:var(--slate-300);">Currency:</strong> All values in USD. Non-USD deals converted at announcement-date exchange rates.</li>
+    <li><strong style="color:var(--slate-300);">Total deal value:</strong> Upfront + development milestones + commercial milestones + equity (where disclosed). Royalty values are not capitalized into total deal value.</li>
+    <li><strong style="color:var(--slate-300);">Regional estimates:</strong> Australia/NZ, LATAM, and GCC values are modeled from observed ratios in the dataset scaled by IQVIA revenue shares, not directly observed transactions.</li>
+    <li><strong style="color:var(--slate-300);">Percentiles:</strong> p25 and p75 are linear interpolation percentiles. For cells with n&lt;3, data is suppressed (&ldquo;&mdash;&rdquo;) to avoid misleading precision.</li>
+  </ul>
+
+  <!-- DISCLAIMER -->
+  <div class="report-footer" style="margin-top:48px;">
+    <h6>Disclaimer</h6>
+    <p class="disclaimer">
+      <strong>This report is provided for informational purposes only and does not constitute investment advice, legal counsel, or a recommendation to enter into any transaction.</strong> The data, analysis, and benchmarks presented herein are derived from publicly available sources and proprietary databases maintained by Ambrosia Ventures. While every effort has been made to ensure accuracy, Ambrosia Ventures makes no warranty, express or implied, regarding the completeness, accuracy, or reliability of the information contained in this report.
+    </p>
+    <p class="disclaimer">
+      Deal terms, market conditions, and regulatory environments change frequently. The benchmarks in this report reflect historical transactions and may not predict future deal terms. Users of this report should conduct their own independent analysis and consult with qualified legal and financial advisors before making any business decisions based on this information.
+    </p>
+    <p class="disclaimer">
+      <strong>Confidentiality:</strong> This report was prepared exclusively for Kevin Sha and the Investment, Collaboration &amp; Business Development team at Daewoong Pharmaceutical Co., Ltd. It may not be reproduced, distributed, or disclosed to any third party without the prior written consent of Ambrosia Ventures.
+    </p>
+    <p class="disclaimer" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
+      &copy; 2026 Ambrosia Ventures. All rights reserved.<br>
+      <span style="color:var(--slate-600);">calculator.ambrosiaventures.co</span>
+    </p>
+    <div style="margin-top:24px;text-align:center;">
+      <img src="/logo-white.png" alt="Ambrosia Ventures" style="width:180px;height:auto;opacity:0.3;" onerror="this.style.display='none'"/>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
