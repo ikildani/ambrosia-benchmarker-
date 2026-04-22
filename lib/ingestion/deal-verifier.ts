@@ -41,13 +41,31 @@ export async function verifyPendingDeals(
 
   const result = { verified: 0, flagged: 0, unchanged: 0, errors: [] as string[] };
 
-  // 1. Query pending deals, highest value first
-  const { data: deals, error: queryError } = await supabase
+  // 1. Query pending deals — prioritize discovery-stage deals (only 9%
+  // verified vs 29% for preclinical) then highest value. The two-pass
+  // approach ensures early-stage deals get verified without starving
+  // high-value deals from the queue.
+  const { data: discoveryDeals } = await supabase
+    .from('deals')
+    .select('id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, confidence_score')
+    .eq('verification_status', 'pending')
+    .in('phase_at_signing', ['discovery', 'preclinical'])
+    .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
+    .limit(Math.ceil(maxDeals * 0.3));
+
+  const discoveryIds = new Set((discoveryDeals || []).map(d => d.id));
+
+  const { data: remainingDeals, error: queryError } = await supabase
     .from('deals')
     .select('id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, confidence_score')
     .eq('verification_status', 'pending')
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(maxDeals);
+
+  const deals = [
+    ...(discoveryDeals || []),
+    ...(remainingDeals || []).filter(d => !discoveryIds.has(d.id)),
+  ].slice(0, maxDeals);
 
   if (queryError) {
     result.errors.push(`Query failed: ${queryError.message}`);

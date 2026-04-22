@@ -203,6 +203,11 @@ async function extractDealsFromText(
   "indication": "specific indication",
   "modality": "smallMolecule|antibody|adc|bispecific|car_t|cell_therapy|gene_therapy|mrna|radiopharm|peptide|oligonucleotide|vaccine|other",
   "phase": "discovery|preclinical|phase_1|phase_2|phase_3|approved",
+  // Phase classification guide:
+  //   discovery = target validation, hit-to-lead, lead optimization, NO lead compound selected for development yet
+  //   preclinical = lead compound selected (PCC), IND-enabling studies (GLP tox, CMC, formulation), pre-IND or IND-ready
+  //   phase_1 = IND filed or cleared, first-in-human dosing initiated
+  // When uncertain between discovery and preclinical, use "preclinical" if any IND-enabling activity is mentioned
   "territory": "global|us|ex_us|etc",
   "announced_date": "YYYY-MM-DD or YYYY-MM or YYYY",
   "therapeutic_area": "${ta}",
