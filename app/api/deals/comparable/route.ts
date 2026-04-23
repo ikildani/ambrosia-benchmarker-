@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { findComparableDealsWithDB } from '@/lib/comparableDeals.server';
 import { findSimilarDeals } from '@/lib/embeddings';
@@ -53,6 +54,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const params = request.nextUrl.searchParams;
     const therapeuticArea = params.get('therapeuticArea') || 'oncology';
     const modality = params.get('modality') || '';

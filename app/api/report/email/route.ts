@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -9,6 +10,8 @@ export const maxDuration = 15;
 
 export async function POST(request: NextRequest) {
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const authUser = await getAuthenticatedUser(request);
     const userId = authUser?.id || null;
 

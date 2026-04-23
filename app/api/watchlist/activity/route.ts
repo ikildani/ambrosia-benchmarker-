@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
@@ -6,6 +7,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     // SECURITY: Require authenticated session — never trust user_id from query
     const [user, authError] = await requireAuth(request);
     if (authError) return authError;

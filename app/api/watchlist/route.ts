@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
@@ -57,6 +58,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const supabase = createServiceClient();
     const body = await request.json();
     const parsed = watchlistAddSchema.safeParse(body);

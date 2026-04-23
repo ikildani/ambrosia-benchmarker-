@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
@@ -11,6 +12,8 @@ export const dynamic = 'force-dynamic';
 // POST - Create a share link
 export async function POST(request: NextRequest) {
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     // SECURITY: Require authenticated session — never trust email from body
     const [user, authError] = await requireAuth(request);
     if (authError) return authError;

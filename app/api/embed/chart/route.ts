@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       'X-Frame-Options': 'ALLOWALL',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://calculator.ambrosiaventures.co',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },
@@ -110,7 +110,7 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://calculator.ambrosiaventures.co',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

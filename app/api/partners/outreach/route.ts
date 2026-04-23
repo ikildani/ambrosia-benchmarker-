@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getOutreachGenerator } from '@/lib/services/outreach-generator';
@@ -10,6 +11,8 @@ const DAILY_EMAIL_LIMIT = 10;
 
 export async function POST(request: NextRequest) {
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const supabase = createServiceClient();
     const body = await request.json() as OutreachGenerationRequest & {
       user_id?: string;

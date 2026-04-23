@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
               if (existingProfile && existingProfile.tier !== 'pro') {
                 await supabase
                   .from('user_profiles')
-                  .update({ tier: 'report', updated_at: new Date().toISOString() })
+                  .update({ tier: 'report', tier_change_authorized: true, updated_at: new Date().toISOString() })
                   .eq('id', upgradedUserId);
                 console.log('User upgraded to report tier:', upgradedUserId);
               }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
                 amount_total: session.amount_total,
                 currency: session.currency,
               },
-              user_tier: 'report',
+              user_tier: 'report', tier_change_authorized: true,
             });
 
             // Notify admin of report purchase
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         const subscriptionId = session.subscription as string;
 
         const updatePayload = {
-          tier: 'pro' as const,
+          tier: 'pro' as const, tier_change_authorized: true,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           subscription_status: 'active',
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
             discount_applied: (session.total_details?.amount_discount || 0) > 0,
             discount_amount: session.total_details?.amount_discount || 0,
           },
-          user_tier: 'pro',
+          user_tier: 'pro', tier_change_authorized: true,
         });
 
         // Notify admin of new subscription
@@ -356,7 +356,7 @@ export async function POST(request: NextRequest) {
             await supabase
               .from('user_profiles')
               .update({
-                tier: 'pro',
+                tier: 'pro', tier_change_authorized: true,
                 subscription_status: 'active',
                 stripe_customer_id: invoiceCustomerId,
                 pro_activated_at: now.toISOString(),
@@ -399,7 +399,7 @@ export async function POST(request: NextRequest) {
                 expires_at: expiresAt.toISOString(),
               },
               user_id: engProfile.id,
-              user_tier: 'pro',
+              user_tier: 'pro', tier_change_authorized: true,
             });
           }
           break; // handled — skip the subscription path
@@ -417,7 +417,7 @@ export async function POST(request: NextRequest) {
             await supabase
               .from('user_profiles')
               .update({
-                tier: 'pro',
+                tier: 'pro', tier_change_authorized: true,
                 stripe_customer_id: invoiceCustomerId,
                 stripe_subscription_id: invoiceSubId,
                 subscription_status: 'active',
@@ -453,7 +453,7 @@ export async function POST(request: NextRequest) {
               amount_paid: invoice.amount_paid,
               currency: invoice.currency,
             },
-            user_tier: 'pro',
+            user_tier: 'pro', tier_change_authorized: true,
           });
         }
         break;
@@ -483,7 +483,7 @@ export async function POST(request: NextRequest) {
             invoice_id: invoice.id,
             attempt_count: invoice.attempt_count,
           },
-          user_tier: 'pro',
+          user_tier: 'pro', tier_change_authorized: true,
         });
 
         // Notify Slack of payment failure

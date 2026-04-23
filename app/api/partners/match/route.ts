@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { findPartnerMatches, getDealHistoryCrossReference, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
@@ -24,6 +25,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const supabase = createServiceClient();
     const body = await request.json();
 

@@ -1,3 +1,4 @@
+import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
@@ -14,6 +15,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const sessionCheck = await requireSingleSession(request);
+    if (sessionCheck) return sessionCheck;
     const rawParams = Object.fromEntries(new URL(request.url).searchParams.entries());
     const parsed = pulseQuerySchema.safeParse(rawParams);
     if (!parsed.success) {

@@ -35,6 +35,15 @@ export async function resolveUserTier(): Promise<TierCheckResult> {
 
     // Internal allowlist short-circuit — free for team emails
     if (user.email && isProEmail(user.email)) {
+      // R72 security: audit-log PRO_EMAILS bypass activations
+      try {
+        await supabase.from('events').insert({
+          event_type: 'pro_email_bypass',
+          event_data: { email: user.email, source: 'tier-check' },
+          user_id: user.id,
+          user_tier: 'pro',
+        });
+      } catch {} // non-blocking — never fail auth on audit log error
       return {
         isAuthenticated: true,
         tier: 'pro',

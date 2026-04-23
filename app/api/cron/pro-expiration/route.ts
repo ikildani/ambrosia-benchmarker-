@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         await supabase
           .from('user_profiles')
           .update({
-            tier: 'free',
+            tier: 'free', tier_change_authorized: true,
             subscription_status: 'expired',
             updated_at: now.toISOString(),
           })
