@@ -46,6 +46,23 @@ export async function POST(request: Request): Promise<Response> {
     // Authorization: verify report purchase OR pro tier
     let authorized = false;
 
+    // Check 0 (R72): Server-side cookie auth — authoritative
+    try {
+      const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
+      const authUser = await getAuthenticatedUser(request);
+      if (authUser?.id) {
+        const { data: cookieProfile } = await supabase
+          .from('user_profiles')
+          .select('id, tier, email')
+          .eq('id', authUser.id)
+          .single();
+        if (cookieProfile) {
+          if (cookieProfile.tier === 'pro' || cookieProfile.tier === 'report') authorized = true;
+          if (!authorized && cookieProfile.email && isProEmail(cookieProfile.email)) authorized = true;
+        }
+      }
+    } catch {} // non-blocking
+
     // Check 1: Report purchase
     if (body.reportId) {
       const { data: report } = await supabase

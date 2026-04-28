@@ -57,6 +57,23 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
+    // Auth method 0 (R72): Server-side cookie auth — authoritative
+    try {
+      const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
+      const authUser = await getAuthenticatedUser(request);
+      if (authUser?.id) {
+        const { data: cookieProfile } = await supabase
+          .from('user_profiles')
+          .select('id, tier, email')
+          .eq('id', authUser.id)
+          .single();
+        if (cookieProfile) {
+          if (cookieProfile.tier === 'pro' || cookieProfile.tier === 'report') authorized = true;
+          if (!authorized && cookieProfile.email && isProEmail(cookieProfile.email)) authorized = true;
+        }
+      }
+    } catch {} // non-blocking — fall through to other methods
+
     // Auth method 1: Bearer token
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
