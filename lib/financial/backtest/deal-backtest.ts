@@ -27,6 +27,7 @@ import { getPlatformOptionFloorM, getNarrowMarketCapM } from '../modality-profil
 import { getPostApprovalUpfrontMultiplier, getPostApprovalFloorM } from '../deal-type-profiles';
 import { getTerritoryAdjustedPeak } from '../geographic-revenue-curves';
 import { recencyWeight } from '../calibration';
+import { weightedQuantile as sharedWeightedQuantile } from '@/lib/math/quantile';
 
 // ---------------------------------------------------------------------------
 // Per-deal result shape
@@ -1155,27 +1156,9 @@ function medianOf(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-// R70: weighted quantile over {value, weight} pairs. Used by the
-// corridor-clamp distribution (weights deals by recencyWeight(year)) so
-// that aggregate comparable medians and percentiles reflect the current
-// dealmaking regime rather than averaging 2019 and 2025 comps equally.
-function weightedQuantile(
-  pairs: Array<{ value: number; weight: number }>,
-  q: number,
-): number {
-  if (pairs.length === 0) return 0;
-  const filtered = pairs.filter(p => p.weight > 0);
-  if (filtered.length === 0) return 0;
-  const sorted = [...filtered].sort((a, b) => a.value - b.value);
-  const totalWeight = sorted.reduce((s, p) => s + p.weight, 0);
-  const target = q * totalWeight;
-  let cum = 0;
-  for (const p of sorted) {
-    cum += p.weight;
-    if (cum >= target) return p.value;
-  }
-  return sorted[sorted.length - 1].value;
-}
+// R70: weighted quantile — now imported from shared lib/math/quantile.ts
+// so the same math is used by the client-side comparable deals selector.
+const weightedQuantile = sharedWeightedQuantile;
 
 function sampleVariance(values: number[]): number {
   if (values.length < 2) return Infinity;

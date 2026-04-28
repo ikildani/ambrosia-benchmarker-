@@ -1,6 +1,6 @@
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
-import { findComparableDealsWithDB } from '@/lib/comparableDeals.server';
+import { findComparableDealsWithDB, findEnrichedComparableDeals } from '@/lib/comparableDeals.server';
 import { findSimilarDeals } from '@/lib/embeddings';
 import { captureApiError } from '@/lib/sentry-api';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
@@ -62,18 +62,33 @@ export async function GET(request: NextRequest) {
     const indication = params.get('indication') || '';
     const phase = params.get('phase') || undefined;
     const dealType = params.get('dealType') || undefined;
+    const enriched = params.get('enriched') === 'true';
 
     // Verify tier server-side to prevent free users from accessing all deals via API
     const tier = await getUserTier();
     const hasFullAccess = tier === 'pro' || tier === 'report';
 
-    // Fetch keyword-scored deals (existing approach)
+    // Enriched mode: return full scoring details + benchmark range for comp selector
+    if (enriched) {
+      const { deals: enrichedDeals, benchmarkRange } = await findEnrichedComparableDeals(
+        { therapeuticArea, modality, indication, phase, dealType },
+        hasFullAccess ? 30 : 30,
+      );
+      const deals = hasFullAccess ? enrichedDeals : enrichedDeals.slice(0, FREE_DEAL_LIMIT);
+      return NextResponse.json({
+        deals,
+        benchmarkRange,
+        totalAvailable: enrichedDeals.length,
+        enriched: true,
+      });
+    }
+
+    // Legacy mode: keyword + semantic matching (existing behavior)
     const keywordDeals = await findComparableDealsWithDB(
       { therapeuticArea, modality, indication, phase },
       hasFullAccess ? 15 : 15
     );
 
-    // Try semantic matching via Perplexity embeddings (silent enhancement)
     let semanticDeals: typeof keywordDeals = [];
     const perplexityKey = process.env.PERPLEXITY_API_KEY;
     if (perplexityKey && hasFullAccess) {
@@ -88,7 +103,6 @@ export async function GET(request: NextRequest) {
           dealType,
         }, 10);
 
-        // Convert DB semantic results to UI format
         semanticDeals = dbResults.map((d, idx) => ({
           id: `sem-${idx}`,
           parties: `${d.licensor_name} / ${d.licensee_name}`,
@@ -102,11 +116,10 @@ export async function GET(request: NextRequest) {
           relevanceReasons: [`${Math.round(d.similarity * 100)}% match`],
         }));
       } catch {
-        // Silent fallback — semantic matching is an enhancement, not required
+        // Silent fallback
       }
     }
 
-    // Merge: semantic results first (higher quality), then keyword results, dedup by parties+year
     const seen = new Set<string>();
     const merged = [...semanticDeals, ...keywordDeals].filter(deal => {
       const key = `${deal.parties.toLowerCase()}|${deal.year}`;
@@ -116,8 +129,6 @@ export async function GET(request: NextRequest) {
     });
 
     const allDeals = merged.slice(0, hasFullAccess ? 15 : 15);
-
-    // Limit response for free users - server-side enforcement
     const deals = hasFullAccess ? allDeals : allDeals.slice(0, FREE_DEAL_LIMIT);
     const totalAvailable = allDeals.length;
 

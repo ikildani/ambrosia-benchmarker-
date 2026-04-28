@@ -9,6 +9,7 @@ import {
   findComparableDeals,
   COMPARABLE_DEALS,
 } from '@/lib/comparableDeals';
+import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 
 // Format dollar amount from raw USD number to display string
 function formatDealValue(usd: number | null): string | null {
@@ -187,4 +188,126 @@ export async function findComparableDealsWithDB(
     console.error('[comparableDeals] DB query failed for UI, using static fallback:', error);
     return findComparableDeals(inputs, maxDeals);
   }
+}
+
+export interface EnrichedComparableDeal {
+  id: string;
+  parties: string;
+  licensor: string;
+  licensee: string;
+  totalValue: string;
+  upfront: string | null;
+  upfrontM: number | null;
+  totalValueM: number | null;
+  year: number;
+  phase: string | null;
+  modality: string | null;
+  indication: string | null;
+  therapeuticArea: string | null;
+  dealType: string | null;
+  territory: string | null;
+  matchScore: number;
+  matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
+  relevanceReasons: string[];
+}
+
+export interface ComparableBenchmarkRange {
+  upfront: { p25: number; median: number; p75: number };
+  totalValue: { p25: number; median: number; p75: number };
+  n: number;
+}
+
+export async function findEnrichedComparableDeals(
+  inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType?: string },
+  maxDeals: number = 30,
+): Promise<{ deals: EnrichedComparableDeal[]; benchmarkRange: ComparableBenchmarkRange }> {
+  const supabase = createServiceClient();
+
+  const { data: dbDeals } = await supabase
+    .from('deals')
+    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name')
+    .eq('terms_disclosed', true)
+    .eq('is_synthetic', false)
+    .not('total_deal_value_usd', 'is', null)
+    .gt('total_deal_value_usd', 0)
+    .order('announced_date', { ascending: false })
+    .limit(500);
+
+  const currentYear = new Date().getFullYear();
+  const MAX_SCORE = 14;
+
+  const scored = (dbDeals || []).map(d => {
+    let score = 0;
+    const reasons: string[] = [];
+    const breakdown = { ta: false, modality: false, phase: false, indication: false, recency: 0 };
+    const ta = d.therapeutic_area || '';
+    const year = d.announced_date ? new Date(d.announced_date).getFullYear() : currentYear;
+
+    if (ta === inputs.therapeuticArea) { score += 3; breakdown.ta = true; reasons.push('Same TA'); }
+    if (inputs.modality && d.modality === inputs.modality) { score += 4; breakdown.modality = true; reasons.push('Same modality'); }
+    if (inputs.indication && (d.indication_category === inputs.indication || d.indication_specific === inputs.indication)) {
+      score += 3; breakdown.indication = true; reasons.push('Same indication');
+    }
+    if (inputs.phase && d.phase_at_signing === inputs.phase) { score += 2; breakdown.phase = true; reasons.push('Same phase'); }
+
+    if (year >= currentYear) { score += 2; breakdown.recency = 2; reasons.push('Current year'); }
+    else if (year >= currentYear - 1) { score += 1; breakdown.recency = 1; }
+
+    const upfrontRaw = d.upfront_usd ? Number(d.upfront_usd) : null;
+    const totalRaw = d.total_deal_value_usd ? Number(d.total_deal_value_usd) : null;
+
+    return {
+      deal: {
+        id: d.id,
+        parties: `${d.licensor_name || 'Unknown'} / ${d.licensee_name || 'Unknown'}`,
+        licensor: d.licensor_name || 'Unknown',
+        licensee: d.licensee_name || 'Unknown',
+        totalValue: formatDealValue(totalRaw) || 'Undisclosed',
+        upfront: formatDealValue(upfrontRaw),
+        upfrontM: upfrontRaw ? Math.round(upfrontRaw / 1_000_000) : null,
+        totalValueM: totalRaw ? Math.round(totalRaw / 1_000_000) : null,
+        year,
+        phase: d.phase_at_signing || null,
+        modality: d.modality || null,
+        indication: d.indication_specific || d.indication_category || null,
+        therapeuticArea: ta || null,
+        dealType: d.deal_type || null,
+        territory: d.territory || null,
+        matchScore: Math.min(score / MAX_SCORE, 1),
+        matchBreakdown: breakdown,
+        relevanceReasons: reasons,
+      } as EnrichedComparableDeal,
+      score,
+    };
+  });
+
+  const filtered = scored
+    .filter(s => s.score >= 2)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxDeals);
+
+  const deals = filtered.map(s => s.deal);
+
+  const upfrontPairs = deals
+    .filter(d => d.upfrontM && d.upfrontM > 0)
+    .map(d => ({ value: d.upfrontM!, weight: recencyWeight(d.year) }));
+  const totalPairs = deals
+    .filter(d => d.totalValueM && d.totalValueM > 0)
+    .map(d => ({ value: d.totalValueM!, weight: recencyWeight(d.year) }));
+
+  const benchmarkRange: ComparableBenchmarkRange = {
+    upfront: {
+      p25: weightedQuantile(upfrontPairs, 0.25),
+      median: weightedQuantile(upfrontPairs, 0.5),
+      p75: weightedQuantile(upfrontPairs, 0.75),
+    },
+    totalValue: {
+      p25: weightedQuantile(totalPairs, 0.25),
+      median: weightedQuantile(totalPairs, 0.5),
+      p75: weightedQuantile(totalPairs, 0.75),
+    },
+    n: deals.length,
+  };
+
+  return { deals, benchmarkRange };
 }
