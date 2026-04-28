@@ -68,18 +68,21 @@ export async function GET(request: NextRequest) {
     const tier = await getUserTier();
     const hasFullAccess = tier === 'pro' || tier === 'report';
 
-    // Enriched mode: return full scoring details + benchmark range for comp selector
+    // Enriched mode: always return full deal set — client handles tier gating
+    // for UI features (checkboxes, filters, recalculation). Returning all
+    // deals lets Pro users toggle comps; free users see the list but can't
+    // interact (paywall CTA shown client-side).
     if (enriched) {
       const { deals: enrichedDeals, benchmarkRange } = await findEnrichedComparableDeals(
         { therapeuticArea, modality, indication, phase, dealType },
-        hasFullAccess ? 30 : 30,
+        30,
       );
-      const deals = hasFullAccess ? enrichedDeals : enrichedDeals.slice(0, FREE_DEAL_LIMIT);
       return NextResponse.json({
-        deals,
+        deals: enrichedDeals,
         benchmarkRange,
         totalAvailable: enrichedDeals.length,
         enriched: true,
+        tier,
       });
     }
 
