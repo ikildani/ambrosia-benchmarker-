@@ -75,7 +75,7 @@ export function SiteFooter() {
             &copy; {new Date().getFullYear()} Ambrosia Ventures. All rights reserved.
           </p>
           <p className="text-xs text-slate-600">
-            Benchmarks powered by 3,000+ real biopharma licensing deals
+            Benchmarks powered by 1,900+ real biopharma licensing deals
           </p>
         </div>
       </div>

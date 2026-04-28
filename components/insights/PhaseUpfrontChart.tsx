@@ -142,7 +142,7 @@ export function PhaseUpfrontChart({ data, title, yLabel = 'Median Upfront ($M)',
         </ResponsiveContainer>
       </div>
       <p className="text-[11px] text-slate-400 mt-3 text-center tracking-wide">
-        Source: Ambrosia Ventures | 2,500+ verified transactions (2020-2026) | SEC filings, FTC premerger filings, press releases
+        Source: Ambrosia Ventures | 1,900+ verified transactions (2020-2026) | SEC filings, FTC premerger filings, press releases
       </p>
     </div>
   );

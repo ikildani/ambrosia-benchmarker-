@@ -61,7 +61,7 @@ const TOUR_STEPS: TourStepDef[] = [
   {
     targetId: TOUR_STEP_IDS.DEAL_TERMS,
     title: 'Deal Terms Overview',
-    body: 'Your headline numbers. These ranges are benchmarked against 2,500+ verified biopharma transactions \u2014 filtered by your exact therapeutic area, modality, and phase combination.',
+    body: 'Your headline numbers. These ranges are benchmarked against 1,900+ verified biopharma transactions \u2014 filtered by your exact therapeutic area, modality, and phase combination.',
     icon: <DollarSign className={ICON_CLASS} />,
   },
   {

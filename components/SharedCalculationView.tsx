@@ -257,7 +257,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
 
       {/* ── Disclaimer ── */}
       <div className="rounded-xl bg-white/[0.04] border border-white/[0.07] p-4 text-[11px] text-slate-500 leading-relaxed mt-6">
-        <strong className="text-slate-600">Disclaimer:</strong> Estimates derived from 2,500+ biopharma transactions. For informational purposes only — not financial or legal advice.
+        <strong className="text-slate-600">Disclaimer:</strong> Estimates derived from 1,900+ biopharma transactions. For informational purposes only — not financial or legal advice.
       </div>
     </div>
   );

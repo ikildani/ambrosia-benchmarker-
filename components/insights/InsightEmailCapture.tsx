@@ -64,7 +64,7 @@ export function InsightEmailCapture({ slug }: InsightEmailCaptureProps) {
           Get deal intelligence in your inbox
         </h3>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-          Weekly benchmarks, market signals, and deal analysis from 2,500+ transactions.
+          Weekly benchmarks, market signals, and deal analysis from 1,900+ transactions.
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">

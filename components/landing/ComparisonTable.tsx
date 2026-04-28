@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const comparisonRows = [
   { feature: 'Time to analyze', manual: '2-3 weeks', ambrosia: 'Under 30 seconds' },
-  { feature: 'Data coverage', manual: '1-2 databases', ambrosia: '3,000+ deals from 10+ sources' },
+  { feature: 'Data coverage', manual: '1-2 databases', ambrosia: '1,900+ deals from 10+ sources' },
   { feature: 'Financial modeling', manual: 'Custom Excel models', ambrosia: 'rNPV + Monte Carlo (10K iterations)' },
   { feature: 'Comparable deals', manual: 'Hours of manual search', ambrosia: 'Semantic matching, ranked by similarity' },
   { feature: 'Partner intelligence', manual: 'Relationship-based', ambrosia: '850+ company profiles with deal history' },

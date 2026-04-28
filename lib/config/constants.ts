@@ -69,7 +69,7 @@ export function formatDealCount(count: number): string {
 // 2026-04-14: Migration 051 flagged 750 LLM-fabricated rows as synthetic
 // (asset_name pattern TARGET-NNN / TARGET-mab / Anti-TARGET, 0-3% verified).
 // Deal count reflects the cleaner verified+real count.
-export const LIVE_DEAL_COUNT = 1947;
+export const LIVE_DEAL_COUNT = 1918;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),

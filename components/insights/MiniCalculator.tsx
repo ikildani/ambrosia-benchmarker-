@@ -88,7 +88,7 @@ export function MiniCalculator({ defaultTA = 'oncology', defaultPhase = 'phase2'
           </svg>
           <h3 className="text-lg font-bold text-white">Quick Benchmark</h3>
         </div>
-        <p className="text-sm text-slate-400 mb-5">Live data from 2,500+ deals. Select your parameters:</p>
+        <p className="text-sm text-slate-400 mb-5">Live data from 1,900+ deals. Select your parameters:</p>
 
         <div className="grid sm:grid-cols-3 gap-3 mb-6">
           <div>

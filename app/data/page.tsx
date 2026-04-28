@@ -90,7 +90,7 @@ export default function DataIndexPage() {
         <section className="border-t border-slate-800 py-12 text-center">
           <div className="mx-auto max-w-2xl px-6">
             <p className="text-slate-500 text-sm mb-4">
-              Benchmarks powered by 3,000+ real biopharma licensing deals
+              Benchmarks powered by 1,900+ real biopharma licensing deals
             </p>
             <Link
               href="/calculator"

@@ -241,7 +241,7 @@ export default function BiotechLicensingDealStructurePage() {
             </h2>
 
             <p className="text-slate-600 leading-relaxed mb-4">
-              Deal economics vary dramatically by structure type. The table below shows typical allocation patterns from our analysis of 2,500+ biopharma transactions.
+              Deal economics vary dramatically by structure type. The table below shows typical allocation patterns from our analysis of 1,900+ biopharma transactions.
             </p>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
@@ -292,7 +292,7 @@ export default function BiotechLicensingDealStructurePage() {
             </div>
 
             <p className="text-xs text-slate-400 mb-6">
-              Source: Ambrosia Ventures deal database, 2,500+ transactions as of April 2026. Percentages represent share of total non-royalty deal value.
+              Source: Ambrosia Ventures deal database, 1,900+ transactions as of April 2026. Percentages represent share of total non-royalty deal value.
             </p>
 
             {/* 2026 Deal Terms Trends */}
@@ -314,7 +314,7 @@ export default function BiotechLicensingDealStructurePage() {
 
             {/* Inline CTA */}
             <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 my-8">
-              <p className="text-slate-900 font-semibold text-lg mb-2">Model your deal structure against 2,500+ benchmarks</p>
+              <p className="text-slate-900 font-semibold text-lg mb-2">Model your deal structure against 1,900+ benchmarks</p>
               <p className="text-slate-600 mb-4">
                 Our calculator models all 5 deal types with phase-specific allocation benchmarks, Monte Carlo simulations, and comparable transaction matching. See exactly how your structure compares to the market.
               </p>
@@ -333,7 +333,7 @@ export default function BiotechLicensingDealStructurePage() {
               Structure Your Next Deal
             </h2>
             <p className="text-teal-100 mb-8 text-lg">
-              Model upfront, milestone, and royalty allocations with real market benchmarks. See how your deal compares to 3,000+ biopharma transactions.
+              Model upfront, milestone, and royalty allocations with real market benchmarks. See how your deal compares to 1,900+ biopharma transactions.
             </p>
             <Link
               href="/calculator"

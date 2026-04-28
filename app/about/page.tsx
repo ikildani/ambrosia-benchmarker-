@@ -204,7 +204,7 @@ export default function AboutPage() {
               </h2>
               <p className="text-slate-600 dark:text-slate-300">
                 The quality of deal intelligence depends entirely on the quality of the underlying
-                data. Our transaction database includes 3,000+ verified biopharma deals spanning
+                data. Our transaction database includes 1,900+ verified biopharma deals spanning
                 2017 through 2026, sourced from SEC filings (8-K material agreements), FTC premerger filings, regulatory
                 agency databases, clinical trial registries, and proprietary intelligence feeds.
               </p>

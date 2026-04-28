@@ -21,7 +21,7 @@ export function AuthorByline({ date = 'March 24, 2026', updatedDate }: AuthorByl
         </>
       )}
       <span className="hidden sm:inline text-slate-300">|</span>
-      <span>Based on 2,500+ verified transactions</span>
+      <span>Based on 1,900+ verified transactions</span>
     </div>
   );
 }

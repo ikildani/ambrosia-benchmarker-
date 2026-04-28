@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'How to Negotiate Pharma Licensing Royalty Rates',
-    description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from 3,000+ transactions.',
+    description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from 1,900+ transactions.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
     images: [{ url: '/api/og?title=Negotiate%20Pharma%20Royalty%20Rates&subtitle=A%20Data-Backed%20Guide&type=landing', width: 1200, height: 630 }],
@@ -52,7 +52,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'How to Negotiate Pharma Licensing Royalty Rates',
-    description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from 3,000+ transactions.',
+    description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from 1,900+ transactions.',
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
@@ -130,7 +130,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             </h1>
 
             <p className="mt-6 text-xl text-slate-300 leading-relaxed">
-              A data-backed framework for structuring and negotiating royalty rates in biopharma licensing deals, informed by benchmarks from 3,000+ transactions.
+              A data-backed framework for structuring and negotiating royalty rates in biopharma licensing deals, informed by benchmarks from 1,900+ transactions.
             </p>
           </div>
         </header>
@@ -148,7 +148,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
 
             <div className="flex items-center gap-2 py-3 px-4 bg-slate-50 border border-slate-200 rounded-lg my-6 text-sm text-slate-600">
               <svg className="w-5 h-5 text-teal-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span>All benchmarks below are derived from analysis of <strong>2,500+ biopharma transactions</strong> in the Ambrosia Ventures database, updated April 2026.</span>
+              <span>All benchmarks below are derived from analysis of <strong>1,900+ biopharma transactions</strong> in the Ambrosia Ventures database, updated April 2026.</span>
             </div>
 
             {/* Royalty Rates by Phase */}
@@ -181,7 +181,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             </div>
 
             <p className="text-xs text-slate-400 mb-6">
-              Source: Ambrosia Ventures deal database, 2,500+ transactions as of April 2026. Ranges represent 25th-75th percentile; outliers in oncology and rare disease can exceed upper bounds.
+              Source: Ambrosia Ventures deal database, 1,900+ transactions as of April 2026. Ranges represent 25th-75th percentile; outliers in oncology and rare disease can exceed upper bounds.
             </p>
 
             {/* Royalty Rates by Modality */}
@@ -206,7 +206,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 my-8">
               <p className="text-slate-900 font-semibold text-lg mb-2">See royalty benchmarks for your specific deal</p>
               <p className="text-slate-600 mb-4">
-                Our calculator generates royalty benchmarks tailored to your phase, modality, and therapeutic area -- calibrated against 2,500+ real transactions across 12 TAs and 23+ modalities.
+                Our calculator generates royalty benchmarks tailored to your phase, modality, and therapeutic area -- calibrated against 1,900+ real transactions across 12 TAs and 23+ modalities.
               </p>
               <Link href="/calculator" className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors text-sm">
                 Get Your Royalty Benchmark
@@ -251,7 +251,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              Our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link> provides royalty rate ranges segmented by all four dimensions above, drawn from 3,000+ publicly disclosed biopharma transactions.
+              Our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link> provides royalty rate ranges segmented by all four dimensions above, drawn from 1,900+ publicly disclosed biopharma transactions.
             </p>
 
             {/* Section 3 */}
@@ -318,7 +318,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
               Model Your Royalty Scenarios
             </h2>
             <p className="text-teal-100 mb-8 text-lg">
-              Input your deal parameters and see how royalty rates compare against market benchmarks from 3,000+ biopharma transactions.
+              Input your deal parameters and see how royalty rates compare against market benchmarks from 1,900+ biopharma transactions.
             </p>
             <Link
               href="/calculator"

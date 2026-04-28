@@ -75,7 +75,7 @@ export default function ProPage() {
   const productSchema = {
     '@context': 'https://schema.org', '@type': 'Product',
     name: 'Ambrosia Ventures Pro Plan',
-    description: 'Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and 2,500+ transaction benchmarks.',
+    description: 'Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and 1,900+ transaction benchmarks.',
     url: 'https://calculator.ambrosiaventures.co/pro',
     brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     offers: [
@@ -352,7 +352,7 @@ export default function ProPage() {
                   Compare Generic vs. up to 3 specific buyers side-by-side. The 5-factor strategic premium model accounts for portfolio fit, deal urgency, patent cliff pressure, pipeline gaps, and competitive pressure.
                 </p>
                 <ul className="space-y-2">
-                  {['10-factor Pharma Intent Score per buyer', 'Strategic premium capped at +75% (calibrated from 2,500+ deals)', 'Negotiation leverage assessment', 'Timing advantage analysis'].map(item => (
+                  {['10-factor Pharma Intent Score per buyer', 'Strategic premium capped at +75% (calibrated from 1,900+ deals)', 'Negotiation leverage assessment', 'Timing advantage analysis'].map(item => (
                     <li key={item} className="flex items-start gap-2 text-sm text-slate-400">
                       <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
                       {item}
