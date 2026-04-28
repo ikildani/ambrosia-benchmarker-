@@ -67,6 +67,7 @@ import {
   hematologyIndicationOptions, dermatologyIndicationOptions, gastroenterologyIndicationOptions,
 } from '@/lib/calculations';
 import type { GroupedOption } from './calculator/SearchableCombobox';
+import CustomSelect from './calculator/CustomSelect';
 import { BENCHMARK_VERSION } from '@/lib/config/constants';
 import { useTracking } from './TrackingProvider';
 import dynamic from 'next/dynamic';
@@ -551,54 +552,37 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           {!showAdvanced && (
             <div className="space-y-6">
               <div className="grid sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-200 mb-2">Phase</label>
-                  <select
-                    value={state.phase}
-                    onChange={(e) => { trackParameterChange('phase', state.phase, e.target.value); actions.setPhase(e.target.value as Phase); }}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
-                  >
-                    <option value="" disabled>Select phase...</option>
-                    {phaseOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-200 mb-2">Modality</label>
-                  <select
-                    value={state.modality}
-                    onChange={(e) => { trackParameterChange('modality', state.modality, e.target.value); actions.setModality(e.target.value as Modality); }}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
-                  >
-                    <option value="" disabled>Select modality...</option>
-                    {(() => {
-                      const modalityMap: Record<TherapeuticArea, GroupedOption[]> = {
-                        oncology: modalityOptions, neurology: neurologyModalityOptions, immunology: immunologyModalityOptions,
-                        metabolic: metabolicModalityOptions, cardiovascular: cardiovascularModalityOptions,
-                        infectiousDisease: infectiousDiseaseModalityOptions, ophthalmology: ophthalmologyModalityOptions,
-                        womensHealth: womensHealthModalityOptions, rareDisease: rareDiseaseModalityOptions,
-                        hematology: hematologyModalityOptions, dermatology: dermatologyModalityOptions,
-                        gastroenterology: gastroenterologyModalityOptions,
-                      };
-                      const groups = modalityMap[state.therapeuticArea] || modalityOptions;
-                      return groups.map(g => (
-                        <optgroup key={g.group} label={g.group}>
-                          {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                        </optgroup>
-                      ));
-                    })()}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-200 mb-2">Deal Type</label>
-                  <select
-                    value={state.dealType}
-                    onChange={(e) => { trackParameterChange('dealType', state.dealType, e.target.value); actions.setDealType(e.target.value as DealType); }}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-800/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
-                  >
-                    <option value="" disabled>Select deal type...</option>
-                    {dealTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Phase"
+                  value={state.phase}
+                  onChange={(v) => { trackParameterChange('phase', state.phase, v); actions.setPhase(v as Phase); }}
+                  options={phaseOptions}
+                  placeholder="Select phase..."
+                />
+                <CustomSelect
+                  label="Modality"
+                  value={state.modality}
+                  onChange={(v) => { trackParameterChange('modality', state.modality, v); actions.setModality(v as Modality); }}
+                  groupedOptions={(() => {
+                    const modalityMap: Record<TherapeuticArea, GroupedOption[]> = {
+                      oncology: modalityOptions, neurology: neurologyModalityOptions, immunology: immunologyModalityOptions,
+                      metabolic: metabolicModalityOptions, cardiovascular: cardiovascularModalityOptions,
+                      infectiousDisease: infectiousDiseaseModalityOptions, ophthalmology: ophthalmologyModalityOptions,
+                      womensHealth: womensHealthModalityOptions, rareDisease: rareDiseaseModalityOptions,
+                      hematology: hematologyModalityOptions, dermatology: dermatologyModalityOptions,
+                      gastroenterology: gastroenterologyModalityOptions,
+                    };
+                    return modalityMap[state.therapeuticArea] || modalityOptions;
+                  })()}
+                  placeholder="Select modality..."
+                />
+                <CustomSelect
+                  label="Deal Type"
+                  value={state.dealType}
+                  onChange={(v) => { trackParameterChange('dealType', state.dealType, v); actions.setDealType(v as DealType); }}
+                  options={dealTypeOptions}
+                  placeholder="Select deal type..."
+                />
               </div>
 
               {/* Calculate button */}
