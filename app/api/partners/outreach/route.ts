@@ -48,8 +48,29 @@ export async function POST(request: NextRequest) {
     let userTier: 'free' | 'pro' | 'report' = 'free';
     let authenticatedUserId: string | null = null;
 
-    // Method 1: Check Supabase user_profiles by user_id
-    if (user_id) {
+    // Method 0 (R72): Server-side cookie auth — authoritative, doesn't depend
+    // on client-sent user_id. Catches cases where client auth context is stale.
+    try {
+      const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
+      const authUser = await getAuthenticatedUser(request);
+      if (authUser?.id) {
+        const { data: cookieProfile } = await supabase
+          .from('user_profiles')
+          .select('id, tier, email')
+          .eq('id', authUser.id)
+          .single();
+        if (cookieProfile) {
+          authenticatedUserId = cookieProfile.id;
+          userTier = (cookieProfile.tier as 'free' | 'pro' | 'report') || 'free';
+          if (userTier === 'free' && cookieProfile.email && isProEmail(cookieProfile.email)) {
+            userTier = 'pro';
+          }
+        }
+      }
+    } catch {} // non-blocking — fall through to client-sent user_id
+
+    // Method 1: Fallback — check by client-sent user_id (original path)
+    if (userTier === 'free' && user_id) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('id, tier')
@@ -63,19 +84,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Method 2: Check PRO_EMAILS list using verified email from database profile
-    if (userTier === 'free' && user_id) {
+    if (userTier === 'free' && (authenticatedUserId || user_id)) {
+      const lookupId = authenticatedUserId || user_id;
       const { data: emailProfile } = await supabase
         .from('user_profiles')
         .select('email')
-        .eq('id', user_id)
+        .eq('id', lookupId)
         .single();
       if (emailProfile?.email && isProEmail(emailProfile.email)) {
         userTier = 'pro';
       }
     }
 
-    // SECURITY: Never trust client-provided tier or email for authorization.
-    // Tier is verified from database only.
+    // SECURITY: Server-side cookie auth is primary. Client user_id is fallback only.
 
     // Only Pro/Report users can generate outreach emails
     if (userTier !== 'pro' && userTier !== 'report') {
