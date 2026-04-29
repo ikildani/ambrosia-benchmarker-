@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import ProCheckoutButton from '@/components/ProCheckoutButton';
+import AuthModalGlobal from '@/components/AuthModalGlobal';
 import {
   Zap, BarChart3, LineChart, GitBranch, Layers, Network,
   TrendingUp, Repeat, Users, Search, Brain, Activity,
@@ -1047,6 +1048,7 @@ export default function ProPage() {
 
       </main>
       <SiteFooter />
+      <AuthModalGlobal />
     </>
   );
 }
