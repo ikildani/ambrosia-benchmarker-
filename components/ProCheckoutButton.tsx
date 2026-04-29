@@ -52,7 +52,15 @@ export default function ProCheckoutButton({
 
       if (data.url) {
         window.location.href = data.url;
+        return;
       }
+
+      if (data.demo || data.message) {
+        setError(data.message || 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.');
+        return;
+      }
+
+      setError('Something went wrong. Please try again or contact support@ambrosiaventures.co.');
     } catch (err) {
       captureClientError(err, 'ProCheckoutButton', { context: 'Checkout failed' });
       setError('Connection error. Please try again.');

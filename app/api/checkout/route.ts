@@ -18,9 +18,10 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
 
     if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
+      console.error('[checkout] STRIPE_SECRET_KEY not configured or invalid');
       return NextResponse.json({
+        error: 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.',
         demo: true,
-        message: 'Stripe not configured. Running in demo mode.',
       });
     }
 
@@ -102,9 +103,10 @@ export async function POST(request: NextRequest) {
       ? (process.env.STRIPE_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_PRICE_ID?.trim())
       : process.env.STRIPE_PRICE_ID?.trim();
     if (!priceId) {
+      console.error('[checkout] STRIPE_PRICE_ID not configured for billing interval:', billingInterval);
       return NextResponse.json({
+        error: 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.',
         demo: true,
-        message: 'Stripe subscription not configured.',
       });
     }
 
