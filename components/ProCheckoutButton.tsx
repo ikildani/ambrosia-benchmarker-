@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Loader2, Tag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { captureClientError } from '@/lib/sentry-client';
 
@@ -21,12 +21,20 @@ export default function ProCheckoutButton({
   const [promoCode, setPromoCode] = useState('');
   const [showPromo, setShowPromo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pendingCheckoutRef = useRef(false);
+
+  // Auto-trigger checkout after user signs up via the auth modal
+  useEffect(() => {
+    if (isAuthenticated && pendingCheckoutRef.current) {
+      pendingCheckoutRef.current = false;
+      handleCheckout();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const handleCheckout = async () => {
-    console.log('[ProCheckout] clicked, isAuthenticated:', isAuthenticated, 'user:', user?.email);
-
     if (!isAuthenticated) {
-      console.log('[ProCheckout] not authenticated, opening auth modal');
+      pendingCheckoutRef.current = true;
       openAuthModal('signup');
       return;
     }
@@ -35,7 +43,6 @@ export default function ProCheckoutButton({
     setError(null);
 
     try {
-      console.log('[ProCheckout] sending checkout request...');
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,7 +55,6 @@ export default function ProCheckoutButton({
       });
 
       const data = await res.json();
-      console.log('[ProCheckout] response:', JSON.stringify(data).slice(0, 200));
 
       if (data.error) {
         setError(data.error);
@@ -88,30 +94,36 @@ export default function ProCheckoutButton({
         )}
       </button>
 
+      {/* Promo code — visible with icon */}
       {!showPromo ? (
         <button
           onClick={() => setShowPromo(true)}
-          className="text-[11px] text-slate-600 hover:text-teal-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-teal-400 transition-colors border border-slate-700 hover:border-teal-500/30 rounded-lg px-3 py-1.5 bg-white/[0.02]"
         >
+          <Tag className="w-3 h-3" />
           Have a promo code?
         </button>
       ) : (
         <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-            placeholder="Enter code"
-            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-600 w-32 focus:outline-none focus:border-teal-500/30"
-          />
+          <div className="relative">
+            <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+              placeholder="Enter promo code"
+              autoFocus
+              className="pl-7 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-500 w-44 focus:outline-none focus:border-teal-500/40 focus:ring-1 focus:ring-teal-500/20"
+            />
+          </div>
           {promoCode && (
-            <span className="text-[10px] text-teal-400">Applied</span>
+            <span className="text-xs text-teal-400 font-medium">✓ Applied</span>
           )}
         </div>
       )}
 
       {error && (
-        <p className="text-xs text-red-400">{error}</p>
+        <p className="text-xs text-red-400 max-w-xs text-center">{error}</p>
       )}
     </div>
   );
