@@ -135,11 +135,11 @@ export async function middleware(request: NextRequest) {
     ? ''
     : [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live",
+        "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live https://snap.licdn.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live https://api.perplexity.ai https://api.semanticscholar.org",
+        "connect-src 'self' https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vercel.live https://api.perplexity.ai https://api.semanticscholar.org https://*.ingest.us.sentry.io https://px.ads.linkedin.com",
         "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live",
         "frame-ancestors 'self'",
         "form-action 'self'",
