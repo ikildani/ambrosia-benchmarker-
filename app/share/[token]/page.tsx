@@ -71,7 +71,7 @@ export default async function SharePage({ params }: Props) {
           <a href="/">
             <Image src="/logo-white.png" alt="Ambrosia Ventures" width={140} height={28} className="h-5 w-auto opacity-70" />
           </a>
-          <a href="/calculator" className="text-xs font-semibold text-slate-600 hover:text-teal-400 transition-colors tracking-wide uppercase">
+          <a href="/calculator" className="text-xs font-semibold text-slate-400 hover:text-teal-400 transition-colors tracking-wide uppercase">
             Try the Calculator
           </a>
         </div>
@@ -87,13 +87,13 @@ export default async function SharePage({ params }: Props) {
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.03em] leading-[1.05] text-white mb-4">
             {modality}<br />
-            <span className="text-slate-600">{indication}</span>
+            <span className="text-slate-400">{indication}</span>
           </h1>
 
-          <div className="flex items-center gap-3 text-sm text-slate-600 mt-2">
-            <span className="px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/[0.05] text-xs font-semibold text-slate-500">{phase}</span>
-            <span className="text-slate-700">&bull;</span>
-            <span className="text-xs text-slate-600">Based on 1,900+ biopharma transactions</span>
+          <div className="flex items-center gap-3 text-sm text-slate-400 mt-2">
+            <span className="px-2.5 py-1 rounded-md bg-white/[0.06] border border-white/[0.08] text-xs font-semibold text-slate-300">{phase}</span>
+            <span className="text-slate-500">&bull;</span>
+            <span className="text-xs text-slate-400">Based on 2,700+ biopharma transactions</span>
           </div>
         </div>
       </header>
@@ -123,7 +123,7 @@ export default async function SharePage({ params }: Props) {
                 <span className="text-teal-400">for {modality}.</span>
               </h3>
 
-              <p className="text-slate-500 text-lg leading-relaxed mb-10 max-w-lg mx-auto">
+              <p className="text-slate-400 text-lg leading-relaxed mb-10 max-w-lg mx-auto">
                 Everything above, plus comparable transactions, sensitivity analysis, partner matching, and a negotiation playbook — in a board-ready PDF.
               </p>
 
@@ -161,7 +161,7 @@ export default async function SharePage({ params }: Props) {
 
               {/* Secondary */}
               <div className="mt-6 flex flex-col items-center gap-3">
-                <a href="/calculator" className="text-sm font-medium text-slate-600 hover:text-teal-400 transition-colors">
+                <a href="/calculator" className="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">
                   or try the calculator free &rarr;
                 </a>
               </div>
@@ -175,12 +175,12 @@ export default async function SharePage({ params }: Props) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Image src="/logo-white.png" alt="Ambrosia Ventures" width={120} height={24} className="h-4 w-auto opacity-30" />
-            <span className="text-[11px] text-slate-600">Data-driven deal intelligence</span>
+            <span className="text-[11px] text-slate-500">Data-driven deal intelligence</span>
           </div>
-          <div className="flex items-center gap-6 text-[11px] text-slate-600">
-            <a href="/methodology" className="hover:text-slate-400 transition-colors">Methodology</a>
-            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
-            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
+          <div className="flex items-center gap-6 text-[11px] text-slate-500">
+            <a href="/methodology" className="hover:text-slate-300 transition-colors">Methodology</a>
+            <a href="/privacy" className="hover:text-slate-300 transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-slate-300 transition-colors">Terms</a>
           </div>
         </div>
       </footer>
