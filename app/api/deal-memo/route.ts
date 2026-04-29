@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 export const maxDuration = 60;
 
@@ -24,7 +25,7 @@ export interface DealMemoResponse {
   error?: string;
 }
 
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: NextRequest): Promise<Response> {
   const requestId = crypto.randomUUID();
   const log = createLogger('api:deal-memo', requestId);
   const elapsed = log.startTimer();
