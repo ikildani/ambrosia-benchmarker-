@@ -234,7 +234,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              $499 Report
+              Pro or Report
             </span>
           </div>
         ))}
@@ -242,22 +242,27 @@ export default function SharedCalculationView({ results, labels, financialSummar
 
       {/* ── Bottom CTA — thumb-reachable on mobile ── */}
       <div className="mt-8 p-4 md:p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15] text-center">
-        <p className="text-sm font-semibold text-slate-300 mb-2">Get the full analysis for this asset</p>
-        <p className="text-xs text-slate-400 mb-4">Comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF</p>
-        <a
-          href="https://calculator.ambrosiaventures.co/calculator"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 text-sm"
-        >
-          Run your own benchmark
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </a>
+        <p className="text-sm font-semibold text-slate-300 mb-2">Unlock the full analysis for this asset</p>
+        <p className="text-xs text-slate-400 mb-5">Comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF</p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/report"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 text-sm"
+          >
+            Full Report — $499
+          </a>
+          <a
+            href="/calculator"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/[0.06] border border-white/[0.1] text-slate-300 font-semibold rounded-xl hover:bg-white/[0.1] transition-all text-sm"
+          >
+            Pro — $299/mo
+          </a>
+        </div>
       </div>
 
       {/* ── Disclaimer ── */}
       <div className="rounded-xl bg-white/[0.04] border border-white/[0.07] p-4 text-[11px] text-slate-400 leading-relaxed mt-6">
-        <strong className="text-slate-300">Disclaimer:</strong> Estimates derived from 1,900+ biopharma transactions. For informational purposes only — not financial or legal advice.
+        <strong className="text-slate-300">Disclaimer:</strong> Estimates derived from 2,700+ biopharma transactions. For informational purposes only — not financial or legal advice.
       </div>
     </div>
   );

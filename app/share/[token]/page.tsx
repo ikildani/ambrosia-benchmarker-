@@ -148,23 +148,34 @@ export default async function SharePage({ params }: Props) {
                 ))}
               </div>
 
-              {/* Primary CTA — report page */}
-              <a
-                href="/report"
-                className="inline-flex items-center gap-3 px-10 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-400 transition-all text-lg shadow-lg shadow-teal-500/15"
-              >
-                See Full Report Features
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </a>
-
-              {/* Secondary */}
-              <div className="mt-6 flex flex-col items-center gap-3">
-                <a href="/calculator" className="text-sm font-medium text-slate-400 hover:text-teal-400 transition-colors">
-                  or try the calculator free &rarr;
-                </a>
+              {/* Pricing tiers */}
+              <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-6">
+                {/* Report — one-time */}
+                <div className="p-5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-teal-500/20 transition-colors">
+                  <p className="text-[10px] font-bold text-teal-400/70 uppercase tracking-wider mb-2">One-Time Report</p>
+                  <p className="text-3xl font-black text-white tracking-tight">$499</p>
+                  <p className="text-xs text-slate-400 mt-1 mb-4">Board-ready PDF + Excel</p>
+                  <a
+                    href="/report"
+                    className="block w-full text-center px-4 py-2.5 bg-teal-500 text-white font-bold rounded-lg hover:bg-teal-400 transition-all text-sm shadow-lg shadow-teal-500/15"
+                  >
+                    Get Full Report
+                  </a>
+                </div>
+                {/* Pro — subscription */}
+                <div className="p-5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-emerald-500/20 transition-colors">
+                  <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">Pro Subscription</p>
+                  <p className="text-3xl font-black text-white tracking-tight">$299<span className="text-lg text-slate-400">/mo</span></p>
+                  <p className="text-xs text-slate-400 mt-1 mb-4">All 14 engines, unlimited assets</p>
+                  <a
+                    href="/calculator"
+                    className="block w-full text-center px-4 py-2.5 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-400 transition-all text-sm shadow-lg shadow-emerald-500/15"
+                  >
+                    Start Pro Trial
+                  </a>
+                </div>
               </div>
+              <p className="text-xs text-slate-500">Annual billing available at $199/mo</p>
             </div>
           </div>
         </div>
