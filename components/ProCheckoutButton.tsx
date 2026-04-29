@@ -23,7 +23,10 @@ export default function ProCheckoutButton({
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckout = async () => {
+    console.log('[ProCheckout] clicked, isAuthenticated:', isAuthenticated, 'user:', user?.email);
+
     if (!isAuthenticated) {
+      console.log('[ProCheckout] not authenticated, opening auth modal');
       openAuthModal('signup');
       return;
     }
@@ -32,6 +35,7 @@ export default function ProCheckoutButton({
     setError(null);
 
     try {
+      console.log('[ProCheckout] sending checkout request...');
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,6 +48,7 @@ export default function ProCheckoutButton({
       });
 
       const data = await res.json();
+      console.log('[ProCheckout] response:', JSON.stringify(data).slice(0, 200));
 
       if (data.error) {
         setError(data.error);
