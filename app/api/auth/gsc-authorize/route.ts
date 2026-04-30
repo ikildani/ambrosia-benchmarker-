@@ -28,4 +28,4 @@ export async function GET() {
   return NextResponse.redirect(authUrl);
 }
 
-// env trigger
+// oauth env trigger v2
