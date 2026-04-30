@@ -203,13 +203,22 @@ export default async function SharePage({ params }: Props) {
             <Image src="/logo-white.png" alt="Ambrosia Ventures" width={100} height={20} className="h-4 w-auto flex-shrink-0" />
             <span className="text-[12px] text-slate-400 hidden sm:inline truncate">Deal intelligence for biopharma dealmakers</span>
           </div>
-          <a
-            href="/calculator"
-            className="inline-flex items-center gap-2 px-5 py-2 bg-teal-500 text-white text-[13px] font-semibold rounded-lg hover:bg-teal-400 hover:-translate-y-0.5 transition-all shadow-lg shadow-teal-500/20 flex-shrink-0"
-          >
-            Run your own analysis
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </a>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <a
+              href="/insights/q1-2026-deal-benchmarks"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium text-slate-300 border border-slate-600 rounded-lg hover:border-teal-500/40 hover:text-teal-300 transition-all"
+            >
+              Free Q1 Benchmarks
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </a>
+            <a
+              href="/calculator"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-teal-500 text-white text-[13px] font-semibold rounded-lg hover:bg-teal-400 hover:-translate-y-0.5 transition-all shadow-lg shadow-teal-500/20"
+            >
+              Run your own analysis
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
         </div>
       </div>
     </main>
