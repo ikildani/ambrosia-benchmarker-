@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createServiceClient } from '@/lib/supabase/server';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   const error = request.nextUrl.searchParams.get('error');
