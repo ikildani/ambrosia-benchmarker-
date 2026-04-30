@@ -10,7 +10,11 @@ export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
 
   if (!clientId || !clientSecret) {
-    return NextResponse.json({ error: 'OAuth credentials not configured' }, { status: 500 });
+    return NextResponse.json({
+      error: 'OAuth credentials not configured',
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+    }, { status: 500 });
   }
 
   const oauth2Client = new google.auth.OAuth2(
