@@ -195,6 +195,23 @@ export default async function SharePage({ params }: Props) {
           </div>
         </div>
       </footer>
+
+      {/* Sticky branding bar — lead gen from shared links */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0d1b]/95 backdrop-blur-md border-t border-teal-500/20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Image src="/logo-white.png" alt="Ambrosia Ventures" width={100} height={20} className="h-4 w-auto flex-shrink-0" />
+            <span className="text-[12px] text-slate-400 hidden sm:inline truncate">Deal intelligence for biopharma dealmakers</span>
+          </div>
+          <a
+            href="/calculator"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-teal-500 text-white text-[13px] font-semibold rounded-lg hover:bg-teal-400 hover:-translate-y-0.5 transition-all shadow-lg shadow-teal-500/20 flex-shrink-0"
+          >
+            Run your own analysis
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+      </div>
     </main>
   );
 }
