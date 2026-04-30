@@ -39,14 +39,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const gsc = new GSCClient();
+    // Try OAuth2 if service account isn't configured
     if (!gsc.isConfigured()) {
-      console.warn('[gsc-sync] GOOGLE_SERVICE_ACCOUNT_JSON not set — GSC sync disabled. CTR optimization will have no candidates until this is configured.');
+      await gsc.initOAuth2();
+    }
+    if (!gsc.isConfigured()) {
+      console.warn('[gsc-sync] Neither service account nor OAuth2 configured — GSC sync disabled.');
       await logCronRun(supabase, 'gsc-sync', {
         processed: 0,
-        parameters: { status: 'not_configured', fix: 'Set GOOGLE_SERVICE_ACCOUNT_JSON env var on Vercel (base64-encoded service account JSON with Search Console API access)' },
+        parameters: { status: 'not_configured', fix: 'Visit /api/auth/gsc-authorize to connect Google Search Console via OAuth2' },
       });
       return NextResponse.json({ message: 'GSC not configured', skipped: true });
     }
+    console.log(`[gsc-sync] Using auth method: ${gsc.getAuthMethod()}`);
 
     const today = new Date().toISOString().split('T')[0];
 
