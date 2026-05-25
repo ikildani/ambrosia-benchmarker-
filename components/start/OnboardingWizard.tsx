@@ -143,12 +143,13 @@ function ChoiceGrid({
 
 interface Props {
   initial?: Partial<OnboardingState>;
+  skipToReview?: boolean;
 }
 
-export function OnboardingWizard({ initial = {} }: Props) {
+export function OnboardingWizard({ initial = {}, skipToReview = false }: Props) {
   const router = useRouter();
   const [state, setState] = useState<OnboardingState>({ ...INITIAL, ...initial });
-  const [step, setStep] = useState<StepId>('stage');
+  const [step, setStep] = useState<StepId>(skipToReview ? 'review' : 'stage');
 
   const stepOrder: StepId[] = ['stage', 'kind', 'area', 'positioning', 'commercial', 'review'];
   const currentIdx = stepOrder.indexOf(step);

@@ -1,11 +1,15 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
 import ExitIntentCapture from '@/components/ExitIntentCapture';
+import ProfileCompletionModal from '@/components/ProfileCompletionModal';
+import TrialBanner from '@/components/TrialBanner';
 import { useAuth } from '@/contexts/AuthContext';
+import { shouldShowOnboarding } from '@/lib/onboarding';
 
 export default function CalculatorPage() {
   const {
@@ -22,6 +26,22 @@ export default function CalculatorPage() {
   } = useAuth();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Redirect first-time users to /start for guided onboarding
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) return;
+    const fromOnboarding = searchParams.get('from') === 'onboarding';
+    if (fromOnboarding) {
+      setShowProfileModal(true);
+      return;
+    }
+    if (!user.company && shouldShowOnboarding()) {
+      router.replace('/start');
+    }
+  }, [isLoading, isAuthenticated, user, searchParams, router]);
+
   const handleUpgrade = () => {
     router.push('/#pricing');
   };
@@ -52,6 +72,15 @@ export default function CalculatorPage() {
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}
+      />
+
+      {/* Trial countdown banner */}
+      {isAuthenticated && <TrialBanner />}
+
+      {/* Profile completion modal */}
+      <ProfileCompletionModal
+        open={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
       />
 
       {/* Main Content */}

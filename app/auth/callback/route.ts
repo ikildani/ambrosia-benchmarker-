@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient, createServiceClient } from '@/lib/supabase/server';
 import { sendAdminSignupNotification } from '@/lib/email/client';
 import { notifyNewSignup, notifyLogin } from '@/lib/slack/notify';
 
@@ -11,6 +11,60 @@ const ERROR_MESSAGES: Record<string, string> = {
   'unauthorized_client': 'This application is not authorized. Please contact support.',
   'invalid_request': 'Invalid request. Please try signing in again.',
 };
+
+const AUTO_TRIAL_DAYS = 7;
+
+async function grantAutoTrial(userId: string, email: string) {
+  const service = createServiceClient();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + AUTO_TRIAL_DAYS * 24 * 60 * 60 * 1000);
+
+  const { error } = await service
+    .from('user_profiles')
+    .update({
+      tier: 'pro',
+      subscription_status: 'active',
+      pro_engagement_type: 'auto-trial-signup',
+      pro_activated_at: now.toISOString(),
+      pro_expires_at: expiresAt.toISOString(),
+      tier_change_authorized: true,
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('[Auth Callback] Auto-trial grant failed:', error);
+    return;
+  }
+
+  await service.from('events').insert({
+    user_id: userId,
+    event_type: 'trial_activated',
+    event_data: { engagement_type: 'auto-trial-signup', source: 'auth_callback', email },
+    user_tier: 'pro',
+  });
+
+  console.log(`[Auth Callback] Auto-trial granted to ${email}, expires ${expiresAt.toISOString()}`);
+}
+
+async function saveAttribution(userId: string, request: NextRequest) {
+  const utmCookie = request.cookies.get('utm_params')?.value;
+  if (!utmCookie) return;
+
+  try {
+    const params = JSON.parse(utmCookie);
+    const service = createServiceClient();
+    await service
+      .from('user_profiles')
+      .update({
+        attribution_source: params.utm_source || null,
+        attribution_campaign: params.utm_campaign || null,
+      })
+      .eq('id', userId)
+      .is('attribution_source', null);
+  } catch {
+    console.error('[Auth Callback] Attribution save failed');
+  }
+}
 
 // Handle auth callbacks (email verification, password reset, magic links, OAuth)
 export async function GET(request: NextRequest) {
@@ -71,17 +125,15 @@ export async function GET(request: NextRequest) {
         if (updateError) {
           console.error('[Auth Callback] Profile update error:', updateError);
         } else {
-          // Notify admin of new verified signup
-          const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('tier')
-            .eq('id', user.id)
-            .single();
+          // Auto-grant 7-day Pro trial for newly verified signups
+          await grantAutoTrial(user.id, user.email || '');
+          await saveAttribution(user.id, request);
+
           const signupInfo = {
             email: user.email || '',
             name: user.user_metadata?.name || user.user_metadata?.full_name,
             company: user.user_metadata?.company,
-            tier: profile?.tier || 'free',
+            tier: 'pro',
           };
           sendAdminSignupNotification(signupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
           notifyNewSignup(signupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
@@ -94,11 +146,37 @@ export async function GET(request: NextRequest) {
       const user = data.user;
       const isNewUser = user.created_at && (Date.now() - new Date(user.created_at).getTime() < 60000);
       if (isNewUser) {
+        // Create profile for OAuth users with auto-trial
+        const service = createServiceClient();
+        await service.from('user_profiles').upsert({
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+          company_name: user.user_metadata?.company || null,
+          tier: 'pro',
+          subscription_status: 'active',
+          pro_engagement_type: 'auto-trial-signup',
+          pro_activated_at: new Date().toISOString(),
+          pro_expires_at: new Date(Date.now() + AUTO_TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+          tier_change_authorized: true,
+          email_verified: true,
+          email_verified_at: new Date().toISOString(),
+        }, { onConflict: 'id', ignoreDuplicates: true });
+
+        await service.from('events').insert({
+          user_id: user.id,
+          event_type: 'trial_activated',
+          event_data: { engagement_type: 'auto-trial-signup', source: 'oauth_callback', email: user.email },
+          user_tier: 'pro',
+        });
+
+        await saveAttribution(user.id, request);
+
         const oauthSignupInfo = {
           email: user.email || '',
           name: user.user_metadata?.name || user.user_metadata?.full_name,
           company: user.user_metadata?.company,
-          tier: 'free',
+          tier: 'pro',
         };
         sendAdminSignupNotification(oauthSignupInfo).catch(err => console.error('[Auth Callback] Admin notification error:', err));
         notifyNewSignup(oauthSignupInfo).catch(err => console.error('[Auth Callback] Slack notification error:', err));
@@ -188,6 +266,7 @@ export async function GET(request: NextRequest) {
           path: '/',
           maxAge: 90 * 24 * 60 * 60, // 90 days
         });
+        response.cookies.delete('utm_params');
         return response;
       } catch (err) {
         console.error('[Auth Callback] Session nonce error:', err);

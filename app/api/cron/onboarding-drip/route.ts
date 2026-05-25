@@ -9,11 +9,13 @@ export const dynamic = 'force-dynamic';
 
 // ---------------------------------------------------------------------------
 // Onboarding Drip Cron — Daily 9AM UTC
-// Converts free users to Pro via 3-email sequence:
-//   Day 0: Welcome email
-//   Day 3: Value/insight email
-//   Day 7: Pro pitch
-// Tracks sent emails in events table to prevent duplicates.
+// 5-email sequence adapting to user state (trial vs free, active vs dormant):
+//   Day 0: Welcome + guided first calculation link
+//   Day 1: "Your Pro trial is active" — feature showcase with pre-filled calc links
+//   Day 3: Value insight (adapted: different if user has run calcs vs not)
+//   Day 5: Trial ending soon — upgrade CTA with pricing
+//   Day 7: Trial expired — last-chance upgrade or annual savings
+// Tracks sent emails in events table (email_number 1-5) to prevent duplicates.
 // ---------------------------------------------------------------------------
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
@@ -61,74 +63,184 @@ function ctaButton(text: string, href: string): string {
 
 function buildDay0Email(name: string): { subject: string; html: string } {
   const firstName = name?.split(' ')[0] || 'there';
+  const prefillUrl = `${BASE_URL}/start?phase=phase2&modality=adc&therapeuticArea=oncology&competitivePosition=racing&dataQuality=strongPhase2&peakSales=2000&from=email`;
   return {
-    subject: 'Your biopharma deal benchmarks are ready',
+    subject: 'Your 7-day Pro trial is active — run your first analysis',
     html: buildEmailWrapper(`
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        Welcome to Ambrosia Ventures. You now have access to the most comprehensive biopharma deal benchmarking platform available.
+        Welcome to Ambrosia Ventures. Your <strong style="color: #14b8a6;">7-day Pro trial</strong> is now active — every feature is unlocked.
       </p>
 
+      <div style="background: #0f172a; border: 1px solid #14b8a6; padding: 16px 20px; border-radius: 12px; margin: 20px 0;">
+        <p style="color: #14b8a6; font-size: 13px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.06em;">Quick start — try this now</p>
+        <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6; margin: 0;">
+          We pre-loaded a <strong>Phase 2 oncology ADC licensing deal</strong> for you. Click below to see the full analysis — rNPV, Monte Carlo simulation, partner matching, and deal terms — in under 60 seconds.
+        </p>
+      </div>
+
+      ${ctaButton('Run the Pre-Loaded Analysis', prefillUrl)}
+
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 8px;">
-        Here is what you can do right now:
+        With Pro, you have access to:
       </p>
 
       <ul style="color: #94a3b8; font-size: 15px; line-height: 1.8; padding-left: 20px; margin: 0 0 16px;">
-        <li><strong style="color: #e2e8f0;">Benchmark any deal</strong> across 12 therapeutic areas and 17+ modalities</li>
-        <li><strong style="color: #e2e8f0;">Get instant valuations</strong> for upfront payments, milestones, and royalties</li>
-        <li><strong style="color: #e2e8f0;">Compare against 1,900+ real deals</strong> sourced from SEC filings, FTC, and regulatory databases</li>
+        <li><strong style="color: #e2e8f0;">Risk-adjusted NPV</strong> with phase-specific probability of success</li>
+        <li><strong style="color: #e2e8f0;">Monte Carlo simulation</strong> (10,000 iterations)</li>
+        <li><strong style="color: #e2e8f0;">Partner matching</strong> across 850+ pharma & biotech companies</li>
+        <li><strong style="color: #e2e8f0;">PDF & Excel export</strong> for board decks</li>
       </ul>
 
-      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 4px;">
-        Run your first calculation to see where your asset stands in the current market.
-      </p>
-
-      ${ctaButton('Run Your First Calculation', `${BASE_URL}/calculator`)}
-
       <p style="color: #64748b; font-size: 13px; margin: 24px 0 0; border-top: 1px solid #1e293b; padding-top: 16px;">
-        Questions? Reply to this email -- our team reads every message.
-      </p>
-
-      <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
-        Best,<br>
-        <strong style="color: #e2e8f0;">The Ambrosia Ventures Team</strong>
+        Questions? Reply directly — I read every message.<br>
+        <strong style="color: #94a3b8;">Issa Kildani</strong>, Founder
       </p>
     `),
   };
 }
 
-function buildDay3Email(name: string): { subject: string; html: string } {
+function buildDay1Email(name: string): { subject: string; html: string } {
   const firstName = name?.split(' ')[0] || 'there';
   return {
-    subject: 'How much is your biotech asset actually worth?',
+    subject: `${firstName}, you haven't run your first analysis yet`,
     html: buildEmailWrapper(`
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        One of the most common questions in biopharma BD is deceptively simple: <em style="color: #e2e8f0;">What is my asset actually worth?</em>
+        You signed up yesterday but haven't run a calculation yet. Your Pro trial has <strong style="color: #14b8a6;">6 days remaining</strong>.
       </p>
-
-      <div style="background: #0f172a; border-left: 3px solid #14b8a6; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-        <p style="color: #14b8a6; font-size: 14px; font-weight: 600; margin: 0 0 4px;">Market Insight</p>
-        <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6; margin: 0;">
-          Phase 2 oncology assets command a <strong>$1.5B median total deal value</strong> in 2025-2026 licensing transactions. But the range is enormous -- from $200M to $7B+ -- and the difference comes down to modality, data maturity, and competitive positioning.
-        </p>
-      </div>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        We wrote a detailed analysis breaking down the factors that drive asset valuation across therapeutic areas, modalities, and clinical phases.
+        Here are three scenarios you can model right now — click any to see the full analysis:
       </p>
 
-      ${ctaButton('Read the Full Analysis', `${BASE_URL}/insights/how-much-is-my-biotech-asset-worth`)}
+      <div style="margin: 20px 0;">
+        <a href="${BASE_URL}/start?phase=phase2&modality=adc&therapeuticArea=oncology&competitivePosition=firstInClass&dataQuality=strongPhase2&peakSales=3000&from=email" style="display: block; text-decoration: none; background: #0f172a; border: 1px solid #1e3a5f; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px;">
+          <strong style="color: #e2e8f0; font-size: 14px;">Phase 2 Oncology ADC — First-in-class</strong>
+          <p style="color: #64748b; font-size: 13px; margin: 4px 0 0;">Strong Phase 2 data, $3B peak sales</p>
+        </a>
+        <a href="${BASE_URL}/start?phase=phase1&modality=smallMolecule&therapeuticArea=metabolic&competitivePosition=racing&dataQuality=promising&peakSales=5000&from=email" style="display: block; text-decoration: none; background: #0f172a; border: 1px solid #1e3a5f; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px;">
+          <strong style="color: #e2e8f0; font-size: 14px;">Phase 1 GLP-1 — Metabolic/Obesity</strong>
+          <p style="color: #64748b; font-size: 13px; margin: 4px 0 0;">Competitive race, $5B peak sales potential</p>
+        </a>
+        <a href="${BASE_URL}/start?phase=phase3&modality=mab&therapeuticArea=immunology&competitivePosition=bestInClass&dataQuality=pivotalReady&peakSales=2000&from=email" style="display: block; text-decoration: none; background: #0f172a; border: 1px solid #1e3a5f; padding: 14px 16px; border-radius: 10px;">
+          <strong style="color: #e2e8f0; font-size: 14px;">Phase 3 mAb — Immunology Best-in-class</strong>
+          <p style="color: #64748b; font-size: 13px; margin: 4px 0 0;">Pivotal data, $2B peak sales</p>
+        </a>
+      </div>
 
       <p style="color: #64748b; font-size: 13px; margin: 24px 0 0; border-top: 1px solid #1e293b; padding-top: 16px;">
-        Already running calculations on the platform? Great -- you are building the data foundation for stronger negotiations.
+        Or <a href="${BASE_URL}/start" style="color: #14b8a6; text-decoration: none;">build your own scenario</a> from scratch.
+      </p>
+    `),
+  };
+}
+
+function buildDay3Email(name: string, hasCalculations: boolean): { subject: string; html: string } {
+  const firstName = name?.split(' ')[0] || 'there';
+
+  if (hasCalculations) {
+    return {
+      subject: 'How much is your biotech asset actually worth?',
+      html: buildEmailWrapper(`
+        <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
+
+        <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+          You have been running calculations — great. Your Pro trial has <strong style="color: #14b8a6;">4 days left</strong>.
+        </p>
+
+        <div style="background: #0f172a; border-left: 3px solid #14b8a6; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+          <p style="color: #14b8a6; font-size: 14px; font-weight: 600; margin: 0 0 4px;">Market Insight</p>
+          <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6; margin: 0;">
+            Phase 2 oncology assets command a <strong>$1.5B median total deal value</strong> in 2025-2026 licensing transactions. But the range is enormous — from $200M to $7B+ — and the difference comes down to modality, data maturity, and competitive positioning.
+          </p>
+        </div>
+
+        <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+          Have you tried exporting a PDF report yet? Pro members can generate board-ready reports with rNPV, Monte Carlo confidence intervals, and comparable deal comps.
+        </p>
+
+        ${ctaButton('Generate a PDF Report', `${BASE_URL}/calculator`)}
+
+        <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
+          Best,<br>
+          <strong style="color: #e2e8f0;">Issa Kildani</strong>, Founder
+        </p>
+      `),
+    };
+  }
+
+  return {
+    subject: `${firstName}, your Pro trial expires in 4 days — try it now`,
+    html: buildEmailWrapper(`
+      <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
+
+      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+        Your Pro trial has <strong style="color: #f59e0b;">4 days left</strong> and you haven't run your first calculation yet. Takes 60 seconds.
+      </p>
+
+      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+        Here is what a single calculation gives you:
+      </p>
+
+      <div style="margin: 16px 0;">
+        <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+          <span style="color: #14b8a6; margin-right: 8px;">1.</span>
+          <span style="color: #e2e8f0; font-size: 14px;"><strong>Deal terms</strong> — upfront, milestones, royalties benchmarked against 2,500+ real deals</span>
+        </div>
+        <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+          <span style="color: #14b8a6; margin-right: 8px;">2.</span>
+          <span style="color: #e2e8f0; font-size: 14px;"><strong>rNPV valuation</strong> — risk-adjusted net present value with LoA calibration</span>
+        </div>
+        <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+          <span style="color: #14b8a6; margin-right: 8px;">3.</span>
+          <span style="color: #e2e8f0; font-size: 14px;"><strong>10 partner matches</strong> — ranked by strategic fit and acquisition intent</span>
+        </div>
+        <div style="padding: 8px 0;">
+          <span style="color: #14b8a6; margin-right: 8px;">4.</span>
+          <span style="color: #e2e8f0; font-size: 14px;"><strong>PDF export</strong> — board-ready report you can share</span>
+        </div>
+      </div>
+
+      ${ctaButton('Run Your First Analysis Now', `${BASE_URL}/start?phase=phase2&modality=adc&therapeuticArea=oncology&competitivePosition=racing&dataQuality=strongPhase2&peakSales=2000&from=email`)}
+
+      <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
+        Best,<br>
+        <strong style="color: #e2e8f0;">Issa Kildani</strong>, Founder
+      </p>
+    `),
+  };
+}
+
+function buildDay5Email(name: string): { subject: string; html: string } {
+  const firstName = name?.split(' ')[0] || 'there';
+  return {
+    subject: `${firstName}, your Pro trial ends in 2 days`,
+    html: buildEmailWrapper(`
+      <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
+
+      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+        Your Pro trial expires in <strong style="color: #f59e0b;">2 days</strong>. After that, you will lose access to rNPV, Monte Carlo, partner matching, and PDF export.
+      </p>
+
+      <div style="background: #0f172a; border: 1px solid #14b8a6; padding: 20px; border-radius: 12px; margin: 24px 0; text-align: center;">
+        <p style="color: #14b8a6; font-size: 13px; font-weight: 600; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.06em;">Most teams pick annual</p>
+        <p style="color: #e2e8f0; font-size: 16px; margin: 0;"><strong>$199/mo</strong> billed annually <span style="color: #64748b;">·</span> <strong style="color: #14b8a6;">save $1,200/year</strong> vs monthly</p>
+      </div>
+
+      ${ctaButton('Keep Pro Access — $199/mo Annual', `${BASE_URL}/pro?plan=annual`)}
+
+      <p style="color: #64748b; font-size: 12px; text-align: center; margin: -16px 0 24px;">Or <a href="${BASE_URL}/pro?plan=monthly" style="color: #64748b;">$299/mo monthly</a></p>
+
+      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
+        If budget is a concern, reply to this email and I will see what I can do.
       </p>
 
       <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
         Best,<br>
-        <strong style="color: #e2e8f0;">The Ambrosia Ventures Team</strong>
+        <strong style="color: #e2e8f0;">Issa Kildani</strong>, Founder
       </p>
     `),
   };
@@ -137,72 +249,55 @@ function buildDay3Email(name: string): { subject: string; html: string } {
 function buildDay7Email(name: string): { subject: string; html: string } {
   const firstName = name?.split(' ')[0] || 'there';
   return {
-    subject: "You've seen the benchmarks. Here's what Pro unlocks.",
+    subject: `Your Pro trial has ended — keep access for $199/mo`,
     html: buildEmailWrapper(`
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        You have been using Ambrosia Ventures for a week now. If you have run a calculation, you have seen what market-grade benchmarks look like.
+        Your 7-day Pro trial ended today. Your account has been moved to the free tier.
       </p>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 8px;">
-        Here is what Pro members get access to:
+        What you no longer have access to:
       </p>
 
-      <div style="margin: 20px 0;">
-        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-          <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
-          <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">Risk-Adjusted NPV (rNPV)</strong>
-            <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">Full DCF analysis with phase-specific probability of success</p>
-          </div>
-        </div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-          <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
-          <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">Monte Carlo Simulation</strong>
-            <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">10,000-run probabilistic analysis with confidence intervals</p>
-          </div>
-        </div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-          <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
-          <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">Partner Matching (850+ Companies)</strong>
-            <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">Buyer-specific valuation and strategic fit scoring</p>
-          </div>
-        </div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-          <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
-          <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">Pharma Intent Score</strong>
-            <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">Predictive model showing which buyers are actively acquiring in your space</p>
-          </div>
-        </div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-          <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
-          <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">PDF & Excel Export</strong>
-            <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">Board-ready reports for presentations and negotiations</p>
-          </div>
-        </div>
+      <div style="margin: 16px 0;">
+        <div style="padding: 6px 0; color: #94a3b8; font-size: 14px;"><span style="color: #ef4444; margin-right: 8px;">&#10005;</span> Risk-adjusted NPV (rNPV)</div>
+        <div style="padding: 6px 0; color: #94a3b8; font-size: 14px;"><span style="color: #ef4444; margin-right: 8px;">&#10005;</span> Monte Carlo simulation (10K iterations)</div>
+        <div style="padding: 6px 0; color: #94a3b8; font-size: 14px;"><span style="color: #ef4444; margin-right: 8px;">&#10005;</span> Partner matching (850+ companies, 10 results)</div>
+        <div style="padding: 6px 0; color: #94a3b8; font-size: 14px;"><span style="color: #ef4444; margin-right: 8px;">&#10005;</span> PDF & Excel report export</div>
+        <div style="padding: 6px 0; color: #94a3b8; font-size: 14px;"><span style="color: #ef4444; margin-right: 8px;">&#10005;</span> Pharma Intent Score</div>
       </div>
 
-      <div style="background: #0f172a; border: 1px solid #1e3a5f; padding: 20px; border-radius: 12px; margin: 24px 0; text-align: center;">
-        <p style="color: #14b8a6; font-size: 14px; font-weight: 600; margin: 0 0 8px;">Why BD teams upgrade</p>
-        <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6; margin: 0;">
-          BD teams using Pro close deals 40% faster with data-backed term sheets. When you walk into a negotiation with Monte Carlo confidence intervals and comparable deal data, the conversation changes.
-        </p>
-      </div>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0 20px;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 10px 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #1e3a5f;">Plan</th>
+            <th style="text-align: right; padding: 10px 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #1e3a5f;">Monthly</th>
+            <th style="text-align: right; padding: 10px 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #1e3a5f;">12-month</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px 8px; font-size: 14px; color: #94a3b8; border-bottom: 1px solid #1e293b;">Monthly</td>
+            <td style="padding: 12px 8px; font-size: 14px; color: #94a3b8; text-align: right; font-family: monospace; border-bottom: 1px solid #1e293b;">$299</td>
+            <td style="padding: 12px 8px; font-size: 14px; color: #94a3b8; text-align: right; font-family: monospace; border-bottom: 1px solid #1e293b;">$3,588</td>
+          </tr>
+          <tr style="background: #0f172a;">
+            <td style="padding: 12px 8px; font-size: 14px; color: #e2e8f0; font-weight: 600;">Annual</td>
+            <td style="padding: 12px 8px; font-size: 14px; color: #e2e8f0; text-align: right; font-family: monospace; font-weight: 600;">$199</td>
+            <td style="padding: 12px 8px; font-size: 14px; color: #14b8a6; text-align: right; font-family: monospace; font-weight: 700;">$2,388</td>
+          </tr>
+        </tbody>
+      </table>
 
-      ${ctaButton('Upgrade to Pro', `${BASE_URL}/calculator?upgrade=true`)}
+      ${ctaButton('Reactivate Pro — Annual ($199/mo)', `${BASE_URL}/pro?plan=annual`)}
 
-      <p style="color: #64748b; font-size: 13px; margin: 24px 0 0; border-top: 1px solid #1e293b; padding-top: 16px;">
-        Have questions about Pro? Reply to this email and we will walk you through it.
-      </p>
+      <p style="color: #64748b; font-size: 12px; text-align: center; margin: -16px 0 24px;">Or <a href="${BASE_URL}/pro?plan=monthly" style="color: #64748b;">$299/mo monthly</a></p>
 
       <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
         Best,<br>
-        <strong style="color: #e2e8f0;">The Ambrosia Ventures Team</strong>
+        <strong style="color: #e2e8f0;">Issa Kildani</strong>, Founder
       </p>
     `),
   };
@@ -229,135 +324,146 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
     const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString();
 
-    // 1. Query free users created in the last 7 days
-    const { data: recentFreeUsers } = await supabase
+    // Query users created in the last 10 days (covers full Day 0–7 window + buffer)
+    // Include both free and pro-trial users (trial users still need drip emails)
+    const { data: recentUsers } = await supabase
       .from('user_profiles')
-      .select('id, email, full_name, tier, created_at')
-      .eq('tier', 'free')
-      .gte('created_at', sevenDaysAgo);
+      .select('id, email, full_name, tier, subscription_status, pro_engagement_type, stripe_customer_id, created_at')
+      .gte('created_at', tenDaysAgo);
 
-    if (!recentFreeUsers || recentFreeUsers.length === 0) {
-      return NextResponse.json({ success: true, message: 'No eligible users', day0: 0, day3: 0, day7: 0 });
+    if (!recentUsers || recentUsers.length === 0) {
+      return NextResponse.json({ success: true, message: 'No eligible users', sent: {} });
     }
 
-    // 2. Get all drip_email_sent events for these users
-    const userIds = recentFreeUsers.map(u => u.id);
-    const { data: sentEvents } = await supabase
-      .from('events')
-      .select('user_id, event_data')
-      .eq('event_type', 'drip_email_sent')
-      .in('user_id', userIds);
+    // Skip users who have paid via Stripe (already converted)
+    const eligibleUsers = recentUsers.filter(u => !u.stripe_customer_id || u.pro_engagement_type?.startsWith('auto-trial'));
 
-    // Build a set of "userId:emailNumber" for already-sent emails
+    const userIds = eligibleUsers.map(u => u.id);
+
+    // Get drip events + calculation counts in parallel
+    const [sentEventsResult, calcCountsResult] = await Promise.all([
+      supabase.from('events').select('user_id, event_data').eq('event_type', 'drip_email_sent').in('user_id', userIds),
+      supabase.from('events').select('user_id').eq('event_type', 'calculation_run').in('user_id', userIds),
+    ]);
+
     const sentSet = new Set<string>();
-    if (sentEvents) {
-      for (const event of sentEvents) {
+    if (sentEventsResult.data) {
+      for (const event of sentEventsResult.data) {
         const emailNum = event.event_data?.email_number;
-        if (emailNum && event.user_id) {
-          sentSet.add(`${event.user_id}:${emailNum}`);
-        }
+        if (emailNum && event.user_id) sentSet.add(`${event.user_id}:${emailNum}`);
       }
     }
 
-    // 3. Also check which users have already upgraded (query current tier again to be safe)
-    const { data: upgradedUsers } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .in('id', userIds)
-      .in('tier', ['pro', 'report']);
+    // Count calculations per user
+    const calcCounts = new Map<string, number>();
+    if (calcCountsResult.data) {
+      for (const event of calcCountsResult.data) {
+        calcCounts.set(event.user_id, (calcCounts.get(event.user_id) || 0) + 1);
+      }
+    }
 
-    const upgradedSet = new Set((upgradedUsers || []).map(u => u.id));
-
-    let day0Sent = 0;
-    let day3Sent = 0;
-    let day7Sent = 0;
+    const sent: Record<string, number> = { day0: 0, day1: 0, day3: 0, day5: 0, day7: 0 };
     const errors: string[] = [];
 
-    for (const user of recentFreeUsers) {
-      // Skip if already upgraded
-      if (upgradedSet.has(user.id)) continue;
-
+    for (const user of eligibleUsers) {
       const createdAt = new Date(user.created_at);
       const daysSinceSignup = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
       const displayName = user.full_name || user.email;
+      const hasCalcs = (calcCounts.get(user.id) || 0) > 0;
 
       try {
-        // Day 0: Welcome email (signup day)
+        // Day 0: Welcome + trial activation + pre-filled calc link
         if (daysSinceSignup >= 0 && !sentSet.has(`${user.id}:1`)) {
           const { subject, html } = buildDay0Email(displayName);
           const result = await sendEmail({ to: user.email, subject, html });
-
           if (result.success) {
             await supabase.from('events').insert({
-              user_id: user.id,
-              event_type: 'drip_email_sent',
-              event_data: { email_number: 1, user_email: user.email, template: 'day0_welcome' },
+              user_id: user.id, event_type: 'drip_email_sent',
+              event_data: { email_number: 1, user_email: user.email, template: 'day0_trial_welcome' },
             });
-            day0Sent++;
-          } else {
-            errors.push(`Day0 failed for ${user.email}: ${result.error}`);
-          }
+            sent.day0++;
+          } else errors.push(`Day0 failed for ${user.email}: ${result.error}`);
         }
 
-        // Day 3: Value/insight email
-        if (daysSinceSignup >= 3 && !sentSet.has(`${user.id}:2`)) {
-          const { subject, html } = buildDay3Email(displayName);
+        // Day 1: Nudge if no calculation yet — 3 scenario links
+        if (daysSinceSignup >= 1 && !hasCalcs && !sentSet.has(`${user.id}:2`)) {
+          const { subject, html } = buildDay1Email(displayName);
           const result = await sendEmail({ to: user.email, subject, html });
-
           if (result.success) {
             await supabase.from('events').insert({
-              user_id: user.id,
-              event_type: 'drip_email_sent',
-              event_data: { email_number: 2, user_email: user.email, template: 'day3_value' },
+              user_id: user.id, event_type: 'drip_email_sent',
+              event_data: { email_number: 2, user_email: user.email, template: 'day1_activation_nudge' },
             });
-            day3Sent++;
-          } else {
-            errors.push(`Day3 failed for ${user.email}: ${result.error}`);
-          }
+            sent.day1++;
+          } else errors.push(`Day1 failed for ${user.email}: ${result.error}`);
         }
 
-        // Day 7: Pro pitch
-        if (daysSinceSignup >= 7 && !sentSet.has(`${user.id}:3`)) {
+        // Day 3: Value insight (different version for active vs dormant)
+        if (daysSinceSignup >= 3 && !sentSet.has(`${user.id}:3`)) {
+          const { subject, html } = buildDay3Email(displayName, hasCalcs);
+          const result = await sendEmail({ to: user.email, subject, html });
+          if (result.success) {
+            await supabase.from('events').insert({
+              user_id: user.id, event_type: 'drip_email_sent',
+              event_data: { email_number: 3, user_email: user.email, template: hasCalcs ? 'day3_value_active' : 'day3_urgency_dormant' },
+            });
+            sent.day3++;
+          } else errors.push(`Day3 failed for ${user.email}: ${result.error}`);
+        }
+
+        // Day 5: Trial ending soon — upgrade CTA
+        if (daysSinceSignup >= 5 && !sentSet.has(`${user.id}:4`)) {
+          const { subject, html } = buildDay5Email(displayName);
+          const result = await sendEmail({ to: user.email, subject, html });
+          if (result.success) {
+            await supabase.from('events').insert({
+              user_id: user.id, event_type: 'drip_email_sent',
+              event_data: { email_number: 4, user_email: user.email, template: 'day5_trial_ending' },
+            });
+            sent.day5++;
+          } else errors.push(`Day5 failed for ${user.email}: ${result.error}`);
+        }
+
+        // Day 7: Trial expired — final upgrade push
+        if (daysSinceSignup >= 7 && !sentSet.has(`${user.id}:5`)) {
           const { subject, html } = buildDay7Email(displayName);
           const result = await sendEmail({ to: user.email, subject, html });
-
           if (result.success) {
             await supabase.from('events').insert({
-              user_id: user.id,
-              event_type: 'drip_email_sent',
-              event_data: { email_number: 3, user_email: user.email, template: 'day7_pro_pitch' },
+              user_id: user.id, event_type: 'drip_email_sent',
+              event_data: { email_number: 5, user_email: user.email, template: 'day7_trial_expired' },
             });
-            day7Sent++;
-          } else {
-            errors.push(`Day7 failed for ${user.email}: ${result.error}`);
-          }
+            sent.day7++;
+          } else errors.push(`Day7 failed for ${user.email}: ${result.error}`);
         }
       } catch (err) {
         errors.push(`Error processing ${user.email}: ${String(err)}`);
       }
     }
 
-    // 7. Slack summary
+    // Slack summary
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (webhookUrl) {
       await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `Onboarding drip: Day 0: ${day0Sent}, Day 3: ${day3Sent}, Day 7: ${day7Sent}`,
+          text: `Onboarding drip: ${JSON.stringify(sent)}`,
           attachments: [{
             color: '#14b8a6',
             blocks: [
-              { type: 'header', text: { type: 'plain_text', text: 'Onboarding Drip Emails', emoji: true } },
+              { type: 'header', text: { type: 'plain_text', text: 'Onboarding Drip (Trial-First)', emoji: true } },
               {
                 type: 'section',
                 fields: [
-                  { type: 'mrkdwn', text: `*Day 0 (Welcome):*\n${day0Sent} sent` },
-                  { type: 'mrkdwn', text: `*Day 3 (Value):*\n${day3Sent} sent` },
-                  { type: 'mrkdwn', text: `*Day 7 (Pro Pitch):*\n${day7Sent} sent` },
-                  { type: 'mrkdwn', text: `*Eligible Users:*\n${recentFreeUsers.length}` },
+                  { type: 'mrkdwn', text: `*Day 0 (Trial Welcome):*\n${sent.day0} sent` },
+                  { type: 'mrkdwn', text: `*Day 1 (Activation):*\n${sent.day1} sent` },
+                  { type: 'mrkdwn', text: `*Day 3 (Value/Urgency):*\n${sent.day3} sent` },
+                  { type: 'mrkdwn', text: `*Day 5 (Trial Ending):*\n${sent.day5} sent` },
+                  { type: 'mrkdwn', text: `*Day 7 (Expired):*\n${sent.day7} sent` },
+                  { type: 'mrkdwn', text: `*Eligible Users:*\n${eligibleUsers.length}` },
                 ],
               },
               ...(errors.length > 0 ? [{
@@ -372,10 +478,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      eligibleUsers: recentFreeUsers.length,
-      day0: day0Sent,
-      day3: day3Sent,
-      day7: day7Sent,
+      eligibleUsers: eligibleUsers.length,
+      sent,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {

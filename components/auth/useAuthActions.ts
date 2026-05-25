@@ -74,17 +74,28 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
       setMode('verify-email');
       setSuccess(`We've sent a verification email to ${email}. Please check your inbox and click the link to verify your account.`);
 
-      // Create user profile
+      // Create user profile — starts as free, auto-trial granted in /auth/callback on verification
       try {
+        const urlParams = new URLSearchParams(window.location.search);
         await supabase.from('user_profiles').upsert({
           id: data.user.id,
           email,
+          full_name: name || null,
           company_name: company || null,
           tier: 'free',
           email_verified: false,
-          attribution_source: new URLSearchParams(window.location.search).get('utm_source') || null,
-          attribution_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || null,
+          attribution_source: urlParams.get('utm_source') || null,
+          attribution_campaign: urlParams.get('utm_campaign') || null,
         }, { onConflict: 'id', ignoreDuplicates: true });
+
+        // Persist UTM in cookie for the callback (user may verify in different tab)
+        const utmSource = urlParams.get('utm_source');
+        const utmCampaign = urlParams.get('utm_campaign');
+        if (utmSource || utmCampaign) {
+          document.cookie = `utm_params=${encodeURIComponent(JSON.stringify({
+            utm_source: utmSource, utm_medium: urlParams.get('utm_medium'), utm_campaign: utmCampaign,
+          }))};path=/;max-age=86400;SameSite=Lax`;
+        }
       } catch (profileErr) {
         console.error('Profile creation error:', profileErr);
       }
@@ -294,6 +305,17 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
 
     setIsLoading(true);
     setError('');
+
+    // Persist UTM params in a cookie before OAuth redirect (they'd be lost otherwise)
+    const searchParams = new URLSearchParams(window.location.search);
+    const utmSource = searchParams.get('utm_source');
+    const utmMedium = searchParams.get('utm_medium');
+    const utmCampaign = searchParams.get('utm_campaign');
+    if (utmSource || utmMedium || utmCampaign) {
+      document.cookie = `utm_params=${encodeURIComponent(JSON.stringify({
+        utm_source: utmSource, utm_medium: utmMedium, utm_campaign: utmCampaign,
+      }))};path=/;max-age=3600;SameSite=Lax`;
+    }
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
