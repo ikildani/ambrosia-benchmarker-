@@ -172,8 +172,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUser(parsed);
 
-        // Auto-upgrade pro users by email (UI hint only - server verifies)
-        if (isProEmailClient(parsed.email)) {
+        // Email allowlist fallback — only when no higher tier is cached
+        const cached = localStorage.getItem('user_tier');
+        if (!cached && isProEmailClient(parsed.email)) {
           setTierState('pro');
           localStorage.setItem('user_tier', 'pro');
         }
@@ -224,30 +225,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               localStorage.setItem('is_authenticated', 'true');
               localStorage.setItem('user_data', JSON.stringify(newUser));
 
-              // Check tier: email allowlist first (sync), then database (awaited)
-              if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
-                setTierState('pro');
-                localStorage.setItem('user_tier', 'pro');
-              } else {
-                // AWAIT the tier query so first paint already has the right tier.
-                // Wrapped in try/catch so a failed query doesn't block sign-in.
-                try {
-                  const { data: profile, error: tierError } = await supabase
-                    .from('user_profiles')
-                    .select('tier, team_id')
-                    .eq('id', supabaseUser.id)
-                    .single();
-                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
-                    setTierState(profile.tier as UserTier);
-                    localStorage.setItem('user_tier', profile.tier);
+              // Check tier: database first (authoritative), then email allowlist fallback
+              try {
+                const { data: profile, error: tierError } = await supabase
+                  .from('user_profiles')
+                  .select('tier, team_id')
+                  .eq('id', supabaseUser.id)
+                  .single();
+                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
+                  setTierState(profile.tier as UserTier);
+                  localStorage.setItem('user_tier', profile.tier);
 
-                    if (profile.tier === 'portfolio' && profile.team_id) {
-                      await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
-                    }
+                  if (profile.tier === 'portfolio' && profile.team_id) {
+                    await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
                   }
-                } catch {
-                  console.warn('[Auth] Tier query failed');
+                } else if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                  setTierState('pro');
+                  localStorage.setItem('user_tier', 'pro');
                 }
+              } catch {
+                // Fallback to email allowlist if DB query fails
+                if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                  setTierState('pro');
+                  localStorage.setItem('user_tier', 'pro');
+                }
+                console.warn('[Auth] Tier query failed');
               }
 
               // Sync usage count from database (fire-and-forget — not gating UI)
@@ -290,27 +292,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // sign-in completing and the tier DB query resolving.
             (async () => {
               try {
-                if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
-                  setTierState('pro');
-                  localStorage.setItem('user_tier', 'pro');
-                } else {
-                  try {
-                    const { data: profile, error: tierError } = await supabase
-                      .from('user_profiles')
-                      .select('tier, team_id')
-                      .eq('id', supabaseUser.id)
-                      .single();
-                    if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
-                      setTierState(profile.tier as UserTier);
-                      localStorage.setItem('user_tier', profile.tier);
+                try {
+                  const { data: profile, error: tierError } = await supabase
+                    .from('user_profiles')
+                    .select('tier, team_id')
+                    .eq('id', supabaseUser.id)
+                    .single();
+                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
+                    setTierState(profile.tier as UserTier);
+                    localStorage.setItem('user_tier', profile.tier);
 
-                      if (profile.tier === 'portfolio' && profile.team_id) {
-                        await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
-                      }
+                    if (profile.tier === 'portfolio' && profile.team_id) {
+                      await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
                     }
-                  } catch {
-                    console.warn('[Auth] Tier query failed on sign-in');
+                  } else if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                    setTierState('pro');
+                    localStorage.setItem('user_tier', 'pro');
                   }
+                } catch {
+                  if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
+                    setTierState('pro');
+                    localStorage.setItem('user_tier', 'pro');
+                  }
+                  console.warn('[Auth] Tier query failed on sign-in');
                 }
               } finally {
                 setShowAuthModal(false);

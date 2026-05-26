@@ -33,26 +33,7 @@ export async function resolveUserTier(): Promise<TierCheckResult> {
       return { isAuthenticated: false, tier: null, email: null, userId: null, hasProAccess: false };
     }
 
-    // Internal allowlist short-circuit — free for team emails
-    if (user.email && isProEmail(user.email)) {
-      // R72 security: audit-log PRO_EMAILS bypass activations
-      try {
-        await supabase.from('events').insert({
-          event_type: 'pro_email_bypass',
-          event_data: { email: user.email, source: 'tier-check' },
-          user_id: user.id,
-          user_tier: 'pro',
-        });
-      } catch {} // non-blocking — never fail auth on audit log error
-      return {
-        isAuthenticated: true,
-        tier: 'pro',
-        email: user.email,
-        userId: user.id,
-        hasProAccess: true,
-      };
-    }
-
+    // Check database tier first (authoritative), then fall back to email allowlist
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
@@ -60,9 +41,23 @@ export async function resolveUserTier(): Promise<TierCheckResult> {
       .maybeSingle();
 
     const rawTier = (profile?.tier as string | undefined) ?? 'free';
-    const tier = rawTier === 'pro' || rawTier === 'report' || rawTier === 'portfolio'
+    let tier: 'free' | 'pro' | 'report' | 'portfolio' = rawTier === 'pro' || rawTier === 'report' || rawTier === 'portfolio'
       ? (rawTier as 'pro' | 'report' | 'portfolio')
       : 'free';
+
+    // Email allowlist fallback — only when DB says 'free'
+    if (tier === 'free' && user.email && isProEmail(user.email)) {
+      tier = 'pro';
+      try {
+        await supabase.from('events').insert({
+          event_type: 'pro_email_bypass',
+          event_data: { email: user.email, source: 'tier-check' },
+          user_id: user.id,
+          user_tier: 'pro',
+        });
+      } catch {} // non-blocking
+    }
+
     const hasProAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
     return {
