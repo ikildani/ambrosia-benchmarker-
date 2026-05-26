@@ -174,12 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUser(parsed);
 
-        // Email allowlist: temporary UI hint only — DB query overrides this async
-        // Do NOT write to localStorage here; the DB query is authoritative
-        const cached = localStorage.getItem('user_tier');
-        if (!cached && isProEmailClient(parsed.email)) {
-          setTierState('pro');
-        }
+        // Tier is resolved async from DB — no sync hints to avoid flicker
       } else {
         // Invalid stored data, clear it
         localStorage.removeItem('is_authenticated');
@@ -446,10 +441,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('is_authenticated', 'true');
     localStorage.setItem('user_data', JSON.stringify(newUser));
 
-    // Email allowlist: temporary UI hint — DB query overrides async
-    if (isProEmailClient(email)) {
-      setTierState('pro');
-    }
+    // Tier resolved async from DB — no sync hints
   }, []);
 
   const signOut = useCallback(async () => {
