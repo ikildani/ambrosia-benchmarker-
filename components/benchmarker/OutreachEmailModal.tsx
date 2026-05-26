@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import { X, Mail, Copy, Check, RefreshCw, Loader2 } from 'lucide-react';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { OutreachEmail, ApproachStrategy, EmailTone } from '@/types/partner-breakdown';
+import type { UserTier } from '@/types/tier';
 
 interface OutreachEmailModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ interface OutreachEmailModalProps {
   userId?: string;
   userEmail?: string;
   sessionId?: string;
-  tier?: 'free' | 'pro' | 'report';
+  tier?: UserTier;
 }
 
 export function OutreachEmailModal({

@@ -32,6 +32,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
     showAuthModal,
     authModalMode,
     isLoading: authLoading,
+    isPortfolioAdmin,
   } = useAuth();
 
   const [data, setData] = useState<any>(null);
@@ -70,6 +71,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
         userName={user?.name}
         userEmail={user?.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

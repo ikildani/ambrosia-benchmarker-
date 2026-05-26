@@ -6,10 +6,11 @@ import { PRICING, DEAL_STATS, PORTFOLIO_PRICING } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { generatePricingSchema } from '@/lib/seo/structured-data';
 import { captureClientError } from '@/lib/sentry-client';
+import type { UserTier } from '@/types/tier';
 
 interface PricingProps {
-  currentTier: 'free' | 'pro' | 'report';
-  onSelectTier: (tier: 'free' | 'pro' | 'report') => void;
+  currentTier: UserTier;
+  onSelectTier: (tier: UserTier) => void;
   userEmail?: string;
   userId?: string;
   initialPromoCode?: string;

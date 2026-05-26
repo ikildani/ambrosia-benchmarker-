@@ -80,7 +80,7 @@ export default function DealStructureToggle({
   onBuyReport,
 }: DealStructureToggleProps) {
   const [mode, setMode] = useState<StructureMode>('balanced');
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const structures = useMemo(() => {
     const baseAlloc = BALANCED_ALLOCATIONS[phase] || BALANCED_ALLOCATIONS.phase2;

@@ -185,7 +185,7 @@ export default function DealBrowser() {
 
         <div className="flex items-center gap-3">
           {/* Excel Export - Pro/Report */}
-          {(tier === 'pro' || tier === 'report') && (
+          {(tier === 'pro' || tier === 'report' || tier === 'portfolio') && (
             <button
               onClick={() => {
                 const dealsForExport: DealForExcel[] = deals.map(deal => ({

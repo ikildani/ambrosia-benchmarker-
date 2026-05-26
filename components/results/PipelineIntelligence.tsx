@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PRICING } from '@/lib/config/constants';
+import type { UserTier } from '@/types/tier';
 
 interface TrialSummary {
   totalTrials: number;
@@ -20,7 +21,7 @@ interface TrialSummary {
 interface PipelineIntelligenceProps {
   therapeuticArea?: string;
   modality?: string;
-  tier: 'free' | 'report' | 'pro';
+  tier: UserTier;
   onUpgrade?: () => void;
   onBuyReport?: () => void;
 }
@@ -43,7 +44,7 @@ export default function PipelineIntelligence({
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
-  const hasFullAccess = tier === 'pro' || tier === 'report';
+  const hasFullAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   useEffect(() => {
     if (!therapeuticArea) {

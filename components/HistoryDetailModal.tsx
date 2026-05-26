@@ -20,12 +20,13 @@ import { findComparableDeals } from '@/lib/comparableDeals';
 import Results from './Results';
 import { PartnerMatchForPDF } from './PartnerMatchesContainer';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+import type { UserTier } from '@/types/tier';
 
 interface HistoryDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: CalculationHistoryItem | null;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   onReuse?: (item: CalculationHistoryItem) => void;
   onUpgrade?: () => void;
   userEmail?: string;
@@ -47,7 +48,7 @@ export default function HistoryDetailModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useFocusTrap(modalRef, isOpen, onClose);
-  const isPro = tier === 'pro' || tier === 'report';
+  const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   // Simple close handler
   const handleClose = useCallback(() => {

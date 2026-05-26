@@ -30,6 +30,7 @@ function PulsePageInner() {
     showAuthModal,
     authModalMode,
     isLoading,
+    isPortfolioAdmin,
   } = useAuth();
 
   const handleAuthSuccess = (email: string, name: string) => {
@@ -43,6 +44,7 @@ function PulsePageInner() {
         userName={user?.name}
         userEmail={user?.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

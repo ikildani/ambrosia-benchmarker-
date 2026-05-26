@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useWatchlistContext } from '@/contexts/WatchlistContext';
 import PaywallModal from './PaywallModal';
+import type { UserTier } from '@/types/tier';
 
 interface WatchButtonProps {
   itemType: 'modality' | 'indication' | 'company' | 'therapeutic_area';
   itemValue: string;
   companyId?: string;
   size?: 'sm' | 'md';
-  tier?: 'free' | 'pro' | 'report';
+  tier?: UserTier;
   onPaywall?: () => void;
 }
 

@@ -5,6 +5,7 @@ import { PRICING } from '@/lib/config/constants';
 import { captureClientError } from '@/lib/sentry-client';
 import AppearanceSettings from './AppearanceSettings';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import type { UserTier } from '@/types/tier';
 
 function PasswordChangeSection() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -125,7 +126,7 @@ interface SettingsTabProps {
   isSaving: boolean;
   saveMessage: string;
   showDeleteConfirm: boolean;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   history: CalculationHistoryItem[];
   avatarGradients: AvatarGradient[];
   getAvatarGradient: (id: string | null) => AvatarGradient;
@@ -234,7 +235,7 @@ const SettingsTab = React.memo(function SettingsTab({
             {editCompany && <p className="text-blue-400 mt-1">{editCompany}</p>}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                (tier === 'pro' || tier === 'report')
+                (tier === 'pro' || tier === 'report' || tier === 'portfolio')
                   ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white'
                   : 'bg-slate-700 text-slate-300'
               }`}>
@@ -433,15 +434,15 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Subscription</h3>
         </div>
-        <div className={`p-5 rounded-xl mb-4 ${(tier === 'pro' || tier === 'report') ? 'bg-gradient-to-br from-slate-50 to-blue-50 dark:from-blue-900/15 dark:to-blue-800/20 border border-blue-200 dark:border-blue-600/20' : 'bg-slate-50 dark:bg-slate-700'}`}>
+        <div className={`p-5 rounded-xl mb-4 ${(tier === 'pro' || tier === 'report' || tier === 'portfolio') ? 'bg-gradient-to-br from-slate-50 to-blue-50 dark:from-blue-900/15 dark:to-blue-800/20 border border-blue-200 dark:border-blue-600/20' : 'bg-slate-50 dark:bg-slate-700'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                (tier === 'pro' || tier === 'report')
+                (tier === 'pro' || tier === 'report' || tier === 'portfolio')
                   ? 'bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-900/15 dark:shadow-blue-400/10'
                   : 'bg-slate-200 dark:bg-slate-600'
               }`}>
-                <svg className={`w-7 h-7 ${(tier === 'pro' || tier === 'report') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-7 h-7 ${(tier === 'pro' || tier === 'report' || tier === 'portfolio') ? 'text-white' : 'text-slate-500 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
@@ -480,7 +481,7 @@ const SettingsTab = React.memo(function SettingsTab({
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          {((tier === 'pro' || tier === 'report')
+          {((tier === 'pro' || tier === 'report' || tier === 'portfolio')
             ? ['Unlimited calculations', 'PDF report generation', 'Full history access', 'Priority support', 'Advanced analytics']
             : ['2 calculations per month', 'Basic deal estimates', 'Calculation history']
           ).map((feature, idx) => (

@@ -6,9 +6,10 @@ import WatchlistItemRow from './WatchlistItemRow';
 import WatchlistActivityFeed from './WatchlistActivityFeed';
 import AddToWatchlistModal from './AddToWatchlistModal';
 import EmptyState from '@/components/ui/EmptyState';
+import type { UserTier } from '@/types/tier';
 
 interface WatchlistPanelProps {
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   onUpgrade: () => void;
 }
 

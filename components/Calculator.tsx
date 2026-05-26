@@ -87,6 +87,7 @@ import type { WizardStep } from './calculator/index';
 import { useCalculatorState } from './calculator/useCalculatorState';
 import type { CalculatorFormState } from './calculator/useCalculatorState';
 import { useCalculation, buildCalculationInput } from './calculator/useCalculation';
+import type { UserTier } from '@/types/tier';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 
@@ -103,11 +104,11 @@ const QUICK_STEPS: WizardStep[] = [
 ];
 
 interface CalculatorProps {
-  tier?: 'free' | 'pro' | 'report';
+  tier?: UserTier;
   onUpgrade?: () => void;
 }
 
-type EffectiveTier = 'free' | 'report' | 'pro';
+type EffectiveTier = UserTier;
 
 export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps) {
   // ── Custom hooks ───────────────────────────────────────────────────────────
@@ -948,7 +949,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               )}
               <Results
                 result={calc.result}
-                tier={(tier === 'pro' ? 'pro' : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
+                tier={(tier === 'pro' || tier === 'portfolio' ? tier : (tier === 'report' || (reportPurchaseId && reportVerified)) ? 'report' : 'free') as EffectiveTier}
                 onUpgrade={onUpgrade}
                 onBuyReport={() => {
                   setPaywallReason('report_upsell');

@@ -2,6 +2,7 @@ import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';
+import type { UserTier } from '@/types/tier';
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +21,7 @@ export async function GET(
     const anonymousId = request.headers.get('x-anonymous-id');
 
     // SECURITY: Only trust database-verified tier, never client-provided tier
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
 
     if (userId) {
       const { data: profile } = await supabase
@@ -29,7 +30,7 @@ export async function GET(
         .eq('id', userId)
         .single();
 
-      userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+      userTier = (profile?.tier as UserTier) || 'free';
 
       // Check PRO_EMAILS using verified database email (not client-provided)
       if (userTier === 'free' && profile?.email && isProEmail(profile.email)) {

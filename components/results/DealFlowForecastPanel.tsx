@@ -90,7 +90,7 @@ export default function DealFlowForecastPanel({
   onUpgrade,
   onBuyReport,
 }: DealFlowForecastPanelProps) {
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const chartData = useMemo(() => {
     if (!forecast) return null;

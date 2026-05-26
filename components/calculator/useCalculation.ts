@@ -13,6 +13,7 @@ import { incrementUsage, getUsage } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
 import { clearSavedFormState } from './useCalculatorState';
+import type { UserTier } from '@/types/tier';
 
 /** Check if minimum fields are filled for quick-calc (phase + modality required).
  *  dealType and indication will use smart defaults if not explicitly set. */
@@ -61,7 +62,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
 }
 
 interface UseCalculationOptions {
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   isAuthenticated: boolean;
   userId?: string;
   sessionId: string;

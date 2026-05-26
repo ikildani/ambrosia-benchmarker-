@@ -312,7 +312,7 @@ export default function AssetReadinessScore({
   onUpgrade,
   onBuyReport,
 }: AssetReadinessScoreProps) {
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const normalizedDealType = (dealType || 'licensing').toLowerCase();
   const isAcquisition = normalizedDealType === 'acquisition';

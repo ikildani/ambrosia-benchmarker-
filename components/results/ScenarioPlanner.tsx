@@ -75,7 +75,7 @@ export default function ScenarioPlanner({
     );
   }
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   // Compute range values for the defensive range bar
   const rangeMin = defensiveAnalysis

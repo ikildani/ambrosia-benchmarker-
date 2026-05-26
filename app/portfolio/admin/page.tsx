@@ -1,0 +1,201 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Users, Clock, Bell, BarChart3, Activity, TrendingUp } from 'lucide-react';
+
+interface DashboardData {
+  team: {
+    name: string;
+    portfolio_tier: string;
+    max_seats: number;
+    analyst_hours_monthly: number;
+    contract_start_date: string;
+    contract_end_date: string | null;
+  };
+  seats: { active: number; pending: number; max: number; utilization: number };
+  analystHours: { used: number; allocated: number; remaining: number };
+  activeAlerts: number;
+  recentActivity: Array<{
+    id: string;
+    user_email: string;
+    action: string;
+    resource: string;
+    created_at: string;
+    details: Record<string, unknown>;
+  }>;
+}
+
+function StatCard({ icon: Icon, label, value, subtext, color }: {
+  icon: typeof Users;
+  label: string;
+  value: string | number;
+  subtext?: string;
+  color: string;
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`p-2 rounded-lg ${color}`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <span className="text-sm text-slate-400">{label}</span>
+      </div>
+      <div className="text-2xl font-bold text-white">{value}</div>
+      {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
+    </div>
+  );
+}
+
+function formatAction(action: string): string {
+  return action
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+export default function PortfolioAdminDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/portfolio/dashboard')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) setData(json);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      fetch('/api/portfolio/dashboard')
+        .then(res => res.json())
+        .then(json => { if (json.success) setData(json); })
+        .catch(console.error);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="text-center text-slate-400 py-20">
+        <p>Failed to load dashboard data.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">{data.team.name}</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Portfolio License — {data.team.portfolio_tier.charAt(0).toUpperCase() + data.team.portfolio_tier.slice(1)} Tier
+          </p>
+        </div>
+        <div className="text-right text-xs text-slate-500">
+          <p>Contract: {new Date(data.team.contract_start_date).toLocaleDateString()}</p>
+          {data.team.contract_end_date && (
+            <p>Renews: {new Date(data.team.contract_end_date).toLocaleDateString()}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={Users}
+          label="Active Seats"
+          value={`${data.seats.active} / ${data.seats.max}`}
+          subtext={data.seats.pending > 0 ? `${data.seats.pending} pending` : `${data.seats.utilization}% utilized`}
+          color="bg-teal-500/10 text-teal-400"
+        />
+        <StatCard
+          icon={Clock}
+          label="Analyst Hours"
+          value={`${data.analystHours.remaining}h`}
+          subtext={`${data.analystHours.used}h used of ${data.analystHours.allocated}h/mo`}
+          color="bg-amber-500/10 text-amber-400"
+        />
+        <StatCard
+          icon={Bell}
+          label="Active Alerts"
+          value={data.activeAlerts}
+          subtext="Deal alert configurations"
+          color="bg-blue-500/10 text-blue-400"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Tier"
+          value={data.team.portfolio_tier.charAt(0).toUpperCase() + data.team.portfolio_tier.slice(1)}
+          subtext={`${data.team.max_seats} seats, ${data.team.analyst_hours_monthly}h analyst/mo`}
+          color="bg-purple-500/10 text-purple-400"
+        />
+      </div>
+
+      {/* Seat utilization bar */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-white flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-teal-400" />
+            Seat Utilization
+          </h2>
+          <span className="text-xs text-slate-400">{data.seats.utilization}%</span>
+        </div>
+        <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(100, data.seats.utilization)}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-slate-500">
+          <span>{data.seats.active} active</span>
+          <span>{data.seats.max - data.seats.active} available</span>
+        </div>
+      </div>
+
+      {/* Recent activity feed */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h2 className="text-sm font-medium text-white flex items-center gap-2 mb-4">
+          <Activity className="w-4 h-4 text-teal-400" />
+          Recent Activity
+        </h2>
+        {data.recentActivity.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-8">
+            No activity recorded yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {data.recentActivity.map((event) => (
+              <div
+                key={event.id}
+                className="flex items-start gap-3 text-sm border-b border-slate-800/50 pb-3 last:border-0"
+              >
+                <div className="w-2 h-2 mt-1.5 rounded-full bg-teal-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-slate-300">
+                    <span className="text-white font-medium">{event.user_email?.split('@')[0] || 'System'}</span>
+                    {' '}
+                    {formatAction(event.action)}
+                    {event.resource && (
+                      <span className="text-slate-500"> · {event.resource}</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {new Date(event.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

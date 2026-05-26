@@ -27,7 +27,7 @@ export default function MonteCarloResults({
 }: MonteCarloResultsProps) {
   const [hoveredBin, setHoveredBin] = useState<number | null>(null);
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const mc = monteCarloResult;
 
   // --- Memoized computations ---

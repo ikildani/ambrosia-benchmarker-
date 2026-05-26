@@ -1,13 +1,14 @@
 'use client';
 
 import { Deal } from './DealBrowser';
+import type { UserTier } from '@/types/tier';
 
 interface DealTableProps {
   deals: Deal[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (field: string) => void;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
 }
 
 const formatCurrency = (value: number | null) => {

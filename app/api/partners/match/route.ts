@@ -7,6 +7,7 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { partnerMatchSchema, formatZodErrors } from '@/lib/api-validation';
+import type { UserTier } from '@/types/tier';
 
 // Tier-based match limits
 const MATCH_LIMITS: Record<string, number> = {
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     } = parsed.data;
 
     // Determine user tier from verified sources (3 methods, in priority order)
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
     let authenticatedUserId: string | null = null;
 
     // Method 1: Verify session from cookie (most reliable — server-side auth)
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
           .eq('id', sessionUser.id)
           .single();
         if (profile) {
-          userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
+          userTier = (profile.tier as UserTier) || 'free';
         }
         // Check PRO_EMAILS using verified session email
         if (userTier === 'free' && sessionUser.email && isProEmail(sessionUser.email)) {
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
 
       if (profile) {
         authenticatedUserId = profile.id;
-        userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
+        userTier = (profile.tier as UserTier) || 'free';
         // Check PRO_EMAILS using database-verified email
         if (userTier === 'free' && profile.email && isProEmail(profile.email)) {
           userTier = 'pro';
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
           .single();
         if (emailProfile) {
           authenticatedUserId = emailProfile.id;
-          userTier = (emailProfile.tier as 'free' | 'pro' | 'report') || 'free';
+          userTier = (emailProfile.tier as UserTier) || 'free';
           if (userTier === 'free' && emailProfile.email && isProEmail(emailProfile.email)) {
             userTier = 'pro';
           }
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
     if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
       const url = new URL(request.url);
       const testTier = url.searchParams.get('test_tier');
-      if (testTier === 'free' || testTier === 'pro' || testTier === 'report') {
+      if (testTier === 'free' || testTier === 'pro' || testTier === 'report' || testTier === 'portfolio') {
         userTier = testTier;
       }
     }
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Build options - include enhanced breakdown for Pro/Report tier
-    const hasPaidAccess = userTier === 'pro' || userTier === 'report';
+    const hasPaidAccess = userTier === 'pro' || userTier === 'report' || userTier === 'portfolio';
     const matchOptions: FindPartnerMatchesOptions = {
       limit: 50,
       includeEnhancedBreakdown: hasPaidAccess,

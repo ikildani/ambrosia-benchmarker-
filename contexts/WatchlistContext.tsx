@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import type { UserTier } from '@/types/tier';
 
 interface WatchlistItem {
   id: string;
@@ -31,7 +32,7 @@ export function useWatchlistContext() {
 
 interface WatchlistProviderProps {
   children: ReactNode;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
 }
 
 export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {

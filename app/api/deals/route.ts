@@ -5,6 +5,7 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { clampInt, dealsQuerySchema, formatZodErrors } from '@/lib/api-validation';
+import type { UserTier } from '@/types/tier';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // SECURITY: Use server-side session auth first, then fall back to UUID header
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
 
     // Method 1: Server-side session (most secure — cannot be spoofed)
     try {
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
           .select('tier')
           .eq('id', user.id)
           .single();
-        userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+        userTier = (profile?.tier as UserTier) || 'free';
 
         // Check email allowlist
         if (userTier === 'free' && user.email) {
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
           .select('tier')
           .eq('id', userId)
           .single();
-        userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+        userTier = (profile?.tier as UserTier) || 'free';
       }
       // NOTE: x-user-email header no longer used for tier lookup (spoofable)
     }
@@ -211,7 +212,7 @@ export async function GET(request: NextRequest) {
     // For free users, only show first 5 full deals globally, blur the rest
     const processedDeals = (deals || []).map((deal, index) => {
       const globalIndex = offset + index;
-      if (userTier === 'pro' || userTier === 'report' || globalIndex < 5) {
+      if (userTier === 'pro' || userTier === 'report' || userTier === 'portfolio' || globalIndex < 5) {
         return deal;
       }
       // Blur financial data for free users beyond 5 deals

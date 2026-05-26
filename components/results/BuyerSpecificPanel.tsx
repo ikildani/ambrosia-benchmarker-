@@ -115,7 +115,7 @@ export default function BuyerSpecificPanel({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const eligiblePartners = useMemo(
     () => partnerMatches.filter(p => p.match_score > 0),

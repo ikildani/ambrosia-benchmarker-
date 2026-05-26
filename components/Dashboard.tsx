@@ -11,6 +11,7 @@ import DashboardNav from './dashboard/DashboardNav';
 import OverviewTab from './dashboard/OverviewTab';
 import HistoryTab from './dashboard/HistoryTab';
 import SettingsTab from './dashboard/SettingsTab';
+import type { UserTier } from '@/types/tier';
 
 // Avatar gradient options - premium color combinations
 const AVATAR_GRADIENTS = [
@@ -29,7 +30,7 @@ function getAvatarGradient(id: string | null) {
 interface DashboardProps {
   userName: string;
   userEmail: string;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   onNavigateToCalculator: () => void;
   onUpgrade: () => void;
   onSignOut: () => void;
@@ -451,8 +452,8 @@ export default function Dashboard({
             <div className="text-center sm:text-left">
               <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
                 <span className="text-blue-400 text-sm font-medium">{getGreeting()}</span>
-                {(tier === 'pro' || tier === 'report') && (
-                  <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600/15 to-cyan-500/20 border border-blue-600/20 text-blue-300 text-xs font-semibold rounded-full">{tier === 'report' ? 'Report' : 'Pro'} Member</span>
+                {(tier === 'pro' || tier === 'report' || tier === 'portfolio') && (
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-blue-600/15 to-cyan-500/20 border border-blue-600/20 text-blue-300 text-xs font-semibold rounded-full">{tier === 'portfolio' ? 'Portfolio' : tier === 'report' ? 'Report' : 'Pro'} Member</span>
                 )}
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2">Welcome back, {userName.split(' ')[0]}!</h1>
@@ -473,6 +474,34 @@ export default function Dashboard({
             </button>
           </div>
         </div>
+
+        {/* Portfolio Admin Quick Access */}
+        {tier === 'portfolio' && (
+          <div className="mb-6 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-amber-500/10">
+                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Portfolio Admin</p>
+                  <p className="text-xs text-slate-400">Manage your fund&apos;s team, alerts, and reports</p>
+                </div>
+              </div>
+              <a
+                href="/portfolio/admin"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Open Admin
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Tabs */}
         <DashboardNav

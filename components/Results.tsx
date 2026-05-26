@@ -64,13 +64,14 @@ import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity
 // by ComparableDealsPanel (structure-aware, ranked, with source URLs).
 import epiData from '@/data/epidemiology.json';
 import { computePeerBenchmark } from '@/lib/peer-benchmark';
+import type { UserTier } from '@/types/tier';
 
 // Dynamic import for TornadoChart (Recharts-heavy, below the fold)
 const TornadoChart = dynamic(() => import('./TornadoChart'), { ssr: false, loading: () => <ChartSkeleton /> });
 
 interface ResultsProps {
   result: CalculationResult;
-  tier?: 'free' | 'report' | 'pro';
+  tier?: UserTier;
   onUpgrade?: () => void;
   onBuyReport?: () => void;
   reportId?: string;

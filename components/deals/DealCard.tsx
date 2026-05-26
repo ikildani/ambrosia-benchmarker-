@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { Deal } from './DealBrowser';
 import WatchButton from '@/components/WatchButton';
+import type { UserTier } from '@/types/tier';
 
 interface DealCardProps {
   deal: Deal;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
 }
 
 const formatCurrency = (value: number | null) => {

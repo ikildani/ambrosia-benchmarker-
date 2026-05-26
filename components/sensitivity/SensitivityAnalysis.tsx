@@ -8,12 +8,13 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { captureClientError } from '@/lib/sentry-client';
 import KeyInsightBox from './KeyInsightBox';
 import ParameterSelector from './ParameterSelector';
+import type { UserTier } from '@/types/tier';
 
 interface SensitivityAnalysisProps {
   currentInputs: CalculationInput;
   currentResult: CalculationResult;
   onApplyChanges: (newInputs: Partial<CalculationInput>) => void;
-  tier?: 'free' | 'report' | 'pro';
+  tier?: UserTier;
   onUpgrade?: () => void;
   onBuyReport?: () => void;
 }
@@ -26,7 +27,7 @@ export default function SensitivityAnalysis({
   onUpgrade,
   onBuyReport,
 }: SensitivityAnalysisProps) {
-  const hasFullAccess = tier === 'pro' || tier === 'report';
+  const hasFullAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const [isExpanded, setIsExpanded] = useState(true);
   const [pendingChanges, setPendingChanges] = useState<Partial<CalculationInput>>({});
   const isMobile = useIsMobile();

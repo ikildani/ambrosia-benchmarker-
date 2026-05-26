@@ -9,6 +9,7 @@ import { WatchOutItem } from './WatchOutItem';
 import { ApproachStrategyCard } from './ApproachStrategyCard';
 import { RecentDealsSection } from './RecentDealsSection';
 import { OutreachEmailModal } from './OutreachEmailModal';
+import type { UserTier } from '@/types/tier';
 import type {
   DetailedScoreBreakdown,
   WatchOutFactor,
@@ -36,7 +37,7 @@ interface ScoreBreakdownProps {
   userId?: string;
   userEmail?: string;
   sessionId?: string;
-  tier?: 'free' | 'pro' | 'report';
+  tier?: UserTier;
   onRegenerateStrategy?: () => void;
 }
 

@@ -80,4 +80,14 @@ export interface ReportMeta {
   pageCount: number;
   currentPage: number;
   tocEntries: TocEntry[];
+  brandConfig?: BrandConfig;
+}
+
+export interface BrandConfig {
+  fundName: string;
+  logoUrl?: string;
+  logoBase64?: string;
+  primaryColor: string;
+  secondaryColor: string;
+  disclaimerText?: string;
 }

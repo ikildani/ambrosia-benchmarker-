@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isAuthenticated, user, tier, signOut, isLoading } = useAuth();
+  const { isAuthenticated, user, tier, signOut, isLoading, isPortfolioAdmin } = useAuth();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -61,6 +61,7 @@ export default function DashboardPage() {
         userName={user.name}
         userEmail={user.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignOut={handleSignOut}
       />
       <Dashboard

@@ -19,6 +19,7 @@ export default function CalculatorPage() {
     showAuthModal,
     authModalMode,
     isLoading,
+    isPortfolioAdmin,
   } = useAuth();
 
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function CalculatorPage() {
         userName={user?.name}
         userEmail={user?.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

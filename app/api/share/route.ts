@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { shareSchema, formatZodErrors } from '@/lib/api-validation';
+import type { UserTier } from '@/types/tier';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    const userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+    const userTier = (profile?.tier as UserTier) || 'free';
 
     if (userTier !== 'pro' && userTier !== 'report') {
       return apiError('Pro subscription required to share calculations', 403);

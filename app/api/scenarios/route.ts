@@ -6,6 +6,7 @@ import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { scenarioCreateSchema, formatZodErrors } from '@/lib/api-validation';
+import type { UserTier } from '@/types/tier';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,14 +29,14 @@ export async function GET(request: NextRequest) {
     const email = user.email!;
 
     // Verify tier from database
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('tier')
       .eq('id', user.id)
       .single();
 
-    userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+    userTier = (profile?.tier as UserTier) || 'free';
 
     // Check PRO_EMAILS list for authorized users
     if (userTier === 'free' && isProEmail(email)) {
@@ -97,14 +98,14 @@ export async function POST(request: NextRequest) {
     const email = user.email!;
 
     // Verify tier from database using authenticated user
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('id, tier')
       .eq('id', user.id)
       .single();
 
-    userTier = (profile?.tier as 'free' | 'pro' | 'report') || 'free';
+    userTier = (profile?.tier as UserTier) || 'free';
 
     if (userTier === 'free' && isProEmail(email)) {
       userTier = 'pro';

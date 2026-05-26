@@ -6,6 +6,8 @@ import { isProEmailClient } from '@/lib/config/authorized-emails.client';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { syncUsageFromDatabase } from '@/lib/usage';
 import { captureClientError } from '@/lib/sentry-client';
+import type { UserTier, TeamContext, TeamRole, PortfolioSubTier } from '@/types/tier';
+import { DEFAULT_TEAM_CONTEXT } from '@/types/tier';
 
 interface User {
   id: string;  // Unique user identifier (UUID)
@@ -83,7 +85,15 @@ interface AuthContextType {
   // Auth state
   isAuthenticated: boolean;
   user: User | null;
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
+
+  // Team/Portfolio state
+  teamId: string | null;
+  teamRole: TeamRole | null;
+  teamName: string | null;
+  teamSlug: string | null;
+  portfolioSubTier: PortfolioSubTier | null;
+  isPortfolioAdmin: boolean;
 
   // Auth actions
   signIn: (email: string, name: string, userData?: Partial<User>) => void;
@@ -91,7 +101,7 @@ interface AuthContextType {
   updateUser: (data: Partial<User>) => void;
 
   // Tier actions
-  setTier: (tier: 'free' | 'pro' | 'report') => void;
+  setTier: (tier: UserTier) => void;
 
   // Modal state
   showAuthModal: boolean;
@@ -108,11 +118,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [tier, setTierState] = useState<'free' | 'pro' | 'report'>('free');
+  const [tier, setTierState] = useState<UserTier>('free');
+  const [teamContext, setTeamContext] = useState<TeamContext>(DEFAULT_TEAM_CONTEXT);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
-  const previousTierRef = useRef<'free' | 'pro' | 'report'>('free');
+  const previousTierRef = useRef<UserTier>('free');
 
   // Show "Welcome to Pro" toast ONLY on actual Stripe upgrades (not PRO_EMAILS auto-detection)
   // Stripe checkout redirects with ?upgraded=stripe in the URL
@@ -147,8 +158,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // SECURITY: localStorage tier is for UI display only, not authorization
     // All Pro features must be verified server-side against the database
     const savedTier = localStorage.getItem('user_tier');
-    if (savedTier === 'pro' || savedTier === 'report') {
-      setTierState(savedTier as 'pro' | 'report'); // UI hint only - server will verify
+    if (savedTier === 'pro' || savedTier === 'report' || savedTier === 'portfolio') {
+      setTierState(savedTier as UserTier); // UI hint only - server will verify
     }
 
     // Load auth state from localStorage first
@@ -223,12 +234,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 try {
                   const { data: profile, error: tierError } = await supabase
                     .from('user_profiles')
-                    .select('tier')
+                    .select('tier, team_id')
                     .eq('id', supabaseUser.id)
                     .single();
-                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                    setTierState(profile.tier as 'pro' | 'report');
+                  if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
+                    setTierState(profile.tier as UserTier);
                     localStorage.setItem('user_tier', profile.tier);
+
+                    if (profile.tier === 'portfolio' && profile.team_id) {
+                      await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
+                    }
                   }
                 } catch {
                   console.warn('[Auth] Tier query failed');
@@ -282,12 +297,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   try {
                     const { data: profile, error: tierError } = await supabase
                       .from('user_profiles')
-                      .select('tier')
+                      .select('tier, team_id')
                       .eq('id', supabaseUser.id)
                       .single();
-                    if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report')) {
-                      setTierState(profile.tier as 'pro' | 'report');
+                    if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
+                      setTierState(profile.tier as UserTier);
                       localStorage.setItem('user_tier', profile.tier);
+
+                      if (profile.tier === 'portfolio' && profile.team_id) {
+                        await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
+                      }
                     }
                   } catch {
                     console.warn('[Auth] Tier query failed on sign-in');
@@ -318,6 +337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(false);
             setUser(null);
             setTierState('free');
+            setTeamContext(DEFAULT_TEAM_CONTEXT);
             localStorage.removeItem('is_authenticated');
             localStorage.removeItem('user_data');
             localStorage.removeItem('user_tier');
@@ -339,7 +359,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .single()
               .then(({ data: profile, error: tierErr }) => {
                 if (!tierErr && profile?.tier && profile.tier !== 'free') {
-                  setTierState(profile.tier as 'pro' | 'report');
+                  setTierState(profile.tier as UserTier);
                   localStorage.setItem('user_tier', profile.tier);
                 }
               });
@@ -355,6 +375,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setIsLoading(false);
+  }, []);
+
+  const fetchTeamContext = useCallback(async (supabase: ReturnType<typeof createClient>, userId: string, teamId: string) => {
+    try {
+      const [teamResult, memberResult] = await Promise.all([
+        supabase!.from('teams').select('name, slug, portfolio_tier, max_seats').eq('id', teamId).single(),
+        supabase!.from('team_members').select('role').eq('team_id', teamId).eq('user_id', userId).eq('status', 'active').single(),
+      ]);
+
+      if (teamResult.data && memberResult.data) {
+        const role = memberResult.data.role as TeamRole;
+        setTeamContext({
+          teamId,
+          teamRole: role,
+          teamName: teamResult.data.name,
+          teamSlug: teamResult.data.slug,
+          portfolioSubTier: teamResult.data.portfolio_tier as PortfolioSubTier,
+          isPortfolioAdmin: role === 'admin',
+          maxSeats: teamResult.data.max_seats,
+        });
+      }
+    } catch {
+      console.warn('[Auth] Failed to fetch team context');
+    }
   }, []);
 
   const signIn = useCallback((email: string, name: string, userData?: Partial<User>) => {
@@ -419,6 +463,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     setUser(null);
     setTierState('free');
+    setTeamContext(DEFAULT_TEAM_CONTEXT);
     localStorage.removeItem('is_authenticated');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_tier');
@@ -471,9 +516,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const setTier = useCallback((newTier: 'free' | 'pro' | 'report') => {
+  const setTier = useCallback((newTier: UserTier) => {
     setTierState(newTier);
-    if (newTier === 'pro' || newTier === 'report') {
+    if (newTier !== 'free') {
       localStorage.setItem('user_tier', newTier);
     } else {
       localStorage.removeItem('user_tier');
@@ -493,6 +538,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated,
     user,
     tier,
+    teamId: teamContext.teamId,
+    teamRole: teamContext.teamRole,
+    teamName: teamContext.teamName,
+    teamSlug: teamContext.teamSlug,
+    portfolioSubTier: teamContext.portfolioSubTier,
+    isPortfolioAdmin: teamContext.isPortfolioAdmin,
     signIn,
     signOut,
     updateUser,

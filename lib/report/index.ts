@@ -25,13 +25,14 @@ import { renderScenarioComparisonPage } from './pages/scenarioComparison';
 import { renderDealWaterfallPage } from './pages/dealWaterfall';
 import { renderRealOptionsLifecyclePage } from './pages/realOptionsLifecycle';
 import { renderBuyerSpecificPage } from './pages/buyerSpecific';
-import type { PDFReportData, ReportMeta, TocEntry } from './types';
+import type { PDFReportData, ReportMeta, TocEntry, BrandConfig } from './types';
 
-export type { PDFReportData, PartnerForPDF } from './types';
+export type { PDFReportData, PartnerForPDF, BrandConfig } from './types';
 
 /** Returns the full HTML document string for the report with styles.
- *  Pages without data (AI memo, playbook) are excluded — no placeholders. */
-export function generateReportHTML(data: PDFReportData): string {
+ *  Pages without data (AI memo, playbook) are excluded — no placeholders.
+ *  When brandConfig is provided, the report uses the fund's branding (white-label). */
+export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfig): string {
   const indication = data.result.labels.indication || data.inputs.indication;
 
   // Build pages dynamically — exclude sections with no data
@@ -83,6 +84,7 @@ export function generateReportHTML(data: PDFReportData): string {
     pageCount: totalPages,
     currentPage: 0,
     tocEntries,
+    brandConfig,
   };
 
   // Helper to render a page with auto-incrementing page number
@@ -126,8 +128,8 @@ export function generateReportHTML(data: PDFReportData): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${indication} — Deal Valuation Report | Ambrosia Ventures</title>
-      <style>${getEmbeddedFontStyles()}${getReportStyles()}</style>
+      <title>${indication} — Deal Valuation Report | ${brandConfig?.fundName || 'Ambrosia Ventures'}</title>
+      <style>${getEmbeddedFontStyles()}${getReportStyles(brandConfig)}</style>
     </head>
     <body>
       ${pages.join('\n')}

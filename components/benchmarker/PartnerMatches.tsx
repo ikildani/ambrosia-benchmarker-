@@ -160,6 +160,7 @@ interface UserAsset {
 // Reuse the server-side TA keyword list for consistent filtering
 import { TA_CLIFF_KEYWORDS } from '@/lib/services/partner-matching';
 import { captureClientError } from '@/lib/sentry-client';
+import type { UserTier } from '@/types/tier';
 
 function filterCliffsByTA(cliffs: PatentCliff[], therapeuticArea?: string): PatentCliff[] {
   if (!therapeuticArea || !TA_CLIFF_KEYWORDS[therapeuticArea]) return [];
@@ -179,7 +180,7 @@ interface PartnerMatchesProps {
   matches: PartnerMatch[];
   totalMatches: number;
   matchesShown: number;
-  userTier: 'free' | 'pro' | 'report';
+  userTier: UserTier;
   upgradeCta?: UpgradeCTA | null;
   advisoryCta?: AdvisoryCTA | null;
   onUpgradeClick: () => void;

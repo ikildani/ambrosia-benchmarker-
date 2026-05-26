@@ -19,6 +19,7 @@ import { Check, ArrowRight } from 'lucide-react';
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
 const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: false });
 import { useAuth } from '@/contexts/AuthContext';
+import type { UserTier } from '@/types/tier';
 import {
   calculateDealTerms,
   formatCurrency,
@@ -274,6 +275,7 @@ export default function Home() {
     showAuthModal,
     authModalMode,
     isLoading,
+    isPortfolioAdmin,
   } = useAuth();
 
   const [isVisible, setIsVisible] = useState(false);
@@ -298,7 +300,7 @@ export default function Home() {
     }
   }, []);
 
-  const handleTierChange = (newTier: 'free' | 'pro' | 'report') => {
+  const handleTierChange = (newTier: UserTier) => {
     setTier(newTier);
   };
 
@@ -319,6 +321,7 @@ export default function Home() {
         userName={user?.name}
         userEmail={user?.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

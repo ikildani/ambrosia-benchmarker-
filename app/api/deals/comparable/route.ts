@@ -7,13 +7,14 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
+import type { UserTier } from '@/types/tier';
 
 export const dynamic = 'force-dynamic';
 
 const FREE_DEAL_LIMIT = 3;
 
 // Server-side tier verification for comparable deals
-async function getUserTier(): Promise<'free' | 'pro' | 'report'> {
+async function getUserTier(): Promise<UserTier> {
   try {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -31,8 +32,8 @@ async function getUserTier(): Promise<'free' | 'pro' | 'report'> {
       .eq('id', user.id)
       .single();
 
-    if (profile?.tier === 'pro' || profile?.tier === 'report') {
-      return profile.tier as 'pro' | 'report';
+    if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
+      return profile.tier as UserTier;
     }
 
     return 'free';
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     // Verify tier server-side to prevent free users from accessing all deals via API
     const tier = await getUserTier();
-    const hasFullAccess = tier === 'pro' || tier === 'report';
+    const hasFullAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
     // Enriched mode: always return full deal set — client handles tier gating
     // for UI features (checkboxes, filters, recalculation). Returning all

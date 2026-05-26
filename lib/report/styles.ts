@@ -1,7 +1,11 @@
 // All CSS for the PDF report — print rules, page styling, typography
 // Consulting-grade output: bold color blocking, navy headers, accent elements
 
-export function getReportStyles(): string {
+import type { BrandConfig } from './types';
+
+export function getReportStyles(brandConfig?: BrandConfig): string {
+  const primaryColor = brandConfig?.primaryColor || '#0f172a';
+  const secondaryColor = brandConfig?.secondaryColor || '#14b8a6';
   return `
     @page {
       size: A4;
@@ -50,7 +54,7 @@ export function getReportStyles(): string {
     .section-title {
       font-size: 9px;
       font-weight: 700;
-      color: #0d9488;
+      color: ${secondaryColor};
       text-transform: uppercase;
       letter-spacing: 0.16em;
       margin-bottom: 10px;
@@ -66,7 +70,7 @@ export function getReportStyles(): string {
       letter-spacing: -0.03em;
       line-height: 1.15;
       padding-left: 12px;
-      border-left: 4px solid #0d9488;
+      border-left: 4px solid ${secondaryColor};
     }
 
     .text-sm { font-size: 10px; }
@@ -81,7 +85,7 @@ export function getReportStyles(): string {
     .font-medium { font-weight: 500; }
 
     .text-navy { color: #1a1e42; }
-    .text-teal { color: #0d9488; }
+    .text-teal { color: ${secondaryColor}; }
     .text-gray { color: #64748b; }
     .text-gray-light { color: #94a3b8; }
     .text-white { color: #ffffff; }
@@ -142,7 +146,7 @@ export function getReportStyles(): string {
     .card-highlight {
       background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
       border: 1px solid #99f6e4;
-      border-left: 4px solid #0d9488;
+      border-left: 4px solid ${secondaryColor};
       border-radius: 6px;
       padding: 16px;
       box-shadow: 0 1px 4px rgba(13,148,136,0.08);
@@ -172,7 +176,7 @@ export function getReportStyles(): string {
     .kpi-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-top: 3px solid #0d9488;
+      border-top: 3px solid ${secondaryColor};
       border-radius: 6px;
       padding: 16px 14px;
       text-align: center;
@@ -182,7 +186,7 @@ export function getReportStyles(): string {
     .kpi-value {
       font-size: 28px;
       font-weight: 800;
-      color: #0d9488;
+      color: ${secondaryColor};
       line-height: 1.1;
       letter-spacing: -0.03em;
     }
@@ -248,7 +252,7 @@ export function getReportStyles(): string {
 
     .data-table .value-cell {
       font-weight: 700;
-      color: #0d9488;
+      color: ${secondaryColor};
       text-align: right;
     }
 
@@ -268,7 +272,7 @@ export function getReportStyles(): string {
 
     .badge-teal {
       background: #ccfbf1;
-      color: #0d9488;
+      color: ${secondaryColor};
     }
 
     .badge-amber {
@@ -316,7 +320,7 @@ export function getReportStyles(): string {
     .score-bar-fill {
       height: 100%;
       border-radius: 3px;
-      background: linear-gradient(90deg, #0d9488, #06b6d4);
+      background: linear-gradient(90deg, ${secondaryColor}, #06b6d4);
     }
 
     /* ========================================
@@ -325,7 +329,7 @@ export function getReportStyles(): string {
 
     .callout {
       background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-      border-left: 4px solid #0d9488;
+      border-left: 4px solid ${secondaryColor};
       padding: 12px 16px;
       border-radius: 0 6px 6px 0;
       font-size: 10px;

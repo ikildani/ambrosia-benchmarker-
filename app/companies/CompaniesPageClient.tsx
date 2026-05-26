@@ -67,7 +67,7 @@ const APPETITE_CONFIG: Record<string, { label: string; color: string; bg: string
 };
 
 export default function CompaniesPageClient() {
-  const { isAuthenticated, user, tier, signIn, signOut, openAuthModal, closeAuthModal, showAuthModal, authModalMode } = useAuth();
+  const { isAuthenticated, user, tier, signIn, signOut, openAuthModal, closeAuthModal, showAuthModal, authModalMode, isPortfolioAdmin } = useAuth();
   const isPro = tier === 'pro';
 
   const [query, setQuery] = useState('');
@@ -169,6 +169,7 @@ export default function CompaniesPageClient() {
         userName={user?.name}
         userEmail={user?.email}
         tier={tier}
+        isPortfolioAdmin={isPortfolioAdmin}
         onSignInClick={() => openAuthModal('signin')}
         onSignUpClick={() => openAuthModal('signup')}
         onSignOut={signOut}

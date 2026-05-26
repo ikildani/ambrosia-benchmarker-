@@ -127,7 +127,7 @@ export default function IndexDrugComparison({
   onUpgrade,
   onBuyReport,
 }: IndexDrugComparisonProps) {
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const analysis = useMemo(() => {
     return checkPeakSalesRealism(modelPeakSalesM, therapeuticArea, indication, modality, phase);

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import BenchmarkInfo from '../BenchmarkInfo';
 import WatchButton from '../WatchButton';
 import { DEAL_STATS, BENCHMARK_VERSION } from '@/lib/config/constants';
+import type { UserTier } from '@/types/tier';
 
 const DEAL_STATS_TOTAL = DEAL_STATS.TOTAL_DEALS;
 
@@ -9,7 +10,7 @@ interface ResultsHeaderProps {
   labels: { phase: string; modality: string; indication: string };
   isPro: boolean;
   hasFullAccess: boolean;
-  tier: 'free' | 'report' | 'pro';
+  tier: UserTier;
   inputs?: { modality: string; phase: string; indication: string; territory: string };
   onDownloadPDF: () => void;
   onDownloadExcel: () => void;

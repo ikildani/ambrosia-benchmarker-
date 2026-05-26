@@ -5,6 +5,7 @@ import { getOutreachGenerator } from '@/lib/services/outreach-generator';
 import { OutreachGenerationRequest } from '@/types/partner-breakdown';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { captureApiError } from '@/lib/sentry-api';
+import type { UserTier } from '@/types/tier';
 
 // Rate limiting constants
 const DAILY_EMAIL_LIMIT = 10;
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
       user_id?: string;
       user_email?: string;
       session_id?: string;
-      tier?: 'free' | 'pro' | 'report'; // Client-side tier for localStorage auth
+      tier?: UserTier; // Client-side tier for localStorage auth
     };
 
     const {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user tier - must be Pro or Report
-    let userTier: 'free' | 'pro' | 'report' = 'free';
+    let userTier: UserTier = 'free';
     let authenticatedUserId: string | null = null;
 
     // Method 0 (R72): Server-side cookie auth — authoritative, doesn't depend
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
           .single();
         if (cookieProfile) {
           authenticatedUserId = cookieProfile.id;
-          userTier = (cookieProfile.tier as 'free' | 'pro' | 'report') || 'free';
+          userTier = (cookieProfile.tier as UserTier) || 'free';
           if (userTier === 'free' && cookieProfile.email && isProEmail(cookieProfile.email)) {
             userTier = 'pro';
           }
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
       if (profile) {
         authenticatedUserId = profile.id;
-        userTier = (profile.tier as 'free' | 'pro' | 'report') || 'free';
+        userTier = (profile.tier as UserTier) || 'free';
       }
     }
 

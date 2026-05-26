@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         .eq('id', userId)
         .single();
 
-      if (profile?.tier === 'pro' || profile?.tier === 'report') {
+      if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
         hasAccess = true;
       }
     }

@@ -54,7 +54,7 @@ export default function MarketSizePanel({
     );
   }
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const ms = marketSize;
 
   // Color intensities for the 5 funnel bars (light to dark)

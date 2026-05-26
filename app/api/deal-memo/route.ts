@@ -58,7 +58,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           .eq('id', authUser.id)
           .single();
         if (cookieProfile) {
-          if (cookieProfile.tier === 'pro' || cookieProfile.tier === 'report') authorized = true;
+          if (cookieProfile.tier === 'pro' || cookieProfile.tier === 'report' || cookieProfile.tier === 'portfolio') authorized = true;
           if (!authorized && cookieProfile.email && isProEmail(cookieProfile.email)) authorized = true;
         }
       }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         query.eq('email', body.email);
       }
       const { data: profile } = await query.single();
-      if (profile?.tier === 'pro' || profile?.tier === 'report') {
+      if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
         authorized = true;
       }
       // Check email whitelist (team members, beta testers)

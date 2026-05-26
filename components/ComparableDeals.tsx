@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { CalculationInput } from '@/lib/calculations';
 import { PRICING } from '@/lib/config/constants';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
+import type { UserTier } from '@/types/tier';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ interface BenchmarkRange {
 
 interface ComparableDealsProps {
   inputs: CalculationInput;
-  tier: 'free' | 'report' | 'pro';
+  tier: UserTier;
   onBuyReport?: () => void;
 }
 
@@ -237,7 +238,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
   const [sortKey, setSortKey] = useState<SortKey>('matchScore');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  const hasFullAccess = tier === 'pro' || tier === 'report';
+  const hasFullAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   // Fetch enriched deals
   useEffect(() => {

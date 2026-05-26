@@ -5,6 +5,7 @@ import { PartnerMatches } from './benchmarker/PartnerMatches';
 import { useTracking } from './TrackingProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import { captureClientError } from '@/lib/sentry-client';
+import type { UserTier } from '@/types/tier';
 
 export interface PartnerMatchForPDF {
   company_name: string;
@@ -36,7 +37,7 @@ interface PartnerMatchesContainerProps {
   };
 
   // User context
-  tier: 'free' | 'pro' | 'report';
+  tier: UserTier;
   onUpgrade: () => void;
 
   // Callback when matches are loaded (for PDF export)
@@ -62,7 +63,7 @@ export default function PartnerMatchesContainer({
   const [matchesShown, setMatchesShown] = useState(0);
   const [upgradeCta, setUpgradeCta] = useState<any>(null);
   const [advisoryCta, setAdvisoryCta] = useState<any>(null);
-  const [serverTier, setServerTier] = useState<'free' | 'pro' | 'report'>(tier);
+  const [serverTier, setServerTier] = useState<UserTier>(tier);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [calculationId, setCalculationId] = useState<string | undefined>();

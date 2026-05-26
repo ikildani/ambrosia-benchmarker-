@@ -116,7 +116,7 @@ export default function RnpvAnalysis({
     </div>
   );
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const derived = useMemo(() => {
     // Payback conditional on success — uses unadjusted PV, not risk-adjusted.

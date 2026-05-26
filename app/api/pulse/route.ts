@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       if (profile?.tier) userTier = profile.tier;
     }
 
-    const isPro = userTier === 'pro' || userTier === 'report';
+    const isPro = userTier === 'pro' || userTier === 'report' || userTier === 'portfolio';
 
     if (history) {
       // Return last 12 weekly snapshots for sparklines

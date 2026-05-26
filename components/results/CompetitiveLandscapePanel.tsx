@@ -118,7 +118,7 @@ export default function CompetitiveLandscapePanel({
     );
   }
 
-  const hasAccess = tier === 'pro' || tier === 'report';
+  const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const { ls, density, phasesWithCounts, maxPhaseCount, erosionPct } = computed;
 
   return (

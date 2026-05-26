@@ -34,7 +34,7 @@ export async function GET(
       if (profile?.tier) userTier = profile.tier;
     }
 
-    const isPro = userTier === 'pro' || userTier === 'report';
+    const isPro = userTier === 'pro' || userTier === 'report' || userTier === 'portfolio';
 
     // Fetch company profile
     const { data: company, error: companyError } = await supabase

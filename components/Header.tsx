@@ -4,6 +4,7 @@ import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { type JSX, useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
+import type { UserTier } from '@/types/tier';
 
 // Avatar gradient options - premium color combinations (synced with Dashboard.tsx)
 const AVATAR_GRADIENTS = [
@@ -23,7 +24,8 @@ interface HeaderProps {
   isAuthenticated?: boolean;
   userName?: string;
   userEmail?: string;
-  tier?: 'free' | 'pro' | 'report';
+  tier?: UserTier;
+  isPortfolioAdmin?: boolean;
   onSignInClick?: () => void;
   onSignUpClick?: () => void;
   onSignOut?: () => void;
@@ -35,6 +37,7 @@ export default function Header({
   userName,
   userEmail,
   tier = 'free',
+  isPortfolioAdmin = false,
   onSignInClick,
   onSignUpClick,
   onSignOut,
@@ -174,7 +177,7 @@ export default function Header({
   }, [userMenuOpen]);
 
   // Navigation items with proper routing
-  const isPro = tier === 'pro' || tier === 'report';
+  const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const navItems = [
     ...(isAuthenticated ? [{
       label: 'Dashboard',
@@ -195,6 +198,11 @@ export default function Header({
       label: 'Companies',
       href: '/companies',
       isActive: isCompaniesPage,
+    }] : []),
+    ...(tier === 'portfolio' && isPortfolioAdmin ? [{
+      label: 'Portfolio',
+      href: '/portfolio/admin',
+      isActive: pathname?.startsWith('/portfolio/admin') || false,
     }] : []),
     {
       label: 'Pricing',
