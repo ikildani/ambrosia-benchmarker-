@@ -355,16 +355,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           supabase.auth.getSession().then(({ data: { session: freshSession } }) => {
             if (!freshSession?.user) return;
             const uid = freshSession.user.id;
-            const uemail = freshSession.user.email;
-            if (uemail && isProEmailClient(uemail)) return; // Already pro via allowlist
             supabase.from('user_profiles')
-              .select('tier')
+              .select('tier, team_id')
               .eq('id', uid)
               .single()
               .then(({ data: profile, error: tierErr }) => {
                 if (!tierErr && profile?.tier && profile.tier !== 'free') {
                   setTierState(profile.tier as UserTier);
                   localStorage.setItem('user_tier', profile.tier);
+                  if (profile.tier === 'portfolio' && profile.team_id) {
+                    fetchTeamContext(supabase, uid, profile.team_id);
+                  }
                 }
               });
           });
