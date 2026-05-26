@@ -111,6 +111,7 @@ interface AuthContextType {
 
   // Loading state
   isLoading: boolean;
+  isTeamLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -120,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [tier, setTierState] = useState<UserTier>('free');
   const [teamContext, setTeamContext] = useState<TeamContext>(DEFAULT_TEAM_CONTEXT);
+  const [isTeamLoading, setIsTeamLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
@@ -383,6 +385,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchTeamContext = useCallback(async (supabase: ReturnType<typeof createClient>, userId: string, teamId: string) => {
+    setIsTeamLoading(true);
     try {
       const [teamResult, memberResult] = await Promise.all([
         supabase!.from('teams').select('name, slug, portfolio_tier, max_seats').eq('id', teamId).single(),
@@ -403,6 +406,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       console.warn('[Auth] Failed to fetch team context');
+    } finally {
+      setIsTeamLoading(false);
     }
   }, []);
 
@@ -557,6 +562,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     openAuthModal,
     closeAuthModal,
     isLoading,
+    isTeamLoading,
   };
 
   return (
