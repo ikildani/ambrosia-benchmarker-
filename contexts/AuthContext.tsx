@@ -174,7 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUser(parsed);
 
-        // Tier is resolved async from DB — no sync hints to avoid flicker
+        // Restore cached tier from localStorage (set by previous DB query)
+        const cachedTier = localStorage.getItem('user_tier');
+        if (cachedTier === 'portfolio' || cachedTier === 'pro' || cachedTier === 'report') {
+          setTierState(cachedTier as UserTier);
+        } else if (isProEmailClient(parsed.email)) {
+          setTierState('pro');
+        }
       } else {
         // Invalid stored data, clear it
         localStorage.removeItem('is_authenticated');
@@ -441,7 +447,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('is_authenticated', 'true');
     localStorage.setItem('user_data', JSON.stringify(newUser));
 
-    // Tier resolved async from DB — no sync hints
+    // Restore cached tier or use email allowlist hint
+    const cachedTier = localStorage.getItem('user_tier');
+    if (cachedTier === 'portfolio' || cachedTier === 'pro' || cachedTier === 'report') {
+      setTierState(cachedTier as UserTier);
+    } else if (isProEmailClient(email)) {
+      setTierState('pro');
+    }
   }, []);
 
   const signOut = useCallback(async () => {

@@ -52,15 +52,13 @@ export default function PortfolioAdminLayoutClient({
   const { isAuthenticated, user, tier, isPortfolioAdmin, teamName, portfolioSubTier, signOut, isLoading, isTeamLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const stillLoading = isLoading || (tier === 'portfolio' && isTeamLoading);
-
   useEffect(() => {
-    if (!stillLoading && (!isAuthenticated || tier !== 'portfolio' || !isPortfolioAdmin)) {
+    if (!isLoading && (!isAuthenticated || tier !== 'portfolio')) {
       router.push('/');
     }
-  }, [isAuthenticated, tier, isPortfolioAdmin, stillLoading, router]);
+  }, [isAuthenticated, tier, isLoading, router]);
 
-  if (stillLoading) {
+  if (isLoading || (tier === 'portfolio' && isTeamLoading)) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
@@ -68,7 +66,7 @@ export default function PortfolioAdminLayoutClient({
     );
   }
 
-  if (!stillLoading && (!isAuthenticated || tier !== 'portfolio' || !isPortfolioAdmin)) {
+  if (!isAuthenticated || tier !== 'portfolio') {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
