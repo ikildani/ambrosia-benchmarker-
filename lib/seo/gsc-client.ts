@@ -7,7 +7,7 @@
  */
 
 import { google, type searchconsole_v1 } from 'googleapis';
-import { JWT } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export interface GSCPerformanceRow {
@@ -28,7 +28,7 @@ export interface GSCCoverageData {
 
 export class GSCClient {
   private client: searchconsole_v1.Searchconsole | null = null;
-  private authClient: JWT | InstanceType<typeof google.auth.OAuth2> | null = null;
+  private authClient: OAuth2Client | null = null;
   private siteUrl: string;
   private configured: boolean = false;
   private authMethod: 'service_account' | 'oauth2' | 'none' = 'none';

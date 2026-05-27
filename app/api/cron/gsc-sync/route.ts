@@ -197,6 +197,15 @@ export async function GET(request: NextRequest) {
                   text: `*Top Queries by Impressions:*\n\`\`\`\n${topQueryLines || 'No data yet'}\n\`\`\``,
                 },
               },
+              ...(indexingResults.submitted > 0
+                ? [{
+                    type: 'section' as const,
+                    text: {
+                      type: 'mrkdwn' as const,
+                      text: `*Auto-Indexing:* ${indexingResults.submitted} pages submitted to Google Indexing API`,
+                    },
+                  }]
+                : []),
               {
                 type: 'context',
                 elements: [
@@ -285,4 +294,190 @@ async function sendCoverageDropAlert(
   } catch (err) {
     console.error('[gsc-sync] Slack notification failed:', err instanceof Error ? err.message : 'Unknown');
   }
+}
+
+// ── Auto-indexing for unindexed pages ──────────────────────────────────────
+
+/** Priority scores for page types (higher = submit first) */
+const PAGE_PRIORITY: { pattern: RegExp; priority: number }[] = [
+  { pattern: /^\/$/, priority: 1.0 },
+  { pattern: /^\/calculator$/, priority: 0.95 },
+  { pattern: /^\/pro$/, priority: 0.9 },
+  { pattern: /^\/therapeutic-areas\//, priority: 0.85 },
+  { pattern: /^\/benchmarks\//, priority: 0.8 },
+  { pattern: /^\/companies\//, priority: 0.75 },
+  { pattern: /^\/insights\//, priority: 0.7 },
+  { pattern: /^\/guides\//, priority: 0.7 },
+  { pattern: /^\/blog\//, priority: 0.65 },
+  { pattern: /^\/glossary\//, priority: 0.5 },
+  { pattern: /^\/pulse$/, priority: 0.8 },
+];
+
+function getPagePriority(url: string): number {
+  const path = url.replace('https://calculator.ambrosiaventures.co', '');
+  for (const { pattern, priority } of PAGE_PRIORITY) {
+    if (pattern.test(path)) return priority;
+  }
+  return 0.4; // default for uncategorized pages
+}
+
+const MAX_INDEXING_REQUESTS_PER_RUN = 10;
+
+async function autoIndexUnindexedPages(
+  supabase: SupabaseClient,
+  gsc: GSCClient,
+  performanceData: GSCPerformanceRow[]
+): Promise<{ submitted: number; failed: number; urls: string[] }> {
+  const baseUrl = 'https://calculator.ambrosiaventures.co';
+
+  // 1. Build the set of pages that have impressions (i.e., Google knows about them)
+  const pagesWithImpressions = new Set<string>();
+  for (const row of performanceData) {
+    if (row.page) pagesWithImpressions.add(row.page);
+  }
+
+  // Also fetch 90-day impression data for a broader view
+  const broadPages = await gsc.getPagesWithImpressions(90);
+  for (const p of broadPages) {
+    pagesWithImpressions.add(p);
+  }
+
+  // 2. Build the canonical set of high-priority pages from known site structure
+  const sitemapPages: { url: string; priority: number }[] = [];
+
+  // Static high-value pages
+  const staticPaths = [
+    '/', '/calculator', '/pro', '/portfolio', '/pulse',
+    '/benchmarks', '/companies', '/glossary', '/blog',
+    '/therapeutic-areas', '/about', '/methodology',
+    '/guides', '/guides/how-to-value-biotech-deal',
+    '/guides/negotiate-pharma-royalty-rates',
+    '/guides/biotech-licensing-deal-structure',
+    '/guides/rnpv-biotech-valuation',
+  ];
+  for (const path of staticPaths) {
+    const url = `${baseUrl}${path}`;
+    sitemapPages.push({ url, priority: getPagePriority(url) });
+  }
+
+  // TA pages
+  const tas = [
+    'oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic',
+    'rareDisease', 'infectiousDisease', 'ophthalmology', 'dermatology',
+    'womensHealth', 'gastroenterology', 'hematology',
+  ];
+  for (const ta of tas) {
+    const url = `${baseUrl}/therapeutic-areas/${ta}`;
+    sitemapPages.push({ url, priority: getPagePriority(url) });
+  }
+
+  // Fetch published blog posts from Supabase
+  const { data: blogPosts } = await supabase
+    .from('blog_posts')
+    .select('slug')
+    .eq('status', 'published')
+    .limit(200);
+
+  for (const post of blogPosts || []) {
+    const url = `${baseUrl}/blog/${post.slug}`;
+    sitemapPages.push({ url, priority: getPagePriority(url) });
+  }
+
+  // Fetch company pages
+  const { data: companies } = await supabase
+    .from('companies')
+    .select('id')
+    .order('deals_last_12mo', { ascending: false, nullsFirst: false })
+    .limit(200);
+
+  for (const company of companies || []) {
+    const url = `${baseUrl}/companies/${company.id}`;
+    sitemapPages.push({ url, priority: getPagePriority(url) });
+  }
+
+  // 3. Find pages with 0 impressions (not indexed or not ranking)
+  const unindexedPages = sitemapPages.filter((p) => !pagesWithImpressions.has(p.url));
+
+  if (unindexedPages.length === 0) {
+    console.log('[gsc-sync] All known pages have impressions — no indexing requests needed');
+    return { submitted: 0, failed: 0, urls: [] };
+  }
+
+  console.log(`[gsc-sync] Found ${unindexedPages.length} pages with 0 impressions`);
+
+  // 4. Check which pages are already in the indexing queue
+  const { data: existingQueue } = await supabase
+    .from('seo_indexing_queue')
+    .select('url, status, submitted_at')
+    .in('url', unindexedPages.map((p) => p.url));
+
+  const alreadySubmitted = new Set(
+    (existingQueue || [])
+      .filter((q) => {
+        // Skip if submitted in the last 3 days (avoid hammering the API)
+        if (q.submitted_at) {
+          const submittedAge = Date.now() - new Date(q.submitted_at).getTime();
+          const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+          return submittedAge < threeDaysMs;
+        }
+        return false;
+      })
+      .map((q) => q.url)
+  );
+
+  // 5. Pick top N unsubmitted pages by priority
+  const toSubmit = unindexedPages
+    .filter((p) => !alreadySubmitted.has(p.url))
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, MAX_INDEXING_REQUESTS_PER_RUN);
+
+  if (toSubmit.length === 0) {
+    console.log('[gsc-sync] All unindexed pages already submitted recently');
+    return { submitted: 0, failed: 0, urls: [] };
+  }
+
+  // 6. Upsert into the queue and attempt indexing requests
+  let submitted = 0;
+  let failed = 0;
+  const submittedUrls: string[] = [];
+
+  for (const page of toSubmit) {
+    // Attempt the Google Indexing API call
+    const result = await gsc.requestIndexing(page.url);
+
+    const now = new Date().toISOString();
+
+    if (result.success) {
+      submitted++;
+      submittedUrls.push(page.url);
+      await supabase.from('seo_indexing_queue').upsert(
+        {
+          url: page.url,
+          priority: page.priority,
+          submitted_at: now,
+          status: 'submitted',
+          updated_at: now,
+        },
+        { onConflict: 'url' }
+      );
+    } else {
+      failed++;
+      await supabase.from('seo_indexing_queue').upsert(
+        {
+          url: page.url,
+          priority: page.priority,
+          status: 'failed',
+          error_message: result.error?.slice(0, 500),
+          updated_at: now,
+        },
+        { onConflict: 'url' }
+      );
+    }
+  }
+
+  console.log(
+    `[gsc-sync] Indexing requests: ${submitted} submitted, ${failed} failed out of ${toSubmit.length}`
+  );
+
+  return { submitted, failed, urls: submittedUrls };
 }
