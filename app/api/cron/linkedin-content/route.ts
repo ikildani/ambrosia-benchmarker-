@@ -39,6 +39,7 @@ interface DealTrend {
 interface LinkedInDraft {
   title: string;
   body: string;
+  first_comment: string;
   link_url: string;
 }
 
@@ -176,56 +177,99 @@ async function generateLinkedInDrafts(
     ? `$${(trends.avgDealValue / 1_000_000).toFixed(0)}M`
     : 'N/A';
 
-  const prompt = `You are ghostwriting LinkedIn posts for Issa Kildani, founder of Ambrosia Ventures. These posts come from Issa's PERSONAL LinkedIn profile, not a company page.
+  const prompt = `You are ghostwriting LinkedIn posts for Issa Kildani, founder of Ambrosia Ventures. These come from Issa's PERSONAL LinkedIn profile.
 
-MANDATORY VOICE & STYLE RULES — violating any of these makes the post unusable:
+HERE ARE 3 REAL POSTS ISSA HAS WRITTEN THAT PERFORMED WELL. Match this exact voice, rhythm, and density — not the topics, but the WAY he writes:
 
-1. HOOK: First 2 lines MUST create tension, surprise, or a "wrong question" framing. This is what appears before "...see more" — it determines whether anyone reads the rest. Never open with a stat or a fact. Open with a human moment, a contradiction, or a provocation.
+EXAMPLE 1 (deal structure):
+"The headline says "$12.5 billion deal."
 
-2. PERSONAL VOICE: Use "I" not "we." Issa is a founder sharing observations, not a company posting content.
+The wire transfer says $500 million.
 
-3. TARGET LENGTH: 700-900 characters. Cut ruthlessly. Every sentence must earn its place.
+Hengrui → GSK: $12.5B deal. $500M upfront. That's 4%.
+Argo → Novartis: $5.2B deal. $160M upfront. That's 3%.
+Merus → Gilead: $6.3B deal. $56M upfront. Under 1%.
 
-4. NO LINKS IN POST BODY: LinkedIn suppresses reach for posts with external links. The link goes in the FIRST COMMENT (the link_url field). Never put a URL in the body text.
+I tracked every licensing deal over $1B in 2024-2025.
 
-5. BANNED PHRASES: Never say "engine", "backtest", "calibrated against N deals", "rNPV model", "our platform", "we built", "check out", "our tool", "data shows" (as an opener). These read as marketing, not insight.
+The median upfront is 8% of the headline number.
 
-6. END WITH ENGAGEMENT QUESTION: The last line must be a specific, easy-to-answer question. Not "What do you think?" — that's lazy. Something like "What modality do you think is next?" or "What's the biggest timing mistake you've seen?" Specific questions get 3-5x more comments.
+The press release says "multi-billion." The balance sheet says "milestone-dependent."
 
-7. HASHTAGS: Exactly 3 hashtags at the very end. PascalCase. Mix broad + niche. Example: #BiopharmaMA #ADCDeals #LifeSciences
+Next time you see a "$5B licensing deal," ask one question: what's the upfront?
 
-8. DATA ACCURACY: Only cite specific dollar amounts, company names, and deal terms that appear in the data below. Do NOT invent or estimate numbers. If the data doesn't support a specific claim, don't make it.
+That's the number that matters.
 
-9. STRUCTURE: Short paragraphs (1-3 sentences max). Use line breaks between every paragraph. The post should feel like scrolling through sharp observations, not reading a wall of text.
+#DealStructure #BiopharmaLicensing #LifeSciences"
 
-10. THE "SCREENSHOT TEST": At least one line in the post should be worth screenshotting and sharing. This is usually a punchline, a reframe, or a non-obvious insight stated in under 15 words.
+EXAMPLE 2 (company strategy):
+"AstraZeneca quietly executed 10 deals in 18 months.
 
-REAL DATA FOR THIS WEEK (use ONLY these numbers):
-- Total deals tracked this month: ${trends.totalDealsThisMonth}
+Not one made the front page of the Wall Street Journal.
+
+Fusion Pharmaceuticals: $2.4B
+Convergent Therapeutics: $1.8B
+CSPC Pharmaceutical: $2.0B
+CinCor Pharma: $1.8B
+Amolyt Pharma: $1.1B
+
+$18.5B total. No mega-acquisition. No hostile bid.
+
+While everyone debated whether AZ would make a "big move," they already did. Ten of them.
+
+The best acquirers don't swing for one $15B deal. They compound ten $1.5B ones.
+
+What's the most disciplined dealmaker you've seen in pharma?
+
+#BiopharmaMA #AstraZeneca #DealStrategy"
+
+EXAMPLE 3 (modality):
+"18 months ago, radiopharmaceutical M&A barely registered.
+
+Today, five major pharma companies have spent $10.5B fighting over the same handful of startups.
+
+AstraZeneca: Fusion ($2.4B), Convergent ($1.8B), Astellia ($425M). Three deals. $4.6B.
+
+Eli Lilly: collaborated with Aktis for $1.16B in 2024 — then acquired them outright for $1.4B in 2025.
+
+Eight deals. Five buyers. One modality.
+
+And here's the problem: there are almost no independent radiopharmaceutical companies left to acquire.
+
+What modality do you think sees this kind of acquisition frenzy next?
+
+#Radiopharmaceuticals #BiopharmaMA #Oncology"
+
+NOTICE THE PATTERN:
+- Opens with a short, punchy line that creates tension (not a stat, not a claim)
+- Lists specific deals with real dollar amounts (company → partner: $XB)
+- Builds to a NON-OBVIOUS insight (the "so what" that makes people stop scrolling)
+- One line that's worth screenshotting (the punchline)
+- Ends with a specific question (not "what do you think?")
+- No marketing language. No "check out." No methodology. Just sharp industry observation.
+- Reads like a text message from a smart friend who works in M&A, not a LinkedIn thought leader
+
+CRITICAL: DO NOT write like AI. No filler words. No "In today's rapidly evolving landscape." No "It's worth noting that." No "This raises an important question." No semicolons. No em-dashes used decoratively. Write like a person texting their observations to a colleague — direct, specific, slightly irreverent.
+
+REAL DATA FOR THIS WEEK (use ONLY these — do not fabricate):
+- Total deals this month: ${trends.totalDealsThisMonth}
 - Deals this week: ${trends.totalDealsThisWeek}
 - Top modalities: ${topModalityStr || 'No modality data'}
 - Top therapeutic areas: ${topTAStr || 'No TA data'}
 - Largest deal this week: ${largestDealStr}
 - Average deal value this month: ${avgValueStr}
 
-Generate exactly 3 LinkedIn post drafts as a JSON array. Each post should have a DIFFERENT angle:
-1. A non-obvious structural insight about deal terms, upfronts, or modality shifts
-2. A specific deal or company story with a contrarian takeaway
-3. A market-level observation that reframes how people think about biopharma M&A
+Generate exactly 3 post drafts. Each needs a DIFFERENT angle from the data above. If the data doesn't support a strong post, say so — don't force weak content.
 
-The link_url field is for Issa's FIRST COMMENT (not the post body):
-- https://calculator.ambrosiaventures.co/pulse
-- https://calculator.ambrosiaventures.co/benchmarks
-- https://calculator.ambrosiaventures.co/calculator
+Each post must include a "first_comment" field — the text Issa posts as the FIRST COMMENT immediately after publishing. This is where the link goes. Format it naturally: "Full deal comps across 1,900+ transactions → calculator.ambrosiaventures.co/benchmarks" — not a bare URL.
 
-FORMAT:
-{
-  "title": "Short internal title for Issa's reference",
-  "body": "The full LinkedIn post text with line breaks as \\n\\n",
+FORMAT (return ONLY this JSON array, nothing else):
+[{
+  "title": "Internal reference title",
+  "body": "Full post text with \\n\\n between paragraphs",
+  "first_comment": "Natural comment text with the link",
   "link_url": "https://calculator.ambrosiaventures.co/..."
-}
-
-Return ONLY a JSON array of 3 objects. No markdown, no explanation.`;
+}]`;
 
   const response = await client.messages.create({
     model: 'claude-opus-4-6',
@@ -276,6 +320,7 @@ Return ONLY a JSON array of 3 objects. No markdown, no explanation.`;
     return {
       title: d.title || 'Untitled Draft',
       body,
+      first_comment: d.first_comment || `Deal benchmarks across 1,900+ verified transactions → ${d.link_url || 'calculator.ambrosiaventures.co'}`,
       link_url: d.link_url || 'https://calculator.ambrosiaventures.co/pulse',
     };
   });
@@ -292,7 +337,7 @@ async function notifyLinkedInDraftsReady(drafts: LinkedInDraft[]): Promise<void>
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Draft ${i + 1}: ${draft.title}*\n\n${draft.body.slice(0, 500)}${draft.body.length > 500 ? '...' : ''}\n\n_Link: ${draft.link_url}_`,
+        text: `*Draft ${i + 1}: ${draft.title}*\n\n${draft.body.slice(0, 600)}${draft.body.length > 600 ? '...' : ''}\n\n💬 *First comment (post immediately after):*\n_${draft.first_comment}_`,
       },
     },
     { type: 'divider' },
@@ -397,6 +442,7 @@ export async function GET(request: NextRequest) {
     const insertRows = drafts.map((draft) => ({
       title: draft.title,
       body: draft.body,
+      first_comment: draft.first_comment,
       link_url: draft.link_url,
       status: 'draft' as const,
       scheduled_for: nextWednesday.toISOString(),
