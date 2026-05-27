@@ -268,7 +268,7 @@ export async function GET(request: NextRequest) {
             },
             user_id: user.id,
             user_tier: 'free',
-          }).catch(() => {});
+          }).then(() => {}, () => {});
 
           emailsSent++;
           console.log(`[calculation-convert] Sent to ${user.email} (${calcCount} calcs, ${therapeuticArea})`);
