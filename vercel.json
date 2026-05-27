@@ -221,6 +221,18 @@
     {
       "path": "/api/cron/seo-page-expand",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/smart-trial-extend",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/calculation-convert",
+      "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/cron/pro-intel-digest",
+      "schedule": "0 13 * * 1"
     }
   ]
 }

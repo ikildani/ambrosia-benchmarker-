@@ -9,9 +9,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
-import { GSCClient } from '@/lib/seo/gsc-client';
+import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
 
 export const maxDuration = 120;
 
@@ -103,6 +104,18 @@ export async function GET(request: NextRequest) {
 
     // 4. Submit sitemap
     await gsc.submitSitemap('https://calculator.ambrosiaventures.co/sitemap.xml');
+
+    // 4b. Auto-indexing: find unindexed pages and request indexing (up to 10 per run)
+    let indexingResults: { submitted: number; failed: number; urls: string[] } = {
+      submitted: 0,
+      failed: 0,
+      urls: [],
+    };
+    try {
+      indexingResults = await autoIndexUnindexedPages(supabase, gsc, performanceData);
+    } catch (err) {
+      console.error('[gsc-sync] Auto-indexing error (non-fatal):', err instanceof Error ? err.message : 'Unknown');
+    }
 
     // 5. Compare indexed count vs yesterday — alert if dropped by >5%
     const yesterday = new Date();
@@ -205,6 +218,8 @@ export async function GET(request: NextRequest) {
         indexedPages: indexedCount,
         performanceRows: performanceData.length,
         coverageDropAlert,
+        indexingSubmitted: indexingResults.submitted,
+        indexingFailed: indexingResults.failed,
       },
     });
 
@@ -213,6 +228,7 @@ export async function GET(request: NextRequest) {
       performanceRows: performanceData.length,
       indexedPages: indexedCount,
       coverageDropAlert,
+      indexing: indexingResults,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';

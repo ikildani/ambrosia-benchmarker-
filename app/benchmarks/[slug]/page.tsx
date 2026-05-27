@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
+import { ProGate } from '@/components/seo/ProGate';
 import {
   getAllBenchmarkSlugs,
   getBenchmarkBySlug,
@@ -177,11 +178,22 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Market Analysis
             </h2>
             <div className="space-y-6">
-              {page.contextParagraphs.map((para, i) => (
-                <p key={i} className="text-slate-600 leading-relaxed text-lg">
-                  {para}
+              {/* First paragraph is free */}
+              {page.contextParagraphs.length > 0 && (
+                <p className="text-slate-600 leading-relaxed text-lg">
+                  {page.contextParagraphs[0]}
                 </p>
-              ))}
+              )}
+              {/* Remaining paragraphs are gated */}
+              {page.contextParagraphs.length > 1 && (
+                <ProGate title="Full Benchmark Analysis" description="Complete deal term ranges, comparable transactions, and negotiation insights." pageSlug={slug}>
+                  {page.contextParagraphs.slice(1).map((para, i) => (
+                    <p key={i} className="text-slate-600 leading-relaxed text-lg">
+                      {para}
+                    </p>
+                  ))}
+                </ProGate>
+              )}
             </div>
           </div>
         </section>
@@ -221,14 +233,14 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
-              {page.faqs.map((faq, i) => (
+              {/* First FAQ is free */}
+              {page.faqs.length > 0 && (
                 <details
-                  key={i}
                   className="group bg-white rounded-xl border border-slate-200 overflow-hidden"
                 >
                   <summary className="flex items-center justify-between p-6 cursor-pointer select-none">
                     <span className="font-medium text-slate-900 pr-4">
-                      {faq.question}
+                      {page.faqs[0].question}
                     </span>
                     <svg
                       className="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform group-open:rotate-180"
@@ -245,10 +257,43 @@ export default async function BenchmarkPage({ params }: PageProps) {
                     </svg>
                   </summary>
                   <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                    {faq.answer}
+                    {page.faqs[0].answer}
                   </div>
                 </details>
-              ))}
+              )}
+              {/* Remaining FAQs are gated */}
+              {page.faqs.length > 1 && (
+                <ProGate title="Full Benchmark Analysis" description="Complete deal term ranges, comparable transactions, and negotiation insights." pageSlug={slug}>
+                  {page.faqs.slice(1).map((faq, i) => (
+                    <details
+                      key={i}
+                      className="group bg-white rounded-xl border border-slate-200 overflow-hidden"
+                    >
+                      <summary className="flex items-center justify-between p-6 cursor-pointer select-none">
+                        <span className="font-medium text-slate-900 pr-4">
+                          {faq.question}
+                        </span>
+                        <svg
+                          className="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform group-open:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </summary>
+                      <div className="px-6 pb-6 text-slate-600 leading-relaxed">
+                        {faq.answer}
+                      </div>
+                    </details>
+                  ))}
+                </ProGate>
+              )}
             </div>
           </div>
         </section>

@@ -7,6 +7,7 @@
  */
 
 import { google, type searchconsole_v1 } from 'googleapis';
+import { JWT } from 'google-auth-library';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export interface GSCPerformanceRow {
@@ -27,6 +28,7 @@ export interface GSCCoverageData {
 
 export class GSCClient {
   private client: searchconsole_v1.Searchconsole | null = null;
+  private authClient: JWT | InstanceType<typeof google.auth.OAuth2> | null = null;
   private siteUrl: string;
   private configured: boolean = false;
   private authMethod: 'service_account' | 'oauth2' | 'none' = 'none';
@@ -45,9 +47,13 @@ export class GSCClient {
         const auth = new google.auth.JWT({
           email: credentials.client_email,
           key: credentials.private_key,
-          scopes: ['https://www.googleapis.com/auth/webmasters.readonly'],
+          scopes: [
+            'https://www.googleapis.com/auth/webmasters.readonly',
+            'https://www.googleapis.com/auth/indexing',
+          ],
         });
 
+        this.authClient = auth;
         this.client = google.searchconsole({ version: 'v1', auth });
         this.configured = true;
         this.authMethod = 'service_account';
@@ -95,6 +101,7 @@ export class GSCClient {
         refresh_token: data.value.refresh_token,
       });
 
+      this.authClient = oauth2Client;
       this.client = google.searchconsole({ version: 'v1', auth: oauth2Client });
       this.configured = true;
       this.authMethod = 'oauth2';
@@ -203,6 +210,91 @@ export class GSCClient {
         '[GSCClient] submitSitemap error:',
         err instanceof Error ? err.message : 'Unknown'
       );
+    }
+  }
+
+  /**
+   * Request indexing for a URL via the Google Indexing API.
+   * Returns true if the request was accepted, false otherwise.
+   */
+  async requestIndexing(url: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.authClient || !this.configured) {
+      return { success: false, error: 'Client not configured' };
+    }
+
+    try {
+      // Get an access token from the auth client
+      const tokenResponse = await this.authClient.getAccessToken();
+      const accessToken = typeof tokenResponse === 'string'
+        ? tokenResponse
+        : tokenResponse?.token;
+
+      if (!accessToken) {
+        return { success: false, error: 'Failed to obtain access token' };
+      }
+
+      const res = await fetch('https://indexing.googleapis.com/v3/urlNotifications:publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          url,
+          type: 'URL_UPDATED',
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.text();
+        console.error(`[GSCClient] Indexing request failed for ${url}: ${res.status} ${body}`);
+        return { success: false, error: `${res.status}: ${body.slice(0, 200)}` };
+      }
+
+      console.log(`[GSCClient] Indexing requested for ${url}`);
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`[GSCClient] requestIndexing error for ${url}:`, message);
+      return { success: false, error: message };
+    }
+  }
+
+  /**
+   * Get all page URLs that have appeared in search analytics.
+   * Returns a set of page URLs that have at least some impressions.
+   */
+  async getPagesWithImpressions(days: number = 90): Promise<Set<string>> {
+    if (!this.client || !this.configured) {
+      return new Set();
+    }
+
+    try {
+      const endDate = formatDate(daysAgo(1));
+      const startDate = formatDate(daysAgo(days));
+
+      const res = await this.client.searchanalytics.query({
+        siteUrl: this.siteUrl,
+        requestBody: {
+          startDate,
+          endDate,
+          dimensions: ['page'],
+          rowLimit: 5000,
+        },
+      });
+
+      const pages = new Set<string>();
+      for (const row of res.data.rows || []) {
+        const pageUrl = row.keys?.[0];
+        if (pageUrl) pages.add(pageUrl);
+      }
+      return pages;
+    } catch (err) {
+      console.error(
+        '[GSCClient] getPagesWithImpressions error:',
+        err instanceof Error ? err.message : 'Unknown'
+      );
+      return new Set();
     }
   }
 

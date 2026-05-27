@@ -144,6 +144,13 @@ export async function POST(request: NextRequest) {
               email: reportEmail || 'unknown',
               amount: session.amount_total || undefined,
             }).catch(err => console.error('Webhook: Slack report notification error:', err));
+
+            // Mark lead as converted (stops drip emails)
+            if (customerEmail) {
+              await supabase.from('leads')
+                .update({ converted_at: new Date().toISOString() })
+                .eq('email', customerEmail.toLowerCase().trim());
+            }
           }
           break;
         }
@@ -238,6 +245,13 @@ export async function POST(request: NextRequest) {
         if (customerEmail) {
           sendUpgradeConfirmation(customerEmail, session.customer_details?.name || 'there')
             .catch(err => console.error('Webhook: Upgrade confirmation email error:', err));
+        }
+
+        // Mark lead as converted (stops drip emails)
+        if (customerEmail) {
+          await supabase.from('leads')
+            .update({ converted_at: new Date().toISOString() })
+            .eq('email', customerEmail.toLowerCase().trim());
         }
         break;
       }
@@ -401,6 +415,11 @@ export async function POST(request: NextRequest) {
               user_id: engProfile.id,
               user_tier: 'pro', tier_change_authorized: true,
             });
+
+            // Mark lead as converted (stops drip emails)
+            await supabase.from('leads')
+              .update({ converted_at: new Date().toISOString() })
+              .eq('email', invoiceEmail);
           }
           break; // handled — skip the subscription path
         }
