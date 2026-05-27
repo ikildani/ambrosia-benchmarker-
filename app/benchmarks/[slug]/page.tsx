@@ -7,6 +7,8 @@ import { ProGate } from '@/components/seo/ProGate';
 import {
   getAllBenchmarkSlugs,
   getBenchmarkBySlug,
+  getBenchmarkBySlugWithDb,
+  getAllBenchmarkSlugsWithDb,
 } from '@/lib/benchmarkPages';
 
 interface PageProps {
@@ -19,7 +21,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const page = getBenchmarkBySlug(slug);
+  const page = await getBenchmarkBySlugWithDb(slug);
   if (!page) return {};
 
   return {
@@ -51,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BenchmarkPage({ params }: PageProps) {
   const { slug } = await params;
-  const page = getBenchmarkBySlug(slug);
+  const page = await getBenchmarkBySlugWithDb(slug);
   if (!page) notFound();
 
   // Build calculator URL from prefill params

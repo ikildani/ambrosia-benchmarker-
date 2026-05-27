@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
-import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
+import { getAllBenchmarkSlugsWithDb } from '@/lib/benchmarkPages';
 import { getAllInsightSlugs } from '@/lib/insightPages';
 import { getAllTermSlugs } from '@/lib/glossaryTerms';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
@@ -176,7 +176,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   // Benchmark pages (statically generated)
-  const benchmarkSlugs = getAllBenchmarkSlugs();
+  const benchmarkSlugs = await getAllBenchmarkSlugsWithDb();
   const benchmarkPages: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/benchmarks`,
