@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const now = new Date();
 
-    const sent = { email1: 0, email2: 0, email3: 0, email4: 0, email5: 0 };
+    const sent = { email1: 0, email2: 0, email3: 0, email4: 0, email5: 0, email6: 0, email7: 0, email8: 0 };
     let completed = 0;
     const errors: string[] = [];
 
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Email 5 — Day 7 (168+ hours) — final push
+        // Email 5 — Day 7 (168+ hours) — personal from Issa
         if (lead.drip_4_sent && !lead.drip_5_sent && hours >= 168) {
           const { subject, html } = buildProGateEmail5(lead.email, context);
           const result = await sendEmail({
@@ -255,17 +255,56 @@ export async function GET(request: NextRequest) {
             replyTo: 'issa@ambrosiaventures.co',
           });
           if (result.success) {
-            await supabase.from('leads').update({ drip_5_sent: true, drip_completed: true }).eq('id', lead.id);
+            await supabase.from('leads').update({ drip_5_sent: true }).eq('id', lead.id);
             sent.email5++;
-            completed++;
           } else {
             errors.push(`E5 failed for ${lead.email}: ${result.error}`);
           }
           continue;
         }
 
-        // Mark completed if Email 5 already sent but drip_completed not set
-        if (lead.drip_5_sent && !lead.drip_completed) {
+        // Email 6 — Day 10 (240+ hours) — loss aversion
+        if (lead.drip_5_sent && !lead.drip_6_sent && hours >= 240) {
+          const { subject, html } = buildProGateEmail6(lead.email, context);
+          const result = await sendEmail({ to: lead.email, subject, html });
+          if (result.success) {
+            await supabase.from('leads').update({ drip_6_sent: true }).eq('id', lead.id);
+            sent.email6++;
+          } else {
+            errors.push(`E6 failed for ${lead.email}: ${result.error}`);
+          }
+          continue;
+        }
+
+        // Email 7 — Day 14 (336+ hours) — ROI math
+        if (lead.drip_6_sent && !lead.drip_7_sent && hours >= 336) {
+          const { subject, html } = buildProGateEmail7(lead.email, context);
+          const result = await sendEmail({ to: lead.email, subject, html });
+          if (result.success) {
+            await supabase.from('leads').update({ drip_7_sent: true }).eq('id', lead.id);
+            sent.email7++;
+          } else {
+            errors.push(`E7 failed for ${lead.email}: ${result.error}`);
+          }
+          continue;
+        }
+
+        // Email 8 — Day 21 (504+ hours) — final re-engagement + sunset
+        if (lead.drip_7_sent && !lead.drip_8_sent && hours >= 504) {
+          const { subject, html } = buildProGateEmail8(lead.email, context);
+          const result = await sendEmail({ to: lead.email, subject, html });
+          if (result.success) {
+            await supabase.from('leads').update({ drip_8_sent: true, drip_completed: true }).eq('id', lead.id);
+            sent.email8++;
+            completed++;
+          } else {
+            errors.push(`E8 failed for ${lead.email}: ${result.error}`);
+          }
+          continue;
+        }
+
+        // Mark completed if Email 8 already sent but drip_completed not set
+        if (lead.drip_8_sent && !lead.drip_completed) {
           await supabase.from('leads').update({ drip_completed: true }).eq('id', lead.id);
           completed++;
         }

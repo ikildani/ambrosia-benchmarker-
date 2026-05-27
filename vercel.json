@@ -83,6 +83,10 @@
       "schedule": "0 */6 * * *"
     },
     {
+      "path": "/api/cron/pro-gate-drip",
+      "schedule": "30 */6 * * *"
+    },
+    {
       "path": "/api/cron/benchmark-calibration",
       "schedule": "0 10 * * 2"
     },
