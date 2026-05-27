@@ -2693,14 +2693,28 @@ const BENCHMARK_PAGES: BenchmarkPageData[] = [
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+import { getGeneratedBenchmarkPages } from './benchmarkPagesGenerated';
+
+let _mergedCache: BenchmarkPageData[] | null = null;
+
+function getMergedPages(): BenchmarkPageData[] {
+  if (_mergedCache) return _mergedCache;
+  const generated = getGeneratedBenchmarkPages();
+  // Deduplicate: hand-written pages take priority over generated ones
+  const handWrittenSlugs = new Set(BENCHMARK_PAGES.map((p) => p.slug));
+  const uniqueGenerated = generated.filter((p) => !handWrittenSlugs.has(p.slug));
+  _mergedCache = [...BENCHMARK_PAGES, ...uniqueGenerated];
+  return _mergedCache;
+}
+
 export function getAllBenchmarkPages(): BenchmarkPageData[] {
-  return BENCHMARK_PAGES;
+  return getMergedPages();
 }
 
 export function getBenchmarkBySlug(slug: string): BenchmarkPageData | undefined {
-  return BENCHMARK_PAGES.find((p) => p.slug === slug);
+  return getMergedPages().find((p) => p.slug === slug);
 }
 
 export function getAllBenchmarkSlugs(): string[] {
-  return BENCHMARK_PAGES.map((p) => p.slug);
+  return getMergedPages().map((p) => p.slug);
 }
