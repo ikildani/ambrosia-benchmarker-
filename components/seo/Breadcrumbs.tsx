@@ -1,57 +1,40 @@
-'use client';
-
 import Link from 'next/link';
-import { ChevronRight, Home } from 'lucide-react';
 
-export interface BreadcrumbItem {
+interface BreadcrumbItem {
   label: string;
   href?: string;
 }
 
-interface BreadcrumbsProps {
-  items: BreadcrumbItem[];
-}
-
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
-  const allItems = [{ label: 'Home', href: '/' }, ...items];
-
-  // Generate JSON-LD for breadcrumbs
-  const breadcrumbSchema = {
+export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
+  const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: allItems.map((item, index) => ({
+    itemListElement: items.map((item, i) => ({
       '@type': 'ListItem',
-      position: index + 1,
+      position: i + 1,
       name: item.label,
-      item: item.href
-        ? `https://calculator.ambrosiaventures.co${item.href}`
-        : undefined,
+      ...(item.href ? { item: `https://calculator.ambrosiaventures.co${item.href}` } : {}),
     })),
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-slate-500">
-        {allItems.map((item, index) => (
-          <span key={index} className="flex items-center gap-1">
-            {index > 0 && <ChevronRight className="w-4 h-4" />}
-            {item.href && index < allItems.length - 1 ? (
-              <Link
-                href={item.href}
-                className="hover:text-teal-600 transition-colors flex items-center gap-1"
-              >
-                {index === 0 && <Home className="w-4 h-4" />}
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-slate-700 font-medium">{item.label}</span>
-            )}
-          </span>
-        ))}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+        <ol className="flex flex-wrap items-center gap-1">
+          {items.map((item, i) => (
+            <li key={i} className="flex items-center gap-1">
+              {i > 0 && <span className="text-slate-400 dark:text-slate-600">/</span>}
+              {item.href && i < items.length - 1 ? (
+                <Link href={item.href} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-slate-700 dark:text-slate-300">{item.label}</span>
+              )}
+            </li>
+          ))}
+        </ol>
       </nav>
     </>
   );

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Pharma M&A vs. Licensing: When to Acquire vs. License | Ambrosia Ventures',
@@ -33,16 +34,6 @@ export const metadata: Metadata = {
 
 export default function PharmaMaVsLicensingPage() {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
-      { '@type': 'ListItem', position: 2, name: 'Guides', item: `${baseUrl}/guides` },
-      { '@type': 'ListItem', position: 3, name: 'Pharma M&A vs. Licensing' },
-    ],
-  };
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -100,7 +91,7 @@ export default function PharmaMaVsLicensingPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbSchema, articleSchema, faqSchema]) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, faqSchema]) }} />
 
       <main className="min-h-screen bg-white">
         {/* Header */}
@@ -109,13 +100,11 @@ export default function PharmaMaVsLicensingPage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.12),rgba(255,255,255,0))]" />
           </div>
           <div className="relative max-w-3xl mx-auto">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-400 mb-8">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/guides" className="hover:text-white transition-colors">Guides</Link>
-              <span>/</span>
-              <span className="text-slate-200">Pharma M&amp;A vs. Licensing</span>
-            </nav>
+            <Breadcrumbs items={[
+              { label: 'Home', href: '/' },
+              { label: 'Guides', href: '/guides' },
+              { label: 'Pharma M&A vs. Licensing' },
+            ]} />
 
             <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 text-sm font-medium rounded-full mb-4">
               13 min read

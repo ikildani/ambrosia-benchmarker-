@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import {
   getAllBenchmarkSlugs,
   getBenchmarkBySlug,
@@ -74,31 +75,6 @@ export default async function BenchmarkPage({ params }: PageProps) {
     })),
   };
 
-  // JSON-LD: Breadcrumb schema
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://calculator.ambrosiaventures.co',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Benchmarks',
-        item: 'https://calculator.ambrosiaventures.co/benchmarks',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: page.h1,
-      },
-    ],
-  };
-
   // JSON-LD: Article schema
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -131,7 +107,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([faqSchema, breadcrumbSchema, articleSchema]),
+          __html: JSON.stringify([faqSchema, articleSchema]),
         }}
       />
 
@@ -146,24 +122,11 @@ export default async function BenchmarkPage({ params }: PageProps) {
 
           <div className="relative max-w-5xl mx-auto">
             {/* Breadcrumb */}
-            <nav
-              aria-label="Breadcrumb"
-              className="flex items-center gap-1 text-sm text-slate-400 mb-8"
-            >
-              <Link href="/" className="hover:text-teal-400 transition-colors">
-                Home
-              </Link>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-              <Link href="/benchmarks" className="hover:text-teal-400 transition-colors">
-                Benchmarks
-              </Link>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-              <span className="text-slate-300 font-medium">{page.h1}</span>
-            </nav>
+            <Breadcrumbs items={[
+              { label: 'Home', href: '/' },
+              { label: 'Benchmarks', href: '/benchmarks' },
+              { label: page.h1 },
+            ]} />
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight">
               {page.h1}

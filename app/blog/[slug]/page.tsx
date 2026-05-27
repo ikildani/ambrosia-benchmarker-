@@ -6,9 +6,9 @@ import { createServiceClient } from '@/lib/supabase/server';
 import {
   generateArticleSchema,
   generateFAQSchema,
-  generateBreadcrumbSchema,
 } from '@/lib/seo/structured-data';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
@@ -233,13 +233,9 @@ export default async function BlogPostPage({ params }: PageProps) {
     description: post.metaDescription,
     slug: post.slug,
     publishedAt: post.publishedAt,
+    image: `${BASE_URL}/api/og?title=${encodeURIComponent(post.title)}&subtitle=${encodeURIComponent(post.category)}`,
   });
   const faqSchema = post.faqs.length > 0 ? generateFAQSchema(post.faqs) : null;
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: 'Home', url: BASE_URL },
-    { name: 'Blog', url: `${BASE_URL}/blog` },
-    { name: post.title },
-  ]);
 
   const publishedDate = new Date(post.publishedAt).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -252,7 +248,6 @@ export default async function BlogPostPage({ params }: PageProps) {
       <main className="min-h-screen bg-white dark:bg-slate-900">
         {/* Structured Data */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'Organization', name: 'Ambrosia Ventures',
           url: BASE_URL, logo: `${BASE_URL}/logo.png`,
@@ -266,15 +261,11 @@ export default async function BlogPostPage({ params }: PageProps) {
 
           <article className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-16">
             {/* Breadcrumb */}
-            <nav aria-label="Breadcrumb" className="mb-8">
-              <ol className="flex items-center gap-2 text-sm text-slate-500">
-                <li><Link href="/" className="hover:text-teal-400 transition-colors">Home</Link></li>
-                <li aria-hidden="true" className="text-slate-700">/</li>
-                <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
-                <li aria-hidden="true" className="text-slate-700">/</li>
-                <li className="text-slate-400 font-medium truncate max-w-[220px] sm:max-w-none">{post.title}</li>
-              </ol>
-            </nav>
+            <Breadcrumbs items={[
+              { label: 'Home', href: '/' },
+              { label: 'Blog', href: '/blog' },
+              { label: post.title },
+            ]} />
 
             {/* Article header */}
             <header className="mb-10 sm:mb-14">

@@ -4,7 +4,7 @@ import { getAllBenchmarkPages } from '@/lib/benchmarkPages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Benchmarks 2026 | Ambrosia Ventures',
+  title: 'Biopharma Deal Benchmarks 2026',
   description:
     'Comprehensive licensing deal benchmarks across oncology, neurology, ADCs, CAR-T, bispecifics, and more. Data-driven deal term analysis for biopharma professionals.',
   keywords: [

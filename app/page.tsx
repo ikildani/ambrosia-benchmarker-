@@ -17,7 +17,7 @@ import { Check, ArrowRight } from 'lucide-react';
 
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
-const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: false });
+const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: true });
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserTier } from '@/types/tier';
 import {

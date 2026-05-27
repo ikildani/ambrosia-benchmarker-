@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties | Ambrosia Ventures',
@@ -36,16 +37,6 @@ export const metadata: Metadata = {
 
 export default function LifeSciencesDealCalculatorGuidePage() {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
-      { '@type': 'ListItem', position: 2, name: 'Guides', item: `${baseUrl}/guides` },
-      { '@type': 'ListItem', position: 3, name: 'Life Sciences Deal Calculator Guide' },
-    ],
-  };
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -136,7 +127,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbSchema, articleSchema, faqSchema, softwareSchema]) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, faqSchema, softwareSchema]) }} />
 
       <main className="min-h-screen bg-white">
         {/* Header */}
@@ -145,13 +136,11 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,165,0.12),rgba(255,255,255,0))]" />
           </div>
           <div className="relative max-w-3xl mx-auto">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-400 mb-8">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/guides" className="hover:text-white transition-colors">Guides</Link>
-              <span>/</span>
-              <span className="text-slate-200">Life Sciences Deal Calculator</span>
-            </nav>
+            <Breadcrumbs items={[
+              { label: 'Home', href: '/' },
+              { label: 'Guides', href: '/guides' },
+              { label: 'Life Sciences Deal Calculator Guide' },
+            ]} />
 
             <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 text-sm font-medium rounded-full mb-4">
               10 min read

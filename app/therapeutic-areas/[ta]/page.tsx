@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase/server';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 const TA_CONFIG: Record<string, { name: string; description: string; keywords: string[] }> = {
   oncology: { name: 'Oncology', description: 'Licensing deals, acquisitions, and collaborations in solid tumors and hematologic malignancies', keywords: ['oncology licensing deals', 'cancer drug deals', 'ADC deal terms', 'immuno-oncology partnerships'] },
@@ -90,13 +91,11 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
       {/* Hero */}
       <section className="py-16 sm:py-20 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
         <div className="max-w-5xl mx-auto">
-          <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
-            <Link href="/" className="hover:text-slate-900 dark:hover:text-white">Home</Link>
-            <span>/</span>
-            <Link href="/therapeutic-areas" className="hover:text-slate-900 dark:hover:text-white">Therapeutic Areas</Link>
-            <span>/</span>
-            <span className="text-slate-900 dark:text-white font-medium">{config.name}</span>
-          </nav>
+          <Breadcrumbs items={[
+            { label: 'Home', href: '/' },
+            { label: 'Therapeutic Areas', href: '/therapeutic-areas' },
+            { label: config.name },
+          ]} />
 
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
             {config.name} Deal Benchmarks

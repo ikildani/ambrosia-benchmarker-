@@ -1161,7 +1161,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Click on {dtl?.upfrontLabel || 'Upfront Payment'} to see detailed breakdown. Get Full Report for complete analysis.</span>
+            <span>You&apos;re seeing the summary view. Pro unlocks full drill-down on every metric, comparable deals, and financial modeling.</span>
           </div>
         )}
 
@@ -1185,7 +1185,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         )}
 
         {/* Deal Summary Strip -- compact single-row overview (Pro/Report only) */}
-        {hasFullAccess && <div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
+        {<div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
           <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-slate-600">
             {[
               { label: dtl?.upfrontLabel || 'Upfront', value: formatCurrency(terms.upfront.median), jargon: 'Upfront' },
@@ -1199,24 +1199,24 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">
                   {item.jargon ? <JargonTooltip term={item.jargon}>{item.label}</JargonTooltip> : item.label}
                 </p>
-                <p className="font-mono text-sm sm:text-base font-bold text-neutral-900 dark:text-white leading-tight mt-0.5">{item.value}</p>
+                <p className={`font-mono text-sm sm:text-base font-bold leading-tight mt-0.5 ${hasFullAccess ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white blur-[6px] select-none'}`}>{item.value}</p>
               </div>
             ))}
           </div>
         </div>}
 
         {/* Scenario Bridge Summary (Pro/Report only) */}
-        {hasFullAccess && financialModel?.defensiveAnalysis && (
+        {financialModel?.defensiveAnalysis && (
           <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono">
             <span className="px-2 py-1 rounded bg-neutral-100 dark:bg-slate-700 text-neutral-700 dark:text-slate-300 border border-neutral-200 dark:border-slate-600">
-              Base <span className="font-bold">{formatCurrency(financialModel.rnpv.riskAdjustedNPV)}</span>
+              Base <span className={`font-bold ${!hasFullAccess ? 'blur-[6px] select-none' : ''}`}>{formatCurrency(financialModel.rnpv.riskAdjustedNPV)}</span>
             </span>
             <span className="px-2 py-1 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
-              Bear <span className="font-bold">{formatCurrency(financialModel.defensiveAnalysis.worstCase.adjustedRNPV)}</span>
+              Bear <span className={`font-bold ${!hasFullAccess ? 'blur-[6px] select-none' : ''}`}>{formatCurrency(financialModel.defensiveAnalysis.worstCase.adjustedRNPV)}</span>
               <span className="ml-1 opacity-75">({financialModel.defensiveAnalysis.worstCase.impactPercent > 0 ? '+' : ''}{financialModel.defensiveAnalysis.worstCase.impactPercent.toFixed(0)}%)</span>
             </span>
             <span className="px-2 py-1 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-              Bull <span className="font-bold">{formatCurrency(financialModel.defensiveAnalysis.bestCase.adjustedRNPV)}</span>
+              Bull <span className={`font-bold ${!hasFullAccess ? 'blur-[6px] select-none' : ''}`}>{formatCurrency(financialModel.defensiveAnalysis.bestCase.adjustedRNPV)}</span>
               <span className="ml-1 opacity-75">(+{financialModel.defensiveAnalysis.bestCase.impactPercent.toFixed(0)}%)</span>
             </span>
           </div>
@@ -1612,6 +1612,51 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Pro feature preview for free users */}
+        {!hasFullAccess && (
+          <div className="mt-6 sm:mt-8 rounded-xl border border-teal-500/20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-900 p-5 sm:p-6 lg:p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/5 rounded-full blur-3xl" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-white">Pro users also get for this calculation</h3>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4">
+                {[
+                  { label: 'Partner Matching', desc: '850+ companies scored for fit', icon: '🎯' },
+                  { label: 'Scenario Comparison', desc: 'Bull / base / bear with your inputs', icon: '📊' },
+                  { label: 'Deal Waterfall', desc: 'Visual value breakdown by component', icon: '💧' },
+                  { label: 'rNPV & Monte Carlo', desc: 'Risk-adjusted valuation model', icon: '🧮' },
+                ].map((feature) => (
+                  <div key={feature.label} className="rounded-lg border border-slate-600/50 bg-slate-800/50 p-3 sm:p-4 hover:border-teal-500/30 transition-colors">
+                    <div className="text-xl mb-2">{feature.icon}</div>
+                    <p className="text-sm font-semibold text-white mb-1">{feature.label}</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">{feature.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  onClick={onUpgrade}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  Unlock Full Analysis
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+                <span className="text-xs text-slate-500">7-day free trial · No credit card required</span>
+              </div>
+            </div>
           </div>
         )}
 
