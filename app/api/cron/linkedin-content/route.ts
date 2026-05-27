@@ -176,45 +176,56 @@ async function generateLinkedInDrafts(
     ? `$${(trends.avgDealValue / 1_000_000).toFixed(0)}M`
     : 'N/A';
 
-  const prompt = `You are writing LinkedIn posts for Issa Kildani, CEO of Ambrosia Ventures, a pharma/biotech deal intelligence company. The platform at calculator.ambrosiaventures.co tracks 2,500+ pharma licensing and acquisition deals.
+  const prompt = `You are ghostwriting LinkedIn posts for Issa Kildani, founder of Ambrosia Ventures. These posts come from Issa's PERSONAL LinkedIn profile, not a company page.
 
-VOICE & STYLE RULES:
-- Lead with a specific, surprising data insight — never with "we built a tool" or "check out our platform"
-- No methodology jargon (never say "engine", "backtest", "calibrated against N deals", "rNPV model")
-- Write like a sharp industry insider sharing observations, not a company promoting a product
-- Short paragraphs. Conversational but data-driven.
-- Each post should be 150-250 words
-- End with a natural (not salesy) connection to the relevant page on calculator.ambrosiaventures.co
-- Use line breaks between paragraphs for LinkedIn readability
+MANDATORY VOICE & STYLE RULES — violating any of these makes the post unusable:
 
-DATA FOR THIS WEEK:
+1. HOOK: First 2 lines MUST create tension, surprise, or a "wrong question" framing. This is what appears before "...see more" — it determines whether anyone reads the rest. Never open with a stat or a fact. Open with a human moment, a contradiction, or a provocation.
+
+2. PERSONAL VOICE: Use "I" not "we." Issa is a founder sharing observations, not a company posting content.
+
+3. TARGET LENGTH: 700-900 characters. Cut ruthlessly. Every sentence must earn its place.
+
+4. NO LINKS IN POST BODY: LinkedIn suppresses reach for posts with external links. The link goes in the FIRST COMMENT (the link_url field). Never put a URL in the body text.
+
+5. BANNED PHRASES: Never say "engine", "backtest", "calibrated against N deals", "rNPV model", "our platform", "we built", "check out", "our tool", "data shows" (as an opener). These read as marketing, not insight.
+
+6. END WITH ENGAGEMENT QUESTION: The last line must be a specific, easy-to-answer question. Not "What do you think?" — that's lazy. Something like "What modality do you think is next?" or "What's the biggest timing mistake you've seen?" Specific questions get 3-5x more comments.
+
+7. HASHTAGS: Exactly 3 hashtags at the very end. PascalCase. Mix broad + niche. Example: #BiopharmaMA #ADCDeals #LifeSciences
+
+8. DATA ACCURACY: Only cite specific dollar amounts, company names, and deal terms that appear in the data below. Do NOT invent or estimate numbers. If the data doesn't support a specific claim, don't make it.
+
+9. STRUCTURE: Short paragraphs (1-3 sentences max). Use line breaks between every paragraph. The post should feel like scrolling through sharp observations, not reading a wall of text.
+
+10. THE "SCREENSHOT TEST": At least one line in the post should be worth screenshotting and sharing. This is usually a punchline, a reframe, or a non-obvious insight stated in under 15 words.
+
+REAL DATA FOR THIS WEEK (use ONLY these numbers):
 - Total deals tracked this month: ${trends.totalDealsThisMonth}
-- Total deals this week: ${trends.totalDealsThisWeek}
-- Top modalities this month: ${topModalityStr || 'No modality data'}
-- Top therapeutic areas this month: ${topTAStr || 'No TA data'}
+- Deals this week: ${trends.totalDealsThisWeek}
+- Top modalities: ${topModalityStr || 'No modality data'}
+- Top therapeutic areas: ${topTAStr || 'No TA data'}
 - Largest deal this week: ${largestDealStr}
 - Average deal value this month: ${avgValueStr}
 
-RELEVANT PAGES TO LINK (pick the most relevant for each post):
-- https://calculator.ambrosiaventures.co/pulse (live deal activity feed)
-- https://calculator.ambrosiaventures.co/therapeutic-areas (TA breakdowns)
-- https://calculator.ambrosiaventures.co/calculator (deal terms calculator)
-- https://calculator.ambrosiaventures.co/benchmarks (benchmark data)
-- https://calculator.ambrosiaventures.co/companies (company profiles)
+Generate exactly 3 LinkedIn post drafts as a JSON array. Each post should have a DIFFERENT angle:
+1. A non-obvious structural insight about deal terms, upfronts, or modality shifts
+2. A specific deal or company story with a contrarian takeaway
+3. A market-level observation that reframes how people think about biopharma M&A
 
-Generate exactly 3 LinkedIn post drafts as a JSON array. Each post should have a different angle:
-1. One about a modality or deal structure trend
-2. One about the largest/most notable deal
-3. One about a therapeutic area trend or shift
+The link_url field is for Issa's FIRST COMMENT (not the post body):
+- https://calculator.ambrosiaventures.co/pulse
+- https://calculator.ambrosiaventures.co/benchmarks
+- https://calculator.ambrosiaventures.co/calculator
 
-FORMAT each post as:
+FORMAT:
 {
-  "title": "Short internal title (not shown on LinkedIn, just for Issa's reference)",
+  "title": "Short internal title for Issa's reference",
   "body": "The full LinkedIn post text with line breaks as \\n\\n",
   "link_url": "https://calculator.ambrosiaventures.co/..."
 }
 
-Return ONLY a JSON array of 3 objects, no other text.`;
+Return ONLY a JSON array of 3 objects. No markdown, no explanation.`;
 
   const response = await client.messages.create({
     model: 'claude-opus-4-6',
@@ -240,11 +251,34 @@ Return ONLY a JSON array of 3 objects, no other text.`;
     throw new Error('Invalid drafts structure from Claude');
   }
 
-  return drafts.slice(0, 3).map((d) => ({
-    title: d.title || 'Untitled Draft',
-    body: d.body || '',
-    link_url: d.link_url || 'https://calculator.ambrosiaventures.co/pulse',
-  }));
+  const BANNED_PHRASES = ['engine', 'backtest', 'calibrated', 'rNPV', 'our platform', 'we built', 'check out', 'our tool', 'data shows'];
+
+  return drafts.slice(0, 3).map((d) => {
+    let body = d.body || '';
+
+    // Strip any URLs from the body (links go in first comment only)
+    body = body.replace(/https?:\/\/\S+/g, '').trim();
+
+    // Flag banned phrases (log but don't block — Issa reviews before posting)
+    const violations = BANNED_PHRASES.filter(phrase => body.toLowerCase().includes(phrase));
+    if (violations.length > 0) {
+      console.warn(`[linkedin-content] Draft "${d.title}" contains banned phrases: ${violations.join(', ')}`);
+    }
+
+    // Ensure exactly 3 hashtags at the end
+    const hashtagMatch = body.match(/#\w+/g);
+    if (!hashtagMatch || hashtagMatch.length > 3) {
+      const tags = (hashtagMatch || []).slice(0, 3);
+      body = body.replace(/#\w+/g, '').trim();
+      if (tags.length > 0) body += '\n\n' + tags.join(' ');
+    }
+
+    return {
+      title: d.title || 'Untitled Draft',
+      body,
+      link_url: d.link_url || 'https://calculator.ambrosiaventures.co/pulse',
+    };
+  });
 }
 
 // ── Slack notification ─────────────────────────────────────────────────────
