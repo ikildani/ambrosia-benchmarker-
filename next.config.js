@@ -18,6 +18,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/benchmarks/alzheimers-deal-benchmarks',
+        destination: '/benchmarks/alzheimers-licensing-deals',
+        permanent: true,
+      },
+    ];
+  },
   // Security headers configuration
   async headers() {
     return [

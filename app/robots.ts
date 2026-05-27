@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/'],
+        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/calculator?*', '/pricing?*', '/&', '/yr', '/mo', '/seat/'],
       },
       {
         userAgent: 'Bingbot',
