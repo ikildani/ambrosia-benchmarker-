@@ -217,6 +217,10 @@
     {
       "path": "/api/cron/pro-expiration",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/seo-page-expand",
+      "schedule": "0 6 * * 1"
     }
   ]
 }

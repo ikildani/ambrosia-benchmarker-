@@ -263,10 +263,14 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Email 6 — Day 10 (240+ hours) — loss aversion
+        // Email 6 — Day 10 (240+ hours) — loss aversion (from Issa)
         if (lead.drip_5_sent && !lead.drip_6_sent && hours >= 240) {
           const { subject, html } = buildProGateEmail6(lead.email, context);
-          const result = await sendEmail({ to: lead.email, subject, html });
+          const result = await sendEmail({
+            to: lead.email, subject, html,
+            from: 'Issa Kildani <issa@ambrosiaventures.co>',
+            replyTo: 'issa@ambrosiaventures.co',
+          });
           if (result.success) {
             await supabase.from('leads').update({ drip_6_sent: true }).eq('id', lead.id);
             sent.email6++;
@@ -276,10 +280,14 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Email 7 — Day 14 (336+ hours) — ROI math
+        // Email 7 — Day 14 (336+ hours) — ROI math (from Issa)
         if (lead.drip_6_sent && !lead.drip_7_sent && hours >= 336) {
           const { subject, html } = buildProGateEmail7(lead.email, context);
-          const result = await sendEmail({ to: lead.email, subject, html });
+          const result = await sendEmail({
+            to: lead.email, subject, html,
+            from: 'Issa Kildani <issa@ambrosiaventures.co>',
+            replyTo: 'issa@ambrosiaventures.co',
+          });
           if (result.success) {
             await supabase.from('leads').update({ drip_7_sent: true }).eq('id', lead.id);
             sent.email7++;
@@ -289,7 +297,7 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Email 8 — Day 21 (504+ hours) — final re-engagement + sunset
+        // Email 8 — Day 21 (504+ hours) — final re-engagement + auto-subscribe to weekly digest
         if (lead.drip_7_sent && !lead.drip_8_sent && hours >= 504) {
           const { subject, html } = buildProGateEmail8(lead.email, context);
           const result = await sendEmail({ to: lead.email, subject, html });
