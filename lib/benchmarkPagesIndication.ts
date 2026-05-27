@@ -223,6 +223,9 @@ const INDICATION_REGISTRY: IndicationDef[] = [
   { value: 'hidradenitisSuppurativa', label: 'Hidradenitis Suppurativa', ta: 'dermatology', modality: 'mab', phase: 'phase2' },
   { value: 'chronicUrticaria', label: 'Chronic Urticaria', ta: 'dermatology', modality: 'mab', phase: 'phase2' },
   { value: 'acne', label: 'Acne', ta: 'dermatology', modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'rosacea', label: 'Rosacea', ta: 'dermatology', modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'prurigo', label: 'Prurigo Nodularis', ta: 'dermatology', modality: 'mab', phase: 'phase2' },
+  { value: 'pemphigus', label: 'Pemphigus (Derm)', ta: 'dermatology', modality: 'mab', phase: 'phase2' },
 
   // ── Gastroenterology ─────────────────────────────────────────────────────
   { value: 'crohnsDisease', label: "Crohn's Disease", ta: 'gastroenterology', modality: 'antiTl1a' as Modality, phase: 'phase2' },
@@ -231,6 +234,18 @@ const INDICATION_REGISTRY: IndicationDef[] = [
   { value: 'celiacDisease', label: 'Celiac Disease', ta: 'gastroenterology', modality: 'smallMolecule', phase: 'phase2' },
   { value: 'ibsD', label: 'IBS-D', ta: 'gastroenterology', modality: 'smallMolecule', phase: 'phase2' },
   { value: 'shortBowelSyndrome', label: 'Short Bowel Syndrome', ta: 'gastroenterology', modality: 'peptide' as Modality, phase: 'phase2' },
+  { value: 'primaryBiliaryCholangitis', label: 'Primary Biliary Cholangitis (PBC)', ta: 'gastroenterology', modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'microscopicColitis', label: 'Microscopic Colitis', ta: 'gastroenterology', modality: 'mab', phase: 'phase2' },
+  { value: 'gastroparesis', label: 'Gastroparesis', ta: 'gastroenterology', modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'nonAlcoholicSteatohepatitis', label: 'NASH (GI)', ta: 'gastroenterology', modality: 'smallMolecule', phase: 'phase2' },
+
+  // ── Women's Health ───────────────────────────────────────────────────────
+  { value: 'endometriosis', label: 'Endometriosis', ta: 'womensHealth' as TherapeuticArea, modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'uterineFibroids', label: 'Uterine Fibroids', ta: 'womensHealth' as TherapeuticArea, modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'pcos', label: 'PCOS', ta: 'womensHealth' as TherapeuticArea, modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'menopause', label: 'Menopause', ta: 'womensHealth' as TherapeuticArea, modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'postpartumDepression', label: 'Postpartum Depression', ta: 'womensHealth' as TherapeuticArea, modality: 'smallMolecule', phase: 'phase2' },
+  { value: 'preeclampsia', label: 'Preeclampsia', ta: 'womensHealth' as TherapeuticArea, modality: 'mab', phase: 'phase2' },
 ];
 
 // ── Deduplicate: same value appearing in multiple TAs → keep first ────────
@@ -282,6 +297,23 @@ const TA_LABELS: Record<string, string> = {
   womensHealth: "Women's Health",
 };
 
+// ── Default modality per TA (for Women's Health input factory) ──────────
+
+const DEFAULT_INDICATION_FOR_TA: Record<string, string> = {
+  oncology: 'lung_nsclc',
+  neurology: 'alzheimers',
+  immunology: 'rheumatoidArthritis',
+  metabolic: 'obesity',
+  cardiovascular: 'heartFailureHfref',
+  infectiousDisease: 'hivAids',
+  ophthalmology: 'wetAmd',
+  rareDisease: 'spinalMuscularAtrophy',
+  hematology: 'dlbcl',
+  dermatology: 'atopicDermatitis',
+  gastroenterology: 'crohnsDisease',
+  womensHealth: 'endometriosis',
+};
+
 // ── Input factory ───────────────────────────────────────────────────────────
 
 function makeIndicationInput(def: IndicationDef): CalculationInput {
@@ -296,6 +328,7 @@ function makeIndicationInput(def: IndicationDef): CalculationInput {
   const isHeme = ta === 'hematology';
   const isDerm = ta === 'dermatology';
   const isGI = ta === 'gastroenterology';
+  const isWomens = ta === ('womensHealth' as TherapeuticArea);
 
   const base: CalculationInput = {
     therapeuticArea: ta,
@@ -369,6 +402,11 @@ function makeIndicationInput(def: IndicationDef): CalculationInput {
     base.giSegment = 'colonic';
     base.biologicExperience = 'biologic_naive';
     base.endoscopicEndpoint = 'endoscopic_remission';
+  }
+  if (isWomens) {
+    base.whTargetPopulation = 'reproductiveAge';
+    base.whUnmetNeed = 'inadequateOptions';
+    base.whRegulatory = 'standardPathway';
   }
 
   return base;
