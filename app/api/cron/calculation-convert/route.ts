@@ -297,7 +297,7 @@ export async function GET(request: NextRequest) {
         body: JSON.stringify({
           text: `Calculation convert: ${emailsSent} high-intent free user${emailsSent !== 1 ? 's' : ''} emailed (3+ calcs in 24h)`,
         }),
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     }
 
     console.log(`[calculation-convert] Done: ${highIntentUserIds.length} high-intent, ${freeUsers.length} free, ${emailsSent} emails sent`);

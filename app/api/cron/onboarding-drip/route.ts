@@ -367,7 +367,7 @@ export async function GET(request: NextRequest) {
             ],
           }],
         }),
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     }
 
     return NextResponse.json({

@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
           },
           user_id: user.id,
           user_tier: 'pro',
-        }).catch(() => {});
+        }).then(() => {}, () => {});
 
         extended++;
         console.log(`[smart-trial-extend] Extended ${user.email}: ${user.pro_expires_at} -> ${newExpiry.toISOString()} (${count} events)`);
@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
         body: JSON.stringify({
           text: `Smart trial extension: ${extended} user${extended !== 1 ? 's' : ''} extended by 7 days`,
         }),
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     }
 
     console.log(`[smart-trial-extend] Done: checked ${expiringUsers.length}, extended ${extended}, errors ${errors.length}`);

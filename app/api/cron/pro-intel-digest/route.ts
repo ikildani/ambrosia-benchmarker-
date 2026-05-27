@@ -328,7 +328,7 @@ export async function GET(request: NextRequest) {
             },
             user_id: user.id,
             user_tier: 'pro',
-          }).catch(() => {});
+          }).then(() => {}, () => {});
 
           emailsSent++;
           console.log(`[pro-intel-digest] Sent to ${user.email} (${ta1}${ta2 ? `/${ta2}` : ''}, ${combinedDeals.length} deals)`);
@@ -362,7 +362,7 @@ export async function GET(request: NextRequest) {
         body: JSON.stringify({
           text: `Pro intel digest: ${emailsSent}/${proUsers.length} Pro users emailed (${recentDeals?.length || 0} new deals across ${dealsByTa.size} TAs)`,
         }),
-      }).catch(() => {});
+      }).then(() => {}, () => {});
     }
 
     console.log(`[pro-intel-digest] Done: ${proUsers.length} Pro users, ${emailsSent} emails sent, ${skippedNoDeals} skipped (no deals), ${errors.length} errors`);
