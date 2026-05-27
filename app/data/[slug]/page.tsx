@@ -7,6 +7,7 @@ import {
   formatCurrency,
 } from '@/lib/seo/programmatic-pages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { ProGate } from '@/components/seo/ProGate';
 import dynamic from 'next/dynamic';
 
 const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
@@ -168,19 +169,21 @@ export default async function ProgrammaticDataPage({
               reflect the risk-adjusted value of clinical-stage assets in the {page.ta.label.toLowerCase()} therapeutic
               area, where development costs, competitive dynamics, and market potential all factor into deal pricing.
             </p>
-            <p className="text-slate-400 leading-relaxed">
-              Total deal values — including milestones for development, regulatory, and commercial
-              achievements — range from {formatCurrency(page.totalValue.low)} to {formatCurrency(page.totalValue.high)},
-              with a median of {formatCurrency(page.totalValue.median)}. Royalty rates for {page.ta.label.toLowerCase()} assets
-              at this stage typically fall between {page.royalty.base}% and {page.royalty.max}% of net sales, reflecting
-              the balance between licensor value contribution and licensee commercialization investment.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              The {page.territory.label} territory applies a {page.territoryMultiplier}x multiplier to base deal
-              economics. This accounts for market size, regulatory complexity, pricing environment, and
-              competitive landscape differences across geographies. Licensors negotiating {page.territory.label.toLowerCase()} rights
-              should calibrate upfront expectations and milestone structures accordingly.
-            </p>
+            <ProGate title="Full Market Analysis" description="Detailed deal economics, territory impact analysis, and royalty structure breakdown.">
+              <p className="text-slate-400 leading-relaxed">
+                Total deal values — including milestones for development, regulatory, and commercial
+                achievements — range from {formatCurrency(page.totalValue.low)} to {formatCurrency(page.totalValue.high)},
+                with a median of {formatCurrency(page.totalValue.median)}. Royalty rates for {page.ta.label.toLowerCase()} assets
+                at this stage typically fall between {page.royalty.base}% and {page.royalty.max}% of net sales, reflecting
+                the balance between licensor value contribution and licensee commercialization investment.
+              </p>
+              <p className="text-slate-400 leading-relaxed">
+                The {page.territory.label} territory applies a {page.territoryMultiplier}x multiplier to base deal
+                economics. This accounts for market size, regulatory complexity, pricing environment, and
+                competitive landscape differences across geographies. Licensors negotiating {page.territory.label.toLowerCase()} rights
+                should calibrate upfront expectations and milestone structures accordingly.
+              </p>
+            </ProGate>
           </div>
         </section>
 
@@ -190,38 +193,40 @@ export default async function ProgrammaticDataPage({
             <h2 className="text-xl font-semibold text-white mb-6">
               Full Benchmark Data
             </h2>
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800 bg-slate-900/60">
-                    <th className="text-left px-4 py-3 text-slate-400 font-medium">Metric</th>
-                    <th className="text-right px-4 py-3 text-slate-400 font-medium">Low</th>
-                    <th className="text-right px-4 py-3 text-slate-400 font-medium">Median</th>
-                    <th className="text-right px-4 py-3 text-slate-400 font-medium">High</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-slate-800/50">
-                    <td className="px-4 py-3 text-slate-300">Upfront Payment</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.upfront.low)}</td>
-                    <td className="px-4 py-3 text-right text-teal-400 font-semibold">{formatCurrency(page.upfront.median)}</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.upfront.high)}</td>
-                  </tr>
-                  <tr className="border-b border-slate-800/50">
-                    <td className="px-4 py-3 text-slate-300">Total Deal Value</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.totalValue.low)}</td>
-                    <td className="px-4 py-3 text-right text-teal-400 font-semibold">{formatCurrency(page.totalValue.median)}</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.totalValue.high)}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-slate-300">Royalty Rate</td>
-                    <td className="px-4 py-3 text-right text-slate-400" colSpan={1}>{page.royalty.base}%</td>
-                    <td className="px-4 py-3 text-right text-teal-400 font-semibold">—</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{page.royalty.max}%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <ProGate title="Full Benchmark Table" description="Low, median, and high ranges for upfront payments, total deal values, and royalty rates.">
+              <div className="overflow-x-auto rounded-xl border border-slate-800">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-800 bg-slate-900/60">
+                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Metric</th>
+                      <th className="text-right px-4 py-3 text-slate-400 font-medium">Low</th>
+                      <th className="text-right px-4 py-3 text-slate-400 font-medium">Median</th>
+                      <th className="text-right px-4 py-3 text-slate-400 font-medium">High</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-slate-800/50">
+                      <td className="px-4 py-3 text-slate-300">Upfront Payment</td>
+                      <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.upfront.low)}</td>
+                      <td className="px-4 py-3 text-right text-teal-400 font-semibold">{formatCurrency(page.upfront.median)}</td>
+                      <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.upfront.high)}</td>
+                    </tr>
+                    <tr className="border-b border-slate-800/50">
+                      <td className="px-4 py-3 text-slate-300">Total Deal Value</td>
+                      <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.totalValue.low)}</td>
+                      <td className="px-4 py-3 text-right text-teal-400 font-semibold">{formatCurrency(page.totalValue.median)}</td>
+                      <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(page.totalValue.high)}</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 text-slate-300">Royalty Rate</td>
+                      <td className="px-4 py-3 text-right text-slate-400" colSpan={1}>{page.royalty.base}%</td>
+                      <td className="px-4 py-3 text-right text-teal-400 font-semibold">—</td>
+                      <td className="px-4 py-3 text-right text-slate-400">{page.royalty.max}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ProGate>
           </div>
         </section>
 
@@ -231,44 +236,46 @@ export default async function ProgrammaticDataPage({
             <h2 className="text-xl font-semibold text-white mb-6">
               Comparable Deals
             </h2>
-            {page.comparableDeals.length > 0 ? (
-              <div className="overflow-x-auto rounded-xl border border-slate-800">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800 bg-slate-900/60">
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Year</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Licensor</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Licensee</th>
-                      <th className="text-right px-4 py-3 text-slate-400 font-medium">Upfront</th>
-                      <th className="text-right px-4 py-3 text-slate-400 font-medium">Total Value</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Deal Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {page.comparableDeals.map((deal, i) => (
-                      <tr key={i} className="border-b border-slate-800/50 last:border-b-0">
-                        <td className="px-4 py-3 text-slate-400">{deal.year}</td>
-                        <td className="px-4 py-3 text-slate-300">{deal.licensor}</td>
-                        <td className="px-4 py-3 text-slate-300">{deal.licensee}</td>
-                        <td className="px-4 py-3 text-right text-teal-400">{formatCurrency(deal.upfront)}</td>
-                        <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(deal.totalDealValue)}</td>
-                        <td className="px-4 py-3 text-slate-400 capitalize">{deal.dealType}</td>
+            <ProGate title="See All Comparable Deals" description={`View ${page.comparableDeals.length} comparable ${page.ta.label} transactions with upfront payments, total values, and deal structures.`}>
+              {page.comparableDeals.length > 0 ? (
+                <div className="overflow-x-auto rounded-xl border border-slate-800">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-800 bg-slate-900/60">
+                        <th className="text-left px-4 py-3 text-slate-400 font-medium">Year</th>
+                        <th className="text-left px-4 py-3 text-slate-400 font-medium">Licensor</th>
+                        <th className="text-left px-4 py-3 text-slate-400 font-medium">Licensee</th>
+                        <th className="text-right px-4 py-3 text-slate-400 font-medium">Upfront</th>
+                        <th className="text-right px-4 py-3 text-slate-400 font-medium">Total Value</th>
+                        <th className="text-left px-4 py-3 text-slate-400 font-medium">Deal Type</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center">
-                <p className="text-slate-500">
-                  No territory-specific comparable deals.{' '}
-                  <Link href={calcUrl} className="text-teal-400 hover:text-teal-300 transition-colors">
-                    Use the calculator
-                  </Link>{' '}
-                  for full analysis.
-                </p>
-              </div>
-            )}
+                    </thead>
+                    <tbody>
+                      {page.comparableDeals.map((deal, i) => (
+                        <tr key={i} className="border-b border-slate-800/50 last:border-b-0">
+                          <td className="px-4 py-3 text-slate-400">{deal.year}</td>
+                          <td className="px-4 py-3 text-slate-300">{deal.licensor}</td>
+                          <td className="px-4 py-3 text-slate-300">{deal.licensee}</td>
+                          <td className="px-4 py-3 text-right text-teal-400">{formatCurrency(deal.upfront)}</td>
+                          <td className="px-4 py-3 text-right text-slate-400">{formatCurrency(deal.totalDealValue)}</td>
+                          <td className="px-4 py-3 text-slate-400 capitalize">{deal.dealType}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center">
+                  <p className="text-slate-500">
+                    No territory-specific comparable deals.{' '}
+                    <Link href={calcUrl} className="text-teal-400 hover:text-teal-300 transition-colors">
+                      Use the calculator
+                    </Link>{' '}
+                    for full analysis.
+                  </p>
+                </div>
+              )}
+            </ProGate>
           </div>
         </section>
 
@@ -295,37 +302,39 @@ export default async function ProgrammaticDataPage({
                 </div>
               </details>
 
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/40">
-                <summary className="cursor-pointer px-6 py-4 text-slate-300 font-medium hover:text-white transition-colors list-none flex items-center justify-between">
-                  How does {page.territory.label} territory affect {page.ta.label} deal value?
-                  <svg className="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <div className="px-6 pb-4 text-slate-400 leading-relaxed">
-                  {page.territory.label} rights carry a {page.territoryMultiplier}x multiplier relative to
-                  base deal economics. This means {page.territory.label.toLowerCase()} {page.ta.label.toLowerCase()} deals
-                  are valued at {page.territoryMultiplier > 1 ? 'a premium' : 'a discount'} compared
-                  to single-country rights, reflecting the combined market opportunity, regulatory
-                  pathway, and competitive dynamics of the territory.
-                </div>
-              </details>
+              <ProGate title="More Expert Insights" description="Territory impact analysis, royalty negotiation strategies, and deal structure guidance.">
+                <details className="group rounded-xl border border-slate-800 bg-slate-900/40">
+                  <summary className="cursor-pointer px-6 py-4 text-slate-300 font-medium hover:text-white transition-colors list-none flex items-center justify-between">
+                    How does {page.territory.label} territory affect {page.ta.label} deal value?
+                    <svg className="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-6 pb-4 text-slate-400 leading-relaxed">
+                    {page.territory.label} rights carry a {page.territoryMultiplier}x multiplier relative to
+                    base deal economics. This means {page.territory.label.toLowerCase()} {page.ta.label.toLowerCase()} deals
+                    are valued at {page.territoryMultiplier > 1 ? 'a premium' : 'a discount'} compared
+                    to single-country rights, reflecting the combined market opportunity, regulatory
+                    pathway, and competitive dynamics of the territory.
+                  </div>
+                </details>
 
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/40">
-                <summary className="cursor-pointer px-6 py-4 text-slate-300 font-medium hover:text-white transition-colors list-none flex items-center justify-between">
-                  What royalty rates are typical for {page.phase.label} {page.ta.label} licensing?
-                  <svg className="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <div className="px-6 pb-4 text-slate-400 leading-relaxed">
-                  Royalty rates for {page.phase.label} {page.ta.label.toLowerCase()} assets typically range
-                  from {page.royalty.base}% to {page.royalty.max}% of net sales. The exact rate depends on
-                  the licensor&apos;s contribution (IP, clinical data, manufacturing), deal structure
-                  (exclusive vs. co-exclusive), and the licensee&apos;s commercialization investment. Higher
-                  royalties often correspond to lower upfront payments, and vice versa.
-                </div>
-              </details>
+                <details className="group rounded-xl border border-slate-800 bg-slate-900/40">
+                  <summary className="cursor-pointer px-6 py-4 text-slate-300 font-medium hover:text-white transition-colors list-none flex items-center justify-between">
+                    What royalty rates are typical for {page.phase.label} {page.ta.label} licensing?
+                    <svg className="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-6 pb-4 text-slate-400 leading-relaxed">
+                    Royalty rates for {page.phase.label} {page.ta.label.toLowerCase()} assets typically range
+                    from {page.royalty.base}% to {page.royalty.max}% of net sales. The exact rate depends on
+                    the licensor&apos;s contribution (IP, clinical data, manufacturing), deal structure
+                    (exclusive vs. co-exclusive), and the licensee&apos;s commercialization investment. Higher
+                    royalties often correspond to lower upfront payments, and vice versa.
+                  </div>
+                </details>
+              </ProGate>
             </div>
           </div>
         </section>
