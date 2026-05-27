@@ -169,7 +169,7 @@ export default async function ProgrammaticDataPage({
               reflect the risk-adjusted value of clinical-stage assets in the {page.ta.label.toLowerCase()} therapeutic
               area, where development costs, competitive dynamics, and market potential all factor into deal pricing.
             </p>
-            <ProGate title="Full Market Analysis" description="Detailed deal economics, territory impact analysis, and royalty structure breakdown.">
+            <ProGate title="Full Market Analysis" description="Detailed deal economics, territory impact analysis, and royalty structure breakdown." pageSlug={slug}>
               <p className="text-slate-400 leading-relaxed">
                 Total deal values — including milestones for development, regulatory, and commercial
                 achievements — range from {formatCurrency(page.totalValue.low)} to {formatCurrency(page.totalValue.high)},
@@ -193,7 +193,7 @@ export default async function ProgrammaticDataPage({
             <h2 className="text-xl font-semibold text-white mb-6">
               Full Benchmark Data
             </h2>
-            <ProGate title="Full Benchmark Table" description="Low, median, and high ranges for upfront payments, total deal values, and royalty rates.">
+            <ProGate title="Full Benchmark Table" description="Low, median, and high ranges for upfront payments, total deal values, and royalty rates." pageSlug={slug}>
               <div className="overflow-x-auto rounded-xl border border-slate-800">
                 <table className="w-full text-sm">
                   <thead>
@@ -236,7 +236,7 @@ export default async function ProgrammaticDataPage({
             <h2 className="text-xl font-semibold text-white mb-6">
               Comparable Deals
             </h2>
-            <ProGate title="See All Comparable Deals" description={`View ${page.comparableDeals.length} comparable ${page.ta.label} transactions with upfront payments, total values, and deal structures.`}>
+            <ProGate title="See All Comparable Deals" description={`View ${page.comparableDeals.length} comparable ${page.ta.label} transactions with upfront payments, total values, and deal structures.`} pageSlug={slug}>
               {page.comparableDeals.length > 0 ? (
                 <div className="overflow-x-auto rounded-xl border border-slate-800">
                   <table className="w-full text-sm">
@@ -302,7 +302,7 @@ export default async function ProgrammaticDataPage({
                 </div>
               </details>
 
-              <ProGate title="More Expert Insights" description="Territory impact analysis, royalty negotiation strategies, and deal structure guidance.">
+              <ProGate title="More Expert Insights" description="Territory impact analysis, royalty negotiation strategies, and deal structure guidance." pageSlug={slug}>
                 <details className="group rounded-xl border border-slate-800 bg-slate-900/40">
                   <summary className="cursor-pointer px-6 py-4 text-slate-300 font-medium hover:text-white transition-colors list-none flex items-center justify-between">
                     How does {page.territory.label} territory affect {page.ta.label} deal value?
@@ -369,6 +369,76 @@ export default async function ProgrammaticDataPage({
             </div>
           </section>
         )}
+
+        {/* Cross-Section Links */}
+        <section className="px-4 pb-16">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-semibold text-white mb-6">
+              Explore More
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Link
+                href={`/therapeutic-areas/${page.ta.key === 'infectiousDisease' ? 'infectiousDisease' : page.ta.key === 'womensHealth' ? 'womensHealth' : page.ta.key === 'rareDisease' ? 'rareDisease' : page.ta.key}`}
+                className="group flex items-center gap-3 rounded-xl border border-slate-800 p-4 hover:border-teal-500/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">All {page.ta.label} Deals</p>
+                  <p className="text-xs text-slate-500">View full therapeutic area benchmarks</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/guides/biopharma-licensing-benchmarks"
+                className="group flex items-center gap-3 rounded-xl border border-slate-800 p-4 hover:border-teal-500/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">Licensing Benchmarks Guide</p>
+                  <p className="text-xs text-slate-500">2026 data from 1,900+ deals</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/guides/negotiate-pharma-royalty-rates"
+                className="group flex items-center gap-3 rounded-xl border border-slate-800 p-4 hover:border-teal-500/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">Royalty Rate Benchmarks</p>
+                  <p className="text-xs text-slate-500">Negotiation strategies by phase & modality</p>
+                </div>
+              </Link>
+
+              <Link
+                href={calcUrl}
+                className="group flex items-center gap-3 rounded-xl border border-slate-800 p-4 hover:border-teal-500/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">Run Custom Analysis</p>
+                  <p className="text-xs text-slate-500">Pre-filled with {page.ta.label} · {page.phase.label}</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-16 px-4">

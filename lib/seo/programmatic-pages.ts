@@ -7,24 +7,25 @@
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { calculateDealTerms, formatCurrency, type CalculationInput, type TherapeuticArea, type Phase, type Territory } from '@/lib/calculations';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
+import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
 
 const benchmarks = getBenchmarksSync();
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
-const TAS: { key: TherapeuticArea; slug: string; label: string }[] = [
-  { key: 'oncology', slug: 'oncology', label: 'Oncology' },
-  { key: 'neurology', slug: 'neurology', label: 'Neurology/CNS' },
-  { key: 'immunology', slug: 'immunology', label: 'Immunology' },
-  { key: 'metabolic', slug: 'metabolic', label: 'Metabolic/Obesity' },
-  { key: 'cardiovascular', slug: 'cardiovascular', label: 'Cardiovascular' },
-  { key: 'infectiousDisease', slug: 'infectious-disease', label: 'Infectious Disease' },
-  { key: 'ophthalmology', slug: 'ophthalmology', label: 'Ophthalmology' },
-  { key: 'womensHealth', slug: 'womens-health', label: "Women's Health" },
-  { key: 'rareDisease', slug: 'rare-disease', label: 'Rare Disease' },
-  { key: 'hematology', slug: 'hematology', label: 'Hematology' },
-  { key: 'dermatology', slug: 'dermatology', label: 'Dermatology' },
-  { key: 'gastroenterology', slug: 'gastroenterology', label: 'Gastroenterology' },
+const TAS: { key: TherapeuticArea; slug: string; label: string; titleLabel: string }[] = [
+  { key: 'oncology', slug: 'oncology', label: 'Oncology', titleLabel: 'Oncology' },
+  { key: 'neurology', slug: 'neurology', label: 'Neurology/CNS', titleLabel: 'Neuro/CNS' },
+  { key: 'immunology', slug: 'immunology', label: 'Immunology', titleLabel: 'Immunology' },
+  { key: 'metabolic', slug: 'metabolic', label: 'Metabolic/Obesity', titleLabel: 'Metabolic' },
+  { key: 'cardiovascular', slug: 'cardiovascular', label: 'Cardiovascular', titleLabel: 'CV' },
+  { key: 'infectiousDisease', slug: 'infectious-disease', label: 'Infectious Disease', titleLabel: 'Infectious Dis.' },
+  { key: 'ophthalmology', slug: 'ophthalmology', label: 'Ophthalmology', titleLabel: 'Ophthal' },
+  { key: 'womensHealth', slug: 'womens-health', label: "Women's Health", titleLabel: "Women's Health" },
+  { key: 'rareDisease', slug: 'rare-disease', label: 'Rare Disease', titleLabel: 'Rare Disease' },
+  { key: 'hematology', slug: 'hematology', label: 'Hematology', titleLabel: 'Hematology' },
+  { key: 'dermatology', slug: 'dermatology', label: 'Dermatology', titleLabel: 'Dermatology' },
+  { key: 'gastroenterology', slug: 'gastroenterology', label: 'Gastroenterology', titleLabel: 'GI' },
 ];
 
 const PHASES: { key: Phase; slug: string; label: string }[] = [
@@ -35,22 +36,22 @@ const PHASES: { key: Phase; slug: string; label: string }[] = [
   { key: 'approved', slug: 'approved', label: 'Approved' },
 ];
 
-const TERRITORIES: { key: Territory; slug: string; label: string }[] = [
-  { key: 'global', slug: 'global', label: 'Global' },
-  { key: 'us_only', slug: 'us', label: 'US Only' },
-  { key: 'ex_us', slug: 'ex-us', label: 'Ex-US' },
-  { key: 'europe', slug: 'europe', label: 'Europe' },
-  { key: 'japan', slug: 'japan', label: 'Japan' },
-  { key: 'china', slug: 'china', label: 'China' },
+const TERRITORIES: { key: Territory; slug: string; label: string; titleLabel: string }[] = [
+  { key: 'global', slug: 'global', label: 'Global', titleLabel: 'Global' },
+  { key: 'us_only', slug: 'us', label: 'US Only', titleLabel: 'US' },
+  { key: 'ex_us', slug: 'ex-us', label: 'Ex-US', titleLabel: 'Ex-US' },
+  { key: 'europe', slug: 'europe', label: 'Europe', titleLabel: 'EU' },
+  { key: 'japan', slug: 'japan', label: 'Japan', titleLabel: 'Japan' },
+  { key: 'china', slug: 'china', label: 'China', titleLabel: 'China' },
 ];
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface ProgrammaticPageData {
   slug: string;
-  ta: { key: TherapeuticArea; slug: string; label: string };
+  ta: { key: TherapeuticArea; slug: string; label: string; titleLabel: string };
   phase: { key: Phase; slug: string; label: string };
-  territory: { key: Territory; slug: string; label: string };
+  territory: { key: Territory; slug: string; label: string; titleLabel: string };
   title: string;
   metaDescription: string;
   h1: string;
@@ -138,9 +139,26 @@ function buildAllPages(): ProgrammaticPageData[] {
           const deals = getMatchingDeals(ta.key, territory.key);
 
           const territoryLabel = territory.key === 'global' ? '' : ` ${territory.label}`;
-          const title = `${ta.label} ${phase.label} Licensing Deal Benchmarks${territoryLabel} | Ambrosia Ventures`;
-          const h1 = `${ta.label} ${phase.label} Deal Benchmarks${territoryLabel ? ` — ${territory.label}` : ''}`;
-          const metaDescription = `${phase.label} ${ta.label.toLowerCase()} licensing deals${territoryLabel ? ` in ${territory.label}` : ''}: ${formatCurrency(result.terms.upfront.median)} median upfront, ${formatCurrency(result.terms.totalDealValue.median)} total value, ${result.tieredRoyalties.base.low}–${result.tieredRoyalties.base.high}% royalty. From 2,500+ verified transactions.`;
+          const territoryTitleSuffix = territory.key === 'global' ? '' : ` ${territory.titleLabel}`;
+          const dealCount = formatDealCount(LIVE_DEAL_COUNT);
+          const upfrontMedian = formatCurrency(result.terms.upfront.median);
+          const upfrontLow = formatCurrency(result.terms.upfront.low);
+          const upfrontHigh = formatCurrency(result.terms.upfront.high);
+          const royaltyLow = result.tieredRoyalties.base.low;
+          const royaltyHigh = result.tieredRoyalties.base.high;
+
+          // CTR-optimized title: TA + phase + year + $ number, under 60 chars
+          // Global: "Oncology Phase 2 Deals 2026: $258M Upfront | Free"
+          // Territory: "Oncology Phase 2 Deals 2026 US: $301M Upfront"
+          const title = territory.key === 'global'
+            ? `${ta.titleLabel} ${phase.label} Deals 2026: ${upfrontMedian} Upfront | Free`
+            : `${ta.titleLabel} ${phase.label} Deals 2026 ${territory.titleLabel}: ${upfrontMedian} Upfront`;
+
+          const h1 = `${ta.label} ${phase.label} Deal Benchmarks${territoryLabel ? ` — ${territory.label}` : ''} (2026)`;
+
+          // CTR-optimized description: lead with range, royalties, deal count, CTA, under 155 chars
+          // "Phase 2 oncology deals: $144M–$365M upfront, 12–19% royalties. From 1,900+ verified deals. Free benchmarks."
+          const metaDescription = `${phase.label} ${ta.label.toLowerCase()} deals${territoryLabel ? ` in ${territory.label}` : ''}: ${upfrontLow}–${upfrontHigh} upfront, ${royaltyLow}–${royaltyHigh}% royalties. From ${dealCount} verified deals. Free benchmarks.`;
 
           pages.push({
             slug,
