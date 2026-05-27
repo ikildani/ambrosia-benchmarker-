@@ -241,13 +241,15 @@ ${footer(email)}`;
 
 export function buildProGateEmail4(
   email: string,
-  context: LeadContext
+  context: LeadContext,
+  proCount?: number
 ): { subject: string; html: string } {
-  const subject = '127 BD teams upgraded this quarter';
+  const count = proCount && proCount > 20 ? proCount : 127;
+  const subject = `${count} BD teams upgraded this quarter`;
 
-  const html = `${header('127 BD teams upgraded this quarter')}
+  const html = `${header('${count} BD teams upgraded this quarter')}
 
-  <p style="font-size: 15px; color: #334155; margin-top: 0;">Since you looked at ${context.ta} ${context.phase} benchmarks, 127 business development teams have upgraded to Pro this quarter.</p>
+  <p style="font-size: 15px; color: #334155; margin-top: 0;">Since you looked at ${context.ta} ${context.phase} benchmarks, ${count} business development teams have upgraded to Pro this quarter.</p>
 
   <p style="font-size: 15px; color: #334155;">They're at biotech companies, pharma licensing groups, and advisory firms — and they're using the same data you saw, plus everything behind the paywall.</p>
 

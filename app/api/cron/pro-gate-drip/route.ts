@@ -153,6 +153,12 @@ export async function GET(request: NextRequest) {
     let completed = 0;
     const errors: string[] = [];
 
+    // Get real Pro subscriber count for social proof in Email 4
+    const { count: proCount } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('tier', 'pro');
+
     // Fetch unconverted leads that haven't finished the drip
     const { data: leads, error: fetchError } = await supabase
       .from('leads')
@@ -233,7 +239,7 @@ export async function GET(request: NextRequest) {
 
         // Email 4 — Day 5 (120+ hours)
         if (lead.drip_3_sent && !lead.drip_4_sent && hours >= 120) {
-          const { subject, html } = buildProGateEmail4(lead.email, context);
+          const { subject, html } = buildProGateEmail4(lead.email, context, proCount || undefined);
           const result = await sendEmail({ to: lead.email, subject, html });
           if (result.success) {
             await supabase.from('leads').update({ drip_4_sent: true }).eq('id', lead.id);
@@ -303,6 +309,17 @@ export async function GET(request: NextRequest) {
           const result = await sendEmail({ to: lead.email, subject, html });
           if (result.success) {
             await supabase.from('leads').update({ drip_8_sent: true, drip_completed: true }).eq('id', lead.id);
+            // Auto-subscribe to weekly digest so they keep getting value
+            await supabase.from('newsletter_subscribers').upsert(
+              {
+                email: lead.email,
+                status: 'active',
+                subscribed_at: new Date().toISOString(),
+                source: 'pro_gate_drip_rollover',
+                drip_completed: true,
+              },
+              { onConflict: 'email' }
+            );
             sent.email8++;
             completed++;
           } else {
