@@ -482,8 +482,7 @@ export async function GET(request: NextRequest) {
 
     const insertRows = drafts.map((draft) => ({
       title: draft.title,
-      body: draft.body,
-      first_comment: draft.first_comment,
+      body: draft.body + '\n\n---\nFIRST COMMENT: ' + draft.first_comment,
       link_url: draft.link_url,
       status: 'draft' as const,
       scheduled_for: nextWednesday.toISOString(),
