@@ -85,22 +85,63 @@ async function fetchDealTrends(supabase: ReturnType<typeof createServiceClient>)
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Deals this month
+  // Deals this month from database
   const { data: monthDeals } = await supabase
     .from('deals')
     .select('id, modality, therapeutic_area, total_deal_value_usd, licensor, licensee, deal_type, announced_date')
     .gte('created_at', oneMonthAgo)
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false });
 
-  // Deals this week
   const { data: weekDeals } = await supabase
     .from('deals')
     .select('id, modality, therapeutic_area, total_deal_value_usd, licensor, licensee, deal_type, announced_date')
     .gte('created_at', oneWeekAgo)
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false });
 
-  const deals = monthDeals || [];
-  const weekDealList = weekDeals || [];
+  let deals = monthDeals || [];
+  let weekDealList = weekDeals || [];
+
+  // Fallback: if no recent DB deals, use curated comparable deals from codebase
+  if (deals.length === 0) {
+    try {
+      const { COMPARABLE_DEALS } = await import('@/lib/comparableDeals');
+      const { EXTENDED_COMPARABLE_DEALS } = await import('@/data/comparable-deals-extended');
+
+      const currentYear = now.getFullYear();
+      const allCurated = [
+        ...COMPARABLE_DEALS.map(d => ({
+          id: `curated-${d.licensor}-${d.year}`,
+          modality: d.modalities?.[0] || 'smallMolecule',
+          therapeutic_area: d.therapeuticArea,
+          total_deal_value_usd: (d.totalValueM || 0) * 1_000_000,
+          licensor: d.licensor,
+          licensee: d.licensee,
+          deal_type: d.dealType || 'licensing',
+          announced_date: `${d.year}-01-01`,
+        })),
+        ...EXTENDED_COMPARABLE_DEALS.map(d => ({
+          id: `ext-${d.licensor}-${d.year}`,
+          modality: d.modality || 'smallMolecule',
+          therapeutic_area: d.therapeuticArea,
+          total_deal_value_usd: (d.totalDealValue || 0) * 1_000_000,
+          licensor: d.licensor,
+          licensee: d.licensee,
+          deal_type: d.dealType || 'licensing',
+          announced_date: `${d.year}-01-01`,
+        })),
+      ];
+
+      // Use 2025 deals as "recent" for content generation
+      deals = allCurated
+        .filter(d => d.announced_date.startsWith(String(currentYear)) || d.announced_date.startsWith(String(currentYear - 1)))
+        .sort((a, b) => (b.total_deal_value_usd || 0) - (a.total_deal_value_usd || 0));
+
+      weekDealList = deals.slice(0, 10);
+      console.log(`[linkedin-content] Fallback to ${deals.length} curated deals (${currentYear - 1}-${currentYear})`);
+    } catch (err) {
+      console.error('[linkedin-content] Fallback deal import failed:', err);
+    }
+  }
 
   // Top 5 modalities by deal count this month
   const modalityCounts: Record<string, number> = {};
