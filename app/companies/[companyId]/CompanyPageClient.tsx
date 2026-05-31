@@ -61,7 +61,7 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
     if (!authLoading) fetchCompany();
   }, [companyId, user?.id, authLoading]);
 
-  const isPro = tier === 'pro';
+  const isPro = tier === 'pro' || tier === 'portfolio';
 
   return (
     <WatchlistProvider tier={tier}>

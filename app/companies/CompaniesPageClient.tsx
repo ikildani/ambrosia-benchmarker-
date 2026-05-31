@@ -68,7 +68,7 @@ const APPETITE_CONFIG: Record<string, { label: string; color: string; bg: string
 
 export default function CompaniesPageClient() {
   const { isAuthenticated, user, tier, signIn, signOut, openAuthModal, closeAuthModal, showAuthModal, authModalMode, isPortfolioAdmin } = useAuth();
-  const isPro = tier === 'pro';
+  const isPro = tier === 'pro' || tier === 'portfolio';
 
   const [query, setQuery] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);

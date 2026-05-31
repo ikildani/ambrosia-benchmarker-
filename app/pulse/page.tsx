@@ -78,7 +78,7 @@ function PulsePageInner() {
           </div>
         ) : (
           <MarketPulse
-            isPro={tier === 'pro'}
+            isPro={tier === 'pro' || tier === 'portfolio'}
             userId={user?.id}
             week={weekParam || undefined}
             onUpgrade={() => router.push('/#pricing')}
