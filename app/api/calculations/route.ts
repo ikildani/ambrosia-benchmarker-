@@ -25,8 +25,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const sessionCheck = await requireSingleSession(request);
-    if (sessionCheck) return sessionCheck;
+    // Session check non-blocking — log but don't reject saves
+    try {
+      const sessionCheck = await requireSingleSession(request);
+      if (sessionCheck) {
+        console.warn('[Calculations] Stale session detected — saving anyway');
+      }
+    } catch {}
     const supabase = createServiceClient();
     const rawBody = await request.json();
 
