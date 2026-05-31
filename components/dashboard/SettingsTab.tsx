@@ -65,6 +65,7 @@ function PasswordChangeSection() {
           <h3 className="font-semibold text-slate-900 dark:text-white">Security</h3>
         </div>
         <button
+          data-password-toggle
           onClick={() => setIsOpen(!isOpen)}
           className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
         >

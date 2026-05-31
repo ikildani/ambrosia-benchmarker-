@@ -65,6 +65,7 @@ const DashboardNav = React.memo(function DashboardNav({
             aria-selected={activeTab === tab.id}
             aria-controls={`tabpanel-${tab.id}`}
             id={`tab-${tab.id}`}
+            data-tab={tab.id}
             tabIndex={activeTab === tab.id ? 0 : -1}
             onClick={() => onTabChange(tab.id as typeof activeTab)}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-2.5 rounded-xl sm:rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none min-w-0 scroll-snap-center touch-feedback ${
