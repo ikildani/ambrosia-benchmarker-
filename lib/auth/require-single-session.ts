@@ -43,15 +43,13 @@ export async function requireSingleSession(
 
     if (!result.valid) {
       console.warn(
-        `[Session Enforcement] Blocked stale session for ${user.email}: ${result.reason}`
+        `[Session Enforcement] Stale session for ${user.email}: ${result.reason} — allowing request`
       );
-      return NextResponse.json(
-        {
-          error: 'Session expired — your account was signed in from another device. Please sign in again.',
-          code: 'SESSION_EXPIRED',
-        },
-        { status: 401 }
-      );
+      // Log-only: don't block API requests for stale sessions.
+      // The session nonce can become stale due to cookie expiry,
+      // multiple tabs, or browser restarts. Blocking causes
+      // "unable to save" errors across all Pro features.
+      return null;
     }
 
     return null; // session valid — proceed
