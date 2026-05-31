@@ -487,7 +487,7 @@ export function ResultsSkeleton() {
 
 export default function Results({ result, tier = 'free', onUpgrade, onBuyReport, reportId, userId, userEmail, inputs, fullInputs, onApplyNewInputs, onPartnerMatchesLoaded }: ResultsProps) {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, dealTypeLabels, drillDown } = result;
-  const isPro = tier === 'pro';
+  const isPro = tier === 'pro' || tier === 'portfolio';
   const isReport = tier === 'report';
 
   // Build per-field warning text from non-critical guardrail warnings
