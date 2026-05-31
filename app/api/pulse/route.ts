@@ -15,8 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const sessionCheck = await requireSingleSession(request);
-    if (sessionCheck) return sessionCheck;
+    // Skip single-session check for read-only GET — don't block market data
     const rawParams = Object.fromEntries(new URL(request.url).searchParams.entries());
     const parsed = pulseQuerySchema.safeParse(rawParams);
     if (!parsed.success) {
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
     const userId = parsed.data.user_id || null;
     const weekParam = parsed.data.week || null;
 
-    // Check user tier for gating
+    // Check user tier — try query param first, then auth cookies
     let userTier = 'free';
     if (userId) {
       const { data: profile } = await supabase
@@ -37,6 +36,21 @@ export async function GET(request: NextRequest) {
         .eq('id', userId)
         .single();
       if (profile?.tier) userTier = profile.tier;
+    }
+    // Fallback: check auth cookies if no user_id param
+    if (userTier === 'free' && !userId) {
+      try {
+        const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
+        const authUser = await getAuthenticatedUser(request);
+        if (authUser?.id) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('tier')
+            .eq('id', authUser.id)
+            .single();
+          if (profile?.tier) userTier = profile.tier;
+        }
+      } catch {}
     }
 
     const isPro = userTier === 'pro' || userTier === 'report' || userTier === 'portfolio';
