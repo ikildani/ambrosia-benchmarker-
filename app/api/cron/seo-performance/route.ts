@@ -229,7 +229,10 @@ export async function GET(request: NextRequest) {
   try {
     const gsc = new GSCClient();
 
-    // ── Check if GSC is configured ──────────────────────────────────────
+    // ── Check if GSC is configured (try OAuth2 fallback) ────────────────
+    if (!gsc.isConfigured()) {
+      await gsc.initOAuth2();
+    }
     if (!gsc.isConfigured()) {
       await sendSlackMessage(
         ':warning: Weekly SEO Digest \u2014 GSC Not Configured',

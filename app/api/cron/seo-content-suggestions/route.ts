@@ -613,6 +613,9 @@ async function getLowPerformingInsightPages(): Promise<LowPerformingPage[]> {
   try {
     const gsc = new GSCClient();
     if (!gsc.isConfigured()) {
+      await gsc.initOAuth2();
+    }
+    if (!gsc.isConfigured()) {
       return [];
     }
 
