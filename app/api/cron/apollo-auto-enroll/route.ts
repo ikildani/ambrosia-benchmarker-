@@ -31,20 +31,54 @@ const SEQUENCES = {
 
 const EMAIL_ACCOUNT_ID = '6463c3c776cb9500a330fab4';
 
-const ENTERPRISE_TITLES = [
-  'ceo', 'coo', 'cbo', 'cso', 'cmo', 'chief',
-  'president', 'managing director', 'managing partner',
-  'vp business development', 'vp corporate development', 'vp bd',
-  'svp', 'evp', 'head of business development', 'head of bd',
-  'head of licensing', 'head of partnering', 'head of strategy',
-  'operating partner', 'general partner', 'partner',
-  'director of business development', 'director of licensing',
+// Titles your strategist handles — SKIP these, don't auto-enroll
+const ENTERPRISE_SKIP_TITLES = [
+  'managing partner', 'general partner', 'operating partner', 'partner',
+  'venture partner', 'principal', 'investment director',
+  'managing director',
+  'portfolio manager', 'fund manager',
 ];
 
-function isEnterpriseTitle(title: string | null): boolean {
+// Company types your strategist handles — SKIP these
+const ENTERPRISE_SKIP_ORG_KEYWORDS = [
+  'capital', 'ventures', 'partners', 'advisors', 'investment',
+  'holdings', 'fund', 'asset management', 'equity',
+  'corporate venture', 'cvc',
+];
+
+// Pro/Report targets — biotech/pharma operators who run deals
+const PRO_FIT_TITLES = [
+  'ceo', 'coo', 'cbo', 'cso', 'cmo', 'chief',
+  'president',
+  'vp business development', 'vp corporate development', 'vp bd',
+  'vp licensing', 'vp partnering', 'vp strategy',
+  'svp', 'evp',
+  'head of business development', 'head of bd',
+  'head of licensing', 'head of partnering', 'head of strategy',
+  'head of corporate development', 'head of alliance',
+  'director of business development', 'director of licensing',
+  'director of partnering', 'director of corporate development',
+  'director of alliance', 'director of strategy',
+  'business development', 'licensing', 'alliance management',
+  'corporate development', 'partnering',
+  'sr. director', 'senior director', 'associate director',
+  'founder', 'co-founder',
+];
+
+function shouldSkipForStrategist(title: string | null, orgName: string | null): boolean {
+  const lowerTitle = (title || '').toLowerCase();
+  const lowerOrg = (orgName || '').toLowerCase();
+
+  if (ENTERPRISE_SKIP_TITLES.some(t => lowerTitle.includes(t))) return true;
+  if (ENTERPRISE_SKIP_ORG_KEYWORDS.some(k => lowerOrg.includes(k))) return true;
+
+  return false;
+}
+
+function isProFit(title: string | null): boolean {
   if (!title) return false;
   const lower = title.toLowerCase();
-  return ENTERPRISE_TITLES.some(t => lower.includes(t));
+  return PRO_FIT_TITLES.some(t => lower.includes(t));
 }
 
 async function apolloFetch(path: string, body: Record<string, unknown>) {
@@ -160,13 +194,15 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const enterpriseContacts: string[] = [];
-    const generalistContacts: string[] = [];
+    const proFitContacts: string[] = [];
     let scanned = 0;
     let skippedNoEmail = 0;
     let skippedAlreadyEnrolled = 0;
+    let skippedEnterprise = 0;
+    let skippedNoTitleMatch = 0;
 
-    // Scan contacts page by page until we fill both batches
+    // Scan contacts — only enroll Pro/Report-fit biotech operators
+    // Skip VCs, CVCs, and enterprise contacts (your strategist handles those)
     for (let page = 1; page <= 10; page++) {
       const { contacts, totalPages } = await getUnenrolledContacts(page);
       if (contacts.length === 0) break;
@@ -184,42 +220,42 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        if (enterpriseContacts.length + generalistContacts.length >= BATCH_SIZE) break;
-
-        if (isEnterpriseTitle(contact.title)) {
-          enterpriseContacts.push(contact.id);
-        } else {
-          generalistContacts.push(contact.id);
+        if (shouldSkipForStrategist(contact.title, contact.organization_name)) {
+          skippedEnterprise++;
+          continue;
         }
+
+        if (!isProFit(contact.title)) {
+          skippedNoTitleMatch++;
+          continue;
+        }
+
+        proFitContacts.push(contact.id);
+        if (proFitContacts.length >= BATCH_SIZE) break;
       }
 
-      if (enterpriseContacts.length + generalistContacts.length >= BATCH_SIZE) break;
+      if (proFitContacts.length >= BATCH_SIZE) break;
       if (page >= totalPages) break;
     }
 
     const results = {
-      enterprise: { added: 0, errors: [] as string[] },
       generalist: { added: 0, errors: [] as string[] },
     };
 
-    if (enterpriseContacts.length > 0) {
-      results.enterprise = await addToSequence(SEQUENCES.enterprise, enterpriseContacts);
+    if (proFitContacts.length > 0) {
+      results.generalist = await addToSequence(SEQUENCES.generalist, proFitContacts);
     }
 
-    if (generalistContacts.length > 0) {
-      results.generalist = await addToSequence(SEQUENCES.generalist, generalistContacts);
-    }
-
-    const totalAdded = results.enterprise.added + results.generalist.added;
+    const totalAdded = results.generalist.added;
     const duration = Date.now() - startTime;
 
     const supabase = createServiceClient();
     await logCronRun(supabase, 'apollo-auto-enroll', {
       fetched: scanned,
-      processed: enterpriseContacts.length + generalistContacts.length,
+      processed: proFitContacts.length,
       inserted: totalAdded,
-      errors: [...results.enterprise.errors, ...results.generalist.errors],
-      parameters: { skippedNoEmail, skippedAlreadyEnrolled, enterprise: results.enterprise.added, generalist: results.generalist.added },
+      errors: results.generalist.errors,
+      parameters: { skippedNoEmail, skippedAlreadyEnrolled, skippedEnterprise, skippedNoTitleMatch, proEnrolled: results.generalist.added },
     });
 
     // Slack notification
@@ -228,7 +264,7 @@ export async function GET(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `:rocket: Apollo Auto-Enroll: ${totalAdded} contacts added to sequences (${results.enterprise.added} enterprise, ${results.generalist.added} generalist). Scanned ${scanned}, skipped ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.`,
+          text: `:rocket: Apollo Auto-Enroll: ${totalAdded} Pro-fit contacts enrolled into Generalist sequence. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC (strategist), ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.`,
         }),
       }).catch(() => {});
     }
@@ -237,8 +273,9 @@ export async function GET(request: NextRequest) {
       success: true,
       scanned,
       enrolled: totalAdded,
-      enterprise: results.enterprise.added,
-      generalist: results.generalist.added,
+      proFit: results.generalist.added,
+      skippedEnterprise,
+      skippedNoTitleMatch,
       skippedNoEmail,
       skippedAlreadyEnrolled,
       durationMs: duration,
