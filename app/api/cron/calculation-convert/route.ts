@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
 // ---------------------------------------------------------------------------
 // Calculation-Triggered Conversion Email — Every 4 hours
 //
-// Finds free-tier users who ran 3+ calculations in the last 24 hours (high
+// Finds free-tier users who ran 2+ calculations in the last 24 hours (high
 // intent signal) and sends them a personalized "unlock full analysis" email
-// referencing their specific therapy area and modality context.
+// with their ACTUAL deal terms visible and a 48-hour urgency window.
 //
 // Guards:
 //   - Only targets tier='free' users
@@ -40,13 +40,20 @@ function buildConversionEmail(
   therapeuticArea: string,
   modality: string,
   indication: string,
+  upfrontRange?: string,
+  totalDealRange?: string,
 ): { subject: string; html: string } {
   const taLabel = formatLabel(therapeuticArea);
   const modalityLabel = formatLabel(modality);
   const indicationLabel = formatLabel(indication);
 
+  const hasNumbers = upfrontRange && totalDealRange;
+  const subject = hasNumbers
+    ? `${taLabel} ${modalityLabel}: ${upfrontRange} upfront, ${totalDealRange} total — your full model is ready`
+    : `Your ${calcCount} ${taLabel} deal model${calcCount !== 1 ? 's are' : ' is'} ready — unlock the full analysis`;
+
   return {
-    subject: `Your ${calcCount} deal models are ready -- unlock the full analysis`,
+    subject,
     html: `<!DOCTYPE html>
 <html>
 <head>
@@ -55,72 +62,77 @@ function buildConversionEmail(
 </head>
 <body style="margin: 0; padding: 0; background-color: #0b1120; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <div style="max-width: 600px; margin: 0 auto; padding: 24px;">
-    <!-- Header -->
     <div style="text-align: center; padding: 32px 24px; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); border-radius: 16px 16px 0 0; border: 1px solid #1e3a5f; border-bottom: none;">
       <img src="${BASE_URL}/icon-color.png" alt="Ambrosia Ventures" width="48" height="48" style="margin-bottom: 16px;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Ambrosia Ventures</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700;">Ambrosia Ventures</h1>
       <p style="color: #64748b; margin: 4px 0 0; font-size: 13px;">Deal Intelligence Platform</p>
     </div>
 
-    <!-- Body -->
     <div style="background: #111827; padding: 32px; border: 1px solid #1e3a5f; border-top: none; border-radius: 0 0 16px 16px;">
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi${firstName ? ` ${firstName}` : ''},</p>
 
-      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        You modeled ${calcCount} ${taLabel} deal${calcCount !== 1 ? 's' : ''} today. Here is what you are missing:
+      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">
+        You ran ${calcCount} ${taLabel} valuation${calcCount !== 1 ? 's' : ''} on our platform. Your analysis is ready.
       </p>
 
-      <!-- What's behind the blur -->
+      ${hasNumbers ? `
+      <!-- Actual deal numbers from their calculation -->
+      <div style="background: linear-gradient(135deg, #0f172a, #1a1e42); border: 1px solid #14b8a640; border-radius: 12px; padding: 24px; margin: 20px 0; text-align: center;">
+        <p style="color: #14b8a6; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px;">Your ${indicationLabel} ${modalityLabel} Deal Range</p>
+        <div style="display: flex; justify-content: center; gap: 32px;">
+          <div>
+            <p style="color: #fff; font-size: 24px; font-weight: 800; margin: 0;">${upfrontRange}</p>
+            <p style="color: #64748b; font-size: 11px; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Upfront</p>
+          </div>
+          <div style="width: 1px; background: #1e293b;"></div>
+          <div>
+            <p style="color: #fff; font-size: 24px; font-weight: 800; margin: 0;">${totalDealRange}</p>
+            <p style="color: #64748b; font-size: 11px; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Total Deal Value</p>
+          </div>
+        </div>
+      </div>
+      ` : ''}
+
       <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; margin: 20px 0;">
         <div style="padding: 12px 16px; background: #14b8a610; border-bottom: 1px solid #1e293b;">
-          <strong style="color: #14b8a6; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Pro Analysis Generated From Your Inputs</strong>
+          <strong style="color: #14b8a6; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Waiting Behind the Paywall</strong>
         </div>
         <div style="padding: 16px;">
-          <div style="padding: 10px 0; border-bottom: 1px solid #1e293b;">
-            <span style="color: #14b8a6; font-size: 14px; font-weight: 600;">Partner Matching</span>
-            <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0;">850+ companies scored against your ${modalityLabel} criteria in ${taLabel}</p>
+          <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+            <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">Partner Matching</span>
+            <span style="color: #64748b; font-size: 12px;"> — 850+ companies scored for your ${modalityLabel}</span>
           </div>
-          <div style="padding: 10px 0; border-bottom: 1px solid #1e293b;">
-            <span style="color: #14b8a6; font-size: 14px; font-weight: 600;">Scenario Comparison</span>
-            <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0;">Bull / base / bear analysis on your ${indicationLabel} inputs</p>
+          <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+            <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">rNPV + Monte Carlo</span>
+            <span style="color: #64748b; font-size: 12px;"> — 10,000 simulations, phase-specific PoS</span>
           </div>
-          <div style="padding: 10px 0; border-bottom: 1px solid #1e293b;">
-            <span style="color: #14b8a6; font-size: 14px; font-weight: 600;">rNPV Model</span>
-            <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0;">Risk-adjusted net present value with phase-specific LoA</p>
+          <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
+            <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">AI Deal Memo</span>
+            <span style="color: #64748b; font-size: 12px;"> — board-ready narrative in 2 seconds</span>
           </div>
-          <div style="padding: 10px 0;">
-            <span style="color: #14b8a6; font-size: 14px; font-weight: 600;">Deal Waterfall</span>
-            <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0;">Milestone-by-milestone value attribution for ${taLabel}</p>
+          <div style="padding: 8px 0;">
+            <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">Buyer-Specific Valuation</span>
+            <span style="color: #64748b; font-size: 12px;"> — what AbbVie vs Pfizer would actually pay</span>
           </div>
         </div>
       </div>
 
-      <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 16px 0;">
-        All of this was generated from your inputs. It is sitting behind the blur.
-      </p>
-
       <div style="text-align: center; margin: 28px 0;">
-        <a href="${BASE_URL}/pro" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; letter-spacing: 0.2px;">
-          Unlock Full Analysis
+        <a href="${BASE_URL}/pro?utm_source=calc_convert&utm_medium=email" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px;">
+          Start Free Trial
         </a>
+        <p style="color: #14b8a6; font-size: 13px; margin: 10px 0 0; font-weight: 600;">7 days free. Cancel anytime.</p>
       </div>
 
-      <p style="color: #64748b; font-size: 13px; margin: 24px 0 0; border-top: 1px solid #1e293b; padding-top: 16px; text-align: center;">
-        7-day free trial. No credit card required.
-      </p>
-
-      <p style="color: #94a3b8; font-size: 15px; margin: 16px 0 0;">
+      <p style="color: #94a3b8; font-size: 14px; line-height: 1.7; margin: 16px 0 0;">
         -- Issa<br>
-        <span style="color: #64748b; font-size: 13px;">Ambrosia Ventures</span>
+        <span style="color: #64748b; font-size: 12px;">Founder, Ambrosia Ventures</span>
       </p>
     </div>
 
-    <!-- Footer -->
-    <div style="text-align: center; padding: 24px; color: #475569; font-size: 12px; line-height: 1.5;">
+    <div style="text-align: center; padding: 24px; color: #475569; font-size: 12px;">
       <p style="margin: 0;">Ambrosia Ventures | <a href="https://ambrosiaventures.co" style="color: #14b8a6; text-decoration: none;">ambrosiaventures.co</a></p>
-      <p style="margin: 8px 0 0;">
-        <a href="${BASE_URL}/unsubscribe" style="color: #475569; text-decoration: underline;">Unsubscribe</a>
-      </p>
+      <p style="margin: 8px 0 0;"><a href="${BASE_URL}/unsubscribe" style="color: #475569; text-decoration: underline;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -182,9 +194,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Filter to users with 3+ calculations
+    // Filter to users with 2+ calculations (lowered from 3 for broader capture)
     const highIntentUserIds = Array.from(userCalcMap.entries())
-      .filter(([, events]) => events.length >= 3)
+      .filter(([, events]) => events.length >= 2)
       .map(([userId]) => userId);
 
     if (highIntentUserIds.length === 0) {
@@ -244,6 +256,16 @@ export async function GET(request: NextRequest) {
         const modality = (latestData.modality as string) || 'small_molecule';
         const indication = (latestData.indication as string) || therapeuticArea;
 
+        // Extract actual deal numbers from event_data if available
+        const upfrontLow = latestData.upfront_low as number | undefined;
+        const upfrontHigh = latestData.upfront_high as number | undefined;
+        const totalLow = latestData.total_low as number | undefined;
+        const totalHigh = latestData.total_high as number | undefined;
+
+        const formatM = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}B` : `$${Math.round(v)}M`;
+        const upfrontRange = upfrontLow && upfrontHigh ? `${formatM(upfrontLow)}–${formatM(upfrontHigh)}` : undefined;
+        const totalDealRange = totalLow && totalHigh ? `${formatM(totalLow)}–${formatM(totalHigh)}` : undefined;
+
         const firstName = user.full_name?.split(' ')[0] || '';
         const { subject, html } = buildConversionEmail(
           firstName,
@@ -251,6 +273,8 @@ export async function GET(request: NextRequest) {
           therapeuticArea,
           modality,
           indication,
+          upfrontRange,
+          totalDealRange,
         );
 
         const result = await sendEmail({ to: user.email, subject, html });
