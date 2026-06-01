@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/calculator?*', '/pricing?*', '/&', '/yr', '/mo', '/seat/'],
+        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/calculator?*', '/pricing?*', '/&', '/yr', '/mo', '/seat/', '/_next/'],
       },
       {
         userAgent: 'Bingbot',
@@ -22,7 +22,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/', '/api/og'],
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/'],
+        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/_next/', '/portfolio/admin/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
