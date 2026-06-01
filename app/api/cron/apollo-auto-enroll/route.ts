@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 // ---------------------------------------------------------------------------
 
 const APOLLO_API = 'https://api.apollo.io/api/v1';
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 100;
 
 const SEQUENCES = {
   enterprise: '69cb08dcd75dcd0015f0d695',
