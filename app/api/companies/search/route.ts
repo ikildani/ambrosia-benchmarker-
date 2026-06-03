@@ -66,31 +66,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch aggregate stats (only on first page, unfiltered)
-    // Uses the total count from the main query + a lightweight type-only query
+    // Single GROUP BY query instead of 5 separate COUNT queries
     let stats = null;
     if (page === 1 && !typeFilter && !modalityFilter && !q) {
-      // Get type breakdown using per-type counts instead of fetching all rows
-      const typeBreakdown: { type: string; count: number }[] = [];
-      const validTypes = [...VALID_TYPES, null] as const;
+      const { data: typeRows } = await supabase.rpc('company_type_counts').select();
 
-      const typeCounts = await Promise.all(
-        validTypes.map(async (t) => {
-          const query = supabase.from('companies').select('id', { count: 'exact', head: true });
-          if (t) {
-            query.eq('company_type', t);
-          } else {
-            query.is('company_type', null);
-          }
-          const { count: typeCount } = await query;
-          return { type: t || 'other', count: typeCount || 0 };
-        })
-      );
-
-      const totalCompanies = typeCounts.reduce((sum, tc) => sum + tc.count, 0);
-      stats = {
-        total_companies: totalCompanies,
-        type_breakdown: typeCounts.filter(tc => tc.count > 0).sort((a, b) => b.count - a.count),
-      };
+      if (typeRows) {
+        const typeCounts = (typeRows as Array<{ company_type: string | null; count: number }>).map(r => ({
+          type: r.company_type || 'other',
+          count: Number(r.count),
+        }));
+        stats = {
+          total_companies: typeCounts.reduce((sum, tc) => sum + tc.count, 0),
+          type_breakdown: typeCounts.filter(tc => tc.count > 0).sort((a, b) => b.count - a.count),
+        };
+      } else {
+        stats = { total_companies: count || 0, type_breakdown: [] };
+      }
     }
 
     // Clamp any future last_deal_date to today (defense in depth)
@@ -106,6 +98,10 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       stats,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
     });
   } catch (error) {
     console.error('Company search API error:', error);
