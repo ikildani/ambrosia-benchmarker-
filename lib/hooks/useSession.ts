@@ -63,9 +63,9 @@ export function useSession() {
     setAnonymousId(anonId);
 
     // Check for existing session
-    const storedSessionId = sessionStorage.getItem(SESSION_KEY);
-    const lastActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
-    const sessionStart = sessionStorage.getItem(SESSION_START_KEY);
+    const storedSessionId = localStorage.getItem(SESSION_KEY);
+    const lastActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+    const sessionStart = localStorage.getItem(SESSION_START_KEY);
 
     const now = Date.now();
     const isExpired = lastActivity && now - parseInt(lastActivity, 10) > SESSION_TIMEOUT;
@@ -92,7 +92,7 @@ export function useSession() {
       navigator.sendBeacon(
         '/api/sessions',
         JSON.stringify({
-          session_id: sessionStorage.getItem(SESSION_KEY),
+          session_id: localStorage.getItem(SESSION_KEY),
           ended_at: new Date().toISOString(),
           duration_seconds: durationSeconds,
         })
@@ -103,7 +103,7 @@ export function useSession() {
         '/api/events',
         JSON.stringify({
           event_type: 'session_ended',
-          session_id: sessionStorage.getItem(SESSION_KEY),
+          session_id: localStorage.getItem(SESSION_KEY),
           anonymous_id: anonId,
           event_data: {
             duration_seconds: durationSeconds,
@@ -126,9 +126,9 @@ export function useSession() {
     const newSessionId = generateUUID();
     const now = Date.now();
 
-    sessionStorage.setItem(SESSION_KEY, newSessionId);
-    sessionStorage.setItem(SESSION_START_KEY, now.toString());
-    sessionStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
+    localStorage.setItem(SESSION_KEY, newSessionId);
+    localStorage.setItem(SESSION_START_KEY, now.toString());
+    localStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
 
     setSessionId(newSessionId);
     sessionStartRef.current = now;
@@ -154,7 +154,7 @@ export function useSession() {
 
       if (data.session_id) {
         // Update with server-generated session ID
-        sessionStorage.setItem(SESSION_KEY, data.session_id);
+        localStorage.setItem(SESSION_KEY, data.session_id);
         setSessionId(data.session_id);
       }
 
@@ -180,7 +180,7 @@ export function useSession() {
   const updateLastActivity = useCallback(() => {
     if (typeof window === 'undefined') return;
 
-    sessionStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+    localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
 
     // Reset inactivity timeout
     if (activityTimeoutRef.current) {
@@ -189,7 +189,7 @@ export function useSession() {
 
     activityTimeoutRef.current = setTimeout(() => {
       // Session expired due to inactivity - will create new session on next action
-      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
     }, SESSION_TIMEOUT);
   }, []);
 
