@@ -94,11 +94,21 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
       )}
 
       {/* Magic link toggle + Forgot password */}
+      {!magicLinkMode && (
+        <div className="relative my-1">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-200 dark:border-slate-700" /></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-white dark:bg-slate-800 px-3 text-neutral-400 dark:text-slate-500 uppercase tracking-wider">or</span></div>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => { setMagicLinkMode(!magicLinkMode); actions.clearMessages(); }}
-          className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors flex items-center gap-1.5"
+          className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+            magicLinkMode
+              ? 'text-neutral-500 dark:text-slate-400 hover:text-neutral-700'
+              : 'text-teal-600 hover:text-teal-700 dark:text-teal-400'
+          }`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {magicLinkMode ? (
@@ -107,7 +117,7 @@ export default function SignInForm({ form, actions, setMode }: SignInFormProps) 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             )}
           </svg>
-          {magicLinkMode ? 'Use password instead' : 'Send me a login link'}
+          {magicLinkMode ? 'Use password instead' : 'Sign in with email link (no password)'}
         </button>
         {!magicLinkMode && (
           <button

@@ -29,7 +29,13 @@ const users: UserToProvision[] = [
   { email: 'manu@scirena.bio', name: 'Manu' },
 ];
 
-function buildWelcomeEmail(name: string): string {
+function buildWelcomeEmail(name: string, magicLink?: string | null): string {
+  const ctaUrl = magicLink || APP_URL;
+  const ctaText = magicLink ? 'Sign In Instantly' : 'Open Your Dashboard';
+  const ctaNote = magicLink
+    ? 'Click the button above to sign in instantly — no password needed. You can set a password later from your Dashboard under Account & Security.'
+    : 'To get started, sign in with this email address using Google OAuth or click "Send me a login link" on the sign-in page.';
+
   return `
 <!DOCTYPE html>
 <html>
@@ -50,9 +56,9 @@ function buildWelcomeEmail(name: string): string {
       <li><strong>PDF & Excel export</strong> — institutional-grade reports for your stakeholders</li>
     </ul>
     <div style="text-align: center; margin: 28px 0;">
-      <a href="${APP_URL}" style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0891b2); color: #fff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px;">Open Your Dashboard</a>
+      <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0891b2); color: #fff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px;">${ctaText}</a>
     </div>
-    <p style="color: #64748b; font-size: 14px;">To get started, sign in with this email address. If you haven't set a password yet, use "Sign in with Google" or click "Forgot password" on the sign-in page.</p>
+    <p style="color: #64748b; font-size: 14px;">${ctaNote}</p>
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
     <p style="color: #94a3b8; font-size: 12px; text-align: center;">
       Ambrosia Ventures · <a href="${APP_URL}" style="color: #0d9488;">calculator.ambrosiaventures.co</a><br>
@@ -98,7 +104,21 @@ async function main() {
       console.log(`  Profile created with Pro tier`);
     }
 
-    // 3. Send welcome email
+    // 3. Generate magic link for instant access (no password needed)
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: user.email,
+      options: { redirectTo: `${APP_URL}/auth/callback` },
+    });
+
+    const magicLink = linkError ? null : linkData?.properties?.action_link;
+    if (magicLink) {
+      console.log(`  Magic link generated`);
+    } else {
+      console.log(`  Magic link failed: ${linkError?.message || 'no link returned'}`);
+    }
+
+    // 4. Send welcome email with magic link
     if (SENDGRID_API_KEY) {
       sgMail.setApiKey(SENDGRID_API_KEY);
       try {
@@ -106,8 +126,8 @@ async function main() {
           to: user.email,
           from: 'Ambrosia Ventures <info@ambrosiaventures.co>',
           replyTo: 'hello@ambrosiaventures.co',
-          subject: 'Your Ambrosia Pro Account is Live',
-          html: buildWelcomeEmail(user.name),
+          subject: magicLink ? 'Your Ambrosia Pro Account is Live — Sign In Instantly' : 'Your Ambrosia Pro Account is Live',
+          html: buildWelcomeEmail(user.name, magicLink),
         });
         console.log(`  Welcome email sent`);
       } catch (emailErr) {
