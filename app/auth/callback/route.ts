@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient, createServiceClient } from '@/lib/supabase/server';
 import { sendAdminSignupNotification } from '@/lib/email/client';
 import { notifyNewSignup, notifyLogin } from '@/lib/slack/notify';
 
@@ -159,6 +159,73 @@ export async function GET(request: NextRequest) {
         }
       } catch (err) {
         console.error('[Auth Callback] Error linking report purchases:', err);
+      }
+    }
+
+    // Link a paid Pro subscription to this account by email.
+    // Handles the gap where a visitor subscribes via /api/checkout BEFORE
+    // creating an account (the pricing page and post-payment /welcome flow
+    // both allow this). At payment time the Stripe webhook had no
+    // user_profiles row to upgrade, so the Pro entitlement was orphaned —
+    // the user lands here on first verification still on the 'free' tier
+    // despite having paid. This is the server-side mirror of the
+    // report-purchase linking above, and fulfills the /welcome page's
+    // promise to "link your subscription to an account".
+    if (data.user?.email) {
+      const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
+      if (stripeSecretKey && stripeSecretKey.startsWith('sk_')) {
+        try {
+          // Tier/Stripe fields are guarded by the prevent_tier_escalation
+          // trigger, so this reconciliation must run as the service role.
+          const admin = createServiceClient();
+          const userEmail = data.user.email.toLowerCase();
+          const userId = data.user.id;
+
+          const { data: profile } = await admin
+            .from('user_profiles')
+            .select('tier, stripe_customer_id')
+            .eq('id', userId)
+            .single();
+
+          // Only reconcile when the account isn't already Pro and has no
+          // linked Stripe customer — avoids a Stripe round-trip on every
+          // login for users who are already correctly provisioned.
+          if (profile && profile.tier !== 'pro' && !profile.stripe_customer_id) {
+            const Stripe = (await import('stripe')).default;
+            const stripe = new Stripe(stripeSecretKey);
+
+            const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+            if (customers.data.length > 0) {
+              const customerId = customers.data[0].id;
+              const subs = await stripe.subscriptions.list({
+                customer: customerId,
+                status: 'all',
+                limit: 10,
+              });
+              const activeSub = subs.data.find(
+                s => s.status === 'active' || s.status === 'trialing'
+              );
+
+              if (activeSub) {
+                await admin
+                  .from('user_profiles')
+                  .update({
+                    tier: 'pro',
+                    tier_change_authorized: true,
+                    stripe_customer_id: customerId,
+                    stripe_subscription_id: activeSub.id,
+                    subscription_status: activeSub.status,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', userId);
+                console.log(`[Auth Callback] Linked active Pro subscription to ${userEmail}`);
+              }
+            }
+          }
+        } catch (err) {
+          // Non-blocking — never prevent login if reconciliation fails.
+          console.error('[Auth Callback] Error linking subscription:', err);
+        }
       }
     }
 
