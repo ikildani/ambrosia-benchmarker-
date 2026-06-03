@@ -26,6 +26,17 @@ const MEDIAN_SHIFT_THRESHOLD = 0.20; // 20%
 const STDDEV_SHIFT_THRESHOLD = 0.50; // 50%
 const MIN_SAMPLE_SIZE = 10; // require at least 10 calcs in a window
 
+// R72 post-calibration: suppress known drifts from the indication-level peak
+// consensus expansion (032f373). These TA/phase combos shifted because 40 new
+// indications got typicalAssetPeakSales_M values, changing the median rNPV.
+// The 30-day baseline will converge naturally; suppress until 2026-07-15.
+const R72_SUPPRESSED_COMBOS = new Set([
+  'hematology|approved',
+  'ophthalmology|preclinical',
+  'rareDisease|phase2',
+]);
+const R72_SUPPRESSION_EXPIRES = new Date('2026-07-15T00:00:00Z');
+
 // ---------------------------------------------------------------------------
 // Auth — timing-safe comparison like the other crons
 // ---------------------------------------------------------------------------
@@ -198,6 +209,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       summaries.push({ key, recent, baseline });
 
       const [ta, phase] = key.split('|');
+
+      // Skip R72 post-calibration known drifts until baseline converges
+      if (R72_SUPPRESSED_COMBOS.has(key) && new Date() < R72_SUPPRESSION_EXPIRES) {
+        continue;
+      }
 
       const meanShift = pctShift(recent.mean, baseline.mean);
       const medianShift = pctShift(recent.median, baseline.median);
