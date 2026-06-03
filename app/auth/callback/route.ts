@@ -121,12 +121,20 @@ export async function GET(request: NextRequest) {
 
     // Link existing report purchases to this user by email
     // Handles: user buys report as anonymous → later signs up → gets their purchase linked
+    //
+    // Runs as the service role: the report_purchases rows being linked have
+    // a null user_id (so RLS would hide them from the user-context client),
+    // and the tier update is guarded by the prevent_tier_escalation trigger
+    // which only permits service_role writes. Using the user-context client
+    // here silently linked nothing and never upgraded the tier.
     if (data.user?.email) {
       const userEmail = data.user.email.toLowerCase();
       const userId = data.user.id;
       try {
+        const admin = createServiceClient();
+
         // Find completed report purchases with matching email but no user_id
-        const { data: unlinkedPurchases } = await supabase
+        const { data: unlinkedPurchases } = await admin
           .from('report_purchases')
           .select('id')
           .eq('email', userEmail)
@@ -135,7 +143,7 @@ export async function GET(request: NextRequest) {
 
         if (unlinkedPurchases && unlinkedPurchases.length > 0) {
           // Link purchases to this user
-          await supabase
+          await admin
             .from('report_purchases')
             .update({ user_id: userId })
             .eq('email', userEmail)
@@ -143,16 +151,16 @@ export async function GET(request: NextRequest) {
             .is('user_id', null);
 
           // Upgrade to report tier (unless already pro)
-          const { data: profile } = await supabase
+          const { data: profile } = await admin
             .from('user_profiles')
             .select('tier')
             .eq('id', userId)
             .single();
 
           if (profile && profile.tier !== 'pro') {
-            await supabase
+            await admin
               .from('user_profiles')
-              .update({ tier: 'report', updated_at: new Date().toISOString() })
+              .update({ tier: 'report', tier_change_authorized: true, updated_at: new Date().toISOString() })
               .eq('id', userId);
           }
           console.log(`[Auth Callback] Linked ${unlinkedPurchases.length} report purchase(s) to ${userEmail}`);

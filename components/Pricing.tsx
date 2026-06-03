@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { PRICING, DEAL_STATS, PORTFOLIO_PRICING } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { generatePricingSchema } from '@/lib/seo/structured-data';
@@ -17,10 +18,12 @@ interface PricingProps {
 }
 
 export default function Pricing({ currentTier, onSelectTier, userEmail, userId, initialPromoCode }: PricingProps) {
+  const { isAuthenticated, openAuthModal, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isManageLoading, setIsManageLoading] = useState(false);
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
   const [error, setError] = useState<string | null>(null);
+  const pendingCheckoutRef = useRef(false);
   const {
     promoCode, setPromoCode, promoStatus, promoDiscount, promoId, promoError,
     validatePromoCode, clearPromo,
@@ -28,7 +31,27 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
   const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
 
+  // Resume checkout once the user signs in via the auth modal. Mirrors
+  // ProCheckoutButton so the subscription is always tied to an account —
+  // a checkout without a userId orphans the Pro entitlement at the webhook.
+  useEffect(() => {
+    if (isAuthenticated && pendingCheckoutRef.current) {
+      pendingCheckoutRef.current = false;
+      handleUpgrade();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
   const handleUpgrade = async () => {
+    // Require an account BEFORE checkout. Without an authenticated user the
+    // Stripe webhook has no user_profiles row to upgrade and the paid Pro
+    // tier is lost, forcing a post-payment signup + email verification.
+    if (!isAuthenticated) {
+      pendingCheckoutRef.current = true;
+      openAuthModal('signup');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
@@ -36,8 +59,8 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: userEmail,
-          userId: userId,
+          email: user?.email || userEmail,
+          userId: user?.id || userId,
           billingInterval,
           promoCode: promoId || undefined,
         }),
