@@ -25,6 +25,11 @@ const nextConfig = {
         destination: '/benchmarks/alzheimers-licensing-deals',
         permanent: true,
       },
+      {
+        source: '/abd',
+        destination: '/?utm_source=abd_capital_connect&utm_medium=webinar&utm_campaign=market_terms_june2026',
+        permanent: false,
+      },
     ];
   },
   // Security headers configuration
