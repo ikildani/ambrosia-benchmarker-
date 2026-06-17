@@ -1,6 +1,8 @@
 // Slack webhook notifications for admin alerts
 // Uses native fetch — no npm dependencies required
 
+import { PRICING } from '@/lib/config/constants';
+
 interface SlackAttachment {
   color: string;
   blocks: object[];
@@ -322,7 +324,7 @@ export async function notifyDailyStats(stats: {
         {
           type: 'context',
           elements: [
-            { type: 'mrkdwn', text: `Newsletter subscribers: ${stats.newsletterSubscribers.toLocaleString()} | Pro MRR: $${(stats.proUsers * 99).toLocaleString()}/mo` },
+            { type: 'mrkdwn', text: `Newsletter subscribers: ${stats.newsletterSubscribers.toLocaleString()} | Pro MRR: $${(stats.proUsers * PRICING.PRO_PRICE_NUM).toLocaleString()}/mo` },
           ],
         },
       ],
