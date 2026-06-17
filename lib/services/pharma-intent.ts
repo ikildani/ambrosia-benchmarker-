@@ -41,21 +41,7 @@ const MODALITY_ADJACENCY: Record<string, string[]> = {
   protac: ['molecularGlue', 'small_molecule'],
 };
 
-// TA adjacency for patent cliff relevance
-const TA_ADJACENCY: Record<string, string[]> = {
-  oncology: ['hematology'],
-  hematology: ['oncology'],
-  immunology: ['dermatology', 'gastroenterology', 'rareDisease'],
-  neurology: ['psychiatry'],
-  metabolic: ['cardiovascular', 'endocrinology'],
-  cardiovascular: ['metabolic'],
-  rareDisease: ['immunology', 'hematology', 'neurology'],
-  infectiousDisease: [],
-  ophthalmology: [],
-  dermatology: ['immunology'],
-  gastroenterology: ['immunology'],
-  womensHealth: [],
-};
+import { TA_ADJACENCY } from '../financial/ta-adjacency';
 
 // Phase preference by company type
 const PHASE_PREFERENCE: Record<string, { sweet: string[]; acceptable: string[]; dealType: string }> = {

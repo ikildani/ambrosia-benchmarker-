@@ -63,6 +63,21 @@ const TA_SHARE_MULTIPLIER: Record<string, number> = {
   // immunology/neurology/metabolic/cardiovascular/infectiousDisease/womensHealth: 1.00 implicit
 };
 
+const ADOPTION_CEILING_BY_TA: Record<string, number> = {
+  rareDisease: 0.85,
+  hematology: 0.80,
+  ophthalmology: 0.75,
+  dermatology: 0.75,
+  gastroenterology: 0.70,
+  immunology: 0.65,
+  oncology: 0.65,
+  neurology: 0.55,
+  cardiovascular: 0.50,
+  metabolic: 0.50,
+  infectiousDisease: 0.65,
+  womensHealth: 0.65,
+};
+
 function applyTAShareMultiplier(
   base: { low: number; median: number; high: number },
   therapeuticArea: string,
@@ -111,13 +126,22 @@ export function estimateMarketSize(
   );
   const diagnosedPatients = Math.round(prevalentPatients * epidemiologyData.diagnosedPercent);
   const treatedPatients = Math.round(diagnosedPatients * epidemiologyData.treatedPercent);
-  const drugEligiblePatients = Math.round(treatedPatients * epidemiologyData.drugEligiblePercent);
+  const rawDrugEligible = epidemiologyData.drugEligiblePercent;
+  const drugEligiblePercent = (rawDrugEligible != null && Number.isFinite(rawDrugEligible) && rawDrugEligible > 0 && rawDrugEligible <= 1)
+    ? rawDrugEligible
+    : 0.40;
+  if (drugEligiblePercent !== rawDrugEligible) {
+    fallbackReasons.push(`drugEligiblePercent was ${rawDrugEligible} — defaulted to 40%`);
+  }
+  const drugEligiblePatients = Math.round(treatedPatients * drugEligiblePercent);
 
   // Revenue per patient adjusted for territory pricing
   const annualRevenuePerPatient = epidemiologyData.annualCostOfTherapy * territoryInfo.pricingIndexVsUS;
 
-  // Addressable patients (drug-eligible × adoption ceiling ~70%)
-  const adoptionCeiling = 0.70;
+  // Addressable patients (drug-eligible × adoption ceiling, TA-specific)
+  const adoptionCeiling = therapeuticArea
+    ? (ADOPTION_CEILING_BY_TA[therapeuticArea] ?? 0.70)
+    : 0.70;
   const addressablePatients = Math.round(drugEligiblePatients * adoptionCeiling);
 
   // Standard TAM -> SAM -> SOM taxonomy:

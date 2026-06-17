@@ -74,9 +74,10 @@ interface ComparableMethodResult {
  * Filter comparables by TA + modality + phase ±1, widening progressively
  * until the sample is large enough or we run out of widening levels.
  *
- * Comparables with `phase` undefined are treated as wildcard matches (kept
- * in every filter level) — this addresses Bug C from the plan, where many
- * historical deals lack a phase tag.
+ * Phase-unknown deals are EXCLUDED from levels 0 and 1 (which require phase
+ * matching), but naturally included at level 2 (TA-only) since that filter
+ * does not call matchesPhase. This prevents Phase 2 deals from silently
+ * leaking into Phase 3 analyses via missing-phase wildcards (Bug C fix v2).
  */
 function computeComparableMethod(
   rnpvInput: RNPVInput,
@@ -87,9 +88,11 @@ function computeComparableMethod(
   const targetDBPhase = normalizePhaseForDB(rnpvInput.phase);
   const phaseWindow = new Set(phaseWindowDB(targetDBPhase, PHASE_WINDOW));
 
-  /** Match by phase: compound calculator phases collapse to DB form before comparing. */
+  /** Match by phase: compound calculator phases collapse to DB form before comparing.
+   *  Phase-unknown deals are excluded at levels 0 and 1 (strict/modality-widened)
+   *  but naturally included at level 2 (TA-only) since that filter skips matchesPhase. */
   const matchesPhase = (d: ComparableDeal): boolean => {
-    if (!d.phase) return true; // missing phase → wildcard (Bug C fix)
+    if (!d.phase) return false; // missing phase → exclude from strict/level-1 filters
     const dbPhase = normalizePhaseForDB(d.phase);
     return phaseWindow.has(dbPhase);
   };

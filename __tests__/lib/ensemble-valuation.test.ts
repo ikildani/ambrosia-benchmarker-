@@ -156,11 +156,13 @@ describe('comparable filter (Method 2)', () => {
     expect(result.matchedDeals).toHaveLength(0);
   });
 
-  test('comparables with missing phase are wildcard-matched', () => {
-    // Bug C: deals without phase should still match
+  test('comparables with missing phase are excluded from strict/level-1 but included at level-2', () => {
+    // Bug C v2: phase-unknown deals excluded from strict/level-1 to prevent
+    // Phase 2 deals silently leaking into Phase 3 analyses. They are included
+    // at level 2 (TA-only) since that filter does not call matchesPhase.
     const deals = syntheticDeals([400, 600, 800, 1000, 1200], { phase: undefined });
     const result = __test.computeComparableMethod(makeRNPVInput(), deals);
-    expect(result.widenLevel).toBe(0);
+    expect(result.widenLevel).toBe(2); // falls through to TA-only
     expect(result.sampleSize).toBe(5);
   });
 

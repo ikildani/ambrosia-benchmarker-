@@ -9,11 +9,13 @@
  */
 
 import { z } from 'zod';
+import { INDICATION_CATALOG } from './indication-tier3-calibration';
 
 /** Valid therapeutic areas */
 const therapeuticAreas = [
   'oncology', 'neurology', 'immunology', 'metabolic',
   'cardiovascular', 'infectiousDisease', 'ophthalmology', 'womensHealth',
+  'rareDisease', 'hematology', 'dermatology', 'gastroenterology',
 ] as const;
 
 /** Valid development phases */
@@ -23,6 +25,7 @@ const phases = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'pha
 const territories = [
   'global', 'us_only', 'europe', 'china', 'japan',
   'ex_us', 'row', 'us_eu', 'us_japan',
+  'canada', 'australia', 'south_korea', 'apac_ex_cj', 'latam', 'mena',
 ] as const;
 
 /** Range schema (low/median/high) with positive values */
@@ -38,10 +41,10 @@ const positiveRange = z.object({
 /** rNPV input validation schema */
 export const RNPVInputSchema = z.object({
   phase: z.enum(phases, { error: `Phase must be one of: ${phases.join(', ')}` }),
-  therapeuticArea: z.string().min(1, 'Therapeutic area is required'),
+  therapeuticArea: z.enum(therapeuticAreas, { error: `Therapeutic area must be one of: ${therapeuticAreas.join(', ')}` }),
   modality: z.string().min(1, 'Modality is required'),
   indication: z.string().min(1, 'Indication is required'),
-  territory: z.string().min(1, 'Territory is required'),
+  territory: z.enum(territories, { error: `Territory must be one of: ${territories.join(', ')}` }),
   peakSalesEstimate: positiveRange,
   competitivePosition: z.string().min(1),
   dataQuality: z.string().min(1),
@@ -77,6 +80,30 @@ export const EpidemiologyDataSchema = z.object({
   annualCostOfTherapy: z.number().min(0),
   sources: z.array(z.string()),
 });
+
+// ---------------------------------------------------------------------------
+// Cross-field validation: indication ↔ therapeutic area
+// ---------------------------------------------------------------------------
+
+const indicationToTAs: Map<string, string[]> = new Map();
+for (const [ta, indications] of Object.entries(INDICATION_CATALOG)) {
+  for (const ind of indications) {
+    const existing = indicationToTAs.get(ind) ?? [];
+    existing.push(ta);
+    indicationToTAs.set(ind, existing);
+  }
+}
+
+/**
+ * Check whether an indication belongs to the given therapeutic area.
+ * Returns null if valid (or indication not in catalog), or a warning string.
+ */
+export function validateIndicationTA(indication: string, therapeuticArea: string): string | null {
+  const validTAs = indicationToTAs.get(indication);
+  if (!validTAs) return null;
+  if (validTAs.includes(therapeuticArea)) return null;
+  return `Indication '${indication}' belongs to ${validTAs.join('/')} but was submitted with therapeutic area '${therapeuticArea}'`;
+}
 
 /**
  * Validate rNPV input and return cleaned data or throw descriptive error.

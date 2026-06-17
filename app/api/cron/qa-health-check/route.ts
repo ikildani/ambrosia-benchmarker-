@@ -7,6 +7,8 @@ import type { RNPVInput } from '@/lib/financial/types';
 import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity';
 import { runFinancialModel } from '@/lib/financial/run-financial-model';
 import { captureApiError } from '@/lib/sentry-api';
+import { estimateMarketSize } from '@/lib/financial/market-size';
+import { validateIndicationTA } from '@/lib/financial/validation';
 
 export const maxDuration = 300; // 5 min — full matrix takes time
 export const dynamic = 'force-dynamic';
@@ -554,6 +556,251 @@ export async function GET(request: NextRequest) {
     }
   } catch (err) {
     checks.push({ name: 'Deal Count Consistency', status: 'warn', details: `Scan failed: ${err instanceof Error ? err.message : 'unknown'}` });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: PoS Modifier Bounds
+  // Tests edge-case combos to catch aggregate modifier overflow
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    const failures: string[] = [];
+    const edgeCombos = [
+      { ta: 'rareDisease', modality: 'geneTherapy', indication: 'rare_genetic', phase: 'preclinical', label: 'rareDisease/geneTherapy/preclinical' },
+      { ta: 'oncology', modality: 'adc', indication: 'solid_tumor', phase: 'phase2', label: 'oncology/adc/phase2' },
+      { ta: 'neurology', modality: 'smallMolecule', indication: 'neurodegeneration', phase: 'phase1', label: 'neurology/smallMolecule/phase1' },
+    ];
+
+    for (const ec of edgeCombos) {
+      try {
+        const r = calculateRNPV(makeRnpvInput(ec.ta, ec.modality, ec.indication, ec.phase));
+        if (r.cumulativePoS < 0.01 || r.cumulativePoS > 0.99) {
+          failures.push(`${ec.label}: PoS=${r.cumulativePoS.toFixed(4)} outside [0.01, 0.99]`);
+        }
+      } catch (err) {
+        failures.push(`${ec.label}: CRASH`);
+      }
+    }
+
+    checks.push({
+      name: 'PoS Modifier Bounds',
+      status: failures.length === 0 ? 'pass' : 'fail',
+      details: failures.length === 0 ? `${edgeCombos.length}/${edgeCombos.length} edge combos within [0.01, 0.99]` : `${failures.length} failures: ${failures.join('; ')}`,
+      durationMs: Date.now() - t0,
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: Market Size Sanity
+  // Verifies TAM > SAM > SOM and all positive for key TAs
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    const failures: string[] = [];
+    const marketTAs = [
+      { ta: 'oncology', indication: 'solid_tumor', label: 'oncology' },
+      { ta: 'rareDisease', indication: 'rare_genetic', label: 'rareDisease' },
+      { ta: 'neurology', indication: 'neurodegeneration', label: 'neurology' },
+    ];
+
+    const standardEpi = {
+      prevalencePerMillion: 500,
+      incidencePerMillion: 50,
+      diagnosedPercent: 0.7,
+      treatedPercent: 0.5,
+      drugEligiblePercent: 0.3,
+      annualCostOfTherapy: 80000,
+      sources: ['QA health check stub'],
+    };
+
+    for (const mt of marketTAs) {
+      try {
+        const ms = estimateMarketSize(mt.indication, 'global', 'firstInClass', standardEpi, mt.ta);
+        const tam = ms.totalAddressableMarket;
+        const sam = ms.serviceableAddressableMarket;
+        const som = ms.serviceableObtainableMarket;
+
+        if (tam <= 0 || sam <= 0 || som <= 0) {
+          failures.push(`${mt.label}: non-positive values (TAM=${tam}, SAM=${sam}, SOM=${som})`);
+        } else if (!(tam >= sam && sam >= som)) {
+          failures.push(`${mt.label}: chain broken (TAM=${tam.toFixed(0)}, SAM=${sam.toFixed(0)}, SOM=${som.toFixed(0)})`);
+        }
+      } catch (err) {
+        failures.push(`${mt.label}: CRASH — ${err instanceof Error ? err.message : 'unknown'}`);
+      }
+    }
+
+    checks.push({
+      name: 'Market Size Sanity',
+      status: failures.length === 0 ? 'pass' : 'fail',
+      details: failures.length === 0 ? `${marketTAs.length}/${marketTAs.length} TAs: TAM > SAM > SOM, all positive` : `${failures.length} failures: ${failures.join('; ')}`,
+      durationMs: Date.now() - t0,
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: Ensemble Method Count
+  // Verifies ensemble valuation has at least 1 non-zero-weight method
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let details = '';
+
+    try {
+      const input = makeInput('oncology', 'smallMolecule', 'solid_tumor', 'phase2');
+      const dealResult = calculateDealTerms(input);
+      const fm = runFinancialModel(input, dealResult);
+
+      if (fm.ensemble && Array.isArray(fm.ensemble.methods)) {
+        const nonZero = fm.ensemble.methods.filter((m: { weight: number }) => m.weight > 0);
+        if (nonZero.length >= 1) {
+          details = `${nonZero.length} method(s) with non-zero weight (of ${fm.ensemble.methods.length} total)`;
+        } else {
+          status = 'fail';
+          details = `All ${fm.ensemble.methods.length} ensemble methods have zero weight`;
+        }
+      } else {
+        status = 'warn';
+        details = 'Ensemble result not available on financial model output';
+      }
+    } catch (err) {
+      status = 'fail';
+      details = `CRASH — ${err instanceof Error ? err.message : 'unknown'}`;
+    }
+
+    checks.push({
+      name: 'Ensemble Method Count',
+      status,
+      details,
+      durationMs: Date.now() - t0,
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: Cross-Field Validation
+  // Verifies the indication-TA cross-validator catches mismatches
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let details = '';
+
+    try {
+      const warning = validateIndicationTA('lung_nsclc', 'immunology');
+      if (warning && typeof warning === 'string' && warning.length > 0) {
+        details = `Cross-field validator correctly warns: "${warning.substring(0, 80)}…"`;
+      } else {
+        status = 'fail';
+        details = 'validateIndicationTA("lung_nsclc", "immunology") returned null — expected a warning';
+      }
+    } catch (err) {
+      status = 'fail';
+      details = `CRASH — ${err instanceof Error ? err.message : 'unknown'}`;
+    }
+
+    checks.push({
+      name: 'Cross-Field Validation',
+      status,
+      details,
+      durationMs: Date.now() - t0,
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: Data Freshness
+  // Monitors comparable deals recency and indication catalog size
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    const details: string[] = [];
+
+    try {
+      const { COMPARABLE_DEALS } = await import('@/lib/comparableDeals');
+      const { INDICATION_CATALOG } = await import('@/lib/financial/indication-tier3-calibration');
+
+      // Check 1: Comparable deals from 2025+
+      const recentDeals = COMPARABLE_DEALS.filter(d => d.year >= 2025);
+      const recentCount = recentDeals.length;
+
+      // Check 2: Most recent deal year
+      const mostRecentYear = COMPARABLE_DEALS.reduce((max, d) => Math.max(max, d.year), 0);
+
+      // Check 3: Indication catalog size
+      const catalogSize = Object.values(INDICATION_CATALOG).reduce(
+        (sum, indications) => sum + indications.length,
+        0,
+      );
+
+      details.push(`${recentCount} deals from 2025+`);
+      details.push(`most recent deal year: ${mostRecentYear}`);
+      details.push(`${catalogSize} indications in catalog`);
+
+      // Determine status
+      if (mostRecentYear <= 2023) {
+        status = 'fail';
+        details.push('STALE: no deals newer than 2023');
+      } else if (mostRecentYear <= 2024 || recentCount === 0) {
+        status = 'warn';
+        details.push('deals stop at 2024 — may need refresh');
+      }
+
+      if (catalogSize < 500) {
+        status = status === 'fail' ? 'fail' : 'warn';
+        details.push(`catalog below 500 threshold (${catalogSize})`);
+      }
+    } catch (err) {
+      status = 'fail';
+      details.push(`CRASH — ${err instanceof Error ? err.message : 'unknown'}`);
+    }
+
+    checks.push({
+      name: 'Data Freshness',
+      status,
+      details: details.join(' | '),
+      durationMs: Date.now() - t0,
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CHECK: Pipeline Intelligence Freshness
+  // Monitors ClinicalTrials.gov scan recency and deal ingestion lag
+  // ═══════════════════════════════════════════════════════════
+  {
+    const t0 = Date.now();
+    try {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { count: recentTrials } = await supabase
+        .from('pipeline_trials')
+        .select('*', { count: 'exact', head: true })
+        .gte('updated_at', sevenDaysAgo);
+
+      const { count: recentIngested } = await supabase
+        .from('deals')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', fourteenDaysAgo);
+
+      const trialsFresh = (recentTrials ?? 0) > 0;
+      const dealsFresh = (recentIngested ?? 0) > 0;
+      const status = trialsFresh && dealsFresh ? 'pass' : (!trialsFresh && !dealsFresh) ? 'fail' : 'warn';
+
+      checks.push({
+        name: 'Pipeline Intelligence Freshness',
+        status,
+        details: `Trials updated (7d): ${recentTrials ?? 0} | Deals ingested (14d): ${recentIngested ?? 0}`,
+        durationMs: Date.now() - t0,
+      });
+    } catch (err) {
+      checks.push({
+        name: 'Pipeline Intelligence Freshness',
+        status: 'warn',
+        details: `Check skipped: ${err instanceof Error ? err.message : 'unknown'}`,
+        durationMs: Date.now() - t0,
+      });
+    }
   }
 
   // ═══════════════════════════════════════════════════════════

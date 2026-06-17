@@ -629,6 +629,13 @@ export interface RealOptionsResult {
    * "deep out-of-the-money" so users know the static DCF disagrees.
    */
   underlyingFlooredToZero?: boolean;
+  /**
+   * True when the lattice value at N steps and 2*N steps agree within 5%.
+   * When false, the refined (2*N) value is used and callers should note
+   * that the base lattice depth was insufficient for convergence (typically
+   * caused by high volatility).
+   */
+  converged: boolean;
 }
 
 /** Phase order for iteration through development stages */
@@ -826,6 +833,7 @@ export function calculateRealOptions(
       narrative: 'Asset is already approved. No optionality remains in development; ' +
         'value equals the static rNPV. Optionality exists only in lifecycle ' +
         'management decisions (label expansions, formulation changes).',
+      converged: true,
     };
   }
 
@@ -852,10 +860,6 @@ export function calculateRealOptions(
   // present-value K before plugging it into the lattice; using face-value K
   // overstates the strike price for long-dated gates and undervalues deep-
   // OTM options. (Trigeorgis 2017, §6.3)
-  const optionValueByPhase: RealOptionsResult['optionValueByPhase'] = [];
-
-  // The underlying for the final phase is the total unadjusted commercial value
-  let downstreamValue = totalCashFlowPV;
 
   // Build cumulative time-to-gate offsets so earlier phases carry shorter
   // discount horizons than later phases.
@@ -867,35 +871,58 @@ export function calculateRealOptions(
     cumulativeTimeToGate[i] = runningT;
   }
 
-  // Process phases in reverse order (last phase first)
-  for (let i = remainingPhases.length - 1; i >= 0; i--) {
-    const phase = remainingPhases[i];
-    const S = downstreamValue;
-    const T = Math.max(phase.duration, 0.25); // Floor at 3 months
-    const yearsToGate = cumulativeTimeToGate[i];
-    // Discount the strike (phase cost) to present using the risk-free rate.
-    const K = phase.cost / Math.pow(1 + rf, yearsToGate);
+  // Helper: compute the compound option chain at a given lattice depth.
+  // Returns phase-by-phase decomposition and the total compound option value.
+  function computeCompoundLattice(latticeSteps: number): {
+    optionValueByPhase: RealOptionsResult['optionValueByPhase'];
+    totalOptionValue: number;
+  } {
+    const phases: RealOptionsResult['optionValueByPhase'] = [];
+    let downstream = totalCashFlowPV;
 
-    // Price the option using CRR binomial lattice
-    const optionValue = buildCRRLattice(S, K, T, sigma, rf, N);
-    const intrinsicValue = Math.max(S - K, 0);
-    const timeValue = Math.max(optionValue - intrinsicValue, 0);
+    for (let i = remainingPhases.length - 1; i >= 0; i--) {
+      const phase = remainingPhases[i];
+      const S = downstream;
+      const T = Math.max(phase.duration, 0.25); // Floor at 3 months
+      const yearsToGate = cumulativeTimeToGate[i];
+      const K = phase.cost / Math.pow(1 + rf, yearsToGate);
 
-    optionValueByPhase.unshift({
-      phase: phase.phase,
-      optionValue: Math.round(optionValue * 10) / 10,
-      intrinsicValue: Math.round(intrinsicValue * 10) / 10,
-      timeValue: Math.round(timeValue * 10) / 10,
-    });
+      const optionValue = buildCRRLattice(S, K, T, sigma, rf, latticeSteps);
+      const intrinsicValue = Math.max(S - K, 0);
+      const timeValue = Math.max(optionValue - intrinsicValue, 0);
 
-    // The option value of this phase becomes the underlying for the previous phase
-    downstreamValue = optionValue;
+      phases.unshift({
+        phase: phase.phase,
+        optionValue: Math.round(optionValue * 10) / 10,
+        intrinsicValue: Math.round(intrinsicValue * 10) / 10,
+        timeValue: Math.round(timeValue * 10) / 10,
+      });
+
+      downstream = optionValue;
+    }
+
+    const total = phases.length > 0 ? phases[0].optionValue : baseResult.riskAdjustedNPV;
+    return { optionValueByPhase: phases, totalOptionValue: total };
   }
 
+  // Compute at base depth, then at 2x depth for convergence check.
+  // If the values differ by more than 5%, the base lattice depth is
+  // insufficient (typically high-volatility assets) — use the refined value.
+  const N_BASE = N;
+  const baseRun = computeCompoundLattice(N_BASE);
+  const refinedRun = computeCompoundLattice(N_BASE * 2);
+
+  const convergenceDelta = Math.abs(refinedRun.totalOptionValue - baseRun.totalOptionValue)
+    / Math.max(Math.abs(baseRun.totalOptionValue), 1);
+  const converged = convergenceDelta <= 0.05;
+
+  // Use base result when converged, refined (2x) result when not
+  const selectedRun = converged ? baseRun : refinedRun;
+  const optionValueByPhase = selectedRun.optionValueByPhase;
+  const effectiveLatticeSteps = converged ? N_BASE : N_BASE * 2;
+
   // --- 6. Compute aggregate metrics ---
-  const totalOptionValue = optionValueByPhase.length > 0
-    ? optionValueByPhase[0].optionValue
-    : baseResult.riskAdjustedNPV;
+  const totalOptionValue = selectedRun.totalOptionValue;
 
   const flexibilityPremium = totalOptionValue - baseResult.riskAdjustedNPV;
   const flexibilityPremiumPercent = baseResult.riskAdjustedNPV !== 0
@@ -934,6 +961,13 @@ export function calculateRealOptions(
       `asset is deep in-the-money at most remaining decision points.`;
   }
 
+  // Append convergence warning when the base lattice depth was insufficient
+  if (!converged) {
+    narrative += ` Note: the lattice did not converge at ${N_BASE} steps ` +
+      `(${(convergenceDelta * 100).toFixed(1)}% delta); a refined ${N_BASE * 2}-step ` +
+      `lattice was used for this valuation.`;
+  }
+
   return {
     optionValueByPhase,
     totalOptionValue: Math.round(totalOptionValue * 10) / 10,
@@ -941,9 +975,10 @@ export function calculateRealOptions(
     flexibilityPremiumPercent: Math.round(flexibilityPremiumPercent * 10) / 10,
     volatilityUsed: Math.round(sigma * 1000) / 1000,
     riskFreeRate: rf,
-    latticeSteps: N,
+    latticeSteps: effectiveLatticeSteps,
     narrative,
     underlyingFlooredToZero,
+    converged,
   };
 }
 

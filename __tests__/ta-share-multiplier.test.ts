@@ -19,12 +19,15 @@ describe('TA-aware market share multiplier (R68-T4)', () => {
   it('rare disease FIC captures more share than oncology FIC at same position', () => {
     const rare = estimateMarketSize('mps_i', 'global', 'firstInClass', stubEpi, 'rareDisease');
     const onco = estimateMarketSize('breast_her2', 'global', 'firstInClass', stubEpi, 'oncology');
-    // Both use the same epidemiology + territory, so only TA multiplier differs.
-    // rareDisease 1.35 vs oncology 0.85 = rare FIC should be ~1.6× oncology FIC
+    // Both use the same epidemiology + territory, so TA share multiplier AND
+    // TA-specific adoption ceiling differ.
+    // Share: rareDisease 1.35 vs oncology 0.85 (~1.59×)
+    // Adoption ceiling: rareDisease 0.85 vs oncology 0.65 (~1.31×)
+    // Combined: ~2.08×
     expect(rare.peakSales.median).toBeGreaterThan(onco.peakSales.median);
     const ratio = rare.peakSales.median / onco.peakSales.median;
-    expect(ratio).toBeGreaterThanOrEqual(1.4);
-    expect(ratio).toBeLessThanOrEqual(1.8);
+    expect(ratio).toBeGreaterThanOrEqual(1.8);
+    expect(ratio).toBeLessThanOrEqual(2.3);
   });
 
   it('oncology FIC median share dampened vs TA-neutral base', () => {

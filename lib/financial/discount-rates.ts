@@ -203,3 +203,29 @@ export const TERRITORY_RISK_PREMIUM: Record<string, number> = {
   latam: 0.02,         // Currency volatility, tender market risk
   mena: 0.015,         // Mixed — Gulf stable, North Africa volatile
 };
+
+/**
+ * Territory-specific effective corporate tax rates for pharma/biotech.
+ * Reflects blended rates accounting for IP holding structures typical
+ * of multinational pharma companies operating in each jurisdiction.
+ *
+ * Sources: Deloitte 2024 pharma tax benchmark, OECD BEPS Pillar Two,
+ * PwC global pharma tax rate survey.
+ */
+export const TERRITORY_TAX_RATE: Record<string, number> = {
+  us_only: 0.15,
+  global: 0.18,
+  us_eu: 0.18,
+  us_japan: 0.17,
+  europe: 0.22,
+  japan: 0.23,
+  china: 0.25,
+  ex_us: 0.20,
+  row: 0.20,
+  canada: 0.20,
+  australia: 0.25,
+  south_korea: 0.22,
+  apac_ex_cj: 0.20,
+  latam: 0.25,
+  mena: 0.15,
+};

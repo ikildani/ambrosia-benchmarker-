@@ -317,20 +317,7 @@ const MODALITY_CLASS: Record<string, string> = {
   antiActivin: 'biologic',
 };
 
-// TA adjacency map for related-TA scoring
-// TODO: Consolidate TA_ADJACENCY with pharma-intent.ts and partner-matching.ts
-//       to avoid maintaining three slightly-different copies of the same lookup.
-const TA_ADJACENCY: Record<string, string[]> = {
-  immunology: ['gastroenterology', 'dermatology', 'rareDisease'],
-  gastroenterology: ['immunology'],
-  dermatology: ['immunology'],
-  oncology: ['hematology'],
-  hematology: ['oncology', 'rareDisease'],
-  neurology: ['rareDisease'],
-  metabolic: ['cardiovascular'],
-  cardiovascular: ['metabolic'],
-  rareDisease: ['hematology', 'neurology', 'immunology'],
-};
+import { TA_ADJACENCY } from './financial/ta-adjacency';
 
 // Phase rank for distance scoring
 const PHASE_RANK: Record<string, number> = {

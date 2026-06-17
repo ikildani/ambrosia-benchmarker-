@@ -32,7 +32,7 @@ import {
   checkPeakSalesCeiling,
   getGenericEntrenchmentMultiplier,
 } from './index-drugs';
-import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
+import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT, TERRITORY_TAX_RATE } from './discount-rates';
 import { checkRNPVInvariants, assertInvariants } from './invariants';
 import { getCompetitiveDensity } from './indication-competitive-density';
 import {
@@ -49,13 +49,12 @@ import { getPatentCliffAdjustment } from './patent-cliffs';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 import { computeEmpiricalMultiplier } from './empirical-multiplier';
 import { getCeiling, clampRange } from './indication-ceilings';
+import { computeCalculationFingerprint } from './calculation-version';
 
-/**
- * Effective corporate tax rate for pharma/biotech.
- * Source: Deloitte 2024 pharma tax benchmark — US effective rate ~15-21%;
- * we use 18% as a blended global rate reflecting offshore IP structures.
- */
-const EFFECTIVE_TAX_RATE = 0.18;
+/** Resolve territory-specific effective tax rate, defaulting to 18% global blend. */
+function getEffectiveTaxRate(territory: string): number {
+  return TERRITORY_TAX_RATE[territory] ?? 0.18;
+}
 
 // ---------------------------------------------------------------------------
 // Indication-Specific PoS Modifiers
@@ -483,6 +482,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     indicationModifier = Math.pow(modifierProduct, 1.0 / transitionKeys.length);
   }
 
+  // Aggregate cap: total indication modifier deviation should not exceed ±35%,
+  // slightly tighter than per-transition ±40% to prevent compound extremes
+  indicationModifier = Math.max(0.65, Math.min(1.35, indicationModifier));
+
   const modifiedPoS = Math.max(0, Math.min(1, rawCumulativePoS * indicationModifier));
 
   // Apply scenario PoS multiplier (e.g., 0.85 for reduced approval confidence)
@@ -699,6 +702,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     therapeuticArea,
     pathway, // Pass pathway so R&D cost schedule uses sequential phases, not PHASE_ORDER linear sum
     input.indication, // Indication-specific revenue curve lookup (takes precedence over TA override)
+    territory, // Territory-specific tax rate
   );
 
   // 6. Calculate NPV from cash flows
@@ -1161,7 +1165,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       return `LOE: ${loe} years post-approval; generic erosion: ${(genericErosion * 100).toFixed(0)}% (${modality})`;
     })(),
     `COGS: modality-specific (${modality}); SG&A: lifecycle-stage-specific`,
-    `Corporate tax: ${(EFFECTIVE_TAX_RATE * 100).toFixed(0)}% effective rate on positive operating income`,
+    `Corporate tax: ${(getEffectiveTaxRate(territory) * 100).toFixed(0)}% effective rate on positive operating income (${territory || 'global'})`,
   ];
 
   // --- Geographic revenue decomposition ---
@@ -1221,6 +1225,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     cashFlows,
     peakSalesYear,
     yearsToMarket: Math.round(yearsToMarket * 10) / 10,
+    calculationFingerprint: computeCalculationFingerprint(input as unknown as Record<string, unknown>),
     impliedDealValue: {
       upfront: roundRange(impliedDealValue.upfront),
       totalDeal: roundRange(impliedDealValue.totalDeal),
@@ -1348,6 +1353,7 @@ function projectCashFlows(
   therapeuticArea: string,
   pathway?: string[],
   indication?: string,
+  territory?: string,
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
   // Resolve revenue curve parameters with the following precedence:
@@ -1465,7 +1471,7 @@ function projectCashFlows(
     const preTaxCashFlow = grossProfit - rdCosts - sgaCosts;
     // Apply corporate tax on positive operating income only (no tax benefit on losses
     // for simplicity — pharma NOL carryforwards are complex and company-specific)
-    const tax = preTaxCashFlow > 0 ? preTaxCashFlow * EFFECTIVE_TAX_RATE : 0;
+    const tax = preTaxCashFlow > 0 ? preTaxCashFlow * getEffectiveTaxRate(territory ?? 'global') : 0;
     const netCashFlow = preTaxCashFlow - tax;
     const discountFactor = 1 / Math.pow(1 + discountRate, year);
     const presentValue = netCashFlow * discountFactor;

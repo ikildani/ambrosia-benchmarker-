@@ -18,6 +18,8 @@ import {
   checkRNPVInvariants,
   checkMonteCarloInvariants,
 } from '@/lib/financial/invariants';
+import { estimateMarketSize } from '@/lib/financial/market-size';
+import { TERRITORY_TAX_RATE } from '@/lib/financial/discount-rates';
 import type { RNPVInput } from '@/lib/financial/types';
 
 // ---------------------------------------------------------------------------
@@ -410,5 +412,86 @@ describe('Property: Monte Carlo invariants', () => {
       console.warn(failures.slice(0, 3));
     }
     expect(failures.length).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 3B: New property tests (QA/QC expansion)
+// ---------------------------------------------------------------------------
+
+// Ordered by effective TAM (population × pricing index), not raw population
+const TERRITORIES_TAM_ORDERED = [
+  { key: 'japan' },    // 123M × 0.45 = 55.35
+  { key: 'europe' },   // 450M × 0.38 = 171
+  { key: 'us_only' },  // 340M × 1.00 = 340
+  { key: 'global' },   // 8200M × 0.28 = 2296
+] as const;
+
+const stubEpi = {
+  prevalencePerMillion: 100,
+  incidencePerMillion: 10,
+  diagnosedPercent: 0.80,
+  treatedPercent: 0.70,
+  drugEligiblePercent: 0.60,
+  annualCostOfTherapy: 50_000,
+  sources: ['Property test stub'],
+} as any;
+
+describe('Property: Market size monotonicity', () => {
+  test('higher effective TAM territory (pop × pricing) produces larger TAM', () => {
+    for (let i = 1; i < TERRITORIES_TAM_ORDERED.length; i++) {
+      const smaller = estimateMarketSize('test', TERRITORIES_TAM_ORDERED[i - 1].key, 'firstInClass', stubEpi);
+      const larger = estimateMarketSize('test', TERRITORIES_TAM_ORDERED[i].key, 'firstInClass', stubEpi);
+      expect(larger.totalAddressableMarket).toBeGreaterThanOrEqual(smaller.totalAddressableMarket);
+    }
+  });
+
+  test('TAM >= SAM >= SOM for random TA/territory combos', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...TAS),
+        fc.constantFrom('global', 'us_only', 'europe', 'japan', 'china'),
+        fc.constantFrom('firstInClass', 'racing', 'crowded'),
+        (ta, territory, position) => {
+          const result = estimateMarketSize('test', territory, position, stubEpi, ta);
+          return (
+            result.totalAddressableMarket >= result.serviceableAddressableMarket &&
+            result.serviceableAddressableMarket >= result.serviceableObtainableMarket
+          );
+        },
+      ),
+      { numRuns: 200 },
+    );
+  });
+});
+
+describe('Property: Territory tax rate consistency', () => {
+  test('US effective tax rate < Europe effective tax rate', () => {
+    expect(TERRITORY_TAX_RATE['us_only']).toBeLessThan(TERRITORY_TAX_RATE['europe']);
+  });
+
+  test('all tax rates are within [0.10, 0.35]', () => {
+    for (const [territory, rate] of Object.entries(TERRITORY_TAX_RATE)) {
+      expect(rate).toBeGreaterThanOrEqual(0.10);
+      expect(rate).toBeLessThanOrEqual(0.35);
+    }
+  });
+});
+
+describe('Property: Adoption ceiling ordering', () => {
+  test('rare disease adoption ceiling >= oncology adoption ceiling', () => {
+    const rare = estimateMarketSize('test', 'global', 'firstInClass', stubEpi, 'rareDisease');
+    const onco = estimateMarketSize('test', 'global', 'firstInClass', stubEpi, 'oncology');
+    expect(rare.patientFunnel.addressablePatients).toBeGreaterThanOrEqual(
+      onco.patientFunnel.addressablePatients,
+    );
+  });
+
+  test('hematology adoption ceiling >= oncology adoption ceiling', () => {
+    const heme = estimateMarketSize('test', 'global', 'firstInClass', stubEpi, 'hematology');
+    const onco = estimateMarketSize('test', 'global', 'firstInClass', stubEpi, 'oncology');
+    expect(heme.patientFunnel.addressablePatients).toBeGreaterThanOrEqual(
+      onco.patientFunnel.addressablePatients,
+    );
   });
 });

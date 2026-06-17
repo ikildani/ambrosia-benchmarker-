@@ -34,6 +34,7 @@ import type { CompetitiveDynamicsResult, RealOptionsResult } from './advanced-up
 import { checkCrossEngineConsistency } from './consistency-checks';
 import { assertInvariants, checkScenarioInvariants } from './invariants';
 import { calculateEnsembleValuation } from './ensemble-valuation';
+import { computeCalculationFingerprint } from './calculation-version';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -57,6 +58,8 @@ export interface FinancialModelResult {
   realOptions: RealOptionsResult;
   /** Tier 3 Item 7: blended valuation across rNPV / comparables / real options */
   ensemble: EnsembleResult;
+  /** Deterministic fingerprint for full model reproducibility (inputs + engine version) */
+  calculationFingerprint?: string;
 }
 
 /**
@@ -329,6 +332,7 @@ export function runFinancialModel(
     competitiveDynamics,
     realOptions,
     ensemble,
+    calculationFingerprint: computeCalculationFingerprint(inputs as unknown as Record<string, unknown>),
   };
 }
 

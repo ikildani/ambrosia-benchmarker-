@@ -267,6 +267,49 @@ export function checkRNPVInvariants(
     }
   }
 
+  // 13. PoS aggregate modifier bounds — tighter than [0,1] for pre-approval phases
+  //     Catches modifier overflow/underflow that pushes PoS to extremes
+  if (isFiniteNumber(result.cumulativePoS)) {
+    const preApproval = input.phase !== 'approved' && input.phase !== 'nda_filed';
+    if (preApproval && (result.cumulativePoS < 0.005 || result.cumulativePoS > 0.95)) {
+      out.push(
+        v('warning', 'rnpv.pos_aggregate_modifier',
+          `Pre-approval cumulativePoS ${(result.cumulativePoS * 100).toFixed(2)}% is outside expected [0.5%, 95%] band. Possible modifier overflow/underflow.`,
+          { cumulativePoS: result.cumulativePoS, phase: input.phase }),
+      );
+    }
+  }
+
+  // 14. Discount rate extended warning — [0.30, 0.40] is unusual territory
+  if (isFiniteNumber(result.discountRate) && result.discountRate >= 0.30 && result.discountRate <= 0.40) {
+    out.push(
+      v('warning', 'rnpv.discount_rate_high_warning',
+        `discountRate ${(result.discountRate * 100).toFixed(1)}% is in the 30-40% range — only appropriate for highly distressed or speculative assets.`,
+        { discountRate: result.discountRate }),
+    );
+  }
+
+  // 15. Cash flow COGS-to-revenue ratio — for years with material revenue,
+  //     COGS should be a reasonable fraction (10-80%) of revenue
+  if (Array.isArray(result.cashFlows)) {
+    const badYears: { year: number; cogsRatio: number }[] = [];
+    for (const cf of result.cashFlows) {
+      if (cf.revenue > 1) {
+        const cogsRatio = cf.cogs / cf.revenue;
+        if (cogsRatio < 0.05 || cogsRatio > 0.85) {
+          badYears.push({ year: cf.year, cogsRatio });
+        }
+      }
+    }
+    if (badYears.length > 0) {
+      out.push(
+        v('warning', 'rnpv.cash_flow_cogs_ratio',
+          `${badYears.length} cash flow year(s) have COGS/revenue ratio outside [5%, 85%]: ${badYears.slice(0, 3).map(y => `year ${y.year}: ${(y.cogsRatio * 100).toFixed(1)}%`).join(', ')}.`,
+          { badYears: badYears.slice(0, 5) }),
+      );
+    }
+  }
+
   return out;
 }
 

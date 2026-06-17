@@ -558,6 +558,9 @@ export interface RNPVResult {
     narrative: string;
   };
 
+  /** Deterministic fingerprint for calculation reproducibility (inputs + engine version) */
+  calculationFingerprint?: string;
+
   /** WACC / discount rate used in the model */
   discountRate: number;
 
@@ -880,6 +883,13 @@ export interface MonteCarloResult {
    * due to the binary nature of clinical trial outcomes.
    */
   kurtosis: number;
+
+  /**
+   * Runtime warnings emitted during simulation (e.g., correlation matrix
+   * validation failures, near-singular decompositions).
+   * Empty array when everything is clean.
+   */
+  warnings?: string[];
 }
 
 // ---------------------------------------------------------------------------

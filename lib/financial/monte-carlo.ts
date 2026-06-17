@@ -253,6 +253,30 @@ const DEAL_TYPE_CORRELATION_OVERRIDES: Record<string, number[][]> = {
 };
 
 /**
+ * Validate that a matrix is a proper correlation matrix before Cholesky
+ * decomposition.  Checks:
+ *   1. Unit diagonal (all diagonal entries = 1.0 within tolerance)
+ *   2. Symmetry   (A[i][j] = A[j][i] within tolerance)
+ *   3. Bounds     (|A[i][j]| < 1 for off-diagonal entries)
+ *
+ * Returns true if the matrix passes all checks.  When false, the caller
+ * should fall back to an identity matrix (independent sampling) rather
+ * than feeding a degenerate matrix into Cholesky where Math.max(0, ...)
+ * silently collapses dimensions.
+ */
+function validateCorrelationMatrix(matrix: number[][]): boolean {
+  const n = matrix.length;
+  for (let i = 0; i < n; i++) {
+    if (Math.abs(matrix[i][i] - 1.0) > 1e-6) return false;
+    for (let j = 0; j < i; j++) {
+      if (Math.abs(matrix[i][j] - matrix[j][i]) > 1e-6) return false;
+      if (Math.abs(matrix[i][j]) >= 1.0) return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Cholesky decomposition of a symmetric positive-definite matrix.
  * Returns lower-triangular matrix L such that L * L^T = A.
  * Used to transform independent standard normal samples into correlated samples.
@@ -563,9 +587,30 @@ export function runMonteCarlo(
   // Track which scenario each iteration was drawn from
   const scenarioAssignment = new Uint8Array(iterations);
 
+  // Warnings accumulated during simulation (surfaced in result)
+  const warnings: string[] = [];
+
   // Select deal-type-specific correlation matrix (falls back to default for licensing/codevelopment/collaboration)
   const dealType = rnpv.dealType || 'licensing';
-  const correlationMatrix = DEAL_TYPE_CORRELATION_OVERRIDES[dealType] ?? CORRELATION_MATRIX;
+  let correlationMatrix = DEAL_TYPE_CORRELATION_OVERRIDES[dealType] ?? CORRELATION_MATRIX;
+
+  // Validate correlation matrix before Cholesky decomposition.
+  // A malformed matrix (non-unit diagonal, asymmetric, or |r| >= 1) causes
+  // choleskyDecompose to silently collapse dimensions via Math.max(0, ...),
+  // giving some parameters zero variation. Fall back to identity (independent
+  // sampling) rather than producing a degenerate decomposition.
+  const isValidCorrelation = validateCorrelationMatrix(correlationMatrix);
+  if (!isValidCorrelation) {
+    const n = correlationMatrix.length;
+    correlationMatrix = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
+    );
+    warnings.push(
+      `Correlation matrix for deal type "${dealType}" failed validation ` +
+      `(non-unit diagonal, asymmetric, or |r| >= 1). ` +
+      `Fell back to identity matrix — parameters sampled independently.`
+    );
+  }
 
   // Pre-compute Cholesky factor for correlated sampling
   const choleskyL = choleskyDecompose(correlationMatrix);
@@ -821,6 +866,8 @@ export function runMonteCarlo(
     cvar95,
     skewness,
     kurtosis,
+
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 
   // Layer 1: mathematical invariants — log to Sentry but never throw.
