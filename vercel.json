@@ -251,6 +251,10 @@
       "schedule": "0 */4 * * *"
     },
     {
+      "path": "/api/cron/portfolio-activity-digest",
+      "schedule": "0 14 * * 1"
+    },
+    {
       "path": "/api/cron/apollo-auto-enroll",
       "schedule": "0 10 * * 1,3,5"
     },

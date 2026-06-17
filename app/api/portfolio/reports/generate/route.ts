@@ -4,13 +4,27 @@ import { isScalePlus } from '@/lib/portfolio/feature-gates';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateReportHTML } from '@/lib/report';
 import { renderPDFBuffer } from '@/lib/report/server-renderer';
-import { apiError } from '@/lib/api-response';
+import { apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 import type { PDFReportData, BrandConfig } from '@/lib/report/types';
 
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 requests per minute per user (spawns headless Chromium)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'portfolioReportGenerate', { limit: 5, windowSeconds: 60 });
+
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders(
+        'Too many requests. Please try again later.',
+        429,
+        getRateLimitHeaders(rateLimitResult),
+        'RATE_LIMITED'
+      );
+    }
+
     const auth = await requireTeamMember(request);
     if ('error' in auth) return auth.error;
 

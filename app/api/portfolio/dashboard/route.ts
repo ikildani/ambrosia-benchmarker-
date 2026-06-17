@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     const teamId = membership.team_id;
 
-    const [teamResult, membersResult, analystHoursResult, alertsResult, auditResult] = await Promise.all([
+    const [teamResult, membersResult, analystHoursResult, alertsResult, auditResult, calculationsResult] = await Promise.all([
       supabase.from('teams').select('*').eq('id', teamId).single(),
 
       supabase
@@ -51,6 +51,13 @@ export async function GET(request: NextRequest) {
         .eq('team_id', teamId)
         .order('created_at', { ascending: false })
         .limit(20),
+
+      supabase
+        .from('audit_log')
+        .select('id')
+        .eq('team_id', teamId)
+        .eq('action', 'run_calculation')
+        .limit(1),
     ]);
 
     const team = teamResult.data;
@@ -76,6 +83,14 @@ export async function GET(request: NextRequest) {
       },
       activeAlerts: alertsResult.data?.length || 0,
       recentActivity: auditResult.data || [],
+      onboarding: {
+        hasLogo: !!team?.logo_url,
+        hasMembers: activeMembers > 1,
+        hasAlerts: (alertsResult.data?.length || 0) > 0,
+        hasCalculations: (calculationsResult.data?.length || 0) > 0,
+        hasSlack: !!team?.slack_webhook_url,
+        tier: team?.portfolio_tier || 'growth',
+      },
     });
   } catch {
     return apiError('Internal server error', 500);

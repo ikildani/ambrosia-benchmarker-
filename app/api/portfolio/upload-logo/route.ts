@@ -1,13 +1,27 @@
 import { NextRequest } from 'next/server';
 import { requireTeamAdmin } from '@/lib/portfolio/auth';
 import { createServiceClient } from '@/lib/supabase/server';
-import { apiSuccess, apiError } from '@/lib/api-response';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 requests per minute per user (file upload abuse prevention)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'portfolioUploadLogo', { limit: 5, windowSeconds: 60 });
+
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders(
+        'Too many requests. Please try again later.',
+        429,
+        getRateLimitHeaders(rateLimitResult),
+        'RATE_LIMITED'
+      );
+    }
+
     const auth = await requireTeamAdmin(request);
     if ('error' in auth) return auth.error;
 

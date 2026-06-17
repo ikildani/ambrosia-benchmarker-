@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireTeamAdmin } from '@/lib/portfolio/auth';
-import { apiSuccess, apiError } from '@/lib/api-response';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { logAuditEvent, getAuditContext } from '@/lib/audit-log';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,19 @@ function getQuarterDateRange(quarter: number, year: number): { start: string; en
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting: 3 requests per minute per user (large data aggregation)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'portfolioQuarterlyReport', { limit: 3, windowSeconds: 60 });
+
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders(
+        'Too many requests. Please try again later.',
+        429,
+        getRateLimitHeaders(rateLimitResult),
+        'RATE_LIMITED'
+      );
+    }
+
     const auth = await requireTeamAdmin(request);
     if ('error' in auth) return auth.error;
     const { teamId } = auth;
@@ -41,6 +55,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 3 requests per minute per user (large data aggregation)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'portfolioQuarterlyReport', { limit: 3, windowSeconds: 60 });
+
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders(
+        'Too many requests. Please try again later.',
+        429,
+        getRateLimitHeaders(rateLimitResult),
+        'RATE_LIMITED'
+      );
+    }
+
     const auth = await requireTeamAdmin(request);
     if ('error' in auth) return auth.error;
     const { user, teamId, team } = auth;

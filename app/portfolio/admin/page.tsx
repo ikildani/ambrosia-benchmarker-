@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, Clock, Bell, BarChart3, Activity, TrendingUp } from 'lucide-react';
+import { Users, Clock, Bell, BarChart3, Activity, TrendingUp, CheckSquare, Circle } from 'lucide-react';
 
 interface DashboardData {
   team: {
@@ -23,6 +23,14 @@ interface DashboardData {
     created_at: string;
     details: Record<string, unknown>;
   }>;
+  onboarding: {
+    hasLogo: boolean;
+    hasMembers: boolean;
+    hasAlerts: boolean;
+    hasCalculations: boolean;
+    hasSlack: boolean;
+    tier: string;
+  };
 }
 
 function StatCard({ icon: Icon, label, value, subtext, color }: {
@@ -52,9 +60,118 @@ function formatAction(action: string): string {
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
+interface ChecklistItem {
+  key: string;
+  label: string;
+  completed: boolean;
+  href: string;
+  scaleOnly?: boolean;
+}
+
+function OnboardingChecklist({ onboarding, onDismiss }: {
+  onboarding: DashboardData['onboarding'];
+  onDismiss: () => void;
+}) {
+  const items: ChecklistItem[] = [
+    {
+      key: 'logo',
+      label: 'Upload your fund logo',
+      completed: onboarding.hasLogo,
+      href: '/portfolio/admin/settings',
+    },
+    {
+      key: 'members',
+      label: 'Invite your first team member',
+      completed: onboarding.hasMembers,
+      href: '/portfolio/admin/team',
+    },
+    {
+      key: 'alerts',
+      label: 'Configure deal alerts',
+      completed: onboarding.hasAlerts,
+      href: '/portfolio/admin/alerts',
+    },
+    {
+      key: 'calculations',
+      label: 'Run your first calculation',
+      completed: onboarding.hasCalculations,
+      href: '/calculator',
+    },
+    {
+      key: 'slack',
+      label: 'Set up Slack notifications',
+      completed: onboarding.hasSlack,
+      href: '/portfolio/admin/settings',
+      scaleOnly: true,
+    },
+  ];
+
+  const visibleItems = items.filter(item => !item.scaleOnly || onboarding.tier === 'scale');
+  const completedCount = visibleItems.filter(i => i.completed).length;
+  const totalCount = visibleItems.length;
+  const progressPercent = Math.round((completedCount / totalCount) * 100);
+
+  return (
+    <div className="bg-slate-800/50 border border-indigo-500/30 rounded-xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Getting Started</h2>
+          <p className="text-sm text-slate-400 mt-0.5">
+            {completedCount} of {totalCount} complete
+          </p>
+        </div>
+        <button
+          onClick={onDismiss}
+          className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-700/50"
+        >
+          Dismiss
+        </button>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-2 bg-slate-700 rounded-full overflow-hidden mb-5">
+        <div
+          className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      <div className="space-y-2">
+        {visibleItems.map((item) => (
+          <a
+            key={item.key}
+            href={item.href}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-700/40 transition-colors group"
+          >
+            {item.completed ? (
+              <CheckSquare className="w-5 h-5 text-emerald-400 shrink-0" />
+            ) : (
+              <Circle className="w-5 h-5 text-slate-600 shrink-0 group-hover:text-indigo-400 transition-colors" />
+            )}
+            <span className={item.completed ? 'text-slate-500 line-through' : 'text-slate-200'}>
+              {item.label}
+            </span>
+            {item.scaleOnly && (
+              <span className="text-[10px] uppercase tracking-wider text-indigo-400/60 bg-indigo-500/10 px-1.5 py-0.5 rounded ml-auto">
+                Scale+
+              </span>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function PortfolioAdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem('portfolio-onboarding-dismissed');
+    if (dismissed === 'true') setOnboardingDismissed(true);
+  }, []);
 
   useEffect(() => {
     fetch('/api/portfolio/dashboard')
@@ -107,6 +224,27 @@ export default function PortfolioAdminDashboard() {
           )}
         </div>
       </div>
+
+      {data.onboarding && !onboardingDismissed && (() => {
+        const items = [
+          data.onboarding.hasLogo,
+          data.onboarding.hasMembers,
+          data.onboarding.hasAlerts,
+          data.onboarding.hasCalculations,
+          ...(data.onboarding.tier === 'scale' ? [data.onboarding.hasSlack] : []),
+        ];
+        const allComplete = items.every(Boolean);
+        if (allComplete) return null;
+        return (
+          <OnboardingChecklist
+            onboarding={data.onboarding}
+            onDismiss={() => {
+              setOnboardingDismissed(true);
+              localStorage.setItem('portfolio-onboarding-dismissed', 'true');
+            }}
+          />
+        );
+      })()}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

@@ -555,3 +555,113 @@ export async function sendUpgradeConfirmation(to: string, name: string) {
     html,
   });
 }
+
+export async function sendPortfolioActivityDigest(
+  to: string,
+  teamName: string,
+  digest: {
+    period: string;
+    activeSeats: number;
+    maxSeats: number;
+    calculationsRun: number;
+    reportsGenerated: number;
+    alertsFired: number;
+    analystHoursUsed: number;
+    analystHoursAllocated: number;
+    topCompanies: Array<{ name: string; calculations: number }>;
+  },
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const companyRows = digest.topCompanies.slice(0, 5).map((company, i) => `
+    <tr>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f1f5f9; font-weight: 600; font-size: 14px;">${i + 1}. ${company.name}</td>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #14b8a6; font-weight: 600; font-size: 14px; text-align: right;">${company.calculations}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #e2e8f0; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #0f172a;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 22px;">${teamName} Weekly Portfolio Activity</h1>
+          <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">${digest.period}</p>
+        </div>
+
+        <div style="background: #1e293b; padding: 24px; border: 1px solid #334155; border-top: none;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tbody>
+              <tr>
+                <td style="padding: 16px; text-align: center; width: 33%; border-bottom: 1px solid #334155; border-right: 1px solid #334155;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Active Seats</div>
+                  <div style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.activeSeats}<span style="color: #64748b; font-size: 14px; font-weight: 400;">/${digest.maxSeats}</span></div>
+                </td>
+                <td style="padding: 16px; text-align: center; width: 33%; border-bottom: 1px solid #334155; border-right: 1px solid #334155;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Calculations Run</div>
+                  <div style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.calculationsRun}</div>
+                </td>
+                <td style="padding: 16px; text-align: center; width: 34%; border-bottom: 1px solid #334155;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Reports Generated</div>
+                  <div style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.reportsGenerated}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 16px; text-align: center; width: 33%; border-right: 1px solid #334155;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Alerts Fired</div>
+                  <div style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.alertsFired}</div>
+                </td>
+                <td style="padding: 16px; text-align: center; width: 33%; border-right: 1px solid #334155;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Analyst Hours</div>
+                  <div style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.analystHoursUsed}<span style="color: #64748b; font-size: 14px; font-weight: 400;">/${digest.analystHoursAllocated}</span></div>
+                </td>
+                <td style="padding: 16px; text-align: center; width: 34%;">
+                  <div style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Utilization</div>
+                  <div style="color: #14b8a6; font-size: 24px; font-weight: 700; margin-top: 4px;">${digest.analystHoursAllocated > 0 ? Math.round((digest.analystHoursUsed / digest.analystHoursAllocated) * 100) : 0}%</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        ${digest.topCompanies.length > 0 ? `
+        <div style="background: #1e293b; padding: 24px; border: 1px solid #334155; border-top: none;">
+          <h2 style="color: #f1f5f9; font-size: 14px; margin: 0 0 16px; text-transform: uppercase; letter-spacing: 0.05em;">Top 5 Most Active Companies</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Company</th>
+                <th style="padding: 8px 12px; text-align: right; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Calculations</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${companyRows}
+            </tbody>
+          </table>
+        </div>
+        ` : ''}
+
+        <div style="background: #1e293b; padding: 24px; border: 1px solid #334155; border-top: none; border-radius: 0 0 16px 16px; text-align: center;">
+          <a href="https://calculator.ambrosiaventures.co/portfolio/admin" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 14px;">
+            View Dashboard
+          </a>
+        </div>
+
+        <div style="text-align: center; padding: 20px; color: #64748b; font-size: 12px;">
+          <p style="margin: 0;">Ambrosia Ventures Portfolio License</p>
+          <p style="margin: 6px 0 0;">
+            <a href="https://calculator.ambrosiaventures.co/portfolio/admin/settings" style="color: #14b8a6;">Unsubscribe from weekly digests</a>
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `${teamName} Weekly Activity — ${digest.period}`,
+    html,
+  });
+}

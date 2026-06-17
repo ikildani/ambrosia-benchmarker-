@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireTeamMember } from '@/lib/portfolio/auth';
-import { apiSuccess, apiError } from '@/lib/api-response';
+import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
+import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,19 @@ const COMPLEMENTARY_PAIRS: [string, string][] = [
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting: 10 requests per minute per user
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, 'portfolioPartnerMatching', RATE_LIMIT_CONFIGS.partnerMatch);
+
+    if (!rateLimitResult.success) {
+      return apiErrorWithHeaders(
+        'Too many requests. Please try again later.',
+        429,
+        getRateLimitHeaders(rateLimitResult),
+        'RATE_LIMITED'
+      );
+    }
+
     const result = await requireTeamMember(request);
     if ('error' in result) return result.error;
 
