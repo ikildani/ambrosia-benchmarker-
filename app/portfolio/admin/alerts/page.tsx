@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Bell, Plus, Trash2, Pause, Play, Mail, MessageSquare } from 'lucide-react';
 
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
 interface AlertConfig {
   id: string;
   name: string;
@@ -25,6 +39,8 @@ export default function AlertsPage() {
   const [slackChannel, setSlackChannel] = useState(false);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [toggleFeedback, setToggleFeedback] = useState<{ id: string; text: string } | null>(null);
 
   async function fetchAlerts() {
     try {
@@ -85,6 +101,8 @@ export default function AlertsPage() {
       });
       const json = await res.json();
       if (json.success) {
+        setToggleFeedback({ id: alertId, text: currentActive ? 'Paused' : 'Resumed' });
+        setTimeout(() => setToggleFeedback(null), 2000);
         fetchAlerts();
       }
     } catch {
@@ -93,7 +111,12 @@ export default function AlertsPage() {
   }
 
   async function handleDelete(alertId: string) {
-    if (!window.confirm('Delete this alert?')) return;
+    if (confirmDelete !== alertId) {
+      setConfirmDelete(alertId);
+      setTimeout(() => setConfirmDelete((prev) => (prev === alertId ? null : prev)), 3000);
+      return;
+    }
+    setConfirmDelete(null);
     try {
       const res = await fetch(`/api/portfolio/alerts?id=${alertId}`, {
         method: 'DELETE',
@@ -186,7 +209,7 @@ export default function AlertsPage() {
                     onChange={(e) => setEmailChannel(e.target.checked)}
                     className="rounded border-slate-600"
                   />
-                  <Mail className="w-3.5 h-3.5" /> Email
+                  <Mail className="w-3.5 h-3.5" aria-label="Email delivery" /> Email
                 </label>
                 <label className="flex items-center gap-1.5 text-sm text-slate-300 cursor-pointer">
                   <input
@@ -195,7 +218,7 @@ export default function AlertsPage() {
                     onChange={(e) => setSlackChannel(e.target.checked)}
                     className="rounded border-slate-600"
                   />
-                  <MessageSquare className="w-3.5 h-3.5" /> Slack
+                  <MessageSquare className="w-3.5 h-3.5" aria-label="Slack delivery" /> Slack
                 </label>
               </div>
             </div>
@@ -227,7 +250,7 @@ export default function AlertsPage() {
           <Bell className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-white mb-1">No alerts configured</h3>
           <p className="text-sm text-slate-400">
-            Set up deal alert rules to get notified when new deals match your criteria.
+            Stay informed about relevant deals. Create your first alert to receive notifications when matching deals are announced.
           </p>
         </div>
       ) : (
@@ -245,10 +268,17 @@ export default function AlertsPage() {
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
                   {alert.frequency} · {alert.channels.join(', ')}
-                  {alert.last_triggered_at && ` · Last: ${new Date(alert.last_triggered_at).toLocaleDateString()}`}
                 </p>
+                {alert.last_triggered_at && (
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Last triggered: {formatRelativeTime(alert.last_triggered_at)}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
+                {toggleFeedback?.id === alert.id && (
+                  <span className="text-xs text-teal-400 animate-pulse">{toggleFeedback.text}</span>
+                )}
                 <button
                   onClick={() => handleToggle(alert.id, alert.is_active)}
                   className="text-slate-500 hover:text-slate-300 p-1.5"
@@ -257,9 +287,13 @@ export default function AlertsPage() {
                 </button>
                 <button
                   onClick={() => handleDelete(alert.id)}
-                  className="text-slate-500 hover:text-red-400 p-1.5"
+                  className={`p-1.5 ${confirmDelete === alert.id ? 'text-red-400' : 'text-slate-500 hover:text-red-400'}`}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  {confirmDelete === alert.id ? (
+                    <span className="text-xs font-medium">Confirm?</span>
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>

@@ -39,6 +39,7 @@ export default function OfficeHoursPage() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   // Form fields
   const [companyName, setCompanyName] = useState('');
@@ -97,8 +98,18 @@ export default function OfficeHoursPage() {
     }
   }
 
-  async function handleCancel(slotId: string) {
-    if (!window.confirm('Cancel this office hours slot?')) return;
+  function handleCancelClick(slotId: string) {
+    if (confirmCancelId === slotId) {
+      // Already confirming — execute cancel
+      performCancel(slotId);
+    } else {
+      setConfirmCancelId(slotId);
+      setTimeout(() => setConfirmCancelId((prev) => (prev === slotId ? null : prev)), 3000);
+    }
+  }
+
+  async function performCancel(slotId: string) {
+    setConfirmCancelId(null);
     try {
       const res = await fetch('/api/portfolio/office-hours', {
         method: 'PUT',
@@ -148,10 +159,14 @@ export default function OfficeHoursPage() {
         </button>
       </div>
 
+      <p className="text-sm text-slate-400">
+        Schedule quarterly BD consultations for your portfolio companies
+      </p>
+
       {showCreate && (
         <div className="bg-slate-900 border border-teal-500/30 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-medium text-white">Book Office Hours</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Company Name</label>
               <input
@@ -173,7 +188,7 @@ export default function OfficeHoursPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Contact Email</label>
               <input
@@ -229,9 +244,9 @@ export default function OfficeHoursPage() {
       ) : slots.length === 0 ? (
         <div className="bg-slate-900 border border-slate-800 border-dashed rounded-xl p-12 text-center">
           <Calendar className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-white mb-1">No office hours scheduled</h3>
+          <h3 className="text-lg font-medium text-white mb-1">No office hours scheduled yet</h3>
           <p className="text-sm text-slate-400">
-            Book office hours for portfolio companies to discuss BD strategy, deal terms, and market positioning.
+            Book quarterly 30-minute consultations with Ambrosia BD advisors for your portfolio companies.
           </p>
         </div>
       ) : (
@@ -293,11 +308,19 @@ export default function OfficeHoursPage() {
                             Complete
                           </button>
                           <button
-                            onClick={() => handleCancel(slot.id)}
-                            className="text-slate-500 hover:text-red-400 p-1.5 transition-colors"
+                            onClick={() => handleCancelClick(slot.id)}
+                            className={`text-xs px-2 py-1 rounded border transition-colors ${
+                              confirmCancelId === slot.id
+                                ? 'text-red-400 border-red-500/50 hover:border-red-500'
+                                : 'text-slate-500 hover:text-red-400 border-transparent'
+                            }`}
                             title="Cancel"
                           >
-                            <XCircle className="w-4 h-4" />
+                            {confirmCancelId === slot.id ? (
+                              'Confirm Cancel?'
+                            ) : (
+                              <XCircle className="w-4 h-4" />
+                            )}
                           </button>
                         </>
                       )}

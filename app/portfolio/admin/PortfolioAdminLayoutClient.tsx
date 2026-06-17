@@ -92,6 +92,10 @@ export default function PortfolioAdminLayoutClient({
         <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setSidebarOpen(false); }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation menu"
         />
       )}
 
@@ -107,7 +111,7 @@ export default function PortfolioAdminLayoutClient({
           </div>
           {teamName && (
             <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-slate-400 text-xs truncate">{teamName}</p>
+              <p className="text-slate-400 text-xs truncate" title={teamName}>{teamName}</p>
               {portfolioSubTier && (
                 <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider ${
                   portfolioSubTier === 'enterprise' ? 'bg-purple-500/15 text-purple-400' :
@@ -136,6 +140,7 @@ export default function PortfolioAdminLayoutClient({
             const locked = isLocked || isEnterpriseLocked;
 
             if (locked) {
+              const requiredTier = item.minTier === 'enterprise' ? 'Enterprise' : 'Scale';
               return (
                 <div
                   key={item.href}
@@ -143,7 +148,7 @@ export default function PortfolioAdminLayoutClient({
                 >
                   <item.icon className="w-4 h-4" />
                   <span className="flex-1">{item.label}</span>
-                  <Lock className="w-3 h-3 text-slate-600" />
+                  <Lock className="w-3 h-3 text-slate-600" aria-label={`Requires ${requiredTier} tier`} />
                   <div className="absolute left-full ml-2 hidden group-hover:block bg-slate-800 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap border border-slate-700 shadow-lg z-50">
                     Requires {item.minTier === 'enterprise' ? 'Enterprise' : 'Scale'} tier
                   </div>
@@ -172,16 +177,19 @@ export default function PortfolioAdminLayoutClient({
               </Link>
             );
           })}
+
+          <div className="border-t border-slate-800 mt-3 pt-3">
+            <Link
+              href="/"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-teal-400 hover:bg-slate-800 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Calculator</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800 space-y-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-teal-400 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Calculator
-          </Link>
           <div className="text-xs text-slate-500 truncate">{user?.email}</div>
           <button
             onClick={async () => {
@@ -202,6 +210,7 @@ export default function PortfolioAdminLayoutClient({
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden text-slate-400 hover:text-white"
+              aria-label="Open navigation menu"
             >
               <Menu className="w-6 h-6" />
             </button>

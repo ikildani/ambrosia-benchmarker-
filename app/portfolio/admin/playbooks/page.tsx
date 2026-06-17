@@ -207,7 +207,7 @@ export default function PlaybooksPage() {
       </div>
 
       <p className="text-sm text-slate-400">
-        Curated negotiation frameworks and term sheet templates by deal type and therapeutic area.
+        Negotiation frameworks and term benchmarks from 1,900+ biopharma deals
       </p>
 
       {/* Filter bar */}
@@ -306,9 +306,9 @@ export default function PlaybooksPage() {
       ) : playbooks.length === 0 ? (
         <div className="bg-slate-900 border border-slate-800 border-dashed rounded-xl p-12 text-center">
           <BookOpen className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-white mb-1">No playbooks yet</h3>
+          <h3 className="text-lg font-medium text-white mb-1">No matching playbooks</h3>
           <p className="text-sm text-slate-400 mb-4">
-            Create a custom playbook or check back soon for system playbooks curated by deal type.
+            Access negotiation frameworks built from 1,900+ real deals. System playbooks are loaded automatically — check your filters.
           </p>
         </div>
       ) : (
@@ -371,7 +371,12 @@ export default function PlaybooksPage() {
                       </button>
 
                       {/* Expanded content */}
-                      {isExpanded && hasContent && (
+                      <div
+                        className={`overflow-hidden transition-all duration-200 ${
+                          isExpanded && hasContent ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                      {hasContent && (
                         <div className="border-t border-slate-800 p-5 space-y-6">
                           {/* Key Terms */}
                           {content.key_terms && content.key_terms.length > 0 && (
@@ -442,12 +447,17 @@ export default function PlaybooksPage() {
                           )}
                         </div>
                       )}
+                      </div>
 
-                      {isExpanded && !hasContent && (
+                      <div
+                        className={`overflow-hidden transition-all duration-200 ${
+                          isExpanded && !hasContent ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
                         <div className="border-t border-slate-800 p-5">
                           <p className="text-sm text-slate-500 italic">No template content defined for this playbook.</p>
                         </div>
-                      )}
+                      </div>
                     </div>
                   );
                 })}

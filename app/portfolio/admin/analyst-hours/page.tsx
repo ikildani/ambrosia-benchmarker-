@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Clock, Plus, TrendingDown, X, Loader2 } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Clock, Plus, TrendingDown, X, Loader2, AlertTriangle } from 'lucide-react';
 
 interface HoursData {
   used: number;
@@ -32,12 +32,24 @@ export default function AnalystHoursPage() {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [hoursFieldError, setHoursFieldError] = useState('');
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Form state
   const [description, setDescription] = useState('');
   const [hours, setHours] = useState('');
   const [serviceDate, setServiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState('research');
+
+  // Escape key handler for modal
+  useEffect(() => {
+    if (!showModal) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setShowModal(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showModal]);
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -67,6 +79,17 @@ export default function AnalystHoursPage() {
     setServiceDate(new Date().toISOString().slice(0, 10));
     setCategory('research');
     setFormError('');
+    setHoursFieldError('');
+  }
+
+  function handleHoursChange(value: string) {
+    setHours(value);
+    const parsed = parseFloat(value);
+    if (value && (isNaN(parsed) || parsed <= 0)) {
+      setHoursFieldError('Hours must be positive');
+    } else {
+      setHoursFieldError('');
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -134,6 +157,10 @@ export default function AnalystHoursPage() {
         Analyst Hours
       </h1>
 
+      <p className="text-sm text-slate-400">
+        Track and manage your dedicated analyst service hours
+      </p>
+
       {hoursData && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
@@ -165,6 +192,16 @@ export default function AnalystHoursPage() {
               style={{ width: `${Math.min(100, percentUsed)}%` }}
             />
           </div>
+          {percentUsed > 80 && (
+            <div className="flex items-center gap-2 mt-3 p-2.5 bg-amber-500/10 border border-amber-500/25 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <p className="text-xs text-amber-400">
+                {percentUsed >= 100
+                  ? 'Monthly analyst hours fully used. Contact your account manager to add additional hours.'
+                  : `${percentUsed}% of your monthly allocation used. Consider prioritizing remaining hours for high-impact requests.`}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -219,7 +256,7 @@ export default function AnalystHoursPage() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div ref={modalRef} className="relative bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-white">Log Analyst Hours</h3>
               <button
@@ -250,10 +287,17 @@ export default function AnalystHoursPage() {
                     step="0.5"
                     min="0.5"
                     value={hours}
-                    onChange={e => setHours(e.target.value)}
+                    onChange={e => handleHoursChange(e.target.value)}
                     placeholder="2.0"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+                    className={`w-full bg-slate-800 border rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${
+                      hoursFieldError
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-slate-700 focus:border-teal-500 focus:ring-teal-500'
+                    }`}
                   />
+                  {hoursFieldError && (
+                    <p className="text-xs text-red-400 mt-1">{hoursFieldError}</p>
+                  )}
                 </div>
 
                 <div>

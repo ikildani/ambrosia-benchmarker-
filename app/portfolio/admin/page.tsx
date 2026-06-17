@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Users, Clock, Bell, BarChart3, Activity, TrendingUp, CheckSquare, Circle } from 'lucide-react';
 
 interface DashboardData {
@@ -41,7 +42,7 @@ function StatCard({ icon: Icon, label, value, subtext, color }: {
   color: string;
 }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:bg-slate-800/80 transition-colors cursor-default">
       <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 rounded-lg ${color}`}>
           <Icon className="w-5 h-5" />
@@ -194,8 +195,9 @@ export default function PortfolioAdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
+        <p className="text-sm text-slate-400">Loading your dashboard...</p>
       </div>
     );
   }
@@ -216,6 +218,7 @@ export default function PortfolioAdminDashboard() {
           <p className="text-sm text-slate-400 mt-1">
             Portfolio License — {data.team.portfolio_tier.charAt(0).toUpperCase() + data.team.portfolio_tier.slice(1)} Tier
           </p>
+          <p className="text-sm text-slate-400 mt-0.5">Overview of your portfolio&apos;s benchmarking activity</p>
         </div>
         <div className="text-right text-xs text-slate-500">
           <p>Contract: {new Date(data.team.contract_start_date).toLocaleDateString()}</p>
@@ -280,7 +283,7 @@ export default function PortfolioAdminDashboard() {
       {/* Seat utilization bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-white flex items-center gap-2">
+          <h2 className="text-base font-semibold text-slate-300 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-teal-400" />
             Seat Utilization
           </h2>
@@ -296,42 +299,66 @@ export default function PortfolioAdminDashboard() {
           <span>{data.seats.active} active</span>
           <span>{data.seats.max - data.seats.active} available</span>
         </div>
+        {data.seats.utilization >= 80 && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+            <Bell className="w-3.5 h-3.5 shrink-0" />
+            <span>Approaching seat limit — contact support to add seats</span>
+          </div>
+        )}
       </div>
 
       {/* Recent activity feed */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-        <h2 className="text-sm font-medium text-white flex items-center gap-2 mb-4">
+        <h2 className="text-base font-semibold text-slate-300 flex items-center gap-2 mb-4">
           <Activity className="w-4 h-4 text-teal-400" />
           Recent Activity
         </h2>
         {data.recentActivity.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-8">
-            No activity recorded yet.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {data.recentActivity.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-start gap-3 text-sm border-b border-slate-800/50 pb-3 last:border-0"
-              >
-                <div className="w-2 h-2 mt-1.5 rounded-full bg-teal-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-300">
-                    <span className="text-white font-medium">{event.user_email?.split('@')[0] || 'System'}</span>
-                    {' '}
-                    {formatAction(event.action)}
-                    {event.resource && (
-                      <span className="text-slate-500"> · {event.resource}</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {new Date(event.created_at).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-8">
+            <p className="text-sm text-slate-500">
+              Activity appears here as team members run benchmarks.
+            </p>
+            <Link
+              href="/portfolio/admin/members"
+              className="text-sm text-teal-400 hover:text-teal-300 mt-2 inline-block transition-colors"
+            >
+              Invite your first member to get started &rarr;
+            </Link>
           </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {data.recentActivity.map((event) => (
+                <div
+                  key={event.id}
+                  className="flex items-start gap-3 text-sm border-b border-slate-800/50 pb-3 last:border-0"
+                >
+                  <div className="w-2 h-2 mt-1.5 rounded-full bg-teal-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-300">
+                      <span className="text-white font-medium">{event.user_email?.split('@')[0] || 'System'}</span>
+                      {' '}
+                      {formatAction(event.action)}
+                      {event.resource && (
+                        <span className="text-slate-500"> · {event.resource}</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {new Date(event.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-800/50">
+              <Link
+                href="/portfolio/admin/audit"
+                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                View Full Audit Log &rarr;
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </div>

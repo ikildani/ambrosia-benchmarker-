@@ -100,6 +100,15 @@ export default function PipelinePage() {
     fetchPipeline();
   }, []);
 
+  useEffect(() => {
+    if (!editingDeal) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setEditingDeal(null);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [editingDeal]);
+
   function resetForm() {
     setCompanyName('');
     setPartnerName('');
@@ -267,7 +276,7 @@ export default function PipelinePage() {
           <h2 className="text-sm font-medium text-white">Add Pipeline Deal</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Company Name *</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Company Name *</label>
               <input
                 type="text"
                 placeholder="Portfolio company"
@@ -277,7 +286,7 @@ export default function PipelinePage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Partner Name</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Partner Name</label>
               <input
                 type="text"
                 placeholder="Target partner / acquirer"
@@ -287,7 +296,7 @@ export default function PipelinePage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Stage</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Stage</label>
               <select
                 value={stage}
                 onChange={(e) => setStage(e.target.value)}
@@ -301,7 +310,7 @@ export default function PipelinePage() {
           </div>
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Deal Type</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Deal Type</label>
               <select
                 value={dealType}
                 onChange={(e) => setDealType(e.target.value)}
@@ -316,7 +325,7 @@ export default function PipelinePage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Therapeutic Area</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Therapeutic Area</label>
               <select
                 value={therapeuticArea}
                 onChange={(e) => setTherapeuticArea(e.target.value)}
@@ -329,7 +338,7 @@ export default function PipelinePage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Modality</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Modality</label>
               <input
                 type="text"
                 placeholder="e.g., Small molecule"
@@ -339,7 +348,7 @@ export default function PipelinePage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Indication</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Indication</label>
               <input
                 type="text"
                 placeholder="e.g., NSCLC"
@@ -351,7 +360,7 @@ export default function PipelinePage() {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Estimated Value ($M)</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Estimated Value ($M)</label>
               <input
                 type="number"
                 placeholder="e.g., 250"
@@ -361,7 +370,7 @@ export default function PipelinePage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Priority</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Priority</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
@@ -373,7 +382,7 @@ export default function PipelinePage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Notes</label>
+              <label className="block text-sm text-slate-400 mb-1.5">Notes</label>
               <input
                 type="text"
                 placeholder="Key context"
@@ -453,7 +462,7 @@ export default function PipelinePage() {
             <p className="text-xs text-slate-400">{editingDeal.company_name} &mdash; {editingDeal.partner_name || 'No partner'}</p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Stage</label>
+                <label className="block text-sm text-slate-400 mb-1.5">Stage</label>
                 <select
                   value={editingDeal.stage}
                   onChange={(e) => setEditingDeal({ ...editingDeal, stage: e.target.value })}
@@ -465,7 +474,7 @@ export default function PipelinePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Priority</label>
+                <label className="block text-sm text-slate-400 mb-1.5">Priority</label>
                 <select
                   value={editingDeal.priority}
                   onChange={(e) => setEditingDeal({ ...editingDeal, priority: e.target.value as 'high' | 'medium' | 'low' })}
@@ -477,7 +486,7 @@ export default function PipelinePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Estimated Value ($M)</label>
+                <label className="block text-sm text-slate-400 mb-1.5">Estimated Value ($M)</label>
                 <input
                   type="number"
                   value={editingDeal.estimated_value_m ?? ''}
@@ -486,7 +495,7 @@ export default function PipelinePage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1.5">Notes</label>
+                <label className="block text-sm text-slate-400 mb-1.5">Notes</label>
                 <textarea
                   value={editingDeal.notes ?? ''}
                   onChange={(e) => setEditingDeal({ ...editingDeal, notes: e.target.value })}
@@ -521,13 +530,13 @@ export default function PipelinePage() {
       ) : deals.length === 0 ? (
         <div className="bg-slate-900 border border-slate-800 border-dashed rounded-xl p-12 text-center">
           <GitBranch className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-white mb-1">No pipeline deals</h3>
+          <h3 className="text-lg font-medium text-white mb-1">No deals in your pipeline yet</h3>
           <p className="text-sm text-slate-400">
-            Track deal conversations across your portfolio companies and detect partner conflicts.
+            Track active deal conversations across your portfolio. Click &lsquo;Add Deal&rsquo; to get started.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-6 gap-3 overflow-x-auto">
+        <div className="grid grid-cols-6 gap-3 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           {STAGES.map((s) => (
             <div key={s.key} className="min-w-[200px]">
               <div className="flex items-center justify-between mb-3">
@@ -569,7 +578,7 @@ export default function PipelinePage() {
                       )}
                     </div>
                     {/* Stage dropdown + delete (visible on hover) */}
-                    <div className="mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="mt-2 flex items-center gap-1">
                       <div className="relative flex-1">
                         <select
                           value={deal.stage}

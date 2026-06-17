@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileBarChart, Download, Palette, Clock, Lock, ArrowUpRight, AlertCircle } from 'lucide-react';
+import { FileBarChart, Download, Palette, Clock, Lock, ArrowUpRight, AlertCircle, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
 
@@ -9,6 +9,7 @@ export default function ReportsPage() {
   const { portfolioSubTier } = useAuth();
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const hasAccess = isScalePlus(portfolioSubTier);
 
   if (!hasAccess) {
@@ -83,6 +84,8 @@ export default function ReportsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate report');
     } finally {
@@ -92,10 +95,13 @@ export default function ReportsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-        <FileBarChart className="w-6 h-6 text-teal-400" />
-        White-Label Reports
-      </h1>
+      <div>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <FileBarChart className="w-6 h-6 text-teal-400" />
+          White-Label Reports
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">Generate white-labeled deal reports with your fund&apos;s branding</p>
+      </div>
 
       <p className="text-sm text-slate-400">
         Generate deal reports branded with your fund&apos;s logo, colors, and disclaimer. Reports are identical to standard Ambrosia reports but carry your branding.
@@ -151,14 +157,28 @@ export default function ReportsPage() {
         {error && (
           <div className="mt-3 flex items-start gap-2 text-sm text-red-400">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <span>{error}</span>
+            <div>
+              <p>Report generation failed. Please try again or contact support.</p>
+              <button
+                onClick={handleGenerateSample}
+                className="mt-2 text-xs text-red-300 hover:text-red-200 underline underline-offset-2 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+        {success && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-emerald-400">
+            <Check className="w-4 h-4 flex-shrink-0" />
+            <span>Report downloaded successfully</span>
           </div>
         )}
       </div>
 
       <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-xl p-8 text-center">
         <p className="text-sm text-slate-500">
-          Report generation history will appear here once you generate your first white-label report.
+          Generated reports appear here after your first export. Reports include your fund branding and LP-ready formatting.
         </p>
       </div>
     </div>

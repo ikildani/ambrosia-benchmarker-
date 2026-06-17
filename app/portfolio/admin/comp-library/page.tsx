@@ -130,7 +130,7 @@ export default function CompLibraryPage() {
       </div>
 
       <p className="text-sm text-slate-400">
-        Save and share comparable deal sets across your fund. Annotations, filters, and selected deals persist for every team member.
+        Shared comparable deal sets accessible to all team members
       </p>
 
       {showCreateForm && (
@@ -192,7 +192,10 @@ export default function CompLibraryPage() {
           <Library className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-white mb-1">No comp sets yet</h3>
           <p className="text-sm text-slate-400 mb-4">
-            Run a benchmark in the calculator, then save the comparable deals to your fund library.
+            Build your fund&apos;s shared comparable deals library. Comp sets you create are accessible to all team members.
+          </p>
+          <p className="text-xs text-slate-500 mb-4">
+            Comps are created from calculation results — run a benchmark first, then save the comparable deals here.
           </p>
           <a
             href="/"
@@ -220,13 +223,21 @@ export default function CompLibraryPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="text-slate-500 hover:text-slate-300 p-1" title="Annotations">
+                  <button
+                    className="text-slate-500 hover:text-slate-300 p-1 cursor-default relative group"
+                    title="Annotations — Coming Soon"
+                    aria-label="Annotations — Coming Soon"
+                  >
                     <MessageSquare className="w-4 h-4" />
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[10px] text-slate-300 bg-slate-800 border border-slate-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                      Coming Soon
+                    </span>
                   </button>
                   <button
                     onClick={() => handlePin(set.id, set.is_pinned)}
                     className={`${set.is_pinned ? 'text-amber-400' : 'text-slate-500'} hover:text-amber-400 p-1`}
                     title={set.is_pinned ? 'Unpin' : 'Pin'}
+                    aria-label={set.is_pinned ? 'Unpin comp set' : 'Pin comp set'}
                   >
                     <Pin className="w-4 h-4" />
                   </button>
@@ -234,6 +245,7 @@ export default function CompLibraryPage() {
                     onClick={() => handleDelete(set.id)}
                     className="text-slate-500 hover:text-red-400 p-1"
                     title="Delete"
+                    aria-label="Delete comp set"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
