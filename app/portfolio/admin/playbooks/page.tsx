@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, ChevronDown, ChevronRight, Lock, ArrowUpRight } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
 
@@ -195,7 +196,7 @@ export default function PlaybooksPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <BookOpen className="w-6 h-6 text-teal-400" />
-          Negotiation Playbooks
+          <span className="inline-flex items-center gap-1.5">Negotiation Playbooks <HelpTooltip text="Negotiation frameworks with benchmark ranges derived from 1,900+ disclosed biopharma transactions. Use these as starting points — adjust for your specific deal context." /></span>
         </h1>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}

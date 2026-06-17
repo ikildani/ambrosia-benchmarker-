@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, AlertTriangle, Handshake } from 'lucide-react';
+import { Users, AlertTriangle, Handshake, Download } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 
 interface AssetProfile {
   userId: string;
@@ -121,7 +122,7 @@ export default function PartnerMatchingPage() {
               <div>
                 <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-red-400" />
-                  Competitive Overlaps
+                  <span className="inline-flex items-center gap-1.5">Competitive Overlaps <HelpTooltip text="Two or more portfolio companies exploring the same therapeutic area and modality combination, which could lead to competitive tension with potential partners." /></span>
                 </h2>
                 <p className="text-sm text-slate-400 mt-1">
                   Multiple portfolio companies targeting the same therapeutic area and modality
@@ -160,7 +161,7 @@ export default function PartnerMatchingPage() {
               <div>
                 <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                   <Handshake className="w-5 h-5 text-emerald-400" />
-                  Synergy Opportunities
+                  <span className="inline-flex items-center gap-1.5">Synergy Opportunities <HelpTooltip text="Portfolio companies with complementary capabilities (e.g., one has an ADC platform, another has a validated target) that could benefit from coordinated partnering." /></span>
                 </h2>
                 <p className="text-sm text-slate-400 mt-1">
                   Complementary modalities within the same therapeutic area

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, Plus, Trash2, Pause, Play, Mail, MessageSquare } from 'lucide-react';
+import { Bell, Plus, Trash2, Pause, Play, Mail, MessageSquare, Download } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -135,7 +136,7 @@ export default function AlertsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <Bell className="w-6 h-6 text-teal-400" />
-          Deal Alerts
+          <span className="inline-flex items-center gap-1.5">Deal Alerts <HelpTooltip text="Deal alerts notify your team when new transactions matching your criteria are publicly announced." /></span>
         </h1>
         <button
           onClick={() => setShowCreate(!showCreate)}
@@ -190,7 +191,7 @@ export default function AlertsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">Min Deal Value</label>
+              <label className="block text-xs text-slate-400 mb-1.5"><span className="inline-flex items-center gap-1.5">Min Deal Value <HelpTooltip text="Minimum total deal value (upfront + milestones) to trigger this alert. Set to 0 for all deals." /></span></label>
               <input
                 type="number"
                 placeholder="e.g., 100"

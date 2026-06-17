@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Users, Clock, Bell, BarChart3, Activity, TrendingUp, CheckSquare, Circle } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 
 interface DashboardData {
   team: {
@@ -36,7 +37,7 @@ interface DashboardData {
 
 function StatCard({ icon: Icon, label, value, subtext, color }: {
   icon: typeof Users;
-  label: string;
+  label: React.ReactNode;
   value: string | number;
   subtext?: string;
   color: string;
@@ -252,14 +253,14 @@ export default function PortfolioAdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Users}
-          label="Active Seats"
+          label={<span className="inline-flex items-center gap-1.5">Active Seats <HelpTooltip text="Number of team members with active access. Each seat represents one portfolio company or team member." /></span>}
           value={`${data.seats.active} / ${data.seats.max}`}
           subtext={data.seats.pending > 0 ? `${data.seats.pending} pending` : `${data.seats.utilization}% utilized`}
           color="bg-teal-500/10 text-teal-400"
         />
         <StatCard
           icon={Clock}
-          label="Analyst Hours"
+          label={<span className="inline-flex items-center gap-1.5">Analyst Hours <HelpTooltip text="Dedicated advisory hours included in your plan. Hours reset monthly." /></span>}
           value={`${data.analystHours.remaining}h`}
           subtext={`${data.analystHours.used}h used of ${data.analystHours.allocated}h/mo`}
           color="bg-amber-500/10 text-amber-400"

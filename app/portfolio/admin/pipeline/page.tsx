@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   GitBranch, Plus, X, AlertTriangle, Trash2,
-  ChevronDown, Search, Filter,
+  ChevronDown, Search, Filter, Download,
 } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 
 interface PipelineDeal {
   id: string;
@@ -234,20 +235,43 @@ export default function PipelinePage() {
     return grouped;
   }, [filteredDeals]);
 
+  const exportCSV = () => {
+    const header = 'Company,Partner,Stage,Deal Type,TA,Modality,Estimated Value ($M),Priority,Created,Updated\n';
+    const rows = filteredDeals.map(d =>
+      `"${(d.company_name || '').replace(/"/g, '""')}","${(d.partner_name || '').replace(/"/g, '""')}",${d.stage},${d.deal_type || ''},${d.therapeutic_area || ''},${d.modality || ''},${d.estimated_value_m ?? ''},${d.priority},${d.updated_at || ''},${d.updated_at || ''}`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pipeline-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <GitBranch className="w-6 h-6 text-teal-400" />
-          Deal Pipeline
+          <span className="inline-flex items-center gap-1.5">Deal Pipeline <HelpTooltip text="Track active deal conversations across your portfolio. Conflicts are flagged when multiple companies target the same partner." /></span>
         </h1>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          {showCreate ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showCreate ? 'Close' : 'Add Deal'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            {showCreate ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showCreate ? 'Close' : 'Add Deal'}
+          </button>
+        </div>
       </div>
 
       {/* Conflict alerts */}
@@ -360,7 +384,7 @@ export default function PipelinePage() {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Estimated Value ($M)</label>
+              <label className="block text-sm text-slate-400 mb-1.5"><span className="inline-flex items-center gap-1.5">Estimated Value ($M) <HelpTooltip text="Estimated total deal value in $M. Used for pipeline reporting only — does not affect calculations." /></span></label>
               <input
                 type="number"
                 placeholder="e.g., 250"

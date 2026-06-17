@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock, AlertCircle, Zap } from 'lucide-react';
+import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock, AlertCircle, Zap, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { isScalePlus } from '@/lib/portfolio/feature-gates';
+import { isScalePlus, isEnterprise } from '@/lib/portfolio/feature-gates';
 
 interface TeamSettings {
   name: string;
@@ -13,6 +13,10 @@ interface TeamSettings {
   disclaimer_text: string | null;
   slack_webhook_url: string | null;
   slack_channel_type: string;
+  sso_provider_id: string | null;
+  sso_email_domain: string | null;
+  sso_entity_id: string | null;
+  sso_sso_url: string | null;
 }
 
 export default function SettingsPage() {
@@ -28,6 +32,7 @@ export default function SettingsPage() {
   const [webhookResult, setWebhookResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasSlack = isScalePlus(portfolioSubTier);
+  const hasSso = isEnterprise(portfolioSubTier);
 
   useEffect(() => {
     fetch('/api/portfolio/teams')
@@ -42,6 +47,10 @@ export default function SettingsPage() {
             disclaimer_text: json.team.disclaimer_text,
             slack_webhook_url: json.team.slack_webhook_url,
             slack_channel_type: json.team.slack_channel_type || 'slack',
+            sso_provider_id: json.team.sso_provider_id || null,
+            sso_email_domain: json.team.sso_email_domain || null,
+            sso_entity_id: json.team.sso_entity_id || null,
+            sso_sso_url: json.team.sso_sso_url || null,
           });
         }
       })
@@ -311,6 +320,98 @@ export default function SettingsPage() {
               {webhookResult.message}
             </div>
           )}
+        </div>
+      </div>
+
+      <hr className="border-slate-800" />
+
+      {/* SSO Configuration */}
+      <div className={`bg-slate-900 border rounded-xl p-6 space-y-4 ${hasSso ? 'border-slate-800' : 'border-slate-800/50 opacity-70'}`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-medium text-white flex items-center gap-2">
+              <Key className="w-4 h-4 text-teal-400" />
+              Single Sign-On (SSO)
+              {!hasSso && (
+                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-400 font-medium">
+                  <Lock className="w-3 h-3" /> Enterprise
+                </span>
+              )}
+            </h2>
+            {!hasSso ? (
+              <p className="text-xs text-slate-500 mt-1">SSO requires Enterprise tier</p>
+            ) : (
+              <p className="text-xs text-slate-500 mt-1">Configure SAML-based single sign-on for your team</p>
+            )}
+          </div>
+          {hasSso && (
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+              settings.sso_provider_id && settings.sso_email_domain && settings.sso_entity_id && settings.sso_sso_url
+                ? 'bg-emerald-500/15 text-emerald-400'
+                : settings.sso_provider_id || settings.sso_email_domain
+                  ? 'bg-amber-500/15 text-amber-400'
+                  : 'bg-slate-700/50 text-slate-500'
+            }`}>
+              {settings.sso_provider_id && settings.sso_email_domain && settings.sso_entity_id && settings.sso_sso_url
+                ? 'Active'
+                : settings.sso_provider_id || settings.sso_email_domain
+                  ? 'Configured (Pending Verification)'
+                  : 'Not Configured'}
+            </span>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs text-slate-400 mb-1.5">SSO Provider</label>
+          <select
+            value={settings.sso_provider_id || ''}
+            onChange={(e) => setSettings({ ...settings, sso_provider_id: e.target.value || null })}
+            disabled={!hasSso}
+            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:pointer-events-none"
+          >
+            <option value="">Select provider...</option>
+            <option value="okta">Okta</option>
+            <option value="azure_ad">Azure AD</option>
+            <option value="google_workspace">Google Workspace</option>
+            <option value="custom_saml">Custom SAML</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs text-slate-400 mb-1.5">Email Domain</label>
+          <input
+            type="text"
+            value={settings.sso_email_domain || ''}
+            onChange={(e) => setSettings({ ...settings, sso_email_domain: e.target.value || null })}
+            disabled={!hasSso}
+            placeholder="acmebio.com"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:pointer-events-none"
+          />
+          <p className="text-xs text-slate-500 mt-1">Only emails from this domain can join via SSO</p>
+        </div>
+
+        <div>
+          <label className="block text-xs text-slate-400 mb-1.5">SAML Entity ID / Issuer URL</label>
+          <input
+            type="text"
+            value={settings.sso_entity_id || ''}
+            onChange={(e) => setSettings({ ...settings, sso_entity_id: e.target.value || null })}
+            disabled={!hasSso}
+            placeholder="https://idp.example.com/entity-id"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:pointer-events-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-slate-400 mb-1.5">SAML SSO URL</label>
+          <input
+            type="text"
+            value={settings.sso_sso_url || ''}
+            onChange={(e) => setSettings({ ...settings, sso_sso_url: e.target.value || null })}
+            disabled={!hasSso}
+            placeholder="https://idp.example.com/sso/saml"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:pointer-events-none"
+          />
         </div>
       </div>
 

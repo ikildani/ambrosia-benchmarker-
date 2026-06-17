@@ -12,6 +12,7 @@ import {
   FileBarChart,
   Shield,
   Settings,
+  Code,
   Clock,
   LogOut,
   Menu,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 import type { PortfolioSubTier } from '@/types/tier';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
+import NotificationBell from '@/components/portfolio/NotificationBell';
 
 interface NavItem {
   href: string;
@@ -45,6 +47,7 @@ const allNavItems: NavItem[] = [
   { href: '/portfolio/admin/office-hours', icon: Clock, label: 'Office Hours', minTier: 'growth' },
   { href: '/portfolio/admin/pipeline', icon: GitBranch, label: 'Deal Pipeline', minTier: 'growth' },
   { href: '/portfolio/admin/analyst-hours', icon: Clock, label: 'Analyst Hours' },
+  { href: '/portfolio/admin/api-docs', icon: Code, label: 'API Docs', minTier: 'growth' },
   { href: '/portfolio/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -216,6 +219,7 @@ export default function PortfolioAdminLayoutClient({
             </button>
             <div className="hidden lg:block" />
             <div className="flex items-center gap-4">
+              <NotificationBell />
               <Link
                 href="/portfolio"
                 className="text-sm text-slate-400 hover:text-teal-400"

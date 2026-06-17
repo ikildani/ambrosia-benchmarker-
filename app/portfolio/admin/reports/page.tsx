@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FileBarChart, Download, Palette, Clock, Lock, ArrowUpRight, AlertCircle, Check } from 'lucide-react';
+import { HelpTooltip } from '@/components/portfolio';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
 
@@ -141,7 +142,7 @@ export default function ReportsPage() {
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <h2 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
           <Download className="w-4 h-4 text-teal-400" />
-          Generate On-Demand Report
+          <span className="inline-flex items-center gap-1.5">Generate On-Demand Report <HelpTooltip text="Reports include your fund's logo, colors, and disclaimer text. Configure branding in Settings." /></span>
         </h2>
         <p className="text-xs text-slate-400 mb-4">
           Run a benchmark in the calculator, then generate a white-label PDF with your fund branding applied. The report includes all Pro-tier sections with your logo and disclaimer.

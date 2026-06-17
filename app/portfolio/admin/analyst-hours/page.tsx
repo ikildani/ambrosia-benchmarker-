@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Clock, Plus, TrendingDown, X, Loader2, AlertTriangle } from 'lucide-react';
+import { Clock, Plus, TrendingDown, X, Loader2, AlertTriangle, Download } from 'lucide-react';
 
 interface HoursData {
   used: number;

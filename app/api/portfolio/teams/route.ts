@@ -145,6 +145,13 @@ const BLOCKED_FIELDS = new Set([
   'contract_end_date',
 ]);
 
+const SSO_FIELDS = new Set([
+  'sso_provider_id',
+  'sso_email_domain',
+  'sso_entity_id',
+  'sso_sso_url',
+]);
+
 export async function PATCH(request: NextRequest) {
   try {
     const auth = await requireTeamAdmin(request);
@@ -153,6 +160,7 @@ export async function PATCH(request: NextRequest) {
     const { user, teamId } = auth;
 
     const body = await request.json();
+    const supabase = createServiceClient();
 
     // Filter to only allowed fields, explicitly reject blocked fields
     const updates: Record<string, unknown> = {};
@@ -163,11 +171,29 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // SSO fields require enterprise tier
+    const ssoUpdates: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(body)) {
+      if (SSO_FIELDS.has(key)) {
+        ssoUpdates[key] = value;
+      }
+    }
+
+    if (Object.keys(ssoUpdates).length > 0) {
+      const { data: team } = await supabase
+        .from('teams')
+        .select('portfolio_tier')
+        .eq('id', teamId)
+        .single();
+
+      if (team?.portfolio_tier === 'enterprise') {
+        Object.assign(updates, ssoUpdates);
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return apiError('No valid fields to update', 400);
     }
-
-    const supabase = createServiceClient();
 
     const { error: updateError } = await supabase
       .from('teams')

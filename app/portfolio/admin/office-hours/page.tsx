@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, Plus, X, Calendar, XCircle } from 'lucide-react';
+import { Clock, Plus, X, Calendar, XCircle, Download } from 'lucide-react';
 
 interface Slot {
   id: string;
@@ -143,6 +143,20 @@ export default function OfficeHoursPage() {
 
   const monthGroups = groupByMonth(slots);
 
+  const exportCSV = () => {
+    const header = 'Company,Contact,Email,Date,Duration,Status,Topic\n';
+    const rows = slots.map(s =>
+      `"${(s.company_name || '').replace(/"/g, '""')}","${(s.contact_name || '').replace(/"/g, '""')}",${s.contact_email || ''},${s.scheduled_date},${s.duration_minutes || ''},${s.status},${(s.topic || '').replace(/"/g, '""')}`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `office-hours-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -150,13 +164,22 @@ export default function OfficeHoursPage() {
           <Clock className="w-6 h-6 text-teal-400" />
           Office Hours
         </h1>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          {showCreate ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showCreate ? 'Close' : 'Book Office Hours'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            {showCreate ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showCreate ? 'Close' : 'Book Office Hours'}
+          </button>
+        </div>
       </div>
 
       <p className="text-sm text-slate-400">
