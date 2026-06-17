@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDealAlert } from '@/lib/slack/portfolio-notify';
+import { sendDealAlertDigestEmail } from '@/lib/email/client';
 import { timingSafeEqual } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -86,8 +87,25 @@ export async function GET(request: NextRequest) {
       }
 
       if (channels.includes('email')) {
-        // TODO: Send email digest via SendGrid
-        deliveredVia.push('email');
+        // Look up the user's email from user_profiles
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('email')
+          .eq('id', config.user_id)
+          .single();
+
+        if (profile?.email) {
+          const emailResult = await sendDealAlertDigestEmail(
+            profile.email,
+            config.name,
+            dealPayload,
+          );
+          if (emailResult.success) {
+            deliveredVia.push('email');
+          } else {
+            console.error(`[portfolio-deal-alerts] Email failed for ${profile.email}:`, emailResult.error);
+          }
+        }
       }
 
       for (const deal of newDeals) {

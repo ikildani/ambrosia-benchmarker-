@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Clock, Plus, TrendingDown } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Clock, Plus, TrendingDown, X, Loader2 } from 'lucide-react';
 
 interface HoursData {
   used: number;
@@ -18,22 +18,104 @@ interface HourEntry {
   created_at: string;
 }
 
+const CATEGORIES = [
+  { value: 'research', label: 'Research' },
+  { value: 'report', label: 'Report' },
+  { value: 'call', label: 'Call' },
+  { value: 'custom', label: 'Custom' },
+];
+
 export default function AnalystHoursPage() {
   const [hoursData, setHoursData] = useState<HoursData | null>(null);
-  const [entries] = useState<HourEntry[]>([]);
+  const [entries, setEntries] = useState<HourEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  useEffect(() => {
-    fetch('/api/portfolio/dashboard')
+  // Form state
+  const [description, setDescription] = useState('');
+  const [hours, setHours] = useState('');
+  const [serviceDate, setServiceDate] = useState(new Date().toISOString().slice(0, 10));
+  const [category, setCategory] = useState('research');
+
+  const fetchData = useCallback(() => {
+    setLoading(true);
+    fetch('/api/portfolio/analyst-hours')
       .then(res => res.json())
       .then(json => {
         if (json.success) {
-          setHoursData(json.analystHours);
+          setEntries(json.entries || []);
+          setHoursData({
+            used: json.allocation.used,
+            allocated: json.allocation.monthly,
+            remaining: json.allocation.remaining,
+          });
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  function resetForm() {
+    setDescription('');
+    setHours('');
+    setServiceDate(new Date().toISOString().slice(0, 10));
+    setCategory('research');
+    setFormError('');
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError('');
+
+    const parsedHours = parseFloat(hours);
+    if (!description.trim()) {
+      setFormError('Description is required.');
+      return;
+    }
+    if (isNaN(parsedHours) || parsedHours <= 0) {
+      setFormError('Hours must be a positive number.');
+      return;
+    }
+    if (!serviceDate) {
+      setFormError('Service date is required.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/portfolio/analyst-hours', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: description.trim(),
+          hours: parsedHours,
+          service_date: serviceDate,
+          category,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFormError(data.error || 'Failed to log hours.');
+        return;
+      }
+
+      setShowModal(false);
+      resetForm();
+      fetchData();
+    } catch {
+      setFormError('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -89,7 +171,13 @@ export default function AnalystHoursPage() {
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-white">Service History</h2>
-          <button className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs transition-colors">
+          <button
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs transition-colors"
+          >
             <Plus className="w-3.5 h-3.5" />
             Log Hours
           </button>
@@ -126,6 +214,105 @@ export default function AnalystHoursPage() {
           </table>
         )}
       </div>
+
+      {/* Log Hours Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-white">Log Analyst Hours</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Description</label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="e.g., Market landscape research for OncoVista"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Hours</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0.5"
+                    value={hours}
+                    onChange={e => setHours(e.target.value)}
+                    placeholder="2.0"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Service Date</label>
+                  <input
+                    type="date"
+                    value={serviceDate}
+                    onChange={e => setServiceDate(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Category</label>
+                <select
+                  value={category}
+                  onChange={e => setCategory(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+                >
+                  {CATEGORIES.map(c => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {formError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-lg">
+                  <p className="text-xs text-red-400">{formError}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-400 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg hover:shadow-lg hover:shadow-teal-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Log Hours'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

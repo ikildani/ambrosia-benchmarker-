@@ -15,6 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NextRequest } from 'next/server';
 
 export interface AuditEvent {
+  team_id?: string | null;
   user_id?: string | null;
   user_email?: string | null;
   action: string;
@@ -36,6 +37,7 @@ export async function logAuditEvent(
 ): Promise<void> {
   try {
     await supabase.from('audit_log').insert({
+      team_id: event.team_id || null,
       user_id: event.user_id || null,
       user_email: event.user_email || null,
       action: event.action,

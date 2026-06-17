@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { logAuditEvent, getAuditContext } from '@/lib/audit-log';
+import { requireTeamAdmin } from '@/lib/portfolio/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,6 +121,74 @@ export async function GET(request: NextRequest) {
       .single();
 
     return apiSuccess({ team, role: membership.role });
+  } catch {
+    return apiError('Internal server error', 500);
+  }
+}
+
+const ALLOWED_FIELDS = new Set([
+  'logo_url',
+  'primary_color',
+  'secondary_color',
+  'disclaimer_text',
+  'slack_webhook_url',
+  'slack_channel_type',
+]);
+
+const BLOCKED_FIELDS = new Set([
+  'portfolio_tier',
+  'max_seats',
+  'stripe_customer_id',
+  'stripe_subscription_id',
+  'stripe_price_id',
+  'contract_start_date',
+  'contract_end_date',
+]);
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const auth = await requireTeamAdmin(request);
+    if ('error' in auth) return auth.error;
+
+    const { user, teamId } = auth;
+
+    const body = await request.json();
+
+    // Filter to only allowed fields, explicitly reject blocked fields
+    const updates: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(body)) {
+      if (BLOCKED_FIELDS.has(key)) continue;
+      if (ALLOWED_FIELDS.has(key)) {
+        updates[key] = value;
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return apiError('No valid fields to update', 400);
+    }
+
+    const supabase = createServiceClient();
+
+    const { error: updateError } = await supabase
+      .from('teams')
+      .update(updates)
+      .eq('id', teamId);
+
+    if (updateError) {
+      return apiError('Failed to update team settings', 500);
+    }
+
+    await logAuditEvent(supabase, {
+      user_id: user.id,
+      user_email: user.email,
+      action: 'team_settings_updated',
+      resource: 'team',
+      resource_id: teamId,
+      ...getAuditContext(request),
+      details: { fields: Object.keys(updates) },
+    });
+
+    return apiSuccess({ updated: true });
   } catch {
     return apiError('Internal server error', 500);
   }

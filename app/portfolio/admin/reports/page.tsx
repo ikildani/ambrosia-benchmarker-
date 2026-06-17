@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { FileBarChart, Download, Palette, Clock, Lock, ArrowUpRight } from 'lucide-react';
+import { FileBarChart, Download, Palette, Clock, Lock, ArrowUpRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
 
 export default function ReportsPage() {
   const { portfolioSubTier } = useAuth();
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const hasAccess = isScalePlus(portfolioSubTier);
 
   if (!hasAccess) {
@@ -29,6 +30,65 @@ export default function ReportsPage() {
       </div>
     );
   }
+
+  const handleGenerateSample = async () => {
+    setGenerating(true);
+    setError(null);
+
+    try {
+      // Sample report data for white-label preview
+      const sampleReportData = {
+        result: {
+          upfrontPayment: { min: 25_000_000, max: 75_000_000, median: 50_000_000, label: '$50M' },
+          totalDealValue: { min: 200_000_000, max: 600_000_000, median: 400_000_000, label: '$400M' },
+          milestones: { regulatory: '$80M', commercial: '$120M', development: '$100M' },
+          royaltyRange: { min: 8, max: 15, median: 12 },
+          labels: { indication: 'Sample Oncology Asset', modality: 'Small Molecule', phase: 'Phase 2' },
+          confidence: 0.82,
+          dealType: 'licensing',
+        },
+        inputs: {
+          therapeuticArea: 'oncology',
+          modality: 'small_molecule',
+          phase: 'phase_2',
+          indication: 'non_small_cell_lung_cancer',
+          dealType: 'licensing',
+        },
+        sensitivityData: {
+          parameters: [],
+          baseValue: 400_000_000,
+        },
+        riskScore: 65,
+        comparableDeals: [],
+      };
+
+      const res = await fetch('/api/portfolio/reports/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportData: sampleReportData }),
+      });
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error || `Report generation failed (${res.status})`);
+      }
+
+      // Download the PDF
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sample-white-label-report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate report');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -81,16 +141,19 @@ export default function ReportsPage() {
           Run a benchmark in the calculator, then generate a white-label PDF with your fund branding applied. The report includes all Pro-tier sections with your logo and disclaimer.
         </p>
         <button
-          onClick={() => {
-            setGenerating(true);
-            setTimeout(() => setGenerating(false), 2000);
-          }}
+          onClick={handleGenerateSample}
           disabled={generating}
           className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
         >
           <Download className="w-4 h-4" />
           {generating ? 'Generating...' : 'Generate Sample Report'}
         </button>
+        {error && (
+          <div className="mt-3 flex items-start gap-2 text-sm text-red-400">
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
 
       <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-xl p-8 text-center">

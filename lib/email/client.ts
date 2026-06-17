@@ -364,6 +364,142 @@ export async function sendAdminSubscriptionNotification(details: {
   });
 }
 
+export async function sendPortfolioInviteEmail(
+  to: string,
+  teamName: string,
+  role: string,
+  joinUrl: string,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 24px;">You're Invited</h1>
+          <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">Join ${teamName} on Ambrosia Benchmarker</p>
+        </div>
+
+        <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
+          <p style="font-size: 16px;">You've been invited to join <strong>${teamName}</strong> on Ambrosia Benchmarker as a <strong>${roleLabel}</strong>.</p>
+
+          <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin: 24px 0;">
+            <div style="margin-bottom: 8px;">
+              <span style="color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600;">Team</span>
+              <p style="margin: 4px 0; font-weight: 600; font-size: 16px;">${teamName}</p>
+            </div>
+            <div>
+              <span style="color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600;">Your Role</span>
+              <p style="margin: 4px 0; font-weight: 600; font-size: 16px;">${roleLabel}</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${joinUrl}" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+              Accept Invite
+            </a>
+          </div>
+
+          <p style="color: #94a3b8; font-size: 13px; text-align: center;">This invite expires in 7 days.</p>
+
+          <p style="margin-top: 24px;">
+            Best,<br>
+            <strong>The Ambrosia Ventures Team</strong>
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 24px; color: #64748b; font-size: 12px;">
+          <p style="margin: 0;">
+            Ambrosia Ventures | <a href="https://ambrosiaventures.co" style="color: #14b8a6;">ambrosiaventures.co</a>
+          </p>
+          <p style="margin: 8px 0 0;">
+            <a href="https://calculator.ambrosiaventures.co/unsubscribe" style="color: #64748b;">Unsubscribe</a>
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `You've been invited to join ${teamName} on Ambrosia Benchmarker`,
+    html,
+  });
+}
+
+export async function sendDealAlertDigestEmail(
+  to: string,
+  alertName: string,
+  deals: Array<{ parties: string; therapeuticArea: string; totalValue: string; phase?: string; date: string }>,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const dealRows = deals.slice(0, 10).map(deal => `
+    <tr>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #f1f5f9; font-weight: 600; font-size: 14px;">${deal.parties}</td>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; font-size: 13px;">${deal.therapeuticArea}</td>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #14b8a6; font-weight: 600; font-size: 14px;">${deal.totalValue}</td>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; font-size: 13px;">${deal.phase || '-'}</td>
+      <td style="padding: 10px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; font-size: 13px;">${deal.date}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #e2e8f0; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #0f172a;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 22px;">Deal Alert: ${alertName}</h1>
+          <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">${deals.length} new deal${deals.length !== 1 ? 's' : ''} matched your criteria</p>
+        </div>
+
+        <div style="background: #1e293b; padding: 24px; border: 1px solid #334155; border-top: none; border-radius: 0 0 16px 16px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Parties</th>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">TA</th>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Value</th>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Phase</th>
+                <th style="padding: 8px 12px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid #334155;">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dealRows}
+            </tbody>
+          </table>
+
+          <div style="text-align: center; margin: 28px 0 12px;">
+            <a href="https://calculator.ambrosiaventures.co/portfolio" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 14px;">
+              View on Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div style="text-align: center; padding: 20px; color: #64748b; font-size: 12px;">
+          <p style="margin: 0;">Ambrosia Ventures Portfolio License</p>
+          <p style="margin: 6px 0 0;">
+            <a href="https://calculator.ambrosiaventures.co/portfolio/admin/alerts" style="color: #14b8a6;">Manage alert settings</a>
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `Deal Alert: ${alertName} — ${deals.length} new deal${deals.length !== 1 ? 's' : ''}`,
+    html,
+  });
+}
+
 export async function sendUpgradeConfirmation(to: string, name: string) {
   const html = `
     <!DOCTYPE html>

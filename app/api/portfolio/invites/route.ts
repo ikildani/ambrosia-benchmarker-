@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { logAuditEvent, getAuditContext } from '@/lib/audit-log';
+import { sendPortfolioInviteEmail } from '@/lib/email/client';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -107,8 +108,8 @@ export async function POST(request: NextRequest) {
       details: { invitedEmail: email, role: inviteRole, teamName: team.name },
     });
 
-    // TODO: Send invite email via SendGrid
-    // const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portfolio/join?token=${token}`;
+    const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co'}/portfolio/join?token=${token}`;
+    await sendPortfolioInviteEmail(email, team.name, inviteRole, joinUrl);
 
     return apiSuccess({
       invite: {

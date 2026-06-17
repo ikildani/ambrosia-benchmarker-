@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock, AlertCircle, Zap } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
 
@@ -21,6 +21,12 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [testingWebhook, setTestingWebhook] = useState(false);
+  const [webhookResult, setWebhookResult] = useState<{ success: boolean; message: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasSlack = isScalePlus(portfolioSubTier);
 
   useEffect(() => {
@@ -47,13 +53,82 @@ export default function SettingsPage() {
     if (!settings) return;
     setSaving(true);
     setSaved(false);
+    setError(null);
 
-    // TODO: implement PATCH /api/portfolio/teams to update team settings
-    // For now, simulate save
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      const res = await fetch('/api/portfolio/teams', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      });
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to save settings');
+      }
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/portfolio/upload-logo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to upload logo');
+      }
+
+      setSettings(prev => prev ? { ...prev, logo_url: json.logoUrl } : prev);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      // Reset file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleTestWebhook = async () => {
+    setTestingWebhook(true);
+    setWebhookResult(null);
+
+    try {
+      const res = await fetch('/api/portfolio/test-webhook', {
+        method: 'POST',
+      });
+      const json = await res.json();
+
+      if (!json.success) {
+        setWebhookResult({ success: false, message: json.error || 'Test failed' });
+      } else {
+        setWebhookResult({ success: true, message: 'Test notification sent successfully' });
+        setTimeout(() => setWebhookResult(null), 4000);
+      }
+    } catch {
+      setWebhookResult({ success: false, message: 'Failed to send test notification' });
+    } finally {
+      setTestingWebhook(false);
+    }
   };
 
   if (loading || !settings) {
@@ -88,11 +163,28 @@ export default function SettingsPage() {
                 <span className="text-xs text-slate-500">No logo</span>
               </div>
             )}
-            <button className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-sm transition-colors">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              onChange={handleLogoUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 px-3 py-2 rounded-lg text-sm transition-colors"
+            >
               <Upload className="w-4 h-4" />
-              Upload Logo
+              {uploading ? 'Uploading...' : 'Upload Logo'}
             </button>
           </div>
+          {uploadError && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
+              <AlertCircle className="w-3.5 h-3.5" />
+              {uploadError}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -170,16 +262,34 @@ export default function SettingsPage() {
 
         <div>
           <label className="block text-xs text-slate-400 mb-1.5">Incoming Webhook URL</label>
-          <input
-            type="url"
-            value={settings.slack_webhook_url || ''}
-            onChange={(e) => setSettings({ ...settings, slack_webhook_url: e.target.value })}
-            placeholder="https://hooks.slack.com/services/..."
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="url"
+              value={settings.slack_webhook_url || ''}
+              onChange={(e) => setSettings({ ...settings, slack_webhook_url: e.target.value })}
+              placeholder="https://hooks.slack.com/services/..."
+              className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            />
+            {hasSlack && settings.slack_webhook_url && (
+              <button
+                onClick={handleTestWebhook}
+                disabled={testingWebhook}
+                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 px-3 py-2 rounded-lg text-sm transition-colors whitespace-nowrap"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                {testingWebhook ? 'Sending...' : 'Test'}
+              </button>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-1">
             Deal alerts and activity notifications will be sent to this webhook.
           </p>
+          {webhookResult && (
+            <div className={`mt-2 flex items-center gap-1.5 text-xs ${webhookResult.success ? 'text-emerald-400' : 'text-red-400'}`}>
+              {webhookResult.success ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+              {webhookResult.message}
+            </div>
+          )}
         </div>
       </div>
 
@@ -191,6 +301,9 @@ export default function SettingsPage() {
         {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
         {saving ? 'Saving...' : saved ? 'Saved' : 'Save Settings'}
       </button>
+      {error && (
+        <div className="text-sm text-red-400 mt-2">{error}</div>
+      )}
     </div>
   );
 }

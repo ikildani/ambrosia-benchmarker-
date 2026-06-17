@@ -40,10 +40,14 @@ export default function CompLibraryPage() {
   const { portfolioSubTier } = useAuth();
   const [compSets, setCompSets] = useState<CompSet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [creating, setCreating] = useState(false);
   const hasAccess = isScalePlus(portfolioSubTier);
 
-  useEffect(() => {
-    if (!hasAccess) return;
+  const fetchCompSets = () => {
+    setLoading(true);
     fetch('/api/portfolio/comp-sets')
       .then(res => res.json())
       .then(json => {
@@ -51,7 +55,61 @@ export default function CompLibraryPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!hasAccess) return;
+    fetchCompSets();
   }, [hasAccess]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch('/api/portfolio/comp-sets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, description: newDescription, dealIds: [], filters: {} }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewName('');
+        setNewDescription('');
+        setShowCreateForm(false);
+        fetchCompSets();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this comp set?')) return;
+    try {
+      const res = await fetch(`/api/portfolio/comp-sets?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) fetchCompSets();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePin = async (id: string, currentPinned: boolean) => {
+    try {
+      const res = await fetch('/api/portfolio/comp-sets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isPinned: !currentPinned }),
+      });
+      const json = await res.json();
+      if (json.success) fetchCompSets();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (!hasAccess) return <ScaleGate />;
 
@@ -62,7 +120,10 @@ export default function CompLibraryPage() {
           <Library className="w-6 h-6 text-teal-400" />
           Shared Comp Library
         </h1>
-        <button className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
           <Plus className="w-4 h-4" />
           New Comp Set
         </button>
@@ -71,6 +132,56 @@ export default function CompLibraryPage() {
       <p className="text-sm text-slate-400">
         Save and share comparable deal sets across your fund. Annotations, filters, and selected deals persist for every team member.
       </p>
+
+      {showCreateForm && (
+        <div className="bg-slate-900 border border-teal-500/30 rounded-xl p-6 space-y-4">
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <label htmlFor="comp-set-name" className="block text-sm font-medium text-slate-300 mb-1">
+                Name
+              </label>
+              <input
+                id="comp-set-name"
+                type="text"
+                required
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Oncology Licensing 2024"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="comp-set-description" className="block text-sm font-medium text-slate-300 mb-1">
+                Description (optional)
+              </label>
+              <textarea
+                id="comp-set-description"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Brief description of this comp set..."
+                rows={3}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none"
+              />
+            </div>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { setShowCreateForm(false); setNewName(''); setNewDescription(''); }}
+                className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creating || !newName.trim()}
+                className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                {creating ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
@@ -112,7 +223,18 @@ export default function CompLibraryPage() {
                   <button className="text-slate-500 hover:text-slate-300 p-1" title="Annotations">
                     <MessageSquare className="w-4 h-4" />
                   </button>
-                  <button className="text-slate-500 hover:text-red-400 p-1" title="Delete">
+                  <button
+                    onClick={() => handlePin(set.id, set.is_pinned)}
+                    className={`${set.is_pinned ? 'text-amber-400' : 'text-slate-500'} hover:text-amber-400 p-1`}
+                    title={set.is_pinned ? 'Unpin' : 'Pin'}
+                  >
+                    <Pin className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(set.id)}
+                    className="text-slate-500 hover:text-red-400 p-1"
+                    title="Delete"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

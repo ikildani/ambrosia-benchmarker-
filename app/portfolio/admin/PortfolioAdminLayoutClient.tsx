@@ -19,6 +19,8 @@ import {
   Crown,
   ArrowLeft,
   Lock,
+  BookOpen,
+  GitBranch,
 } from 'lucide-react';
 import type { PortfolioSubTier } from '@/types/tier';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
@@ -34,10 +36,14 @@ interface NavItem {
 const allNavItems: NavItem[] = [
   { href: '/portfolio/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/portfolio/admin/members', icon: Users, label: 'Members & Seats' },
+  { href: '/portfolio/admin/partner-matching', icon: Users, label: 'Partner Matching', minTier: 'growth' },
   { href: '/portfolio/admin/comp-library', icon: Library, label: 'Comp Library', minTier: 'scale' },
+  { href: '/portfolio/admin/playbooks', icon: BookOpen, label: 'Playbooks', minTier: 'scale', badge: 'Scale+' },
   { href: '/portfolio/admin/alerts', icon: Bell, label: 'Deal Alerts' },
   { href: '/portfolio/admin/reports', icon: FileBarChart, label: 'Reports', minTier: 'scale', badge: 'Scale+' },
   { href: '/portfolio/admin/audit', icon: Shield, label: 'Audit Log' },
+  { href: '/portfolio/admin/office-hours', icon: Clock, label: 'Office Hours', minTier: 'growth' },
+  { href: '/portfolio/admin/pipeline', icon: GitBranch, label: 'Deal Pipeline', minTier: 'growth' },
   { href: '/portfolio/admin/analyst-hours', icon: Clock, label: 'Analyst Hours' },
   { href: '/portfolio/admin/settings', icon: Settings, label: 'Settings' },
 ];
