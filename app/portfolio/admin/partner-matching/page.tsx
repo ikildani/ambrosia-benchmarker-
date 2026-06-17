@@ -53,12 +53,37 @@ export default function PartnerMatchingPage() {
 
   const isEmpty = profiles.length === 0 && overlaps.length === 0 && synergies.length === 0;
 
+  const exportCSV = () => {
+    const header = 'Company,TA,Modality,Calculation Count,Last Active\n';
+    const rows = profiles.flatMap(p =>
+      p.assets.map(a =>
+        `"${(p.companyName || p.email).replace(/"/g, '""')}",${a.therapeuticArea},${a.modality},${a.count},${a.latestDate}`
+      )
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `partner-matching-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-        <Users className="w-6 h-6 text-teal-400" />
-        Cross-Portfolio Partner Matching
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Users className="w-6 h-6 text-teal-400" />
+          Cross-Portfolio Partner Matching
+        </h1>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock, AlertCircle, Zap, Key } from 'lucide-react';
+import { Settings, Palette, Upload, MessageSquare, Save, Check, Lock, AlertCircle, Zap, Key, Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus, isEnterprise } from '@/lib/portfolio/feature-gates';
 
@@ -30,6 +30,8 @@ export default function SettingsPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [testingWebhook, setTestingWebhook] = useState(false);
   const [webhookResult, setWebhookResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [registeringSso, setRegisteringSso] = useState(false);
+  const [ssoRegisterResult, setSsoRegisterResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasSlack = isScalePlus(portfolioSubTier);
   const hasSso = isEnterprise(portfolioSubTier);
@@ -137,6 +139,37 @@ export default function SettingsPage() {
       setWebhookResult({ success: false, message: 'Failed to send test notification' });
     } finally {
       setTestingWebhook(false);
+    }
+  };
+
+  const handleRegisterSso = async () => {
+    setRegisteringSso(true);
+    setSsoRegisterResult(null);
+
+    try {
+      const res = await fetch('/api/portfolio/sso/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+
+      if (!json.success) {
+        setSsoRegisterResult({ success: false, message: json.error || 'Registration failed' });
+      } else {
+        const message = json.requires_dashboard_setup
+          ? 'SSO config saved. Complete setup in Supabase dashboard.'
+          : json.message || 'SSO provider registered successfully.';
+        setSsoRegisterResult({ success: true, message });
+        // Update the local provider ID if returned
+        if (json.provider_id && settings) {
+          setSettings({ ...settings, sso_provider_id: json.provider_id });
+        }
+        setTimeout(() => setSsoRegisterResult(null), 6000);
+      }
+    } catch {
+      setSsoRegisterResult({ success: false, message: 'Failed to register SSO provider' });
+    } finally {
+      setRegisteringSso(false);
     }
   };
 
@@ -413,6 +446,40 @@ export default function SettingsPage() {
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:pointer-events-none"
           />
         </div>
+
+        {/* Register SSO Provider Button */}
+        {hasSso && settings.sso_email_domain && settings.sso_entity_id && settings.sso_sso_url && (
+          <div className="pt-2 border-t border-slate-800">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleRegisterSso}
+                disabled={registeringSso}
+                className="flex items-center gap-2 bg-teal-500/15 hover:bg-teal-500/25 disabled:opacity-50 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                {registeringSso ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Register SSO Provider
+                  </>
+                )}
+              </button>
+              <p className="text-xs text-slate-500">
+                Save settings first, then register the SAML provider with Supabase
+              </p>
+            </div>
+            {ssoRegisterResult && (
+              <div className={`mt-2 flex items-center gap-1.5 text-xs ${ssoRegisterResult.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                {ssoRegisterResult.success ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                {ssoRegisterResult.message}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <button

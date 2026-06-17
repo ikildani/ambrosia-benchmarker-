@@ -150,12 +150,35 @@ export default function AnalystHoursPage() {
 
   const percentUsed = hoursData ? Math.round((hoursData.used / hoursData.allocated) * 100) : 0;
 
+  const exportCSV = () => {
+    const header = 'Description,Hours,Date,Category\n';
+    const rows = entries.map(e =>
+      `"${(e.description || '').replace(/"/g, '""')}",${e.hours},${e.service_date},${e.category}`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analyst-hours-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-        <Clock className="w-6 h-6 text-teal-400" />
-        Analyst Hours
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Clock className="w-6 h-6 text-teal-400" />
+          Analyst Hours
+        </h1>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
+      </div>
 
       <p className="text-sm text-slate-400">
         Track and manage your dedicated analyst service hours

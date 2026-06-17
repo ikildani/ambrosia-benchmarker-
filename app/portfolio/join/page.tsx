@@ -2,7 +2,8 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, LogIn } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, LogIn, Key } from 'lucide-react';
+import Link from 'next/link';
 
 function JoinPageContent() {
   const searchParams = useSearchParams();
@@ -131,6 +132,17 @@ function JoinPageContent() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* SSO Link */}
+        <div className="text-center mt-4">
+          <Link
+            href="/portfolio/sso"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-400 transition-colors"
+          >
+            <Key className="w-3 h-3" />
+            Sign in with SSO instead
+          </Link>
         </div>
 
         {/* Footer */}

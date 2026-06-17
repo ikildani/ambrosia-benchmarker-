@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useAuthForm } from './auth/useAuthForm';
@@ -187,16 +188,27 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
               </p>
             )}
             {mode === 'signin' && (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                Don&apos;t have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => handleModeSwitch('signup')}
-                  className="text-slate-900 dark:text-teal-400 font-semibold hover:underline"
+              <>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  Don&apos;t have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleModeSwitch('signup')}
+                    className="text-slate-900 dark:text-teal-400 font-semibold hover:underline"
+                  >
+                    Create one
+                  </button>
+                </p>
+                <Link
+                  href="/portfolio/sso"
+                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-teal-500 dark:hover:text-teal-400 transition-colors mt-2"
                 >
-                  Create one
-                </button>
-              </p>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                  Sign in with SSO
+                </Link>
+              </>
             )}
             {mode === 'forgot-password' && (
               <p className="text-slate-500 dark:text-slate-400 text-sm">

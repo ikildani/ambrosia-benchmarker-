@@ -131,6 +131,20 @@ export default function AlertsPage() {
     }
   }
 
+  const exportCSV = () => {
+    const header = 'Alert Name,Type,Frequency,Active,Last Triggered,Channels\n';
+    const rows = alerts.map(a =>
+      `"${(a.name || '').replace(/"/g, '""')}",${a.alert_type},${a.frequency},${a.is_active},${a.last_triggered_at || ''},"${a.channels.join(', ')}"`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement('a');
+    el.href = url;
+    el.download = `alerts-${new Date().toISOString().split('T')[0]}.csv`;
+    el.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -138,13 +152,22 @@ export default function AlertsPage() {
           <Bell className="w-6 h-6 text-teal-400" />
           <span className="inline-flex items-center gap-1.5">Deal Alerts <HelpTooltip text="Deal alerts notify your team when new transactions matching your criteria are publicly announced." /></span>
         </h1>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Alert
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Alert
+          </button>
+        </div>
       </div>
 
       {showCreate && (
