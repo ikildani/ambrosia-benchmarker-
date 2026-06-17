@@ -53,7 +53,7 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
   }, []);
 
   const fetchItems = useCallback(async (signal?: AbortSignal) => {
-    if (!userId || tier !== 'pro') return;
+    if (!userId || (tier !== 'pro' && tier !== 'portfolio')) return;
     setIsLoading(true);
     try {
       const res = await fetch(`/api/watchlist?user_id=${userId}`, { signal });
@@ -82,7 +82,7 @@ export function WatchlistProvider({ children, tier }: WatchlistProviderProps) {
 
   const toggle = useCallback(
     async (itemType: string, itemValue: string, companyId?: string) => {
-      if (!userId || tier !== 'pro') return;
+      if (!userId || (tier !== 'pro' && tier !== 'portfolio')) return;
 
       let existingItem: WatchlistItem | undefined;
       setItems((prev) => {

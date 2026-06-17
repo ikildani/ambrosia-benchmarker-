@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'deal_calculator_usage';
-const FREE_TIER_LIMIT = Infinity; // Unlimited free calculations — gate output, not input
+const FREE_TIER_LIMIT = 3;
 
 interface UsageData {
   count: number;

@@ -23,6 +23,7 @@ interface PaywallModalProps {
 export default function PaywallModal({ isOpen, onClose, reason, promoCode: initialPromo, calculationData }: PaywallModalProps) {
   const [isReportLoading, setIsReportLoading] = useState(false);
   const [isProLoading, setIsProLoading] = useState(false);
+  const [isTrialLoading, setIsTrialLoading] = useState(false);
   const { trackUpgradeCtaClick, trackPaywallDismissed } = useTracking();
   const { promoId, promoStatus, promoDiscount } = usePromoCode(initialPromo);
   const { user } = useAuth();
@@ -35,6 +36,33 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
   const handleClose = () => {
     trackPaywallDismissed();
     onClose();
+  };
+
+  const handleTrialStart = async () => {
+    trackUpgradeCtaClick('paywall_trial');
+    setIsTrialLoading(true);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          purchaseType: 'subscription',
+          userId: user?.id,
+          email: user?.email,
+          trial: true,
+        }),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        captureClientError(data.error || 'Trial checkout failed', 'PaywallModal', { context: 'Trial checkout' });
+      }
+    } catch {
+      captureClientError(new Error('Trial checkout failed'), 'PaywallModal', { context: 'Trial checkout network error' });
+    } finally {
+      setIsTrialLoading(false);
+    }
   };
 
   const handleBuyReport = async () => {
@@ -152,109 +180,154 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
           </div>
         </div>
 
-        {/* Two-option cards */}
-        <div className="p-5 sm:p-6">
-          <div className="grid sm:grid-cols-2 gap-4">
-            {/* Report Card */}
-            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-5 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Get This Report</h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className="text-2xl font-bold text-slate-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">one-time</span>
+        {/* Trial Banner */}
+        <div className="mx-5 sm:mx-6 mt-5 p-4 sm:p-5 rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-500/20">
+          <div className="text-center">
+            <p className="text-xs font-bold text-teal-400 tracking-wider uppercase mb-2">Recommended</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Try Pro Free for 7 Days</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+              14 engines · Unlimited calculations · PDF exports · 850+ company profiles
+            </p>
+            <button
+              onClick={handleTrialStart}
+              disabled={isTrialLoading}
+              className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
+                       hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       flex items-center justify-center gap-2 text-sm mx-auto"
+            >
+              {isTrialLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Processing...
+                </>
+              ) : 'Start Free Trial'}
+            </button>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">Cancel anytime during trial. No charge for 7 days.</p>
+          </div>
+        </div>
+
+        <div className="px-5 sm:px-6 pt-3 pb-1">
+          <p className="text-xs text-center text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">Or purchase directly</p>
+        </div>
+
+        {/* Three-option cards */}
+        <div className="p-5 sm:p-6 pt-2">
+          <div className="grid sm:grid-cols-3 gap-3">
+            {/* Starter Card */}
+            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-4 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Starter</h3>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.STARTER_PRICE}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">/month</span>
               </div>
-              <ul className="space-y-2 mb-5 text-sm">
+              <ul className="space-y-1.5 mb-4 text-xs">
                 {[
-                  'Institutional deal memo',
-                  'Full comparable deals',
-                  'Complete sensitivity analysis',
-                  'Negotiation playbook',
-                  'Board-ready branded PDF',
-                  'Excel data export',
+                  '10 calculations/month',
+                  'Deal terms + rNPV',
+                  '3 partner matches',
+                  '3 PDF exports/month',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">For this calculation only</p>
               <button
-                onClick={handleBuyReport}
-                disabled={isReportLoading || !calculationData}
-                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
-                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2 text-sm"
+                onClick={async () => {
+                  trackUpgradeCtaClick('paywall_starter');
+                  try {
+                    const response = await fetch('/api/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ purchaseType: 'starter', userId: user?.id, email: user?.email }),
+                    });
+                    const data = await response.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch {}
+                }}
+                className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
+                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all text-xs"
               >
-                {isReportLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Processing...
-                  </>
-                ) : (
-                  `Get Full Report — ${PRICING.REPORT_PRICE}`
-                )}
+                Start Starter — {PRICING.STARTER_MONTHLY}
               </button>
             </div>
 
             {/* Pro Card */}
-            <div className="relative border-2 border-teal-400 dark:border-teal-500 rounded-xl p-5 bg-gradient-to-b from-teal-50/50 to-white dark:from-teal-900/10 dark:to-slate-800">
-              <div className="absolute -top-3 right-4">
-                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="relative border-2 border-teal-400 dark:border-teal-500 rounded-xl p-4 bg-gradient-to-b from-teal-50/50 to-white dark:from-teal-900/10 dark:to-slate-800">
+              <div className="absolute -top-3 right-3">
+                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
                   Best Value
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Go Pro</h3>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className="text-2xl font-bold text-slate-900 dark:text-white">{PRICING.PRO_PRICE}</span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">/month</span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Pro</h3>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.PRO_PRICE}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">/month</span>
               </div>
-              <ul className="space-y-2 mb-5 text-sm">
+              <ul className="space-y-1.5 mb-4 text-xs">
                 {[
-                  'Everything in Report, plus:',
-                  'Unlimited full reports',
-                  'Scenario comparison tool',
+                  'Unlimited calculations',
+                  'All 14 engines',
+                  'Full partner + intent scoring',
+                  'Unlimited PDF + Excel',
                   'Watchlist & deal alerts',
-                  'Weekly market digest',
-                  'Full partner profiles',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">For all your calculations</p>
               <button
                 onClick={handleUpgradePro}
                 disabled={isProLoading}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
+                className="w-full py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
                          hover:from-teal-600 hover:to-cyan-600 transition-all shadow-soft hover:shadow-glow
                          disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2 text-sm"
+                         flex items-center justify-center gap-2 text-xs"
               >
-                {isProLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                {isProLoading ? 'Processing...' : (hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`)}
+              </button>
+            </div>
+
+            {/* Report Card */}
+            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-4 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">This Report</h3>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">one-time</span>
+              </div>
+              <ul className="space-y-1.5 mb-4 text-xs">
+                {[
+                  'Deal memo + comparables',
+                  'Sensitivity analysis',
+                  'Negotiation playbook',
+                  'Board-ready PDF + Excel',
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    {hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`}
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </>
-                )}
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={handleBuyReport}
+                disabled={isReportLoading || !calculationData}
+                className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
+                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+              >
+                {isReportLoading ? 'Processing...' : `Get Report — ${PRICING.REPORT_PRICE}`}
               </button>
             </div>
           </div>

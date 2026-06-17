@@ -23,7 +23,7 @@ export default function WatchButton({ itemType, itemValue, companyId, size = 'sm
   const loading = toggling || contextLoading;
 
   async function handleClick() {
-    if (tier !== 'pro') {
+    if (tier !== 'pro' && tier !== 'portfolio') {
       if (onPaywall) {
         onPaywall();
       } else {

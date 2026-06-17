@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
+import { fixUpfrontExceedsTdv, fixMissingTherapeuticArea, flagDuplicatesForReview } from '@/lib/ingestion/auto-remediate';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -161,7 +162,40 @@ export async function GET(request: NextRequest) {
       .lt('updated_at', ninetyDaysAgo);
 
     // ═══════════════════════════════════════════════════════════════════
-    // COMPUTE QUALITY SCORE
+    // AUTO-REMEDIATION: Fix detected issues before scoring
+    // ═══════════════════════════════════════════════════════════════════
+    const tdvFixResult = await fixUpfrontExceedsTdv(supabase);
+    const taFixResult = await fixMissingTherapeuticArea(supabase);
+
+    // Build duplicate groups from the pairMap for flagging
+    const duplicateGroups: Array<{ dealIds: string[]; licensor: string; licensee: string }> = [];
+    if (allDealsForDupes && allDealsForDupes.length > 1) {
+      const pairMapForDupes = new Map<string, typeof allDealsForDupes>();
+      for (const deal of allDealsForDupes) {
+        const key = `${deal.licensor_name.toLowerCase().trim()}|${deal.licensee_name.toLowerCase().trim()}`;
+        if (!pairMapForDupes.has(key)) pairMapForDupes.set(key, []);
+        pairMapForDupes.get(key)!.push(deal);
+      }
+      for (const [, deals] of pairMapForDupes) {
+        if (deals.length < 2) continue;
+        for (let i = 0; i < deals.length - 1; i++) {
+          const dateA = new Date(deals[i].announced_date).getTime();
+          const dateB = new Date(deals[i + 1].announced_date).getTime();
+          const daysDiff = Math.abs(dateB - dateA) / (1000 * 60 * 60 * 24);
+          if (daysDiff <= 7) {
+            duplicateGroups.push({
+              dealIds: [deals[i].id, deals[i + 1].id],
+              licensor: deals[i].licensor_name,
+              licensee: deals[i].licensee_name,
+            });
+          }
+        }
+      }
+    }
+    const dupResult = await flagDuplicatesForReview(supabase, duplicateGroups);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // COMPUTE QUALITY SCORE (before remediation — for comparison)
     // ═══════════════════════════════════════════════════════════════════
     const total = totalDeals || 1;
     const issues = {
@@ -187,6 +221,35 @@ export async function GET(request: NextRequest) {
     if ((dealsThisMonth || 0) > 0) {
       qualityScore = Math.min(100, qualityScore + 5);
     }
+
+    const preRemediationScore = qualityScore;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RECALCULATE QUALITY SCORE AFTER REMEDIATION
+    // ═══════════════════════════════════════════════════════════════════
+    const postIssues = {
+      missingUpfront: issues.missingUpfront,
+      upfrontExceedsTdv: Math.max(0, issues.upfrontExceedsTdv - tdvFixResult.fixed),
+      duplicates: Math.max(0, issues.duplicates - dupResult.fixed),
+      noTa: Math.max(0, issues.noTa - taFixResult.fixed),
+      otherModality: issues.otherModality,
+      staleCompanies: issues.staleCompanies,
+    };
+
+    let postRemediationScore = 100;
+    postRemediationScore -= Math.min(20, (postIssues.missingUpfront / total) * 200);
+    postRemediationScore -= Math.min(15, postIssues.upfrontExceedsTdv * 3);
+    postRemediationScore -= Math.min(15, postIssues.duplicates * 2);
+    postRemediationScore -= Math.min(15, (postIssues.noTa / total) * 150);
+    postRemediationScore -= Math.min(10, (postIssues.otherModality / total) * 100);
+    postRemediationScore -= Math.min(10, (postIssues.staleCompanies / 100) * 10);
+    postRemediationScore = Math.max(0, Math.round(postRemediationScore));
+    if ((dealsThisMonth || 0) > 0) {
+      postRemediationScore = Math.min(100, postRemediationScore + 5);
+    }
+
+    // Use post-remediation score as the final score
+    qualityScore = postRemediationScore;
 
     // ═══════════════════════════════════════════════════════════════════
     // SEND SLACK REPORT
@@ -259,7 +322,15 @@ export async function GET(request: NextRequest) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `${scoreEmoji} *Quality Score: ${qualityScore}/100*`,
+          text: `:wrench: *Auto-Remediation:*\n• Upfront > TDV: found ${issues.upfrontExceedsTdv} | fixed ${tdvFixResult.fixed} | review ${tdvFixResult.errors.length}\n• Missing TA: found ${issues.noTa} | fixed ${taFixResult.fixed} | skipped ${taFixResult.skipped}\n• Duplicates: found ${potentialDuplicates} | flagged ${dupResult.fixed} | review ${potentialDuplicates - dupResult.fixed}`,
+        },
+      },
+      { type: 'divider' },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `${scoreEmoji} *Quality Score: ${preRemediationScore}/100 → ${qualityScore}/100* ${preRemediationScore !== qualityScore ? '(+' + (qualityScore - preRemediationScore) + ' after remediation)' : '(no change)'}`,
         },
       },
       {

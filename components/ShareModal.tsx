@@ -27,7 +27,7 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels, f
   useFocusTrap(modalRef, isOpen, onClose);
 
   const handleShare = async () => {
-    if (!user?.email || tier !== 'pro') return;
+    if (!user?.email || (tier !== 'pro' && tier !== 'portfolio')) return;
 
     setLoading(true);
     setError(null);

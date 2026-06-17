@@ -984,6 +984,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     window.open(url, '_blank', 'width=600,height=500');
   };
 
+  const handleXShare = () => {
+    const text = `${labels.phase} ${labels.modality} deal for ${labels.indication}: Upfront ${formatCurrency(terms.upfront.low)}-${formatCurrency(terms.upfront.high)}, Total value up to ${formatCurrency(terms.totalDealValue.high)}. calculator.ambrosiaventures.co`;
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleEmailShare = () => {
+    const subject = `Biopharma Deal Benchmark: ${labels.phase} ${labels.modality} — ${labels.indication}`;
+    const body = `Upfront: ${formatCurrency(terms.upfront.low)}-${formatCurrency(terms.upfront.high)}\nTotal Value: up to ${formatCurrency(terms.totalDealValue.high)}\n\nView benchmarks: https://calculator.ambrosiaventures.co/calculator`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   const handleDownloadPDF = () => {
     trackExportAttempted('pdf');
     setReportFormat('pdf');
@@ -1061,6 +1072,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         onFreePDFClick={handleFreePDFClick}
         onShare={() => setShowShareModal(true)}
         onLinkedInShare={handleLinkedInShare}
+        onXShare={handleXShare}
+        onEmailShare={handleEmailShare}
         onDownloadExecutiveSummary={handleDownloadExecutiveSummary}
         onCompare={() => setShowHistoryPicker(true)}
         hasHistory={hasHistory}

@@ -1,4 +1,4 @@
-export type UserTier = 'free' | 'pro' | 'report' | 'portfolio';
+export type UserTier = 'free' | 'starter' | 'pro' | 'report' | 'portfolio';
 
 export type TeamRole = 'admin' | 'analyst' | 'viewer';
 
@@ -26,4 +26,8 @@ export const DEFAULT_TEAM_CONTEXT: TeamContext = {
 
 export function hasProAccess(tier: UserTier | null): boolean {
   return tier === 'pro' || tier === 'report' || tier === 'portfolio';
+}
+
+export function hasPaidAccess(tier: UserTier | null): boolean {
+  return tier === 'starter' || tier === 'pro' || tier === 'report' || tier === 'portfolio';
 }

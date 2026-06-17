@@ -232,12 +232,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try {
                 const { data: profile, error: tierError } = await supabase
                   .from('user_profiles')
-                  .select('tier, team_id')
+                  .select('tier, team_id, pro_expires_at')
                   .eq('id', supabaseUser.id)
                   .single();
-                if (!tierError && (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio')) {
-                  setTierState(profile.tier as UserTier);
-                  localStorage.setItem('user_tier', profile.tier);
+
+                let effectiveTier = profile?.tier;
+                if (effectiveTier === 'pro' && profile?.pro_expires_at) {
+                  const expiresAt = new Date(profile.pro_expires_at);
+                  if (expiresAt.getTime() < Date.now()) {
+                    effectiveTier = 'free';
+                  }
+                }
+
+                if (!tierError && (effectiveTier === 'pro' || effectiveTier === 'starter' || effectiveTier === 'report' || effectiveTier === 'portfolio')) {
+                  setTierState(effectiveTier as UserTier);
+                  localStorage.setItem('user_tier', effectiveTier);
 
                   if (profile.tier === 'portfolio' && profile.team_id) {
                     await fetchTeamContext(supabase, supabaseUser.id, profile.team_id);
@@ -359,14 +368,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!freshSession?.user) return;
             const uid = freshSession.user.id;
             supabase.from('user_profiles')
-              .select('tier, team_id')
+              .select('tier, team_id, pro_expires_at')
               .eq('id', uid)
               .single()
               .then(({ data: profile, error: tierErr }) => {
-                if (!tierErr && profile?.tier && profile.tier !== 'free') {
-                  setTierState(profile.tier as UserTier);
-                  localStorage.setItem('user_tier', profile.tier);
-                  if (profile.tier === 'portfolio' && profile.team_id) {
+                if (tierErr || !profile?.tier) return;
+
+                let effectiveTier = profile.tier;
+                if (effectiveTier === 'pro' && profile.pro_expires_at) {
+                  const expiresAt = new Date(profile.pro_expires_at);
+                  if (expiresAt.getTime() < Date.now()) {
+                    effectiveTier = 'free';
+                  }
+                }
+
+                if (effectiveTier !== 'free') {
+                  setTierState(effectiveTier as UserTier);
+                  localStorage.setItem('user_tier', effectiveTier);
+                  if (effectiveTier === 'portfolio' && profile.team_id) {
                     fetchTeamContext(supabase, uid, profile.team_id);
                   }
                 }

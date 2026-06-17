@@ -7,6 +7,7 @@ import {
   BarChart3, TrendingUp, ArrowRight, Check, Download,
   FileText, Shield, Building2, Zap, ChevronRight,
 } from 'lucide-react';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
 export default function Q1BenchmarksReport() {
   const [email, setEmail] = useState('');
@@ -261,6 +262,8 @@ export default function Q1BenchmarksReport() {
           </div>
         </div>
       </section>
+
+      <InsightEmailCapture slug="q1-2026-deal-benchmarks" />
 
       {/* Source credibility */}
       <section className="py-16 px-4 border-t border-white/[0.04]">

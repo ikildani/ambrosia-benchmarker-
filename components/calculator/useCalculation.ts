@@ -91,6 +91,7 @@ export interface UseCalculationReturn {
   ) => void;
   calculationCountRef: React.MutableRefObject<number>;
   limitHit: boolean;
+  remainingCalcs: number | null;
 }
 
 export function useCalculation(opts: UseCalculationOptions): UseCalculationReturn {
@@ -103,16 +104,19 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const calculatingRef = useRef(false);
   const calculationCountRef = useRef(0);
 
-  const FREE_CALC_LIMIT = 3;
+  const calcLimit = tier === 'starter' ? 10 : tier === 'free' ? 3 : Infinity;
   const [limitHit, setLimitHit] = useState(false);
+  const [remainingCalcs, setRemainingCalcs] = useState<number | null>(null);
 
   // Check limit on mount
   useEffect(() => {
-    if (isAuthenticated && tier === 'free' && userId) {
+    if (isAuthenticated && (tier === 'free' || tier === 'starter') && userId && calcLimit !== Infinity) {
       fetch(`/api/calculations?user_id=${userId}&count=true&month=true`)
         .then(r => r.json())
         .then(data => {
-          if (data.data?.count >= FREE_CALC_LIMIT) {
+          const count = data.data?.count || 0;
+          setRemainingCalcs(Math.max(0, calcLimit - count));
+          if (count >= calcLimit) {
             setLimitHit(true);
           }
         })
@@ -141,7 +145,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     }
 
     // Hard block after 3 calculations for free users — triggers paywall
-    if (tier === 'free' && limitHit) {
+    if ((tier === 'free' || tier === 'starter') && limitHit) {
       onLimitReached?.();
       return;
     }
@@ -259,10 +263,11 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       clearSavedFormState();
 
       // Increment usage + check if limit reached (free tier only)
-      if (tier === 'free') {
+      if (tier === 'free' || tier === 'starter') {
         incrementUsage();
         calculationCountRef.current++;
-        if (calculationCountRef.current >= FREE_CALC_LIMIT) {
+        setRemainingCalcs(prev => prev !== null ? Math.max(0, prev - 1) : null);
+        if (calculationCountRef.current >= calcLimit) {
           setLimitHit(true);
         }
       }
@@ -375,5 +380,6 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     handleSensitivityApply,
     calculationCountRef,
     limitHit,
+    remainingCalcs,
   };
 }

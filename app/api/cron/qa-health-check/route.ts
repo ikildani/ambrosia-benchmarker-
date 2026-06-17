@@ -9,6 +9,7 @@ import { runFinancialModel } from '@/lib/financial/run-financial-model';
 import { captureApiError } from '@/lib/sentry-api';
 import { estimateMarketSize } from '@/lib/financial/market-size';
 import { validateIndicationTA } from '@/lib/financial/validation';
+import { fixNegativeDealValues, fixMissingTherapeuticArea } from '@/lib/ingestion/auto-remediate';
 
 export const maxDuration = 300; // 5 min — full matrix takes time
 export const dynamic = 'force-dynamic';
@@ -445,6 +446,12 @@ export async function GET(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════════════════════
+  // AUTO-REMEDIATION: Fix detected data issues
+  // ═══════════════════════════════════════════════════════════
+  const negFixResult = await fixNegativeDealValues(supabase);
+  const taFixResult = await fixMissingTherapeuticArea(supabase);
+
+  // ═══════════════════════════════════════════════════════════
   // CHECK 11: Platform Health
   // ═══════════════════════════════════════════════════════════
   {
@@ -821,6 +828,26 @@ export async function GET(request: NextRequest) {
       return `${icon} *${c.name}*: ${c.details}${dur}`;
     }).join('\n');
 
+    // Build auto-remediation summary
+    const remediationLines: string[] = [];
+    const totalFixed = negFixResult.fixed + taFixResult.fixed;
+    const totalSkipped = negFixResult.skipped + taFixResult.skipped;
+    const totalErrors = negFixResult.errors.length + taFixResult.errors.length;
+
+    if (negFixResult.fixed > 0 || negFixResult.errors.length > 0) {
+      remediationLines.push(`:wrench: *Negative Values*: found ${negFixResult.fixed + negFixResult.skipped + negFixResult.errors.length} | fixed ${negFixResult.fixed} | errors ${negFixResult.errors.length}`);
+    }
+    if (taFixResult.fixed > 0 || taFixResult.skipped > 0) {
+      remediationLines.push(`:wrench: *Missing TA*: found ${taFixResult.fixed + taFixResult.skipped} | fixed ${taFixResult.fixed} | skipped ${taFixResult.skipped}`);
+    }
+
+    const remediationBlock = remediationLines.length > 0
+      ? [
+          { type: 'divider' },
+          { type: 'section', text: { type: 'mrkdwn', text: `*Auto-Remediation* (found ${totalFixed + totalSkipped + totalErrors} | fixed ${totalFixed} | review ${totalSkipped})\n${remediationLines.join('\n')}` } },
+        ]
+      : [];
+
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -831,6 +858,7 @@ export async function GET(request: NextRequest) {
           blocks: [
             { type: 'header', text: { type: 'plain_text', text: `Daily QA/QC — ${statusText}` } },
             { type: 'section', text: { type: 'mrkdwn', text: checkLines } },
+            ...remediationBlock,
             { type: 'context', elements: [{ type: 'mrkdwn', text: `${new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' })} ET | ${matrix.length} matrix combos | ${checks.length} checks | ${totalDuration}ms total` }] },
           ],
         }],

@@ -97,11 +97,21 @@ export async function POST(request: NextRequest) {
       return apiSuccess({ url: session.url, reportId: reportPurchase.id });
     }
 
-    // --- SUBSCRIPTION (Pro plan — monthly or annual) ---
+    // --- SUBSCRIPTION (Pro or Starter plan — monthly or annual) ---
     const billingInterval = body.billingInterval || 'monthly';
-    const priceId = billingInterval === 'annual'
-      ? (process.env.STRIPE_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_PRICE_ID?.trim())
-      : process.env.STRIPE_PRICE_ID?.trim();
+    const isStarter = body.purchaseType === 'starter';
+    const productLabel = isStarter ? 'deal-calculator-starter' : 'deal-calculator-pro';
+
+    let priceId: string | undefined;
+    if (isStarter) {
+      priceId = billingInterval === 'annual'
+        ? (process.env.STRIPE_STARTER_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_STARTER_PRICE_ID?.trim())
+        : process.env.STRIPE_STARTER_PRICE_ID?.trim();
+    } else {
+      priceId = billingInterval === 'annual'
+        ? (process.env.STRIPE_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_PRICE_ID?.trim())
+        : process.env.STRIPE_PRICE_ID?.trim();
+    }
     if (!priceId) {
       console.error('[checkout] STRIPE_PRICE_ID not configured for billing interval:', billingInterval);
       return NextResponse.json({
@@ -120,13 +130,13 @@ export async function POST(request: NextRequest) {
       tax_id_collection: { enabled: true },
       subscription_data: {
         metadata: {
-          product: 'deal-calculator-pro',
+          product: productLabel,
           user_id: userId ?? '',
           promo_code: promoCode || '',
         },
       },
       metadata: {
-        product: 'deal-calculator-pro',
+        product: productLabel,
         user_id: userId ?? '',
         promo_code: promoCode || '',
       },
@@ -196,6 +206,38 @@ export async function POST(request: NextRequest) {
           promoId = promoCodes.data[0].id;
         }
         sessionOptions.discounts = [{ promotion_code: promoId }];
+      }
+    }
+
+    // 7-day trial for first-time subscribers (no promo code needed)
+    if (body.trial && !sessionOptions.subscription_data?.trial_period_days) {
+      let hadPriorSub = false;
+      const supabase = createServiceClient();
+
+      if (userId) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('subscription_status')
+          .eq('id', userId)
+          .single();
+        if (profile?.subscription_status && ['active', 'cancelled', 'past_due', 'expired'].includes(profile.subscription_status)) {
+          hadPriorSub = true;
+        }
+      }
+
+      if (!hadPriorSub && customerEmail) {
+        const customers = await stripe.customers.list({ email: customerEmail.toLowerCase(), limit: 1 });
+        if (customers.data.length > 0) {
+          const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 10 });
+          hadPriorSub = subs.data.some(s => s.trial_end !== null);
+        }
+      }
+
+      if (!hadPriorSub) {
+        sessionOptions.subscription_data = {
+          ...sessionOptions.subscription_data,
+          trial_period_days: 7,
+        };
       }
     }
 

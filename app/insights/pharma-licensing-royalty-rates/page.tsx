@@ -6,6 +6,7 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { AuthorByline } from '@/components/insights/AuthorByline';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
@@ -507,6 +508,8 @@ export default function PharmaLicensingRoyaltyRatesPage() {
           <InlineEmailCapture source="royalty-rates" />
 
           <RelatedInsights articles={relatedArticles} />
+
+          <InsightEmailCapture slug="pharma-licensing-royalty-rates" />
 
           <InsightCTA
             variant="bottom"

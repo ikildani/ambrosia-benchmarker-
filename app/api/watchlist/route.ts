@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (profile?.tier !== 'pro') {
+    if (profile?.tier !== 'pro' && profile?.tier !== 'portfolio') {
       return apiError('Pro subscription required', 403);
     }
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (profile?.tier !== 'pro') {
+    if (profile?.tier !== 'pro' && profile?.tier !== 'portfolio') {
       return apiError('Pro subscription required', 403);
     }
 

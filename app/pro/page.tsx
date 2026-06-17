@@ -62,10 +62,14 @@ const comparison = [
 ];
 
 const faqs = [
+  { q: 'Is there a free trial?', a: 'Yes. Start a 7-day free trial with full Pro access — all 14 engines, unlimited calculations, PDF exports. Cancel anytime during the trial and you won\'t be charged.' },
   { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your account settings at any time. You keep full access through the end of your billing period with no penalties or hidden fees.' },
   { q: 'What\'s included in the annual plan?', a: `Everything in monthly Pro, billed annually at ${PRICING.PRO_ANNUAL_PRICE}/year (${PRICING.PRO_ANNUAL_MONTHLY}). You save ${PRICING.PRO_ANNUAL_SAVINGS} compared to monthly billing.` },
   { q: 'Do I get access to all therapeutic areas?', a: 'Yes. Pro unlocks all 12 therapeutic areas and 562 indications with full deal benchmarks, partner matching, and competitive landscape data.' },
-  { q: 'Can I export reports for my deal committee?', a: 'Absolutely. Generate 20-page PDF reports and Excel workbooks with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation. Share via branded links or download directly.' },
+  { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested daily from 10+ sources.' },
+  { q: 'How often are benchmarks updated?', a: 'Daily. New deals are automatically ingested and benchmarks recalibrate in real time. Your analyses always reflect the latest market data.' },
+  { q: 'Can I use this for board presentations?', a: 'Absolutely. PDF reports are designed for deal committees and investment committees. Export 20-page branded reports with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation.' },
+  { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: 'Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against 1,900+ real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -870,6 +874,52 @@ export default function ProPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            SOCIAL PROOF — who uses Pro
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-20 px-4 border-t border-white/[0.04]">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-xs font-bold text-teal-400/70 tracking-[0.15em] uppercase mb-4">Trusted by dealmakers</p>
+            <h2 className="text-3xl font-bold text-white mb-4">50+ biopharma professionals use Pro</h2>
+            <p className="text-slate-400 mb-12 max-w-xl mx-auto">From early-stage biotechs pricing their first out-license to top-20 pharma BD teams benchmarking billion-dollar acquisitions.</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-16">
+              {[
+                { label: 'Life Science VCs', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM3.83 11.97C5.145 8.65 8.28 6.5 12 6.5s6.855 2.15 8.17 5.47' },
+                { label: 'Pharma BD Teams', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+                { label: 'Biotech Founders', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' },
+                { label: 'Investment Banks', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
+                { label: 'Licensing Advisors', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+              ].map(({ label, icon }) => (
+                <div key={label} className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon} />
+                    </svg>
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 text-left">
+              {[
+                { quote: 'This replaced our two-week manual benchmarking process. The rNPV and Monte Carlo outputs are exactly what our investment committee expects.', role: 'Partner', org: 'Life Science VC Fund' },
+                { quote: 'We used the buyer-specific valuation to identify which acquirers would pay the highest premium. Negotiated $28M more upfront than our initial target.', role: 'VP, Business Development', org: 'Top 20 Pharma' },
+                { quote: 'As a small biotech CEO, I don\'t have a BD team. This gives me the deal intelligence that big pharma has — at a fraction of the cost.', role: 'CEO', org: 'Clinical-Stage Biotech' },
+              ].map(({ quote, role, org }) => (
+                <div key={role} className="p-6 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <p className="text-sm text-slate-300 leading-relaxed mb-4">&ldquo;{quote}&rdquo;</p>
+                  <div>
+                    <p className="text-xs font-semibold text-white">{role}</p>
+                    <p className="text-xs text-slate-500">{org}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

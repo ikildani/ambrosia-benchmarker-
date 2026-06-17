@@ -35,7 +35,7 @@ export default function ScenarioComparison({
   const [showScenarioPicker, setShowScenarioPicker] = useState(false);
 
   const fetchScenarios = useCallback(async () => {
-    if (!user?.email || tier !== 'pro') return;
+    if (!user?.email || (tier !== 'pro' && tier !== 'portfolio')) return;
 
     setLoading(true);
     try {
@@ -128,7 +128,7 @@ export default function ScenarioComparison({
 
   const compareScenarios = scenarios.filter((s) => selectedScenarios.includes(s.id));
 
-  if (tier !== 'pro') {
+  if (tier !== 'pro' && tier !== 'portfolio') {
     return null;
   }
 

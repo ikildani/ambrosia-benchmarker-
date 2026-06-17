@@ -16,6 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { investigateDriftCause } from '@/lib/ingestion/auto-remediate';
 
 // ---------------------------------------------------------------------------
 // Thresholds (defined at the top so they're easy to tune)
@@ -259,16 +260,41 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Send Slack alert if any drift was detected
     if (findings.length > 0) {
-      const body = findings
+      // Investigate drift causes for each unique TA/phase combo
+      const supabase = createServiceClient();
+      const investigatedCombos = new Set<string>();
+      const investigationLines: string[] = [];
+
+      for (const f of findings) {
+        const comboKey = `${f.therapeuticArea}|${f.phase}`;
+        if (investigatedCombos.has(comboKey)) continue;
+        investigatedCombos.add(comboKey);
+
+        try {
+          const investigation = await investigateDriftCause(supabase, f.therapeuticArea, f.phase);
+          if (investigation.suspectDealIds.length > 0) {
+            investigationLines.push(`  :mag: _${f.therapeuticArea}/${f.phase}_: ${investigation.summary}`);
+          }
+        } catch (err) {
+          investigationLines.push(`  :mag: _${f.therapeuticArea}/${f.phase}_: investigation failed — ${err instanceof Error ? err.message : 'unknown'}`);
+        }
+      }
+
+      const driftLines = findings
         .slice(0, 25)
         .map(
           (f) =>
             `• *${f.therapeuticArea}/${f.phase}* — ${f.metric} shifted ${(f.shift * 100).toFixed(0)}% (current $${f.current.toFixed(0)}M vs baseline $${f.baseline.toFixed(0)}M, n=${f.recentN}/${f.baselineN})`,
         )
         .join('\n');
+
+      const investigationSection = investigationLines.length > 0
+        ? `\n\n:wrench: *Auto-Investigation:*\n${investigationLines.join('\n')}`
+        : '';
+
       await postSlackAlert(
         `⚠️ rNPV Distribution Drift: ${findings.length} finding(s)`,
-        body,
+        driftLines + investigationSection,
       );
     }
 

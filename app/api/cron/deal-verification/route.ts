@@ -14,6 +14,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { logCronRun } from '@/lib/cron-utils';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
+import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -68,6 +69,10 @@ export async function GET(request: NextRequest) {
     timeBudgetMs: 250_000,
   });
 
+  // Auto-remediation: accept high-confidence verified deals, reject low-confidence flagged deals
+  const acceptResult = await autoAcceptVerifiedDeals(supabase);
+  const rejectResult = await autoRejectLowConfidenceDeals(supabase);
+
   // Notify Slack if any deals were flagged
   if (result.flagged > 0) {
     // Fetch the flagged deals for the notification
@@ -102,7 +107,7 @@ export async function GET(request: NextRequest) {
             elements: [
               {
                 type: 'mrkdwn',
-                text: `Verified: ${result.verified} | Flagged: ${result.flagged} | Unchanged: ${result.unchanged} | Errors: ${result.errors.length}`,
+                text: `Verified: ${result.verified} (${acceptResult.fixed} auto-accepted) | Flagged: ${result.flagged} | Rejected: ${rejectResult.fixed} auto-rejected | Unchanged: ${result.unchanged} | Errors: ${result.errors.length}`,
               },
             ],
           },

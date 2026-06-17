@@ -164,8 +164,9 @@ export async function POST(request: NextRequest) {
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
 
+        const subscriptionTier = session.metadata?.product === 'deal-calculator-starter' ? 'starter' as const : 'pro' as const;
         const updatePayload = {
-          tier: 'pro' as const, tier_change_authorized: true,
+          tier: subscriptionTier, tier_change_authorized: true,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           subscription_status: 'active',
@@ -189,13 +190,13 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // 2. Fallback: lookup by email (with warning)
+        // 2. Fallback: lookup by email (case-insensitive)
         if (!upgraded && customerEmail) {
           console.warn('Using email fallback for subscription upgrade:', customerEmail ? maskEmail(customerEmail) : 'none');
           const { error: emailError } = await supabase
             .from('user_profiles')
             .update(updatePayload)
-            .eq('email', customerEmail);
+            .ilike('email', customerEmail);
 
           if (!emailError) {
             upgraded = true;
@@ -266,7 +267,9 @@ export async function POST(request: NextRequest) {
         // Map Stripe status to our tier — but preserve 'report' tier for non-active
         // (report tier comes from one-time purchase, independent of subscription)
         const isActive = ['active', 'trialing'].includes(status);
-        let tier: 'pro' | 'report' | 'free' = isActive ? 'pro' : 'free';
+        const subProduct = subscription.metadata?.product;
+        const activeTier = subProduct === 'deal-calculator-starter' ? 'starter' as const : 'pro' as const;
+        let tier: 'starter' | 'pro' | 'report' | 'free' = isActive ? activeTier : 'free';
 
         if (!isActive) {
           // Check if user has report tier from a one-time purchase — don't downgrade them
@@ -306,7 +309,7 @@ export async function POST(request: NextRequest) {
         // Preserve 'report' tier if user purchased a one-time report
         const { data: existingProfile } = await supabase
           .from('user_profiles')
-          .select('tier')
+          .select('id, email, full_name, tier')
           .eq('stripe_customer_id', customerId)
           .single();
         const downgradeToTier = existingProfile?.tier === 'report' ? 'report' : 'free';
@@ -336,6 +339,25 @@ export async function POST(request: NextRequest) {
           },
           user_tier: 'free',
         });
+
+        // Send win-back email with 50% off reactivation offer
+        if (existingProfile?.email) {
+          try {
+            const { buildSubscriptionWinbackEmail } = await import('@/lib/email/winback');
+            const { sendEmail } = await import('@/lib/email/client');
+            const { subject, html } = buildSubscriptionWinbackEmail(existingProfile.full_name || existingProfile.email);
+            const result = await sendEmail({ to: existingProfile.email, subject, html });
+            if (result.success) {
+              await supabase.from('events').insert({
+                user_id: existingProfile.id,
+                event_type: 'subscription_winback_email_sent',
+                event_data: { email: existingProfile.email, stripe_customer_id: customerId },
+              });
+            }
+          } catch (emailErr) {
+            console.error('Win-back email failed:', emailErr);
+          }
+        }
         break;
       }
 

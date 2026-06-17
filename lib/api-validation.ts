@@ -156,9 +156,10 @@ export const eventSchema = z.object({
 // Checkout POST body
 export const checkoutSchema = z.object({
   email: z.string().email().optional(),
-  purchaseType: z.enum(['subscription', 'report']).default('subscription'),
+  purchaseType: z.enum(['subscription', 'starter', 'report']).default('subscription'),
   billingInterval: z.enum(['monthly', 'annual']).default('monthly'),
   promoCode: z.string().optional(),
+  trial: z.boolean().optional(),
   shareToken: z.string().optional(),
   calculationData: z.object({
     inputs: z.record(z.string(), z.unknown()),

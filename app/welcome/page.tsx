@@ -372,10 +372,14 @@ function WelcomePageInner() {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, [verifying, verifyError]);
 
-  // Set tier to pro after successful verification
+  // Set tier to pro after successful verification + persist to localStorage
   useEffect(() => {
     if (sessionData?.valid && sessionData.plan === 'pro') {
       setTier('pro');
+      localStorage.setItem('user_tier', 'pro');
+    } else if (sessionData?.valid && sessionData.plan === 'starter') {
+      setTier('starter');
+      localStorage.setItem('user_tier', 'starter');
     }
   }, [sessionData, setTier]);
 

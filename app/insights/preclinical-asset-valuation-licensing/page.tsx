@@ -6,6 +6,7 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { AuthorByline } from '@/components/insights/AuthorByline';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
@@ -571,6 +572,8 @@ export default function PreclinicalValuationPage() {
 
           </div>
         </article>
+
+        <InsightEmailCapture slug="preclinical-asset-valuation-licensing" />
 
         <InsightCTA
           variant="bottom"

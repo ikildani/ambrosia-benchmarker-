@@ -136,7 +136,7 @@ export default function CalculatorPage() {
         initialMode={authModalMode}
       />
 
-      <ExitIntentCapture />
+      {tier === 'free' && <ExitIntentCapture />}
     </div>
   );
 }

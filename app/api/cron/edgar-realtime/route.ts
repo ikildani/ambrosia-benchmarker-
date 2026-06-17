@@ -9,6 +9,7 @@ import {
   findOrCreateCompany,
   deriveTherapeuticArea,
 } from '@/lib/ingestion/sec-edgar';
+import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
 import { isTimeBudgetExceeded, logCronRun } from '@/lib/cron-utils';
 
@@ -194,6 +195,13 @@ export async function GET(request: NextRequest) {
         if (deal && deal.confidence_score >= 75) {
           // Validate company names
           if (!deal.licensor?.trim() || !deal.licensee?.trim()) {
+            continue;
+          }
+
+          // Phase 4 fabrication validator
+          const validation = validateExtractedDeal(deal);
+          if (!validation.valid) {
+            console.log(`[edgar-realtime] Rejected deal (${validation.rejectCode}): ${deal.licensor} / ${deal.licensee}`);
             continue;
           }
 

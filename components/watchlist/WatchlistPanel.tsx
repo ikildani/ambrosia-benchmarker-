@@ -31,7 +31,7 @@ export default function WatchlistPanel({ tier, onUpgrade }: WatchlistPanelProps)
 
   const { items, activity, isLoading, error, addItem, removeItem } = useWatchlist(userId);
 
-  if (tier !== 'pro') {
+  if (tier !== 'pro' && tier !== 'portfolio') {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 text-center">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-600/15 to-cyan-500/20 flex items-center justify-center">

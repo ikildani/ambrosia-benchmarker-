@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (profile?.tier !== 'pro') {
+    if (profile?.tier !== 'pro' && profile?.tier !== 'portfolio') {
       return NextResponse.json({ error: 'Pro subscription required' }, { status: 403 });
     }
 

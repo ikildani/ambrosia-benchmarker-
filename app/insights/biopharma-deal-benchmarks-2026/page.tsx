@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Benchmarks 2026: 3 Data Insights from 3,447 Deals | Ambrosia Ventures',
@@ -251,6 +252,8 @@ export default function DealInsightsReport() {
             </p>
           </div>
         </section>
+
+        <InsightEmailCapture slug="biopharma-deal-benchmarks-2026" />
 
         {/* CTA */}
         <section className="py-20 px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">

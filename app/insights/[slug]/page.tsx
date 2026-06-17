@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getAllInsightSlugs, getInsightBySlug } from '@/lib/insightPages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
 export async function generateStaticParams() {
   return getAllInsightSlugs().map((slug) => ({ slug }));
@@ -159,6 +160,8 @@ export default async function InsightPage({
           </div>
         </div>
       </section>
+
+      <InsightEmailCapture slug={slug} />
 
       {/* Bottom CTA */}
       <section className="border-t border-slate-800 py-12 text-center">

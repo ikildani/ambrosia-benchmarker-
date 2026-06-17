@@ -179,7 +179,7 @@ export default function Dashboard({
 
   // Fetch watchlist activity count for notification dot
   useEffect(() => {
-    if (tier !== 'pro') return;
+    if (tier !== 'pro' && tier !== 'portfolio') return;
     const userData = localStorage.getItem('user_data');
     if (!userData) return;
     try {

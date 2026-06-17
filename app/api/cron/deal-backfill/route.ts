@@ -20,6 +20,7 @@ import {
   findOrCreateCompany,
   deriveTherapeuticArea,
 } from '@/lib/ingestion/sec-edgar';
+import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -166,6 +167,12 @@ export async function GET(request: NextRequest) {
         const deal = await extractDealFromFiling(content, anthropicApiKey);
 
         if (!deal || deal.confidence_score < 75 || !deal.licensor || !deal.licensee) continue;
+
+        const validation = validateExtractedDeal(deal);
+        if (!validation.valid) {
+          console.log(`[deal-backfill] Rejected deal (${validation.rejectCode}): ${deal.licensor} / ${deal.licensee}`);
+          continue;
+        }
 
         result.extracted++;
 

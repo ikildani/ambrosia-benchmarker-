@@ -87,6 +87,7 @@ import type { WizardStep } from './calculator/index';
 import { useCalculatorState } from './calculator/useCalculatorState';
 import type { CalculatorFormState } from './calculator/useCalculatorState';
 import { useCalculation, buildCalculationInput } from './calculator/useCalculation';
+import { UsageCounter } from './calculator/UsageCounter';
 import type { UserTier } from '@/types/tier';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
@@ -541,6 +542,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
         {/* Form */}
         <div className="p-4 sm:p-6 lg:p-8 xl:p-10 bg-gradient-subtle">
+          {/* Usage Counter */}
+          <div className="mb-4">
+            <UsageCounter
+              remaining={calc.remainingCalcs}
+              tier={tier}
+              onUpgrade={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+            />
+          </div>
+
           {/* Therapeutic Area Selector */}
           <TherapeuticAreaSelector
             therapeuticArea={state.therapeuticArea}

@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import SharedCalculationView from '@/components/SharedCalculationView';
+import { ShareEmailGate } from '@/components/share/ShareEmailGate';
+import { createServerClient } from '@/lib/supabase/server';
 
 const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
 
@@ -56,6 +58,15 @@ export default async function SharePage({ params }: Props) {
   const indication = data.labels?.indication || '';
   const phase = data.labels?.phase || '';
 
+  let isAuthenticated = false;
+  try {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    isAuthenticated = !!user;
+  } catch {}
+
+  const showGate = !isAuthenticated;
+
   return (
     <main className="min-h-screen bg-[#0c1220]">
       <ShareViewTracker
@@ -100,11 +111,21 @@ export default async function SharePage({ params }: Props) {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <SharedCalculationView
-          results={data.results}
-          labels={data.labels}
-          financialSummary={data.results?.financialSummary}
-        />
+        {showGate ? (
+          <ShareEmailGate token={token}>
+            <SharedCalculationView
+              results={data.results}
+              labels={data.labels}
+              financialSummary={data.results?.financialSummary}
+            />
+          </ShareEmailGate>
+        ) : (
+          <SharedCalculationView
+            results={data.results}
+            labels={data.labels}
+            financialSummary={data.results?.financialSummary}
+          />
+        )}
       </div>
 
       {/* Report Purchase CTA */}
