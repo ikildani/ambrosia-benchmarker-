@@ -11,28 +11,42 @@ interface Props {
 
 export function CompetitiveCluster({ readoutsByTA }: Props) {
   const hotTAs = Object.entries(readoutsByTA)
-    .filter(([, count]) => count >= 3)
+    .filter(([, count]) => count >= 4)
     .sort((a, b) => b[1] - a[1]);
 
   if (hotTAs.length === 0) return null;
 
+  const totalReadouts = hotTAs.reduce((sum, [, count]) => sum + count, 0);
+  const topTAs = hotTAs.slice(0, 3);
+
   return (
-    <div className="mb-6 space-y-2">
-      {hotTAs.map(([ta, count]) => (
-        <div
-          key={ta}
-          className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3"
-        >
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-xs text-amber-400">
-            !
-          </span>
-          <p className="text-sm text-amber-200/90">
-            <span className="font-semibold text-amber-300">{count}</span>{' '}
-            <span className="text-teal-400">{formatTA(ta)}</span> Phase 3 readouts in next 60 days
-            — deal benchmarks in this space will likely reset.
+    <div className="mb-8 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-5">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-400">
+          !
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-amber-200 mb-1">
+            Heavy readout period ahead — {totalReadouts} Phase 3 readouts across {hotTAs.length} therapeutic areas in the next 60 days
           </p>
+          <p className="text-xs text-slate-400 mb-3">
+            Deal benchmarks in these spaces will likely reset. Factor readout timing into your negotiation strategy.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {topTAs.map(([ta, count]) => (
+              <span key={ta} className="inline-flex items-center gap-1.5 rounded-md bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs">
+                <span className="font-semibold text-teal-400">{formatTA(ta)}</span>
+                <span className="text-slate-500">{count} readouts</span>
+              </span>
+            ))}
+            {hotTAs.length > 3 && (
+              <span className="inline-flex items-center rounded-md bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs text-slate-500">
+                +{hotTAs.length - 3} more
+              </span>
+            )}
+          </div>
         </div>
-      ))}
+      </div>
     </div>
   );
 }

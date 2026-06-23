@@ -128,7 +128,7 @@ export function TradeSpaceForm() {
           key={opt.value}
           type="button"
           onClick={() => setter(opt.value)}
-          className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+          className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all ${
             current === opt.value
               ? 'border-teal-500/60 bg-teal-500/15 text-teal-300'
               : 'border-slate-700 bg-slate-900/40 text-slate-400 hover:border-slate-600 hover:text-slate-300'
@@ -144,7 +144,7 @@ export function TradeSpaceForm() {
     <div className="space-y-8">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Asset profile */}
-        <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-5">
+        <div className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-6">
           <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-slate-400">
             Asset Profile
           </h3>
@@ -183,7 +183,7 @@ export function TradeSpaceForm() {
         </div>
 
         {/* Peak sales */}
-        <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-5">
+        <div className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-6">
           <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-slate-400">
             Peak Sales Estimates ($M)
           </h3>
@@ -228,7 +228,7 @@ export function TradeSpaceForm() {
         </div>
 
         {/* Optional buyer name */}
-        <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-5">
+        <div className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-6">
           <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-slate-400">
             Buyer (optional)
           </h3>
@@ -255,7 +255,7 @@ export function TradeSpaceForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all hover:from-teal-400 hover:to-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Optimizing...' : 'Optimize Deal Structure'}
         </button>
