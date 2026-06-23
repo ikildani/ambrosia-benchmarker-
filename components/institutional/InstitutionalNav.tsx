@@ -38,7 +38,7 @@ interface Props {
 export function InstitutionalNav({ activePath }: Props) {
   return (
     <nav
-      className="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur"
+      className="sticky top-16 z-40 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur"
       aria-label="Institutional intelligence navigation"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
@@ -47,7 +47,7 @@ export function InstitutionalNav({ activePath }: Props) {
           className="shrink-0 text-sm font-semibold tracking-tight text-slate-200 hover:text-slate-50"
         >
           Ambrosia<span className="text-slate-500"> · </span>
-          <span className="font-normal text-slate-400">Institutional</span>
+          <span className="font-normal text-slate-400">Intelligence</span>
         </Link>
 
         <ul className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2">

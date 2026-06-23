@@ -178,21 +178,16 @@ export default function Header({
     }
   }, [userMenuOpen]);
 
-  // Navigation items with proper routing
+  // Navigation items — clean hierarchy, max 5-6 visible on desktop
   const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
   const navItems = [
-    ...(isAuthenticated ? [{
-      label: 'Dashboard',
-      href: '/dashboard',
-      isActive: isDashboardPage,
-    }] : []),
     {
       label: 'Calculator',
       href: '/calculator',
       isActive: isCalculatorPage,
     },
     ...(isPro ? [{
-      label: 'Pulse',
+      label: 'Market Pulse',
       href: '/pulse',
       isActive: isPulsePage,
     },
@@ -200,8 +195,8 @@ export default function Header({
       label: 'Companies',
       href: '/companies',
       isActive: isCompaniesPage,
-    }] : []),
-    ...(isPro ? [{
+    },
+    {
       label: 'Intelligence',
       href: '/playbook',
       isActive: isIntelligencePage,
@@ -212,16 +207,11 @@ export default function Header({
       href: '/portfolio/admin',
       isActive: pathname?.startsWith('/portfolio/admin') || false,
     }] : []),
-    {
+    ...(!isPro ? [{
       label: 'Pricing',
-      href: isLandingPage ? '#pricing' : '/#pricing',
-      isActive: false,
-    },
-    {
-      label: 'About',
-      href: isLandingPage ? '#about' : '/#about',
-      isActive: false,
-    },
+      href: '/pro',
+      isActive: pathname === '/pro',
+    }] : []),
     {
       label: 'Contact',
       href: '/contact',

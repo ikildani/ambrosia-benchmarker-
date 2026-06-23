@@ -136,24 +136,29 @@ export default function ContactForm(): JSX.Element {
         />
       </div>
 
-      {/* Subject */}
+      {/* Subject — styled pill selector instead of native dropdown */}
       <div>
-        <label htmlFor="contact-subject" className="block text-sm font-medium text-slate-300 mb-1.5">
-          Subject <span className="text-red-400" aria-hidden="true">*</span>
+        <label className="block text-sm font-medium text-slate-300 mb-2.5">
+          What can we help with? <span className="text-red-400" aria-hidden="true">*</span>
         </label>
-        <select
-          id="contact-subject"
-          required
-          value={form.subject}
-          onChange={(e) => setForm((prev) => ({ ...prev, subject: e.target.value }))}
-          className={inputClassName}
-        >
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Subject">
           {SUBJECTS.map((s) => (
-            <option key={s} value={s}>
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={form.subject === s}
+              onClick={() => setForm((prev) => ({ ...prev, subject: s }))}
+              className={`px-4 py-2 text-sm rounded-full border transition-all duration-200 ${
+                form.subject === s
+                  ? 'border-teal-500 bg-teal-500/15 text-teal-300 font-medium shadow-sm shadow-teal-500/10'
+                  : 'border-slate-600 bg-slate-800/30 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+              }`}
+            >
               {s}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {/* Message */}
