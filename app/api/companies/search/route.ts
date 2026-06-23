@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
     // Build query — unified path for all modes (search, top, filtered)
     let query = supabase
       .from('companies')
-      .select(selectFields, { count: 'exact' });
+      .select(selectFields, { count: 'exact' })
+      .not('name', 'ilike', '%FDA%Approval%')
+      .not('name', 'ilike', '%FDA%sNDA%')
+      .not('name', 'ilike', '%EMA%Approval%')
+      .neq('company_type', 'regulatory');
 
     // Apply name search
     if (q && q.length >= 2) {

@@ -303,7 +303,7 @@ export async function runOpenFDAIngestion(
         const { error: insertError } = await supabase.from('deals').insert({
           licensor_name: companyName,
           licensor_id: companyId,
-          licensee_name: 'FDA Approval', // Regulatory milestone, not a deal per se
+          licensee_name: null, // Regulatory approval — no licensee party
           asset_name: assetName,
           asset_description: assetDescription,
           modality,
@@ -398,7 +398,7 @@ export async function runOpenFDAIngestion(
           const { error: insertError } = await supabase.from('deals').insert({
             licensor_name: companyName,
             licensor_id: companyId,
-            licensee_name: 'FDA sNDA Approval',
+            licensee_name: null, // Supplemental approval — no licensee party
             asset_name: brandName || genericName,
             asset_description: `New indication approval — ${genericName || brandName} (${result.application_number})`,
             modality: (result.application_number || '').startsWith('BLA') ? 'antibody' : 'small_molecule',

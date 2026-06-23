@@ -986,7 +986,10 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
 
 function normalizeCompanyName(name: string): string {
   return name
-    .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?)$/i, '')
+    .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|S\.A\.?|N\.V\.?|SE|GmbH|A\/S)$/i, '')
+    .replace(/\s*\(.*?\)\s*/g, ' ')
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/\band\b/gi, '&')
     .replace(/\s+/g, ' ')
     .trim();
 }
