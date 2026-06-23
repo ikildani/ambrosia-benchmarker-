@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExitIntentCapture() {
+  const { tier } = useAuth();
   const [show, setShow] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const handleClose = useCallback(() => setShow(false), []);
@@ -13,7 +15,13 @@ export default function ExitIntentCapture() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem('exit_intent_shown') || sessionStorage.getItem('email_captured')) return;
+    // Don't show for paid-tier users
+    if (tier === 'pro' || tier === 'report' || tier === 'portfolio') return;
+
+    // Desktop only -- exit intent doesn't work on mobile
+    if (window.innerWidth < 768 || !window.matchMedia('(pointer: fine)').matches) return;
+
+    if (localStorage.getItem('exit_intent_shown') || localStorage.getItem('email_captured')) return;
 
     let triggered = false;
 
@@ -21,26 +29,16 @@ export default function ExitIntentCapture() {
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && !triggered) {
         triggered = true;
-        sessionStorage.setItem('exit_intent_shown', 'true');
+        localStorage.setItem('exit_intent_shown', 'true');
         setShow(true);
       }
     };
-
-    // Mobile: 30s timer
-    const timer = setTimeout(() => {
-      if (!triggered && !sessionStorage.getItem('exit_intent_shown')) {
-        triggered = true;
-        sessionStorage.setItem('exit_intent_shown', 'true');
-        setShow(true);
-      }
-    }, 30000);
 
     document.addEventListener('mouseleave', handleMouseLeave);
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
-      clearTimeout(timer);
     };
-  }, []);
+  }, [tier]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +56,7 @@ export default function ExitIntentCapture() {
         body: JSON.stringify({ email, source: 'exit_intent' }),
       }).catch(() => {});
       setSubmitted(true);
-      sessionStorage.setItem('email_captured', 'true');
+      localStorage.setItem('email_captured', 'true');
     } catch {
       setSubmitted(true);
     } finally {
@@ -94,9 +92,9 @@ export default function ExitIntentCapture() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Get Your First Deal Report Free</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Wait &mdash; before you go</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Benchmark your asset in 60 seconds. Subscribe and get a free PDF deal report with comparable transactions, royalty benchmarks, and negotiation insights.
+                Get a free deal benchmark report for your next calculation.
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -115,7 +113,7 @@ export default function ExitIntentCapture() {
                 disabled={submitting}
                 className="w-full py-3 text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-500 text-white rounded-xl hover:from-teal-700 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 dark:shadow-teal-400/10 disabled:opacity-50"
               >
-                {submitting ? 'Subscribing...' : 'Calculate Now — Free Report Included'}
+                {submitting ? 'Sending...' : 'Send My Free Report'}
               </button>
               <p className="text-xs text-slate-500 dark:text-slate-400 text-center">No spam, unsubscribe anytime. 350+ deals benchmarked.</p>
             </form>

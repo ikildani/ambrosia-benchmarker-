@@ -71,6 +71,8 @@ export default function Header({
   const isDashboardPage = pathname === '/dashboard';
   const isPulsePage = pathname === '/pulse';
   const isCompaniesPage = pathname?.startsWith('/companies');
+  const isIntelligencePage = pathname?.startsWith('/playbook') || pathname?.startsWith('/trade-space') || pathname?.startsWith('/simulator') || pathname?.startsWith('/intelligence') || pathname?.startsWith('/methodology/engine') || false;
+  const [intelDropdownOpen, setIntelDropdownOpen] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -199,6 +201,12 @@ export default function Header({
       href: '/companies',
       isActive: isCompaniesPage,
     }] : []),
+    ...(isPro ? [{
+      label: 'Intelligence',
+      href: '/playbook',
+      isActive: isIntelligencePage,
+      isDropdown: true,
+    }] : []),
     ...(tier === 'portfolio' && isPortfolioAdmin ? [{
       label: 'Portfolio',
       href: '/portfolio/admin',
@@ -213,6 +221,11 @@ export default function Header({
       label: 'About',
       href: isLandingPage ? '#about' : '/#about',
       isActive: false,
+    },
+    {
+      label: 'Contact',
+      href: '/contact',
+      isActive: pathname === '/contact',
     },
   ];
 
@@ -236,8 +249,51 @@ export default function Header({
 
           {/* Desktop Navigation */}
           <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10">
-            {navItems.map((item, idx) => (
-              item.href.startsWith('#') || item.href.includes('#') ? (
+            {navItems.map((item: { label: string; href: string; isActive: boolean; isDropdown?: boolean }, idx) => {
+              if ((item as { isDropdown?: boolean }).isDropdown) {
+                return (
+                  <div key={idx} className="relative" onMouseEnter={() => setIntelDropdownOpen(true)} onMouseLeave={() => setIntelDropdownOpen(false)}>
+                    <button
+                      className={`relative text-sm font-medium transition-colors flex items-center gap-1 group ${
+                        item.isActive
+                          ? 'text-slate-900 dark:text-white font-semibold'
+                          : 'text-neutral-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {item.label}
+                      <svg className={`w-3.5 h-3.5 transition-transform ${intelDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span className={`absolute -bottom-1 left-0 h-0.5 bg-slate-900 dark:bg-white transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                    </button>
+                    {intelDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
+                        {[
+                          { label: 'Counterparty Playbooks', href: '/playbook', desc: 'Buyer premiums & strategy' },
+                          { label: 'Deal Structure Trade Space', href: '/trade-space', desc: 'Optimize deal type' },
+                          { label: 'Negotiation Simulator', href: '/simulator', desc: 'ZOPA & opening strategy' },
+                          { label: 'Market Intelligence', href: '/intelligence', desc: 'Live readouts & AdComm' },
+                          { label: 'Engine Methodology', href: '/methodology/engine', desc: 'How the engine works' },
+                        ].map(sub => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className={`block px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                              pathname?.startsWith(sub.href) ? 'bg-slate-50 dark:bg-slate-700' : ''
+                            }`}
+                            onClick={() => setIntelDropdownOpen(false)}
+                          >
+                            <div className="text-sm font-medium text-slate-900 dark:text-white">{sub.label}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{sub.desc}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return item.href.startsWith('#') || item.href.includes('#') ? (
                 <a
                   key={idx}
                   href={item.href}
@@ -263,8 +319,8 @@ export default function Header({
                   {item.label}
                   <span className={`absolute -bottom-1 left-0 h-0.5 bg-slate-900 dark:bg-white transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </Link>
-              )
-            ))}
+              );
+            })}
           </nav>
 
           {/* Right Side Actions */}
@@ -492,6 +548,11 @@ export default function Header({
                   About: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  Contact: (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   ),
                 };

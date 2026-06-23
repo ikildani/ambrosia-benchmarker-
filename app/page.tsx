@@ -922,7 +922,7 @@ export default function Home() {
             <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm">
               {[
                 { label: 'Website', href: 'https://www.ambrosiaventures.co', external: true },
-                { label: 'Contact', href: 'mailto:info@ambrosiaventures.co', external: false },
+                { label: 'Contact', href: '/contact', external: false },
                 { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ambrosia-ventures', external: true },
                 { label: 'Benchmarks', href: '/benchmarks', external: false },
                 { label: 'Guides', href: '/guides', external: false },
