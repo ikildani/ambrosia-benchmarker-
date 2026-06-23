@@ -1,6 +1,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import Anthropic from '@anthropic-ai/sdk';
 import { reclassifyOtherDeals } from '@/lib/cron-utils';
 import { REMEDIATION_THRESHOLDS } from '@/lib/config/remediation-thresholds';
+
+const VALID_TAS = [
+  'oncology', 'cardiovascular', 'neurology', 'immunology', 'metabolic',
+  'infectiousDisease', 'rareDisease', 'hematology', 'ophthalmology',
+  'dermatology', 'gastroenterology', 'womensHealth',
+] as const;
 
 export interface RemediationResult {
   fixed: number;
@@ -78,26 +85,99 @@ export async function fixNegativeDealValues(supabase: SupabaseClient): Promise<R
 
 export async function fixMissingTherapeuticArea(supabase: SupabaseClient): Promise<RemediationResult> {
   if (REMEDIATION_THRESHOLDS.DRY_RUN_MODE) return emptyResult();
-
-  const before = await supabase
-    .from('deals')
-    .select('id', { count: 'exact', head: true })
-    .or('therapeutic_area.is.null,therapeutic_area.eq.other')
-    .eq('is_synthetic', false);
-
-  const reclassified = await reclassifyOtherDeals(supabase);
-
   const result = emptyResult();
-  result.fixed = reclassified;
-  result.skipped = (before.count || 0) - reclassified;
+
+  // Phase 1: Deterministic reclassification from indication_category mapping
+  const reclassified = await reclassifyOtherDeals(supabase);
+  result.fixed += reclassified;
 
   if (reclassified > 0) {
     await logRemediation(supabase, {
       cronSource: 'deal_data_health', issueType: 'missing_therapeutic_area',
       actionTaken: 'reclassified_from_indication',
-      newValue: `${reclassified} deals reclassified`,
+      newValue: `${reclassified} deals reclassified (deterministic)`,
     });
   }
+
+  // Phase 2: AI-powered classification for remaining deals
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicKey) return result;
+
+  const { data: remaining } = await supabase
+    .from('deals')
+    .select('id, asset_name, indication_specific, indication_category, modality, licensor_name, licensee_name')
+    .or('therapeutic_area.is.null,therapeutic_area.eq.other')
+    .eq('is_synthetic', false)
+    .limit(30);
+
+  if (!remaining || remaining.length === 0) return result;
+
+  const anthropic = new Anthropic({ apiKey: anthropicKey, timeout: 30_000 });
+
+  const dealDescriptions = remaining.map((d, i) =>
+    `${i + 1}. asset="${d.asset_name || 'unknown'}" indication="${d.indication_specific || d.indication_category || 'unknown'}" modality="${d.modality || 'unknown'}" licensor="${d.licensor_name}" licensee="${d.licensee_name}"`
+  ).join('\n');
+
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2000,
+      messages: [{
+        role: 'user',
+        content: `Classify each deal into exactly one therapeutic area. Return ONLY a JSON array of objects with "index" (1-based) and "ta" fields.
+
+Valid therapeutic areas: ${VALID_TAS.join(', ')}
+
+If you cannot determine the TA with reasonable confidence, use "unknown".
+
+Deals:
+${dealDescriptions}
+
+Return format: [{"index":1,"ta":"oncology"},{"index":2,"ta":"neurology"}]`,
+      }],
+    });
+
+    const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return result;
+
+    const classifications = JSON.parse(jsonMatch[0]) as Array<{ index: number; ta: string }>;
+
+    for (const cls of classifications) {
+      const deal = remaining[cls.index - 1];
+      if (!deal) continue;
+      if (!VALID_TAS.includes(cls.ta as typeof VALID_TAS[number])) continue;
+      if (cls.ta === 'unknown') { result.skipped++; continue; }
+
+      const { error } = await supabase
+        .from('deals')
+        .update({
+          therapeutic_area: cls.ta,
+          verification_notes: `TA auto-classified by AI from: asset="${deal.asset_name}", indication="${deal.indication_specific || deal.indication_category}", modality="${deal.modality}"`,
+        })
+        .eq('id', deal.id);
+
+      if (!error) {
+        result.fixed++;
+        result.details.push({
+          dealId: deal.id, issueType: 'missing_ta_ai_classified',
+          oldValue: 'other', newValue: cls.ta,
+        });
+        await logRemediation(supabase, {
+          cronSource: 'deal_data_health', issueType: 'missing_therapeutic_area',
+          dealId: deal.id, fieldName: 'therapeutic_area',
+          oldValue: 'other', newValue: cls.ta,
+          actionTaken: 'ai_classified',
+          confidence: 85,
+        });
+      } else {
+        result.errors.push(`AI reclassify failed for ${deal.id}: ${error.message}`);
+      }
+    }
+  } catch (err) {
+    result.errors.push(`AI classification failed: ${String(err)}`);
+  }
+
   return result;
 }
 
