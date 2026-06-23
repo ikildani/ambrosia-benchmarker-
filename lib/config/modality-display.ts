@@ -39,6 +39,23 @@ export const MODALITY_DISPLAY: Record<string, string> = {
   antibody_fragment: 'Ab Fragment',
   vaccine: 'Vaccine',
   therapeuticVaccine: 'Vaccine',
+  other: 'Other',
+  adc_her2: 'ADC (HER2)',
+  adc_trop2: 'ADC (TROP2)',
+  adc_claudin18_2: 'ADC (Claudin 18.2)',
+  topicalOphthalmic: 'Topical Ophthalmic',
+  antiviral: 'Antiviral',
+  allosteric_inhibitor: 'Allosteric Inhibitor',
+  antibioticNovel: 'Novel Antibiotic',
+  vaccinePreventive: 'Preventive Vaccine',
+  geneTherapyOcular: 'Ocular Gene Therapy',
+  intravitreal: 'Intravitreal',
+  antiVegf: 'Anti-VEGF',
+  carT_allogeneic: 'Allogeneic CAR-T',
+  carT_autoimmune: 'Autoimmune CAR-T',
+  covalent_inhibitor: 'Covalent Inhibitor',
+  crispr_base_editing: 'CRISPR Base Editing',
+  inVivoCarT: 'In Vivo CAR-T',
   bbb_platform: 'BBB Platform',
   glp1Agonist: 'GLP-1 Agonist',
   dualIncretin: 'Dual Incretin',
@@ -58,12 +75,12 @@ export const MODALITY_DISPLAY: Record<string, string> = {
  */
 export function formatModality(raw: string | null | undefined): string {
   if (!raw) return 'Unknown';
-  return (
-    MODALITY_DISPLAY[raw] ||
-    MODALITY_DISPLAY[raw.toLowerCase()] ||
-    raw
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ')
-  );
+  if (MODALITY_DISPLAY[raw]) return MODALITY_DISPLAY[raw];
+  if (MODALITY_DISPLAY[raw.toLowerCase()]) return MODALITY_DISPLAY[raw.toLowerCase()];
+  // Fallback: split on underscores AND camelCase boundaries, then title-case
+  return raw
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
