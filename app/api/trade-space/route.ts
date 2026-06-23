@@ -59,12 +59,21 @@ export async function POST(request: NextRequest) {
     return apiError('Missing required fields: therapeuticArea, phase, modality, peakSalesMedian', 400);
   }
 
-  // Build rNPV input
+  if (peakSalesMedian < 10) {
+    return apiError('Peak sales median must be at least $10M', 400);
+  }
+
+  const {
+    dataQuality: userDataQuality,
+    biomarkerStatus: userBiomarkerStatus,
+    breakthrough, fastTrack, orphan, prime,
+  } = body as unknown as Record<string, unknown>;
+
   const rnpvInput: RNPVInput = {
     therapeuticArea,
     phase,
     modality,
-    indication: indication || 'lung_nsclc',
+    indication: indication || '',
     territory: 'global',
     dealType: 'licensing',
     peakSalesEstimate: {
@@ -73,13 +82,13 @@ export async function POST(request: NextRequest) {
       high: peakSalesHigh || peakSalesMedian * 2,
     },
     competitivePosition: competitivePosition || 'racing',
-    dataQuality: 'strongPhase2',
-    biomarkerStatus: 'unselected',
+    dataQuality: (userDataQuality as string) || 'strongPhase2',
+    biomarkerStatus: (userBiomarkerStatus as string) || 'unselected',
     regulatoryDesignations: {
-      breakthrough: false,
-      fastTrack: false,
-      orphan: false,
-      prime: false,
+      breakthrough: breakthrough === true,
+      fastTrack: fastTrack === true,
+      orphan: orphan === true,
+      prime: prime === true,
     },
     companyType: companyType || 'biotech',
   };

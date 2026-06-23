@@ -53,7 +53,7 @@ const SCENARIOS_CONFIG: Array<{
   {
     slug: 'phase3-rare-gene-therapy',
     title: 'Phase 3 rare disease gene therapy',
-    subtitle: 'DMD, $1B peak, orphan designation',
+    subtitle: 'DMD, $500M peak, orphan designation',
     input: {
       therapeuticArea: 'rareDisease',
       indication: 'duchenne_muscular_dystrophy',
@@ -61,7 +61,7 @@ const SCENARIOS_CONFIG: Array<{
       phase: 'phase3',
       territory: 'global',
       dealType: 'licensing',
-      peakSalesEstimate: { low: 500, median: 1000, high: 2000 },
+      peakSalesEstimate: { low: 250, median: 500, high: 900 },
       competitivePosition: 'firstInClass',
       dataQuality: 'pivotalReady',
       biomarkerStatus: 'selected',
@@ -91,7 +91,7 @@ const SCENARIOS_CONFIG: Array<{
   {
     slug: 'phase1-platform-rnai',
     title: 'Phase 1 platform RNAi',
-    subtitle: 'Cardiovascular, $800M peak, early-stage option play',
+    subtitle: 'Cardiovascular, $400M peak, early-stage option play',
     input: {
       therapeuticArea: 'cardiovascular',
       indication: 'atherosclerosis',
@@ -99,7 +99,7 @@ const SCENARIOS_CONFIG: Array<{
       phase: 'phase1',
       territory: 'global',
       dealType: 'licensing',
-      peakSalesEstimate: { low: 400, median: 800, high: 1600 },
+      peakSalesEstimate: { low: 200, median: 400, high: 800 },
       competitivePosition: 'firstInClass',
       dataQuality: 'promising',
       biomarkerStatus: 'unselected',

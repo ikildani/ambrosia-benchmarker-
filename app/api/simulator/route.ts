@@ -80,7 +80,16 @@ export async function POST(request: NextRequest) {
     return apiError('batnaUpfrontM must be a non-negative number', 400);
   }
 
-  // Build rNPV input
+  if (peakSalesMedian < 10) {
+    return apiError('Peak sales median must be at least $10M', 400);
+  }
+
+  const {
+    dataQuality: userDataQuality,
+    biomarkerStatus: userBiomarkerStatus,
+    breakthrough, fastTrack, orphan, prime,
+  } = body as unknown as Record<string, unknown>;
+
   const rnpvInput: RNPVInput = {
     therapeuticArea,
     indication: indication || '',
@@ -94,13 +103,13 @@ export async function POST(request: NextRequest) {
       high: peakSalesHigh || peakSalesMedian * 2,
     },
     competitivePosition: competitivePosition || 'racing',
-    dataQuality: 'moderate',
-    biomarkerStatus: 'unselected',
+    dataQuality: (userDataQuality as string) || 'moderate',
+    biomarkerStatus: (userBiomarkerStatus as string) || 'unselected',
     regulatoryDesignations: {
-      breakthrough: false,
-      fastTrack: false,
-      orphan: false,
-      prime: false,
+      breakthrough: breakthrough === true,
+      fastTrack: fastTrack === true,
+      orphan: orphan === true,
+      prime: prime === true,
     },
     companyType: companyType || 'biotech',
   };
@@ -136,11 +145,13 @@ export async function POST(request: NextRequest) {
     const buyerTopUpfront = Math.round(baseUpfront * premium);
     const floorUpfront = Math.round(batnaUpfrontM);
     const zopaWidth = buyerTopUpfront - floorUpfront;
-    const recommendedOpening = Math.round(buyerTopUpfront * 1.15);
-    const recommendedFallback =
-      zopaWidth > 0
-        ? Math.round((floorUpfront + buyerTopUpfront) / 2)
-        : floorUpfront;
+    const zopaMidpoint = zopaWidth > 0 ? (floorUpfront + buyerTopUpfront) / 2 : floorUpfront;
+    const recommendedOpening = zopaWidth > 0
+      ? Math.round(zopaMidpoint + zopaWidth * 0.35)
+      : Math.round(buyerTopUpfront);
+    const recommendedFallback = zopaWidth > 0
+      ? Math.round(zopaMidpoint)
+      : floorUpfront;
 
     return {
       name: buyerName,
