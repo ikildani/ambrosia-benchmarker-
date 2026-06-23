@@ -130,9 +130,33 @@ function fmtUSD(val: number | null | undefined): string {
 }
 
 function fmtDate(dateStr: string | null): string {
-  if (!dateStr) return '';
+  if (!dateStr) return 'Date undisclosed';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  if (isNaN(d.getTime())) return 'Date undisclosed';
+  // Full date if day is available (not a year-month-only string with day=01)
+  const day = d.getUTCDate();
+  const isMonthOnly = day === 1 && dateStr.length <= 7; // e.g. "2025-03"
+  if (isMonthOnly) {
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  }
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
+/** Returns true when announced_date looks suspicious and should show a warning */
+function isDateSuspicious(dateStr: string | null): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  // Future date
+  if (d.getTime() > now.getTime()) return true;
+  // More than 5 years old
+  const fiveYearsAgo = new Date();
+  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+  if (d.getTime() < fiveYearsAgo.getTime()) return true;
+  // Exactly Jan 1 of a year (often a placeholder)
+  if (d.getUTCMonth() === 0 && d.getUTCDate() === 1) return true;
+  return false;
 }
 
 // ─── Server Data Fetching ──────────────────────────────────
@@ -602,7 +626,16 @@ export default async function CompanyPage({ params }: Props) {
                           {deal.deal_type?.replace(/_/g, ' ') || '—'}
                         </td>
                         <td className="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                          {fmtDate(deal.announced_date)}
+                          <span className="inline-flex items-center gap-1">
+                            {fmtDate(deal.announced_date)}
+                            {isDateSuspicious(deal.announced_date) && (
+                              <span title="Date may be estimated or approximate" className="inline-flex items-center text-amber-500 dark:text-amber-400">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                              </span>
+                            )}
+                          </span>
                         </td>
                       </tr>
                     );

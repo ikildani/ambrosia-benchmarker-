@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { formatModality } from '@/lib/config/modality-display';
 
 interface Deal {
   id: string;
@@ -39,16 +40,6 @@ function formatPhase(phase: string): string {
     phase_1_2: 'P1/2', phase_2: 'P2', phase_2_3: 'P2/3', phase_3: 'P3', approved: 'Approved',
   };
   return map[phase] || phase;
-}
-
-function formatModality(m: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC', car_t: 'CAR-T', bispecific_antibody: 'Bispecific', small_molecule: 'SM',
-    radiopharmaceutical: 'Radiopharm', monoclonal_antibody: 'mAb', gene_therapy: 'Gene Tx',
-    mrna: 'mRNA', rnai: 'RNAi', antibody: 'Antibody', peptide: 'Peptide',
-    cell_therapy: 'Cell Tx', protac: 'PROTAC',
-  };
-  return names[m] || m.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 export default function CompanyDealHistory({ deals, isPro, dealsByModality }: CompanyDealHistoryProps) {

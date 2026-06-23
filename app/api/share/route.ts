@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const userTier = (profile?.tier as UserTier) || 'free';
 
-    if (userTier !== 'pro' && userTier !== 'report') {
+    if (userTier !== 'pro' && userTier !== 'report' && userTier !== 'portfolio') {
       return apiError('Pro subscription required to share calculations', 403);
     }
 

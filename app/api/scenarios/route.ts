@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       userTier = 'pro';
     }
 
-    if (userTier !== 'pro' && userTier !== 'report') {
+    if (userTier !== 'pro' && userTier !== 'report' && userTier !== 'portfolio') {
       return apiError('Pro subscription required', 403);
     }
 
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       userTier = 'pro';
     }
 
-    if (userTier !== 'pro' && userTier !== 'report') {
+    if (userTier !== 'pro' && userTier !== 'report' && userTier !== 'portfolio') {
       return apiError('Pro subscription required to save scenarios', 403);
     }
 

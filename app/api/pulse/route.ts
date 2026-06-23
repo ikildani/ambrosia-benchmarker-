@@ -102,13 +102,14 @@ export async function GET(request: NextRequest) {
 
       supabase
         .from('deals')
-        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type')
-        .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes from pulse feed
+        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status')
+        .eq('is_synthetic', false)
+        .neq('verification_status', 'rejected')
         .gte('announced_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .lte('announced_date', new Date().toISOString().split('T')[0])
         .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')
         .order('announced_date', { ascending: false })
-        .limit(25),
+        .limit(30),
     ]);
 
     if (snapshotResult.error) {
@@ -117,7 +118,16 @@ export async function GET(request: NextRequest) {
     }
 
     const snapshot = snapshotResult.data;
-    const deals = dealsResult.data || [];
+    const rawDeals = dealsResult.data || [];
+
+    // Dedup: remove duplicate deals by licensor+licensee+announced_date key
+    const seen = new Set<string>();
+    const deals = rawDeals.filter(d => {
+      const key = `${(d.licensor_name || '').toLowerCase()}|${(d.licensee_name || '').toLowerCase()}|${d.announced_date || ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 25);
 
     // Gate data for free users
     if (!isPro) {

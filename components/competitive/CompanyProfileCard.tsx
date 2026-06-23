@@ -1,6 +1,7 @@
 'use client';
 
 import WatchButton from '@/components/WatchButton';
+import { formatModality } from '@/lib/config/modality-display';
 
 interface CompanyProfileCardProps {
   company: {
@@ -35,16 +36,6 @@ const appetiteConfig: Record<string, { label: string; color: string; bg: string;
   moderate: { label: 'Active Acquirer', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/20', dot: 'bg-amber-500' },
   selective: { label: 'Selective Acquirer', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-500/20', dot: 'bg-blue-500' },
 };
-
-function formatModality(m: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC', car_t: 'CAR-T', bispecific_antibody: 'Bispecific', small_molecule: 'SM',
-    gene_therapy: 'Gene Tx', radiopharmaceutical: 'Radiopharm', monoclonal_antibody: 'mAb',
-    mrna: 'mRNA', rnai: 'RNAi', antibody: 'Antibody', peptide: 'Peptide',
-    cell_therapy: 'Cell Tx', protac: 'PROTAC',
-  };
-  return names[m] || m.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
 
 export default function CompanyProfileCard({ company, isPro, marketPosition, dealFlowTrend }: CompanyProfileCardProps) {
   const appetite = company.acquisition_appetite ? appetiteConfig[company.acquisition_appetite] : null;

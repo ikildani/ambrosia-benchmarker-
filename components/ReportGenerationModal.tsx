@@ -499,13 +499,25 @@ export default function ReportGenerationModal({
   const handleSaveToDevice = useCallback(() => {
     if (!pdfBlobRef.current) return;
     const url = URL.createObjectURL(pdfBlobRef.current);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Mobile Safari doesn't reliably handle programmatic a.click() for blob downloads.
+    // Use window.open as primary method, with anchor fallback for desktop.
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // On mobile, open the PDF in a new tab — user can then use native share/save
+      window.open(url, '_blank');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Ambrosia-Deal-Report-${labels.indication.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // Delay revocation to allow download to start
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   }, [labels.indication]);
 
   const handleEmailReport = useCallback(async () => {

@@ -1,5 +1,7 @@
 'use client';
 
+import { formatModality } from '@/lib/config/modality-display';
+
 interface Deal {
   id: string;
   licensor_name: string;
@@ -35,16 +37,6 @@ function formatPhase(phase: string): string {
   return map[phase] || phase;
 }
 
-function formatModality(modality: string): string {
-  const short: Record<string, string> = {
-    adc: 'ADC', car_t: 'CAR-T', bispecific_antibody: 'Bispecific', small_molecule: 'SM',
-    gene_therapy: 'Gene Tx', cell_therapy: 'Cell Tx', mrna: 'mRNA', radiopharmaceutical: 'Radiopharm',
-    monoclonal_antibody: 'mAb', rnai: 'RNAi', antisense_oligonucleotide: 'ASO', peptide: 'Peptide',
-    protein_degrader: 'Degrader', gene_editing: 'Gene Edit', oncolytic_virus: 'OV',
-    antibody_fragment: 'Ab Frag', vaccine: 'Vaccine',
-  };
-  return short[modality] || modality.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
 
 const normalizeTA = (ta: string) => ta?.toLowerCase().replace(/[_\s]/g, '') || '';
 

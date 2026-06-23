@@ -39,7 +39,7 @@ export async function GET(
     }
 
     // Free users can't access detailed profiles
-    if (userTier !== 'pro' && userTier !== 'report') {
+    if (userTier !== 'pro' && userTier !== 'report' && userTier !== 'portfolio') {
       return NextResponse.json(
         {
           error: 'Pro subscription required',

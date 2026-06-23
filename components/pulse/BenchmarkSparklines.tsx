@@ -1,6 +1,7 @@
 'use client';
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatModality } from '@/lib/config/modality-display';
 
 interface PulseSnapshot {
   snapshot_date: string;
@@ -16,18 +17,43 @@ interface BenchmarkSparklinesProps {
 
 const MODALITIES_TO_TRACK = ['adc', 'radiopharmaceutical', 'bispecific_antibody', 'car_t', 'small_molecule', 'gene_therapy'];
 
-function formatModality(modality: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC', radiopharmaceutical: 'Radiopharm', bispecific_antibody: 'Bispecific',
-    car_t: 'CAR-T', small_molecule: 'Small Molecule', gene_therapy: 'Gene Therapy',
-  };
-  return names[modality] || modality;
-}
-
 function formatUsdShort(val: number): string {
   if (val >= 1e9) return `$${(val / 1e9).toFixed(1)}B`;
   if (val >= 1e6) return `$${(val / 1e6).toFixed(0)}M`;
   return `$${(val / 1e3).toFixed(0)}K`;
+}
+
+/** Compute percentage change vs N weeks ago (default 4). Falls back to whatever is available. */
+function computePctChange(data: Array<{ avg_upfront: number | null }>, weeksAgo: number = 4): { pct: number; weeks: number } | null {
+  const latestIdx = data.length - 1;
+  const actualWeeks = Math.min(weeksAgo, latestIdx);
+  if (actualWeeks < 1) return null;
+  const compareIdx = latestIdx - actualWeeks;
+  const latest = data[latestIdx]?.avg_upfront;
+  const compare = data[compareIdx]?.avg_upfront;
+  if (latest == null || compare == null || compare === 0) return null;
+  return { pct: ((latest - compare) / compare) * 100, weeks: actualWeeks };
+}
+
+/** Determine trend direction from first non-null to last non-null value */
+function getTrendColor(latestValue: number | null, firstValue: number | null): string {
+  if (latestValue == null || firstValue == null || firstValue === 0) return '#3b82f6'; // Blue default
+  const pct = ((latestValue - firstValue) / firstValue) * 100;
+  if (pct > 3) return '#3b82f6';  // Blue - up
+  if (pct < -3) return '#ef4444'; // Red - down
+  return '#f59e0b';               // Amber - flat
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.[0]) return null;
+  const value = payload[0].value as number;
+  return (
+    <div className="bg-slate-900 dark:bg-slate-700 text-white rounded-lg shadow-xl px-3 py-2 text-xs">
+      <div className="text-slate-300 mb-0.5">Week of {label}</div>
+      <div className="font-semibold">{formatUsdShort(value)} avg upfront</div>
+    </div>
+  );
 }
 
 export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSparklinesProps) {
@@ -46,7 +72,7 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Trends Available Soon</p>
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">No Trend Data</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs">
             Benchmark trends require at least 3 weeks of data.{' '}
             {3 - snapshots.length > 0
@@ -96,50 +122,69 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
           const data = modalityData[modality];
           const latestValue = data[data.length - 1]?.avg_upfront;
           const firstValue = data.find(d => d.avg_upfront != null)?.avg_upfront;
+          const trendColor = getTrendColor(latestValue, firstValue);
+          const change = computePctChange(data);
           const trendDir = latestValue != null && firstValue != null
             ? latestValue > firstValue ? 'trending up' : latestValue < firstValue ? 'trending down' : 'stable'
             : 'insufficient data';
+
+          // Compute max value for Y-axis label
+          const maxVal = Math.max(...data.filter(d => d.avg_upfront != null).map(d => d.avg_upfront!));
+
           return (
             <div key={modality} className="relative" role="img" aria-label={`${formatModality(modality)} benchmark trend: ${latestValue != null ? formatUsdShort(latestValue) : 'no data'}, ${trendDir}`}>
+              {/* Card title: canonical modality display name */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{formatModality(modality)}</span>
-                {data[data.length - 1]?.avg_upfront != null && (
-                  <span className="text-xs font-medium text-slate-900 dark:text-white">
-                    {formatUsdShort(data[data.length - 1].avg_upfront!)}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Percentage change indicator */}
+                  {change != null && (
+                    <span className={`text-[11px] font-semibold ${change.pct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                      {change.pct >= 0 ? '+' : ''}{change.pct.toFixed(0)}% vs {change.weeks}w ago
+                    </span>
+                  )}
+                  {latestValue != null && (
+                    <span className="text-xs font-medium text-slate-900 dark:text-white">
+                      {formatUsdShort(latestValue)}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="h-24">
+              <div className="h-24 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                     <defs>
                       <linearGradient id={`gradient-${modality}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        <stop offset="5%" stopColor={trendColor} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={trendColor} stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" hide />
-                    <YAxis hide domain={['dataMin', 'dataMax']} />
-                    <Tooltip
-                      contentStyle={{
-                        background: '#0f172a',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        color: '#fff',
-                      }}
-                      formatter={(value) => [formatUsdShort(value as number), 'Avg Upfront']}
+                    <YAxis
+                      hide={false}
+                      domain={['dataMin', 'dataMax']}
+                      width={1}
+                      tick={false}
+                      axisLine={false}
+                      tickLine={false}
                     />
+                    <Tooltip content={<CustomTooltip />} />
                     <Area
                       type="monotone"
                       dataKey="avg_upfront"
-                      stroke="#3b82f6"
+                      stroke={trendColor}
                       strokeWidth={2}
                       fill={`url(#gradient-${modality})`}
                       connectNulls
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+                {/* Y-axis max label overlay */}
+                {maxVal > 0 && (
+                  <span className="absolute top-0 left-1 text-[9px] text-slate-400 dark:text-slate-500 leading-none pointer-events-none">
+                    {formatUsdShort(maxVal)}
+                  </span>
+                )}
               </div>
               {/* Blur overlay for free */}
               {!isPro && (

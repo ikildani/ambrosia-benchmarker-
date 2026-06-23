@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { formatModality } from '@/lib/config/modality-display';
 
 interface Peer {
   id: string;
@@ -23,30 +24,6 @@ const typeLabels: Record<string, string> = {
   specialty: 'Specialty',
 };
 
-function formatModality(m: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC',
-    car_t: 'CAR-T',
-    bispecific_antibody: 'Bispecific',
-    small_molecule: 'SM',
-    gene_therapy: 'Gene Tx',
-    radiopharmaceutical: 'Radiopharm',
-    monoclonal_antibody: 'mAb',
-    mrna: 'mRNA',
-    rnai: 'RNAi',
-    antibody: 'Ab',
-    peptide: 'Peptide',
-    cell_therapy: 'Cell Tx',
-    protac: 'PROTAC',
-  };
-  return (
-    names[m] ||
-    m
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ')
-  );
-}
 
 function PeerCard({
   peer,

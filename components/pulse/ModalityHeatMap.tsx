@@ -1,20 +1,13 @@
 'use client';
 
+import { formatModality } from '@/lib/config/modality-display';
+
 interface ModalityHeatMapProps {
   snapshot: any;
   isPro: boolean;
 }
 
 const TOP_MODALITIES = ['adc', 'bispecific_antibody', 'car_t', 'small_molecule', 'radiopharmaceutical', 'gene_therapy', 'monoclonal_antibody', 'rnai'];
-
-function formatModality(modality: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC', bispecific_antibody: 'Bispecific', car_t: 'CAR-T', small_molecule: 'SM',
-    radiopharmaceutical: 'Radiopharm', gene_therapy: 'Gene Tx', monoclonal_antibody: 'mAb',
-    rnai: 'RNAi', antisense_oligonucleotide: 'ASO', peptide: 'Peptide',
-  };
-  return names[modality] || modality.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
 
 
 export default function ModalityHeatMap({ snapshot, isPro }: ModalityHeatMapProps) {

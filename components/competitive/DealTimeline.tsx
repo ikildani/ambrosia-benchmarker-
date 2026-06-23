@@ -1,51 +1,29 @@
 'use client';
 
 import React, { useMemo, useState, useRef, useCallback } from 'react';
+import { formatModality } from '@/lib/config/modality-display';
 
-// Color map for modalities (display names)
+// Color map keyed by canonical display names from formatModality().
+// Every modality gets a visually distinct hex so overlapping timeline
+// entries are easy to tell apart.
 const modalityColors: Record<string, string> = {
-  'Small Molecule': '#14b8a6',
-  'Monoclonal Antibody': '#06b6d4',
-  'ADC': '#8b5cf6',
-  'Bispecific': '#f59e0b',
-  'Cell Therapy': '#ec4899',
-  'Gene Therapy': '#10b981',
-  'RNA': '#6366f1',
-  'Radiopharmaceutical': '#ef4444',
-  'CAR-T': '#ec4899',
-  'mRNA': '#6366f1',
-  'RNAi': '#6366f1',
-  'PROTAC': '#f97316',
-  'Antibody': '#06b6d4',
-  'Peptide': '#a855f7',
+  'Small Molecule': '#14b8a6',  // Teal
+  'mAb': '#3b82f6',             // Blue
+  'ADC': '#8b5cf6',             // Violet
+  'Bispecific': '#f59e0b',      // Amber
+  'Cell Therapy': '#ec4899',    // Pink
+  'Gene Therapy': '#10b981',    // Emerald
+  'Radiopharm': '#ef4444',      // Red
+  'CAR-T': '#f97316',           // Orange
+  'mRNA': '#a855f7',            // Purple
+  'RNAi': '#06b6d4',            // Cyan
+  'PROTAC': '#84cc16',          // Lime
+  'ASO': '#0ea5e9',             // Sky
+  'Peptide': '#d946ef',         // Fuchsia
+  'Gene Editing': '#6366f1',    // Indigo
+  'Vaccine': '#22c55e',         // Green
 };
-const defaultColor = '#14b8a6';
-
-const modalityDisplayNames: Record<string, string> = {
-  adc: 'ADC',
-  car_t: 'CAR-T',
-  bispecific_antibody: 'Bispecific',
-  small_molecule: 'Small Molecule',
-  gene_therapy: 'Gene Therapy',
-  radiopharmaceutical: 'Radiopharmaceutical',
-  monoclonal_antibody: 'Monoclonal Antibody',
-  mrna: 'mRNA',
-  rnai: 'RNAi',
-  antibody: 'Antibody',
-  peptide: 'Peptide',
-  cell_therapy: 'Cell Therapy',
-  protac: 'PROTAC',
-};
-
-function formatModality(m: string): string {
-  return (
-    modalityDisplayNames[m] ||
-    m
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ')
-  );
-}
+const defaultColor = '#64748b'; // Slate (neutral fallback)
 
 function getModalityColor(modality: string): string {
   const displayName = formatModality(modality);
@@ -216,10 +194,10 @@ const DealTimeline = React.memo(function DealTimeline({
     );
   }
 
-  // Build unique modalities for legend
+  // Build unique modalities for legend — show all that appear in the timeline
   const legendModalities = Array.from(
     new Set(sortedDeals.map((d) => d.modality).filter(Boolean))
-  ).slice(0, 6);
+  );
 
   return (
     <div
@@ -235,21 +213,6 @@ const DealTimeline = React.memo(function DealTimeline({
           {companyName} &mdash; {sortedDeals.length} most recent deal
           {sortedDeals.length !== 1 ? 's' : ''}
         </p>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-4">
-        {legendModalities.map((m) => (
-          <div key={m} className="flex items-center gap-1.5">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: getModalityColor(m) }}
-            />
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {formatModality(m)}
-            </span>
-          </div>
-        ))}
       </div>
 
       {/* Horizontal timeline (sm and above) */}
@@ -462,6 +425,28 @@ const DealTimeline = React.memo(function DealTimeline({
           })}
         </div>
       </div>
+
+      {/* Modality color legend */}
+      {legendModalities.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 font-semibold">
+            Modalities
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+            {legendModalities.map((m) => (
+              <div key={m} className="flex items-center gap-1.5">
+                <div
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: getModalityColor(m) }}
+                />
+                <span className="text-xs text-slate-600 dark:text-slate-300">
+                  {formatModality(m)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 });

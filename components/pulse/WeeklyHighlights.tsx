@@ -1,5 +1,7 @@
 'use client';
 
+import { formatModality } from '@/lib/config/modality-display';
+
 interface WeeklyHighlightsProps {
   snapshot: any;
   isPro: boolean;
@@ -10,13 +12,6 @@ function formatUsd(amount: number | null): string {
   if (amount >= 1e9) return `$${(amount / 1e9).toFixed(1)}B`;
   if (amount >= 1e6) return `$${(amount / 1e6).toFixed(0)}M`;
   return `$${(amount / 1e3).toFixed(0)}K`;
-}
-
-function formatModality(modality: string): string {
-  return modality
-    .replace(/([a-z])([A-Z])/g, '$1 $2')  // camelCase → spaced
-    .replace(/_/g, ' ')                     // snake_case → spaced
-    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsProps) {

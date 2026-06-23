@@ -177,7 +177,7 @@ export default function CompetitiveLandscapePanel({
                   }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-[10px] text-neutral-400 dark:text-slate-500">
+              <div className="flex justify-between mt-1 text-xs text-neutral-400 dark:text-slate-500">
                 {DENSITY_TICKS.map((tick) => (
                   <span key={tick}>{tick}</span>
                 ))}
@@ -192,7 +192,7 @@ export default function CompetitiveLandscapePanel({
               <div className="space-y-2">
                 {phasesWithCounts.map(({ label, count }) => (
                   <div key={label} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 dark:text-slate-400 w-20 sm:w-24 flex-shrink-0 truncate">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 w-28 sm:w-32 flex-shrink-0">
                       {label}
                     </span>
                     <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -214,7 +214,7 @@ export default function CompetitiveLandscapePanel({
             </div>
 
             {/* ---- Key Metrics Row ---- */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
               {/* Next Expected Approval -- always rendered */}
               <div className="p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
                 <p className="text-xs text-neutral-500 dark:text-slate-400">
@@ -275,15 +275,18 @@ export default function CompetitiveLandscapePanel({
                   <Target className="w-4 h-4 text-rose-500" />
                   Key Competitors
                 </h5>
-                <div className="space-y-2">
+                <div className="space-y-0 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
                   {ls.keyCompetitors.map((competitor, idx) => (
                     <div
                       key={`${competitor.companyName}-${competitor.assetName}-${idx}`}
-                      className="flex items-start gap-3 p-3 bg-white dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600"
+                      className="flex items-start gap-3 p-3 sm:p-4 bg-white dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 last:border-b-0"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-navy-800 dark:text-white truncate">
+                          <span
+                            className="text-sm font-semibold text-navy-800 dark:text-white truncate"
+                            title={competitor.companyName}
+                          >
                             {competitor.companyName}
                           </span>
                           <span
@@ -292,14 +295,17 @@ export default function CompetitiveLandscapePanel({
                             {competitor.phase}
                           </span>
                         </div>
-                        <p className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5 truncate">
+                        <p
+                          className="text-xs text-neutral-500 dark:text-slate-400 mt-0.5 truncate"
+                          title={`${competitor.assetName}${competitor.expectedApprovalYear ? ` \u00B7 Expected approval ${competitor.expectedApprovalYear}` : ''}`}
+                        >
                           {competitor.assetName}
                           {competitor.expectedApprovalYear
                             ? ` \u00B7 Expected approval ${competitor.expectedApprovalYear}`
                             : ''}
                         </p>
                         {competitor.differentiator && (
-                          <p className="text-[10px] text-neutral-400 dark:text-slate-500 mt-1 italic">
+                          <p className="text-xs text-neutral-400 dark:text-slate-500 mt-1 italic">
                             {competitor.differentiator}
                           </p>
                         )}

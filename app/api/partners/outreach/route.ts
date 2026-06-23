@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Server-side cookie auth is primary. Client user_id is fallback only.
 
-    // Only Pro/Report users can generate outreach emails
-    if (userTier !== 'pro' && userTier !== 'report') {
+    // Only Pro/Report/Portfolio users can generate outreach emails
+    if (userTier !== 'pro' && userTier !== 'report' && userTier !== 'portfolio') {
       return NextResponse.json(
         {
           error: 'Outreach email generation is a Pro feature',
