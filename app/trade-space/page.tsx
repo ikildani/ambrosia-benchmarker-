@@ -1,16 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import nextDynamic from 'next/dynamic';
 import { loadTradeSpaceScenarios } from '@/lib/trade-space-data';
 import { StructureCards } from '@/components/trade-space/StructureCards';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
-
-const TradeSpaceForm = nextDynamic(
-  () => import('@/components/trade-space/TradeSpaceForm').then((m) => m.TradeSpaceForm),
-  { ssr: false }
-);
+import { TradeSpaceForm } from '@/components/trade-space/TradeSpaceForm';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 

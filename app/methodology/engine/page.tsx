@@ -3,14 +3,9 @@ import Link from 'next/link';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
-import dynamic from 'next/dynamic';
 import { LiveAccuracyDashboard } from '@/components/methodology/LiveAccuracyDashboard';
 import { FailureCaseExplorer } from '@/components/methodology/FailureCaseExplorer';
-
-const DimensionExplorer = dynamic(
-  () => import('@/components/methodology/DimensionExplorer').then((m) => m.DimensionExplorer),
-  { ssr: false },
-);
+import { DimensionExplorer } from '@/components/methodology/DimensionExplorer';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
