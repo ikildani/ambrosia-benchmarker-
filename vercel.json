@@ -281,6 +281,18 @@
     {
       "path": "/api/cron/trial-onboarding",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/content-performance",
+      "schedule": "0 15 * * 1"
+    },
+    {
+      "path": "/api/cron/seo-page-render",
+      "schedule": "0 8 * * 2,5"
+    },
+    {
+      "path": "/api/cron/ctr-validation",
+      "schedule": "0 9 * * 3"
     }
   ]
 }
