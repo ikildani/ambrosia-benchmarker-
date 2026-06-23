@@ -365,7 +365,7 @@ async function getUtmAttribution(
     const existing = sourceMap.get(key) || {
       utmSource: s.utm_source,
       utmCampaign: s.utm_campaign,
-      sessions: [],
+      sessions: [] as Array<{ user_id: string; started_at: string }>,
     };
     existing.sessions.push({ user_id: s.user_id, started_at: s.started_at });
     sourceMap.set(key, existing);
@@ -479,9 +479,17 @@ async function feedWinnersToQueue(
     .select('slug, title, modality, category, tags')
     .in('slug', winnerSlugs);
 
-  const postMap = new Map(
-    (winnerPosts || []).map((p: { slug: string; title: string; modality: string | null; category: string | null; tags: string[] | null }) => [p.slug, p] as const),
-  );
+  interface WinnerPost {
+    slug: string;
+    title: string;
+    modality: string | null;
+    category: string | null;
+    tags: string[] | null;
+  }
+  const postMap = new Map<string, WinnerPost>();
+  for (const p of (winnerPosts || []) as WinnerPost[]) {
+    postMap.set(p.slug, p);
+  }
   const queuedTopics: QueuedTopic[] = [];
 
   for (const winner of winners) {
