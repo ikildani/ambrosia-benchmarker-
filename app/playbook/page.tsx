@@ -65,7 +65,7 @@ export default async function PlaybookIndex() {
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/playbook" />
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
-        <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Counterparty Playbooks
           </h1>

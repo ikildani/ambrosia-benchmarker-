@@ -127,7 +127,7 @@ export default async function IntelligencePage({ searchParams }: Props) {
       <InstitutionalNav activePath="/intelligence" />
 
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
-        <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-12">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Live Market Intelligence
           </h1>
