@@ -259,22 +259,23 @@ export default function Header({
                     {intelDropdownOpen && (
                       <div className="absolute top-full left-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
                         {[
-                          { label: 'Counterparty Playbooks', href: '/playbook', desc: 'Buyer premiums & strategy' },
-                          { label: 'Deal Structure Trade Space', href: '/trade-space', desc: 'Optimize deal type' },
-                          { label: 'Negotiation Simulator', href: '/simulator', desc: 'ZOPA & opening strategy' },
-                          { label: 'Market Intelligence', href: '/intelligence', desc: 'Live readouts & AdComm' },
-                          { label: 'Engine Methodology', href: '/methodology/engine', desc: 'How the engine works' },
+                          { label: 'Counterparty Playbooks', href: '/playbook' },
+                          { label: 'Deal Trade Space', href: '/trade-space' },
+                          { label: 'Negotiation Simulator', href: '/simulator' },
+                          { label: 'Market Intelligence', href: '/intelligence' },
+                          { label: 'Methodology', href: '/methodology/engine' },
                         ].map(sub => (
                           <Link
                             key={sub.href}
                             href={sub.href}
-                            className={`block px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
-                              pathname?.startsWith(sub.href) ? 'bg-slate-50 dark:bg-slate-700' : ''
+                            className={`block px-4 py-2.5 text-sm font-medium transition-colors ${
+                              pathname?.startsWith(sub.href)
+                                ? 'text-white bg-slate-50 dark:bg-slate-700'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
                             }`}
                             onClick={() => setIntelDropdownOpen(false)}
                           >
-                            <div className="text-sm font-medium text-slate-900 dark:text-white">{sub.label}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">{sub.desc}</div>
+                            {sub.label}
                           </Link>
                         ))}
                       </div>
