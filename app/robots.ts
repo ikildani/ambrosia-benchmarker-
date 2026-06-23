@@ -11,8 +11,8 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/calculator?*', '/pricing?*', '/&', '/yr', '/mo', '/seat/', '/_next/'],
+        allow: ['/', '/api/og'],
+        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/_next/'],
       },
       {
         userAgent: 'Bingbot',

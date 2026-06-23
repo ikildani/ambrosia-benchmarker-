@@ -16,6 +16,12 @@ function toSlug(term: string): string {
 
 const rawTerms: Omit<GlossaryTerm, 'slug'>[] = [
   {
+    term: 'Risk-Adjusted NPV (rNPV)',
+    definition: 'A valuation method that discounts projected cash flows by both the time value of money (WACC) and the probability of success at each development phase. rNPV accounts for clinical and regulatory risk by applying phase-specific probability-of-success rates to future revenue streams, making it the standard valuation approach for biopharma licensing and M&A transactions.',
+    relatedTerms: ['NPV', 'Probability of Success', 'WACC', 'Monte Carlo Simulation'],
+    category: 'Valuation',
+  },
+  {
     term: 'Upfront Payment',
     definition: 'A non-refundable payment made by the licensee to the licensor at the signing of a licensing agreement. Upfront payments compensate the licensor for the value created to date and provide immediate capital.',
     relatedTerms: ['Option Payment', 'Signing Bonus'],
