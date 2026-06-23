@@ -12,24 +12,23 @@ export default function AppleIcon() {
           width: 180,
           height: 180,
           borderRadius: 40,
-          background: '#f4f1e8',
+          background: '#ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <svg
-          width={180}
-          height={180}
-          viewBox="0 0 64 64"
-          xmlns="http://www.w3.org/2000/svg"
+        <span
+          style={{
+            fontSize: 80,
+            fontWeight: 700,
+            fontFamily: 'Georgia, Times New Roman, serif',
+            color: '#0f172a',
+            letterSpacing: '-4px',
+          }}
         >
-          <path
-            fillRule="evenodd"
-            fill="#0a0d1b"
-            d="M32 10 L50 54 L42 54 L37 42 L27 42 L22 54 L14 54 Z M28 38 L36 38 L32 22 Z"
-          />
-        </svg>
+          AV
+        </span>
       </div>
     ),
     { ...size }
