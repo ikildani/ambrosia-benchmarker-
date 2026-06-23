@@ -293,6 +293,14 @@
     {
       "path": "/api/cron/ctr-validation",
       "schedule": "0 9 * * 3"
+    },
+    {
+      "path": "/api/cron/comparison-optimizer",
+      "schedule": "0 16 * * 1"
+    },
+    {
+      "path": "/api/cron/exit-intent-optimizer",
+      "schedule": "0 10 * * 2"
     }
   ]
 }
