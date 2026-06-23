@@ -1,5 +1,7 @@
 'use client';
 
+import { formatModality } from '@/lib/config/modality-display';
+
 interface CompanySummaryProps {
   summary: string;
   marketPosition: {
@@ -7,29 +9,6 @@ interface CompanySummaryProps {
     total_companies: number;
     primary_modality: string | null;
   } | null;
-}
-
-function formatModality(m: string): string {
-  const names: Record<string, string> = {
-    adc: 'ADC',
-    car_t: 'CAR-T',
-    bispecific_antibody: 'Bispecific',
-    small_molecule: 'Small Molecule',
-    gene_therapy: 'Gene Therapy',
-    radiopharmaceutical: 'Radiopharm',
-    monoclonal_antibody: 'mAb',
-    mrna: 'mRNA',
-    rnai: 'RNAi',
-    antibody: 'Antibody',
-    peptide: 'Peptide',
-  };
-  return (
-    names[m] ||
-    m
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ')
-  );
 }
 
 export default function CompanySummary({ summary, marketPosition }: CompanySummaryProps) {

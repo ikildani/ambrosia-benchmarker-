@@ -7,15 +7,15 @@ export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 
 // ---------------------------------------------------------------------------
-// Apollo Auto-Enrollment Cron — Twice weekly (Mon & Thu 10 AM UTC)
+// Apollo Auto-Enrollment Cron — Mon/Wed/Fri 10 AM UTC
 //
 // Pulls unenrolled contacts from Apollo (verified email, not in any sequence)
-// and adds them in batches to the two outreach sequences:
-//   - Tier 1 Enterprise Contacts (C-suite, VP BD, operating partners)
-//   - Tier 1 Generalist (all other biotech/pharma contacts)
+// and adds them to the Generalist outreach sequence:
+//   - Tier 1 Generalist: biotech/pharma operators (BD, licensing, C-suite)
+//   - Skips VCs, CVCs, PE firms (your strategist handles those directly)
 //
-// Batches of 50 per run to stay within Apollo rate limits and warm the
-// sending domain gradually. At 2x/week = ~100 contacts/week enrolled.
+// Batches of 100 per run. At 3x/week = ~300 contacts/week enrolled.
+// Logs each enrollment batch to apollo_enrollments for attribution tracking.
 //
 // Auth: Bearer $CRON_SECRET
 // Requires: APOLLO_API_KEY env var
@@ -158,15 +158,77 @@ async function addToSequence(
       sequence_finished_in_other_campaigns: true,
     });
 
+    const addedCount = data.contacts?.length || contactIds.length;
+    const apiErrors = data.errors || [];
+
+    // Verify enrollment: if Apollo says 0 contacts added but we sent some, flag it
+    if (addedCount === 0 && contactIds.length > 0 && apiErrors.length === 0) {
+      apiErrors.push(`Enrollment verification failed: sent ${contactIds.length} contacts but Apollo returned 0 added`);
+    }
+
     return {
-      added: data.contacts?.length || contactIds.length,
-      errors: data.errors || [],
+      added: addedCount,
+      errors: apiErrors,
     };
   } catch (err) {
     return {
       added: 0,
       errors: [err instanceof Error ? err.message : 'Unknown error'],
     };
+  }
+}
+
+async function sendSlackNotification(message: string, isError = false): Promise<void> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message }),
+    });
+  } catch {
+    // Non-fatal
+  }
+}
+
+interface EnrolledContact {
+  apollo_contact_id: string;
+  email: string;
+  email_domain: string;
+  name: string;
+  title: string | null;
+  organization_name: string;
+  sequence_id: string;
+  sequence_name: string;
+}
+
+async function logEnrollments(
+  supabase: ReturnType<typeof createServiceClient>,
+  contacts: EnrolledContact[],
+): Promise<void> {
+  if (contacts.length === 0) return;
+
+  try {
+    const rows = contacts.map((c) => ({
+      apollo_contact_id: c.apollo_contact_id,
+      email: c.email,
+      email_domain: c.email_domain,
+      name: c.name,
+      title: c.title,
+      organization_name: c.organization_name,
+      sequence_id: c.sequence_id,
+      sequence_name: c.sequence_name,
+      enrolled_at: new Date().toISOString(),
+    }));
+
+    const { error } = await supabase.from('apollo_enrollments').insert(rows);
+    if (error) {
+      console.error('[apollo-auto-enroll] Failed to log enrollments:', error.message);
+    }
+  } catch (err) {
+    console.error('[apollo-auto-enroll] Enrollment logging error:', err);
   }
 }
 
@@ -194,14 +256,21 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const proFitContacts: string[] = [];
+    // Track full contact details for enrollment logging
+    const proFitContactDetails: Array<{
+      id: string;
+      email: string;
+      name: string;
+      title: string | null;
+      organization_name: string;
+    }> = [];
     let scanned = 0;
     let skippedNoEmail = 0;
     let skippedAlreadyEnrolled = 0;
     let skippedEnterprise = 0;
     let skippedNoTitleMatch = 0;
 
-    // Scan contacts — only enroll Pro/Report-fit biotech operators
+    // Scan contacts -- only enroll Pro/Report-fit biotech operators
     // Skip VCs, CVCs, and enterprise contacts (your strategist handles those)
     for (let page = 1; page <= 10; page++) {
       const { contacts, totalPages } = await getUnenrolledContacts(page);
@@ -230,43 +299,69 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        proFitContacts.push(contact.id);
-        if (proFitContacts.length >= BATCH_SIZE) break;
+        proFitContactDetails.push({
+          id: contact.id,
+          email: contact.email,
+          name: contact.name,
+          title: contact.title,
+          organization_name: contact.organization_name,
+        });
+        if (proFitContactDetails.length >= BATCH_SIZE) break;
       }
 
-      if (proFitContacts.length >= BATCH_SIZE) break;
+      if (proFitContactDetails.length >= BATCH_SIZE) break;
       if (page >= totalPages) break;
     }
+
+    const proFitContactIds = proFitContactDetails.map((c) => c.id);
 
     const results = {
       generalist: { added: 0, errors: [] as string[] },
     };
 
-    if (proFitContacts.length > 0) {
-      results.generalist = await addToSequence(SEQUENCES.generalist, proFitContacts);
+    if (proFitContactIds.length > 0) {
+      results.generalist = await addToSequence(SEQUENCES.generalist, proFitContactIds);
     }
 
     const totalAdded = results.generalist.added;
+    const hasErrors = results.generalist.errors.length > 0;
     const duration = Date.now() - startTime;
 
     const supabase = createServiceClient();
+
+    // Log enrollment details to apollo_enrollments table for attribution tracking
+    if (totalAdded > 0) {
+      const enrolledContacts: EnrolledContact[] = proFitContactDetails.slice(0, totalAdded).map((c) => ({
+        apollo_contact_id: c.id,
+        email: c.email,
+        email_domain: c.email.split('@')[1] || '',
+        name: c.name,
+        title: c.title,
+        organization_name: c.organization_name,
+        sequence_id: SEQUENCES.generalist,
+        sequence_name: 'Tier 1 Generalist',
+      }));
+      await logEnrollments(supabase, enrolledContacts);
+    }
+
     await logCronRun(supabase, 'apollo-auto-enroll', {
       fetched: scanned,
-      processed: proFitContacts.length,
+      processed: proFitContactDetails.length,
       inserted: totalAdded,
       errors: results.generalist.errors,
       parameters: { skippedNoEmail, skippedAlreadyEnrolled, skippedEnterprise, skippedNoTitleMatch, proEnrolled: results.generalist.added },
     });
 
-    // Slack notification
-    if (totalAdded > 0 && process.env.SLACK_WEBHOOK_URL) {
-      await fetch(process.env.SLACK_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: `:rocket: Apollo Auto-Enroll: ${totalAdded} Pro-fit contacts enrolled into Generalist sequence. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC (strategist), ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.`,
-        }),
-      }).catch(() => {});
+    // Slack notification -- send on success AND failure
+    if (totalAdded > 0) {
+      await sendSlackNotification(
+        `:rocket: Apollo Auto-Enroll: ${totalAdded} Pro-fit contacts enrolled into Generalist sequence. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC (strategist), ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.${hasErrors ? `\n:warning: Errors: ${results.generalist.errors.join(', ')}` : ''}`,
+      );
+    } else {
+      // Zero enrollments -- could indicate a problem or just no new contacts
+      await sendSlackNotification(
+        `:warning: Apollo Auto-Enroll: 0 contacts enrolled. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC, ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.${hasErrors ? `\n:x: Errors: ${results.generalist.errors.join(', ')}` : ' All contacts already processed or filtered out.'}`,
+      );
     }
 
     return NextResponse.json({
@@ -278,12 +373,20 @@ export async function GET(request: NextRequest) {
       skippedNoTitleMatch,
       skippedNoEmail,
       skippedAlreadyEnrolled,
+      errors: results.generalist.errors,
       durationMs: duration,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     const supabase = createServiceClient();
     await logCronRun(supabase, 'apollo-auto-enroll', { errors: [message] });
+
+    // Alert Slack on hard failure
+    await sendSlackNotification(
+      `:x: Apollo Auto-Enroll FAILED: ${message}`,
+      true,
+    );
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

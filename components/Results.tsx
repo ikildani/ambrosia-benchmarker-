@@ -490,6 +490,21 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const isPro = tier === 'pro' || tier === 'portfolio';
   const isReport = tier === 'report';
 
+  // Power Calculation: first-ever free calc gets full unblurred access
+  const [isPowerCalc, setIsPowerCalc] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (tier !== 'free') return false;
+    const used = localStorage.getItem('power_calc_used');
+    return !used; // true if this is the first calculation ever
+  });
+
+  // Mark power calc as used after this render so subsequent calculations are gated
+  useEffect(() => {
+    if (isPowerCalc && tier === 'free') {
+      localStorage.setItem('power_calc_used', 'true');
+    }
+  }, [isPowerCalc, tier]);
+
   // Build per-field warning text from non-critical guardrail warnings
   const fieldWarnings = useMemo(() => {
     const map: Record<string, string> = {};
@@ -550,7 +565,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const metricBadges = getMetricBadges(dealTypeLabels);
   const metricTooltips = getMetricTooltips(dealTypeLabels);
   const dtl = dealTypeLabels; // shorthand
-  const hasFullAccess = isPro || isReport;
+  const hasFullAccess = isPro || isReport || isPowerCalc;
   const { trackProFeatureClick, trackExportAttempted, trackUpgradeCtaClick } = useTracking();
   const [activeTab, setActiveTab] = useState<'summary' | 'analysis' | 'comparables' | 'playbook'>('summary');
   const [scenarioFlip, setScenarioFlip] = useState<{ label: string; field: string; newValue: string; result: CalculationResult } | null>(null);
@@ -1167,6 +1182,32 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             </div>
           </div>
         </div>
+
+        {/* Power Calculation used banner — shown to free users who already used their one free analysis */}
+        {!hasFullAccess && !isPowerCalc && tier === 'free' && (
+          <div className="mb-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-900/20 to-orange-900/20 p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-amber-200 mb-1">You&apos;ve used your free Power Analysis</h4>
+                <p className="text-xs text-amber-300/70 mb-3">Upgrade to Pro for unlimited access to all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more.</p>
+                <button
+                  onClick={onUpgrade}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all"
+                >
+                  Unlock Pro — {PRICING.PRO_MONTHLY}
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Expandable hint for free users */}
         {!hasFullAccess && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { formatModality } from '@/lib/config/modality-display';
 import {
   Lock,
   ChevronRight,
@@ -859,23 +860,6 @@ function formatCompanyType(type: string | null): string {
   return labels[type] || type;
 }
 
-function formatModality(modality: string | null): string {
-  if (!modality) return '';
-  const labels: Record<string, string> = {
-    'adc': 'ADC',
-    'bispecific': 'Bispecific',
-    'small_molecule': 'Small Molecule',
-    'antibody': 'Antibody',
-    'car_t': 'CAR-T',
-    'cell_therapy': 'Cell Therapy',
-    'gene_therapy': 'Gene Therapy',
-    'mrna': 'mRNA',
-    'radiopharm': 'Radiopharm',
-    'oligonucleotide': 'Oligo',
-    'peptide': 'Peptide',
-  };
-  return labels[modality] || modality;
-}
 
 function formatPhase(phase: string | null): string {
   if (!phase) return '';

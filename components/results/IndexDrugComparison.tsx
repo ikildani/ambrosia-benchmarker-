@@ -11,6 +11,7 @@ import {
   type PhaseAdjustedConfidence,
 } from '@/lib/financial/index-drugs';
 import { Lock, Pill, AlertTriangle, CheckCircle, Info, TrendingUp, BarChart3, Target } from 'lucide-react';
+import { formatModality } from '@/lib/config/modality-display';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -76,34 +77,6 @@ function ConfidenceIcon({ type }: { type: 'check' | 'info' | 'alert' | 'warning'
   }
 }
 
-// ---------------------------------------------------------------------------
-// Format modality into readable label
-// ---------------------------------------------------------------------------
-
-function formatModality(modality: string): string {
-  const map: Record<string, string> = {
-    smallMolecule: 'Small Molecule',
-    mab: 'mAb',
-    adc: 'ADC',
-    bispecific: 'Bispecific',
-    geneTherapy: 'Gene Therapy',
-    geneEditing: 'Gene Editing',
-    carT_heme: 'CAR-T',
-    carT_solid: 'CAR-T (Solid)',
-    cellTherapy: 'Cell Therapy',
-    sirna: 'siRNA',
-    aso: 'ASO',
-    mrna: 'mRNA',
-    vaccine: 'Vaccine',
-    peptide: 'Peptide',
-    enzyme: 'Enzyme',
-    glp1Agonist: 'GLP-1 Agonist',
-    gnrhAntagonist: 'GnRH Antagonist',
-    neuroactiveSteroid: 'Neuroactive Steroid',
-    radiopharmaceutical: 'Radiopharmaceutical',
-  };
-  return map[modality] || modality.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-}
 
 // ---------------------------------------------------------------------------
 // Format TA name
