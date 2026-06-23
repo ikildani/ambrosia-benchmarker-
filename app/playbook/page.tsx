@@ -64,7 +64,9 @@ export default async function PlaybookIndex() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/playbook" />
-      <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+      <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Counterparty Playbooks
@@ -89,10 +91,11 @@ export default async function PlaybookIndex() {
           {buyers.length === 0 ? (
             <p className="text-slate-400">No counterparty data yet — run the seed script.</p>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-slate-800">
+            <div className="overflow-hidden rounded-xl border border-slate-800 bg-gradient-to-b from-slate-900/30 to-slate-950/50">
               <table className="w-full text-sm">
                 <thead className="bg-slate-900/50 text-xs uppercase tracking-wider text-slate-500">
                   <tr>
+                    <th className="px-4 py-3 text-left font-normal w-10">#</th>
                     <th className="px-4 py-3 text-left font-normal">Buyer</th>
                     <th className="px-4 py-3 text-right font-normal">Premium</th>
                     <th className="px-4 py-3 text-right font-normal">Disclosed deals</th>
@@ -102,22 +105,25 @@ export default async function PlaybookIndex() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
-                  {buyers.map((b) => {
+                  {buyers.map((b, idx) => {
                     const conf = confidenceLabel(b.confidence);
                     const topTAs = Object.entries(b.byTherapeuticArea)
                       .sort((a, b) => b[1].n - a[1].n)
                       .slice(0, 3)
                       .map(([ta]) => ta.replace(/_/g, ' '))
                       .join(', ');
+                    const isHighPremium = b.premiumMultiplier >= 1.2;
                     return (
-                      <tr key={b.companyId} className="text-slate-200 transition-colors hover:bg-slate-900/40">
+                      <tr key={b.companyId} className={`text-slate-200 transition-colors hover:bg-slate-900/40 ${isHighPremium ? 'border-l-2 border-l-teal-500/40' : ''}`}>
+                        <td className="px-4 py-3 font-mono text-xs text-slate-600">{idx + 1}</td>
                         <td className="px-4 py-3 font-medium">{b.companyName}</td>
-                        <td className={`px-4 py-3 text-right font-mono text-base ${premiumColor(b.premiumMultiplier)}`}>
+                        <td className={`px-4 py-3 text-right font-mono text-lg font-bold ${premiumColor(b.premiumMultiplier)}`}>
                           ×{b.premiumMultiplier.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono text-slate-400">{b.sampleSize}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${conf.color}`}>
+                          <span className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium shadow-sm ${conf.color}`}>
+                            <span className={`inline-block h-1.5 w-1.5 rounded-full ${b.confidence === 'high' ? 'bg-teal-400' : b.confidence === 'medium' ? 'bg-cyan-400' : 'bg-slate-400'}`} />
                             {conf.label}
                           </span>
                         </td>

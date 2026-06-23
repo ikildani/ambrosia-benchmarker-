@@ -126,7 +126,9 @@ export default async function IntelligencePage({ searchParams }: Props) {
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/intelligence" />
 
-      <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+      <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-12">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Live Market Intelligence
@@ -178,14 +180,16 @@ export default async function IntelligencePage({ searchParams }: Props) {
       {userCalculations.length > 0 && (
         <section>
           <div className="mx-auto max-w-6xl px-6 pt-10 pb-2">
-            <DealImpactSection userCalculations={userCalculations} readouts={flatReadouts} />
+            <div className="rounded-xl border border-slate-800 bg-gradient-to-r from-slate-900/60 via-slate-950/40 to-slate-900/60 p-6 border-l-2 border-l-teal-500/40">
+              <DealImpactSection userCalculations={userCalculations} readouts={flatReadouts} />
+            </div>
           </div>
         </section>
       )}
 
       {/* ── Competitive cluster alerts ── */}
       <section>
-        <div className="mx-auto max-w-6xl px-6 pt-4 pb-0">
+        <div className="mx-auto max-w-6xl px-6 pt-6 pb-4">
           <CompetitiveCluster readoutsByTA={readoutsByTA} />
         </div>
       </section>

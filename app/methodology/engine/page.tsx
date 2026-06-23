@@ -53,7 +53,9 @@ export default function EngineMethodology() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/methodology/engine" />
-      <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+      <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
         <div className="mx-auto max-w-4xl px-6 pt-10 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Engine Methodology
@@ -122,7 +124,10 @@ export default function EngineMethodology() {
           flags — default off until backtest validates each one individually.
         </p>
 
-        <DimensionExplorer />
+        <div className="my-12 border-t border-slate-800/60 pt-8">
+          <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-slate-500">Try It: Dimension Explorer</h3>
+          <DimensionExplorer />
+        </div>
 
         <SectionAnchor id="calibration">3. Calibration framework (Option B rigor)</SectionAnchor>
         <p className="mt-4">
@@ -181,8 +186,11 @@ export default function EngineMethodology() {
           journey itself is part of the model&rsquo;s methodology.
         </p>
 
-        <LiveAccuracyDashboard />
-        <FailureCaseExplorer />
+        <div className="my-12 border-t border-slate-800/60 pt-8">
+          <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-slate-500">Engine Accuracy</h3>
+          <LiveAccuracyDashboard />
+          <FailureCaseExplorer />
+        </div>
 
         <SectionAnchor id="limitations">5. Honest limitations</SectionAnchor>
         <p className="mt-4">The model is not ready for:</p>

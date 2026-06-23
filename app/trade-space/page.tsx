@@ -44,7 +44,9 @@ export default function TradeSpacePage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/trade-space" />
-      <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+      <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Deal Structure Trade Space
@@ -67,9 +69,13 @@ export default function TradeSpacePage() {
       </section>
 
       {/* Interactive optimizer */}
-      <section className="border-b border-slate-800/60">
+      <section className="relative overflow-hidden border-b border-slate-800/60">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-teal-500/[0.02] rounded-full blur-3xl pointer-events-none" />
         <div className="mx-auto max-w-6xl px-6 py-12">
-          <h2 className="mb-2 text-2xl font-semibold text-slate-100">
+          <div className="mb-2 inline-block rounded-md bg-teal-500/10 border border-teal-500/20 px-3 py-1 text-xs font-medium uppercase tracking-wider text-teal-400">
+            Interactive
+          </div>
+          <h2 className="mb-2 text-3xl font-semibold text-slate-100">
             Run Your Own Asset
           </h2>
           <p className="mb-8 text-sm text-slate-400">

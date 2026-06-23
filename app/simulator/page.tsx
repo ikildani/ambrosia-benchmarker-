@@ -54,7 +54,9 @@ export default async function SimulatorPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/simulator" />
-      <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+      <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
         <div className="mx-auto max-w-5xl px-6 pt-10 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Negotiation Simulator
@@ -83,10 +85,14 @@ export default async function SimulatorPage() {
       </section>
 
       {/* ── Interactive Simulator ─────────────────────────────── */}
-      <section className="border-b border-slate-800/60">
+      <section className="relative overflow-hidden border-b border-slate-800/60">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-teal-500/[0.02] rounded-full blur-3xl pointer-events-none" />
         <div className="mx-auto max-w-5xl px-6 py-12">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-slate-100">
+            <div className="mb-2 inline-block rounded-md bg-teal-500/10 border border-teal-500/20 px-3 py-1 text-xs font-medium uppercase tracking-wider text-teal-400">
+              Interactive
+            </div>
+            <h2 className="text-3xl font-semibold text-slate-100">
               Build Your Scenario
             </h2>
             <p className="mt-1 text-sm text-slate-500">
