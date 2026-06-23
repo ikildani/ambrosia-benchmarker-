@@ -56,7 +56,7 @@ export default function EngineMethodology() {
       <section className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl pointer-events-none translate-y-1/2" />
-        <div className="mx-auto max-w-4xl px-6 pt-10 pb-16">
+        <div className="mx-auto max-w-4xl px-6 pt-20 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
             Engine Methodology
           </h1>
