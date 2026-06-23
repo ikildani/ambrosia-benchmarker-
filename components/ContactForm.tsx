@@ -70,13 +70,22 @@ export default function ContactForm(): JSX.Element {
         <p className="text-sm text-slate-400">
           Thanks for reaching out. We typically respond within 24 hours.
         </p>
-        <button
-          type="button"
-          onClick={() => setStatus('idle')}
-          className="mt-6 text-sm text-teal-400 hover:text-teal-300 transition-colors"
-        >
-          Send another message
-        </button>
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setStatus('idle')}
+            className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+          >
+            Send another message
+          </button>
+          <span className="text-slate-600">·</span>
+          <a
+            href="/"
+            className="text-sm text-slate-400 hover:text-slate-300 transition-colors"
+          >
+            Back to home
+          </a>
+        </div>
       </div>
     );
   }
