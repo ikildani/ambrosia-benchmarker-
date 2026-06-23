@@ -32,6 +32,7 @@ function buildAdminEmailHtml(data: z.infer<typeof contactSchema>): string {
       <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <img src="https://calculator.ambrosiaventures.co/logo.png" alt="Ambrosia Ventures" style="height: 36px; margin-bottom: 16px;" />
           <h1 style="color: #fff; margin: 0; font-size: 24px;">New Contact Form Submission</h1>
           <p style="color: #94a3b8; margin: 8px 0 0; font-size: 14px;">${data.subject}</p>
         </div>
@@ -79,25 +80,27 @@ function buildConfirmationEmailHtml(name: string): string {
     <!DOCTYPE html>
     <html>
       <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
-          <h1 style="color: #fff; margin: 0; font-size: 24px;">Thanks for Reaching Out</h1>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 16px;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 40px 24px; border-radius: 16px 16px 0 0; text-align: center;">
+          <img src="https://calculator.ambrosiaventures.co/logo.png" alt="Ambrosia Ventures" style="height: 36px; margin-bottom: 20px;" />
+          <h1 style="color: #fff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Thanks for Reaching Out</h1>
+          <p style="color: #94a3b8; margin: 10px 0 0; font-size: 15px;">We&rsquo;ll be in touch soon</p>
         </div>
 
-        <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
-          <p style="font-size: 16px;">Hi ${escapeHtml(name)},</p>
+        <div style="background: #fff; padding: 32px 24px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
+          <p style="font-size: 16px; margin-top: 0;">Hi ${escapeHtml(name)},</p>
 
-          <p>We received your message and will get back to you within 24 hours.</p>
+          <p style="font-size: 15px; color: #334155;">We received your message and will get back to you within <strong>24 hours</strong>.</p>
 
-          <p>In the meantime, feel free to explore our deal benchmarking tools:</p>
+          <p style="font-size: 15px; color: #334155;">In the meantime, explore our deal benchmarking tools:</p>
 
           <div style="text-align: center; margin: 32px 0;">
-            <a href="https://calculator.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+            <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
               Open Deal Calculator
             </a>
           </div>
 
-          <p style="margin-top: 24px;">
+          <p style="margin-top: 24px; font-size: 15px;">
             Best,<br>
             <strong>The Ambrosia Ventures Team</strong>
           </p>
