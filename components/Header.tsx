@@ -257,7 +257,8 @@ export default function Header({
                       <span className={`absolute -bottom-1 left-0 h-0.5 bg-slate-900 dark:bg-white transition-all duration-300 ${item.isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                     </button>
                     {intelDropdownOpen && (
-                      <div className="absolute top-full left-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
+                      <div className="absolute top-full left-0 pt-2 w-56 z-50">
+                      <div className="rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 py-2">
                         {[
                           { label: 'Counterparty Playbooks', href: '/playbook' },
                           { label: 'Deal Trade Space', href: '/trade-space' },
@@ -278,6 +279,7 @@ export default function Header({
                             {sub.label}
                           </Link>
                         ))}
+                      </div>
                       </div>
                     )}
                   </div>
