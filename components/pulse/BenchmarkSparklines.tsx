@@ -120,8 +120,8 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" role="group" aria-label="Benchmark trend sparklines by modality">
         {activeModalities.map((modality) => {
           const data = modalityData[modality];
-          const latestValue = data[data.length - 1]?.avg_upfront;
-          const firstValue = data.find(d => d.avg_upfront != null)?.avg_upfront;
+          const latestValue = data[data.length - 1]?.avg_upfront ?? null;
+          const firstValue = data.find(d => d.avg_upfront != null)?.avg_upfront ?? null;
           const trendColor = getTrendColor(latestValue, firstValue);
           const change = computePctChange(data);
           const trendDir = latestValue != null && firstValue != null
