@@ -9,6 +9,10 @@ import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceU
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { ReadoutImpactEstimate } from '@/components/intelligence/ReadoutImpactEstimate';
+import { CompetitiveCluster } from '@/components/intelligence/CompetitiveCluster';
+import { DealImpactSection } from '@/components/intelligence/DealImpactSection';
+import { createServerClient } from '@/lib/supabase/server';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -65,6 +69,42 @@ export default async function IntelligencePage({ searchParams }: Props) {
       readouts: await fetchUpcomingReadouts({ ta, phase: 'PHASE3', limit: 6, daysAhead: 90 }),
     })),
   );
+
+  // ── User calculations for personalized readout matching ──────────────
+  let userCalculations: Array<{ therapeutic_area: string; indication: string }> = [];
+  if (auth.userId) {
+    try {
+      const supabase = await createServerClient();
+      const { data } = await supabase
+        .from('calculations')
+        .select('therapeutic_area, indication_category')
+        .eq('user_id', auth.userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      userCalculations = (data || []).map((d: { therapeutic_area: string; indication_category: string }) => ({
+        therapeutic_area: d.therapeutic_area,
+        indication: d.indication_category,
+      }));
+    } catch {} // non-blocking — personalization is best-effort
+  }
+
+  // ── Readouts by TA for competitive cluster alerts ───────────────────
+  const readoutsByTA: Record<string, number> = {};
+  const allFlat = allReadouts.flatMap((s) => s.readouts);
+  for (const r of allFlat) {
+    if (r.therapeuticArea && r.daysToReadout <= 60) {
+      readoutsByTA[r.therapeuticArea] = (readoutsByTA[r.therapeuticArea] || 0) + 1;
+    }
+  }
+
+  // Flatten readouts for DealImpactSection
+  const flatReadouts = allFlat.map((r) => ({
+    therapeuticArea: r.therapeuticArea || '',
+    conditions: r.conditions,
+    title: r.title,
+    sponsor: r.sponsor,
+    daysToReadout: r.daysToReadout,
+  }));
 
   // FDA AdComm calendar — curated static, fast + reliable
   const adCommAll = getAdCommCalendar({ ta: selectedTA });
@@ -134,6 +174,22 @@ export default async function IntelligencePage({ searchParams }: Props) {
         </div>
       </section>
 
+      {/* ── Personalized deal impact section ── */}
+      {userCalculations.length > 0 && (
+        <section>
+          <div className="mx-auto max-w-6xl px-6 pt-10 pb-2">
+            <DealImpactSection userCalculations={userCalculations} readouts={flatReadouts} />
+          </div>
+        </section>
+      )}
+
+      {/* ── Competitive cluster alerts ── */}
+      <section>
+        <div className="mx-auto max-w-6xl px-6 pt-4 pb-0">
+          <CompetitiveCluster readoutsByTA={readoutsByTA} />
+        </div>
+      </section>
+
       {/* Phase 3 readouts */}
       <section>
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-4">
@@ -145,12 +201,14 @@ export default async function IntelligencePage({ searchParams }: Props) {
           ) : (
             <div className={selectedTA ? '' : 'grid gap-5 md:grid-cols-2 lg:grid-cols-3'}>
               {visibleSections.map(({ ta, readouts }) => (
-                <MarketIntelligenceSidebar
-                  key={ta}
-                  readouts={readouts}
-                  title={`${ta.replace(/([A-Z])/g, ' $1').trim()}`}
-                  taLabel={ta}
-                />
+                <div key={ta}>
+                  <MarketIntelligenceSidebar
+                    readouts={readouts}
+                    title={`${ta.replace(/([A-Z])/g, ' $1').trim()}`}
+                    taLabel={ta}
+                  />
+                  <ReadoutImpactEstimate therapeuticArea={ta} />
+                </div>
               ))}
             </div>
           )}

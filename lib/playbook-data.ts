@@ -25,7 +25,9 @@ export interface PlaybookDeal {
   asset: string | null;
   licensorName: string | null;
   indication: string | null;
+  therapeuticArea: string | null;
   phase: string | null;
+  dealType: string | null;
   upfrontUsd: number | null;
   totalDealValueUsd: number | null;
   modality: string | null;
@@ -68,7 +70,7 @@ export async function loadPlaybookBuyer(slug: string): Promise<{
 
   const { data: dealRows } = await supabase
     .from('deals')
-    .select('id, announced_date, asset_name, licensor_name, indication_specific, indication_category, phase_at_signing, upfront_usd, total_deal_value_usd, modality')
+    .select('id, announced_date, asset_name, licensor_name, indication_specific, indication_category, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, modality')
     .eq('licensee_id', buyer.companyId)
     .not('total_deal_value_usd', 'is', null)
     .order('announced_date', { ascending: false })
@@ -80,7 +82,9 @@ export async function loadPlaybookBuyer(slug: string): Promise<{
     asset: d.asset_name ?? null,
     licensorName: d.licensor_name ?? null,
     indication: d.indication_specific ?? d.indication_category ?? null,
+    therapeuticArea: d.therapeutic_area ?? null,
     phase: d.phase_at_signing ?? null,
+    dealType: d.deal_type ?? null,
     upfrontUsd: d.upfront_usd ?? null,
     totalDealValueUsd: d.total_deal_value_usd ?? null,
     modality: d.modality ?? null,

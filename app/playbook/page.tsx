@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { loadPlaybookBuyers } from '@/lib/playbook-data';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -138,6 +139,10 @@ export default async function PlaybookIndex() {
           )}
         </div>
       </section>
+
+      <div className="mx-auto max-w-6xl px-6 pb-12">
+        <IntelligenceEmailCapture context="playbook" />
+      </div>
 
       <SiteFooter />
     </main>

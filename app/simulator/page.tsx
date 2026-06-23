@@ -5,6 +5,8 @@ import { ZOPAChart } from '@/components/simulator/ZOPAChart';
 import { PeerBenchmarkPanel } from '@/components/peer-benchmark/PeerBenchmarkPanel';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
+import { SimulatorForm } from '@/components/simulator/SimulatorForm';
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -77,6 +79,31 @@ export default async function SimulatorPage() {
               Deal-structure trade space →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── Interactive Simulator ─────────────────────────────── */}
+      <section className="border-b border-slate-800/60">
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-slate-100">
+              Build Your Scenario
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Configure your asset, select up to 3 buyers, and set your BATNA to see the zone of agreement.
+            </p>
+          </div>
+          <SimulatorForm />
+        </div>
+      </section>
+
+      {/* ── Reference Negotiations ────────────────────────────── */}
+      <section className="border-b border-slate-800/60 bg-slate-900/10">
+        <div className="mx-auto max-w-5xl px-6 py-8">
+          <h2 className="text-xl font-semibold text-slate-300">Reference Negotiations</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Pre-configured scenarios pairing realistic assets with high-confidence buyer data.
+          </p>
         </div>
       </section>
 
@@ -248,6 +275,10 @@ export default async function SimulatorPage() {
           </div>
         </div>
       </section>
+
+      <div className="mx-auto max-w-5xl px-6 pb-12">
+        <IntelligenceEmailCapture context="simulator" />
+      </div>
 
       <SiteFooter />
     </main>

@@ -4,6 +4,10 @@ import { notFound } from 'next/navigation';
 import { loadPlaybookBuyer, listAllSlugs } from '@/lib/playbook-data';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { BuyerStrategyNarrative } from '@/components/playbook/BuyerStrategyNarrative';
+import { PremiumTrendChart } from '@/components/playbook/PremiumTrendChart';
+import { PipelineGapViz } from '@/components/playbook/PipelineGapViz';
+import { DealTypeBreakdown } from '@/components/playbook/DealTypeBreakdown';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,6 +155,40 @@ export default async function PlaybookDetail({ params }: Props) {
           )}
         </div>
       </section>
+
+      {/* Strategy narrative */}
+      <BuyerStrategyNarrative
+        companyName={buyer.companyName}
+        deals={deals.map(d => ({
+          therapeutic_area: d.therapeuticArea ?? d.indication ?? '',
+          deal_type: d.dealType ?? '',
+          total_deal_value_usd: d.totalDealValueUsd,
+          announced_date: d.year ? `${d.year}-01-01` : null,
+        }))}
+        byTherapeuticArea={buyer.byTherapeuticArea}
+        premiumMultiplier={buyer.premiumMultiplier}
+      />
+
+      {/* Premium by TA bar chart */}
+      <PremiumTrendChart
+        byTherapeuticArea={buyer.byTherapeuticArea}
+        companyName={buyer.companyName}
+      />
+
+      {/* Pipeline coverage & gaps */}
+      <PipelineGapViz
+        byTherapeuticArea={buyer.byTherapeuticArea}
+        companyName={buyer.companyName}
+      />
+
+      {/* Deal type breakdown */}
+      <DealTypeBreakdown
+        deals={deals.map(d => ({
+          deal_type: d.dealType,
+          upfront_usd: d.upfrontUsd,
+          total_deal_value_usd: d.totalDealValueUsd,
+        }))}
+      />
 
       {/* Recent deals */}
       <section className="border-b border-slate-800/60">

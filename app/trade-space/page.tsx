@@ -1,9 +1,16 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import nextDynamic from 'next/dynamic';
 import { loadTradeSpaceScenarios } from '@/lib/trade-space-data';
 import { StructureCards } from '@/components/trade-space/StructureCards';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
+
+const TradeSpaceForm = nextDynamic(
+  () => import('@/components/trade-space/TradeSpaceForm').then((m) => m.TradeSpaceForm),
+  { ssr: false }
+);
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -60,6 +67,30 @@ export default function TradeSpacePage() {
             <code className="rounded bg-slate-800 px-1 py-0.5 text-slate-400">DEAL_TYPE_CAPTURE</code> and{' '}
             <code className="rounded bg-slate-800 px-1 py-0.5 text-slate-400">PHASE_ALLOCATION</code>{' '}
             tables. All figures in $M unless noted otherwise.
+          </p>
+        </div>
+      </section>
+
+      {/* Interactive optimizer */}
+      <section className="border-b border-slate-800/60">
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <h2 className="mb-2 text-2xl font-semibold text-slate-100">
+            Run Your Own Asset
+          </h2>
+          <p className="mb-8 text-sm text-slate-400">
+            Configure an asset profile below and the engine will rank all five deal structures
+            in real time.
+          </p>
+          <TradeSpaceForm />
+        </div>
+      </section>
+
+      {/* Reference scenarios */}
+      <section className="border-b border-slate-800/60 bg-slate-900/20">
+        <div className="mx-auto max-w-6xl px-6 pt-12 pb-2">
+          <h2 className="text-xl font-semibold text-slate-100">Reference Scenarios</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Four representative assets pre-computed for comparison.
           </p>
         </div>
       </section>
@@ -132,6 +163,10 @@ export default function TradeSpacePage() {
           </div>
         </div>
       </section>
+
+      <div className="mx-auto max-w-6xl px-6 pb-12">
+        <IntelligenceEmailCapture context="trade-space" />
+      </div>
 
       <SiteFooter />
     </main>

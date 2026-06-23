@@ -2,6 +2,15 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
+import dynamic from 'next/dynamic';
+import { LiveAccuracyDashboard } from '@/components/methodology/LiveAccuracyDashboard';
+import { FailureCaseExplorer } from '@/components/methodology/FailureCaseExplorer';
+
+const DimensionExplorer = dynamic(
+  () => import('@/components/methodology/DimensionExplorer').then((m) => m.DimensionExplorer),
+  { ssr: false },
+);
 
 const BASE_URL = 'https://calculator.ambrosiaventures.co';
 
@@ -118,6 +127,8 @@ export default function EngineMethodology() {
           flags — default off until backtest validates each one individually.
         </p>
 
+        <DimensionExplorer />
+
         <SectionAnchor id="calibration">3. Calibration framework (Option B rigor)</SectionAnchor>
         <p className="mt-4">
           Most engines publish source citations and call it rigor. Ours does both that AND
@@ -174,6 +185,9 @@ export default function EngineMethodology() {
           failed rounds alongside wins in the internal iteration log &mdash; the calibration
           journey itself is part of the model&rsquo;s methodology.
         </p>
+
+        <LiveAccuracyDashboard />
+        <FailureCaseExplorer />
 
         <SectionAnchor id="limitations">5. Honest limitations</SectionAnchor>
         <p className="mt-4">The model is not ready for:</p>
@@ -267,6 +281,10 @@ git diff __tests__/backtest/baseline-errors.json`}</code>
           </p>
         </div>
       </article>
+
+      <div className="mx-auto max-w-4xl px-6 pb-12">
+        <IntelligenceEmailCapture context="methodology" />
+      </div>
 
       <SiteFooter />
     </main>
