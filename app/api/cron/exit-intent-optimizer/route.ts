@@ -25,7 +25,7 @@ interface ExitIntentVariant {
   footnote: string;
 }
 
-const EXIT_INTENT_VARIANTS: ExitIntentVariant[] = [
+const VARIANTS: ExitIntentVariant[] = [
   {
     id: 'A',
     headline: 'Wait — before you go',
@@ -361,7 +361,7 @@ async function rotateOrLockVariant(
     };
   }
 
-  const variantIds = EXIT_INTENT_VARIANTS.map((v) => v.id);
+  const variantIds = VARIANTS.map((v) => v.id);
   const currentIndex = variantIds.indexOf(config.active_variant);
 
   // After one full rotation (4 weeks), pick the winner
@@ -526,7 +526,7 @@ async function sendSlackDigest(
       ? ((weekPerformance.captures / weekPerformance.impressions) * 100).toFixed(1)
       : '0.0';
 
-  const activeVariantData = EXIT_INTENT_VARIANTS.find(
+  const activeVariantData = VARIANTS.find(
     (v) => v.id === rotation.newVariant
   );
 
@@ -542,7 +542,7 @@ async function sendSlackDigest(
     variantStats.set(entry.variant_id, existing);
   }
 
-  const variantLines = EXIT_INTENT_VARIANTS.map((v) => {
+  const variantLines = VARIANTS.map((v) => {
     const stats = variantStats.get(v.id);
     if (!stats) return `  ${v.id}: _No data yet_`;
     const rate =
