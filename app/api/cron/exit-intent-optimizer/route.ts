@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 // ── Exit-intent copy variants ──────────────────────────────────────────────
 
-export interface ExitIntentVariant {
+interface ExitIntentVariant {
   id: string;
   headline: string;
   subtext: string;
@@ -25,7 +25,7 @@ export interface ExitIntentVariant {
   footnote: string;
 }
 
-export const EXIT_INTENT_VARIANTS: ExitIntentVariant[] = [
+const EXIT_INTENT_VARIANTS: ExitIntentVariant[] = [
   {
     id: 'A',
     headline: 'Wait — before you go',
