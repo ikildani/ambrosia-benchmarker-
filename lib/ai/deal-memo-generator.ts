@@ -386,14 +386,14 @@ export class DealMemoGenerator {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           log.info('AI call starting', {
-            model: 'claude-opus-4-6',
+            model: 'claude-sonnet-4-6',
             attempt: attempt + 1,
             maxAttempts,
             circuitState: circuitBreaker.getState(),
           });
 
           const message = await this.client.messages.create({
-            model: 'claude-opus-4-6',
+            model: 'claude-sonnet-4-6',
             max_tokens: 2500,
             messages: [{ role: 'user', content: prompt }],
           });
