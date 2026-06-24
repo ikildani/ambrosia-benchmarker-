@@ -313,9 +313,9 @@ export function buildScenarioBridge(
   const bear_value_m = Math.round(baseRNPV + downsideTotal);
   const bull_value_m = Math.round(baseRNPV + upsideTotal);
 
-  // Probability-weighted expected value: 20% bear, 50% base, 30% bull
+  // Probability-weighted expected value: symmetric 25/50/25 (aligned with generateScenarioComparison)
   const expected_value_m = Math.round(
-    0.20 * bear_value_m + 0.50 * baseRNPV + 0.30 * bull_value_m
+    0.25 * bear_value_m + 0.50 * baseRNPV + 0.25 * bull_value_m
   );
 
   return {

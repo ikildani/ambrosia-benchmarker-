@@ -400,12 +400,44 @@ function isLateStage(phase: string): boolean {
 }
 
 /**
+ * Indication-specific scenario band widening for indications with historically
+ * extreme failure rates or bimodal outcome distributions.
+ * Multiplied against the base early-stage band to widen bear (lower) and bull (higher).
+ *
+ * Sources: Nature Reviews Drug Discovery 2023 (AD attrition), BIO/QLS 2024 PoS study,
+ * DealForma 2020-2025 (deal outcome variance by indication).
+ */
+const HIGH_RISK_INDICATION_BANDS: Record<string, { bearPeakMult: number; bullPeakMult: number; bearPosMult: number; bullPosMult: number; bearDiscountDelta: number; bullDiscountDelta: number }> = {
+  alzheimers:    { bearPeakMult: 0.65, bullPeakMult: 1.50, bearPosMult: 0.65, bullPosMult: 1.30, bearDiscountDelta: 0.04, bullDiscountDelta: 0.02 },
+  als:           { bearPeakMult: 0.70, bullPeakMult: 1.40, bearPosMult: 0.70, bullPosMult: 1.25, bearDiscountDelta: 0.035, bullDiscountDelta: 0.018 },
+  schizophrenia: { bearPeakMult: 0.75, bullPeakMult: 1.30, bearPosMult: 0.75, bullPosMult: 1.20, bearDiscountDelta: 0.03, bullDiscountDelta: 0.015 },
+  parkinsons:    { bearPeakMult: 0.80, bullPeakMult: 1.20, bearPosMult: 0.80, bullPosMult: 1.15, bearDiscountDelta: 0.025, bullDiscountDelta: 0.012 },
+  huntingtons:   { bearPeakMult: 0.70, bullPeakMult: 1.40, bearPosMult: 0.70, bullPosMult: 1.25, bearDiscountDelta: 0.035, bullDiscountDelta: 0.018 },
+};
+
+const TA_SCENARIO_BANDS: Record<string, { bearPeakMult: number; bullPeakMult: number; bearPosMult: number; bullPosMult: number; bearDiscountDelta: number; bullDiscountDelta: number }> = {
+  neurology:       { bearPeakMult: 0.85, bullPeakMult: 1.15, bearPosMult: 0.88, bullPosMult: 1.12, bearDiscountDelta: 0.03, bullDiscountDelta: 0.015 },
+  rareDisease:     { bearPeakMult: 0.90, bullPeakMult: 1.10, bearPosMult: 0.90, bullPosMult: 1.10, bearDiscountDelta: 0.025, bullDiscountDelta: 0.012 },
+  psychiatry:      { bearPeakMult: 0.85, bullPeakMult: 1.15, bearPosMult: 0.85, bullPosMult: 1.12, bearDiscountDelta: 0.03, bullDiscountDelta: 0.015 },
+};
+
+const DEFAULT_SCENARIO_BAND = { bearPeakMult: 1.0, bullPeakMult: 1.0, bearPosMult: 1.0, bullPosMult: 1.0, bearDiscountDelta: 0.02, bullDiscountDelta: 0.01 };
+
+function getScenarioBands(indication: string | undefined, ta: string | undefined) {
+  const indicationKey = indication?.toLowerCase().replace(/[\s-]/g, '') ?? '';
+  if (HIGH_RISK_INDICATION_BANDS[indicationKey]) return HIGH_RISK_INDICATION_BANDS[indicationKey];
+  if (ta && TA_SCENARIO_BANDS[ta]) return TA_SCENARIO_BANDS[ta];
+  return DEFAULT_SCENARIO_BAND;
+}
+
+/**
  * Generate a bear/base/bull scenario comparison.
  *
  * Runs the rNPV engine under pessimistic, base-case, and optimistic
  * assumptions, then produces a probability-weighted expected value.
  * Late-stage assets use tighter assumption bands reflecting lower
- * remaining uncertainty.
+ * remaining uncertainty. High-risk indications (Alzheimer's, ALS, etc.)
+ * use wider bands reflecting bimodal outcome distributions.
  *
  * @param input           - The original rNPV calculation input (used as base case)
  * @param baseResult      - The base-case rNPV result (already computed)
@@ -418,21 +450,33 @@ export function generateScenarioComparison(
   calculateRNPVFn: (input: RNPVInput) => RNPVResult,
 ): ScenarioComparisonResult {
   const lateStage = isLateStage(input.phase);
+  const bands = getScenarioBands(input.indication, input.therapeuticArea);
+
+  const baseBearPeak = lateStage ? 0.75 : 0.60;
+  const baseBullPeak = lateStage ? 1.30 : 1.50;
+  const baseBearPos = lateStage ? 0.85 : 0.75;
+  const baseBullPos = lateStage ? 1.10 : 1.15;
+
+  const bearPeakFactor = baseBearPeak * bands.bearPeakMult;
+  const bullPeakFactor = baseBullPeak * bands.bullPeakMult;
+  const bearPosFactor = baseBearPos * bands.bearPosMult;
+  const bullPosFactor = baseBullPos * bands.bullPosMult;
+  const bearDiscountDelta = lateStage ? 0.015 : bands.bearDiscountDelta;
+  const bullDiscountDelta = lateStage ? 0.005 : bands.bullDiscountDelta;
 
   // --- Bear scenario ---
   const bearInput: RNPVInput = {
     ...input,
-    posMultiplier: (input.posMultiplier ?? 1.0) * (lateStage ? 0.85 : 0.75),
+    posMultiplier: (input.posMultiplier ?? 1.0) * bearPosFactor,
     peakSalesEstimate: {
-      low: input.peakSalesEstimate.low * (lateStage ? 0.75 : 0.60),
-      median: input.peakSalesEstimate.median * (lateStage ? 0.75 : 0.60),
-      high: input.peakSalesEstimate.high * (lateStage ? 0.75 : 0.60),
+      low: input.peakSalesEstimate.low * bearPeakFactor,
+      median: input.peakSalesEstimate.median * bearPeakFactor,
+      high: input.peakSalesEstimate.high * bearPeakFactor,
     },
     // Cap bear discount rate at 35% — above that, the DCF collapses to noise
-    // and the scenario loses interpretive value.
     discountRate: Math.min(
       0.35,
-      (input.discountRate ?? baseResult.discountRate) + (lateStage ? 0.015 : 0.02),
+      (input.discountRate ?? baseResult.discountRate) + bearDiscountDelta,
     ),
     timeToMarketAdjustment: (input.timeToMarketAdjustment ?? 0) + (lateStage ? 0.5 : 1.5),
   };
@@ -441,24 +485,18 @@ export function generateScenarioComparison(
   // --- Bull scenario ---
   const bullInput: RNPVInput = {
     ...input,
-    posMultiplier: (input.posMultiplier ?? 1.0) * (lateStage ? 1.10 : 1.15),
+    posMultiplier: (input.posMultiplier ?? 1.0) * bullPosFactor,
     peakSalesEstimate: {
-      low: input.peakSalesEstimate.low * (lateStage ? 1.30 : 1.50),
-      median: input.peakSalesEstimate.median * (lateStage ? 1.30 : 1.50),
-      high: input.peakSalesEstimate.high * (lateStage ? 1.30 : 1.50),
+      low: input.peakSalesEstimate.low * bullPeakFactor,
+      median: input.peakSalesEstimate.median * bullPeakFactor,
+      high: input.peakSalesEstimate.high * bullPeakFactor,
     },
-    discountRate: Math.max(0.01, (input.discountRate ?? baseResult.discountRate) - (lateStage ? 0.005 : 0.01)),
+    discountRate: Math.max(0.01, (input.discountRate ?? baseResult.discountRate) - bullDiscountDelta),
     timeToMarketAdjustment: (input.timeToMarketAdjustment ?? 0) - (lateStage ? 0.25 : 0.5),
   };
   const bullResult = calculateRNPVFn(bullInput);
 
   // Scenario weights (symmetric: bear and bull each 25%, base 50%).
-  //
-  // Rationale: Asymmetric weighting (e.g., bear=0.20, bull=0.30) biases
-  // expected value upward relative to the base case, which understates
-  // downside risk. Symmetric weighting is the neutral prior; adjust
-  // explicitly per asset if there is empirical justification to favor
-  // one tail.
   const bearWeight = 0.25;
   const baseWeight = 0.50;
   const bullWeight = 0.25;
@@ -468,10 +506,13 @@ export function generateScenarioComparison(
     baseWeight * baseResult.riskAdjustedNPV +
     bullWeight * bullResult.riskAdjustedNPV;
 
+  const bearPeakPct = Math.round(bearPeakFactor * 100);
+  const bullPeakPct = Math.round(bullPeakFactor * 100);
+
   const bearAssumptions = [
-    `Peak sales reduced to ${(lateStage ? 75 : 60)}% of base case`,
-    `PoS multiplier: ${(lateStage ? 0.85 : 0.75).toFixed(2)}x`,
-    `Discount rate increased by ${(lateStage ? 1.5 : 2.0).toFixed(1)}pp`,
+    `Peak sales reduced to ${bearPeakPct}% of base case`,
+    `PoS multiplier: ${bearPosFactor.toFixed(2)}x`,
+    `Discount rate increased by ${(bearDiscountDelta * 100).toFixed(1)}pp`,
     `Time to market delayed by ${(lateStage ? 0.5 : 1.5).toFixed(1)} years`,
   ];
   const baseAssumptions = [
@@ -480,12 +521,13 @@ export function generateScenarioComparison(
     `Discount rate: ${(baseResult.discountRate * 100).toFixed(1)}%`,
   ];
   const bullAssumptions = [
-    `Peak sales increased to ${(lateStage ? 130 : 150)}% of base case`,
-    `PoS multiplier: ${(lateStage ? 1.10 : 1.15).toFixed(2)}x`,
-    `Discount rate decreased by ${(lateStage ? 0.5 : 1.0).toFixed(1)}pp`,
+    `Peak sales increased to ${bullPeakPct}% of base case`,
+    `PoS multiplier: ${bullPosFactor.toFixed(2)}x`,
+    `Discount rate decreased by ${(bullDiscountDelta * 100).toFixed(1)}pp`,
     `Time to market accelerated by ${(lateStage ? 0.25 : 0.5).toFixed(1)} years`,
   ];
 
+  const isHighRisk = bands !== DEFAULT_SCENARIO_BAND && !lateStage;
   const narrative = [
     `Tri-scenario analysis for ${input.therapeuticArea} ${input.phase.replace('_', ' ')} asset.`,
     `Bear case (${(bearWeight * 100).toFixed(0)}% weight): rNPV of ${fmtM(bearResult.riskAdjustedNPV)} — reflects regulatory delays, competitive erosion, and lower peak uptake.`,
@@ -494,7 +536,9 @@ export function generateScenarioComparison(
     `Probability-weighted expected value: ${fmtM(expectedValue)}.`,
     lateStage
       ? 'Late-stage asset: narrower scenario bands applied reflecting reduced remaining uncertainty.'
-      : 'Early/mid-stage asset: wider scenario bands applied reflecting substantial remaining clinical and regulatory risk.',
+      : isHighRisk
+        ? `High-risk indication: widened scenario bands applied reflecting historically elevated attrition and bimodal outcome distribution for ${input.indication || input.therapeuticArea}.`
+        : 'Early/mid-stage asset: wider scenario bands applied reflecting substantial remaining clinical and regulatory risk.',
   ].join(' ');
 
   return {

@@ -36,11 +36,10 @@ describe('parseJsonResponse', () => {
     );
   });
 
-  // 6. Unbalanced braces (more opens than closes)
-  it('throws when braces are unbalanced', () => {
-    expect(() => parseJsonResponse('{"a": {"b": 1}')).toThrow(
-      'Unbalanced JSON braces in AI response'
-    );
+  // 6. Unbalanced braces (more opens than closes) — auto-repaired
+  it('repairs truncated JSON by closing open braces', () => {
+    const result = parseJsonResponse<{ a: { b: number } }>('{"a": {"b": 1}');
+    expect(result).toEqual({ a: { b: 1 } });
   });
 
   // 7. Control characters cleaned (null bytes removed)

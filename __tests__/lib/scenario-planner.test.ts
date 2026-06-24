@@ -304,10 +304,10 @@ describe('buildScenarioBridge', () => {
     expect(bridge.bull_value_m).toBe(Math.round(bridge.base_value_m + upsideSum));
   });
 
-  it('expected_value_m is the probability-weighted average (20% bear + 50% base + 30% bull)', () => {
+  it('expected_value_m is the probability-weighted average (25% bear + 50% base + 25% bull)', () => {
     const bridge = buildScenarioBridge(input, baseResult);
     const expected = Math.round(
-      0.20 * bridge.bear_value_m + 0.50 * bridge.base_value_m + 0.30 * bridge.bull_value_m,
+      0.25 * bridge.bear_value_m + 0.50 * bridge.base_value_m + 0.25 * bridge.bull_value_m,
     );
     expect(bridge.expected_value_m).toBe(expected);
   });
