@@ -351,7 +351,8 @@ function backoffDelay(attempt: number, baseMs: number = 1_000): number {
 
 function isRetryableError(error: Error): boolean {
   const msg = error.message.toLowerCase();
-  return msg.includes('timeout') || msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
+  if (msg.includes('timeout')) return false;
+  return msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
 }
 
 // Deal Memo Generator class
@@ -363,7 +364,7 @@ export class DealMemoGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey, timeout: 50_000 });
+    this.client = new Anthropic({ apiKey, timeout: 45_000 });
   }
 
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {
@@ -379,7 +380,7 @@ export class DealMemoGenerator {
 
     const prompt = buildMemoPrompt(input, comparableDeals);
     let lastError: Error | null = null;
-    const maxAttempts = 3;
+    const maxAttempts = 2;
 
     return circuitBreaker.execute(async () => {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
