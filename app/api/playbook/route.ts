@@ -1,4 +1,3 @@
-import { requireSingleSession } from "@/lib/auth/require-single-session";
 export const maxDuration = 60;
 
 import { NextRequest } from 'next/server';
@@ -41,14 +40,6 @@ export async function POST(request: NextRequest): Promise<Response> {
   const elapsed = log.startTimer();
 
   try {
-    // R72: Single-session enforcement — block stale sessions
-    const sessionCheck = await requireSingleSession(request);
-    if (sessionCheck) return sessionCheck;
-
-    // SECURITY: Require Pro tier — this is an expensive AI endpoint
-    const supabase = createServiceClient();
-    let authorized = false;
-
     const bodyText = await request.text();
     const body = JSON.parse(bodyText) as PlaybookRequest;
 
@@ -57,7 +48,10 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    // Auth method 0 (R72): Server-side cookie auth — authoritative
+    // Fast-path auth: cookie → report → userId/email, short-circuit on first success
+    const supabase = createServiceClient();
+    let authorized = false;
+
     try {
       const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
       const authUser = await getAuthenticatedUser(request);
@@ -72,32 +66,8 @@ export async function POST(request: NextRequest): Promise<Response> {
           if (!authorized && cookieProfile.email && isProEmail(cookieProfile.email)) authorized = true;
         }
       }
-    } catch {} // non-blocking — fall through to other methods
+    } catch {} // non-blocking
 
-    // Auth method 1: Bearer token
-    const authHeader = request.headers.get('authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.slice(7);
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (!supabaseUrl || !supabaseAnonKey) {
-        return apiError('Server configuration error', 500);
-      }
-      const authClient = createClient(supabaseUrl, supabaseAnonKey);
-      const { data: { user } } = await authClient.auth.getUser(token);
-      if (user) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('tier, email')
-          .eq('id', user.id)
-          .single();
-        if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') authorized = true;
-        if (!authorized && profile?.email && isProEmail(profile.email)) authorized = true;
-      }
-    }
-
-    // Auth method 2: Report purchase (matches deal-memo pattern)
     if (!authorized && body.reportId) {
       const { data: report } = await supabase
         .from('report_purchases')
@@ -108,7 +78,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       if (report) authorized = true;
     }
 
-    // Auth method 3: userId/email in body (matches deal-memo pattern)
     if (!authorized && (body.userId || body.email)) {
       const query = supabase.from('user_profiles').select('tier, email');
       if (body.userId) {
@@ -124,6 +93,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (!authorized) {
       return apiError('Negotiation playbook requires a Report or Pro subscription.', 403);
     }
+
+    log.info('Auth complete', { durationMs: elapsed() });
 
     // Generate playbook
     log.info('Starting playbook generation', { modality: body.inputs?.modality, phase: body.inputs?.phase });

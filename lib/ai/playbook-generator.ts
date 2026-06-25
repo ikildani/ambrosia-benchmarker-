@@ -156,7 +156,7 @@ export class PlaybookGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey, timeout: 45_000 });
+    this.client = new Anthropic({ apiKey, timeout: 35_000 });
   }
 
   async generatePlaybook(input: PlaybookInput): Promise<NegotiationPlaybook> {

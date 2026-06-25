@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import { requireSingleSession } from "@/lib/auth/require-single-session";
 export const maxDuration = 60;
 
 import { createServiceClient } from '@/lib/supabase/server';
@@ -31,10 +30,6 @@ export async function POST(request: NextRequest): Promise<Response> {
   const elapsed = log.startTimer();
 
   try {
-    // R72: Single-session enforcement — block stale sessions
-    const sessionCheck = await requireSingleSession(request);
-    if (sessionCheck) return sessionCheck;
-
     const body = (await request.json()) as DealMemoRequest;
 
     const parsed = dealMemoSchema.safeParse(body);
@@ -42,12 +37,10 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
+    // Fast-path auth: cookie auth is authoritative — skip DB if it succeeds
+    let authorized = false;
     const supabase = createServiceClient();
 
-    // Authorization: verify report purchase OR pro tier
-    let authorized = false;
-
-    // Check 0 (R72): Server-side cookie auth — authoritative
     try {
       const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
       const authUser = await getAuthenticatedUser(request);
@@ -64,8 +57,8 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
     } catch {} // non-blocking
 
-    // Check 1: Report purchase
-    if (body.reportId) {
+    // Check 1: Report purchase (also returns cached memo)
+    if (!authorized && body.reportId) {
       const { data: report } = await supabase
         .from('report_purchases')
         .select('id, status, memo_content')
@@ -75,15 +68,13 @@ export async function POST(request: NextRequest): Promise<Response> {
 
       if (report) {
         authorized = true;
-
-        // Return cached memo if already generated
         if (report.memo_content) {
           return apiSuccess({ memo: report.memo_content as DealMemo });
         }
       }
     }
 
-    // Check 2: Pro tier (database)
+    // Check 2: Pro tier (database) — only if not already authorized
     if (!authorized && (body.userId || body.email)) {
       const query = supabase.from('user_profiles').select('tier, email');
       if (body.userId) {
@@ -95,21 +86,19 @@ export async function POST(request: NextRequest): Promise<Response> {
       if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
         authorized = true;
       }
-      // Check email whitelist (team members, beta testers)
       if (!authorized && profile?.email && isProEmail(profile.email)) {
         authorized = true;
       }
     }
 
-    // SECURITY: Removed body.email whitelist fallback — only trust email from
-    // database profile (Check 2 above) to prevent tier escalation via request body.
-
     if (!authorized) {
       return apiError('Report purchase or Pro subscription required', 403);
     }
 
+    log.info('Auth complete', { durationMs: elapsed() });
+
     // Generate memo
-    log.info('Starting memo generation', { reportId: body.reportId, modality: body.inputs?.modality });
+    log.info('Starting memo generation', { reportId: body.reportId, modality: body.inputs?.modality, authDurationMs: elapsed() });
     const generator = getDealMemoGenerator();
     const memo = await generator.generateMemo({
       inputs: body.inputs,
