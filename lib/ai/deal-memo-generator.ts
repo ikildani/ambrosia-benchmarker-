@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { ComparableDeal } from '@/lib/comparableDeals';
 import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
@@ -355,18 +354,38 @@ function isRetryableError(error: Error): boolean {
   return msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
 }
 
-// Deal Memo Generator class
-export class DealMemoGenerator {
-  private client: Anthropic;
+async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY environment variable is required');
 
-  constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY environment variable is required');
-    }
-    this.client = new Anthropic({ apiKey, timeout: 35_000 });
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal: AbortSignal.timeout(40_000),
+  });
+
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => '');
+    throw new Error(`Anthropic API error ${response.status}: ${errBody.substring(0, 200)}`);
   }
 
+  const data = await response.json() as { content: Array<{ type: string; text: string }>; usage?: Record<string, number> };
+  const textContent = data.content?.find((c: { type: string }) => c.type === 'text');
+  if (!textContent) throw new Error('No text content in AI response');
+  return textContent.text;
+}
+
+// Deal Memo Generator class
+export class DealMemoGenerator {
   async generateMemo(input: DealMemoInput): Promise<DealMemo> {
     const log = createLogger('deal-memo');
     const elapsed = log.startTimer();
@@ -392,30 +411,15 @@ export class DealMemoGenerator {
             circuitState: circuitBreaker.getState(),
           });
 
-          const message = await this.client.messages.create({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 2500,
-            messages: [{ role: 'user', content: prompt }],
-          });
+          const text = await callAnthropicAPI(prompt, 2500);
+          const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(text);
 
-          const textContent = message.content.find((c) => c.type === 'text');
-          if (!textContent || textContent.type !== 'text') {
-            throw new Error('No text content in AI response');
-          }
-
-          const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(textContent.text);
-
-          // Validate required fields
           if (!parsed.executive_summary || !parsed.valuation_rationale || !Array.isArray(parsed.risk_factors)) {
             throw new Error('AI response missing required fields (executive_summary, valuation_rationale, or risk_factors)');
           }
 
           const durationMs = elapsed();
-          log.info('Memo generated', {
-            durationMs,
-            attempt: attempt + 1,
-            tokenUsage: message.usage,
-          });
+          log.info('Memo generated', { durationMs, attempt: attempt + 1 });
 
           return { ...parsed, generatedAt: new Date().toISOString() };
         } catch (error) {

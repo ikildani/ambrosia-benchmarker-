@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { CalculationResult, DealTerms, TieredRoyalties, DealRecommendation } from '@/lib/calculations';
 import { ComparableDeal } from '@/lib/comparableDeals';
 import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
@@ -147,18 +146,38 @@ function isRetryableError(error: Error): boolean {
   return msg.includes('529') || msg.includes('overloaded') || msg.includes('rate');
 }
 
-// Playbook Generator class
-export class PlaybookGenerator {
-  private client: Anthropic;
+async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY environment variable is required');
 
-  constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY environment variable is required');
-    }
-    this.client = new Anthropic({ apiKey, timeout: 35_000 });
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal: AbortSignal.timeout(40_000),
+  });
+
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => '');
+    throw new Error(`Anthropic API error ${response.status}: ${errBody.substring(0, 200)}`);
   }
 
+  const data = await response.json() as { content: Array<{ type: string; text: string }>; usage?: Record<string, number> };
+  const textContent = data.content?.find((c: { type: string }) => c.type === 'text');
+  if (!textContent) throw new Error('No text content in AI response');
+  return textContent.text;
+}
+
+// Playbook Generator class
+export class PlaybookGenerator {
   async generatePlaybook(input: PlaybookInput): Promise<NegotiationPlaybook> {
     const log = createLogger('playbook');
     const elapsed = log.startTimer();
@@ -184,33 +203,19 @@ export class PlaybookGenerator {
             circuitState: circuitBreaker.getState(),
           });
 
-          const message = await this.client.messages.create({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 4000,
-            messages: [{ role: 'user', content: prompt }],
-          });
-
-          const textContent = message.content.find((c) => c.type === 'text');
-          if (!textContent || textContent.type !== 'text') {
-            throw new Error('No text content in AI response');
-          }
+          const text = await callAnthropicAPI(prompt, 4000);
 
           const parsed = parseJsonResponse<{
             sections: NegotiationPlaybook['sections'];
             keyCaveats: string[];
-          }>(textContent.text);
+          }>(text);
 
-          // Validate required fields
           if (!parsed.sections?.openingPosition || !Array.isArray(parsed.keyCaveats)) {
             throw new Error('AI response missing required playbook sections');
           }
 
           const durationMs = elapsed();
-          log.info('Playbook generated', {
-            durationMs,
-            attempt: attempt + 1,
-            tokenUsage: message.usage,
-          });
+          log.info('Playbook generated', { durationMs, attempt: attempt + 1 });
 
           return {
             generatedAt: new Date().toISOString(),
