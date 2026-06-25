@@ -370,7 +370,7 @@ async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<stri
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     }),
-    signal: AbortSignal.timeout(40_000),
+    signal: AbortSignal.timeout(50_000),
   });
 
   if (!response.ok) {
