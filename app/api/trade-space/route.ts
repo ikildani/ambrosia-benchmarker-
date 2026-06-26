@@ -25,6 +25,7 @@ interface TradeSpaceRequestBody {
   peakSalesMedian: number;
   peakSalesHigh: number;
   competitivePosition: string;
+  differentiationFactors?: string[];
   companyType: string;
   buyerName?: string;
 }
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     peakSalesMedian,
     peakSalesHigh,
     competitivePosition,
+    differentiationFactors,
     companyType,
     buyerName,
   } = body;
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
       high: peakSalesHigh || peakSalesMedian * 2,
     },
     competitivePosition: competitivePosition || 'racing',
+    differentiationFactors,
     dataQuality: (userDataQuality as string) || 'strongPhase2',
     biomarkerStatus: (userBiomarkerStatus as string) || 'unselected',
     regulatoryDesignations: {

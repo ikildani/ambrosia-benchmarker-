@@ -79,6 +79,7 @@ const PaywallModal = dynamic(() => import('./PaywallModal'), { ssr: false });
 const OnboardingModal = dynamic(() => import('./OnboardingModal'), { ssr: false });
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 import { TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
+import { AssetDifferentiationSection } from './calculator/AssetDifferentiationSection';
 import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
 import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
 import { getValidationWarnings } from '@/lib/validationWarnings';
@@ -812,7 +813,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = <AdvancedOptionsSection column="left" {...advancedProps} />;
                     break;
                   case 'competitive':
-                    stepContent = <AdvancedOptionsSection column="competitive" {...advancedProps} />;
+                    stepContent = (
+                      <div className="space-y-6">
+                        <AdvancedOptionsSection column="competitive" {...advancedProps} />
+                        <AssetDifferentiationSection
+                          selectedFactors={state.differentiationFactors}
+                          onToggle={actions.toggleDifferentiationFactor}
+                        />
+                      </div>
+                    );
                     break;
                   case 'deal':
                     stepContent = <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
@@ -821,6 +830,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = (
                       <div className="space-y-8">
                         <AdvancedOptionsSection column="competitive" {...advancedProps} />
+                        <AssetDifferentiationSection
+                          selectedFactors={state.differentiationFactors}
+                          onToggle={actions.toggleDifferentiationFactor}
+                        />
                         <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
                       </div>
                     );

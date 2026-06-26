@@ -26,6 +26,7 @@ interface SimulatorRequestBody {
   peakSalesMedian: number;
   peakSalesHigh: number;
   competitivePosition: string;
+  differentiationFactors?: string[];
   companyType: string;
   buyers: string[];
   batnaUpfrontM: number;
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
     peakSalesMedian,
     peakSalesHigh,
     competitivePosition,
+    differentiationFactors,
     companyType,
     buyers,
     batnaUpfrontM,
@@ -103,6 +105,7 @@ export async function POST(request: NextRequest) {
       high: peakSalesHigh || peakSalesMedian * 2,
     },
     competitivePosition: competitivePosition || 'racing',
+    differentiationFactors,
     dataQuality: (userDataQuality as string) || 'moderate',
     biomarkerStatus: (userBiomarkerStatus as string) || 'unselected',
     regulatoryDesignations: {

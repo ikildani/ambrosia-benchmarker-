@@ -100,6 +100,7 @@ function buildRNPVInput(
     territory: inputs.territory,
     peakSalesEstimate: peakSalesOverride || defaultPeakSales,
     competitivePosition: inputs.competitivePosition || 'racing',
+    differentiationFactors: inputs.differentiationFactors,
     dataQuality: inputs.dataQuality || 'moderate',
     biomarkerStatus: inputs.biomarker || 'unselected',
     regulatoryDesignations: {

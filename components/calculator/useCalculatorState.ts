@@ -116,6 +116,10 @@ export interface CalculatorFormState {
   giSegment: GISegment;
   biologicExperience: BiologicExperience;
   endoscopicEndpoint: EndoscopicEndpoint;
+  // Asset differentiation factors — additive premium on competitive position.
+  // Array of selected DifferentiationKey values from differentiation-profiles.ts.
+  differentiationFactors: string[];
+
   // Round 23 (2026-04-13): Asset-specific peak sales override.
   // When set (>0), this value replaces the engine's indication-based peak
   // anchor. BD users who have their own analyst consensus peak should
@@ -188,6 +192,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   giSegment: 'colonic',
   biologicExperience: 'biologic_naive',
   endoscopicEndpoint: 'endoscopic_improvement',
+  differentiationFactors: [],  // No differentiation factors selected by default
   peakSalesOverrideM: null,  // R23: null = use engine default
   assetName: '',  // R63: empty = no branded lookup
   wizardStep: 0,
@@ -203,6 +208,7 @@ type CalculatorAction =
   | { type: 'SET_THERAPEUTIC_AREA'; area: TherapeuticArea }
   | { type: 'SET_STEP'; step: number }
   | { type: 'TOGGLE_REGULATORY'; designation: keyof RegulatoryDesignations }
+  | { type: 'TOGGLE_DIFFERENTIATION'; key: string }
   | { type: 'CLEAR_HIGHLIGHTS' }
   | { type: 'BULK_SET'; fields: Partial<CalculatorFormState> }
   | { type: 'RESET' };
@@ -351,6 +357,15 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
         },
       };
 
+    case 'TOGGLE_DIFFERENTIATION': {
+      const current = state.differentiationFactors;
+      const key = action.key;
+      const next = current.includes(key)
+        ? current.filter((k) => k !== key)
+        : [...current, key];
+      return { ...state, differentiationFactors: next };
+    }
+
     case 'CLEAR_HIGHLIGHTS':
       return { ...state, highlightedFields: new Set() };
 
@@ -387,6 +402,8 @@ export interface CalculatorActions {
   setCombinationPotential: (v: CombinationPotential) => void;
   setCompetitivePosition: (v: CompetitivePosition) => void;
   setDataQuality: (v: DataQuality) => void;
+  /** Toggle a differentiation factor on/off. */
+  toggleDifferentiationFactor: (key: string) => void;
   /** R23: Set asset-specific peak sales override in $M. null = use engine default. */
   setPeakSalesOverrideM: (v: number | null) => void;
   /** R63: Set asset name for branded-asset lookup (ASSET_PEAK_SALES_TABLE). */
@@ -460,6 +477,7 @@ const FORM_FIELDS: (keyof CalculatorFormState)[] = [
   'hemeLineage', 'transplantEligibility', 'mrdStatus',
   'skinSeverity', 'chronicityProfile', 'topicalVsSystemic',
   'giSegment', 'biologicExperience', 'endoscopicEndpoint',
+  'differentiationFactors',
   'peakSalesOverrideM', 'assetName',
 ];
 
@@ -533,6 +551,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
     setCombinationPotential: (v) => dispatch({ type: 'SET_FIELD', field: 'combinationPotential', value: v }),
     setCompetitivePosition: (v) => dispatch({ type: 'SET_FIELD', field: 'competitivePosition', value: v }),
     setDataQuality: (v) => dispatch({ type: 'SET_FIELD', field: 'dataQuality', value: v }),
+    toggleDifferentiationFactor: (key) => dispatch({ type: 'TOGGLE_DIFFERENTIATION', key }),
     setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),
     setAssetName: (v) => dispatch({ type: 'SET_FIELD', field: 'assetName', value: v }),
     setRegulatoryDesignations: (v) => dispatch({ type: 'SET_FIELD', field: 'regulatoryDesignations', value: v }),

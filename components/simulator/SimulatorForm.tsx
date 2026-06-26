@@ -5,6 +5,7 @@ import { BATNACalculator } from './BATNACalculator';
 import { MultiBidderZOPA } from './MultiBidderZOPA';
 import type { BuyerZOPAResult } from './MultiBidderZOPA';
 import { SensitivitySlider } from './SensitivitySlider';
+import { AssetDifferentiationSection } from '@/components/calculator/AssetDifferentiationSection';
 
 // ──────────────────────────────────────────────────────────────
 // Constants (mirrors the option sets from lib/calculations.ts)
@@ -135,6 +136,13 @@ export function SimulatorForm() {
   const [buyerSearch, setBuyerSearch] = useState('');
   const [showBuyerDropdown, setShowBuyerDropdown] = useState(false);
   const [batnaUpfrontM, setBatnaUpfrontM] = useState(0);
+  const [differentiationFactors, setDifferentiationFactors] = useState<string[]>([]);
+
+  const toggleDifferentiationFactor = (key: string) => {
+    setDifferentiationFactors((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
 
   // API state
   const [loading, setLoading] = useState(false);
@@ -215,6 +223,7 @@ export function SimulatorForm() {
           companyType,
           buyers: selectedBuyers,
           batnaUpfrontM,
+          differentiationFactors: differentiationFactors.length > 0 ? differentiationFactors : undefined,
         }),
       });
 
@@ -238,7 +247,7 @@ export function SimulatorForm() {
       handleSubmit(undefined, adjusted);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [therapeuticArea, modality, phase, competitivePosition, companyType, selectedBuyers, batnaUpfrontM]
+    [therapeuticArea, modality, phase, competitivePosition, companyType, selectedBuyers, batnaUpfrontM, differentiationFactors]
   );
 
   // Pill selector helper
@@ -306,6 +315,12 @@ export function SimulatorForm() {
             </div>
           </div>
         </div>
+
+        {/* Asset Differentiation */}
+        <AssetDifferentiationSection
+          selectedFactors={differentiationFactors}
+          onToggle={toggleDifferentiationFactor}
+        />
 
         {/* Peak sales */}
         <div className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-6">

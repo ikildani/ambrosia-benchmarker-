@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { InteractiveResults } from './InteractiveResults';
 import type { TradeSpaceResponse } from './InteractiveResults';
+import { AssetDifferentiationSection } from '@/components/calculator/AssetDifferentiationSection';
 
 // ──────────────────────────────────────────────────────────────
 // Constants (mirrors the option sets from lib/calculations.ts)
@@ -74,6 +75,13 @@ export function TradeSpaceForm() {
   const [competitivePosition, setCompetitivePosition] = useState('racing');
   const [companyType, setCompanyType] = useState('biotech');
   const [buyerName, setBuyerName] = useState('');
+  const [differentiationFactors, setDifferentiationFactors] = useState<string[]>([]);
+
+  const toggleDifferentiationFactor = (key: string) => {
+    setDifferentiationFactors((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
 
   // API state
   const [loading, setLoading] = useState(false);
@@ -100,6 +108,7 @@ export function TradeSpaceForm() {
           competitivePosition,
           companyType,
           buyerName: buyerName.trim() || undefined,
+          differentiationFactors: differentiationFactors.length > 0 ? differentiationFactors : undefined,
         }),
       });
 
@@ -181,6 +190,12 @@ export function TradeSpaceForm() {
             </div>
           </div>
         </div>
+
+        {/* Asset Differentiation */}
+        <AssetDifferentiationSection
+          selectedFactors={differentiationFactors}
+          onToggle={toggleDifferentiationFactor}
+        />
 
         {/* Peak sales */}
         <div className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-6">

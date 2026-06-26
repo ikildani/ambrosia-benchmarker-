@@ -352,6 +352,23 @@ export interface RNPVInput {
   endoscopicEndpoint?: string;
 
   // =========================================================================
+  // Asset Differentiation
+  // =========================================================================
+
+  /**
+   * Asset differentiation factors that add incremental premium on top of the
+   * base competitive position multiplier. Each factor is a boolean toggle
+   * contributing a small additive adjustment (capped at +20% total).
+   *
+   * Valid keys: 'novelMechanism', 'superiorEfficacy', 'betterSafety',
+   *             'convenientDosing', 'biomarkerSelected'.
+   *
+   * See `lib/financial/differentiation-profiles.ts` for factor definitions
+   * and the `computeDifferentiationAdjustment()` function.
+   */
+  differentiationFactors?: string[];
+
+  // =========================================================================
   // Internal flags — DO NOT set from public API code.
   // Used by lib/financial/risk-decomposition.ts (Tier 4 item 11) to run
   // counterfactual NPVs with specific risk sources neutralized. Always

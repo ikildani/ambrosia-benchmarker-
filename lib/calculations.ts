@@ -369,6 +369,12 @@ export interface CalculationInput {
   biologicExperience?: BiologicExperience;
   endoscopicEndpoint?: EndoscopicEndpoint;
 
+  // Asset differentiation factors — additive premium on top of competitive position.
+  // Valid keys: 'novelMechanism', 'superiorEfficacy', 'betterSafety',
+  //             'convenientDosing', 'biomarkerSelected'.
+  // See lib/financial/differentiation-profiles.ts for definitions.
+  differentiationFactors?: string[];
+
   // Round 23 (2026-04-13): Asset-specific peak sales override ($M, median).
   // BD users who have their own analyst consensus peak should enter it here.
   // When set (>0), takes precedence over the engine's indication-based anchor.

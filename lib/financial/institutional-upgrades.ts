@@ -26,6 +26,8 @@ import type {
   LifecycleExtension,
   LifecycleExtensionResult,
 } from './types';
+import { computeDifferentiationAdjustment } from './differentiation-profiles';
+import type { DifferentiationKey } from './differentiation-profiles';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -230,17 +232,31 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
     rationale: `Cumulative probability of success: ${(result.cumulativePoS * 100).toFixed(1)}%. Reflects phase-specific attrition from ${input.phase} through approval and launch.`,
   });
 
-  // Step 3: Strategic premium/discount
+  // Step 3: Strategic premium/discount (+ asset differentiation overlay)
   const positionKey = input.competitivePosition || 'racing';
   const strategic = STRATEGIC_PREMIUM[positionKey] ?? STRATEGIC_PREMIUM.racing;
-  const strategicAdjusted = running * strategic.multiplier;
+  let effectiveMultiplier = strategic.multiplier;
+  let strategicRationale = strategic.rationale;
+
+  // Apply asset differentiation adjustment if factors are present
+  if (input.differentiationFactors && input.differentiationFactors.length > 0) {
+    const diffResult = computeDifferentiationAdjustment(
+      input.differentiationFactors as DifferentiationKey[],
+    );
+    if (diffResult.totalAdjustment > 0) {
+      effectiveMultiplier += diffResult.totalAdjustment;
+      strategicRationale += ` ${diffResult.narrative}`;
+    }
+  }
+
+  const strategicAdjusted = running * effectiveMultiplier;
   const strategicDelta = strategicAdjusted - running;
   running = strategicAdjusted;
   steps.push({
     label: 'Strategic Premium/Discount',
     adjustment: strategicDelta,
     runningTotal: running,
-    rationale: strategic.rationale,
+    rationale: strategicRationale,
   });
 
   // Step 4: Deal structure capture
