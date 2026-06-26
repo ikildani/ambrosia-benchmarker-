@@ -126,7 +126,7 @@ export function AssetDifferentiationSection({
                           isActive ? 'text-teal-400' : 'text-slate-600',
                         ].join(' ')}
                       >
-                        +{(factor.adjustment * 100).toFixed(0)}%
+                        +{(factor.baseAdjustment * 100).toFixed(0)}%
                       </span>
                     </div>
                     <p

@@ -242,6 +242,7 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
   if (input.differentiationFactors && input.differentiationFactors.length > 0) {
     const diffResult = computeDifferentiationAdjustment(
       input.differentiationFactors as DifferentiationKey[],
+      input.phase,
     );
     if (diffResult.totalAdjustment > 0) {
       effectiveMultiplier += diffResult.totalAdjustment;
