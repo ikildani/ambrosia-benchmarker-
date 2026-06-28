@@ -283,74 +283,29 @@ export default function ReportGenerationModal({
           return;
         }
 
-        // Step 2: Wait for memo + playbook with generous timeout
-        // Haiku is fast (3-8s typically), but we give up to 20s to ensure coverage.
-        // This is still 3-4x faster than the old Sonnet flow (30-60s).
+        // Step 2: Wait for memo + playbook — single attempt each, in parallel, 12s cap
+        // Reports render fine without AI content (shows fallback text), so don't block long.
         setCurrentStep('generating_memo');
         let memo = p.existingMemo;
         let playbook: NegotiationPlaybook | null = null;
 
-        if (!memo && memoPromise) {
-          // Try the in-flight request first, then auto-retry once on failure
-          for (let attempt = 0; attempt < 2; attempt++) {
-            try {
-              const source = attempt === 0 ? memoPromise : fetch('/api/deal-memo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  reportId: p.reportId || undefined,
-                  userId: p.userId || undefined,
-                  email: p.userEmail || undefined,
-                  inputs: p.fullInputs,
-                  results: p.result,
-                  labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
-                }),
-                keepalive: true,
-              }).then(async r => r.ok ? ((await r.json()).memo || null) as DealMemo | null : null).catch(() => null);
+        const aiResults = await Promise.allSettled([
+          !memo && memoPromise
+            ? Promise.race([memoPromise, new Promise<null>(r => setTimeout(() => r(null), 12000))])
+            : Promise.resolve(null),
+          playbookPromise
+            ? Promise.race([playbookPromise, new Promise<null>(r => setTimeout(() => r(null), 12000))])
+            : Promise.resolve(null),
+        ]);
 
-              const fetchedMemo = await Promise.race([
-                source,
-                new Promise<null>(r => setTimeout(() => r(null), 15000)),
-              ]);
-              if (fetchedMemo) {
-                memo = fetchedMemo;
-                p.onMemoGenerated(memo);
-                break;
-              }
-              // First attempt failed/timed out — retry
-            } catch {
-              // Retry on next iteration
-            }
-          }
+        const memoResult = aiResults[0].status === 'fulfilled' ? aiResults[0].value : null;
+        if (memoResult && !memo) {
+          memo = memoResult as DealMemo;
+          p.onMemoGenerated(memo);
         }
-        if (playbookPromise) {
-          for (let attempt = 0; attempt < 2; attempt++) {
-            try {
-              const source = attempt === 0 ? playbookPromise : fetch('/api/playbook', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  userId: p.userId || undefined,
-                  email: p.userEmail || undefined,
-                  inputs: { modality: p.fullInputs.modality, phase: p.fullInputs.phase, indication: p.fullInputs.indication, territory: p.fullInputs.territory },
-                  results: { terms: p.result.terms, tieredRoyalties: p.result.tieredRoyalties, dealRecommendation: p.result.dealRecommendation, negotiationInsight: p.result.negotiationInsight, modifiers: p.result.modifiers },
-                  labels: { phase: p.labels.phase, modality: p.labels.modality, indication: p.labels.indication },
-                }),
-                keepalive: true,
-              }).then(async r => r.ok ? ((await r.json()).playbook || null) as NegotiationPlaybook | null : null).catch(() => null);
-
-              const fetchedPlaybook = await Promise.race([
-                source,
-                new Promise<null>(r => setTimeout(() => r(null), 15000)),
-              ]);
-              if (fetchedPlaybook) {
-                playbook = fetchedPlaybook;
-                break;
-              }
-            } catch {
-              // Retry
-            }
-          }
+        const playbookResult = aiResults[1].status === 'fulfilled' ? aiResults[1].value : null;
+        if (playbookResult) {
+          playbook = playbookResult as NegotiationPlaybook;
         }
         if (abortRef.current) return;
         markComplete('generating_memo');
